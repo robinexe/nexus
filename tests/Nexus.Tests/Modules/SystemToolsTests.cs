@@ -68,6 +68,28 @@ public sealed class SystemToolsParserTests
     }
 
     [Fact]
+    public void Netsh_windows11_sem_recuo_em_utf8_como_no_pc_real()
+    {
+        // Saída real (pt-BR, build 26200): linhas de perfil sem recuo e texto em UTF-8 com o console em 850.
+        var raw = "\r\nPerfis na interface Wi-Fi:\r\n\r\nPerfis da política de grupo (somente leitura)\r\n---------------------------------\r\n    <Nenhum>\r\n\r\n" +
+                  "Perfis do usuário\r\n-------------\r\nTodos os Perfis de Usuários: Angelburger_5G\r\nTodos os Perfis de Usuários: THE FERIAS \r\nTodos os Perfis de Usuários: Gleyckelly❤️\r\n";
+        var bytes = System.Text.Encoding.UTF8.GetBytes(raw);
+        Assert.True(ProcessText.IsValidUtf8(bytes));
+        var l = WifiParsers.ParseNetshProfiles(System.Text.Encoding.UTF8.GetString(bytes));
+        Assert.Equal(3, l.Profiles.Count);
+        Assert.All(l.Profiles, p => Assert.Equal(WifiProfileScope.AllUsers, p.Scope));
+        Assert.Contains(l.Profiles, p => p.Name == "Gleyckelly❤️");
+        Assert.All(l.Profiles, p => Assert.Equal("Wi-Fi", p.Interface));
+    }
+
+    [Fact]
+    public void Codificacao_ascii_e_oem_nao_sao_tratadas_como_utf8()
+    {
+        Assert.False(ProcessText.IsValidUtf8("pnputil ok"u8));
+        Assert.False(ProcessText.IsValidUtf8(new byte[] { 0x50, 0xA0, 0x67 })); // "Pág" em 850
+    }
+
+    [Fact]
     public void Netsh_without_wifi_gives_note()
     {
         var l = WifiParsers.ParseNetshProfiles("The Wireless AutoConfig Service (wlansvc) is not running.\r\n");

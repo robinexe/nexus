@@ -89,6 +89,8 @@ public sealed class SystemToolsPage : ModulePage
     // ------------------------------------------------------------------ estado lido
 
     public string DnsEntries { get => _dns; private set => Set(ref _dns, value); }
+    private string _dnsCaption = "entradas guardadas";
+    public string DnsCaption { get => _dnsCaption; private set => Set(ref _dnsCaption, value); }
     public string ArpEntries { get => _arp; private set => Set(ref _arp, value); }
     public ObservableCollection<SystemActionRow> WifiProfiles { get; } = [];
     public string WifiNote { get => _wifiNote; private set => Set(ref _wifiNote, value); }
@@ -138,7 +140,10 @@ public sealed class SystemToolsPage : ModulePage
         var backups = Task.Run(() => SystemToolsReader.DriverBackups(AdminDataDirectory));
 
         var n = await network;
-        DnsEntries = N(n.DnsEntries);
+        DnsEntries = n.DnsEntries is null ? "—" : N(n.DnsEntries);
+        DnsCaption = n.DnsEntries is null
+            ? "contar as entradas exige administrador neste Windows (limpar não exige)"
+            : "entradas guardadas";
         ArpEntries = N(n.ArpEntries);
         FillWifi(await wifi);
         FillDriverReading(await drivers);

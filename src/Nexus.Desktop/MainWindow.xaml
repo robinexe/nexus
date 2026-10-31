@@ -167,7 +167,7 @@
         <ListBox x:Name="Nav" Margin="0,8,0,0" ItemContainerStyle="{StaticResource Nav.Item}"
                  SelectedItem="{Binding SelectedPage}" IsSynchronizedWithCurrentItem="False"
                  Background="Transparent" BorderThickness="0" KeyboardNavigation.TabNavigation="Once"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Navegação">
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel" AutomationProperties.Name="Navegação">
           <ListBox.GroupStyle>
             <GroupStyle>
               <GroupStyle.HeaderTemplate>

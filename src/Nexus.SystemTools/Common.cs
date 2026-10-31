@@ -58,8 +58,9 @@ public sealed class WindowsProcessRunner : IProcessRunner
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             RedirectStandardInput = true,
-            StandardOutputEncoding = utf8 ? new UTF8Encoding(false) : OemEncoding(),
-            StandardErrorEncoding = utf8 ? new UTF8Encoding(false) : OemEncoding(),
+            // Bytes crus: várias ferramentas (netsh no Windows 11) escrevem UTF-8 mesmo com o console em 850; decidimos depois.
+            StandardOutputEncoding = Latin1,
+            StandardErrorEncoding = Latin1,
             WorkingDirectory = SystemPaths.System32,
         };
         foreach (var a in arguments) psi.ArgumentList.Add(a);
@@ -73,7 +74,17 @@ public sealed class WindowsProcessRunner : IProcessRunner
             throw new TimeoutException($"{Path.GetFileName(fileName)} não terminou em {timeout.TotalSeconds:0} s.");
         }
         p.WaitForExit();
-        return new ProcessResult(p.ExitCode, stdout.GetAwaiter().GetResult(), stderr.GetAwaiter().GetResult());
+        return new ProcessResult(p.ExitCode, Decode(stdout.GetAwaiter().GetResult(), utf8), Decode(stderr.GetAwaiter().GetResult(), utf8));
+    }
+
+    private static readonly Encoding Latin1 = Encoding.Latin1;
+
+    /// <summary>UTF-8 quando os bytes são UTF-8 válido (ou pedido); senão a página OEM do console.</summary>
+    internal static string Decode(string latin1, bool utf8)
+    {
+        var bytes = Latin1.GetBytes(latin1);
+        if (utf8 || ProcessText.IsValidUtf8(bytes)) return new UTF8Encoding(false).GetString(bytes);
+        return OemEncoding().GetString(bytes);
     }
 
     private static Encoding OemEncoding()
@@ -85,6 +96,22 @@ public sealed class WindowsProcessRunner : IProcessRunner
         }
         catch (ArgumentException) { return Encoding.UTF8; }
         catch (NotSupportedException) { return Encoding.UTF8; }
+    }
+}
+
+/// <summary>Decisão de codificação da saída de ferramentas (pura, testável).</summary>
+public static class ProcessText
+{
+    private static readonly UTF8Encoding Strict = new(false, throwOnInvalidBytes: true);
+
+    /// <summary>Verdadeiro se os bytes formam UTF-8 válido E contêm algo além de ASCII (ASCII puro é igual nas duas páginas).</summary>
+    public static bool IsValidUtf8(ReadOnlySpan<byte> bytes)
+    {
+        var ascii = true;
+        foreach (var b in bytes) if (b >= 0x80) { ascii = false; break; }
+        if (ascii) return false;
+        try { Strict.GetCharCount(bytes); return true; }
+        catch (DecoderFallbackException) { return false; }
     }
 }
 

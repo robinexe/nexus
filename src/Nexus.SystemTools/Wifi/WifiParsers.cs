@@ -25,7 +25,8 @@ public static class WifiParsers
             var line = raw.TrimEnd();
             if (line.Trim().Length == 0 || line.Trim().All(c => c == '-')) continue;
             var folded = Text.Fold(line);
-            var indented = raw.Length > 0 && char.IsWhiteSpace(raw[0]);
+            // Windows 11 recente escreve "Todos os Perfis de Usuários: Nome" sem recuo: a linha de perfil vem pelo rótulo, não pelo recuo.
+            var indented = (raw.Length > 0 && char.IsWhiteSpace(raw[0])) || IsProfileLabel(line);
 
             if (!indented)
             {
@@ -37,7 +38,8 @@ public static class WifiParsers
                 }
                 else if (folded.Contains("group policy", StringComparison.Ordinal) || folded.Contains("politica de grupo", StringComparison.Ordinal))
                     groupPolicy = true;
-                else if (folded.Contains("user profiles", StringComparison.Ordinal) || folded.Contains("perfis de usuario", StringComparison.Ordinal))
+                else if (folded.Contains("user profiles", StringComparison.Ordinal) || folded.Contains("perfis de usuario", StringComparison.Ordinal) ||
+                         folded.Contains("perfis do usuario", StringComparison.Ordinal))
                     groupPolicy = false;
                 else if (folded.Contains("wlansvc", StringComparison.Ordinal) || folded.Contains("no wireless interface", StringComparison.Ordinal) ||
                          folded.Contains("nenhuma interface", StringComparison.Ordinal) || folded.Contains("sem fio", StringComparison.Ordinal))
@@ -64,6 +66,16 @@ public static class WifiParsers
             list.Add(new WifiProfileInfo(name, iface, scope));
         }
         return new WifiListing(list, list.Count == 0 ? note : null);
+    }
+
+    private static bool IsProfileLabel(string line)
+    {
+        var colon = line.IndexOf(':', StringComparison.Ordinal);
+        if (colon <= 0 || line[(colon + 1)..].Trim().Length == 0) return false;
+        var label = Text.Fold(line[..colon]);
+        return label.Contains("all user profile", StringComparison.Ordinal) || label.Contains("current user profile", StringComparison.Ordinal) ||
+               label.Contains("todos os perfis", StringComparison.Ordinal) || label.Contains("perfil de usuario atual", StringComparison.Ordinal) ||
+               label.Contains("perfil do usuario atual", StringComparison.Ordinal);
     }
 
     /// <summary>SYSTEMTIME de 16 bytes (valor DateLastConnected do NetworkList), ou null se inválido.</summary>
