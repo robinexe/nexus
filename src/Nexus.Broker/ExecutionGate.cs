@@ -14,6 +14,12 @@ public sealed class AlwaysBlockedGate : IExecutionGate
     public GateDecision Evaluate() => new(false, "Execução real desativada nesta instalação.");
 }
 
+/// <summary>Bloqueio com motivo próprio (ex.: a pasta de dados do aplicador elevado não pôde ser protegida).</summary>
+public sealed class BlockedGate(string reason) : IExecutionGate
+{
+    public GateDecision Evaluate() => new(false, reason);
+}
+
 /// <summary>
 /// Libera escrita somente em máquina virtual de teste, com dupla confirmação:
 /// <list type="number">

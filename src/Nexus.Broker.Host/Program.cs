@@ -90,6 +90,14 @@ namespace Nexus.Broker.Host
             var vmGate = new VmOnlyExecutionGate(() => facts.IsVirtualMachine, VmOnlyExecutionGate.DefaultMarkerPath, Environment.MachineName, AdminOwnedFile.Check);
             IExecutionGate gate = o.AllowHost ? new AnyGate(new HostConsentGate(), vmGate) : vmGate;
             var decision = gate.Evaluate();
+            // Aplicador elevado (administrador ou SYSTEM): a pasta de dados (diário, quarentenas, cópias) é a base de toda
+            // restauração feita com privilégio. Sob %ProgramData% ela precisa ser só dos administradores; senão, nada é escrito.
+            if (decision.Allowed && (self.IsSystem || facts.IsElevated == true) &&
+                AdminOnlyDirectory.Ensure(Path.GetDirectoryName(Path.GetFullPath(o.JournalPath))!) is { } unsafeData)
+            {
+                gate = new BlockedGate("Pasta de dados do aplicador não protegida: " + unsafeData);
+                decision = gate.Evaluate();
+            }
 
             log($"NEXUS broker {BrokerService.Version} — pipe \\\\.\\pipe\\{o.PipeName}{(o.Service ? " (serviço)" : "")}");
             log($"Conta: {self.Name}{(asSystem ? " (HKCU = perfil de quem pede)" : "")}");
