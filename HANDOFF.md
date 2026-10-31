@@ -191,7 +191,13 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     Diagnóstico permanente adicionado: `%LocalAppData%\NEXUS\desktop-diag.log` (etapa atual + "INTERFACE PARADA há X s").
     Próximo passo: abrir pelo `Abrir NEXUS.cmd`, reproduzir e ler esse log; `_claude\diag-start.cmd` abre esperando e
     anota código de saída + erros do .NET no Visualizador de Eventos.
-11. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+11. **31/10 noite (pedidos do responsável):** página Atualizar drivers (Windows Update oficial + backup/desfazer pelo pnputil;
+    GPU com link oficial), desinstalação em massa na aba Programas (fila sequencial, MSI /qb-, 1618/3010, ponto de restauração,
+    sobras de todos), Memória: diagnóstico (vazamentos por tendência, pool do kernel por tag, soluções temporárias e
+    permanentes), Medir v2 (jogo detectado → captura automática PresentMon, antes x depois automático, ao vivo, mostrador
+    de FPS sem injeção; página Comparar absorvida). Defeito real achado no PC: ProgressBar ligada a propriedade só leitura
+    (pilha de janelas de erro) → corrigido + teste `XamlBindingTests`. CI: 1504 unitários e 51/51 integração no Windows.
+12. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
