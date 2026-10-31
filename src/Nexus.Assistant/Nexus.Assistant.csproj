@@ -8,6 +8,9 @@
     <RootNamespace>Nexus.Assistant</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />

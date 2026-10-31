@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using Nexus.Broker;
@@ -164,7 +163,26 @@ public sealed record AssistantReport(
     public static string DefaultDirectory =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NEXUS", "relatorios");
 
-    private static string E(string? s) => WebUtility.HtmlEncode(s ?? "");
+    /// <summary>Escapa só o necessário (&amp; &lt; &gt; aspas): o arquivo é UTF-8 e o português fica legível no código-fonte.</summary>
+    internal static string E(string? s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        var sb = new StringBuilder(s.Length + 16);
+        foreach (var ch in s)
+        {
+            sb.Append(ch switch
+            {
+                '&' => "&amp;",
+                '<' => "&lt;",
+                '>' => "&gt;",
+                '"' => "&quot;",
+                '\'' => "&#39;",
+                _ when char.IsControl(ch) && ch is not ('\n' or '\t') => "",
+                _ => ch.ToString(),
+            });
+        }
+        return sb.ToString();
+    }
 
     private static void Row(StringBuilder sb, string label, string? value) =>
         sb.Append("<tr><th scope=\"row\">").Append(E(label)).Append("</th><td>").Append(E(value ?? "não lido")).Append("</td></tr>");

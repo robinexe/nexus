@@ -202,6 +202,13 @@ public sealed class AssistantPage : ModulePage
             if (_store.Exists)
             {
                 var (saved, status) = _store.Load();
+                if (status == LoadStatus.Resumed)
+                {
+                    // O estado salvo vale também depois de concluído: é ele que guarda o que "Desfazer tudo" desfaz.
+                    _state = saved;
+                    _flow = new AssistantFlow(_state);
+                    OnPropertyChanged(nameof(CanUndoAll));
+                }
                 if (status == LoadStatus.Resumed && !saved.Finished)
                 {
                     HasSaved = true;
@@ -223,7 +230,9 @@ public sealed class AssistantPage : ModulePage
         _catalog ??= await Task.Run(() => AssistantCatalog.Load(catalogDir));
         if (fresh)
         {
-            if (_hasSaved && !Host.Confirm("Começar de novo", "Começar do zero? O que já foi aplicado continua aplicado (e pode ser desfeito na página Aplicar/Histórico), mas o progresso salvo do assistente é substituído."))
+            if ((_hasSaved || _state.HasUndoableRuns) && !Host.Confirm("Começar de novo",
+                    "Começar do zero? O que já foi aplicado continua aplicado, mas o progresso salvo do assistente é substituído e o botão " +
+                    "\"Desfazer tudo que o assistente fez\" passa a valer só para a nova rodada (as anteriores continuam na página Histórico)."))
                 return;
             _state = new AssistantState();
         }
