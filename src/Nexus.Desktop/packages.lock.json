@@ -126,6 +126,7 @@
         "type": "Project",
         "dependencies": {
           "Nexus.Experimentation": "[0.9.0, )",
+          "Nexus.Lab.Gpu": "[0.9.0, )",
           "Nexus.TraceAnalysis": "[0.9.0, )"
         }
       },

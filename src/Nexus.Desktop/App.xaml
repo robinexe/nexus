@@ -15,7 +15,6 @@
         <ResourceDictionary Source="Views/Pages/Plan.xaml"/>
         <ResourceDictionary Source="Views/Pages/Broker.xaml"/>
         <ResourceDictionary Source="Views/Pages/Measure.xaml"/>
-        <ResourceDictionary Source="Views/Pages/Compare.xaml"/>
         <ResourceDictionary Source="Views/Pages/Cleaning.xaml"/>
         <ResourceDictionary Source="Views/Pages/Disk.xaml"/>
         <ResourceDictionary Source="Views/Pages/Programs.xaml"/>

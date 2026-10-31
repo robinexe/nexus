@@ -1,11 +1,14 @@
 <!--
-  Medir: gravar (PresentMon) ou importar uma sessão, ver o traço de frametime e marcar antes/depois.
+  Medir (v2): jogo detectado agora, números e frametime ao vivo com a partida de referência sobreposta, antes x depois
+  automático, jogos com tendência, partidas do jogo, comparação manual (antes/depois marcados) e preferências
+  (medição automática, mostrador de FPS, atalho, listas de jogos, PresentMon, limpeza/exportação).
   Recursos locais em DataTemplate.Resources; do tema, só as chaves do contrato (Tokens.xaml / Controls.xaml / Converters.xaml).
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
-                    xmlns:m="clr-namespace:Nexus.Desktop.Views.Measure">
+                    xmlns:m="clr-namespace:Nexus.Desktop.Views.Measure"
+                    xmlns:mm="clr-namespace:Nexus.Desktop.Views.Modules.Measure">
   <DataTemplate DataType="{x:Type vm:MeasurePage}">
     <DataTemplate.Resources>
       <m:BoolVisibilityConverter x:Key="M.Vis"/>
@@ -13,8 +16,6 @@
       <m:PresenceVisibilityConverter x:Key="M.Has"/>
       <m:PresenceVisibilityConverter x:Key="M.HasNot" Invert="True"/>
       <m:IntEqualsConverter x:Key="M.IntEq"/>
-      <m:CaptureClockConverter x:Key="M.Clock"/>
-      <m:InvertBoolConverter x:Key="M.Not"/>
 
       <Style TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource Brush.Bg}"/>
@@ -29,60 +30,16 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
       </Style>
 
-      <!-- Atalho de duração: botão de opção com cara de segmento. -->
-      <Style x:Key="M.Preset" TargetType="RadioButton">
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Margin" Value="0,0,6,0"/>
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-        <Setter Property="Template">
-          <Setter.Value>
-            <ControlTemplate TargetType="RadioButton">
-              <Border x:Name="seg" Background="Transparent" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
-                      CornerRadius="{StaticResource Radius.Control}" Padding="12,7" MinWidth="54">
-                <TextBlock x:Name="label" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" HorizontalAlignment="Center"
-                           FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.Body}" Foreground="{StaticResource Brush.TextMuted}"/>
-              </Border>
-              <ControlTemplate.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.TextDim}"/>
-                  <Setter TargetName="label" Property="Foreground" Value="{StaticResource Brush.Text}"/>
-                </Trigger>
-                <Trigger Property="IsKeyboardFocused" Value="True">
-                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.Signal}"/>
-                </Trigger>
-                <Trigger Property="IsChecked" Value="True">
-                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.Trace}"/>
-                  <Setter TargetName="seg" Property="Background" Value="{StaticResource Brush.SurfaceHi}"/>
-                  <Setter TargetName="label" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                  <Setter Property="Opacity" Value="0.45"/>
-                </Trigger>
-              </ControlTemplate.Triggers>
-            </ControlTemplate>
-          </Setter.Value>
-        </Setter>
+      <!-- Número grande ao vivo. -->
+      <Style x:Key="M.LiveNumber" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
+        <Setter Property="FontSize" Value="{StaticResource Size.Metric}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
       </Style>
 
-      <!-- Barra de progresso da captura: trilho escuro, traço âmbar com brilho. -->
-      <Style x:Key="M.CaptureBar" TargetType="ProgressBar">
-        <Setter Property="Height" Value="6"/>
-        <Setter Property="Minimum" Value="0"/>
-        <Setter Property="Maximum" Value="1"/>
-        <Setter Property="Template">
-          <Setter.Value>
-            <ControlTemplate TargetType="ProgressBar">
-              <Grid>
-                <Border x:Name="PART_Track" Background="{StaticResource Brush.Bg}" CornerRadius="3"/>
-                <Border x:Name="PART_Indicator" Background="{StaticResource Brush.Trace}" CornerRadius="3" HorizontalAlignment="Left">
-                  <Border.Effect>
-                    <DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.7" Color="{Binding Color, Source={StaticResource Brush.Trace}}"/>
-                  </Border.Effect>
-                </Border>
-              </Grid>
-            </ControlTemplate>
-          </Setter.Value>
-        </Setter>
+      <!-- Seção da configuração. -->
+      <Style x:Key="M.SectionTitle" TargetType="TextBlock" BasedOn="{StaticResource Text.H2}">
+        <Setter Property="Margin" Value="0,0,0,8"/>
       </Style>
 
       <!-- Selo Antes (ciano) / Depois (âmbar) de uma SessionRow. Sem marca: nada aparece. -->
@@ -106,8 +63,8 @@
         </DataTemplate.Triggers>
       </DataTemplate>
 
-      <!-- Cartão de sessão na lista. -->
-      <Style x:Key="M.SessionItem" TargetType="ListBoxItem">
+      <!-- Cartão de item de lista (jogos e partidas). -->
+      <Style x:Key="M.Item" TargetType="ListBoxItem">
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -119,7 +76,6 @@
                         CornerRadius="{StaticResource Radius.Card}" Padding="14,10,12,10">
                   <ContentPresenter/>
                 </Border>
-                <!-- Marca de seleção: um filete âmbar à esquerda, como o cursor de um instrumento. -->
                 <Border x:Name="tick" Width="3" HorizontalAlignment="Left" Margin="0,10" CornerRadius="0,2,2,0"
                         Background="{StaticResource Brush.Trace}" Visibility="Collapsed"/>
               </Grid>
@@ -139,16 +95,59 @@
           </Setter.Value>
         </Setter>
       </Style>
+
+      <!-- Uma métrica do antes x depois: nome, antes → depois, diferença ± e a frase. -->
+      <DataTemplate x:Key="M.MetricRow">
+        <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1" Padding="0,8">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="150"/>
+              <ColumnDefinition Width="150"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" ToolTip="{Binding Explanation}"/>
+            <TextBlock Grid.Column="1" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.Body}">
+              <Run Text="{Binding BeforeText, Mode=OneWay}" Foreground="{StaticResource Brush.Signal}"/><Run Text="  →  " Foreground="{StaticResource Brush.TextDim}"/><Run Text="{Binding AfterText, Mode=OneWay}" Foreground="{StaticResource Brush.Trace}"/>
+            </TextBlock>
+            <StackPanel Grid.Column="2">
+              <TextBlock x:Name="delta" Text="{Binding DeltaText}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.Body}"
+                         Foreground="{StaticResource Brush.TextMuted}"/>
+              <TextBlock Text="{Binding Sentence}" Style="{StaticResource Text.Small}"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding Better}" Value="True">
+            <Setter TargetName="delta" Property="Foreground" Value="{StaticResource Brush.Good}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding Better}" Value="False">
+            <Setter TargetName="delta" Property="Foreground" Value="{StaticResource Brush.Bad}"/>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
+
+      <!-- Lista de executáveis com botão remover (o comando vem do ItemsControl). -->
+      <DataTemplate x:Key="M.ExeItem">
+        <DockPanel Margin="0,2">
+          <Button DockPanel.Dock="Right" Style="{StaticResource Button.Ghost}" Content="Remover" Margin="8,0,0,0" Padding="6,2"
+                  Command="{Binding Tag, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
+          <TextBlock Text="{Binding}" Style="{StaticResource Text.Body}" FontFamily="Consolas" VerticalAlignment="Center"/>
+        </DockPanel>
+      </DataTemplate>
     </DataTemplate.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <Grid Margin="28,24,28,28">
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" MinWidth="360"/>
+          <ColumnDefinition Width="*" MinWidth="380"/>
           <ColumnDefinition Width="20"/>
-          <ColumnDefinition Width="300"/>
+          <ColumnDefinition Width="320"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
@@ -156,336 +155,218 @@
         </Grid.RowDefinitions>
 
         <!-- Cabeçalho -->
-        <StackPanel Grid.ColumnSpan="3" Margin="0,0,0,18">
+        <StackPanel Grid.ColumnSpan="3" Margin="0,0,0,16">
           <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
           <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+          <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Signal}" Margin="0,8,0,0"
+                     Visibility="{Binding Status, Converter={StaticResource M.Has}}"/>
         </StackPanel>
 
-        <!-- (a) Bancada de captura. Sem sessões, fica no topo e completa; com sessões, desce para baixo do palco e fica enxuta
-             (o traço é o elemento principal e não pode ficar abaixo da dobra). -->
-        <Border Grid.ColumnSpan="3" Padding="20,18">
-          <Border.Style>
-            <Style TargetType="Border" BasedOn="{StaticResource Panel.Card}">
-              <Setter Property="Grid.Row" Value="1"/>
-              <Setter Property="Margin" Value="0,0,0,20"/>
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding HasSessions}" Value="True">
-                  <Setter Property="Grid.Row" Value="3"/>
-                  <Setter Property="Margin" Value="0,20,0,0"/>
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </Border.Style>
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" MinWidth="160"/>
-              <ColumnDefinition Width="Auto"/>
-              <ColumnDefinition Width="220"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <StackPanel Grid.ColumnSpan="2" Margin="0,0,24,14">
-              <TextBlock Text="{Binding CaptureTitle}" Style="{StaticResource Text.H2}"/>
-              <TextBlock Style="{StaticResource Text.Small}" Margin="0,3,0,0" Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}"
-                         Text="Abra o jogo, entre numa partida ou no treino e grave. O NEXUS só lê o tempo de cada quadro; nada no PC muda."/>
+        <!-- Convite depois de aplicar algo pelo NEXUS -->
+        <Border Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource Panel.Notice}" Margin="0,0,0,16" Padding="16,12"
+                Visibility="{Binding ShowInvite, Converter={StaticResource M.Vis}}">
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+              <Button Style="{StaticResource Button.Primary}" Command="{Binding EnableAutoCommand}" Content="Medir automaticamente" Margin="0,0,8,0"
+                      Visibility="{Binding AutoMeasure, Converter={StaticResource M.VisNot}}"/>
+              <Button Style="{StaticResource Button.Ghost}" Command="{Binding DismissInviteCommand}" Content="Entendi" Margin="0"/>
             </StackPanel>
-
-            <!-- Jogo -->
-            <TextBlock Grid.Row="1" Text="Jogo" Style="{StaticResource Text.MetricLabel}" Margin="0,0,0,6"/>
-            <StackPanel Grid.Row="2" Margin="0,0,24,0">
-              <TextBox Text="{Binding ProcessName, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Busy, Converter={StaticResource M.Not}, Mode=OneWay}"
-                       ToolTip="Nome do executável do jogo, como aparece no Gerenciador de Tarefas (aba Detalhes)."/>
-              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,5,0,0"
-                         Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}"
-                         Text="O nome do executável, como cs2.exe ou VALORANT-Win64-Shipping.exe."/>
+            <StackPanel>
+              <TextBlock Text="Jogue uma partida para medirmos o antes e depois" Style="{StaticResource Text.Body}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Trace}"/>
+              <TextBlock Text="{Binding InviteText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,3,0,0"/>
             </StackPanel>
+          </DockPanel>
+        </Border>
 
-            <!-- Duração -->
-            <TextBlock Grid.Row="1" Grid.Column="1" Text="Duração" Style="{StaticResource Text.MetricLabel}" Margin="0,0,0,6"/>
-            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,24,0" IsEnabled="{Binding Busy, Converter={StaticResource M.Not}, Mode=OneWay}">
-              <StackPanel Orientation="Horizontal">
-                <RadioButton Style="{StaticResource M.Preset}" Content="30 s" GroupName="M.Duration"
-                             IsChecked="{Binding Seconds, Converter={StaticResource M.IntEq}, ConverterParameter=30}"/>
-                <RadioButton Style="{StaticResource M.Preset}" Content="60 s" GroupName="M.Duration"
-                             IsChecked="{Binding Seconds, Converter={StaticResource M.IntEq}, ConverterParameter=60}"/>
-                <RadioButton Style="{StaticResource M.Preset}" Content="120 s" GroupName="M.Duration"
-                             IsChecked="{Binding Seconds, Converter={StaticResource M.IntEq}, ConverterParameter=120}"/>
-                <RadioButton Style="{StaticResource M.Preset}" Content="300 s" GroupName="M.Duration"
-                             IsChecked="{Binding Seconds, Converter={StaticResource M.IntEq}, ConverterParameter=300}"/>
-              </StackPanel>
-              <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                <TextBlock Text="Outra:" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <TextBox Text="{Binding Seconds, UpdateSourceTrigger=LostFocus}" Width="64" Padding="6,3" HorizontalContentAlignment="Right"
-                         FontFamily="{StaticResource Font.Numbers}" ToolTip="De 10 a 600 segundos."/>
-                <TextBlock Text="segundos (10 a 600)" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="6,0,0,0"/>
-              </StackPanel>
-            </StackPanel>
-
-            <!-- Permissão -->
-            <CheckBox Grid.Row="3" Grid.ColumnSpan="2" IsChecked="{Binding RequestElevation}" IsEnabled="{Binding Busy, Converter={StaticResource M.Not}, Mode=OneWay}" Margin="0,16,24,0" VerticalContentAlignment="Top"
-                      ToolTip="O PresentMon costuma precisar de permissão de administrador para ler os quadros do jogo. O Windows pergunta antes de abrir. Desmarque só se sua conta já tem esse acesso (grupo Usuários de log de desempenho).">
-              <StackPanel Margin="4,0,0,0">
-                <TextBlock Text="Pedir permissão ao Windows" Style="{StaticResource Text.Body}"/>
-                <TextBlock Style="{StaticResource Text.Small}" Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}"
-                           Text="O PresentMon costuma precisar de permissão de administrador para ler os quadros do jogo. O Windows pergunta antes de abrir. Desmarque só se sua conta já tem esse acesso (grupo Usuários de log de desempenho)."/>
-              </StackPanel>
-            </CheckBox>
-
-            <!-- Ação: Gravar / gravando -->
-            <Grid Grid.Row="1" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Center">
-              <StackPanel Visibility="{Binding Busy, Converter={StaticResource M.VisNot}}">
-                <Button Style="{StaticResource Button.Primary}" Command="{Binding CaptureCommand}" Margin="0" Height="48"
-                        HorizontalAlignment="Stretch"
-                        ToolTip="Começa a gravar o jogo indicado pela duração escolhida. Deixe o jogo em primeiro plano.">
-                  <TextBlock Text="Gravar sessão" FontFamily="{StaticResource Font.Display}" FontSize="{StaticResource Size.H2}"
-                             Foreground="{StaticResource Brush.Bg}"/>
-                </Button>
-                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,8,0,0" TextAlignment="Center"
-                           Visibility="{Binding HasPresentMon, Converter={StaticResource M.VisNot}}"
-                           Text="Localize o PresentMon abaixo para gravar."/>
-              </StackPanel>
-              <StackPanel Visibility="{Binding Busy, Converter={StaticResource M.Vis}}">
-                <DockPanel>
-                  <TextBlock DockPanel.Dock="Right" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H2}"
-                             Foreground="{StaticResource Brush.Trace}">
-                    <TextBlock.Text>
-                      <MultiBinding Converter="{StaticResource M.Clock}">
-                        <Binding Path="Progress"/>
-                        <Binding Path="Seconds"/>
-                      </MultiBinding>
-                    </TextBlock.Text>
-                  </TextBlock>
-                  <TextBlock Text="Gravando" Style="{StaticResource Text.H2}" Foreground="{StaticResource Brush.Trace}"/>
-                </DockPanel>
-                <ProgressBar Style="{StaticResource M.CaptureBar}" Value="{Binding Progress, Mode=OneWay}" Margin="0,10,0,12"/>
-                <Button Style="{StaticResource Button.Secondary}" Command="{Binding CancelCommand}" Content="Cancelar" Margin="0"
-                        HorizontalAlignment="Stretch"/>
-              </StackPanel>
-            </Grid>
-
-            <!-- Rodapé: PresentMon e importação -->
-            <Border Grid.Row="4" Grid.ColumnSpan="3" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0" Margin="0,18,0,0" Padding="0,12,0,0">
-              <DockPanel LastChildFill="True">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                  <TextBlock Text="Já tem uma captura?" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding ImportCommand}" Content="Importar CSV" Margin="0"
-                          ToolTip="Importa um ou mais CSV do PresentMon ou do CapFrameX. O arquivo original não é alterado."/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                  <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,8,0">
+        <!-- (a) Hero: jogo agora + números e traço ao vivo -->
+        <Border Grid.Row="2" Grid.ColumnSpan="3" Style="{StaticResource Panel.Hero}" Padding="24,22" Margin="0,0,0,20">
+          <StackPanel>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <StackPanel Margin="0,0,24,0">
+                <StackPanel Orientation="Horizontal">
+                  <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,4,10,0">
                     <Ellipse.Style>
                       <Style TargetType="Ellipse">
-                        <Setter Property="Fill" Value="{StaticResource Brush.Bad}"/>
+                        <Setter Property="Fill" Value="{StaticResource Brush.TextDim}"/>
                         <Style.Triggers>
-                          <DataTrigger Binding="{Binding HasPresentMon}" Value="True">
-                            <Setter Property="Fill" Value="{StaticResource Brush.Good}"/>
+                          <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                            <Setter Property="Fill" Value="{StaticResource Brush.Signal}"/>
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding IsCapturing}" Value="True">
+                            <Setter Property="Fill" Value="{StaticResource Brush.Bad}"/>
                           </DataTrigger>
                         </Style.Triggers>
                       </Style>
                     </Ellipse.Style>
                   </Ellipse>
-                  <TextBlock Style="{StaticResource Text.Small}" VerticalAlignment="Center" TextWrapping="NoWrap">
-                    <Run Text="PresentMon:" Foreground="{StaticResource Brush.TextDim}"/>
-                    <Run Text="{Binding PresentMonText, Mode=OneWay}" Foreground="{StaticResource Brush.Text}"/>
-                  </TextBlock>
-                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding BrowseCommand}" Content="Localizar PresentMon" Margin="8,0,0,0"
-                          ToolTip="Indique onde está o PresentMon (executável oficial da Intel). O NEXUS lembra o caminho."/>
+                  <TextBlock Text="{Binding HeroTitle}" Style="{StaticResource Text.Display}"/>
                 </StackPanel>
-              </DockPanel>
-            </Border>
+                <TextBlock Text="{Binding HeroDetail}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="20,4,0,0"/>
+                <TextBlock Text="{Binding CaptureNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="20,6,0,0"
+                           Visibility="{Binding CaptureNote, Converter={StaticResource M.Has}}"/>
+                <WrapPanel Margin="20,10,0,0" Visibility="{Binding IsPlaying, Converter={StaticResource M.Vis}}">
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding AddCurrentGameCommand}" Content="É um jogo: lembrar" Margin="0,0,8,0"
+                          ToolTip="Coloca este executável na sua lista de jogos."/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding ExcludeCurrentCommand}" Content="Não é jogo" Margin="0"
+                          ToolTip="O NEXUS deixa de tratar este programa como jogo."/>
+                </WrapPanel>
+              </StackPanel>
 
-            <!-- Ajuda quando o PresentMon não foi encontrado -->
-            <Border Grid.Row="5" Grid.ColumnSpan="3" Style="{StaticResource Panel.Notice}" Margin="0,12,0,0"
-                    Visibility="{Binding ShowPresentMonHelp, Converter={StaticResource M.Vis}}">
-              <TextBlock Text="{Binding PresentMonHelp}" Style="{StaticResource Text.Body}"/>
-            </Border>
-
-            <!-- Status -->
-            <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Text="{Binding Status}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"
-                       Margin="0,12,0,0" Visibility="{Binding Status, Converter={StaticResource M.Has}}"/>
-
-            <!-- Saída do PresentMon (para entender um erro) -->
-            <Expander Grid.Row="7" Grid.ColumnSpan="3" Margin="0,10,0,0" Visibility="{Binding Log, Converter={StaticResource M.Has}}">
-              <Expander.Header>
-                <TextBlock Text="Ver a saída do PresentMon" Style="{StaticResource Text.Small}"/>
-              </Expander.Header>
-              <Border Style="{StaticResource Panel.Inset}" Margin="0,8,0,0" MaxHeight="220">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                  <TextBlock Text="{Binding Log}" FontFamily="Consolas" FontSize="{StaticResource Size.Small}" Foreground="{StaticResource Brush.TextMuted}"
-                             TextWrapping="Wrap"/>
-                </ScrollViewer>
-              </Border>
-            </Expander>
-          </Grid>
-        </Border>
-
-        <!-- (b) O palco: a sessão selecionada -->
-        <Grid Grid.Row="2" Grid.Column="0">
-          <!-- Sessão selecionada -->
-          <Border Style="{StaticResource Panel.Hero}" Padding="24,22"
-                  Visibility="{Binding Selected, Converter={StaticResource M.Has}}">
-            <StackPanel>
-              <DockPanel>
-                <ContentControl DockPanel.Dock="Right" Content="{Binding Selected}" ContentTemplate="{StaticResource M.TagChip}"
-                                VerticalAlignment="Top" Margin="12,6,0,0" Focusable="False"/>
-                <StackPanel>
-                  <TextBlock Text="{Binding Selected.Name}" Style="{StaticResource Text.H1}"/>
-                  <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
-                    <Run Text="{Binding Selected.Application, Mode=OneWay}" Foreground="{StaticResource Brush.Text}"/><Run Text=", gravada em "/><Run Text="{Binding Selected.When, Mode=OneWay}"/><Run Text=". "/><Run Text="{Binding Selected.DurationText, Mode=OneWay}"/><Run Text=" de captura, "/><Run Text="{Binding Selected.FramesText, Mode=OneWay}"/><Run Text=", "/><Run Text="{Binding Selected.Source, Mode=OneWay}"/><Run Text="."/>
-                  </TextBlock>
+              <StackPanel Grid.Column="1" Width="260">
+                <CheckBox IsChecked="{Binding AutoMeasure}" Margin="0,0,0,8"
+                          ToolTip="Quando um jogo abre, o NEXUS começa a medir; quando fecha, guarda a partida e compara com a anterior.">
+                  <TextBlock Text="Medir automaticamente" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding OverlayEnabled}" Margin="0,0,0,4"
+                          ToolTip="Janela pequena por cima do jogo com FPS, 1% low e frametime. Não entra no jogo.">
+                  <TextBlock Text="Mostrador de FPS no jogo" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <TextBlock Text="{Binding HotkeyStatus}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="24,0,0,12"
+                           Visibility="{Binding HotkeyEnabled, Converter={StaticResource M.Vis}}"/>
+                <Button Style="{StaticResource Button.Primary}" Command="{Binding StartCaptureCommand}" Height="44" Margin="0,4,0,0"
+                        HorizontalAlignment="Stretch" Visibility="{Binding IsCapturing, Converter={StaticResource M.VisNot}}"
+                        ToolTip="Começa a medir agora o jogo aberto (ou o executável indicado abaixo).">
+                  <TextBlock Text="Medir agora" FontFamily="{StaticResource Font.Display}" FontSize="{StaticResource Size.H2}" Foreground="{StaticResource Brush.Bg}"/>
+                </Button>
+                <Button Style="{StaticResource Button.Secondary}" Command="{Binding StopCaptureCommand}" Height="44" Margin="0,4,0,0"
+                        HorizontalAlignment="Stretch" Visibility="{Binding IsCapturing, Converter={StaticResource M.Vis}}"
+                        ToolTip="Para a medição e guarda a partida (o jogo continua aberto).">
+                  <TextBlock Text="Parar e guardar" FontFamily="{StaticResource Font.Display}" FontSize="{StaticResource Size.H2}"/>
+                </Button>
+                <StackPanel Margin="0,8,0,0" Visibility="{Binding IsPlaying, Converter={StaticResource M.VisNot}}">
+                  <TextBlock Text="Sem jogo detectado? Indique o executável:" Style="{StaticResource Text.Small}" Margin="0,0,0,4"/>
+                  <TextBox Text="{Binding ManualExe, UpdateSourceTrigger=PropertyChanged}" ToolTip="Ex.: cs2.exe (como aparece no Gerenciador de Tarefas, aba Detalhes)."/>
                 </StackPanel>
-              </DockPanel>
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Bad}" Margin="0,8,0,0" Text="Localize o PresentMon na configuração abaixo para medir."
+                           Visibility="{Binding HasPresentMon, Converter={StaticResource M.VisNot}}"/>
+              </StackPanel>
+            </Grid>
 
-              <!-- Os quatro números -->
-              <UniformGrid Columns="4" Margin="0,22,0,18">
-                <StackPanel Margin="0,0,16,0" ToolTip="Quantos quadros por segundo, em média, durante a sessão inteira.">
-                  <TextBlock Text="FPS médio" Style="{StaticResource Text.MetricLabel}"/>
-                  <TextBlock Style="{StaticResource Text.Metric}" Foreground="{StaticResource Brush.Trace}"
-                             m:CountUp.Format="0" m:CountUp.Value="{Binding Selected.AverageFps, Mode=OneWay, FallbackValue=NaN}"/>
-                  <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"
-                             Text="Quadros por segundo, em média, na sessão inteira."/>
+            <!-- Ao vivo -->
+            <StackPanel Margin="0,20,0,0" Visibility="{Binding IsCapturing, Converter={StaticResource M.Vis}}">
+              <UniformGrid Columns="4" Margin="0,0,0,14">
+                <StackPanel Margin="0,0,16,0" ToolTip="Quadros por segundo no último segundo.">
+                  <TextBlock Text="FPS agora" Style="{StaticResource Text.MetricLabel}"/>
+                  <TextBlock Text="{Binding LiveFps}" Style="{StaticResource M.LiveNumber}" Foreground="{StaticResource Brush.Trace}"/>
                 </StackPanel>
-                <StackPanel Margin="0,0,16,0" ToolTip="O FPS dos piores momentos: a média do 1% de quadros mais lentos. É o que você sente como travadinha.">
-                  <TextBlock Text="1% low" Style="{StaticResource Text.MetricLabel}"/>
-                  <TextBlock Style="{StaticResource Text.Metric}"
-                             m:CountUp.Format="0" m:CountUp.Value="{Binding Selected.Low1Fps, Mode=OneWay, FallbackValue=NaN}"/>
-                  <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"
-                             Text="O FPS dos piores momentos. É a travadinha que você sente."/>
+                <StackPanel Margin="0,0,16,0" ToolTip="Média do 1% de quadros mais lentos dos últimos 10 segundos: a travadinha que você sente agora.">
+                  <TextBlock Text="1% low (10 s)" Style="{StaticResource Text.MetricLabel}"/>
+                  <TextBlock Text="{Binding LiveLow1}" Style="{StaticResource M.LiveNumber}"/>
                 </StackPanel>
-                <StackPanel Margin="0,0,16,0" ToolTip="99% dos quadros saíram mais rápido que isto. Quanto menor, mais estável.">
-                  <TextBlock Text="Frametime P99" Style="{StaticResource Text.MetricLabel}"/>
-                  <StackPanel Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource Text.Metric}"
-                               m:CountUp.Format="0.0" m:CountUp.Value="{Binding Selected.P99Ms, Mode=OneWay, FallbackValue=NaN}"/>
-                    <TextBlock Text="ms" Style="{StaticResource Text.MetricLabel}" VerticalAlignment="Bottom" Margin="4,0,0,10"/>
-                  </StackPanel>
-                  <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"
-                             Text="99% dos quadros saíram mais rápido que isso. Menor é mais estável."/>
+                <StackPanel Margin="0,0,16,0" ToolTip="Tempo mediano de cada quadro no último segundo.">
+                  <TextBlock Text="Frametime (ms)" Style="{StaticResource Text.MetricLabel}"/>
+                  <TextBlock Text="{Binding LiveFrametime}" Style="{StaticResource M.LiveNumber}"/>
                 </StackPanel>
-                <StackPanel ToolTip="Quadros que demoraram mais que o dobro dos vizinhos (e mais de 8 ms). Cada um é um tranco visível.">
-                  <TextBlock Text="Engasgos por minuto" Style="{StaticResource Text.MetricLabel}"/>
-                  <TextBlock Style="{StaticResource Text.Metric}"
-                             m:CountUp.Format="0.0" m:CountUp.Value="{Binding Selected.StuttersPerMinute, Mode=OneWay, FallbackValue=NaN}"/>
-                  <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"
-                             Text="Quadros com mais que o dobro do tempo dos vizinhos. Cada um é um tranco."/>
+                <StackPanel ToolTip="FPS médio desde o começo da partida.">
+                  <TextBlock Style="{StaticResource Text.MetricLabel}"><Run Text="FPS médio · "/><Run Text="{Binding LiveClock, Mode=OneWay}"/></TextBlock>
+                  <TextBlock Text="{Binding LiveAverage}" Style="{StaticResource M.LiveNumber}"/>
                 </StackPanel>
               </UniformGrid>
-
-              <!-- O traço -->
+              <TextBlock Text="{Binding LiveDelta}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Signal}" Margin="0,0,0,10"
+                         Visibility="{Binding LiveDelta, Converter={StaticResource M.Has}}"/>
               <Border Style="{StaticResource Panel.Inset}" Padding="10,12,14,8">
-                <m:FrametimeChart Height="260" Points="{Binding Selected.Trace}"
-                                  Stroke="{StaticResource Brush.Trace}" GridBrush="{StaticResource Brush.Line}" LabelBrush="{StaticResource Brush.TextDim}"
-                                  ToolTip="Tempo de cada quadro ao longo da sessão, em milissegundos. As linhas tracejadas marcam o tempo por quadro de 60, 144 e 240 FPS."/>
+                <m:FrametimeChart Height="200" IsLive="True" Points="{Binding LiveTrace}" SecondaryPoints="{Binding ReferenceTrace}"
+                                  Stroke="{StaticResource Brush.Trace}" SecondaryStroke="{StaticResource Brush.Signal}"
+                                  GridBrush="{StaticResource Brush.Line}" LabelBrush="{StaticResource Brush.TextDim}"
+                                  ToolTip="Últimos 60 segundos: tempo de cada quadro (âmbar) e a partida de referência (ciano)."/>
               </Border>
-              <TextBlock Style="{StaticResource Text.Small}" Margin="2,8,0,0"
-                         Text="Tempo de cada quadro, do começo ao fim da sessão. Linha baixa e reta é jogo liso; cada pico é um engasgo. Triângulos no topo marcam picos maiores que a escala."/>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="2,8,0,0">
+                <Run Text="Últimos 60 segundos, em âmbar. "/><Run Text="{Binding ReferenceText, Mode=OneWay}"/>
+              </TextBlock>
+            </StackPanel>
+            <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="20,16,0,0"
+                       Visibility="{Binding IsCapturing, Converter={StaticResource M.VisNot}}"
+                       Text="Os números ao vivo e o traço aparecem aqui enquanto uma partida está sendo medida."/>
+          </StackPanel>
+        </Border>
 
-              <!-- Histograma -->
-              <Grid Margin="0,20,0,0">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="220"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Margin="0,0,20,0" VerticalAlignment="Center">
-                  <TextBlock Text="Como os quadros se distribuem" Style="{StaticResource Text.Body}"/>
-                  <TextBlock Style="{StaticResource Text.Small}" Margin="0,3,0,0"
-                             Text="Uma torre estreita à esquerda é bom sinal. Barras espalhadas para a direita são quadros lentos."/>
+        <!-- (b) Antes x depois automático -->
+        <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource Panel.Card}" Padding="22,20" Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="Antes x depois" Style="{StaticResource Text.H1}"/>
+            <TextBlock Text="{Binding ComparisonEmptyText}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                       Visibility="{Binding HasComparison, Converter={StaticResource M.VisNot}}"/>
+            <StackPanel Visibility="{Binding HasComparison, Converter={StaticResource M.Vis}}">
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0"><Run Text="{Binding ComparisonTitle, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding ComparisonModeText, Mode=OneWay}"/></TextBlock>
+              <TextBlock Text="{Binding ComparisonVerdict}" FontFamily="{StaticResource Font.Display}" FontSize="{StaticResource Size.H1}" Margin="0,12,0,4">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+                    <Setter Property="TextWrapping" Value="Wrap"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding ComparisonTone}" Value="Good">
+                        <Setter Property="Foreground" Value="{StaticResource Brush.Good}"/>
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding ComparisonTone}" Value="Bad">
+                        <Setter Property="Foreground" Value="{StaticResource Brush.Bad}"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <TextBlock Text="{Binding ComparisonWhy}" Style="{StaticResource Text.Small}" Margin="0,0,0,10"/>
+              <ItemsControl ItemsSource="{Binding ComparisonRows}" ItemTemplate="{StaticResource M.MetricRow}" Focusable="False"/>
+
+              <Border Style="{StaticResource Panel.Inset}" Padding="10,12,14,8" Margin="0,14,0,0">
+                <m:FrametimeChart Height="170" Points="{Binding ComparisonAfterTrace}" SecondaryPoints="{Binding ComparisonBeforeTrace}"
+                                  Stroke="{StaticResource Brush.Trace}" SecondaryStroke="{StaticResource Brush.Signal}"
+                                  GridBrush="{StaticResource Brush.Line}" LabelBrush="{StaticResource Brush.TextDim}"/>
+              </Border>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="2,6,0,0">
+                <Run Text="Ciano: antes." Foreground="{StaticResource Brush.Signal}"/><Run Text=" "/><Run Text="Âmbar: depois." Foreground="{StaticResource Brush.Trace}"/><Run Text=" Linha mais baixa e mais reta é melhor."/>
+              </TextBlock>
+
+              <StackPanel Margin="0,14,0,0" Visibility="{Binding ComparisonChanges.Count, Converter={StaticResource M.Has}}">
+                <TextBlock Text="O que o NEXUS mudou entre as duas partidas" Style="{StaticResource Text.Body}" FontWeight="SemiBold"/>
+                <ItemsControl ItemsSource="{Binding ComparisonChanges}" Focusable="False">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"><Run Text="• "/><Run Text="{Binding Mode=OneWay}"/></TextBlock>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <Border Style="{StaticResource Panel.Notice}" Padding="14,10" Margin="0,14,0,0" Visibility="{Binding ComparisonWarnings.Count, Converter={StaticResource M.Has}}">
+                <StackPanel>
+                  <TextBlock Text="Antes de acreditar no resultado" Style="{StaticResource Text.Body}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Trace}"/>
+                  <ItemsControl ItemsSource="{Binding ComparisonWarnings}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,3,0,0"><Run Text="• "/><Run Text="{Binding Mode=OneWay}"/></TextBlock>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
                 </StackPanel>
-                <m:HistogramChart Grid.Column="1" Height="84" Bins="{Binding Selected.Histogram}" Fill="{StaticResource Brush.Trace}"
-                                  OverflowFill="{StaticResource Brush.Bad}" LabelBrush="{StaticResource Brush.TextDim}"
-                                  ToolTip="Quantos quadros caíram em cada faixa de 1 ms. A barra separada à direita junta tudo acima de 50 ms."/>
-              </Grid>
-
-              <!-- Ações da sessão selecionada -->
-              <Border BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0" Margin="0,20,0,0" Padding="0,14,0,0">
-                <DockPanel>
-                  <Button DockPanel.Dock="Right" Style="{StaticResource Button.Danger}" Command="{Binding DeleteCommand}" Content="Apagar" Margin="0"
-                          ToolTip="Remove esta sessão (e o CSV dela) da pasta de sessões do NEXUS. Pede confirmação."/>
-                  <WrapPanel>
-                    <Button Style="{StaticResource Button.Secondary}" Command="{Binding TagBeforeCommand}" BorderBrush="{StaticResource Brush.Signal}" Margin="0,0,8,4"
-                            ToolTip="Sessão gravada antes da mudança que você quer testar.">
-                      <TextBlock Text="Marcar como antes" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Signal}"/>
-                    </Button>
-                    <Button Style="{StaticResource Button.Secondary}" Command="{Binding TagAfterCommand}" BorderBrush="{StaticResource Brush.Trace}" Margin="0,0,8,4"
-                            ToolTip="Sessão gravada depois da mudança.">
-                      <TextBlock Text="Marcar como depois" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Trace}"/>
-                    </Button>
-                    <Button Style="{StaticResource Button.Ghost}" Command="{Binding ClearTagCommand}" Content="Tirar marca" Margin="0,0,8,4"/>
-                  </WrapPanel>
-                </DockPanel>
               </Border>
+
+              <Expander Margin="0,12,0,0">
+                <Expander.Header>
+                  <TextBlock Text="Como foi calculado" Style="{StaticResource Text.Small}"/>
+                </Expander.Header>
+                <TextBlock Text="{Binding ComparisonMethod}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
+              </Expander>
+              <Button Style="{StaticResource Button.Secondary}" Command="{Binding ExportReportCommand}" Content="Exportar relatório" HorizontalAlignment="Left" Margin="0,12,0,0"
+                      ToolTip="Salva um arquivo de texto com o veredito, os números, as mudanças e os avisos."/>
             </StackPanel>
-          </Border>
+          </StackPanel>
+        </Border>
 
-          <!-- Há sessões, mas nenhuma escolhida -->
-          <Border Style="{StaticResource Panel.Card}" Padding="24">
-            <Border.Visibility>
-              <MultiBinding Converter="{x:Static m:MeasureVisibility.HasItemsButNoSelection}">
-                <Binding Path="HasSessions"/>
-                <Binding Path="Selected"/>
-              </MultiBinding>
-            </Border.Visibility>
-            <TextBlock Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}"
-                       Text="Escolha uma sessão na lista ao lado para ver o traço e os números dela."/>
-          </Border>
-
-          <!-- Estado vazio: primeira medição -->
-          <Border Style="{StaticResource Panel.Hero}" Padding="28,26" Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}">
-            <StackPanel>
-              <TextBlock Text="Sua primeira medição" Style="{StaticResource Text.Display}"/>
-              <TextBlock Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,20"
-                         Text="Grave uma partida e o NEXUS desenha aqui o tempo de cada quadro, com FPS médio, 1% low e engasgos."/>
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*"/>
-                  <ColumnDefinition Width="24"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <DockPanel>
-                  <TextBlock DockPanel.Dock="Left" Text="1" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.Display}"
-                             Foreground="{StaticResource Brush.Trace}" Margin="0,-6,14,0"/>
-                  <StackPanel>
-                    <TextBlock Text="Abra o jogo" Style="{StaticResource Text.H2}"/>
-                    <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0"
-                               Text="Entre numa partida, no treino ou num replay. Jogue um minuto antes para o jogo aquecer (shaders e cache)."/>
-                  </StackPanel>
-                </DockPanel>
-                <DockPanel Grid.Column="2">
-                  <TextBlock DockPanel.Dock="Left" Text="2" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.Display}"
-                             Foreground="{StaticResource Brush.Trace}" Margin="0,-6,14,0"/>
-                  <StackPanel>
-                    <TextBlock Text="Grave uma sessão" Style="{StaticResource Text.H2}"/>
-                    <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0"
-                               Text="Confira o nome do jogo acima e clique em Gravar sessão. Sem PresentMon? Importe um CSV do PresentMon ou do CapFrameX."/>
-                  </StackPanel>
-                </DockPanel>
-              </Grid>
-              <!-- Osciloscópio em repouso: a grade e as referências, sem sinal. -->
-              <Border Style="{StaticResource Panel.Inset}" Padding="10,12,14,8" Margin="0,24,0,0" Opacity="0.7">
-                <m:FrametimeChart Height="170" GridBrush="{StaticResource Brush.Line}" LabelBrush="{StaticResource Brush.TextDim}"/>
-              </Border>
-            </StackPanel>
-          </Border>
-        </Grid>
-
-        <!-- (c) Sessões e (d) como comparar direito -->
-        <StackPanel Grid.Row="2" Grid.Column="2">
+        <!-- (c) Jogos com tendência -->
+        <StackPanel Grid.Row="3" Grid.Column="2">
           <DockPanel Margin="2,0,0,10">
-            <TextBlock DockPanel.Dock="Right" Text="{Binding Sessions.Count}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H2}"
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Games.Count}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H2}"
                        Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Bottom"/>
-            <TextBlock Text="Sessões" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="Jogos medidos" Style="{StaticResource Text.H2}"/>
           </DockPanel>
-
-          <ListBox ItemsSource="{Binding Sessions}" SelectedItem="{Binding Selected, Mode=TwoWay}" ItemContainerStyle="{StaticResource M.SessionItem}"
+          <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="2,0,0,12"
+                     Visibility="{Binding HasGames, Converter={StaticResource M.VisNot}}"
+                     Text="Cada jogo medido aparece aqui com a tendência das partidas."/>
+          <ListBox ItemsSource="{Binding Games}" SelectedItem="{Binding SelectedGame, Mode=TwoWay}" ItemContainerStyle="{StaticResource M.Item}"
                    SelectionMode="Single" Background="Transparent" BorderThickness="0" Focusable="False">
             <ListBox.Template>
               <ControlTemplate TargetType="ListBox">
@@ -502,35 +383,268 @@
                   <StackPanel Margin="0,0,10,0">
                     <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
                     <TextBlock Style="{StaticResource Text.Small}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis">
-                      <Run Text="{Binding Application, Mode=OneWay}"/><Run Text=", "/><Run Text="{Binding When, Mode=OneWay}"/>
+                      <Run Text="{Binding SessionsText, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding LastPlayedText, Mode=OneWay}"/>
                     </TextBlock>
-                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource M.TagChip}" Margin="0,6,0,0" HorizontalAlignment="Left" Focusable="False"
-                                    Visibility="{Binding TagText, Converter={StaticResource M.Has}}"/>
+                    <mm:Sparkline Height="22" Margin="0,6,0,0" Values="{Binding Low1Trend}" Stroke="{StaticResource Brush.Trace}"
+                                  ToolTip="1% low de cada partida, da mais antiga para a mais nova."/>
+                    <TextBlock Text="{Binding TrendText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
                   </StackPanel>
                   <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                    <TextBlock Text="{Binding AverageFpsText}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H1}"
+                    <TextBlock Text="{Binding LastFpsText}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H1}"
                                Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Right"/>
                     <TextBlock Text="FPS médio" Style="{StaticResource Text.MetricLabel}" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource Text.Small}"><Run Text="1% low "/><Run Text="{Binding LastLow1Text, Mode=OneWay}"/></TextBlock>
                   </StackPanel>
                 </Grid>
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
-
-          <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="2,0,0,12"
-                     Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}"
-                     Text="As sessões gravadas ou importadas aparecem aqui."/>
-
-          <TextBlock Style="{StaticResource Text.Small}" Margin="2,6,0,14" Visibility="{Binding HasSessions, Converter={StaticResource M.Vis}}"
-                     Text="Marque sessões como antes e depois de uma mudança e abra Comparar para ver se a diferença é real."/>
-
-          <Border Style="{StaticResource Panel.Notice}" Padding="14,12">
-            <StackPanel>
-              <TextBlock Text="Para comparar direito" Style="{StaticResource Text.Body}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Trace}"/>
-              <TextBlock Text="{Binding HowTo}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,4,0,0"/>
-            </StackPanel>
-          </Border>
         </StackPanel>
+
+        <!-- (d) Partida selecionada -->
+        <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource Panel.Card}" Padding="22,20" Margin="0,0,0,20"
+                Visibility="{Binding Selected, Converter={StaticResource M.Has}}">
+          <StackPanel>
+            <DockPanel>
+              <ContentControl DockPanel.Dock="Right" Content="{Binding Selected}" ContentTemplate="{StaticResource M.TagChip}" VerticalAlignment="Top" Focusable="False"/>
+              <StackPanel>
+                <TextBlock Text="{Binding Selected.Name}" Style="{StaticResource Text.H2}"/>
+                <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
+                  <Run Text="{Binding Selected.Application, Mode=OneWay}" Foreground="{StaticResource Brush.Text}"/><Run Text=", "/><Run Text="{Binding Selected.When, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Selected.DurationText, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Selected.FramesText, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Selected.Source, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock Text="{Binding Selected.ConditionsText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"
+                           Visibility="{Binding Selected.ConditionsText, Converter={StaticResource M.Has}}"/>
+                <TextBlock Text="{Binding Selected.AppliedText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
+                <TextBlock Text="{Binding Selected.ExcludedText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}"
+                           Visibility="{Binding Selected.ExcludedText, Converter={StaticResource M.Has}}"/>
+              </StackPanel>
+            </DockPanel>
+            <UniformGrid Columns="4" Margin="0,16,0,14">
+              <StackPanel Margin="0,0,16,0" ToolTip="Quadros por segundo, em média, na partida inteira.">
+                <TextBlock Text="FPS médio" Style="{StaticResource Text.MetricLabel}"/>
+                <TextBlock Style="{StaticResource Text.Metric}" Foreground="{StaticResource Brush.Trace}"
+                           m:CountUp.Format="0" m:CountUp.Value="{Binding Selected.AverageFps, Mode=OneWay, FallbackValue=NaN}"/>
+              </StackPanel>
+              <StackPanel Margin="0,0,16,0" ToolTip="O FPS dos piores momentos: a média do 1% de quadros mais lentos.">
+                <TextBlock Text="1% low" Style="{StaticResource Text.MetricLabel}"/>
+                <TextBlock Style="{StaticResource Text.Metric}" m:CountUp.Format="0" m:CountUp.Value="{Binding Selected.Low1Fps, Mode=OneWay, FallbackValue=NaN}"/>
+              </StackPanel>
+              <StackPanel Margin="0,0,16,0" ToolTip="99% dos quadros saíram mais rápido que isto.">
+                <TextBlock Text="Frametime P99 (ms)" Style="{StaticResource Text.MetricLabel}"/>
+                <TextBlock Style="{StaticResource Text.Metric}" m:CountUp.Format="0.0" m:CountUp.Value="{Binding Selected.P99Ms, Mode=OneWay, FallbackValue=NaN}"/>
+              </StackPanel>
+              <StackPanel ToolTip="Quadros com mais que o dobro do tempo dos vizinhos (e mais de 8 ms).">
+                <TextBlock Text="Engasgos por minuto" Style="{StaticResource Text.MetricLabel}"/>
+                <TextBlock Style="{StaticResource Text.Metric}" m:CountUp.Format="0.0" m:CountUp.Value="{Binding Selected.StuttersPerMinute, Mode=OneWay, FallbackValue=NaN}"/>
+              </StackPanel>
+            </UniformGrid>
+            <Border Style="{StaticResource Panel.Inset}" Padding="10,12,14,8">
+              <m:FrametimeChart Height="200" Points="{Binding Selected.Trace}" Stroke="{StaticResource Brush.Trace}"
+                                GridBrush="{StaticResource Brush.Line}" LabelBrush="{StaticResource Brush.TextDim}"
+                                ToolTip="Tempo de cada quadro ao longo da partida. As linhas tracejadas marcam 60, 144 e 240 FPS."/>
+            </Border>
+            <Grid Margin="0,14,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,0,16,0" VerticalAlignment="Center"
+                         Text="Como os quadros se distribuem: torre estreita à esquerda é bom sinal."/>
+              <m:HistogramChart Grid.Column="1" Height="70" Bins="{Binding Selected.Histogram}" Fill="{StaticResource Brush.Trace}"
+                                OverflowFill="{StaticResource Brush.Bad}" LabelBrush="{StaticResource Brush.TextDim}"/>
+            </Grid>
+            <Border BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0" Margin="0,16,0,0" Padding="0,12,0,0">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource Button.Danger}" Command="{Binding DeleteCommand}" Content="Apagar" Margin="0"
+                        ToolTip="Remove esta partida (e o CSV dela) da pasta de sessões do NEXUS. Pede confirmação."/>
+                <WrapPanel>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding CompareSelectedCommand}" Content="Comparar com a anterior" Margin="0,0,8,4"
+                          ToolTip="Mostra no cartão Antes x depois esta partida contra a referência escolhida pelo NEXUS."/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding ToggleExcludeCommand}" Content="Usar ou não nas comparações" Margin="0,0,8,4"
+                          ToolTip="Partida atípica (outro mapa, alguém baixando no PC, tela de carregamento longa)? Tire das comparações."/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding TagBeforeCommand}" Content="Marcar como antes" Margin="0,0,8,4"/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding TagAfterCommand}" Content="Marcar como depois" Margin="0,0,8,4"/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding ClearTagCommand}" Content="Tirar marca" Margin="0,0,8,4"/>
+                </WrapPanel>
+              </DockPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <!-- (e) Partidas do jogo escolhido -->
+        <StackPanel Grid.Row="4" Grid.Column="2" Visibility="{Binding HasSessions, Converter={StaticResource M.Vis}}">
+          <DockPanel Margin="2,0,0,10">
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Sessions.Count}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H2}"
+                       Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Bottom"/>
+            <TextBlock Style="{StaticResource Text.H2}"><Run Text="Partidas de "/><Run Text="{Binding SelectedGame.Name, Mode=OneWay}"/></TextBlock>
+          </DockPanel>
+          <ListBox ItemsSource="{Binding Sessions}" SelectedItem="{Binding Selected, Mode=TwoWay}" ItemContainerStyle="{StaticResource M.Item}"
+                   SelectionMode="Single" Background="Transparent" BorderThickness="0" Focusable="False" MaxHeight="620">
+            <ListBox.Template>
+              <ControlTemplate TargetType="ListBox">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                  <ItemsPresenter/>
+                </ScrollViewer>
+              </ControlTemplate>
+            </ListBox.Template>
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="{Binding When}" Style="{StaticResource Text.Body}" TextWrapping="NoWrap"/>
+                    <TextBlock Style="{StaticResource Text.Small}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis">
+                      <Run Text="{Binding DurationText, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Source, Mode=OneWay}"/>
+                    </TextBlock>
+                    <TextBlock Text="{Binding ExcludedText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}"
+                               Visibility="{Binding ExcludedText, Converter={StaticResource M.Has}}"/>
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource M.TagChip}" Margin="0,4,0,0" HorizontalAlignment="Left" Focusable="False"
+                                    Visibility="{Binding TagText, Converter={StaticResource M.Has}}"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                    <TextBlock Text="{Binding AverageFpsText}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H2}"
+                               Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource Text.Small}"><Run Text="1% low "/><Run Text="{Binding Low1Text, Mode=OneWay}"/></TextBlock>
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <Button Style="{StaticResource Button.Ghost}" Command="{Binding ImportCommand}" Content="Importar CSV (PresentMon ou CapFrameX)" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+        </StackPanel>
+
+        <!-- (f) Comparação manual: o antigo "Comparar" (sessões marcadas antes/depois, de qualquer jogo) -->
+        <Border Grid.Row="5" Grid.ColumnSpan="3" Style="{StaticResource Panel.Card}" Padding="22,18" Margin="0,0,0,20"
+                Visibility="{Binding HasManual, Converter={StaticResource M.Vis}}">
+          <StackPanel>
+            <TextBlock Text="Comparação manual (marcadas como antes e depois)" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="{Binding ManualHeadline}" Style="{StaticResource Text.Body}" Margin="0,6,0,8"/>
+            <ItemsControl ItemsSource="{Binding ManualRows}" ItemTemplate="{StaticResource M.MetricRow}" Focusable="False"/>
+            <TextBlock Text="{Binding ManualMethod}" Style="{StaticResource Text.Small}" Margin="0,8,0,0"/>
+          </StackPanel>
+        </Border>
+
+        <!-- (g) Configuração -->
+        <Border Grid.Row="6" Grid.ColumnSpan="3" Style="{StaticResource Panel.Card}" Padding="22,20">
+          <StackPanel>
+            <TextBlock Text="Configuração da medição" Style="{StaticResource Text.H1}" Margin="0,0,0,14"/>
+            <UniformGrid Columns="2">
+              <!-- Medição automática -->
+              <StackPanel Margin="0,0,24,20">
+                <TextBlock Text="Medição automática" Style="{StaticResource M.SectionTitle}"/>
+                <CheckBox IsChecked="{Binding AutoMeasure}" Margin="0,0,0,6">
+                  <TextBlock Text="Medir sozinho quando um jogo abrir" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding DetectFullscreen}" Margin="0,0,0,6"
+                          ToolTip="Além das bibliotecas e das listas, trata como jogo qualquer programa que ocupe a tela inteira (exceto navegadores e players conhecidos).">
+                  <TextBlock Text="Também considerar jogo o que estiver em tela cheia" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding RequestElevation}" Margin="0,0,0,6">
+                  <TextBlock Text="Deixar o PresentMon pedir permissão ao Windows" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <TextBlock Text="{Binding RightsText}" Style="{StaticResource Text.Small}" Margin="24,0,0,8"/>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                  <TextBlock Text="Guardar partidas com pelo menos" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+                  <TextBox Text="{Binding MinSessionSeconds, UpdateSourceTrigger=LostFocus}" Width="60" Margin="8,0" Padding="6,3" HorizontalContentAlignment="Right"
+                           FontFamily="{StaticResource Font.Numbers}"/>
+                  <TextBlock Text="segundos" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+                </StackPanel>
+              </StackPanel>
+
+              <!-- Mostrador -->
+              <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Mostrador de FPS" Style="{StaticResource M.SectionTitle}"/>
+                <CheckBox IsChecked="{Binding OverlayEnabled}" Margin="0,0,0,6">
+                  <TextBlock Text="Ligado" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding OverlayOnGameStart}" Margin="0,0,0,6">
+                  <TextBlock Text="Ligar sozinho quando um jogo abrir" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding OverlayShowSystem}" Margin="0,0,0,8">
+                  <TextBlock Text="Mostrar uso de CPU, GPU e temperatura da GPU" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <TextBlock Text="Canto da tela" Style="{StaticResource Text.Small}" Margin="0,0,0,4"/>
+                <WrapPanel Margin="0,0,0,8">
+                  <RadioButton GroupName="M.Corner" Content="Superior esquerdo" Margin="0,0,12,4" IsChecked="{Binding OverlayCornerValue, Converter={StaticResource M.IntEq}, ConverterParameter=0}"/>
+                  <RadioButton GroupName="M.Corner" Content="Superior direito" Margin="0,0,12,4" IsChecked="{Binding OverlayCornerValue, Converter={StaticResource M.IntEq}, ConverterParameter=1}"/>
+                  <RadioButton GroupName="M.Corner" Content="Inferior esquerdo" Margin="0,0,12,4" IsChecked="{Binding OverlayCornerValue, Converter={StaticResource M.IntEq}, ConverterParameter=2}"/>
+                  <RadioButton GroupName="M.Corner" Content="Inferior direito" Margin="0,0,12,4" IsChecked="{Binding OverlayCornerValue, Converter={StaticResource M.IntEq}, ConverterParameter=3}"/>
+                </WrapPanel>
+                <CheckBox IsChecked="{Binding HotkeyEnabled}" Margin="0,0,0,6"
+                          ToolTip="Um atalho global vale no Windows inteiro enquanto o NEXUS estiver aberto (inclusive na bandeja). Escolha uma combinação que nenhum outro programa use.">
+                  <TextBlock Text="Atalho de teclado para ligar e desligar" Style="{StaticResource Text.Body}"/>
+                </CheckBox>
+                <StackPanel Orientation="Horizontal" Margin="24,0,0,4">
+                  <TextBox Text="{Binding HotkeyText, UpdateSourceTrigger=PropertyChanged}" Width="140" ToolTip="Ex.: Ctrl+Shift+F, Alt+F10, Ctrl+Alt+O."/>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding ApplyHotkeyCommand}" Content="Usar este atalho" Margin="8,0,0,0"/>
+                </StackPanel>
+                <TextBlock Text="{Binding HotkeyStatus}" Style="{StaticResource Text.Small}" Margin="24,0,0,8"/>
+                <Button Style="{StaticResource Button.Ghost}" Command="{Binding PreviewOverlayCommand}" Content="{Binding PreviewText}" HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                <TextBlock Text="{Binding OverlayHelp}" Style="{StaticResource Text.Small}"/>
+              </StackPanel>
+
+              <!-- Jogos -->
+              <StackPanel Margin="0,0,24,20">
+                <TextBlock Text="Quais programas são jogos" Style="{StaticResource M.SectionTitle}"/>
+                <TextBlock Text="{Binding LibraryText}" Style="{StaticResource Text.Small}" Margin="0,0,0,4"/>
+                <Button Style="{StaticResource Button.Ghost}" Command="{Binding RescanLibraryCommand}" Content="Ler as bibliotecas de novo" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+                <TextBlock Text="Sua lista (sempre jogo)" Style="{StaticResource Text.Body}"/>
+                <ItemsControl ItemsSource="{Binding UserGames}" Tag="{Binding RemoveGameCommand}" ItemTemplate="{StaticResource M.ExeItem}" Focusable="False" Margin="0,4,0,4"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                  <TextBox Text="{Binding NewGameExe, UpdateSourceTrigger=PropertyChanged}" Width="220" ToolTip="Nome do executável, ex.: eldenring.exe"/>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding AddGameCommand}" Content="Adicionar" Margin="8,0,0,0"/>
+                </StackPanel>
+                <TextBlock Text="Nunca tratar como jogo" Style="{StaticResource Text.Body}"/>
+                <ItemsControl ItemsSource="{Binding ExcludedGames}" Tag="{Binding RemoveExcludedCommand}" ItemTemplate="{StaticResource M.ExeItem}" Focusable="False" Margin="0,4,0,0"/>
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"
+                           Text="O NEXUS só lê o nome e a pasta de cada programa (o mesmo que o Gerenciador de Tarefas mostra). Não abre o jogo nem lê a memória dele."/>
+              </StackPanel>
+
+              <!-- PresentMon e sessões -->
+              <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="PresentMon" Style="{StaticResource M.SectionTitle}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                  <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,8,0">
+                    <Ellipse.Style>
+                      <Style TargetType="Ellipse">
+                        <Setter Property="Fill" Value="{StaticResource Brush.Bad}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding HasPresentMon}" Value="True">
+                            <Setter Property="Fill" Value="{StaticResource Brush.Good}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Ellipse.Style>
+                  </Ellipse>
+                  <TextBlock Text="{Binding PresentMonText}" Style="{StaticResource Text.Body}"/>
+                </StackPanel>
+                <WrapPanel Margin="0,0,0,6">
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding BrowseCommand}" Content="Localizar PresentMon" Margin="0,0,8,4"/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding RescanPresentMonCommand}" Content="Procurar de novo" Margin="0,0,8,4"/>
+                </WrapPanel>
+                <TextBlock Text="{Binding PresentMonHelp}" Style="{StaticResource Text.Small}" Margin="0,0,0,16"/>
+
+                <TextBlock Text="Partidas guardadas" Style="{StaticResource M.SectionTitle}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                  <TextBlock Text="Apagar partidas com mais de" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+                  <TextBox Text="{Binding KeepDays, UpdateSourceTrigger=LostFocus}" Width="60" Margin="8,0" Padding="6,3" HorizontalContentAlignment="Right"
+                           FontFamily="{StaticResource Font.Numbers}" ToolTip="0 = guardar para sempre."/>
+                  <TextBlock Text="dias" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding CleanupCommand}" Content="Limpar agora" Margin="12,0,0,0"/>
+                </StackPanel>
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,0,0,8"
+                           Text="A última partida de cada jogo e as marcadas como antes/depois nunca são apagadas pela limpeza. Só arquivos da pasta de sessões do NEXUS."/>
+                <WrapPanel>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding ExportCsvCommand}" Content="Exportar todas (CSV)" Margin="0,0,8,4"/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding OpenFolderCommand}" Content="Abrir a pasta de sessões" Margin="0,0,8,4"/>
+                </WrapPanel>
+              </StackPanel>
+            </UniformGrid>
+          </StackPanel>
+        </Border>
       </Grid>
     </ScrollViewer>
   </DataTemplate>
