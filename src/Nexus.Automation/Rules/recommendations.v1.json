@@ -1,0 +1,257 @@
+{
+  // Regras do Automático: etiquetas do perfil (PcProfiler) → ações do catálogo carregado.
+  // kind: Recommend (pode entrar no "Otimizar agora" se o risco for baixo), Consider (só com medição antes/depois),
+  //       Review (abre a página do módulo; o usuário escolhe), Avoid (NÃO fazer neste PC), Info (conselho, sem ação).
+  // Alvo: "action" (id exato), "actionPrefix" (todas as ações do módulo até "maxRisk"), ou "module" (só para Review).
+  // Ação ausente do catálogo = regra ignorada. Sem mitos: "gain" diz o ganho esperado de forma honesta, inclusive "nenhum".
+  "schema": "nexus.automation.rules/1",
+  "rules": [
+    // ---------------------------------------------------------------- o que NÃO fazer neste PC (avaliado primeiro)
+    {
+      "id": "avoid.high-performance.on-battery",
+      "kind": "Avoid",
+      "action": "power.active-scheme.high-performance.session",
+      "when": ["on-battery"],
+      "priority": 1,
+      "reason": "Seu notebook está na bateria: o plano Alto desempenho mantém o processador em frequência alta, gasta a bateria bem mais rápido e esquenta. Na bateria o Windows limita a potência de qualquer jeito, então o ganho em jogos não aparece."
+    },
+    {
+      "id": "avoid.high-performance.laptop",
+      "kind": "Avoid",
+      "action": "power.active-scheme.high-performance.session",
+      "when": ["laptop"],
+      "priority": 2,
+      "reason": "Em notebook, o plano Alto desempenho aumenta calor e ruído; com o aparelho já no limite térmico, o processador reduz a frequência e o ganho some. Prefira o modo de energia \"Melhor desempenho\" do próprio Windows quando estiver na tomada."
+    },
+    {
+      "id": "avoid.high-performance.vm",
+      "kind": "Avoid",
+      "action": "power.active-scheme.high-performance.session",
+      "when": ["vm"],
+      "priority": 3,
+      "reason": "Em máquina virtual, o plano de energia do Windows convidado não controla o processador real. Não muda nada."
+    },
+    {
+      "id": "avoid.core-parking.laptop",
+      "kind": "Avoid",
+      "action": "power.processor.min-cores-parking",
+      "any": ["laptop", "vm"],
+      "priority": 2,
+      "reason": "Manter todos os núcleos sempre acordados tira do processador a chance de economizar energia: em notebook gasta bateria e esquenta; em máquina virtual não tem efeito."
+    },
+    {
+      "id": "avoid.sysmain.hdd",
+      "kind": "Avoid",
+      "action": "svc.sysmain.manual.lab",
+      "any": ["hdd", "low-ram"],
+      "priority": 1,
+      "reason": "Seu PC tem HDD ou pouca memória: o SysMain (antigo Superfetch) pré-carrega na memória os programas que você mais usa, e é justamente nesse tipo de PC que ele mais ajuda. Desligar costuma deixar a abertura de programas mais lenta."
+    },
+    {
+      "id": "avoid.hags.integrated",
+      "kind": "Avoid",
+      "action": "gpu.hags.lab",
+      "any": ["gpu-integrated-only", "vm"],
+      "priority": 3,
+      "reason": "Sem placa de vídeo dedicada (ou em máquina virtual), o agendamento de GPU acelerado por hardware não traz ganho mensurável e pode nem ser suportado pelo driver."
+    },
+    {
+      "id": "avoid.priority-separation",
+      "kind": "Avoid",
+      "action": "sched.win32priorityseparation.lab",
+      "when": [],
+      "priority": 3,
+      "reason": "Mudar o Win32PrioritySeparation é um ajuste antigo muito repetido em guias; o padrão do Windows já favorece o programa em primeiro plano. Sem medição no seu PC, não recomendamos."
+    },
+    {
+      "id": "avoid.system-responsiveness",
+      "kind": "Avoid",
+      "action": "sched.mmcss.system-responsiveness.lab",
+      "when": [],
+      "priority": 3,
+      "reason": "O SystemResponsiveness afeta o agendador multimídia (áudio e vídeo), não o FPS de jogos em geral. Fica só como teste de laboratório com medição."
+    },
+
+    // ---------------------------------------------------------------- recomendações diretas (podem entrar no "Otimizar agora")
+    {
+      "id": "gamemode.off",
+      "kind": "Recommend",
+      "action": "win.gamemode.enable",
+      "when": ["diag:win.gamemode:attention"],
+      "priority": 1,
+      "reason": "O Modo de Jogo está desligado neste PC (AutoGameModeEnabled = 0). Ligado, que é o padrão do Windows, ele dá prioridade ao jogo em primeiro plano e segura atualizações e reinícios do Windows Update durante a partida.",
+      "gain": "Ganho de FPS pequeno e variável; o benefício principal é evitar interrupções de tarefas em segundo plano durante o jogo."
+    },
+    {
+      "id": "gamedvr.capture.laptop",
+      "kind": "Recommend",
+      "action": "win.gamedvr.background-capture.disable",
+      "when": ["diag:win.gamedvr.capture:attention", "laptop"],
+      "priority": 1,
+      "reason": "A captura em segundo plano da Game Bar está ligada: ela grava o tempo todo os últimos minutos de jogo usando o codificador de vídeo da GPU. Num notebook isso também é calor e bateria. Se você não usa \"gravar o que aconteceu\", vale desligar.",
+      "gain": "Libera o codificador de vídeo e um pouco de GPU/disco; o efeito no FPS varia e pode ser medido em Medir."
+    },
+    {
+      "id": "gamedvr.capture",
+      "kind": "Recommend",
+      "action": "win.gamedvr.background-capture.disable",
+      "when": ["diag:win.gamedvr.capture:attention"],
+      "priority": 2,
+      "reason": "A captura em segundo plano da Game Bar está ligada: ela grava o tempo todo os últimos minutos de jogo usando o codificador de vídeo da GPU ({gpu}). Se você não usa \"gravar o que aconteceu\", vale desligar.",
+      "gain": "Libera o codificador de vídeo e um pouco de GPU/disco; o efeito no FPS varia e pode ser medido em Medir."
+    },
+    {
+      "id": "cleaning.low-disk",
+      "kind": "Recommend",
+      "actionPrefix": "cleaning.",
+      "maxRisk": "Low",
+      "when": ["low-disk"],
+      "priority": 1,
+      "reason": "Pouco espaço livre no disco do sistema. Com o disco quase cheio, atualizações do Windows falham e o arquivo de paginação não cresce. Esta limpeza só remove o que o Windows e os programas recriam, e vai para a quarentena (dá para desfazer).",
+      "gain": "Espaço em disco. Não aumenta FPS."
+    },
+    {
+      "id": "cleaning.hdd",
+      "kind": "Recommend",
+      "actionPrefix": "cleaning.",
+      "maxRisk": "Low",
+      "when": ["hdd"],
+      "priority": 2,
+      "reason": "Seu PC tem HDD: menos arquivos temporários significa menos coisa para o Windows indexar e verificar. Só entra o que é recriado automaticamente, e vai para a quarentena (dá para desfazer).",
+      "gain": "Espaço em disco e um pouco menos de atividade no HDD. Não aumenta FPS."
+    },
+    {
+      "id": "cleaning.routine",
+      "kind": "Recommend",
+      "actionPrefix": "cleaning.",
+      "maxRisk": "Low",
+      "when": [],
+      "priority": 3,
+      "reason": "Limpeza segura de rotina: só caches e temporários que o Windows e os programas recriam. Vai para a quarentena (dá para desfazer).",
+      "gain": "Espaço em disco. Não aumenta FPS."
+    },
+
+    // ---------------------------------------------------------------- revisar no módulo (o usuário escolhe o quê)
+    {
+      "id": "review.startup.slow-pc",
+      "kind": "Review",
+      "module": "boot.",
+      "title": "Revisar programas que iniciam com o Windows",
+      "any": ["hdd", "low-ram", "few-cores"],
+      "priority": 1,
+      "reason": "Seu PC tem {memoryGb} GB de memória e/ou HDD: cada programa que abre junto com o Windows atrasa a inicialização e fica ocupando memória enquanto você joga. A página mostra o impacto de cada um; você escolhe.",
+      "gain": "Inicialização mais rápida e mais memória livre. Ganho de FPS só se o programa trabalhava durante o jogo."
+    },
+    {
+      "id": "review.startup.legacy",
+      "kind": "Review",
+      "module": "startup.",
+      "title": "Revisar programas que iniciam com o Windows",
+      "any": ["hdd", "low-ram", "few-cores"],
+      "priority": 1,
+      "reason": "Seu PC tem {memoryGb} GB de memória e/ou HDD: cada programa que abre junto com o Windows atrasa a inicialização e fica ocupando memória enquanto você joga. Você escolhe o que desativar.",
+      "gain": "Inicialização mais rápida e mais memória livre. Ganho de FPS só se o programa trabalhava durante o jogo."
+    },
+    {
+      "id": "review.startup",
+      "kind": "Review",
+      "module": "boot.",
+      "title": "Ver o que inicia com o Windows",
+      "when": [],
+      "priority": 3,
+      "reason": "Desativar o que você não usa deixa a inicialização mais rápida. Nada é desativado sem você escolher.",
+      "gain": "Inicialização mais rápida. Não muda o FPS se o programa fica parado."
+    },
+    {
+      "id": "review.cleaning.low-disk",
+      "kind": "Review",
+      "module": "cleaning.",
+      "title": "Ver o que ocupa espaço",
+      "when": ["low-disk"],
+      "priority": 1,
+      "reason": "O disco do sistema está com pouco espaço. Na Limpeza você vê o tamanho de cada categoria antes de remover.",
+      "gain": "Espaço em disco."
+    },
+    {
+      "id": "review.privacy",
+      "kind": "Review",
+      "module": "privacy.",
+      "title": "Revisar privacidade",
+      "when": [],
+      "priority": 3,
+      "reason": "Ajustes de privacidade (telemetria, anúncios, histórico). Sendo honesto: não deixam o PC mais rápido; servem para enviar menos dados.",
+      "gain": "Nenhum ganho de desempenho."
+    },
+
+    // ---------------------------------------------------------------- considerar só com medição antes/depois
+    {
+      "id": "consider.high-performance.desktop",
+      "kind": "Consider",
+      "action": "power.active-scheme.high-performance.session",
+      "when": ["desktop", "gamer"],
+      "unless": ["cpu-amd"],
+      "priority": 3,
+      "reason": "Num desktop gamer na tomada, o plano Alto desempenho pode reduzir a latência de subida de frequência do processador. O efeito varia por CPU e jogo: grave uma sessão em Medir antes e depois. Vale só durante a sessão e volta sozinho.",
+      "gain": "Incerto; só a medição no seu PC diz."
+    },
+    {
+      "id": "consider.hags.gamer",
+      "kind": "Consider",
+      "action": "gpu.hags.lab",
+      "when": ["gamer", "win11"],
+      "priority": 3,
+      "reason": "Com placa dedicada ({gpu}) e Windows 11, o agendamento de GPU acelerado por hardware pode reduzir um pouco a latência, ou não; depende do driver. Exige reiniciar e medir antes e depois.",
+      "gain": "Incerto; varia por driver e jogo."
+    },
+
+    // ---------------------------------------------------------------- conselhos de hardware (sem ação)
+    {
+      "id": "info.hdd",
+      "kind": "Info",
+      "title": "O disco do sistema é um HDD",
+      "when": ["hdd"],
+      "priority": 1,
+      "reason": "Trocar o disco do Windows por um SSD é a melhoria de maior impacto em inicialização, abertura de programas e carregamento de jogos. Nenhum ajuste de software chega perto."
+    },
+    {
+      "id": "info.low-ram",
+      "kind": "Info",
+      "title": "Pouca memória para jogos atuais",
+      "when": ["low-ram"],
+      "priority": 1,
+      "reason": "Seu PC tem {memoryGb} GB. Jogos atuais costumam pedir 8 a 16 GB; com menos, o Windows usa o disco como memória e aparecem engasgos. Programas que \"limpam a RAM\" não resolvem: só mais memória resolve."
+    },
+    {
+      "id": "info.memory-channels",
+      "kind": "Info",
+      "title": "Memória possivelmente em canal único",
+      "when": ["diag:mem.channels:attention"],
+      "priority": 2,
+      "reason": "Há um número ímpar de módulos de memória. Em placas de dois canais, instalar os módulos em par (mesmo tamanho) dobra a largura de banda, o que ajuda principalmente com vídeo integrado e jogos que dependem do processador."
+    },
+    {
+      "id": "info.memory-speed",
+      "kind": "Info",
+      "title": "Memória abaixo da velocidade anunciada",
+      "when": ["diag:mem.speed:attention"],
+      "priority": 2,
+      "reason": "Os módulos estão rodando abaixo da velocidade que anunciam. Isso se ajusta no BIOS/UEFI (perfil XMP/EXPO), fora do Windows; o NEXUS não mexe no BIOS."
+    },
+    {
+      "id": "info.on-battery",
+      "kind": "Info",
+      "title": "Notebook na bateria",
+      "when": ["on-battery"],
+      "priority": 2,
+      "reason": "Para jogar, ligue o notebook na tomada: na bateria o Windows e o fabricante limitam a potência da CPU e da GPU, e nenhum ajuste muda isso."
+    },
+    {
+      "id": "info.vm",
+      "kind": "Info",
+      "title": "Máquina virtual",
+      "when": ["vm"],
+      "priority": 3,
+      "reason": "Em máquina virtual, desempenho depende do hospedeiro e das configurações da VM (núcleos, memória, aceleração 3D), não de ajustes dentro do Windows convidado."
+    }
+  ]
+}
