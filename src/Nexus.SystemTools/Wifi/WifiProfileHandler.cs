@@ -53,9 +53,14 @@ public sealed class WifiProfileHandler : IActionHandler, IRestoreValidator
     private readonly IBackupProtector _protector;
     private readonly string _backupDir;
     private readonly bool _otherAccount;
+    private readonly Action<string>? _restrictBackupDirectory;
 
-    public WifiProfileHandler(IWifiBackend wifi, IBackupProtector protector, string dataDirectory, bool otherAccount)
+    /// <param name="restrictBackupDirectory">Chamado com a pasta dos backups ANTES de gravar qualquer arquivo nela. No aplicador como
+    /// serviço o backup usa DPAPI da máquina (qualquer conta local consegue decifrar), então a pasta precisa ficar só para
+    /// SYSTEM/Administradores; senão um usuário comum leria as senhas de Wi-Fi de todos os usuários.</param>
+    public WifiProfileHandler(IWifiBackend wifi, IBackupProtector protector, string dataDirectory, bool otherAccount, Action<string>? restrictBackupDirectory = null)
     {
+        _restrictBackupDirectory = restrictBackupDirectory;
         _wifi = wifi ?? throw new ArgumentNullException(nameof(wifi));
         _protector = protector ?? throw new ArgumentNullException(nameof(protector));
         _backupDir = Path.Combine(dataDirectory ?? throw new ArgumentNullException(nameof(dataDirectory)), "backup", "wifi");
@@ -160,6 +165,8 @@ public sealed class WifiProfileHandler : IActionHandler, IRestoreValidator
     {
         var plain = JsonSerializer.SerializeToUtf8Bytes(backup, Json);
         var envelope = new WifiBackupFile("nexus.wifi-backup/1", _protector.Scope, Convert.ToBase64String(_protector.Protect(plain)));
+        Directory.CreateDirectory(_backupDir);
+        _restrictBackupDirectory?.Invoke(_backupDir);
         Text.WriteAtomic(BackupPath(backup.ProfileName), JsonSerializer.SerializeToUtf8Bytes(envelope, Json));
     }
 

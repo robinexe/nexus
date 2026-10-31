@@ -99,6 +99,22 @@ public static class AdminOnlyDirectory
         }
     }
 
+    /// <summary>
+    /// Pasta com segredos (ex.: backups de Wi-Fi com a senha): SYSTEM e Administradores com controle total, mais ninguém (nem
+    /// leitura para Usuários). Os arquivos dentro herdam. Lança exceção se não conseguir: o handler então não grava o segredo.
+    /// </summary>
+    [SupportedOSPlatform("windows")]
+    public static void RestrictToAdministrators(string directory)
+    {
+        const InheritanceFlags inherit = InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit;
+        var ds = new DirectorySecurity();
+        ds.SetOwner(new SecurityIdentifier(AdministratorsSid));
+        ds.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+        ds.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(LocalSystemSid), FileSystemRights.FullControl, inherit, PropagationFlags.None, AccessControlType.Allow));
+        ds.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(AdministratorsSid), FileSystemRights.FullControl, inherit, PropagationFlags.None, AccessControlType.Allow));
+        new DirectoryInfo(directory).SetAccessControl(ds);
+    }
+
     [SupportedOSPlatform("windows")]
     private static string? Check(FileSystemSecurity security)
     {

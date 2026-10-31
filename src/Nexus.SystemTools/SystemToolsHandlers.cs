@@ -19,15 +19,17 @@ public static class SystemToolsHandlers
             var runner = new WindowsProcessRunner();
             var store = new PnpUtilDriverStore(runner);
             return Build(environment, new WindowsNetworkBackend(runner), new WindowsWifiBackend(),
-                new DpapiProtector(machineScope: environment.OtherAccount), store, new WindowsRestorePointBackend(runner), new PowerShellAppxBackend(runner));
+                new DpapiProtector(machineScope: environment.OtherAccount), store, new WindowsRestorePointBackend(runner), new PowerShellAppxBackend(runner),
+                environment.OtherAccount || environment.Elevated ? AdminOnlyDirectory.RestrictToAdministrators : null);
         }
         var none = new Unsupported();
         return Build(environment, none, none, none, none, none, none);
     }
 
     /// <summary>Monta os handlers com backends injetados (testes usam backends falsos).</summary>
+    /// <param name="restrictSecrets">Protege pastas com segredos (backups de Wi-Fi) para só SYSTEM/Administradores (aplicador elevado).</param>
     public static IEnumerable<IActionHandler> Build(HandlerEnvironment environment, INetworkBackend network, IWifiBackend wifi, IBackupProtector protector,
-        IDriverStore drivers, IRestorePointBackend restore, IAppxBackend appx)
+        IDriverStore drivers, IRestorePointBackend restore, IAppxBackend appx, Action<string>? restrictSecrets = null)
     {
         ArgumentNullException.ThrowIfNull(environment);
         var data = environment.DataDirectory;
@@ -35,7 +37,7 @@ public static class SystemToolsHandlers
         [
             new DnsFlushHandler(network),
             new ArpFlushHandler(network),
-            new WifiProfileHandler(wifi, protector, data, environment.OtherAccount),
+            new WifiProfileHandler(wifi, protector, data, environment.OtherAccount, restrictSecrets),
             new DriverPackageHandler(drivers, data),
             new DriverBackupAllHandler(drivers, data),
             new RestorePointHandler(restore),

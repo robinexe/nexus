@@ -628,6 +628,30 @@ public sealed class SystemToolsHandlerTests : IDisposable
     }
 
     [Fact]
+    public void Wifi_backup_folder_is_restricted_before_the_secret_is_written()
+    {
+        // Revisão de segurança: como serviço, o backup usa DPAPI da máquina (qualquer conta local decifra) e ficava numa pasta
+        // legível por Usuários. A pasta agora é restringida antes de o primeiro arquivo ser gravado; falha = nada removido.
+        var wifi = new FakeWifi();
+        wifi.Profiles[(wifi.If1, "Casa")] = (Xml("Casa"), false, false);
+        var restricted = new List<(string Dir, int FilesAtThatMoment)>();
+        var h = new WifiProfileHandler(wifi, new FakeProtector(), _dir, otherAccount: false,
+            restrictBackupDirectory: d => restricted.Add((d, Directory.GetFiles(d).Length)));
+        h.Apply(Instance("system.wifi.profile-remove", new() { ["wifiProfile"] = "Casa" }));
+        var (dir, files) = Assert.Single(restricted);
+        Assert.Equal(Path.GetDirectoryName(h.BackupPath("Casa")), dir);
+        Assert.Equal(0, files);
+        Assert.Empty(wifi.Profiles);
+
+        wifi.Profiles[(wifi.If1, "Outra")] = (Xml("Outra"), false, false);
+        var failing = new WifiProfileHandler(wifi, new FakeProtector(), _dir, otherAccount: false,
+            restrictBackupDirectory: _ => throw new UnauthorizedAccessException("sem permissão"));
+        Assert.Throws<UnauthorizedAccessException>(() => failing.Apply(Instance("system.wifi.profile-remove", new() { ["wifiProfile"] = "Outra" })));
+        Assert.True(wifi.Profiles.ContainsKey((wifi.If1, "Outra"))); // sem backup protegido, nada é removido
+        Assert.False(File.Exists(failing.BackupPath("Outra")));
+    }
+
+    [Fact]
     public void Wifi_group_policy_missing_and_other_account_rules()
     {
         var wifi = new FakeWifi();
