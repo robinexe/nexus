@@ -79,7 +79,8 @@ hospedeiro: o portão exige VM, e a interface ainda não tem caminho de execuç�
 | `src/Nexus.Desktop` | Interface WPF somente leitura | Não executa nada (garantido por teste); grava só o próprio log de erros e o JSON exportado pelo usuário |
 | `src/Nexus.Recovery.Cli` | `nexus-recover` | `recover`/`revert` **sim**, com a trava e o portão (fora de VM liberada: exit 7; `--host-emergency` é exceção explícita); `accept` só o diário (com a trava, sem portão); `runs`/`show`/`scan` não |
 | `src/Nexus.Broker` | Protocolo fechado, `BrokerService` (motor completo do lado do broker), `CatalogBoundHandler`, portão `VmOnlyExecutionGate`, transporte por pipe | Só via portão + trava |
-| `src/Nexus.Broker.Host` | `nexus-broker` (console; serviço pendente), pipe com ACL | No PC físico: nada (nem cria arquivos) |
+| `src/Nexus.Broker.Host` | `nexus-broker`: console ou serviço Windows (`--service`, LocalSystem); pipe com ACL; como serviço, HKCU = perfil de quem pede (B10) | No PC físico: nada (nem cria arquivos) |
+| `tools/service` | `Install-Broker.ps1` / `Uninstall-Broker.ps1` (elevados): binários, `%ProgramData%\NEXUS` e `nexus.lock` com ACL, serviço `NexusBroker` | Sim (só onde for instalado; hoje só a VM do CI) |
 | `tests/Nexus.IntegrationTests` | Testes com handlers **reais**, fora da solução | Só em VM liberada (portão antes de tudo) |
 | `tools/vm` | Windows Sandbox: `Prepare-Sandbox.ps1` (hospedeiro), `Inside-Sandbox.ps1` (dentro) | Hospedeiro: só builds e `vm-saida`/`vm-config` |
 | `src/Nexus.TraceAnalysis`, `src/Nexus.Experimentation` | Parser PresentMon, métricas, comparação estatística | Não |
@@ -147,9 +148,10 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
    o modelo do disco (truncado) e SSD/HDD, que são limitações conhecidas (`docs/06-build-log.md`).
 2. ~~Decisões em aberto~~ (decididas em 31/10; ver `docs/07-recovery-cases.md`).
 3. ~~Rodar os testes de integração em VM~~ (feito em 31/10 no GitHub Actions: 6/6 reais).
-4. **Broker como serviço:** instalador com ACL de `%ProgramData%\NEXUS` (R1/B1), trava com ACL (B7), HKCU pelo SID do
-   cliente (B10), validação da identidade do servidor no cliente (B3), assinatura do cliente (Authenticode).
-5. **Interface → broker:** só depois do item 4; até lá a interface continua sem caminho de execução.
+4. ~~Broker como serviço~~ (feito em 31/10: B10, B3, B7, R1/B1; validado na VM do CI com o serviço instalado, ver
+   `tools/service/README.md`). Pendente só a assinatura Authenticode do cliente (exige certificado de assinatura de código).
+5. **Interface → broker (próximo):** a interface fala com o serviço por `BrokerClient` (`BrokerServerKind.Service`):
+   simulação pelo broker, depois aplicar/reverter com confirmação. A execução real continua presa ao portão de VM.
 6. Só depois da VM aprovada: liberar execução real (hoje não existe caminho de execução na interface).
 7. Captura PresentMon e comparação de sessões; depois NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B,
    relatórios e, por último, a IA.

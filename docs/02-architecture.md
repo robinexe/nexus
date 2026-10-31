@@ -45,7 +45,10 @@ Recovery.Cli (executável independente; lê o diário; fala com o broker ou exec
 O desktop **nunca** executa nada elevado. O broker é um serviço Windows (`NexusBroker`, conta LocalSystem, início manual) que:
 
 1. Abre o pipe `\\.\pipe\NexusBroker.v1` com DACL: SYSTEM + Administradores (total), **SID do usuário interativo que instalou** (leitura/escrita). `PIPE_REJECT_REMOTE_CLIENTS`.
-2. Verifica o cliente com `GetNamedPipeClientProcessId` → caminho da imagem → assinatura Authenticode igual à do broker.
+2. Identifica o cliente pelo token do pipe (impersonação *Identification*): ações de HKCU vão para `HKU\<SID do cliente>`,
+   e o SID fica no diário (B10, implementado). O cliente confere que o dono do pipe é SYSTEM/Administradores (B3,
+   implementado). **Pendente:** verificar a assinatura Authenticode do executável cliente (`GetNamedPipeClientProcessId`
+   → caminho da imagem → assinatura igual à do broker), que exige certificado de assinatura de código.
 3. Aceita só mensagens do **enum fechado** `BrokerOperation` (JSON com esquema; tamanho máximo 64 KiB). Não existe operação "executar comando".
 4. Cada operação recebe `ActionId` + `HandlerKind` + parâmetros tipados; o broker **revalida** contra o catálogo assinado que ele mesmo carrega (o cliente não envia caminhos de registro livres).
 5. Aplica a lista de **alvos proibidos** independente do catálogo (ex.: `HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard`, chaves de Defender, Vanguard `vgc`/`vgk`, BCD, serviços de anticheat).

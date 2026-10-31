@@ -262,6 +262,23 @@ Ramos da rodada #5 (log):
 | Crash + `nexus-recover` | — | escrita real, crash simulado, CLI real restaurou e removeu a chave criada |
 | Alvo protegido (HKLM\…\Lsa) | — | recusado por `Assess` e pela validação de restauração |
 
+## Broker como serviço (B10, B3, B7, R1/B1) — 2026-10-31
+
+Linux: build 0 avisos; **163/163** (14 novos). Mutações: não gravar o SID, aceitar HKCU sem perfil no modo serviço,
+aceitar SID adulterado, transporte sem identidade, aceitar qualquer SID: 5 de 5 detectadas.
+
+VM do GitHub Actions (rodada de 6b0db82; a anterior, 4ab33f0, falhou no `sc.exe create`: o PowerShell 5.1 quebra as aspas
+do binPath, erro 1639, trocado por `New-Service`):
+
+| Passo | Resultado |
+|---|---|
+| Unitários | 163/163 |
+| Integração (handlers diretos) | 6/6 com escrita real (como antes) |
+| `Install-Broker.ps1 -Start` | serviço `NexusBroker` LocalSystem, Running; `%ProgramData%\NEXUS`: Usuários (RX), Administradores/SYSTEM (F); `nexus.lock`: só Administradores/SYSTEM |
+| `ServiceIntegrationTests` (cliente = usuário da VM) | 2/2. Execute pelo serviço: **Verified**, HKCU do cliente 0 → 1, HKCU do SYSTEM (`HKU\S-1-5-18`) intocado, `userSid` do cliente no diário, RevertRun voltou a 0. Cliente conferiu o dono do pipe (B3) |
+| Log do serviço | `Conta: NT AUTHORITY\SYSTEM`, escrita liberada pela VM, Status/Execute/RevertRun ok |
+| `Uninstall-Broker.ps1` | serviço e binários removidos; dados preservados |
+
 ## Pendente no Windows (esta versão)
 
 1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).
