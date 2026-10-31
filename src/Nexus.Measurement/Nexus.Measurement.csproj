@@ -1,11 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Sessões de medição: importar/capturar (PresentMon), resumir, guardar e comparar. Sem WPF; testável em qualquer SO. -->
+  <!-- Medição: sessões (importar/capturar com PresentMon), estatística ao vivo, detecção de jogos, antes x depois automático e
+       estado do mostrador de FPS. Sem WPF. A lógica roda nos testes em qualquer SO; o que é do Windows (processos, janela em
+       primeiro plano, PresentMon) fica em Windows/*, com [SupportedOSPlatform("windows")]. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Nexus.Measurement</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.TraceAnalysis\Nexus.TraceAnalysis.csproj" />
     <ProjectReference Include="..\Nexus.Experimentation\Nexus.Experimentation.csproj" />
+    <!-- Parsers das bibliotecas Steam/Epic (GameLibraries) já usados pelo laboratório da GPU. -->
+    <ProjectReference Include="..\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
   </ItemGroup>
 </Project>

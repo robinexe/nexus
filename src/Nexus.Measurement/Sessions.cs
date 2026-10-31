@@ -31,7 +31,29 @@ public sealed record MeasuredSession(
     IReadOnlyList<TracePoint> Trace,
     IReadOnlyList<HistogramBin> Histogram,
     int SkippedRows,
-    string MetricsFlavor);
+    string MetricsFlavor)
+{
+    /// <summary>Nome do jogo para mostrar (da biblioteca ou da detecção); sem ele, o executável.</summary>
+    public string? GameName { get; init; }
+    /// <summary>Gravada sozinha pela medição automática (e não importada ou gravada à mão).</summary>
+    public bool Automatic { get; init; }
+    /// <summary>O usuário pediu para não usar esta sessão nas comparações (partida atípica).</summary>
+    public bool Excluded { get; init; }
+    /// <summary>Condições da partida (resolução, driver, bateria, modo de apresentação) para avisar quando diferem.</summary>
+    public SessionConditions? Conditions { get; init; }
+    /// <summary>Mudanças do NEXUS ativas quando a sessão foi gravada (lidas do diário).</summary>
+    public IReadOnlyList<AppliedChange> Applied { get; init; } = [];
+    /// <summary>Resumo por trechos de 30 s (para comparar trechos equivalentes de duas partidas).</summary>
+    public IReadOnlyList<SegmentSummary> Segments { get; init; } = [];
+
+    /// <summary>Chave do jogo (executável em minúsculas): agrupa as sessões do mesmo jogo.</summary>
+    [JsonIgnore] public string Game => GameKey.Of(Application);
+    [JsonIgnore] public string DisplayName => string.IsNullOrWhiteSpace(GameName) ? GameMatcher.Pretty(Application) : GameName!;
+    [JsonIgnore] public double DurationSeconds => Summary.DurationMs / 1000.0;
+}
+
+/// <summary>Um trecho da partida (padrão: 30 s) com as métricas que a comparação usa.</summary>
+public sealed record SegmentSummary(double StartSeconds, double DurationSeconds, int Frames, double AverageFps, double Low1Fps, double P99Ms, double StuttersPerMinute);
 
 public static class SessionAnalyzer
 {
@@ -61,8 +83,45 @@ public static class SessionAnalyzer
         if (ft.Count < 100)
             throw new InvalidDataException($"Só {ft.Count} frames de {app}: são precisos pelo menos 100 (capture por mais tempo).");
         var summary = FrametimeMetrics.Summarize(ft);
+        var mode = frames.Where(f => !string.IsNullOrWhiteSpace(f.PresentMode)).GroupBy(f => f.PresentMode!).MaxBy(g => g.Count())?.Key;
         return new MeasuredSession(id, name, app, capturedAt, source, SessionTag.None, Path.GetFileName(csvFile), summary,
-            Downsample(frames), Histogram(ft), capture.SkippedRows, capture.MetricsFlavor);
+            Downsample(frames), Histogram(ft), capture.SkippedRows, capture.MetricsFlavor)
+        {
+            Segments = Segment(ft),
+            Conditions = mode is null ? null : new SessionConditions { PresentMode = mode },
+        };
+    }
+
+    public const double SegmentSeconds = 30;
+
+    /// <summary>Corta a partida em trechos de <paramref name="seconds"/> s (pelo tempo acumulado dos quadros) e resume cada um. Trechos com menos de 100 quadros são descartados.</summary>
+    public static IReadOnlyList<SegmentSummary> Segment(IReadOnlyList<double> frametimesMs, double seconds = SegmentSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(frametimesMs);
+        var result = new List<SegmentSummary>();
+        var chunk = new List<double>();
+        double start = 0, acc = 0;
+        foreach (var ft in frametimesMs)
+        {
+            if (!(ft > 0) || !double.IsFinite(ft)) continue;
+            chunk.Add(ft);
+            acc += ft;
+            if (acc - start * 1000 < seconds * 1000) continue;
+            Flush();
+            start = acc / 1000;
+        }
+        if (chunk.Count > 0 && chunk.Sum() >= seconds * 1000 * 0.8) Flush(); // último trecho só se tiver quase o tamanho dos outros
+        return result;
+
+        void Flush()
+        {
+            if (chunk.Count >= 100)
+            {
+                var s = FrametimeMetrics.Summarize(chunk);
+                result.Add(new SegmentSummary(start, s.DurationMs / 1000, s.Frames, s.AverageFps, s.OnePercentLowAverageFps, s.P99FrametimeMs, s.StuttersPerMinute));
+            }
+            chunk.Clear();
+        }
     }
 
     /// <summary>
@@ -176,6 +235,24 @@ public sealed class SessionStore
             catch (Exception ex) when (ex is JsonException or IOException or NotSupportedException) { bad++; }
         }
         return (list.OrderByDescending(s => s.CapturedAt).ToList(), bad);
+    }
+
+    /// <summary>
+    /// Limpeza: apaga (JSON + CSV, só desta pasta) sessões gravadas antes de <paramref name="olderThan"/>, MAS mantém sempre a
+    /// sessão mais recente de cada jogo e as marcadas antes/depois (são a referência das comparações). Devolve quantas apagou.
+    /// </summary>
+    public int Cleanup(DateTimeOffset olderThan)
+    {
+        var (list, _) = List();
+        var keep = new HashSet<string>(list.GroupBy(s => s.Game).Select(g => g.MaxBy(s => s.CapturedAt)!.Id), StringComparer.Ordinal);
+        var removed = 0;
+        foreach (var s in list)
+        {
+            if (s.CapturedAt >= olderThan || keep.Contains(s.Id) || s.Tag != SessionTag.None) continue;
+            try { Delete(s); removed++; }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        }
+        return removed;
     }
 
     /// <summary>Remove a sessão (JSON e CSV) desta pasta.</summary>
