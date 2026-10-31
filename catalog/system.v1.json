@@ -1,0 +1,177 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Ferramentas do sistema (rede, Wi-Fi, drivers, apps do Windows, pontos de restauração). Handlers em src/Nexus.SystemTools. Ações 'efêmeras' (desiredType Ephemeral) não têm estado anterior a restaurar: desfazer é declarado 'nada a restaurar'. Ver docs/modules/system.md.",
+  "actions": [
+    {
+      "id": "system.network.dns-flush",
+      "version": 1,
+      "title": "Limpar o cache DNS",
+      "classification": "SupportedDocumented",
+      "handlerKind": "SystemDnsFlush",
+      "target": { "cache": "dns" },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Esvazia o cache do cliente DNS do Windows (o mesmo que 'ipconfig /flushdns', pela função DnsFlushResolverCache). Os nomes voltam a ser consultados no servidor DNS na próxima vez que forem usados. Resolve sites que mudaram de endereço ou erros de 'site não encontrado' depois de trocar de DNS. Não acelera a internet nem os jogos: o cache existe justamente para evitar consultas.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig" }
+      ],
+      "risks": "Nenhum risco conhecido. As primeiras aberturas de sites depois da limpeza podem levar alguns milissegundos a mais.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "O Windows confirma a limpeza (retorno da função).",
+      "revert": "Nada a restaurar: o cache se refaz sozinho conforme os nomes são usados."
+    },
+    {
+      "id": "system.network.arp-flush",
+      "version": 1,
+      "title": "Limpar o cache ARP",
+      "classification": "SupportedDocumented",
+      "handlerKind": "SystemArpFlush",
+      "target": { "cache": "arp" },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Apaga a tabela que liga endereços IP da rede local a endereços físicos (MAC), com 'netsh interface ip delete arpcache'. Útil depois de trocar o roteador ou quando um aparelho da rede mudou de endereço e o PC não o alcança. Não acelera a internet.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-server/administration/windows-commands/netsh-interface" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-server/administration/windows-commands/arp" }
+      ],
+      "risks": "Muito baixo. A conexão pode pausar por uma fração de segundo enquanto o Windows reaprende o endereço do roteador.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Código de saída do netsh.",
+      "revert": "Nada a restaurar: as entradas são reaprendidas automaticamente em segundos."
+    },
+    {
+      "id": "system.wifi.profile-remove",
+      "version": 1,
+      "title": "Remover perfil Wi-Fi salvo (com backup)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "SystemWifiProfile",
+      "target": { "profileName": "{wifiProfile}" },
+      "userParameters": { "wifiProfile": "[^\\x00-\\x1F\\x7F]{1,255}" },
+      "desiredType": "WifiProfile",
+      "desiredValue": "removido",
+      "mechanism": "Remove uma rede Wi-Fi salva que você não usa mais, para o Windows não tentar se conectar a ela. Antes, o NEXUS exporta o perfil completo (com a senha) pela API oficial do Wi-Fi (WlanGetProfile) e guarda o arquivo protegido pela criptografia do Windows (DPAPI) na pasta de dados do aplicador. Só então remove (WlanDeleteProfile). Não melhora a velocidade do Wi-Fi.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/wlanapi/nf-wlanapi-wlangetprofile" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/wlanapi/nf-wlanapi-wlandeleteprofile" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/wlanapi/nf-wlanapi-wlansetprofile" }
+      ],
+      "risks": "Baixo. Se remover a rede que está usando, a conexão cai até você restaurar ou digitar a senha de novo. Perfis definidos pela empresa (política de grupo) nunca são removidos.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura da lista de perfis de todos os adaptadores Wi-Fi.",
+      "revert": "Reimporta o perfil guardado (WlanSetProfile) no adaptador onde ele estava."
+    },
+    {
+      "id": "system.driver.package-remove",
+      "version": 1,
+      "title": "Remover pacote de driver antigo não usado (com backup)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "SystemDriverPackage",
+      "target": { "publishedName": "{driverInf}" },
+      "userParameters": { "driverInf": "oem[0-9]{1,5}\\.inf" },
+      "desiredType": "DriverPackage",
+      "desiredValue": "removido",
+      "compatibility": { "minBuild": 19041 },
+      "mechanism": "Remove do repositório de drivers do Windows um pacote de terceiros que nenhum dispositivo usa (por exemplo, versões antigas do driver de vídeo que ficaram depois de atualizar). Antes, exporta o pacote com 'pnputil /export-driver'; depois remove com 'pnputil /delete-driver' SEM /force, então o próprio Windows recusa se algum dispositivo usar o pacote. Libera espaço em disco; não muda o desempenho.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-hardware/drivers/devtest/pnputil-command-syntax" }
+      ],
+      "risks": "Baixo: só pacotes que não estão em uso, fora de classes críticas (disco, controladoras, sistema, USB, teclado). Drivers de vídeo e rede só quando há uma versão mais nova instalada. Um aparelho que estava desconectado pode pedir o driver de novo ao ser ligado: restaure pelo NEXUS.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura de 'pnputil /enum-drivers'.",
+      "revert": "Reinstala o pacote do backup com 'pnputil /add-driver <inf> /install' (o nome oemNN.inf pode mudar; o NEXUS reconhece o mesmo pacote e versão)."
+    },
+    {
+      "id": "system.driver.backup-all",
+      "version": 1,
+      "title": "Fazer backup de todos os drivers de terceiros",
+      "classification": "SupportedDocumented",
+      "handlerKind": "SystemDriverBackup",
+      "target": { "scope": "third-party" },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "compatibility": { "minBuild": 14393 },
+      "mechanism": "Copia todos os drivers de terceiros instalados ('pnputil /export-driver *') para uma pasta datada dentro da pasta de dados do NEXUS. Útil antes de formatar ou atualizar drivers: dá para reinstalar qualquer um com 'pnputil /add-driver'. Não altera nada no sistema.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-hardware/drivers/devtest/pnputil-command-syntax" }
+      ],
+      "risks": "Nenhum para o sistema. Ocupa espaço em disco (de dezenas de MB a alguns GB, conforme os drivers).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Código de saída do pnputil.",
+      "revert": "Nada a desfazer: a cópia fica guardada; apague a pasta quando não precisar mais."
+    },
+    {
+      "id": "system.restore.create-point",
+      "version": 1,
+      "title": "Criar ponto de restauração agora",
+      "classification": "SupportedDocumented",
+      "handlerKind": "SystemRestorePoint",
+      "target": { "kind": "manual" },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Pede ao Windows um ponto de restauração (SRSetRestorePointW), que guarda arquivos de sistema, registro e drivers para voltar atrás pela Restauração do Sistema. Exige a Proteção do Sistema ligada. O Windows cria no máximo um ponto a cada 24 horas por padrão; se já houver um recente (por exemplo, o que o NEXUS cria antes de mudanças de sistema), ele vale.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/srrestoreptapi/nf-srrestoreptapi-srsetrestorepointw" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/sr/createrestorepoint-systemrestore" }
+      ],
+      "risks": "Nenhum. Usa parte do espaço reservado para a Proteção do Sistema; os pontos mais antigos são apagados pelo Windows quando o espaço acaba.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Lista de pontos (root/default:SystemRestore): um ponto novo ou criado nos últimos 10 minutos.",
+      "revert": "Nada a desfazer: o ponto fica disponível na Restauração do Sistema."
+    },
+    {
+      "id": "system.appx.remove-user",
+      "version": 1,
+      "title": "Remover app pré-instalado do Windows (para este usuário)",
+      "classification": "Conditional",
+      "handlerKind": "SystemAppxPackage",
+      "target": { "scope": "HKCU", "packageName": "{appxName}" },
+      "userParameters": { "appxName": "[A-Za-z0-9][A-Za-z0-9.\\-]{2,99}" },
+      "desiredType": "AppxPackage",
+      "desiredValue": "removido",
+      "mechanism": "Remove para o seu usuário um app da lista fechada de pré-instalados (Candy Crush, TikTok, Clipchamp, Notícias, Solitaire, Obter Ajuda, Hub de Comentários, apps Xbox se você não usa etc.) com 'Remove-AppxPackage'. Nunca remove o pacote provisionado (o que é instalado para contas novas), nem Store, Instalador de Aplicativo (winget), bibliotecas (VCLibs, .NET, UI.Xaml), Segurança do Windows ou componentes do sistema. Libera espaço e tira atalhos do menu Iniciar; não acelera jogos.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/powershell/module/appx/remove-appxpackage" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/powershell/module/appx/add-appxpackage" }
+      ],
+      "risks": "Baixo para os apps marcados como seguros. Para Fotos, Calculadora, Game Bar, Xbox e similares a página avisa o que se perde. A reversão é LIMITADA: se os arquivos do app não estiverem mais no PC, é preciso reinstalar pela Microsoft Store.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura com 'Get-AppxPackage -Name'.",
+      "revert": "Reinstala com 'Add-AppxPackage -Register' do manifesto quando o pacote ainda está no PC (provisionado ou de outra conta); senão, informa o link da Microsoft Store."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "myth.system.winsock-reset-speed",
+      "classification": "Ineffective",
+      "reason": "'netsh winsock reset' e 'netsh int ip reset' restauram a configuração de rede ao padrão para CORRIGIR conexões quebradas (por exemplo, por software que alterou o Winsock). Não aumentam a velocidade, exigem reinício e não têm como ser desfeitos com segurança (configurações manuais de IP/DNS se perdem). O NEXUS explica e abre a Redefinição de rede do próprio Windows em vez de executar.",
+      "source": "https://learn.microsoft.com/windows-server/administration/windows-commands/netsh-winsock"
+    },
+    {
+      "id": "myth.system.flushdns-speed",
+      "classification": "Ineffective",
+      "reason": "Limpar o cache DNS periodicamente não acelera a internet nem reduz ping: o cache evita consultas. Só ajuda quando um nome aponta para um endereço desatualizado.",
+      "source": "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig"
+    },
+    {
+      "id": "myth.system.remove-provisioned-appx",
+      "classification": "Rejected",
+      "reason": "Remover pacotes provisionados (Remove-AppxProvisionedPackage) muda a imagem do Windows para todas as contas novas e pode quebrar atualizações de recursos; o ganho é só espaço. O NEXUS remove apenas para o usuário.",
+      "source": "https://learn.microsoft.com/powershell/module/dism/remove-appxprovisionedpackage"
+    }
+  ]
+}
