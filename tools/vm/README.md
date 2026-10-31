@@ -9,7 +9,14 @@ Estes testes escrevem de verdade no registro, no plano de energia e em serviços
   máquina e (3) esse arquivo pertencer a Administradores sem permitir escrita a usuários comuns. No PC físico, a
   condição 1 já falha.
 
-## Opção recomendada: Windows Sandbox (descartável)
+## Opção usada desde 31/10/2026: GitHub Actions (VM descartável)
+
+O PC atual tem Windows Home, que não tem o Windows Sandbox. O workflow `.github/workflows/vm-integracao.yml` roda tudo
+numa VM `windows-latest` elevada e destruída no fim: build, testes unitários, descoberta (recusa liberar o portão se não
+for VM), estado inicial diferente do desejado para energia e core parking, e os testes de integração. Resultados
+(log, `.trx`, descoberta) ficam como artefato da rodada. Disparo: GitHub → Actions → vm-integracao → Run workflow.
+
+## Opção: Windows Sandbox (descartável; exige Windows Pro/Enterprise)
 
 1. No PC (PowerShell normal, não elevado), na pasta do projeto:
    `powershell -ExecutionPolicy Bypass -File .\tools\vm\Prepare-Sandbox.ps1`

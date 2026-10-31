@@ -14,12 +14,11 @@ Ainda **não feitas** pelo responsável:
    tokens). O token nunca foi gravado no repositório. Ele nem foi usado para o envio, mas ficou no histórico da conversa.
 3. [x] **(Feito em 31/10 02:25 no PC novo: 143/143, 0 avisos, coordenação 10/10, descoberta 0 indisponíveis; ver `docs/06-build-log.md`.)** Validar a Etapa 3 no Windows: `powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1`. O
    esperado são 143 testes aprovados e 0 avisos. Devolver o log gerado em `%TEMP%`.
-4. [ ] **Testes de integração reais:** o Windows Sandbox **não existe no Windows Home** deste PC. Criado o workflow
-   `.github/workflows/vm-integracao.yml` (VM Windows descartável do GitHub Actions, elevada), mas o GitHub recusou
-   rodar em 31/10: "billing is currently locked" na conta robinexe. Para destravar: GitHub → Settings → Billing and
-   plans → atualizar a forma de pagamento (repositório privado usa a cota gratuita de minutos; o bloqueio é de
-   cadastro). Depois: Actions → vm-integracao → Run workflow. Alternativa sem GitHub: VM local (VirtualBox) com
-   Windows, ver `tools/vm/README.md`. Rodar como administrador no PC físico continua fora de questão.
+4. [x] **(Feito em 31/10 03:25.)** Testes de integração reais: o Windows Sandbox não existe no Windows Home, então
+   rodam numa VM Windows descartável do GitHub Actions (`.github/workflows/vm-integracao.yml`). **6/6 com alteração e
+   reversão reais** (registro, Modo de Jogo, crash + `nexus-recover`, sessão de energia, SysMain, core parking AC).
+   Para rodar de novo: GitHub → Actions → vm-integracao → Run workflow (dispara sozinho quando o workflow ou os testes
+   de integração mudam). Custo: dentro da cota gratuita (≈ 3 min por rodada; limite de gasto US$ 0).
 5. [x] **(Decidido em 31/10, por delegação do responsável: "faça tudo, não me pergunte nada".)** A1: mantido
    (restaura e marca como inferido). R3: `nexus-recover accept <entryId>` implementado (esquema do diário 3).
    R5: mantido (o `--force` confirmado vale para a nova tentativa da mesma entrada). Detalhes e motivos no fim de
@@ -42,8 +41,9 @@ As regras da seção 2 valem também no PC novo. Se ele for de jogos, nada de al
 
 Etapa 2 validada no Windows: 0 erros, 0 avisos, 99/99, inclusive coordenação entre processos reais. A interface
 **somente leitura** abriu no PC do usuário. A Etapa 3 (broker e kit de VM) passa em 143/143 em Linux e, desde 31/10, também no
-Windows (PC novo). Os testes de integração compilam e nunca foram executados. A aplicação de otimizações reais continua
-**bloqueada** no Windows hospedeiro.
+Windows (PC novo; 149/149 com o `accept`). Os testes de integração rodaram numa VM Windows descartável (GitHub Actions)
+em 31/10: **6/6 com alteração e reversão reais**. A aplicação de otimizações reais continua **bloqueada** no Windows
+hospedeiro: o portão exige VM, e a interface ainda não tem caminho de execução (itens 4–6 da seção 7).
 
 ## 2. Regras que continuam valendo
 
@@ -65,7 +65,7 @@ Windows (PC novo). Os testes de integração compilam e nunca foram executados. 
 | Linux | Etapa 2 + correção de rede | 106/106 | idem |
 | Linux | **Etapa 3 (atual: broker + kit de VM)** | 143/143, 0 avisos; integração compila, **não executada** | idem |
 | **Windows (PC novo, MATHEUSANJOS)** | Etapa 3 | restore/build 0 (**0 avisos**); **143/143**; coordenação 10/10; descoberta 0 indisponíveis; CLI 0/1/0/3; SHA igual | `docs/06-build-log.md` |
-| VM Windows | qualquer | **não existe ainda** | — |
+| **VM Windows (GitHub Actions, windows-latest, elevada)** | Etapa 3 + `accept` | 149/149 unitários; **integração 6/6** com escrita e reversão reais; descoberta "Máquina virtual: Sim" | `docs/06-build-log.md` |
 
 ## 4. Mapa do código
 
@@ -146,8 +146,7 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
    `accept`: feito (149/149 no Windows). Valores da descoberta conferidos contra o próprio Windows: tudo igual, exceto
    o modelo do disco (truncado) e SSD/HDD, que são limitações conhecidas (`docs/06-build-log.md`).
 2. ~~Decisões em aberto~~ (decididas em 31/10; ver `docs/07-recovery-cases.md`).
-3. **Rodar os testes de integração no Windows Sandbox** (`tools/vm`) e corrigir o que falhar. Exige ativar o recurso
-   Windows Sandbox (decisão do usuário; administrador e reinício).
+3. ~~Rodar os testes de integração em VM~~ (feito em 31/10 no GitHub Actions: 6/6 reais).
 4. **Broker como serviço:** instalador com ACL de `%ProgramData%\NEXUS` (R1/B1), trava com ACL (B7), HKCU pelo SID do
    cliente (B10), validação da identidade do servidor no cliente (B3), assinatura do cliente (Authenticode).
 5. **Interface → broker:** só depois do item 4; até lá a interface continua sem caminho de execução.

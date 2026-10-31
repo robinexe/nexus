@@ -237,6 +237,31 @@ A interface não pôde ser vista pelo controle de tela (não é app instalado). 
 Nenhuma correção de código: a única divergência (modelo do disco truncado e tipo de mídia) depende de IOCTL/WMI, já
 listada nas limitações.
 
+## Testes de integração — VM Windows descartável (GitHub Actions), 2026-10-31
+
+O Windows Sandbox não existe no Windows Home do PC atual. Workflow `.github/workflows/vm-integracao.yml` em
+`windows-latest` (Azure, elevado). Descoberta na VM: "Microsoft Corporation / Virtual Machine", **Máquina virtual: Sim**,
+processo elevado: Sim; arquivo de liberação criado com ACL de Administradores.
+
+| Rodada | Commit | Resultado |
+|---|---|---|
+| #1 | 10caafc | Não iniciou: cobrança da conta bloqueada (resolvido pelo responsável) |
+| #2 | 10caafc | **Falhou** num teste unitário: `CoordinationTests.Recovery_is_refused_while_another_process_is_restoring…` procurava texto acentuado na saída redirecionada do CLI, que nesta VM usa a página de código 437. Defeito do teste; corrigido em d592777 (motivo conferido pelo diário) |
+| #3 | d592777 | 149/149 + integração 6/6, mas energia (sessão) e core parking caíram em "já configurado": a imagem já vem em Alto desempenho e com CPMINCORES no valor desejado |
+| #4 | 95505d8 | Igual à #3, agora com o ramo de cada teste no log |
+| #5 | 73c5540 | **149/149 + integração 6/6, todos com escrita real.** O workflow ativa o plano Equilibrado e põe CPMINCORES AC em 50 antes dos testes |
+
+Ramos da rodada #5 (log):
+
+| Teste | Antes | Resultado |
+|---|---|---|
+| Sessão de energia | Equilibrado (381b4222-…) | Verified → Alto desempenho → `EndSession` voltou ao Equilibrado |
+| SysMain (admin) | Disabled | Verified → Manual → revertido para Disabled |
+| Core parking AC (admin) | 50 | Verified → revertido para 50 |
+| Modo de Jogo (HKCU) | — | aplicado, relido e revertido ao valor exato |
+| Crash + `nexus-recover` | — | escrita real, crash simulado, CLI real restaurou e removeu a chave criada |
+| Alvo protegido (HKLM\…\Lsa) | — | recusado por `Assess` e pela validação de restauração |
+
 ## Pendente no Windows (esta versão)
 
 1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).

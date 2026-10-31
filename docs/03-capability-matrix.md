@@ -29,7 +29,7 @@ arquivos temporários e processos auxiliares. Nenhum teste toca registro, energi
 | Broker: protocolo fechado, validação contra o próprio catálogo, sessão com trava, portão de execução | implementado, não validado | 36 testes em Linux (inclui pipe real); 2 revisões independentes | Não executado no Windows |
 | Broker: host com pipe ACL (`nexus-broker`) | implementado, não validado | Compila; no PC físico serve só leitura | Pendente: serviço Windows, validação do servidor pelo cliente (B3), trava com ACL (B7), HKCU como serviço (B10) |
 | Portão de execução (VM + liberação com dono administrador) | implementado, não validado | Testes em Linux; no Windows o SMBIOS do PC físico já bloqueia | |
-| Testes de integração em VM (registro, energia, serviço, crash + `nexus-recover`) | implementado, não validado | Compilam; **nunca executados** | Rodar no Windows Sandbox (`tools/vm`) |
+| Testes de integração em VM (registro, energia, serviço, crash + `nexus-recover`) | **implementado e validado em VM** | GitHub Actions windows-latest, elevado, 31/10: 6/6 com alteração e reversão reais | Rodar de novo a cada mudança (workflow `vm-integracao`) |
 | Handler EcoQoS (ProcessPowerThrottling) | pendente | | |
 | NVIDIA DRS | pendente | | |
 | Tarefas agendadas (descoberta e handler) | pendente | | |
