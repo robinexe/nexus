@@ -54,11 +54,41 @@ public static class WindowsCleaningFolders
     }
 
     /// <summary>Só as pastas da máquina (perfil vazio): para regras de máquina no aplicador que roda com outra conta.</summary>
-    public static CleaningFolders ForMachine(IRegistryBackend registry) => new(
-        null, null, null, null, null,
-        Nullify(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)),
-        Nullify(Environment.GetFolderPath(Environment.SpecialFolder.Windows)),
-        SteamPath(registry));
+    public static CleaningFolders ForMachine(IRegistryBackend registry)
+    {
+        var windows = Nullify(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+        return new(
+            null, null, null, null, null,
+            Nullify(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)),
+            windows,
+            SteamPath(registry))
+        {
+            SystemDrive = windows is null ? null : Nullify(Path.GetPathRoot(windows)),
+        };
+    }
+
+    /// <summary>SID da conta deste processo (null se não der para ler).</summary>
+    public static string? CurrentUserSid()
+    {
+        try
+        {
+            using var me = System.Security.Principal.WindowsIdentity.GetCurrent();
+            var sid = me.User?.Value;
+            return UserProfileScope.IsValidSid(sid) ? sid : null;
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or InvalidOperationException) { return null; }
+    }
+
+    /// <summary>
+    /// Pasta das regras do usuário (<c>%AppData%\NEXUS\rules</c>) da conta deste processo, com a pasta do perfil lida de
+    /// <c>ProfileList</c> (HKLM) pelo SID do próprio processo, como no aplicador como serviço. Null se não der para identificar.
+    /// </summary>
+    public static string? UserRulesFolderForCurrentUser(IRegistryBackend registry)
+    {
+        ArgumentNullException.ThrowIfNull(registry);
+        var sid = CurrentUserSid();
+        return sid is null || ForSid(registry, sid) is not { } f ? null : UserCleaningRules.FolderFor(f);
+    }
 
     private static string? ProfileImagePath(IRegistryBackend registry, string sid)
     {
@@ -91,7 +121,7 @@ public static class WindowsCleaningFolders
     private static string? Nullify(string? s) => string.IsNullOrWhiteSpace(s) ? null : s;
 }
 
-/// <summary>Tamanho da Lixeira (todas as unidades), pela API do Shell. Só leitura; esvaziar fica com o Windows.</summary>
+/// <summary>Tamanho da Lixeira (todas as unidades ou uma), pela API do Shell. Esvaziar só pelo handler irreversível no aplicador.</summary>
 [SupportedOSPlatform("windows")]
 public static partial class RecycleBinInfo
 {
@@ -117,18 +147,50 @@ public static partial class RecycleBinInfo
     [LibraryImport("shell32.dll", EntryPoint = "SHQueryRecycleBinW", StringMarshalling = StringMarshalling.Utf16)]
     private static partial int Query32(string? rootPath, ref ShQueryRbInfo32 info);
 
-    public static (long Files, long Bytes)? TryQuery()
+    [LibraryImport("shell32.dll", EntryPoint = "SHEmptyRecycleBinW", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial int EmptyNative(IntPtr hwnd, string? rootPath, uint flags);
+
+    private const uint SherbNoConfirmation = 0x1, SherbNoProgressUi = 0x2, SherbNoSound = 0x4;
+
+    public static (long Files, long Bytes)? TryQuery() => TryQuery(null);
+
+    /// <param name="rootPath">"C:" para uma unidade; null = todas.</param>
+    public static (long Files, long Bytes)? TryQuery(string? rootPath)
     {
         try
         {
             if (IntPtr.Size == 8)
             {
                 var info = new ShQueryRbInfo64 { CbSize = Marshal.SizeOf<ShQueryRbInfo64>() };
-                return Query64(null, ref info) == 0 ? (info.I64NumItems, info.I64Size) : null;
+                return Query64(rootPath, ref info) == 0 ? (info.I64NumItems, info.I64Size) : null;
             }
             var info32 = new ShQueryRbInfo32 { CbSize = Marshal.SizeOf<ShQueryRbInfo32>() };
-            return Query32(null, ref info32) == 0 ? (info32.I64NumItems, info32.I64Size) : null;
+            return Query32(rootPath, ref info32) == 0 ? (info32.I64NumItems, info32.I64Size) : null;
         }
         catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or SEHException) { return null; }
+    }
+
+    /// <summary>Esvazia sem confirmação, progresso nem som (o NEXUS já confirmou duas vezes). Só o handler do aplicador chama.</summary>
+    internal static int EmptyNow(string? rootPath) => EmptyNative(IntPtr.Zero, rootPath, SherbNoConfirmation | SherbNoProgressUi | SherbNoSound);
+}
+
+/// <summary>Lixeira real do usuário deste processo (Shell). Usado pelo <see cref="CleaningRecycleBinHandler"/> no aplicador.</summary>
+[SupportedOSPlatform("windows")]
+public sealed class WindowsRecycleBin : IRecycleBinBackend
+{
+    public static readonly WindowsRecycleBin Instance = new();
+
+    public RecycleBinSize? Query(string? rootPath) => RecycleBinInfo.TryQuery(rootPath) is { } q ? new RecycleBinSize(q.Files, q.Bytes) : null;
+
+    public int Empty(string? rootPath)
+    {
+        try { return RecycleBinInfo.EmptyNow(rootPath); }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or SEHException) { return unchecked((int)0x80004005); }
+    }
+
+    public bool DriveReady(string rootPath)
+    {
+        try { return new DriveInfo(rootPath).IsReady; }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException) { return false; }
     }
 }

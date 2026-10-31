@@ -35,6 +35,8 @@ public static class QuarantineEntryState
     public const string Restored = "restored";
     public const string RestoredRenamed = "restored-renamed";
     public const string RestoreFailed = "restore-failed";
+    /// <summary>Apagado de vez ao esvaziar a quarentena.</summary>
+    public const string Purged = "purged";
 }
 
 public sealed class QuarantineEntry
@@ -58,6 +60,12 @@ public sealed class QuarantineManifest
     public const string Applying = "applying";
     public const string Applied = "applied";
     public const string Restored = "restored";
+    /// <summary>Esvaziamento começou (irreversível): os arquivos deste manifesto estão sendo apagados de vez.</summary>
+    public const string Purging = "purging";
+    /// <summary>Quarentena esvaziada: os arquivos foram apagados de vez. O manifesto fica, para o histórico.</summary>
+    public const string Purged = "purged";
+
+    public static bool IsPurge(string status) => status is Purging or Purged;
 
     public int Format { get; set; } = 1;
     public string Batch { get; set; } = "";
@@ -68,6 +76,13 @@ public sealed class QuarantineManifest
     public DateTime CreatedUtc { get; set; }
     public DateTime? FinishedUtc { get; set; }
     public DateTime? RestoredUtc { get; set; }
+    public DateTime? PurgedUtc { get; set; }
+    /// <summary>Bytes que estavam na quarentena e foram apagados de vez (espaço recuperado de verdade).</summary>
+    public long PurgedBytes { get; set; }
+    public long PurgedFiles { get; set; }
+    /// <summary>Regra do usuário (pasta "u_&lt;id&gt;"); <see cref="RuleSnapshot"/> guarda a regra para o desfazer.</summary>
+    public bool UserRule { get; set; }
+    public string? RuleSnapshot { get; set; }
     public string Status { get; set; } = Applying;
     public long MovedFiles { get; set; }
     public long MovedBytes { get; set; }
@@ -79,14 +94,26 @@ public sealed class QuarantineManifest
 /// <summary>Um lote (um clique) com as regras que ele limpou, numa pasta de dados (conta do usuário ou administrador).</summary>
 public sealed record QuarantineBatch(string BatchId, string DataDirectory, DateTime CreatedUtc, IReadOnlyList<QuarantineManifest> Rules)
 {
-    /// <summary>Bytes ainda na quarentena (regras não restauradas).</summary>
-    public long BytesInQuarantine => Rules.Where(r => r.Status != QuarantineManifest.Restored).Sum(r => r.MovedBytes);
-    public long FilesInQuarantine => Rules.Where(r => r.Status != QuarantineManifest.Restored).Sum(r => r.MovedFiles);
+    /// <summary>Bytes ainda na quarentena (regras nem restauradas nem esvaziadas; restauração parcial conta só o que ficou).</summary>
+    public long BytesInQuarantine => Rules.Where(InQuarantine).Sum(RemainingBytes);
+    public long FilesInQuarantine => Rules.Where(InQuarantine).Sum(r => r.Entries.Count == 0 ? r.MovedFiles : r.Entries.LongCount(e => e.State is QuarantineEntryState.Moved or QuarantineEntryState.RestoreFailed));
     public bool FullyRestored => Rules.All(r => r.Status == QuarantineManifest.Restored);
+    /// <summary>Esvaziado (no todo ou em parte): nada mais pode voltar das regras esvaziadas.</summary>
+    public bool AnyPurged => Rules.Any(r => QuarantineManifest.IsPurge(r.Status));
+    public bool FullyPurged => Rules.Where(r => r.MovedFiles > 0).All(r => QuarantineManifest.IsPurge(r.Status)) && AnyPurged;
+    public long BytesPurged => Rules.Sum(r => r.PurgedBytes);
+    public long BytesMoved => Rules.Sum(r => r.MovedBytes);
+    public DateTime? PurgedUtc => Rules.Where(r => r.PurgedUtc is not null).Select(r => r.PurgedUtc).Max();
+
+    private static bool InQuarantine(QuarantineManifest r) => r.Status != QuarantineManifest.Restored && !QuarantineManifest.IsPurge(r.Status);
+
+    /// <summary>Bytes do manifesto ainda na quarentena: os movidos menos os já devolvidos.</summary>
+    internal static long RemainingBytes(QuarantineManifest r) =>
+        r.Entries.Count == 0 ? r.MovedBytes : r.Entries.Where(e => e.State is QuarantineEntryState.Moved or QuarantineEntryState.RestoreFailed).Sum(e => e.Size);
 }
 
 /// <summary>Leitura da quarentena da limpeza (somente leitura; pode rodar na interface).</summary>
-public static class QuarantineStore
+public static partial class QuarantineStore
 {
     public const string ManifestFile = "manifest.json";
     public const string FilesDirectory = "files";
@@ -95,10 +122,70 @@ public static class QuarantineStore
 
     public static string CleaningRoot(string dataDirectory) => Path.Combine(dataDirectory, "quarantine", "cleaning");
 
-    public static string RuleDirectory(string dataDirectory, string batch, string ruleId)
+    [GeneratedRegex(@"^(u_)?[a-z0-9]+(-[a-z0-9]+)*\z", RegexOptions.CultureInvariant)]
+    private static partial Regex RuleKeyPattern();
+
+    /// <param name="ruleKey">Id da regra embutida ou "u_&lt;id&gt;" de uma regra do usuário (<see cref="CleaningRule.QuarantineKey"/>).</param>
+    public static string RuleDirectory(string dataDirectory, string batch, string ruleKey)
     {
         if (!CleaningBatchId.IsValid(batch)) throw new ArgumentException("Id de lote inválido.", nameof(batch));
-        return Path.Combine(CleaningRoot(dataDirectory), batch, ruleId);
+        if (ruleKey is null || ruleKey.Length > 52 || !RuleKeyPattern().IsMatch(ruleKey)) throw new ArgumentException("Id de regra inválido.", nameof(ruleKey));
+        return Path.Combine(CleaningRoot(dataDirectory), batch, ruleKey);
+    }
+
+    public static string BatchDirectory(string dataDirectory, string batch)
+    {
+        if (!CleaningBatchId.IsValid(batch)) throw new ArgumentException("Id de lote inválido.", nameof(batch));
+        return Path.Combine(CleaningRoot(dataDirectory), batch);
+    }
+
+    /// <summary>
+    /// Lotes com mais de <paramref name="days"/> dias que ainda têm algo na quarentena (base da expiração automática opcional:
+    /// a interface ou o módulo Automático SUGEREM esvaziar; nada é apagado sem o usuário confirmar).
+    /// </summary>
+    public static IReadOnlyList<QuarantineBatch> ExpiredBatches(string dataDirectory, int days, DateTime nowUtc)
+    {
+        if (days < 1 || days > 3650) throw new ArgumentOutOfRangeException(nameof(days), "De 1 a 3650 dias.");
+        var limit = nowUtc.ToUniversalTime().AddDays(-days);
+        return ReadBatches(dataDirectory).Where(b => b.CreatedUtc <= limit && (b.BytesInQuarantine > 0 || b.FilesInQuarantine > 0)).ToList();
+    }
+
+    /// <summary>Arquivos e bytes realmente presentes na pasta da quarentena de um lote (lidos do disco, sem seguir links).</summary>
+    public static (long Files, long Bytes) MeasureOnDisk(string dataDirectory, string batch)
+    {
+        var dir = BatchDirectory(dataDirectory, batch);
+        long files = 0, bytes = 0;
+        if (!Directory.Exists(dir)) return (0, 0);
+        var stack = new Stack<string>();
+        stack.Push(dir);
+        while (stack.Count > 0)
+        {
+            var cur = stack.Pop();
+            IEnumerable<FileSystemInfo> entries;
+            try { entries = new DirectoryInfo(cur).EnumerateFileSystemInfos("*", new EnumerationOptions { IgnoreInaccessible = false, AttributesToSkip = 0, RecurseSubdirectories = false }).ToList(); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { continue; }
+            foreach (var e in entries)
+            {
+                if (e is DirectoryInfo d)
+                {
+                    // Só as pastas "files" contam (manifestos ficam para o histórico); links nunca são seguidos.
+                    if ((d.Attributes & FileAttributes.ReparsePoint) == 0) stack.Push(d.FullName);
+                    continue;
+                }
+                if (e is FileInfo f && IsInsideFilesDirectory(dir, f.FullName))
+                {
+                    files++;
+                    try { bytes += f.Length; } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+                }
+            }
+        }
+        return (files, bytes);
+    }
+
+    private static bool IsInsideFilesDirectory(string batchDir, string file)
+    {
+        var rel = Path.GetRelativePath(batchDir, file).Split(Path.DirectorySeparatorChar);
+        return rel.Length >= 3 && rel[1] == FilesDirectory;
     }
 
     public static string QuarantinedFile(string ruleDirectory, int index) =>
@@ -223,7 +310,7 @@ internal sealed class QuarantineMover
 
     public QuarantineOutcome Apply(CleaningRule rule, CleaningFolders folders, string dataDirectory, string batch, string? userSid)
     {
-        var ruleDir = QuarantineStore.RuleDirectory(dataDirectory, batch, rule.Id);
+        var ruleDir = QuarantineStore.RuleDirectory(dataDirectory, batch, rule.QuarantineKey);
         if (File.Exists(Path.Combine(ruleDir, QuarantineStore.ManifestFile)))
             throw new InvalidOperationException("Este lote de limpeza já foi usado; peça uma nova limpeza.");
 
@@ -235,6 +322,7 @@ internal sealed class QuarantineMover
         var manifest = new QuarantineManifest
         {
             Batch = batch, Rule = rule.Id, RuleTitle = rule.Title, Category = rule.Category.ToString(), UserSid = userSid, CreatedUtc = now,
+            UserRule = rule.IsUserRule, RuleSnapshot = rule.SourceJson,
             Entries = candidates.Select((c, i) => new QuarantineEntry { Index = i, Path = c.Path, Size = c.Size, LastWriteUtc = c.LastWriteUtc }).ToList(),
         };
         WriteManifest(ruleDir, manifest); // antes do primeiro arquivo sair
@@ -283,9 +371,10 @@ internal sealed class QuarantineMover
     /// </summary>
     public QuarantineOutcome Restore(CleaningRule rule, CleaningFolders folders, string dataDirectory, string batch)
     {
-        var ruleDir = QuarantineStore.RuleDirectory(dataDirectory, batch, rule.Id);
+        var ruleDir = QuarantineStore.RuleDirectory(dataDirectory, batch, rule.QuarantineKey);
         var manifest = QuarantineStore.ReadManifest(ruleDir);
         if (manifest is null) return new QuarantineOutcome(0, 0, 0, 0, 0, 0, 0);
+        if (QuarantineManifest.IsPurge(manifest.Status)) throw new InvalidOperationException("A quarentena deste lote foi esvaziada: os arquivos foram apagados de vez e não há o que devolver.");
         if (manifest.Rule != rule.Id || manifest.Batch != batch) throw new InvalidDataException("Manifesto não corresponde à regra/lote.");
         EnsureRealChain(dataDirectory, ruleDir);
 
@@ -378,7 +467,7 @@ internal sealed class QuarantineMover
     }
 
     /// <summary>Da pasta de dados até a pasta da regra, nenhuma pasta pode ser link/junção (evita desviar as escritas do aplicador).</summary>
-    private static void EnsureRealChain(string dataDirectory, string dir)
+    internal static void EnsureRealChain(string dataDirectory, string dir)
     {
         var top = CleaningPaths.Normalize(dataDirectory);
         var cur = CleaningPaths.Normalize(dir);
@@ -392,7 +481,7 @@ internal sealed class QuarantineMover
         }
     }
 
-    private static void WriteManifest(string ruleDir, QuarantineManifest manifest)
+    internal static void WriteManifest(string ruleDir, QuarantineManifest manifest)
     {
         var path = Path.Combine(ruleDir, QuarantineStore.ManifestFile);
         var tmp = path + ".tmp";

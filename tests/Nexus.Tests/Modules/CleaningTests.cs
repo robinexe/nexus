@@ -265,8 +265,10 @@ public sealed class CleaningHandlerTests
             Assert.Equal(CleaningBatchId.Pattern, a.UserParameters["batch"]);
             Assert.StartsWith("cleaning.", a.Definition.Id, StringComparison.Ordinal);
         }
-        Assert.True(actions.Count(a => a.Definition.Privileges == PrivilegeLevel.User) <= 32);
-        Assert.True(actions.Count(a => a.Definition.Privileges == PrivilegeLevel.Admin) <= 32);
+        // Um pedido ao aplicador leva no máximo 64 ações; a página divide em partes, mas as embutidas de um nível cabem num pedido
+        // com folga para as regras do usuário.
+        Assert.True(actions.Count(a => a.Definition.Privileges == PrivilegeLevel.User) <= 48);
+        Assert.True(actions.Count(a => a.Definition.Privileges == PrivilegeLevel.Admin) <= 48);
         // Todo handlerKind do catálogo do módulo é registrado pelo módulo.
         var kinds = CleaningHandlers.Create(new HandlerEnvironment(new InMemoryRegistryBackend(), Path.GetTempPath(), false, false)).Select(h => h.HandlerKind).ToList();
         Assert.All(actions, a => Assert.Contains(a.Definition.HandlerKind, kinds));

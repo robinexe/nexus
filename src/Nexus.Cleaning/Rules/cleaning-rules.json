@@ -94,7 +94,7 @@
       "id": "recycle-bin", "title": "Lixeira", "category": "Sistema", "scope": "User", "mode": "MeasureOnly", "special": "RecycleBin",
       "roots": [], "patterns": [ "*" ], "recursive": false, "minAgeHours": 0,
       "nativeTool": "shell:RecycleBinFolder",
-      "explanation": "Esvaziar a Lixeira apaga de vez e não pode ser desfeito, então o NEXUS não faz isso por você: ele mostra quanto ela ocupa e abre a Lixeira para você revisar e esvaziar.",
+      "explanation": "Esvaziar a Lixeira apaga de vez e não pode ser desfeito. O NEXUS mostra quanto ela ocupa; você pode abrir a Lixeira para revisar ou usar \"Esvaziar Lixeira\" (pede duas confirmações, com o tamanho exato, e não tem desfazer).",
       "expectedGain": "Espaço em disco (o que estiver na Lixeira).",
       "evidence": "https://learn.microsoft.com/windows/win32/api/shellapi/nf-shellapi-shqueryrecyclebinw"
     },
@@ -380,6 +380,156 @@
       "explanation": "Cache do Battle.net em ProgramData, que a Blizzard manda apagar quando o aplicativo apresenta erros. O Battle.net precisa estar fechado.",
       "expectedGain": "Espaço em disco (geralmente pouco). Útil para corrigir erros do Battle.net.",
       "evidence": "https://us.battle.net/support/article/27596"
+    },
+
+    {
+      "id": "windows-logs-old", "title": "Registros antigos de instalação do Windows", "category": "Sistema", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%WinDir%\\Logs\\DISM", "%WinDir%\\Logs\\MoSetup", "%WinDir%\\Logs\\NetSetup" ], "patterns": [ "*.log", "*.log.old", "*.bak" ], "recursive": false, "minAgeHours": 720,
+      "defaultSelected": false,
+      "explanation": "Registros (texto) de instalações e atualizações do Windows: DISM, instalação de versão (MoSetup) e configuração de rede. Só sai o que não foi escrito há mais de 30 dias; o registro em uso (ex.: dism.log atual) fica. CBS tem regra própria. Panther e WindowsUpdate não são tocados (o Windows usa para diagnóstico).",
+      "expectedGain": "Espaço em disco (normalmente de poucos MB a centenas de MB). Não deixa o PC mais rápido.",
+      "evidence": "https://learn.microsoft.com/windows-hardware/manufacture/desktop/deployment-troubleshooting-and-log-files (locais dos registros de instalação e do DISM)"
+    },
+    {
+      "id": "store-cache", "title": "Microsoft Store: cache de imagens", "category": "Apps", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Packages\\Microsoft.WindowsStore_8wekyb3d8bbwe\\LocalState\\Cache" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "closeApps": [ "WinStore.App" ],
+      "defaultSelected": false,
+      "explanation": "Imagens e páginas que a Microsoft Store guarda para abrir mais rápido. A Store recria sozinha. Não usamos o wsreset (ele também apaga a sessão da Store e roda sem mostrar o que faz); só esta pasta de cache conhecida, com mais de 24 horas.",
+      "expectedGain": "Espaço em disco (de poucos MB a algumas centenas de MB).",
+      "evidence": "https://learn.microsoft.com/windows/apps/design/app-settings/store-and-retrieve-app-data (LocalState/LocalCache: dados locais do app; a pasta Cache é recriada pela Store)"
+    },
+    {
+      "id": "nvidia-nvcache", "title": "NVIDIA: cache de shaders global (NV_Cache)", "category": "Jogos", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%ProgramData%\\NVIDIA Corporation\\NV_Cache" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 0,
+      "defaultSelected": false,
+      "warning": "É cache de shaders: jogos e programas vão recompilar e as primeiras partidas podem engasgar (stutter). Só vale para liberar espaço ou depois de trocar de driver com problemas gráficos.",
+      "explanation": "Cache de shaders da NVIDIA para todos os usuários (drivers antigos e alguns programas usam esta pasta). O driver recria. Feche jogos e programas 3D antes (arquivos em uso são pulados).",
+      "expectedGain": "Espaço em disco (até alguns GB). Não aumenta FPS; no começo, piora a fluidez até o cache ser refeito.",
+      "evidence": "Painel de Controle NVIDIA > Configurações 3D > 'Tamanho do cache do shader' (o driver mantém e recria o cache)"
+    },
+    {
+      "id": "nvidia-installers", "title": "NVIDIA: instaladores de driver extraídos", "category": "Jogos", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%SystemDrive%\\NVIDIA\\DisplayDriver" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 720,
+      "closeApps": [ "setup" ],
+      "defaultSelected": false,
+      "explanation": "O instalador do driver NVIDIA extrai os arquivos em C:\\NVIDIA\\DisplayDriver\\<versão> (caminho padrão da tela 'Extraction path') e não apaga depois. O driver já instalado não usa esta pasta; um novo instalador extrai de novo. Só sai o que tem mais de 30 dias e com nenhum instalador ('setup') aberto.",
+      "expectedGain": "Espaço em disco (comum: 0,5 a 2 GB por versão de driver guardada).",
+      "evidence": "Instalador do driver NVIDIA: pasta de extração padrão C:\\NVIDIA\\DisplayDriver\\<versão>, usada só durante a instalação"
+    },
+    {
+      "id": "amd-installers", "title": "AMD: instaladores extraídos (C:\\AMD)", "category": "Jogos", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%SystemDrive%\\AMD" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 720,
+      "closeApps": [ "setup", "AMDSoftwareInstaller" ],
+      "defaultSelected": false,
+      "explanation": "O AMD Software (vídeo e chipset) extrai os pacotes de instalação em C:\\AMD e não apaga depois. Os drivers instalados não usam esta pasta. Só sai o que tem mais de 30 dias e com nenhum instalador aberto.",
+      "expectedGain": "Espaço em disco (comum: 0,5 a vários GB).",
+      "evidence": "AMD Software: Adrenalin Edition — o instalador extrai para C:\\AMD por padrão (pasta de extração mostrada pelo instalador)"
+    },
+    {
+      "id": "riot-logs", "title": "Riot Client e VALORANT: registros antigos", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        { "path": "%LocalAppData%\\Riot Games\\Riot Client\\Logs", "patterns": [ "*.log", "*.txt" ], "recursive": true },
+        { "path": "%LocalAppData%\\VALORANT\\Saved\\Logs", "patterns": [ "*.log" ], "recursive": false }
+      ],
+      "minAgeHours": 72,
+      "closeApps": [ "RiotClientServices", "VALORANT-Win64-Shipping" ],
+      "defaultSelected": true,
+      "explanation": "Registros de diagnóstico do Riot Client e do VALORANT com mais de 3 dias. Configurações, replays e o anti-cheat (Vanguard) não são tocados.",
+      "expectedGain": "Espaço em disco (geralmente dezenas a centenas de MB).",
+      "evidence": "Suporte da Riot: os registros do VALORANT ficam em %LocalAppData%\\VALORANT\\Saved\\Logs e os do Riot Client em %LocalAppData%\\Riot Games\\Riot Client\\Logs (artigos sobre envio de logs)"
+    },
+    {
+      "id": "minecraft-logs", "title": "Minecraft: registros antigos", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%AppData%\\.minecraft\\logs" ], "patterns": [ "*.log.gz", "*.log" ], "recursive": false, "minAgeHours": 72,
+      "exclude": [ "latest.log" ],
+      "closeApps": [ "javaw", "Minecraft", "MinecraftLauncher" ],
+      "defaultSelected": true,
+      "explanation": "Registros compactados de sessões anteriores do Minecraft (Java Edition), com mais de 3 dias. Mundos, capturas e configurações não são tocados; o latest.log fica.",
+      "expectedGain": "Espaço em disco (de poucos MB a centenas de MB em quem joga muito).",
+      "evidence": "https://minecraft.wiki/w/.minecraft (pasta logs: registros de sessões anteriores, compactados .log.gz)"
+    },
+    {
+      "id": "ea-logs", "title": "EA app: registros antigos", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Electronic Arts\\EA Desktop\\Logs" ], "patterns": [ "*.log", "*.txt" ], "recursive": true, "minAgeHours": 72,
+      "closeApps": [ "EADesktop", "EABackgroundService" ],
+      "defaultSelected": true,
+      "explanation": "Registros de diagnóstico do EA app com mais de 3 dias. O cache do EA app não é tocado aqui: o próprio app limpa em Ajuda > Recuperação do aplicativo.",
+      "expectedGain": "Espaço em disco (geralmente dezenas de MB).",
+      "evidence": "Ajuda da EA: os registros do EA app ficam em %LocalAppData%\\Electronic Arts\\EA Desktop\\Logs (artigo sobre encontrar os logs do EA app)"
+    },
+    {
+      "id": "ubisoft-logs", "title": "Ubisoft Connect: registros antigos", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Ubisoft Game Launcher\\logs" ], "patterns": [ "*.log", "*.txt" ], "recursive": true, "minAgeHours": 72,
+      "closeApps": [ "UbisoftConnect", "upc" ],
+      "defaultSelected": true,
+      "explanation": "Registros de diagnóstico do Ubisoft Connect com mais de 3 dias. O cache do launcher fica na pasta de instalação (Arquivos de Programas), que o NEXUS não toca; a Ubisoft orienta limpar por lá com o launcher fechado.",
+      "expectedGain": "Espaço em disco (geralmente dezenas de MB).",
+      "evidence": "Suporte da Ubisoft: arquivos de log do Ubisoft Connect em %LocalAppData%\\Ubisoft Game Launcher\\logs"
+    },
+    {
+      "id": "obs-logs", "title": "OBS Studio: registros e relatórios de travamento antigos", "category": "Apps", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%AppData%\\obs-studio\\logs", "%AppData%\\obs-studio\\crashes" ], "patterns": [ "*.txt" ], "recursive": false, "minAgeHours": 168,
+      "closeApps": [ "obs64", "obs32" ],
+      "defaultSelected": true,
+      "explanation": "Registros de sessões e relatórios de travamento do OBS com mais de 7 dias. Cenas, perfis e gravações não são tocados.",
+      "expectedGain": "Espaço em disco (de poucos MB a dezenas de MB).",
+      "evidence": "OBS Studio: Ajuda > Arquivos de log > Mostrar arquivos de log abre %AppData%\\obs-studio\\logs (obsproject.com, guia de logs)"
+    },
+    {
+      "id": "dev-vscode-cache", "title": "VS Code: caches (desenvolvedor)", "category": "Desenvolvedor", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%AppData%\\Code\\Cache", "%AppData%\\Code\\CachedData", "%AppData%\\Code\\Code Cache", "%AppData%\\Code\\GPUCache", "%AppData%\\Code\\CachedExtensionVSIXs" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "closeApps": [ "Code" ],
+      "defaultSelected": false,
+      "explanation": "Caches do Visual Studio Code (Chromium/Electron e cópias de extensões baixadas). Configurações, extensões instaladas e projetos não são tocados. O VS Code recria ao abrir.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB). Primeira abertura depois pode ser um pouco mais lenta.",
+      "evidence": "VS Code (Electron): pastas Cache, Code Cache, GPUCache e CachedData em %AppData%\\Code são caches recriados pelo editor"
+    },
+    {
+      "id": "dev-npm-cache", "title": "npm: cache de pacotes (desenvolvedor)", "category": "Desenvolvedor", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\npm-cache\\_cacache" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "closeApps": [ "node" ],
+      "defaultSelected": false,
+      "explanation": "Cópias dos pacotes que o npm já baixou. Equivale ao 'npm cache clean --force'. Os projetos não mudam; o próximo 'npm install' baixa de novo o que faltar.",
+      "expectedGain": "Espaço em disco (comum: 1 a vários GB em quem programa).",
+      "evidence": "https://docs.npmjs.com/cli/commands/npm-cache (no Windows, o cache fica em %LocalAppData%\\npm-cache)"
+    },
+    {
+      "id": "dev-pip-cache", "title": "pip (Python): cache (desenvolvedor)", "category": "Desenvolvedor", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\pip\\Cache" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "closeApps": [ "pip", "python" ],
+      "defaultSelected": false,
+      "explanation": "Downloads e pacotes compilados (wheels) que o pip guarda. Equivale ao 'pip cache purge'. Pacotes já instalados continuam funcionando.",
+      "expectedGain": "Espaço em disco (de centenas de MB a alguns GB).",
+      "evidence": "https://pip.pypa.io/en/stable/topics/caching/ (Windows: %LocalAppData%\\pip\\Cache)"
+    },
+    {
+      "id": "dev-nuget-cache", "title": "NuGet: cache HTTP (desenvolvedor)", "category": "Desenvolvedor", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\NuGet\\v3-cache", "%LocalAppData%\\NuGet\\plugins-cache" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "closeApps": [ "dotnet", "devenv", "MSBuild" ],
+      "defaultSelected": false,
+      "explanation": "Cache HTTP do NuGet (equivale a 'dotnet nuget locals http-cache --clear' e plugins-cache). A pasta de pacotes globais (%UserProfile%\\.nuget\\packages) NÃO é tocada.",
+      "expectedGain": "Espaço em disco (de dezenas de MB a alguns GB).",
+      "evidence": "https://learn.microsoft.com/nuget/consume-packages/managing-the-global-packages-and-cache-folders (http-cache em %LocalAppData%\\NuGet\\v3-cache)"
+    },
+    {
+      "id": "dev-gradle-cache", "title": "Gradle: caches (desenvolvedor)", "category": "Desenvolvedor", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%UserProfile%\\.gradle\\caches" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 168,
+      "closeApps": [ "java", "javaw", "studio64" ],
+      "defaultSelected": false,
+      "explanation": "Dependências baixadas e resultados de compilação que o Gradle guarda (inclusive do Android Studio). Só sai o que tem mais de 7 dias; o próximo build baixa de novo o que faltar (pode demorar).",
+      "expectedGain": "Espaço em disco (comum: vários GB em quem programa para Android/Java).",
+      "evidence": "https://docs.gradle.org/current/userguide/directory_layout.html (Gradle User Home: caches/ pode ser removido; é recriado)"
+    },
+    {
+      "id": "dev-java-cache", "title": "Java: cache de implantação (desenvolvedor)", "category": "Desenvolvedor", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppDataLow%\\Sun\\Java\\Deployment\\cache" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "closeApps": [ "java", "javaw", "javaws" ],
+      "defaultSelected": false,
+      "explanation": "Arquivos temporários do Java (Web Start e applets antigos), os mesmos que o Painel de Controle Java apaga em Arquivos Temporários da Internet.",
+      "expectedGain": "Espaço em disco (geralmente pouco; às vezes centenas de MB).",
+      "evidence": "Oracle — Painel de Controle Java, guia Geral > Arquivos Temporários da Internet > Excluir Arquivos (docs.oracle.com, Java Deployment Guide)"
     }
   ]
 }
