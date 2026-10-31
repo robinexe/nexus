@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Nexus.Broker;
 using Nexus.HardwareDiscovery;
 using Nexus.Lab.Memory;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -17,6 +18,8 @@ public sealed class MemSlotRow
     public string SizeText { get; init; } = "";
     public string Detail { get; init; } = "";
     public string Tip { get; init; } = "";
+    /// <summary>Slot livre de verdade (não soldado): "encaixe aqui".</summary>
+    public bool CanAdd => !Occupied;
 }
 
 /// <summary>Um canal com seus slots.</summary>
@@ -47,6 +50,8 @@ public sealed class MemBarRow
     public required string ValueText { get; init; }
     public required double Fraction { get; init; }
     public string Detail { get; init; } = "";
+    /// <summary>A barra do teórico (cinza, referência).</summary>
+    public bool IsTheory => Label == "Teórico";
 }
 
 /// <summary>Fonte citada (abre no navegador).</summary>
@@ -74,6 +79,9 @@ public sealed class MemFindingRow : ObservableObject
     public bool HasAction => ActionId is not null;
     public bool HasSteps => Steps.Count > 0;
     public string SeverityText => Severity switch { "bad" => "Problema", "warn" => "Atenção", "good" => "Tudo certo", _ => "Informação" };
+    public UiTone ToneKind => Severity switch { "bad" => UiTone.Bad, "warn" => UiTone.Warn, "good" => UiTone.Good, _ => UiTone.Info };
+    public string IconKey => Severity switch { "bad" => "Icon.Error", "warn" => "Icon.Warning", "good" => "Icon.Check", _ => "Icon.Info" };
+    public bool HasDetails => Steps.Count > 0 || Sources.Count > 0;
     public ICommand? ApplyCommand { get; set; }
     public ICommand? RevertCommand { get; set; }
     public string Status { get => _status; set => Set(ref _status, value); }
@@ -105,6 +113,7 @@ public sealed class MemoryLabPage : ModulePage
     private string _headline = "Lendo a memória…", _headlineTone = "info", _subline = "", _capacityText = "", _channelText = "";
     private string _verdict = "", _theoryText = "", _latencyText = "", _latencyDetail = "", _progress = "", _compareText = "", _stateNote = "";
     private string _gamingHeadline = "", _gamingDetail = "";
+    private bool _attempted;
 
     public MemoryLabPage()
     {
@@ -144,9 +153,75 @@ public sealed class MemoryLabPage : ModulePage
     public string StateNote { get => _stateNote; private set => Set(ref _stateNote, value); }
     public string GamingHeadline { get => _gamingHeadline; private set => Set(ref _gamingHeadline, value); }
     public string GamingDetail { get => _gamingDetail; private set => Set(ref _gamingDetail, value); }
-    public bool Measuring { get => _measuring; private set { if (Set(ref _measuring, value)) CommandManager.InvalidateRequerySuggested(); } }
+    public bool Measuring
+    {
+        get => _measuring;
+        private set
+        {
+            if (!Set(ref _measuring, value)) return;
+            OnPropertyChanged(nameof(CancelText));
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
     public bool HasBars => Bars.Count > 0;
     public bool HasRuns => Runs.Count > 0;
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Verdadeiro até a primeira leitura do SMBIOS terminar (esqueleto no destaque).</summary>
+    public bool IsLoading => !_attempted;
+    /// <summary>Memória instalada (bytes; NaN = ainda não lida).</summary>
+    public double InstalledBytes => _analysis is { } a ? a.Inventory.InstalledBytes : double.NaN;
+    public bool IsSingleChannel => _analysis?.Layout.Mode == ChannelMode.SingleChannel;
+    /// <summary>Há um slot livre (não soldado) para um segundo pente.</summary>
+    public bool HasFreeSlot => _analysis?.Inventory.Empty.Any(d => !d.LooksSoldered) == true;
+    public bool ShowUpgradeSteps => IsSingleChannel && HasFreeSlot;
+    public UiTone ChannelTone => _analysis?.Layout.Mode switch
+    {
+        ChannelMode.SingleChannel => UiTone.Warn,
+        ChannelMode.DualChannel or ChannelMode.QuadChannel or ChannelMode.MultiChannel => UiTone.Good,
+        _ => UiTone.Info,
+    };
+    public string ChannelModeText => _analysis?.Layout.Mode switch
+    {
+        ChannelMode.SingleChannel => "Canal único",
+        ChannelMode.DualChannel => "Dois canais (dual channel)",
+        ChannelMode.QuadChannel => "Quatro canais",
+        ChannelMode.MultiChannel => "Vários canais",
+        null => "",
+        _ => "Canais não identificados",
+    };
+    /// <summary>"1 de 2 slots em uso".</summary>
+    public string SlotsText => _analysis is { } a
+        ? $"{a.Inventory.Populated.Count} de {a.Inventory.Devices.Count} {(a.Inventory.Devices.Count == 1 ? "posição" : "posições")} em uso"
+        : "";
+    /// <summary>Banda teórica com a configuração de agora (GB/s; 0 = velocidade não informada).</summary>
+    public double TheoryGbps => _analysis?.TheoreticalGbps ?? 0;
+    /// <summary>Com um segundo pente igual (dois canais): o dobro do canal único.</summary>
+    public double DualTheoryGbps => IsSingleChannel ? TheoryGbps * 2 : TheoryGbps;
+    public bool ShowDualDemo => IsSingleChannel && TheoryGbps > 0;
+    /// <summary>Leitura medida (GB/s; NaN = ainda não medido).</summary>
+    public double ReadGbps => _bandwidth?.ReadGbps is { } r && r > 0 ? r : double.NaN;
+    public double ReadPercentOfTheory => _bandwidth is { } b && TheoryGbps > 0 ? Math.Clamp(b.ReadGbps / TheoryGbps * 100, 0, 100) : double.NaN;
+    public double LatencyNs => _latency?.RandomNs is { } n && n > 0 ? n : double.NaN;
+    /// <summary>Estado do Windows: % em uso e % do limite de memória comprometida (NaN = não lido).</summary>
+    public double UsedPercent => _state is { TotalPhysicalBytes: { } t, AvailablePhysicalBytes: { } av } && t > 0 ? (t - av) * 100.0 / t : double.NaN;
+    public double CommitPercent => _state is { CommitTotalBytes: { } ct, CommitLimitBytes: { } cl } && cl > 0 ? ct * 100.0 / cl : double.NaN;
+    public double StandbyBytes => _state?.StandbyBytes is { } sb ? sb : double.NaN;
+    public bool HasState => _state is not null;
+    public string CancelText => Measuring ? "Cancelar medição" : "";
+
+    private void NotifyNumbers()
+    {
+        foreach (var name in new[]
+                 {
+                     nameof(IsLoading), nameof(InstalledBytes), nameof(IsSingleChannel), nameof(HasFreeSlot), nameof(ShowUpgradeSteps),
+                     nameof(ChannelTone), nameof(ChannelModeText), nameof(SlotsText), nameof(TheoryGbps), nameof(DualTheoryGbps),
+                     nameof(ShowDualDemo), nameof(ReadGbps), nameof(ReadPercentOfTheory), nameof(LatencyNs), nameof(UsedPercent),
+                     nameof(CommitPercent), nameof(StandbyBytes), nameof(HasState),
+                 })
+            OnPropertyChanged(name);
+    }
 
     public static string MythText =>
         "\"Limpador de RAM\" não acelera nada. O Windows usa a memória livre como cache (lista de espera) de propósito: o que está " +
@@ -191,6 +266,11 @@ public sealed class MemoryLabPage : ModulePage
             Headline = "Não foi possível ler a memória";
             Message = $"Leitura do SMBIOS falhou: {ex.Message}";
         }
+        finally
+        {
+            _attempted = true;
+            NotifyNumbers();
+        }
     }
 
     private async Task LoadStateAsync()
@@ -203,6 +283,7 @@ public sealed class MemoryLabPage : ModulePage
             var sysMain = _facts?.Services.FirstOrDefault(s => string.Equals(s.Name, "SysMain", StringComparison.OrdinalIgnoreCase));
             _state = await Task.Run(() => WindowsMemoryReader.ReadState(sysMain?.State, sysMain?.StartType));
             ShowState();
+            NotifyNumbers();
             StateNote = _state.Problems.Count == 0 ? "" : "Não lido: " + string.Join("; ", _state.Problems.Select(p => $"{p.Key} ({p.Value})"));
             Rebuild();
         }
@@ -372,6 +453,7 @@ public sealed class MemoryLabPage : ModulePage
             var lat = await Task.Run(() => MemoryBenchmark.MeasureLatency(options, null, progress, token), token);
             _latency = lat;
             ShowMeasure();
+            NotifyNumbers();
             SaveRun();
             ProgressText = "Medição concluída e salva para comparar depois.";
             Rebuild();
