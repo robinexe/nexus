@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows;
 using Nexus.Broker;
 using Nexus.Security;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -16,6 +17,10 @@ public sealed class ProtectionRow(ProtectionItem item, RelayCommand? open)
     public string? Advice => item.Advice;
     public string ToneKey => item.Tone.ToString();
     public RelayCommand? OpenCommand => open;
+    /// <summary>Tom do design system (cor do distintivo e do selo).</summary>
+    public UiTone Tone => SecurityPage.UiToneOf(item.Tone);
+    /// <summary>Ícone do distintivo: ✓ verde, ! âmbar, × vermelho, i quando não se sabe.</summary>
+    public string IconKey => SecurityPage.ToneIcon(Tone);
 }
 
 /// <summary>Ponto suspeito para revisão. Só tem botão de correção quando existe ação reversível no catálogo.</summary>
@@ -30,6 +35,9 @@ public sealed class FindingRow(Finding f, RelayCommand? fix)
     public string SeverityText => f.Severity switch { Severity.High => "Alta", Severity.Medium => "Média", Severity.Low => "Baixa", _ => "Info" };
     public string ToneKey => f.Severity switch { Severity.High => "Bad", Severity.Medium => "Warn", Severity.Low => "Unknown", _ => "Info" };
     public RelayCommand? FixCommand => fix;
+    public UiTone Tone => f.Severity switch { Severity.High => UiTone.Bad, Severity.Medium => UiTone.Warn, Severity.Low => UiTone.Neutral, _ => UiTone.Info };
+    public string IconKey => SecurityPage.ToneIcon(Tone);
+    public string SeverityLabel => $"Gravidade {SeverityText.ToLowerInvariant()}";
 }
 
 public sealed class ThreatRow(ThreatRecord t)
@@ -39,6 +47,9 @@ public sealed class ThreatRow(ThreatRecord t)
     public string Resources => t.Resources.Count == 0 ? "" : string.Join("\n", t.Resources);
     public string Recommendation => t.Recommendation;
     public string ToneKey => t.Active || t.Recommendation.StartsWith("Ação", StringComparison.Ordinal) ? "Bad" : "Good";
+    public UiTone Tone => ToneKey == "Bad" ? UiTone.Bad : UiTone.Good;
+    public string StateText => ToneKey == "Bad" ? "Pede ação" : "Resolvida";
+    public string IconKey => SecurityPage.ToneIcon(Tone);
 }
 
 public sealed class OrphanRow(RegistryOrphan o) : ObservableObject
@@ -69,6 +80,8 @@ public sealed class SecurityPage : ModulePage
     private bool _loaded;
     private bool _scanning;
     private bool _inspecting;
+    private bool _reading;
+    private double _scorePercent = double.NaN, _goodNumber = double.NaN, _warnNumber = double.NaN, _badNumber = double.NaN;
     private string _headline = "Lendo o estado de proteção…";
     private string _headlineTone = "Unknown";
     private string _scoreText = "";
@@ -109,7 +122,7 @@ public sealed class SecurityPage : ModulePage
     public ObservableCollection<string> ScanOutput { get; } = [];
 
     public string Headline { get => _headline; private set => Set(ref _headline, value); }
-    public string HeadlineTone { get => _headlineTone; private set => Set(ref _headlineTone, value); }
+    public string HeadlineTone { get => _headlineTone; private set { if (Set(ref _headlineTone, value)) OnPropertyChanged(nameof(HeadlineUiTone)); } }
     public string ScoreText { get => _scoreText; private set => Set(ref _scoreText, value); }
     public string ReadAt { get => _readAt; private set => Set(ref _readAt, value); }
     public string ScanStatus { get => _scanStatus; private set => Set(ref _scanStatus, value); }
@@ -119,6 +132,29 @@ public sealed class SecurityPage : ModulePage
     public bool Scanning { get => _scanning; private set => Set(ref _scanning, value); }
     public bool Inspecting { get => _inspecting; private set => Set(ref _inspecting, value); }
     public bool CanUndo => _lastRuns.Count > 0;
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Primeira leitura em andamento: esqueleto no destaque e nos cartões.</summary>
+    public bool IsLoading => _reading && !_loaded;
+    /// <summary>Itens em verde / total, em % (NaN antes da leitura): o escudo do destaque.</summary>
+    public double ScorePercent { get => _scorePercent; private set => Set(ref _scorePercent, value); }
+    public double GoodNumber { get => _goodNumber; private set => Set(ref _goodNumber, value); }
+    public double WarnNumber { get => _warnNumber; private set => Set(ref _warnNumber, value); }
+    public double BadNumber { get => _badNumber; private set => Set(ref _badNumber, value); }
+    public double ProtectionTotal => Protection.Count;
+    public double FindingNumber => Findings.Count;
+    public double ThreatNumber => Threats.Count;
+    /// <summary>Cor do número/estado do destaque.</summary>
+    public UiTone HeadlineUiTone => HeadlineTone switch { "Good" => UiTone.Good, "Warn" => UiTone.Warn, "Bad" => UiTone.Bad, _ => UiTone.Neutral };
+    public bool HasFindings => Findings.Count > 0;
+    public bool HasThreats => Threats.Count > 0;
+    public bool HasOrphans => Orphans.Count > 0;
+    public string ScoreCaption => Protection.Count == 0 ? "" : $"de {Protection.Count} itens de proteção em verde";
+
+    internal static UiTone UiToneOf(Tone t) => t switch { Tone.Good => UiTone.Good, Tone.Warn => UiTone.Warn, Tone.Bad => UiTone.Bad, _ => UiTone.Info };
+    internal static string ToneIcon(UiTone t) => t switch { UiTone.Good => "Icon.Check", UiTone.Warn => "Icon.Warning", UiTone.Bad => "Icon.Error", _ => "Icon.Info" };
+
     public int FindingCount => Findings.Count;
     public int ThreatCount => Threats.Count;
     public int OrphanCount => Orphans.Count;
@@ -148,8 +184,13 @@ public sealed class SecurityPage : ModulePage
     {
         Headline = "Lendo o estado de proteção…";
         HeadlineTone = "Unknown";
-        var report = await Task.Run(() => WindowsSecurityReader.Read());
+        _reading = true;
+        OnPropertyChanged(nameof(IsLoading));
+        SecurityReport report;
+        try { report = await Task.Run(() => WindowsSecurityReader.Read()); }
+        finally { _reading = false; }
         _loaded = true;
+        OnPropertyChanged(nameof(IsLoading));
         Protection.Clear();
         foreach (var p in report.Protection)
             Protection.Add(new ProtectionRow(p, p.OpenUri is { } uri ? new RelayCommand(() => Open(uri)) : null));
@@ -169,6 +210,12 @@ public sealed class SecurityPage : ModulePage
             : warn > 0 ? ("Protegido, com pontos de atenção", "Warn")
             : ("Protegido", "Good");
         ScoreText = $"{good} de {report.Protection.Count} itens em verde · {warn} em atenção · {bad} em vermelho";
+        ScorePercent = report.Protection.Count == 0 ? double.NaN : 100.0 * good / report.Protection.Count;
+        GoodNumber = good;
+        WarnNumber = warn;
+        BadNumber = bad;
+        foreach (var name in new[] { nameof(ProtectionTotal), nameof(FindingNumber), nameof(ThreatNumber), nameof(HasFindings), nameof(HasThreats), nameof(ScoreCaption) })
+            OnPropertyChanged(name);
         ReadAt = $"Lido em {report.ReadAt.ToLocalTime():dd/MM/yyyy HH:mm}";
         Message = "";
         OnPropertyChanged(nameof(FindingCount));
@@ -324,6 +371,7 @@ public sealed class SecurityPage : ModulePage
             ? "Nenhuma sobra encontrada pelas regras (conservadoras) do inspetor."
             : $"{list.Count(o => o.Removable)} sobra(s) que podem ser removidas com cópia e {list.Count(o => !o.Removable)} só informativa(s). Remover não deixa o PC mais rápido.";
         OnPropertyChanged(nameof(OrphanCount));
+        OnPropertyChanged(nameof(HasOrphans));
     }
 
     private async Task RemoveOrphansAsync()
