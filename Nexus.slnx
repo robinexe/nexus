@@ -15,6 +15,7 @@
     <Project Path="src/Nexus.Boot/Nexus.Boot.csproj" />
     <Project Path="src/Nexus.Privacy/Nexus.Privacy.csproj" />
     <Project Path="src/Nexus.Security/Nexus.Security.csproj" />
+    <Project Path="src/Nexus.Security.Scanner/Nexus.Security.Scanner.csproj" />
     <Project Path="src/Nexus.Monitoring/Nexus.Monitoring.csproj" />
     <Project Path="src/Nexus.SystemTools/Nexus.SystemTools.csproj" />
     <Project Path="src/Nexus.Automation/Nexus.Automation.csproj" />

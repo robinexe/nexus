@@ -1,0 +1,6 @@
+# nexus-hashdb/1
+# Conjunto de TESTE embutido no NEXUS. Nenhuma destas entradas é malware real: servem para conferir que a camada de
+# hashes funciona. Listas reais são importadas pelo usuário (ver docs/modules/scanner.md); o NEXUS não baixa nada.
+#! test
+275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f  EICAR (arquivo de teste padrão de antivírus, 68 bytes)
+c35a6421324e17b03fd9ca115a9a89ae1ae173c367d75f37c05b3beaec01abd7  Amostra de teste do NEXUS (texto "NEXUS-SCANNER-TEST-SAMPLE" + quebra de linha)

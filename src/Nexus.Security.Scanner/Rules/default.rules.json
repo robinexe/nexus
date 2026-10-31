@@ -1,0 +1,172 @@
+{
+  // Regras genéricas do NEXUS (formato nexus.scanrules/1, documentado em docs/modules/scanner.md).
+  // Elas procuram TÉCNICAS comuns (baixar e executar, macro automática, atalho que chama interpretador), não malware
+  // específico: um acerto é "sinal para revisar", e quem decide é o Microsoft Defender.
+  // O texto do EICAR fica em hexadecimal de propósito: assim este arquivo não é, ele próprio, um arquivo de teste.
+  "schema": "nexus.scanrules/1",
+  "rules": [
+    {
+      "id": "test.eicar",
+      "title": "Arquivo de teste EICAR",
+      "why": "É o arquivo de teste padrão dos antivírus (eicar.org): inofensivo, feito para conferir se a proteção reage. Se você não o colocou aí de propósito, pode apagá-lo.",
+      "points": 100,
+      "test": true,
+      "maxSize": 128,
+      "strings": [
+        { "id": "eicar", "at": 0, "hex": "58 35 4F 21 50 25 40 41 50 5B 34 5C 50 5A 58 35 34 28 50 5E 29 37 43 43 29 37 7D 24 45 49 43 41 52 2D 53 54 41 4E 44 41 52 44 2D 41 4E 54 49 56 49 52 55 53 2D 54 45 53 54 2D 46 49 4C 45 21 24 48 2B 48 2A" }
+      ],
+      "condition": "$eicar"
+    },
+    {
+      "id": "script.download-execute",
+      "title": "Script que baixa e executa código",
+      "why": "Combina um comando que baixa algo da internet (DownloadString, WebClient, Invoke-WebRequest, BITS) com um que executa texto como código (IEX/Invoke-Expression). É a técnica \"download cradle\" (MITRE ATT&CK T1059.001 + T1105). Instaladores legítimos raramente fazem isso escondido.",
+      "points": 45,
+      "extensions": [ ".ps1", ".psm1", ".psd1", ".bat", ".cmd", ".vbs", ".vbe", ".js", ".jse", ".wsf", ".hta", ".lnk", ".txt" ],
+      "maxSize": 8388608,
+      "strings": [
+        { "id": "iex_a", "text": "iex(", "nocase": true, "wide": true },
+        { "id": "iex_b", "text": "iex (", "nocase": true, "wide": true },
+        { "id": "iex_c", "text": "| iex", "nocase": true, "wide": true },
+        { "id": "iex_d", "text": "invoke-expression", "nocase": true, "wide": true },
+        { "id": "dl_a", "text": "downloadstring", "nocase": true, "wide": true },
+        { "id": "dl_b", "text": "downloaddata", "nocase": true, "wide": true },
+        { "id": "dl_c", "text": "net.webclient", "nocase": true, "wide": true },
+        { "id": "dl_d", "text": "invoke-webrequest", "nocase": true, "wide": true },
+        { "id": "dl_e", "text": "invoke-restmethod", "nocase": true, "wide": true },
+        { "id": "dl_f", "text": "start-bitstransfer", "nocase": true, "wide": true }
+      ],
+      "condition": "any of ($iex*) and any of ($dl*)"
+    },
+    {
+      "id": "script.powershell-encoded",
+      "title": "PowerShell com comando codificado e escondido",
+      "why": "Chama o PowerShell com -EncodedCommand (o comando vai em Base64, ilegível) junto com janela oculta, decodificação de Base64 ou execução de texto. Ferramentas de administração às vezes usam -enc, mas a combinação com janela oculta é típica de quem quer esconder o que roda (MITRE ATT&CK T1027, T1059.001).",
+      "points": 40,
+      "extensions": [ ".ps1", ".psm1", ".bat", ".cmd", ".vbs", ".vbe", ".js", ".jse", ".wsf", ".hta", ".lnk", ".txt" ],
+      "maxSize": 8388608,
+      "strings": [
+        { "id": "ps", "text": "powershell", "nocase": true, "wide": true },
+        { "id": "enc_a", "text": " -enc ", "nocase": true, "wide": true },
+        { "id": "enc_b", "text": " -encodedcommand ", "nocase": true, "wide": true },
+        { "id": "enc_c", "text": " -ec ", "nocase": true, "wide": true },
+        { "id": "hide_a", "text": "-w hidden", "nocase": true, "wide": true },
+        { "id": "hide_b", "text": "-windowstyle hidden", "nocase": true, "wide": true },
+        { "id": "hide_c", "text": "-win hidden", "nocase": true, "wide": true },
+        { "id": "b64", "text": "frombase64string", "nocase": true, "wide": true },
+        { "id": "iex", "text": "invoke-expression", "nocase": true, "wide": true }
+      ],
+      "condition": "$ps and any of ($enc*) and (any of ($hide*) or $b64 or $iex)"
+    },
+    {
+      "id": "lnk.script-host",
+      "title": "Atalho que abre um interpretador de scripts",
+      "why": "Este atalho (.lnk) chama mshta, wscript/cscript ou PowerShell com argumentos de janela oculta, comando codificado ou endereço da internet. Atalhos assim são usados para disfarçar a execução de scripts como se fossem documentos (MITRE ATT&CK T1204.002, T1218.005). O atalho comum do Windows PowerShell no menu Iniciar não tem esses argumentos.",
+      "points": 45,
+      "extensions": [ ".lnk" ],
+      "maxSize": 1048576,
+      "strings": [
+        { "id": "magic", "at": 0, "hex": "4C 00 00 00 01 14 02 00" },
+        { "id": "mshta", "text": "mshta", "nocase": true, "wide": true },
+        { "id": "wscript", "text": "wscript", "nocase": true, "wide": true },
+        { "id": "cscript", "text": "cscript", "nocase": true, "wide": true },
+        { "id": "ps", "text": "powershell", "nocase": true, "wide": true },
+        { "id": "cmd", "text": "cmd.exe", "nocase": true, "wide": true },
+        { "id": "arg_hidden", "text": "hidden", "nocase": true, "wide": true },
+        { "id": "arg_enc", "text": " -e", "nocase": true, "wide": true },
+        { "id": "arg_http", "text": "http", "nocase": true, "wide": true },
+        { "id": "arg_iex", "text": "iex", "nocase": true, "wide": true },
+        { "id": "arg_vbs", "text": ".vbs", "nocase": true, "wide": true },
+        { "id": "arg_js", "text": ".js", "nocase": true, "wide": true }
+      ],
+      "condition": "$magic and ($mshta or (($wscript or $cscript) and any of ($arg_http, $arg_vbs, $arg_js)) or (($ps or $cmd) and any of ($arg_hidden, $arg_enc, $arg_http, $arg_iex)))"
+    },
+    {
+      "id": "office.ole-autoexec-macro",
+      "title": "Documento do Office (formato antigo) com macro que roda ao abrir",
+      "why": "Documento OLE (.doc/.xls/.ppt do Office 97–2003) com projeto VBA e uma rotina de execução automática (AutoOpen, Document_Open, Workbook_Open...). Macros automáticas são o caminho clássico de infecção por documento (MITRE ATT&CK T1204.002, T1137). O Office bloqueia macros de arquivos da internet por padrão; não habilite o conteúdo se não confia na origem.",
+      "points": 35,
+      "maxSize": 67108864,
+      "strings": [
+        { "id": "ole", "at": 0, "hex": "D0 CF 11 E0 A1 B1 1A E1" },
+        { "id": "vba", "text": "_VBA_PROJECT", "wide": true, "ascii": false },
+        { "id": "auto_a", "text": "AutoOpen", "nocase": true },
+        { "id": "auto_b", "text": "Auto_Open", "nocase": true },
+        { "id": "auto_c", "text": "Document_Open", "nocase": true },
+        { "id": "auto_d", "text": "Workbook_Open", "nocase": true },
+        { "id": "auto_e", "text": "AutoExec", "nocase": true },
+        { "id": "auto_f", "text": "AutoClose", "nocase": true },
+        { "id": "auto_g", "text": "Document_Close", "nocase": true }
+      ],
+      "condition": "$ole and $vba and any of ($auto*)"
+    },
+    {
+      "id": "office.ole-macro-launcher",
+      "title": "Macro com chamadas para executar programas ou baixar arquivos",
+      "why": "Além da macro, aparecem nomes de funções que executam programas ou baixam arquivos (Shell, WScript.Shell, URLDownloadToFile, XMLHTTP, PowerShell). Somado à execução automática, é o padrão de documentos que instalam outra coisa no PC.",
+      "points": 25,
+      "maxSize": 67108864,
+      "strings": [
+        { "id": "ole", "at": 0, "hex": "D0 CF 11 E0 A1 B1 1A E1" },
+        { "id": "vba", "text": "_VBA_PROJECT", "wide": true, "ascii": false },
+        { "id": "call_a", "text": "WScript.Shell", "nocase": true },
+        { "id": "call_b", "text": "URLDownloadToFile", "nocase": true },
+        { "id": "call_c", "text": "XMLHTTP", "nocase": true },
+        { "id": "call_d", "text": "powershell", "nocase": true },
+        { "id": "call_e", "text": "Shell.Application", "nocase": true },
+        { "id": "call_f", "text": "ADODB.Stream", "nocase": true }
+      ],
+      "condition": "$ole and $vba and any of ($call*)"
+    },
+    {
+      "id": "script.vbs-js-dropper",
+      "title": "Script do Windows (VBS/JS/HTA) que baixa e executa",
+      "why": "Usa objetos do Windows Script Host para baixar (XMLHTTP/WinHttp) e gravar (ADODB.Stream) um arquivo e executá-lo (WScript.Shell). É o comportamento de \"downloader\" em script (MITRE ATT&CK T1059.005/.007, T1105).",
+      "points": 45,
+      "extensions": [ ".vbs", ".vbe", ".js", ".jse", ".wsf", ".hta" ],
+      "maxSize": 8388608,
+      "strings": [
+        { "id": "net_a", "text": "MSXML2.XMLHTTP", "nocase": true, "wide": true },
+        { "id": "net_b", "text": "WinHttp.WinHttpRequest", "nocase": true, "wide": true },
+        { "id": "net_c", "text": "MSXML2.ServerXMLHTTP", "nocase": true, "wide": true },
+        { "id": "save", "text": "ADODB.Stream", "nocase": true, "wide": true },
+        { "id": "run", "text": "WScript.Shell", "nocase": true, "wide": true }
+      ],
+      "condition": "any of ($net*) and $save and $run"
+    },
+    {
+      "id": "script.defender-tamper",
+      "title": "Script que tenta desligar ou excluir o Microsoft Defender",
+      "why": "Chama Set-MpPreference para desligar a proteção em tempo real ou Add-MpPreference para excluir pastas/processos da verificação. Malware faz isso antes de agir; scripts de \"otimização\" também, e deixam o PC desprotegido (MITRE ATT&CK T1562.001).",
+      "points": 45,
+      "extensions": [ ".ps1", ".psm1", ".bat", ".cmd", ".vbs", ".js", ".hta", ".txt" ],
+      "maxSize": 8388608,
+      "strings": [
+        { "id": "set", "text": "Set-MpPreference", "nocase": true, "wide": true },
+        { "id": "add", "text": "Add-MpPreference", "nocase": true, "wide": true },
+        { "id": "off_a", "text": "-DisableRealtimeMonitoring", "nocase": true, "wide": true },
+        { "id": "off_b", "text": "-DisableBehaviorMonitoring", "nocase": true, "wide": true },
+        { "id": "off_c", "text": "-DisableIOAVProtection", "nocase": true, "wide": true },
+        { "id": "exc_a", "text": "-ExclusionPath", "nocase": true, "wide": true },
+        { "id": "exc_b", "text": "-ExclusionProcess", "nocase": true, "wide": true }
+      ],
+      "condition": "($set and any of ($off*)) or ($add and any of ($exc*))"
+    },
+    {
+      "id": "pe.embedded-script-launcher",
+      "title": "Executável que guarda comandos de PowerShell escondido",
+      "why": "Dentro do executável há um comando de PowerShell com janela oculta ou comando codificado. Programas comuns não embutem isso; \"lançadores\" de malware sim (MITRE ATT&CK T1059.001).",
+      "points": 30,
+      "requirePe": true,
+      "maxSize": 67108864,
+      "strings": [
+        { "id": "ps", "text": "powershell", "nocase": true, "wide": true },
+        { "id": "h_a", "text": "-w hidden", "nocase": true, "wide": true },
+        { "id": "h_b", "text": "-windowstyle hidden", "nocase": true, "wide": true },
+        { "id": "h_c", "text": " -enc ", "nocase": true, "wide": true },
+        { "id": "h_d", "text": " -encodedcommand ", "nocase": true, "wide": true }
+      ],
+      "condition": "$ps and any of ($h_*)"
+    }
+  ]
+}
