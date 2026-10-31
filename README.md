@@ -6,6 +6,22 @@ Laboratório de desempenho para jogos no Windows (foco VALORANT e CS2): diagnost
 > Interface desktop e descoberta de hardware em **modo somente leitura**. Aplicação de otimizações **bloqueada** até os
 > testes em VM Windows. Comece por **`HANDOFF.md`**.
 
+## Instalação (Windows 10/11, 64 bits)
+
+Baixe da página de Releases (ou dos artifacts do workflow `release`) e confira o SHA-256 em `SHA256SUMS.txt`
+(`Get-FileHash .\arquivo -Algorithm SHA256`). Não precisa do .NET instalado.
+
+- **Instalador (recomendado):** `NEXUS-<versão>-win-x64-instalador.exe`. Instala em `%ProgramFiles%\NEXUS` (pede
+  administrador), cria atalho no Menu Iniciar e, se você marcar, o serviço do aplicador. Desinstale por Configurações →
+  Aplicativos: o desinstalador pergunta antes de apagar os seus dados e, à parte, a quarentena (padrão: manter).
+- **Portátil:** `NEXUS-<versão>-win-x64-portatil.zip`. Extraia tudo numa pasta e abra `Nexus.Desktop.exe`. Os dados ficam
+  em `%LocalAppData%\NEXUS` e `%ProgramData%\NEXUS`. Se mover a pasta, ligue de novo a verificação semanal. Para ações de
+  administrador frequentes, prefira o instalador: numa pasta do seu usuário, outros programas podem trocar os arquivos que
+  rodariam como administrador (`tools\Test-NexusFolderSafety.ps1` confere a pasta).
+
+Gerar os pacotes: `python tools/packaging/publish.py` (pasta e ZIP) e o workflow `release.yml` (instalador, testes de
+instalação numa VM descartável, SHA-256, Release em rascunho em tags `v*`). Detalhes: `docs/08-packaging.md`.
+
 ## Documentos
 
 | Arquivo | Conteúdo |
@@ -16,6 +32,7 @@ Laboratório de desempenho para jogos no Windows (foco VALORANT e CS2): diagnost
 | `docs/05-dependencies.md` | Dependências, licenças e obrigações |
 | `docs/06-build-log.md` | Comandos, códigos de saída e evidências por ambiente |
 | `docs/07-recovery-cases.md` | Casos ambíguos de recuperação, revisão independente e decisões pendentes |
+| `docs/08-packaging.md` | Publicação, ZIP portátil, instalador, workflow de release, assinatura e ícone |
 | `HANDOFF.md` | Estado verificado, pendências e comandos reproduzíveis |
 | `catalog/actions.v1.json` | 13 ações classificadas + 14 mitos/ajustes rejeitados com motivo |
 

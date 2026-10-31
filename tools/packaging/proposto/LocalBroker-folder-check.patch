@@ -1,0 +1,86 @@
+--- a/src/Nexus.Broker/LocalBroker.cs
++++ b/src/Nexus.Broker/LocalBroker.cs
+@@ -1,5 +1,8 @@
+ using System.ComponentModel;
+ using System.Diagnostics;
++using System.Runtime.Versioning;
++using System.Security.AccessControl;
++using System.Security.Principal;
+ 
+ namespace Nexus.Broker;
+ 
+@@ -77,6 +80,18 @@
+ 
+     private static void Start(BrokerLevel level, string brokerDirectory, string userSid)
+     {
++        // Modo portátil: numa pasta que contas comuns alteram (Downloads, Área de Trabalho, D:\ com a ACL padrão), o aplicador
++        // ELEVADO rodaria arquivos que qualquer programa com a conta do usuário pode trocar antes do aviso do Windows. A checagem
++        // fica AQUI, no cliente, antes de pedir a elevação: depois de elevado, um binário trocado não se denunciaria.
++        // O serviço instalado (tentado antes, em Connect) não passa por aqui. Desenvolvimento/CI (pasta bin gravável):
++        // NEXUS_ALLOW_WRITABLE_BROKER_DIR=1.
++        if (level == BrokerLevel.Admin && OperatingSystem.IsWindows() &&
++            Environment.GetEnvironmentVariable("NEXUS_ALLOW_WRITABLE_BROKER_DIR") != "1" &&
++            UnsafeBrokerFolder(brokerDirectory) is { } why)
++            throw new OperationCanceledException(
++                "Ações de administrador desligadas nesta cópia do NEXUS: " + why + ". Programas com a sua conta poderiam trocar os " +
++                "arquivos que rodariam como administrador. Use o instalador (Arquivos de Programas) ou mova a pasta para um lugar que só " +
++                "administradores alteram. Nada foi alterado.");
+         var (file, prefix) = Executable(brokerDirectory);
+         var args = prefix.Concat(Arguments(level, userSid, Environment.ProcessId)).ToList();
+         var psi = new ProcessStartInfo(file)
+@@ -106,4 +121,55 @@
+     }
+ 
+     internal static string Quote(string a) => a.Length > 0 && a.IndexOfAny([' ', '\t', '"']) < 0 ? a : "\"" + a.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
++
++    // Mesma regra de Nexus.WindowsActions.AdminOnlyDirectory.Evaluate e de tools/packaging/Test-NexusFolderSafety.ps1.
++    private const int WriteLike = 0x2 | 0x4 | 0x10 | 0x40 | 0x100 | 0x10000 | 0x40000 | 0x80000 | 0x10000000 | 0x40000000;
++    private const int DeleteChild = 0x40 | 0x10000000;
++    private static readonly string[] PrivilegedSids =
++        ["S-1-5-32-544", "S-1-5-18", "S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464"];
++
++    /// <summary>
++    /// null se só administradores alteram a pasta do aplicador, os .exe/.dll/.json dela e o catálogo, e nenhuma pasta acima
++    /// permite trocá-la (excluir subpastas); senão, o motivo em português simples.
++    /// </summary>
++    [SupportedOSPlatform("windows")]
++    internal static string? UnsafeBrokerFolder(string directory)
++    {
++        try
++        {
++            var dir = new DirectoryInfo(Path.GetFullPath(directory));
++            if (dir.LinkTarget is not null || (dir.Attributes & FileAttributes.ReparsePoint) != 0) return "a pasta é um link ou junção";
++            if (AclProblem(dir.GetAccessControl(), WriteLike, checkOwner: true) is { } p) return $"{dir.FullName}: {p}";
++            foreach (var f in dir.EnumerateFiles("*", SearchOption.TopDirectoryOnly))
++            {
++                var ext = f.Extension.ToUpperInvariant();
++                if (ext is not (".EXE" or ".DLL" or ".JSON")) continue;
++                if (AclProblem(f.GetAccessControl(), WriteLike, checkOwner: true) is { } fp) return $"{f.Name}: {fp}";
++            }
++            var catalog = new DirectoryInfo(Path.Combine(dir.FullName, "catalog"));
++            if (catalog.Exists && AclProblem(catalog.GetAccessControl(), WriteLike, checkOwner: true) is { } cp) return $"catalog: {cp}";
++            for (var parent = dir.Parent; parent is not null; parent = parent.Parent)
++                if (AclProblem(parent.GetAccessControl(), DeleteChild, checkOwner: false) is { } pp) return $"{parent.FullName}: {pp}";
++            return null;
++        }
++        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
++        {
++            return $"não foi possível conferir as permissões da pasta ({ex.Message})";
++        }
++    }
++
++    [SupportedOSPlatform("windows")]
++    private static string? AclProblem(FileSystemSecurity security, int mask, bool checkOwner)
++    {
++        var owner = security.GetOwner(typeof(SecurityIdentifier))?.Value;
++        if (checkOwner && (owner is null || !PrivilegedSids.Contains(owner))) return $"o dono ({owner ?? "desconhecido"}) não é Administradores/SYSTEM";
++        foreach (FileSystemAccessRule rule in security.GetAccessRules(includeExplicit: true, includeInherited: true, typeof(SecurityIdentifier)))
++        {
++            if (rule.AccessControlType != AccessControlType.Allow || (rule.PropagationFlags & PropagationFlags.InheritOnly) != 0) continue;
++            var sid = rule.IdentityReference.Value;
++            if (PrivilegedSids.Contains(sid) || sid == "S-1-3-0") continue; // CREATOR OWNER só vale para o que for criado dentro
++            if (((int)rule.FileSystemRights & mask) != 0) return $"a conta {sid} pode alterar arquivos ali";
++        }
++        return null;
++    }
+ }
