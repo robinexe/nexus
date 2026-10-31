@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Text.Json.Serialization;
 using Nexus.Core;
 using Nexus.Desktop.Services;
+using Nexus.Desktop.Views.Optimize;
 using Nexus.HardwareDiscovery;
 
 namespace Nexus.Desktop.ViewModels;
@@ -109,9 +111,65 @@ public sealed class CatalogRow : ObservableObject
     public string ApplyLabel { get; } = "só pelo serviço do broker (escrita exige VM de teste liberada)";
     public bool CanSimulate => Instance is not null;
 
-    public string Current { get => _current; set => Set(ref _current, value); }
-    public string? ReadError { get => _readError; set => Set(ref _readError, value); }
+    public string Current
+    {
+        get => _current;
+        set { if (Set(ref _current, value)) RaiseReadState(); }
+    }
+    public string? ReadError
+    {
+        get => _readError;
+        set { if (Set(ref _readError, value)) RaiseReadState(); }
+    }
     public bool Include { get => _include; set => Set(ref _include, value && CanSimulate); }
+
+    // ---- textos de apoio para a vitrine (somente leitura, derivados do catálogo e da leitura)
+
+    public string ClassificationText => CatalogText.Classification(Entry.Definition.Classification);
+    public string PersistenceText => CatalogText.Persistence(Entry.Definition.Persistence);
+    public bool IsSession => Entry.Definition.Persistence == PersistenceKind.Session;
+    public string RebootText => CatalogText.Reboot(Entry.Definition.Reboot);
+    public bool NeedsRestart => Entry.Definition.Reboot != RebootRequirement.None;
+    public string PrivilegeText => CatalogText.Privileges(Entry.PrivilegesRaw);
+    public bool NeedsAdmin => Entry.PrivilegesRaw.Contains("Admin", StringComparison.Ordinal);
+    public bool IsExperimental => Entry.Definition.Classification == Nexus.Core.Classification.Experimental;
+
+    public IReadOnlyList<EvidenceItem> EvidenceItems => Entry.Definition.Evidence
+        .Select(e => { var (text, strength) = CatalogText.Evidence(e.Level); return new EvidenceItem(text, e.Source, strength); })
+        .OrderByDescending(e => e.Strength)
+        .ToList();
+
+    /// <summary>Alvo técnico, uma linha por chave (para o bloco recolhido "Detalhes técnicos").</summary>
+    public IReadOnlyList<string> TargetLines => Instance is not null
+        ? Instance.Target.OrderBy(kv => kv.Key, StringComparer.Ordinal).Select(kv => $"{kv.Key} = {kv.Value}").ToList()
+        : Entry.TargetTemplate.Select(kv => $"{kv.Key} = {kv.Value}").ToList();
+
+    /// <summary>"reading", "unread", "error", "same" (já está como o desejado) ou "change" (mudaria).</summary>
+    public string ReadState =>
+        Instance is null ? "unread"
+        : ReadError is not null ? "error"
+        : _current == "lendo…" ? "reading"
+        : _current == Desired || _current.StartsWith(Desired + "  (", StringComparison.Ordinal) ? "same"
+        : "change";
+
+    /// <summary>Valor atual para exibição: um traço quando a ação nem chega a ser lida (o motivo aparece no detalhe).</summary>
+    public string CurrentShown => Instance is null ? "—" : _current;
+
+    public string ReadStateText => ReadState switch
+    {
+        "unread" => "Ainda não dá pra ler neste PC",
+        "error" => "Não deu pra ler agora",
+        "reading" => "Lendo o valor atual…",
+        "same" => "Já está assim no seu PC",
+        _ => "Mudaria com este ajuste",
+    };
+
+    private void RaiseReadState()
+    {
+        OnPropertyChanged(nameof(CurrentShown));
+        OnPropertyChanged(nameof(ReadState));
+        OnPropertyChanged(nameof(ReadStateText));
+    }
 }
 
 public sealed class CatalogPage : PageViewModel
@@ -122,16 +180,57 @@ public sealed class CatalogPage : PageViewModel
     private string _version = "";
     public override string Title => "O que dá pra ajustar";
     public override string Group => "Otimizar";
-    public override string Subtitle => "Ações do catalog/actions.v1.json com o estado real lido agora. Nada é aplicado.";
-    public IReadOnlyList<CatalogRow> Rows { get => _rows; set => Set(ref _rows, value); }
-    public IReadOnlyList<RejectedCatalogItem> Rejected { get => _rejected; set => Set(ref _rejected, value); }
+    public override string Subtitle => "Cada ajuste mostra o valor lido agora no seu PC e o que ele passaria a ser. Nada é aplicado nesta página.";
+    public IReadOnlyList<CatalogRow> Rows
+    {
+        get => _rows;
+        set { if (Set(ref _rows, value)) OnPropertyChanged(nameof(RowsTitle)); }
+    }
+    public IReadOnlyList<RejectedCatalogItem> Rejected
+    {
+        get => _rejected;
+        set
+        {
+            if (!Set(ref _rejected, value)) return;
+            OnPropertyChanged(nameof(Myths));
+            OnPropertyChanged(nameof(MythsTitle));
+        }
+    }
     public CatalogRow? Selected { get => _selected; set => Set(ref _selected, value); }
     public string Version { get => _version; set => Set(ref _version, value); }
+
+    public string RowsTitle => Rows.Count == 1 ? "1 ajuste" : $"{Rows.Count} ajustes";
+    public string MythsTitle => Rejected.Count == 1 ? "1 mito que não aplicamos" : $"{Rejected.Count} mitos que não aplicamos";
+
+    /// <summary>Itens recusados do catálogo como "mitos", com título e veredito legíveis; os não recomendados vêm primeiro.</summary>
+    public IReadOnlyList<MythItem> Myths => Rejected
+        .Select(r => (Item: r, Verdict: CatalogText.MythVerdict(r.Classification)))
+        .OrderBy(x => x.Verdict.Order)
+        .Select(x => new MythItem(x.Item.Id, CatalogText.MythTitle(x.Item.Id), x.Verdict.Verdict, x.Verdict.Tone, x.Item.Reason, x.Item.Source))
+        .ToList();
 }
 
 // ------------------------------------------------------------------ Simulação
 
-public sealed record PlanRow(string Action, string Status, string Observed, string Desired, string Batch, string Reason, PlanStatus Kind);
+public sealed record PlanRow(string Action, string Status, string Observed, string Desired, string Batch, string Reason, PlanStatus Kind)
+{
+    /// <summary>Título da ação sem a chave técnica entre parênteses.</summary>
+    [JsonIgnore]
+    public string Name => Action.LastIndexOf(" (", StringComparison.Ordinal) is var i and > 0 ? Action[..i] : Action;
+
+    /// <summary>Chave técnica (id@versão), quando presente em <see cref="Action"/>.</summary>
+    [JsonIgnore]
+    public string Key => Action.LastIndexOf(" (", StringComparison.Ordinal) is var i and > 0 && Action.EndsWith(')')
+        ? Action[(i + 2)..^1] : "";
+
+    /// <summary>Iria no segundo lote, depois de um reinício.</summary>
+    [JsonIgnore]
+    public bool AfterReboot => Batch.StartsWith('2');
+
+    /// <summary>Tem um "agora/depois" que vale mostrar (seria aplicada ou já está assim).</summary>
+    [JsonIgnore]
+    public bool ShowsChange => Kind is PlanStatus.Pending or PlanStatus.AlreadyConfigured;
+}
 
 public sealed class PlanPage : PageViewModel
 {
@@ -140,14 +239,34 @@ public sealed class PlanPage : PageViewModel
     private bool _busy;
     public override string Title => "Testar sem aplicar";
     public override string Group => "Otimizar";
-    public override string Subtitle => "Dry-run: calcula o que mudaria, na ordem e em lotes, relendo o estado real. Nenhuma alteração é aplicada.";
+    public override string Subtitle => "Simule antes de mexer: a gente relê o estado real do PC e mostra o que mudaria, em ordem e por lote. Nada é aplicado.";
     public ObservableCollection<CatalogRow> Candidates { get; } = [];
-    public IReadOnlyList<PlanRow> Rows { get => _rows; set => Set(ref _rows, value); }
+    public IReadOnlyList<PlanRow> Rows
+    {
+        get => _rows;
+        set
+        {
+            if (!Set(ref _rows, value)) return;
+            OnPropertyChanged(nameof(Groups));
+            OnPropertyChanged(nameof(HasResult));
+        }
+    }
+
+    public bool HasResult => Rows.Count > 0;
+
+    /// <summary>Resultado da simulação agrupado na ordem de leitura: o que mudaria primeiro, o que barrou por último.</summary>
+    public IReadOnlyList<PlanGroup> Groups =>
+    [
+        new(PlanStatus.Pending, "Seria aplicada", "Hoje está diferente do desejado. É isso que mudaria.", Rows.Where(r => r.Kind == PlanStatus.Pending).ToList()),
+        new(PlanStatus.AlreadyConfigured, "Já está assim", "O seu PC já tem o valor desejado. Nada a fazer.", Rows.Where(r => r.Kind == PlanStatus.AlreadyConfigured).ToList()),
+        new(PlanStatus.NotApplicable, "Não se aplica", "Não faz sentido neste PC ou nesta versão do Windows.", Rows.Where(r => r.Kind == PlanStatus.NotApplicable).ToList()),
+        new(PlanStatus.Blocked, "Bloqueada", "Algo impede a mudança com segurança. O motivo está em cada item.", Rows.Where(r => r.Kind == PlanStatus.Blocked).ToList()),
+    ];
     public string Summary { get => _summary; set => Set(ref _summary, value); }
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public RelayCommand? SimulateCommand { get; set; }
     public string BlockedNotice { get; } =
-        "Esta página só simula, localmente. Para aplicar, use a página Broker: o serviço NexusBroker é a única via de escrita e recusa qualquer alteração fora de uma VM de teste liberada.";
+        "Aqui nada é aplicado: a simulação roda só na leitura. Para aplicar, use a página Aplicar. O serviço NexusBroker é a única via de escrita e recusa qualquer alteração fora de uma VM de teste liberada.";
 }
 
 // ------------------------------------------------------------------ Histórico
@@ -164,10 +283,20 @@ public sealed class HistoryPage : PageViewModel
     private string _coordination = "";
     public override string Title => "Histórico";
     public override string Group => "Registro";
-    public override string Subtitle => "Execuções registradas no diário (aberto somente leitura) e estado da coordenação entre executores.";
+    public override string Subtitle => "Tudo o que o serviço registrou no diário, aberto só para leitura, e se há algum executor em uso agora.";
     public string JournalPath { get; set; } = NexusServices.DefaultJournalPath;
-    public IReadOnlyList<HistoryRun> Runs { get => _runs; set => Set(ref _runs, value); }
-    public IReadOnlyList<HistoryEntry> Entries { get => _entries; set => Set(ref _entries, value); }
+    public IReadOnlyList<HistoryRun> Runs
+    {
+        get => _runs;
+        set { if (Set(ref _runs, value)) OnPropertyChanged(nameof(RunsTitle)); }
+    }
+    public IReadOnlyList<HistoryEntry> Entries
+    {
+        get => _entries;
+        set { if (Set(ref _entries, value)) OnPropertyChanged(nameof(EntriesTitle)); }
+    }
+    public string RunsTitle => Runs.Count == 1 ? "1 execução" : $"{Runs.Count} execuções";
+    public string EntriesTitle => Entries.Count == 1 ? "1 ajuste nesta execução" : $"{Entries.Count} ajustes nesta execução";
     public string Status { get => _status; set => Set(ref _status, value); }
     public string Coordination { get => _coordination; set => Set(ref _coordination, value); }
     public Action<HistoryRun?>? OnSelected { get; set; }
@@ -184,8 +313,17 @@ public sealed class CapabilitiesPage : PageViewModel
 {
     public override string Title => "O que já funciona";
     public override string Group => "Registro";
-    public override string Subtitle => "O que existe nesta versão e o que foi validado. Rótulos: implementado e validado · implementado, não validado · não suportado neste ambiente · pendente.";
+    public override string Subtitle => "Sem maquiagem: o que já existe nesta versão e o que foi conferido de verdade, item por item.";
     public IReadOnlyList<CapabilityRow> Rows { get; } = CapabilityCatalog.Rows(OperatingSystem.IsWindows());
+
+    /// <summary>Capacidades agrupadas por área, na ordem em que as áreas aparecem.</summary>
+    public IReadOnlyList<CapabilityGroup> Groups => Rows.GroupBy(r => r.Area, StringComparer.Ordinal)
+        .Select(g => new CapabilityGroup(g.Key, g.ToList())).ToList();
+
+    public int ValidatedCount => Rows.Count(r => r.Label == CapabilityLabel.ImplementedValidated);
+    public int NotValidatedCount => Rows.Count(r => r.Label == CapabilityLabel.ImplementedNotValidated);
+    public int NotSupportedCount => Rows.Count(r => r.Label == CapabilityLabel.NotSupportedHere);
+    public int PendingCount => Rows.Count(r => r.Label == CapabilityLabel.Pending);
 }
 
 public sealed record OverviewCard(string Title, string Value, FactStatus Status, string Detail);
@@ -251,13 +389,45 @@ public sealed class BrokerPage : PageViewModel
     public override string Title => "Aplicar";
     public override string Group => "Otimizar";
     public override string Subtitle =>
-        "Aplicar e reverter pelo serviço NexusBroker. A escrita real só acontece se o serviço estiver numa VM de teste liberada; fora dela, ele recusa sem alterar nada.";
+        "Aplicar e reverter passam pelo serviço NexusBroker. Ele só escreve numa VM de teste liberada; fora dela, recusa sem mexer em nada.";
 
     /// <summary>As mesmas ações marcadas na página Simulação.</summary>
     public ObservableCollection<CatalogRow> Candidates { get; set; } = [];
 
-    public bool Connected { get => _connected; set => Set(ref _connected, value); }
-    public bool WriteAllowed { get => _writeAllowed; set => Set(ref _writeAllowed, value); }
+    public bool Connected
+    {
+        get => _connected;
+        set { if (Set(ref _connected, value)) RaiseGate(); }
+    }
+    public bool WriteAllowed
+    {
+        get => _writeAllowed;
+        set { if (Set(ref _writeAllowed, value)) RaiseGate(); }
+    }
+
+    /// <summary>"unknown" (serviço não consultado ou fora do ar), "blocked" ou "open".</summary>
+    public string GateState => !Connected ? "unknown" : WriteAllowed ? "open" : "blocked";
+
+    public string GateTitle => GateState switch
+    {
+        "open" => "Escrita liberada",
+        "blocked" => "Escrita bloqueada neste PC",
+        _ => "O serviço ainda não respondeu",
+    };
+
+    public string GateExplain => GateState switch
+    {
+        "open" => "O serviço confirmou que está numa VM de teste liberada. Aplicar continua pedindo a sua confirmação, e tudo fica registrado para reverter.",
+        "blocked" => "É proposital e não indica problema. O serviço só altera o Windows numa VM de teste liberada; no seu PC ele lê e simula, mas recusa qualquer escrita sem tocar em nada.",
+        _ => "Clique em Consultar serviço para saber se o NexusBroker está instalado e se ele pode escrever. Até lá, nada é enviado.",
+    };
+
+    private void RaiseGate()
+    {
+        OnPropertyChanged(nameof(GateState));
+        OnPropertyChanged(nameof(GateTitle));
+        OnPropertyChanged(nameof(GateExplain));
+    }
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public string ServiceStatus { get => _serviceStatus; set => Set(ref _serviceStatus, value); }
     public string Gate { get => _gate; set => Set(ref _gate, value); }
