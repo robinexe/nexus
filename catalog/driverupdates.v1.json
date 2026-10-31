@@ -1,0 +1,49 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Atualizar drivers (Nexus.DriverUpdates). Só fontes oficiais: Windows Update (Windows Update Agent) e páginas/apps oficiais dos fabricantes de vídeo (só abertos, nunca baixados pelo NEXUS). Lote: a mesma ação várias vezes no pedido, uma por atualização (UpdateID + revisão validados por regex). Ver docs/modules/driverupdates.md.",
+  "actions": [
+    {
+      "id": "driverupdates.install",
+      "version": 1,
+      "title": "Instalar atualização de driver do Windows Update (com backup do driver atual)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "DriverUpdateInstall",
+      "target": { "updateId": "{updateId}", "revision": "{updateRevision}" },
+      "userParameters": {
+        "updateId": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+        "updateRevision": "[0-9]{1,6}"
+      },
+      "desiredType": "DriverUpdate",
+      "desiredValue": "instalada",
+      "compatibility": { "minBuild": 17763 },
+      "mechanism": "Baixa e instala, pelo próprio Windows Update (API oficial do Windows Update Agent: UpdateDownloader e UpdateInstaller), uma atualização de driver que o Windows oferece para este PC — a mesma que aparece em Configurações > Windows Update (inclusive em 'Atualizações opcionais'). Antes, o NEXUS busca de novo e confere que o ID é de um driver e ainda está disponível, e exporta o driver atual do dispositivo ('pnputil /export-driver') para a pasta de dados do aplicador. Corrige falhas e compatibilidade; em geral não muda o desempenho (exceção: drivers de vídeo para jogos novos).",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/wua_sdk/searching--downloading--and-installing-updates" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/wuapi/nn-wuapi-iwindowsdriverupdate" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-hardware/drivers/devtest/pnputil-command-syntax" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/newdev/nf-newdev-updatedriverforplugandplaydevicesw" }
+      ],
+      "risks": "Baixo a moderado: um driver novo pode trazer um defeito que o antigo não tinha (principalmente vídeo, áudio e rede). O NEXUS cria um ponto de restauração antes e guarda o driver atual para Desfazer. Quando o dispositivo estava sem driver, não há driver anterior para voltar (a confirmação avisa). Alguns drivers só valem depois de reiniciar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura da versão do driver do dispositivo (SetupAPI / chave do driver): precisa ser a versão oferecida, ou o Windows Update ter pedido um reinício que ainda não aconteceu.",
+      "revert": "Reinstala o driver anterior a partir do backup ('pnputil /add-driver' e instalação forçada no mesmo ID de hardware, a API do 'Atualizar driver' do Gerenciador de Dispositivos) ou do INF do próprio Windows. Sem backup possível, o Desfazer diz isso e indica a Restauração do Sistema."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "driverupdates.third-party-booster",
+      "classification": "Rejected",
+      "reason": "Baixar drivers de sites agregadores ('driver booster', 'driver updater') não tem garantia de origem nem de compatibilidade e é vetor conhecido de malware. O NEXUS só usa o Windows Update e as páginas oficiais dos fabricantes.",
+      "source": "https://learn.microsoft.com/windows-hardware/drivers/install/driver-signing"
+    },
+    {
+      "id": "driverupdates.auto-gpu-download",
+      "classification": "Rejected",
+      "reason": "Baixar e instalar sozinho o driver de vídeo do site do fabricante: o NEXUS só abre a página oficial (ou o app oficial já instalado). O usuário escolhe a versão.",
+      "source": "https://www.nvidia.com/pt-br/drivers/"
+    }
+  ]
+}

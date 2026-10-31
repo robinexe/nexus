@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "nexus.core": {
+        "type": "Project"
+      },
+      "nexus.hardwarediscovery": {
+        "type": "Project"
+      },
+      "nexus.lab.gpu": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[0.9.0, )",
+          "Nexus.HardwareDiscovery": "[0.9.0, )",
+          "Nexus.WindowsActions": "[0.9.0, )"
+        }
+      },
+      "nexus.systemtools": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[0.9.0, )",
+          "Nexus.WindowsActions": "[0.9.0, )"
+        }
+      },
+      "nexus.windowsactions": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[0.9.0, )"
+        }
+      }
+    }
+  }
+}

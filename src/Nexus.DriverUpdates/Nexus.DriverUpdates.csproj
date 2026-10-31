@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Atualização de drivers pelo Windows Update (API oficial do Windows Update Agent). net10.0: a lógica (mapeamento,
+       cruzamento com o inventário, regras de reversão, handler) roda nos testes em qualquer SO; o que toca o Windows usa
+       [SupportedOSPlatform("windows")]. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.DriverUpdates</RootNamespace>
+    <!-- LibraryImport (setupapi, newdev) gera código com ponteiros. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
+    <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <ProjectReference Include="..\Nexus.SystemTools\Nexus.SystemTools.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
+  </ItemGroup>
+</Project>

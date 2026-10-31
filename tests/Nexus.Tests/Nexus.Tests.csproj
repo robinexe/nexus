@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\src\Nexus.Security.Scanner\Nexus.Security.Scanner.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Monitoring\Nexus.Monitoring.csproj" />
     <ProjectReference Include="..\..\src\Nexus.SystemTools\Nexus.SystemTools.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.DriverUpdates\Nexus.DriverUpdates.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Automation\Nexus.Automation.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Persistence\Nexus.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
