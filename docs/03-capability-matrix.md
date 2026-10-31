@@ -18,7 +18,7 @@ arquivos temporários e processos auxiliares. Nenhum teste toca registro, energi
 | Diário SQLite (WAL, FULL, esquema 2, `Restoring`, leitura somente leitura, thread-safe) | implementado, não validado | Testado em Linux | |
 | **Coordenação entre executores** (trava do SO, dono verificado por PID + início) | **implementado e validado** | 9 testes com processos reais aprovados no Windows e no Linux | Falta: ACL de `%ProgramData%\NEXUS` no instalador (R1) e cenário com usuários diferentes |
 | Recuperação (A1–A7, R2–R7) | implementado, não validado | Testado em Linux e Windows (testes unitários); mutações detectadas | Decisões tomadas em 31/10 (`07-recovery-cases.md`) |
-| `nexus-recover accept <entryId>` (R3) | implementado, não validado no Windows | Linux: 149/149; processos reais no teste do CLI | Só escreve no diário |
+| `nexus-recover accept <entryId>` (R3) | implementado e testado | Linux e Windows: 149/149; processos reais no teste do CLI | Só escreve no diário |
 | `nexus-recover recover/revert` contra o sistema real | implementado, não validado | Nunca executado contra registro/energia/serviços reais | Só em VM Windows isolada |
 | **Descoberta somente leitura**: Windows, CPU/topologia, GPU/driver, memória/SMBIOS, placa/BIOS, discos, rede, energia, recursos de jogo, serviços, inicialização | implementado, não validado | Executada no Windows sem falhas (0 indisponíveis); valores coerentes com o hardware | Falta a conferência dos valores pelo usuário; correção da rede ainda não rodou no Windows |
 | Diagnóstico somente leitura | implementado, não validado | Regras testadas; "indisponível" quando nada foi lido | |

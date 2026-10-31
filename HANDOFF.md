@@ -139,8 +139,8 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
 ## 7. Pendências, em ordem
 
 1. ~~Validar a Etapa 3 no Windows~~ (feito em 31/10: 143/143). Rodar de novo `tools\etapa1-windows.ps1` com o
-   `accept` (agora 149 testes). Conferir na interface os valores
-   lidos contra o Gerenciador de Tarefas e o Painel de Controle e corrigir o que divergir.
+   `accept`: feito (149/149 no Windows). Valores da descoberta conferidos contra o próprio Windows: tudo igual, exceto
+   o modelo do disco (truncado) e SSD/HDD, que são limitações conhecidas (`docs/06-build-log.md`).
 2. ~~Decisões em aberto~~ (decididas em 31/10; ver `docs/07-recovery-cases.md`).
 3. **Rodar os testes de integração no Windows Sandbox** (`tools/vm`) e corrigir o que falhar. Exige ativar o recurso
    Windows Sandbox (decisão do usuário; administrador e reinício).

@@ -209,9 +209,36 @@ Teste de esquema ajustado por mudança de especificação (esquema 3): agora com
 exige que seja 3, migra v1 e v2 e recusa `SchemaVersion + 1`. Mutações: 3 de 3 detectadas; a quarta (CLI sem trava)
 não compila.
 
+## `accept` — Windows (MATHEUSANJOS), 2026-10-31 02:43 — log `nexus-validacao-20261031-024345.log`
+
+Mesmo script, não elevado: restore/build 0 (**0 avisos**); **149/149**; `CoordinationTests` **11/11** (inclui o
+teste do CLI `accept` com processos reais); descoberta 0 indisponíveis; CLI 0/1/0/3; SHA igual.
+
+## Conferência da descoberta contra o próprio Windows — 2026-10-31 02:46
+
+A interface não pôde ser vista pelo controle de tela (não é app instalado). Como ela mostra a mesma descoberta do
+`Nexus.Discover`, a comparação foi feita entre esse relatório e uma coleta **somente leitura** do Windows
+(`Get-CimInstance`, `Get-PhysicalDisk`, `Get-Volume`, `powercfg /getactivescheme`, `Get-NetAdapter`, `Get-Service`).
+
+| Item | NEXUS | Windows | Resultado |
+|---|---|---|---|
+| Windows | 11 Home Single Language, 25H2, 26200.9711 | idem (UBR 9711) | igual |
+| CPU | Ryzen 5 5600H, 6 núcleos / 12 lógicos, L3 16 MB, 3294 MHz | idem, `MaxClockSpeed` 3301 MHz | igual (frequência: fontes diferentes, ambas ~3,3 GHz) |
+| GPUs e drivers | Radeon 27.20.14032.15001 (25/08/2021, 512 MB); GTX 1650 30.0.15.1274 (03/05/2022, 4 GB) | idem (datas WMI em horário local, 21:00 do dia anterior) | igual |
+| Memória | 7,4 GB utilizáveis; 1 × 8 GB DDR4 3200/3200, SMS4WEC8C1K0446FCG | 7 897 944 064 B; idem | igual |
+| Placa/BIOS | Acer Nitro AN515-45, CZ Scala_CAS, Insyde V1.14 (24/06/2026) | idem | igual |
+| Máquina virtual | Não (inferido) | `HypervisorPresent=True` (hipervisor do próprio Windows) | correto: PC físico; o portão continua fechado |
+| Disco | IM2P33F8ABR2-512, NVMe (inferido); SSD/HDD indisponível | IM2P33F8ABR2-512GB, SSD, NVMe | **diverge:** o modelo vem truncado em 16 caracteres pelo registro; tipo de mídia é limitação conhecida |
+| Volume C: | 475,7 GB, 196,6 GB livres | 510 745 636 864 B, 211 141 165 056 B livres | igual |
+| Rede | Wi-Fi MediaTek MT7921, 1,2 Gb/s | idem | igual |
+| Energia | Acer, 8d5d9f56-… | idem | igual |
+| SysMain | Em execução, Automático | idem | igual |
+
+Nenhuma correção de código: a única divergência (modelo do disco truncado e tipo de mídia) depende de IOCTL/WMI, já
+listada nas limitações.
+
 ## Pendente no Windows (esta versão)
 
 1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).
-2. Abrir `src\Nexus.Desktop\bin\Release\net10.0-windows\Nexus.Desktop.exe` e conferir se hardware, diagnóstico,
-   catálogo e simulação mostram os valores reais deste PC.
+2. ~~Conferir os valores~~ — feito pela descoberta (acima). Falta só olhar a interface em si (abre com `Abrir NEXUS.cmd`).
 3. Testes de aplicação e rollback reais: `tools\vm\README.md` (Windows Sandbox).
