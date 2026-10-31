@@ -13,6 +13,7 @@ Versões centralizadas em `Directory.Packages.props`; resolução travada pelos 
 | Microsoft.Data.Sqlite | 10.0.14 | MIT (`requireLicenseAcceptance=true` no NuGet) | PackageReference em `Nexus.Persistence` (e transitivamente no CLI e nos testes) | Sim: DLLs gerenciadas no output do app | Incluir aviso de copyright e texto da licença MIT na distribuição |
 | Microsoft.NET.Test.Sdk | 17.14.1 | MIT | Só no projeto de testes | Não | Nenhuma para a distribuição |
 | xunit | 2.9.3 | Apache-2.0 | Só no projeto de testes | Não | Nenhuma para a distribuição |
+| System.ServiceProcess.ServiceController | 10.0.14 | MIT (Microsoft, dotnet/runtime) | PackageReference em `Nexus.Broker.Host` (serviço do Windows); traz `System.Diagnostics.EventLog` 10.0.14 (MIT) | Sim: DLLs no output do broker | Incluir aviso de copyright e texto da licença MIT na distribuição. Adicionado em 31/10/2026, avisado ao responsável na conversa |
 | xunit.runner.visualstudio | 3.1.4 | Apache-2.0 | Só no projeto de testes | Não | Nenhuma para a distribuição |
 
 ## Transitivas relevantes para a distribuição

@@ -65,16 +65,18 @@ if (-not (Test-Path $lock)) { [System.IO.File]::WriteAllBytes($lock, [byte[]]@()
 if ($LASTEXITCODE -ne 0) { throw "icacls falhou em $lock ($LASTEXITCODE)" }
 Write-Host "Trava: $lock (só SYSTEM/Administradores)"
 
-# 4. Serviço
+# 4. Serviço. New-Service recebe o caminho como parâmetro: sc.exe pelo PowerShell 5.1 quebra as aspas do binPath (erro 1639).
 $binPath = "`"$(Join-Path $dest 'nexus-broker.exe')`" --service --allow-sid $AllowSid"
 if ($existing) {
-    & sc.exe config $ServiceName binPath= $binPath start= demand obj= LocalSystem | Out-Null
-} else {
-    & sc.exe create $ServiceName binPath= $binPath start= demand obj= LocalSystem DisplayName= 'NEXUS Broker' | Out-Null
+    & sc.exe delete $ServiceName | Out-Null
+    for ($i = 0; $i -lt 50 -and (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 200 }
 }
-if ($LASTEXITCODE -ne 0) { throw "sc.exe falhou ($LASTEXITCODE)" }
-& sc.exe description $ServiceName 'NEXUS Performance Lab: executa ações do catálogo com diário e reversão. Escrita real só em VM de teste liberada.' | Out-Null
-Write-Host "Serviço $ServiceName registrado (LocalSystem, início manual). Cliente autorizado: $AllowSid"
+New-Service -Name $ServiceName -BinaryPathName $binPath -DisplayName 'NEXUS Broker' -StartupType Manual `
+    -Description 'NEXUS Performance Lab: executa ações do catálogo com diário e reversão. Escrita real só em VM de teste liberada.' | Out-Null
+$registered = (Get-CimInstance Win32_Service -Filter "Name='$ServiceName'")
+if (-not $registered -or $registered.StartName -ne 'LocalSystem') { throw "Serviço não registrado como LocalSystem." }
+Write-Host "Serviço $ServiceName registrado (LocalSystem, início manual): $($registered.PathName)"
+Write-Host "Cliente autorizado: $AllowSid"
 
 if ($Start) {
     Start-Service -Name $ServiceName
