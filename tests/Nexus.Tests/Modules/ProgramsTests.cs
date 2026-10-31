@@ -512,6 +512,59 @@ public class ProgramLeftoverHandlerTests
     }
 
     [Fact]
+    public void Restauracao_nao_passa_por_pasta_mae_trocada_por_link()
+    {
+        // Revisão de segurança: a conferência de links só rodava se o alvo existisse. Na restauração ele não existe, então uma
+        // pasta-mãe trocada por junção (AppData\Roaming\Zedsoft -> pasta protegida) recebia o conteúdo, gravado pelo aplicador
+        // (talvez SYSTEM), fora das raízes.
+        if (OperatingSystem.IsWindows()) return;
+        using var t = new TempTree();
+        var target = Path.Combine(t.Roaming, "Zedsoft", "Zed Paint");
+        TempTree.File(Path.Combine(target, "evil.dll"), "payload");
+        var h = Handler(t, new InMemoryRegistryTreeBackend());
+        var a = Action("file", "HKCU", target);
+        var before = h.Detect(a);
+        h.Apply(a);
+        Assert.False(Directory.Exists(target));
+
+        var protectedDir = TempTree.Dir(t.Root, "protegida");
+        Directory.Delete(Path.Combine(t.Roaming, "Zedsoft"), recursive: true);
+        Directory.CreateSymbolicLink(Path.Combine(t.Roaming, "Zedsoft"), protectedDir);
+
+        Assert.NotNull(h.CheckRestore(a, before));
+        Assert.Throws<InvalidOperationException>(() => h.Restore(a, before));
+        Assert.Empty(Directory.EnumerateFileSystemEntries(protectedDir));
+        Assert.True(h.Quarantine.PayloadExists(new LeftoverTarget(false, false, target, null))); // continua guardado
+    }
+
+    [Fact]
+    public void Aplicacao_reconfere_links_logo_antes_de_mover()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        using var t = new TempTree();
+        var target = Path.Combine(t.Roaming, "Zedsoft", "Zed Paint");
+        TempTree.File(Path.Combine(target, "a.ini"), "x");
+        var outside = TempTree.Dir(t.Root, "fora", "Zed Paint");
+        TempTree.File(Path.Combine(outside, "precioso.txt"), "não mexer");
+        var swapped = false;
+        // Troca a pasta-mãe por link depois do inventário, logo antes do movimento (2ª consulta aos programas instalados).
+        var calls = 0;
+        var h = new ProgramLeftoverHandler(new InMemoryRegistryTreeBackend(), new Roots(t), _ =>
+        {
+            if (++calls == 2 && !swapped)
+            {
+                swapped = true;
+                Directory.Delete(Path.Combine(t.Roaming, "Zedsoft"), recursive: true);
+                Directory.CreateSymbolicLink(Path.Combine(t.Roaming, "Zedsoft"), Path.GetDirectoryName(outside)!);
+            }
+            return [];
+        }, t.Data, true, false);
+        Assert.ThrowsAny<Exception>(() => h.Apply(Action("file", "HKCU", target)));
+        Assert.True(swapped);
+        Assert.Equal("não mexer", File.ReadAllText(Path.Combine(outside, "precioso.txt")));
+    }
+
+    [Fact]
     public void Quarentena_adulterada_e_recusada_na_restauracao()
     {
         using var t = new TempTree();

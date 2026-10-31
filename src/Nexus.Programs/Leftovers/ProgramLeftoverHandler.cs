@@ -98,7 +98,9 @@ public sealed class ProgramLeftoverHandler : IActionHandler, IRestoreValidator
         if (roots is null || roots.Count == 0) return "Pastas do perfil do usuário indeterminadas.";
         if (LeftoverPolicy.Overlaps(t.Path, _dataDirectory)) return "A pasta de dados do NEXUS nunca é alvo.";
         if (LeftoverPolicy.CheckFolder(t.Path, roots, installed) is { } problem) return problem;
-        if ((File.Exists(t.Path) || Directory.Exists(t.Path)) && LeftoverScanner.IsLinkOrUnderLink(t.Path, roots))
+        // Também quando o alvo não existe (restauração): uma pasta-mãe trocada por junção desviaria a devolução, feita talvez
+        // como administrador/SYSTEM, para fora das raízes (ex.: AppData\Local\Acme -> C:\Windows\System32).
+        if (LeftoverScanner.IsLinkOrUnderLink(t.Path, roots))
             return "O alvo é (ou está dentro de) um link/junção: o NEXUS nunca segue links.";
         return null;
     }
@@ -143,7 +145,8 @@ public sealed class ProgramLeftoverHandler : IActionHandler, IRestoreValidator
     {
         try
         {
-            _quarantine.QuarantinePath(t);
+            // A conferência de links é refeita depois do inventário (que pode demorar) e logo antes de mover.
+            _quarantine.QuarantinePath(t, beforeMove: () => { if (Validate(t) is { } late) throw new InvalidOperationException(late + " Nada foi movido."); });
         }
         catch when (File.Exists(t.Path) || Directory.Exists(t.Path))
         {
@@ -183,7 +186,9 @@ public sealed class ProgramLeftoverHandler : IActionHandler, IRestoreValidator
         }
         else
         {
-            _quarantine.RestorePath(t, m);
+            // Revalida (raízes, programas instalados, links na cadeia de pastas) imediatamente antes de devolver.
+            if (Validate(t) is { } problem) throw new InvalidOperationException(problem + " Nada foi devolvido.");
+            _quarantine.RestorePath(t, m, beforeMove: () => { if (Validate(t) is { } late) throw new InvalidOperationException(late + " Nada foi devolvido."); });
         }
     }
 

@@ -179,8 +179,15 @@ public static class LeftoverScanner
         ArgumentNullException.ThrowIfNull(roots);
         var root = roots.Select(LeftoverPolicy.TrimSep).FirstOrDefault(r => LeftoverPolicy.IsStrictlyUnder(path, r));
         if (root is null) return true;
-        for (var p = path; p is not null && p.Length > root.Length; p = Path.GetDirectoryName(p))
-            if ((File.Exists(p) || Directory.Exists(p)) && IsReparse(p)) return true;
+        // Inclui a própria raiz e links quebrados (que File/Directory.Exists não enxergam); partes que não existem são ignoradas.
+        for (var p = path; p is not null && p.Length >= root.Length; p = Path.GetDirectoryName(p))
+        {
+            FileAttributes attributes;
+            try { attributes = File.GetAttributes(p); }
+            catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) { continue; }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return true; }
+            if ((attributes & FileAttributes.ReparsePoint) != 0) return true;
+        }
         return false;
     }
 

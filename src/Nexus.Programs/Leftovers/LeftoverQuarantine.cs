@@ -144,7 +144,8 @@ public sealed class LeftoverQuarantine
     }
 
     /// <summary>Move a pasta/arquivo para a quarentena. Manifesto (pendente) primeiro; "done" no fim.</summary>
-    public void QuarantinePath(LeftoverTarget t)
+    /// <param name="beforeMove">Conferência final chamada imediatamente antes de mover (lança para recusar).</param>
+    public void QuarantinePath(LeftoverTarget t, Action? beforeMove = null)
     {
         ArgumentNullException.ThrowIfNull(t);
         var payload = PayloadPath(t);
@@ -159,6 +160,7 @@ public sealed class LeftoverQuarantine
         var manifest = new LeftoverManifest(LeftoverManifest.CurrentFormat, t.Kind, t.Scope, t.UserSid, t.Path, DateTimeOffset.UtcNow, isDir,
             files.Sum(f => f.Size), files, null, "pending");
         WriteManifest(t, manifest);
+        beforeMove?.Invoke();
         MovePath(t.Path, payload, isDir, files);
         WriteManifest(t, manifest with { State = "done" });
     }
@@ -183,12 +185,14 @@ public sealed class LeftoverQuarantine
     }
 
     /// <summary>Devolve ao caminho original; se algo novo ocupa o lugar, restaura ao lado com sufixo (nunca sobrescreve).</summary>
-    public string RestorePath(LeftoverTarget t, LeftoverManifest m)
+    /// <param name="beforeMove">Conferência final chamada depois de recriar a pasta-mãe e imediatamente antes de mover.</param>
+    public string RestorePath(LeftoverTarget t, LeftoverManifest m, Action? beforeMove = null)
     {
         ArgumentNullException.ThrowIfNull(m);
         var dest = AvailableName(t.Path);
         var parent = Path.GetDirectoryName(dest);
         if (parent is not null) Directory.CreateDirectory(parent);
+        beforeMove?.Invoke();
         MovePath(PayloadPath(t), dest, m.IsDirectory, m.Files ?? []);
         Discard(t);
         return dest;
