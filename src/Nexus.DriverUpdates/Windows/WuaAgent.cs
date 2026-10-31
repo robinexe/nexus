@@ -149,6 +149,8 @@ public sealed class WuaAgent : IWindowsUpdateAgent
             TrySet(session, "ClientApplicationID", ClientId);
             var searcher = Com.Call(session, "CreateUpdateSearcher") ?? throw new InvalidOperationException("Sem buscador do Windows Update.");
             var result = Com.Call(searcher, "Search", WindowsUpdateQueries.DriverSearch) ?? throw new InvalidOperationException("Busca sem resultado.");
+            var code = Com.Int(result, "ResultCode");
+            if (code is 4 or 5) return WuSearchOutcome.Fail(WuErrorKind.Other, $"O Windows Update não concluiu a busca (resultado {code}). Tente de novo em alguns minutos.");
             var list = new List<WuDriverUpdate>();
             foreach (var u in Com.Items(Com.Get(result, "Updates")))
             {
