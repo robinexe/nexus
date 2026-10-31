@@ -115,7 +115,8 @@ public sealed class CleaningIntegrationTests : IDisposable
 
         var purge = broker.Handle(Exec("cleaning.quarantine.purge@1", purgeArgs, confirm: true));
         Assert.True(purge.Ok, purge.Error?.Detail);
-        Assert.Equal("Verified", Assert.Single(purge.Results!).Outcome);
+        var purged = Assert.Single(purge.Results!);
+        Assert.True(purged.Outcome == "Verified", $"{purged.Outcome}: {purged.Detail}");
         Assert.Equal((0L, 0L), QuarantineStore.MeasureOnDisk(_dir, batch));
         Assert.True(File.Exists(precious));
         Assert.False(Directory.Exists(junction));

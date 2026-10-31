@@ -133,7 +133,7 @@ public static class AdminOnlyDirectory
                 try
                 {
                     // Criado já com a ACL final (CreateNew: se alguém criou no meio tempo, cai na conferência abaixo).
-                    using var _ = file.Create(FileMode.CreateNew, FileSystemRights.Read | FileSystemRights.Synchronize, FileShare.ReadWrite, 4096, FileOptions.None, LockSecurity());
+                    using var _ = file.Create(FileMode.CreateNew, FileSystemRights.Read | FileSystemRights.Write | FileSystemRights.Synchronize, // CreateNew exige direito de escrita FileShare.ReadWrite, 4096, FileOptions.None, LockSecurity());
                 }
                 catch (IOException) when (File.Exists(file.FullName)) { }
                 file.Refresh();
