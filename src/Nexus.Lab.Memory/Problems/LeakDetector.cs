@@ -156,6 +156,6 @@ public static class LeakDetector
 
     private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
 
-    internal static string Minutes(TimeSpan t) =>
+    public static string Minutes(TimeSpan t) =>
         t.TotalMinutes >= 90 ? string.Create(Pt, $"{t.TotalHours:0.#} h") : string.Create(Pt, $"{Math.Round(t.TotalMinutes):0} min");
 }

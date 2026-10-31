@@ -513,10 +513,10 @@ public static class MemoryDoctorEngine
         };
     }
 
-    internal sealed record TagGrowth(string Tag, double Growth, string? Owner, string Text);
+    public sealed record TagGrowth(string Tag, double Growth, string? Owner, string Text);
 
     /// <summary>Tags do pool com tendência de alta (detector), com dono pela tabela, pooltag.txt local ou busca nos drivers.</summary>
-    internal static IEnumerable<TagGrowth> GrowingTags(MemoryHistory history, DoctorContext context)
+    public static IEnumerable<TagGrowth> GrowingTags(MemoryHistory history, DoctorContext context)
     {
         var latest = history.Latest?.PoolTags;
         if (latest is null) yield break;
