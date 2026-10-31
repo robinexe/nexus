@@ -53,7 +53,7 @@
                      SecondaryText="Ver o diagnóstico" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="DiagnosticsPage">
           <StackPanel Width="164">
             <c:RingMeter Value="{Binding HealthScore}" WarnAt="80" BadAt="50" Label="em ordem" Width="136" Height="136" Thickness="11"
-                         HorizontalAlignment="Center" AutomationProperties.Name="Verificações do diagnóstico em ordem"/>
+                         HorizontalAlignment="Center"/>
             <TextBlock Text="{Binding HealthCaption}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"
                        TextAlignment="Center" HorizontalAlignment="Center" Margin="0,10,0,0"/>
           </StackPanel>

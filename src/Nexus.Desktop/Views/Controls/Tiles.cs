@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -69,9 +70,23 @@ public class StatTile : Button
         Cursor = interactive ? Cursors.Hand : Cursors.Arrow;
     }
 
+    internal string Describe() =>
+        $"{Label}: {(ShowsNumber ? DesignMath.Format(Number, Kind, Decimals) + Suffix : Value)}. {Detail}".TrimEnd(' ', '.');
+
+    /// <summary>Clicável: par de botão (Invoke funciona com leitor de tela) com o nome descritivo; só leitura: texto.</summary>
     protected override AutomationPeer OnCreateAutomationPeer() =>
-        new DescribedPeer(this, Command is null ? AutomationControlType.Text : AutomationControlType.Button, nameof(StatTile),
-            () => $"{Label}: {(ShowsNumber ? DesignMath.Format(Number, Kind, Decimals) + Suffix : Value)}. {Detail}".TrimEnd(' ', '.'));
+        Command is null ? new DescribedPeer(this, AutomationControlType.Text, nameof(StatTile), Describe) : new TilePeer(this);
+
+    private sealed class TilePeer(StatTile owner) : ButtonAutomationPeer(owner)
+    {
+        protected override string GetNameCore()
+        {
+            var given = AutomationProperties.GetName(owner);
+            return string.IsNullOrEmpty(given) ? owner.Describe() : given;
+        }
+
+        protected override string GetClassNameCore() => nameof(StatTile);
+    }
 }
 
 /// <summary>

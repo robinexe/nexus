@@ -5,7 +5,7 @@
   parte medida/ativa, verde (#5EE6A0) = ok, vermelho (#FF6B7A) = problema. Cores literais de propósito: o dicionário não
   depende da ordem de carga. Uso: <Image Source="{StaticResource Illo.Cpu}" Width="160"/>, ou nas propriedades
   Illustration de HeroPanel/StatTile/EmptyState. Catálogo e mapa por módulo: docs/10-design-system.md.
-  Gerado por um script (lista de traços por ilustração); para uma nova, copie um bloco e siga a mesma paleta e grade.
+  Gerado por generate.py (mesma pasta): edite a lista de traços lá e rode de novo; não edite este arquivo à mão.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

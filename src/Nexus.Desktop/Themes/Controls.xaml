@@ -12,6 +12,21 @@
   ListBoxItem, ListView, ListViewItem (com ou sem GridView), GridViewColumnHeader, ScrollBar, ToolTip, Expander, ProgressBar.
   Chaves antigas mantidas por compatibilidade: H1, Sub, Small, Card.
 
+  Design system v2 (docs/10-design-system.md — leia antes de redesenhar uma página):
+    Ícones ..... Themes/Icons.xaml: Geometry "Icon.*" em grade 24 (Icon.Cpu, Icon.Gpu, Icon.Ram, Icon.Disk, Icon.Clean, Icon.Programs,
+                 Icon.Startup, Icon.Services, Icon.Privacy, Icon.Security, Icon.Scan, Icon.Network, Icon.Drivers, Icon.Measure,
+                 Icon.Monitor, Icon.Auto, Icon.Assistant, Icon.MemoryDoctor, Icon.Settings, Icon.Check, Icon.Warning, Icon.Error,
+                 Icon.Info, Icon.Undo, Icon.Refresh, Icon.Export, Icon.Lock, Icon.Trash, Icon.Quarantine…). Desenhe com c:Icon.
+    Ilustrações  Assets/Illustrations/*.xaml: DrawingImage "Illo.*" 160×120 (Illo.Pc, Illo.Cpu, Illo.Gpu, Illo.Ram, Illo.Disk,
+                 Illo.Cleaning, Illo.Programs, Illo.Startup, Illo.Services, Illo.Privacy, Illo.Security, Illo.Scanner, Illo.Network,
+                 Illo.Drivers, Illo.Measure, Illo.Monitor, Illo.Automation, Illo.Assistant, Illo.MemoryDoctor, Illo.Settings,
+                 Illo.Diagnostics, Illo.History).
+    Componentes  Themes/Components.xaml + Views/Controls (xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"): c:HeroPanel,
+                 c:AnimatedNumber, c:RingMeter, c:BeforeAfter, c:HowItWorks + c:StepItem (modelo StepCard), c:StatTile,
+                 c:ExplainToggle, c:StatusChip, c:EmptyState, c:SkeletonLoader, c:Sparkline, c:Icon.
+    Estilos .... Tab.Underline (abas), Explain.Toggle. Conversores: ResourceByKey, ToneBrush, PageIcon, InvertBool.
+    Casca ...... Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="NomeDoTipoDaPagina" abre qualquer página.
+
   Movimento: hover/clique com fade curto (ShellMotion.Fast, que vira zero quando o Windows desliga animações). Nada em loop,
   exceto o indicador de ocupado enquanto algo está de fato carregando (e parado quando as animações estão desligadas).
 -->

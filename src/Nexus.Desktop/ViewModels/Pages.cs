@@ -461,7 +461,7 @@ public sealed class OverviewPage : PageViewModel
     /// <summary>Nome do PC (fabricante e modelo), ou "Seu PC".</summary>
     public string HeroTitle => Cards.FirstOrDefault(c => c.Title == "Sistema") is { Status: not FactStatus.Unavailable } s ? s.Value : "Seu PC";
     public string HeroCaption => Cards.FirstOrDefault(c => c.Title == "Windows") is { Status: not FactStatus.Unavailable } w
-        ? $"Windows {w.Value}. Ler não muda nada."
+        ? (w.Value.StartsWith("Windows", StringComparison.OrdinalIgnoreCase) ? w.Value : "Windows " + w.Value) + ". Ler não muda nada."
         : "Tudo o que o NEXUS leu do seu PC. Ler não muda nada.";
 
     public static IReadOnlyList<OverviewCard> Build(SystemSnapshot s, IReadOnlyList<DiagnosticFinding> findings)
@@ -522,12 +522,12 @@ public sealed class OverviewPage : PageViewModel
         return string.Join(" · ", new[] { m.Type, speed is null ? null : $"{speed} MT/s" }.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
-    /// <summary>"1 de 2 slots" quando a leitura mostra slots vazios; senão "1 pente: canal único" / "2 pentes".</summary>
+    /// <summary>"1 de 2 slots" quando a leitura mostra slots vazios; senão "canal único" (1 pente) / "2 pentes".</summary>
     internal static string MemoryTrend(int slotsListed, int modules) => modules switch
     {
         0 => "",
         _ when slotsListed > modules => $"{modules} de {slotsListed} slots",
-        1 => "1 pente: canal único",
+        1 => "canal único",
         _ => $"{modules} pentes",
     };
 
