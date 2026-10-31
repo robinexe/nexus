@@ -14,6 +14,7 @@ internal static class ModuleHandlers
         .. Nexus.Boot.BootHandlers.Create(environment),
         .. Nexus.Privacy.PrivacyHandlers.Create(environment),
         .. Nexus.Security.SecurityHandlers.Create(environment),
+        .. Nexus.Security.Scanner.ScannerHandlers.Create(environment),
         .. Nexus.Monitoring.MonitoringHandlers.Create(environment),
         .. Nexus.SystemTools.SystemToolsHandlers.Create(environment),
         .. Nexus.Automation.AutomationHandlers.Create(environment),

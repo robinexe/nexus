@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Verificador de arquivos (assinaturas por hash + regras de padrão + heurística de PE). net10.0: a lógica roda nos testes
+       em qualquer SO; o que toca o Windows usa [SupportedOSPlatform("windows")]. Somente leitura, exceto o handler de
+       quarentena, que só roda dentro do aplicador (broker). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.Security.Scanner</RootNamespace>
+    <!-- LibraryImport (SHObjectProperties) gera código com ponteiros. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
+    <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <ProjectReference Include="..\Nexus.Security\Nexus.Security.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Rules\*.json" LogicalName="Nexus.Security.Scanner.Rules.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Hashes\*.txt" LogicalName="Nexus.Security.Scanner.Hashes.%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

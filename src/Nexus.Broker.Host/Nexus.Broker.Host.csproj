@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Nexus.Boot\Nexus.Boot.csproj" />
     <ProjectReference Include="..\Nexus.Privacy\Nexus.Privacy.csproj" />
     <ProjectReference Include="..\Nexus.Security\Nexus.Security.csproj" />
+    <ProjectReference Include="..\Nexus.Security.Scanner\Nexus.Security.Scanner.csproj" />
     <ProjectReference Include="..\Nexus.Monitoring\Nexus.Monitoring.csproj" />
     <ProjectReference Include="..\Nexus.SystemTools\Nexus.SystemTools.csproj" />
     <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />

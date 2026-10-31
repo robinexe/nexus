@@ -51,6 +51,7 @@ public sealed class NexusServices
         [
             Nexus.Cleaning.CleaningHandlers.Create, Nexus.DiskTools.DiskToolsHandlers.Create, Nexus.Programs.ProgramsHandlers.Create,
             Nexus.Boot.BootHandlers.Create, Nexus.Privacy.PrivacyHandlers.Create, Nexus.Security.SecurityHandlers.Create,
+            Nexus.Security.Scanner.ScannerHandlers.Create,
             Nexus.Monitoring.MonitoringHandlers.Create, Nexus.SystemTools.SystemToolsHandlers.Create, Nexus.Automation.AutomationHandlers.Create,
             Nexus.Lab.Cpu.CpuLabHandlers.Create, Nexus.Lab.Gpu.GpuLabHandlers.Create, Nexus.Lab.Memory.MemoryLabHandlers.Create,
         ];

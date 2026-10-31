@@ -1,0 +1,220 @@
+<!--
+  Verificar arquivos: modos (rápida, completa, pasta/arquivo, ao vivo em Downloads), progresso (arquivos/s, arquivo atual),
+  resultados agrupados por gravidade com o porquê de cada sinal e ações (Defender, Explorer, propriedades, ignorar,
+  quarentena reversível). Recursos locais em DataTemplate.Resources; do tema, só as chaves do contrato
+  (Tokens.xaml / Controls.xaml / Converters.xaml).
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels">
+  <DataTemplate DataType="{x:Type vm:ScannerPage}">
+    <DataTemplate.Resources>
+      <!-- Cor por tom: Bad vermelho, Warn âmbar, Info ciano, Unknown cinza. -->
+      <Style x:Key="Sc.ToneText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding ToneKey}" Value="Warn"><Setter Property="Foreground" Value="{StaticResource Brush.Trace}"/></DataTrigger>
+          <DataTrigger Binding="{Binding ToneKey}" Value="Bad"><Setter Property="Foreground" Value="{StaticResource Brush.Bad}"/></DataTrigger>
+          <DataTrigger Binding="{Binding ToneKey}" Value="Info"><Setter Property="Foreground" Value="{StaticResource Brush.Signal}"/></DataTrigger>
+        </Style.Triggers>
+      </Style>
+      <Style x:Key="Sc.ToneBar" TargetType="Border">
+        <Setter Property="Width" Value="3"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="Background" Value="{StaticResource Brush.LineSoft}"/>
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding ToneKey}" Value="Warn"><Setter Property="Background" Value="{StaticResource Brush.Trace}"/></DataTrigger>
+          <DataTrigger Binding="{Binding ToneKey}" Value="Bad"><Setter Property="Background" Value="{StaticResource Brush.Bad}"/></DataTrigger>
+          <DataTrigger Binding="{Binding ToneKey}" Value="Info"><Setter Property="Background" Value="{StaticResource Brush.Signal}"/></DataTrigger>
+        </Style.Triggers>
+      </Style>
+      <Style x:Key="Sc.Code" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+      </Style>
+      <Style x:Key="Sc.Action" TargetType="Button" BasedOn="{StaticResource Button.Ghost}">
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="Margin" Value="0,0,4,0"/>
+      </Style>
+    </DataTemplate.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="28,24,28,28" MaxWidth="1200" HorizontalAlignment="Stretch">
+
+        <!-- Cabeçalho -->
+        <StackPanel Margin="0,0,0,14">
+          <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
+          <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Aviso honesto -->
+        <Border Style="{StaticResource Panel.Notice}" Margin="0,0,0,18">
+          <TextBlock Style="{StaticResource Text.Body}" TextWrapping="Wrap"
+                     Text="O Microsoft Defender é sua proteção principal. Esta verificação procura sinais suspeitos (técnicas comuns de malware, disfarces no nome, executáveis empacotados) e pede a opinião dele. Suspeito não quer dizer malware: confira antes de isolar. Nada é apagado; isolar é desfazível."/>
+        </Border>
+
+        <!-- Herói: modos e progresso -->
+        <Border Style="{StaticResource Panel.Hero}" Margin="0,0,0,20">
+          <StackPanel>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <StackPanel Margin="0,0,20,0">
+                <TextBlock Text="Verificação local, só leitura" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.TextMuted}"/>
+                <TextBlock Text="{Binding DatabaseText}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
+                <TextBlock Style="{StaticResource Text.Small}" Margin="0,8,0,0"
+                           Text="Rápida: Downloads, Área de Trabalho, Temp, AppData, pastas Inicializar e programas que iniciam com o Windows. Completa: as unidades marcadas abaixo. Arquivos só na nuvem (OneDrive) e links não são lidos."/>
+                <ItemsControl ItemsSource="{Binding Drives}" Margin="0,10,0,0" Focusable="False">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <CheckBox Content="{Binding Root}" IsChecked="{Binding IsSelected}" Margin="0,0,16,4"/>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <CheckBox IsChecked="{Binding LiveWatch}" Margin="0,8,0,0"
+                          Content="Ao vivo: verificar arquivos novos em Downloads enquanto esta página estiver aberta"/>
+                <TextBlock Text="{Binding LiveText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,4,0,0"
+                           Visibility="{Binding LiveText, Converter={StaticResource NullToCollapsed}}"/>
+              </StackPanel>
+              <StackPanel Grid.Column="1" MinWidth="230">
+                <Button Content="Verificação rápida" Style="{StaticResource Button.Primary}" Command="{Binding QuickScanCommand}" Margin="0,0,0,8"/>
+                <Button Content="Verificação completa" Style="{StaticResource Button.Secondary}" Command="{Binding FullScanCommand}" Margin="0,0,0,8"/>
+                <Button Content="Verificar uma pasta…" Style="{StaticResource Button.Secondary}" Command="{Binding FolderScanCommand}" Margin="0,0,0,8"/>
+                <Button Content="Verificar arquivos…" Style="{StaticResource Button.Secondary}" Command="{Binding FileScanCommand}" Margin="0,0,0,8"/>
+                <Button Content="Importar lista de hashes…" Style="{StaticResource Button.Ghost}" Command="{Binding ImportHashesCommand}"/>
+                <Button Content="Importar regras…" Style="{StaticResource Button.Ghost}" Command="{Binding ImportRulesCommand}"/>
+              </StackPanel>
+            </Grid>
+
+            <!-- Progresso -->
+            <Border Style="{StaticResource Panel.Inset}" Margin="0,18,0,0" Visibility="{Binding ScanStatus, Converter={StaticResource NullToCollapsed}}">
+              <StackPanel>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="{Binding ScanStatus}" Style="{StaticResource Text.Body}" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="1" Text="{Binding ElapsedText}" Style="{StaticResource Text.Metric}" Foreground="{StaticResource Brush.Trace}" VerticalAlignment="Center" Margin="16,0"/>
+                  <Button Grid.Column="2" Content="Cancelar" Style="{StaticResource Button.Secondary}" Command="{Binding CancelCommand}"
+                          Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}"/>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                  <TextBlock Text="{Binding FilesText}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}"/>
+                  <TextBlock Text="{Binding RateText}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}" Margin="16,0,0,0"/>
+                </StackPanel>
+                <ProgressBar IsIndeterminate="True" Height="4" Margin="0,10,0,0" Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Text="{Binding CurrentFile}" Style="{StaticResource Sc.Code}" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                           Visibility="{Binding CurrentFile, Converter={StaticResource NullToCollapsed}}"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding Notes}" Focusable="False" Margin="0,0,0,8">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate><TextBlock Text="{Binding}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="0,0,0,4"/></DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Resultados -->
+        <Grid Margin="0,0,0,10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <TextBlock Text="Resultados" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="{Binding ResultSummary}" Style="{StaticResource Text.Small}" Margin="0,4,0,0"/>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+            <Button Content="Isolar selecionados" Style="{StaticResource Button.Secondary}" Command="{Binding QuarantineSelectedCommand}" Margin="0,0,8,0"/>
+            <Button Content="Desfazer" Style="{StaticResource Button.Secondary}" Command="{Binding UndoCommand}" Margin="0,0,8,0"
+                    Visibility="{Binding CanUndo, Converter={StaticResource BoolToVis}}"/>
+            <Button Content="Limpar lista" Style="{StaticResource Button.Ghost}" Command="{Binding ClearResultsCommand}"/>
+          </StackPanel>
+        </Grid>
+        <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,0,0,10"
+                   Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}"/>
+
+        <ItemsControl ItemsSource="{Binding Groups}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,0,0,18">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                  <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H2}"/>
+                  <TextBlock Text="{Binding Count}" Style="{StaticResource Sc.ToneText}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.H2}" Margin="10,0,0,0"/>
+                </StackPanel>
+                <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Margin="0,0,0,8"/>
+                <ItemsControl ItemsSource="{Binding Items}" Focusable="False">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,10" Padding="14,12">
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                          </Grid.ColumnDefinitions>
+                          <Border Style="{StaticResource Sc.ToneBar}" Margin="0,2,12,2"/>
+                          <CheckBox Grid.Column="1" IsChecked="{Binding IsSelected}" IsEnabled="{Binding CanQuarantine}" VerticalAlignment="Top" Margin="0,2,10,0"
+                                    ToolTip="Marcar para isolar na quarentena do NEXUS"/>
+                          <StackPanel Grid.Column="2">
+                            <TextBlock Text="{Binding FileName}" Style="{StaticResource Text.Body}" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding Folder}" Style="{StaticResource Sc.Code}" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding Meta}" Style="{StaticResource Text.Small}" Margin="0,4,0,0"/>
+                            <ItemsControl ItemsSource="{Binding Hits}" Focusable="False" Margin="0,8,0,0">
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                  <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                      <ColumnDefinition Width="44"/>
+                                      <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding PointsText}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}"/>
+                                    <StackPanel Grid.Column="1">
+                                      <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}">
+                                        <Run Text="{Binding Title, Mode=OneWay}"/><Run Text=" · " Foreground="{StaticResource Brush.TextDim}"/><Run Text="{Binding Layer, Mode=OneWay}" Foreground="{StaticResource Brush.TextDim}"/>
+                                      </TextBlock>
+                                      <TextBlock Text="{Binding Why}" Style="{StaticResource Text.Small}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                  </Grid>
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <WrapPanel Margin="-8,2,0,0">
+                              <Button Content="Verificar com o Defender" Style="{StaticResource Sc.Action}" Command="{Binding DefenderCommand}"/>
+                              <Button Content="Mostrar no Explorer" Style="{StaticResource Sc.Action}" Command="{Binding ExplorerCommand}"/>
+                              <Button Content="Propriedades e assinatura" Style="{StaticResource Sc.Action}" Command="{Binding PropertiesCommand}"/>
+                              <Button Content="Isolar" Style="{StaticResource Sc.Action}" Command="{Binding QuarantineCommand}"/>
+                              <Button Content="Ignorar" Style="{StaticResource Sc.Action}" Command="{Binding IgnoreCommand}"/>
+                            </WrapPanel>
+                            <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,4,0,0"
+                                       Visibility="{Binding Status, Converter={StaticResource NullToCollapsed}}"/>
+                          </StackPanel>
+                          <StackPanel Grid.Column="3" Margin="16,0,0,0" HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding VerdictText}" Style="{StaticResource Sc.ToneText}" FontWeight="SemiBold" TextAlignment="Right"/>
+                            <TextBlock Text="{Binding ScoreText}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" TextAlignment="Right" Margin="0,2,0,0"/>
+                          </StackPanel>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
+</ResourceDictionary>
