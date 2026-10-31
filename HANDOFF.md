@@ -149,7 +149,8 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
 2. ~~Decisões em aberto~~ (decididas em 31/10; ver `docs/07-recovery-cases.md`).
 3. ~~Rodar os testes de integração em VM~~ (feito em 31/10 no GitHub Actions: 6/6 reais).
 4. ~~Broker como serviço~~ (feito em 31/10: B10, B3, B7, R1/B1; validado na VM do CI com o serviço instalado, ver
-   `tools/service/README.md`). Pendente só a assinatura Authenticode do cliente (exige certificado de assinatura de código).
+   `tools/service/README.md`; impostor do B3 recusado no Windows do responsável, 163/163). Pendente só a assinatura
+   Authenticode do cliente (exige certificado de assinatura de código).
 5. **Interface → broker (próximo):** a interface fala com o serviço por `BrokerClient` (`BrokerServerKind.Service`):
    simulação pelo broker, depois aplicar/reverter com confirmação. A execução real continua presa ao portão de VM.
 6. Só depois da VM aprovada: liberar execução real (hoje não existe caminho de execução na interface).

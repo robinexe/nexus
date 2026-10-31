@@ -279,6 +279,11 @@ do binPath, erro 1639, trocado por `New-Service`):
 | Log do serviço | `Conta: NT AUTHORITY\SYSTEM`, escrita liberada pela VM, Status/Execute/RevertRun ok |
 | `Uninstall-Broker.ps1` | serviço e binários removidos; dados preservados |
 
+Windows do responsável (MATHEUSANJOS, não elevado), 31/10 03:56, log `nexus-validacao-20261031-035641.log`: build 0
+avisos, **163/163**, coordenação 11/11, descoberta 0 indisponíveis, CLI 0/1/0/3, SHA igual. Aqui roda o cenário do impostor
+do B3, que exige processo não elevado: `Client_in_service_mode_refuses_a_pipe_owned_by_an_ordinary_user` **aprovado**
+(o cliente recusou um pipe criado pelo usuário comum com o nome do broker).
+
 ## Pendente no Windows (esta versão)
 
 1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).
