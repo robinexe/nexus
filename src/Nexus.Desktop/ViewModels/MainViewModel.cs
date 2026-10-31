@@ -130,7 +130,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public PageViewModel SelectedPage
     {
         get => _selectedPage;
-        set { if (Set(ref _selectedPage, value) && value is ModulePage m) _ = m.OnShownAsync(); }
+        set
+        {
+            if (!Set(ref _selectedPage, value)) return;
+            Nexus.Desktop.Services.Shell.UiWatchdog.Step($"abrindo página {value?.Title}");
+            if (value is ModulePage m) _ = m.OnShownAsync();
+        }
     }
     public string Status { get => _status; set => Set(ref _status, value); }
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
@@ -169,9 +174,11 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             var unavailable = snapshot.Sections.SelectMany(s => s.Facts).Count(f => f.Status == FactStatus.Unavailable);
             Overview.Footer = $"Leitura concluída em {snapshot.Elapsed.TotalSeconds:0.0} s · {unavailable} valor(es) indisponível(is), cada um com o motivo.";
             Status = $"Pronto · leitura de {snapshot.TakenAt:HH:mm:ss}";
+            Nexus.Desktop.Services.Shell.UiWatchdog.Step("leitura do PC concluída");
             CheckPendingRecovery();
             foreach (var module in Pages.OfType<ModulePage>())
             {
+                Nexus.Desktop.Services.Shell.UiWatchdog.Step($"leitura do PC → {module.Title}");
                 try { await module.OnFactsReadyAsync(snapshot.Facts); }
                 catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"{module.Title}: {ex.Message}"; }
             }

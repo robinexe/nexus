@@ -19,6 +19,8 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         DispatcherUnhandledException += OnUnhandled;
+        Services.Shell.UiWatchdog.Start(Dispatcher);
+        Services.Shell.UiWatchdog.Step("interface iniciada");
         base.OnStartup(e);
 
         _instance = new Mutex(initiallyOwned: true, InstanceName, out var first);
