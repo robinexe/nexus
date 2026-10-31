@@ -195,4 +195,85 @@ public sealed class MeasurementTests : IDisposable
         Assert.False(r.Ok);
         Assert.Contains("não encontrado", r.Message, StringComparison.Ordinal);
     }
+
+    private static List<TracePoint> Flat(int n, double ms, double seconds = 60) =>
+        Enumerable.Range(0, n).Select(i => new TracePoint(i * seconds / Math.Max(1, n - 1), ms)).ToList();
+
+    [Fact]
+    public void Chart_scale_ignores_a_single_huge_spike_and_keeps_the_curve_readable()
+    {
+        var trace = Flat(1500, 4.0);
+        trace[700] = new TracePoint(trace[700].Seconds, 250);
+        var s = ChartScale.For(trace);
+        Assert.InRange(s.YMax, ChartScale.MinYMax, 12); // a curva de 4 ms não é achatada por um pico de 250 ms
+        Assert.True(s.IsClipped(250));
+        Assert.Equal(0, s.Y(250, 100)); // pico cortado fica colado no topo
+        Assert.Equal(60, s.XMax, 6);
+        Assert.Contains(s.VisibleReferences(), r => r.Label == "144 FPS");
+        Assert.DoesNotContain(s.VisibleReferences(), r => r.Label == "60 FPS");
+    }
+
+    [Fact]
+    public void Chart_scale_survives_empty_single_point_equal_values_and_garbage()
+    {
+        var empty = ChartScale.For(null);
+        Assert.Equal(ChartScale.EmptyXMax, empty.XMax);
+        Assert.True(empty.YMax > 0 && empty.YStep > 0 && empty.XStep > 0);
+        Assert.NotEmpty(empty.YGrid());
+
+        var one = ChartScale.For([new TracePoint(0, 16.7)]);
+        Assert.True(one.XMax > 0);
+        Assert.True(one.YMax >= 16.7);
+        Assert.True(double.IsFinite(one.X(0, 300)) && double.IsFinite(one.Y(16.7, 200)));
+
+        var garbage = ChartScale.For([new TracePoint(double.NaN, double.PositiveInfinity), new TracePoint(-1, -5), new TracePoint(2, 0)]);
+        Assert.True(double.IsFinite(garbage.YMax) && garbage.YMax > 0 && garbage.XMax > 0);
+
+        var slow = ChartScale.For(Flat(200, 300)); // jogo a ~3 FPS: o teto cede para a curva caber
+        Assert.True(slow.YMax >= 300);
+    }
+
+    [Fact]
+    public void Chart_scale_puts_two_curves_on_one_axis_and_maps_inside_the_box()
+    {
+        var before = Flat(500, 7, seconds: 30);
+        var after = Flat(500, 5, seconds: 60);
+        var s = ChartScale.For(after, before);
+        Assert.Equal(60, s.XMax, 6);
+        Assert.True(s.YMax >= 7);
+        Assert.Equal(0, s.X(-3, 400));
+        Assert.Equal(400, s.X(999, 400));
+        Assert.Equal(200, s.Y(0, 200));
+        var grid = s.YGrid();
+        Assert.Equal(s.YMax, grid[^1], 6);
+        Assert.All(grid.Zip(grid.Skip(1)), p => Assert.Equal(s.YStep, p.Second - p.First, 6));
+        Assert.Equal(0, s.XTicks()[0]);
+    }
+
+    [Theory]
+    [InlineData(10, 4, 2.5)]
+    [InlineData(60, 6, 10)]
+    [InlineData(17, 4, 5)]
+    [InlineData(0.9, 4, 0.25)]
+    [InlineData(0, 4, 1)]
+    [InlineData(double.NaN, 4, 1)]
+    public void Nice_step_is_round(double range, int ticks, double expected) =>
+        Assert.Equal(expected, ChartScale.NiceStep(range, ticks), 9);
+
+    [Fact]
+    public void Histogram_window_frames_the_occupied_bins()
+    {
+        var bins = SessionAnalyzer.Histogram([3.2, 3.8, 4.1, 4.4, 5.0, 80]);
+        var (first, last) = ChartScale.HistogramWindow(bins);
+        Assert.Equal(2, first);
+        Assert.True(last - first + 1 >= 10);
+        Assert.True(double.IsFinite(bins[last].ToMs));
+
+        Assert.Equal((0, -1), ChartScale.HistogramWindow(null));
+        Assert.Equal((0, -1), ChartScale.HistogramWindow([]));
+        Assert.Equal((0, 9), ChartScale.HistogramWindow(SessionAnalyzer.Histogram([])));
+        var high = ChartScale.HistogramWindow(SessionAnalyzer.Histogram([49.5]));
+        Assert.Equal(49, high.Last);
+        Assert.Equal(40, high.First);
+    }
 }
