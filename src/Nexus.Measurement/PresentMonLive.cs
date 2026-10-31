@@ -120,7 +120,7 @@ public static partial class PresentMonCli
     /// <summary>Geração pelo nome do arquivo (PresentMon-2.3.0-x64.exe, PresentMon64-1.9.2.exe). Sem versão no nome: 2.x (a atual).</summary>
     public static PresentMonGeneration GenerationOf(string? exePath)
     {
-        var name = Path.GetFileName(exePath ?? "");
+        var name = GameLibrary.WinFileName(exePath);
         var m = VersionInName().Match(name);
         if (m.Success && int.TryParse(m.Groups["major"].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var major))
             return major <= 1 ? PresentMonGeneration.V1 : PresentMonGeneration.V2;
@@ -190,10 +190,11 @@ public static partial class PresentMonCli
     {
         ArgumentNullException.ThrowIfNull(files);
         return files
-            .Where(f => Path.GetFileName(f).StartsWith("PresentMon", StringComparison.OrdinalIgnoreCase) && f.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-            .Where(f => !Path.GetFileName(f).Equals("PresentMon.exe", StringComparison.OrdinalIgnoreCase) || Path.GetDirectoryName(f)?.EndsWith("PresentMonCli", StringComparison.OrdinalIgnoreCase) == true)
-            .Where(f => !Path.GetFileName(f).Contains("Service", StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(f => VersionKey(Path.GetFileName(f)))
+            .Where(f => GameLibrary.WinFileName(f).StartsWith("PresentMon", StringComparison.OrdinalIgnoreCase) && f.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            .Where(f => !GameLibrary.WinFileName(f).Equals("PresentMon.exe", StringComparison.OrdinalIgnoreCase) ||
+                        f.Replace('/', '\\').EndsWith("PresentMonCli\\PresentMon.exe", StringComparison.OrdinalIgnoreCase))
+            .Where(f => !GameLibrary.WinFileName(f).Contains("Service", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(f => VersionKey(GameLibrary.WinFileName(f)))
             .FirstOrDefault();
     }
 

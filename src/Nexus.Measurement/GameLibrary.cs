@@ -106,7 +106,7 @@ public static partial class GameLibrary
     public static KnownGame? ParseEpic(string json)
     {
         if (GameLibraries.ParseEpicItem(json) is not { } g) return null;
-        return new KnownGame(g.Name, "Epic", g.InstallDir, g.ExePath is null ? null : Path.GetFileName(g.ExePath.Replace('/', '\\').Split('\\')[^1]));
+        return new KnownGame(g.Name, "Epic", g.InstallDir, g.ExePath is null ? null : WinFileName(g.ExePath));
     }
 
     [GeneratedRegex(@"(?m)^\s*product_install_full_path\s*:\s*""?(?<p>[^""\r\n]+?)""?\s*$", RegexOptions.CultureInvariant)]
@@ -150,7 +150,7 @@ public static partial class GameLibrary
         {
             var path = m.Value.Replace('/', '\\').TrimEnd('\\', ' ');
             if (!IsAbsoluteWindowsPath(path)) continue;
-            var name = Path.GetFileName(path);
+            var name = WinFileName(path);
             if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || BattleNetNotGames.Any(n => name.Equals(n, StringComparison.OrdinalIgnoreCase))) continue;
             if (path.Count(c => c == '\\') > 4) continue; // pasta de jogo fica perto da raiz; caminhos fundos são arquivos internos
             if (games.Any(g => g.InstallDir!.Equals(path, StringComparison.OrdinalIgnoreCase))) continue;
@@ -178,6 +178,14 @@ public static partial class GameLibrary
             list.Add(Path.Combine(driveRoot, rel).Replace('/', '\\').TrimEnd('\\'));
         }
         return list;
+    }
+
+    /// <summary>Nome do arquivo num caminho de Windows (aceita \ e /, em qualquer SO).</summary>
+    public static string WinFileName(string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return "";
+        var i = path.LastIndexOfAny(['\\', '/']);
+        return i >= 0 ? path[(i + 1)..] : path;
     }
 
     /// <summary>Caminho absoluto de Windows (X:\...), sem "..".</summary>
@@ -258,7 +266,7 @@ public static partial class GameLibrary
         }
 
         // Mesma pasta vinda de duas fontes: fica a primeira.
-        return games.Where(g => g.InstallDir is null || IsAbsoluteWindowsPath(g.InstallDir))
+        return games.Where(g => g.InstallDir is null || IsAbsoluteWindowsPath(g.InstallDir) || Path.IsPathFullyQualified(g.InstallDir))
             .GroupBy(g => g.InstallDir ?? g.ExeName ?? g.Name, StringComparer.OrdinalIgnoreCase).Select(g => g.First()).ToList();
     }
 
