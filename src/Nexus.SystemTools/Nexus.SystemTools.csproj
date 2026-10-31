@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Nexus.SystemTools</RootNamespace>
+    <!-- LibraryImport (wlanapi, crypt32, srclient, dnsapi) gera código com ponteiros. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
