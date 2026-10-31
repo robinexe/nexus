@@ -148,16 +148,16 @@ function OriginalUserSid(): String;
 var
   Code, P: Integer;
   OutFile: String;
-  Text: AnsiString;
+  Raw: AnsiString;
   S: String;
 begin
   Result := '';
   OutFile := ExpandConstant('{tmp}\nexus-sid.txt');
   if not ExecAsOriginalUser(ExpandConstant('{cmd}'), '/c whoami /user /fo csv /nh > "' + OutFile + '"', '', SW_HIDE, ewWaitUntilTerminated, Code) then
     Exit;
-  if (Code <> 0) or not LoadStringFromFile(OutFile, Text) then
+  if (Code <> 0) or not LoadStringFromFile(OutFile, Raw) then
     Exit;
-  S := String(Text);
+  S := String(Raw);
   P := Pos('"S-1-5-21-', S);
   if P = 0 then
     Exit;
@@ -179,8 +179,8 @@ begin
   if Sid = '' then
   begin
     SuppressibleMsgBox('Não foi possível identificar a sua conta de usuário, então o serviço do aplicador NÃO foi instalado.' + #13#10#13#10 +
-      'O NEXUS funciona sem ele (pede o aviso do Windows nas ações de administrador). Para instalar depois, num PowerShell de administrador:' + #13#10 +
-      'powershell -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}') + '\tools\service\Install-Broker.ps1" -Source "' + ExpandConstant('{app}') + '" -AllowSid <seu SID> -AllowHost',
+      'O NEXUS funciona sem ele (pede o aviso do Windows nas ações de administrador). Para instalar depois, rode o instalador de novo ' +
+      'a partir da SUA conta (clique duplo e confirme o aviso do Windows) e marque a opção do serviço.',
       mbInformation, MB_OK, IDOK);
     Exit;
   end;
@@ -189,7 +189,7 @@ begin
             ' -Source "' + ExpandConstant('{tmp}\nexus-servico') + '" -AllowSid ' + Sid + ' -AllowHost';
   if not Exec(PowerShell(), Params, '', SW_HIDE, ewWaitUntilTerminated, Code) or (Code <> 0) then
     SuppressibleMsgBox('A instalação do serviço do aplicador falhou (código ' + IntToStr(Code) + '). O NEXUS funciona sem ele.' + #13#10 +
-      'Detalhes: rode o comando de tools\service\README.md num PowerShell de administrador.', mbError, MB_OK, IDOK)
+      'Detalhes no log do instalador (opção /LOG) e em tools\service\README.md.', mbError, MB_OK, IDOK)
   else
     Log('Serviço do aplicador instalado para ' + Sid);
 end;
