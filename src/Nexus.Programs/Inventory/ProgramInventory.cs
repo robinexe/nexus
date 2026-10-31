@@ -134,6 +134,15 @@ public static partial class ProgramInventory
         return p.Length == 0 ? null : p;
     }
 
+    /// <summary>O programa ainda está na lista (mesma chave, ou mesmo nome e versão registrados em outra visão).</summary>
+    public static bool Contains(IEnumerable<InstalledProgram> installed, InstalledProgram program)
+    {
+        ArgumentNullException.ThrowIfNull(installed);
+        ArgumentNullException.ThrowIfNull(program);
+        return installed.Any(x => x.Id == program.Id ||
+            (string.Equals(x.Name, program.Name, StringComparison.OrdinalIgnoreCase) && string.Equals(x.Version, program.Version, StringComparison.OrdinalIgnoreCase)));
+    }
+
     public static IReadOnlyList<InstalledProgram> Filter(IEnumerable<InstalledProgram> programs, string? query)
     {
         ArgumentNullException.ThrowIfNull(programs);
