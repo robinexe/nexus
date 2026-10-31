@@ -8,10 +8,12 @@ namespace Nexus.Broker;
 public enum BrokerOperation { Ping, Status, ReadState, Plan, Execute, EndSession, RevertRun, Recover }
 
 /// <summary>
-/// Pedido de ação: só o id versionado do catálogo do broker ("id@versão") e, quando o catálogo define uma lista de
-/// valores permitidos, a escolha dentro dela. Não há campo de alvo: o cliente não consegue nomear chave, serviço ou arquivo.
+/// Pedido de ação: só o id versionado do catálogo do broker ("id@versão"); quando o catálogo define uma lista de valores
+/// permitidos, a escolha dentro dela; e, quando o catálogo declara parâmetros do usuário (ex.: qual driver antigo remover),
+/// os argumentos, cada um validado pela regra do catálogo. Não há campo de alvo livre: o cliente não nomeia chave, serviço ou
+/// arquivo fora do que o catálogo permite.
 /// </summary>
-public sealed record ActionRequest([property: JsonRequired] string ActionId, string? Value = null);
+public sealed record ActionRequest([property: JsonRequired] string ActionId, string? Value = null, IReadOnlyDictionary<string, string>? Arguments = null);
 
 public sealed record BrokerRequest(
     [property: JsonRequired] int V,

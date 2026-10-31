@@ -52,8 +52,16 @@ public sealed class CatalogBoundHandler : IActionHandler, IRestoreValidator
 
         // Alvo esperado: o que o catálogo instancia. O esquema de energia (PowerSettingValue) é capturado no planejamento
         // e pode diferir do ativo agora; ele só precisa ser um GUID válido.
+        var parameters = WithScheme(action);
+        if (entry.UserParameters.Count > 0)
+        {
+            // Argumentos do usuário: recuperados do alvo registrado e revalidados pela regra do catálogo.
+            var args = entry.UserArgumentsFromTarget(action.Target, out var argError);
+            if (args is null) return $"Argumento do usuário inválido no diário: {argError}";
+            foreach (var (argName, argValue) in args) parameters[argName] = argValue;
+        }
         var probe = (entry.DesiredValue is null && entry.Definition.AllowedValues is { Count: > 0 } allowed ? entry with { DesiredValue = allowed[0] } : entry)
-            .TryInstantiate(WithScheme(action), out var reason);
+            .TryInstantiate(parameters, out var reason);
         if (probe is null)
             return $"Não foi possível reconstruir o alvo pelo catálogo: {reason}";
         var expected = probe.Target;

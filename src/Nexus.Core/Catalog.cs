@@ -24,6 +24,59 @@ public sealed partial record CatalogEntry(
     [GeneratedRegex(@"\{([A-Za-z0-9|]+)\}")]
     private static partial Regex PlaceholderPattern();
 
+    /// <summary>Tipo do valor desejado para handlers sem conversão própria no núcleo (campo "desiredType" do catálogo).</summary>
+    public string? DesiredType { get; init; }
+
+    /// <summary>
+    /// Parâmetros que o USUÁRIO escolhe (ex.: qual driver antigo remover), cada um com a expressão regular que o valor precisa
+    /// casar por inteiro (campo "userParameters"). Só podem ocupar o valor inteiro de um campo do alvo ("{nome}"), para a
+    /// restauração reconstruir e revalidar o alvo a partir do diário.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> UserParameters { get; init; } = new Dictionary<string, string>();
+
+    public const int MaxUserArguments = 8;
+    public const int MaxUserArgumentLength = 260;
+
+    /// <summary>Valida argumentos do usuário: só os declarados, todos presentes, cada um casando sua regra por inteiro.</summary>
+    public IReadOnlyDictionary<string, string>? ValidateUserArguments(IReadOnlyDictionary<string, string>? args, out string? reason)
+    {
+        reason = null;
+        args ??= new Dictionary<string, string>();
+        if (args.Count > MaxUserArguments) { reason = "Argumentos demais."; return null; }
+        var result = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (name, value) in args)
+        {
+            if (!UserParameters.TryGetValue(name, out var pattern)) { reason = $"Argumento '{name}' não é aceito por esta ação."; return null; }
+            if (value is null || value.Length == 0 || value.Length > MaxUserArgumentLength) { reason = $"Argumento '{name}' vazio ou longo demais."; return null; }
+            if (!MatchesWhole(pattern, value)) { reason = $"Valor de '{name}' fora do formato permitido."; return null; }
+            result[name] = value;
+        }
+        var missing = UserParameters.Keys.Where(k => !result.ContainsKey(k)).ToList();
+        if (missing.Count > 0) { reason = $"Falta escolher: {string.Join(", ", missing)}."; return null; }
+        return result;
+    }
+
+    /// <summary>Recupera os argumentos do usuário a partir de um alvo registrado (diário) e os revalida.</summary>
+    public IReadOnlyDictionary<string, string>? UserArgumentsFromTarget(IReadOnlyDictionary<string, string> target, out string? reason)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+        var args = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (key, template) in TargetTemplate)
+        {
+            var m = PlaceholderPattern().Match(template);
+            if (!m.Success || m.Value != template || !UserParameters.ContainsKey(m.Groups[1].Value)) continue;
+            if (!target.TryGetValue(key, out var v)) { reason = $"Alvo registrado sem '{key}'."; return null; }
+            args[m.Groups[1].Value] = v;
+        }
+        return ValidateUserArguments(args, out reason);
+    }
+
+    internal static bool MatchesWhole(string pattern, string value)
+    {
+        try { return Regex.IsMatch(value, "^(?:" + pattern + ")$", RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(200)); }
+        catch (RegexMatchTimeoutException) { return false; }
+    }
+
     /// <summary>Placeholders do alvo que ainda não foram resolvidos (ex.: gameExePath).</summary>
     public IReadOnlyList<string> Placeholders(IReadOnlyDictionary<string, string>? parameters = null) =>
         TargetTemplate.Values
@@ -69,6 +122,9 @@ public sealed partial record CatalogEntry(
             case "PowerActiveScheme" when target.TryGetValue("schemeGuid", out var g):
                 return StateSnapshot.Of("Guid", g.ToLowerInvariant());
         }
+
+        if (DesiredValue is not null && DesiredType is not null)
+            return StateSnapshot.Of(DesiredType, DesiredValue);
 
         if (DesiredValue is null)
         {
@@ -185,9 +241,27 @@ public static class CatalogLoader
             foreach (var p in t.EnumerateObject())
                 target[p.Name] = Scalar(p.Value);
 
+        var userParameters = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (a.TryGetProperty("userParameters", out var up) && up.ValueKind == JsonValueKind.Object)
+            foreach (var p in up.EnumerateObject())
+            {
+                var pattern = p.Value.GetString() ?? throw new InvalidDataException($"{id}: regra vazia para '{p.Name}'.");
+                try { _ = new System.Text.RegularExpressions.Regex(pattern, System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromMilliseconds(200)); }
+                catch (ArgumentException ex) { throw new InvalidDataException($"{id}: regra inválida para '{p.Name}': {ex.Message}"); }
+                // O parâmetro do usuário só pode ser o valor INTEIRO de um campo do alvo.
+                var uses = target.Values.Where(v => v.Contains("{" + p.Name + "}", StringComparison.Ordinal)).ToList();
+                if (uses.Count == 0 || uses.Any(v => v != "{" + p.Name + "}"))
+                    throw new InvalidDataException($"{id}: parâmetro do usuário '{p.Name}' precisa ser o valor inteiro de um campo do alvo.");
+                userParameters[p.Name] = pattern;
+            }
+
         return new CatalogEntry(definition, target,
             a.TryGetProperty("desiredValue", out var dv) ? Scalar(dv) : null,
-            Str(a, "condition"), Str(a, "verification"), Str(a, "revert"), privilegesRaw);
+            Str(a, "condition"), Str(a, "verification"), Str(a, "revert"), privilegesRaw)
+        {
+            DesiredType = Str(a, "desiredType"),
+            UserParameters = userParameters,
+        };
     }
 
     private static string? Str(JsonElement e, string name) =>

@@ -122,7 +122,9 @@ public sealed class BrokerService : IDisposable
             return (null, BrokerResponse.Fail(r.Id, "invalid-request", "Nenhuma ação pedida."));
         if (r.Actions.Count > MaxActionsPerRequest)
             return (null, BrokerResponse.Fail(r.Id, "invalid-request", $"Máximo de {MaxActionsPerRequest} ações por pedido."));
-        if (r.Actions.Any(a => a is null || string.IsNullOrWhiteSpace(a.ActionId) || a.ActionId.Length > 128 || a.Value is { Length: > 64 }))
+        if (r.Actions.Any(a => a is null || string.IsNullOrWhiteSpace(a.ActionId) || a.ActionId.Length > 128 || a.Value is { Length: > 64 } ||
+                               a.Arguments is { Count: > CatalogEntry.MaxUserArguments } ||
+                               (a.Arguments?.Any(kv => kv.Key is null || kv.Key.Length > 64 || kv.Value is null || kv.Value.Length > CatalogEntry.MaxUserArgumentLength) ?? false)))
             return (null, BrokerResponse.Fail(r.Id, "invalid-request", "Ação nula, vazia ou com campos longos demais."));
         if (r.Actions.Select(a => a.ActionId).Distinct(StringComparer.Ordinal).Count() != r.Actions.Count)
             return (null, BrokerResponse.Fail(r.Id, "invalid-request", "Ação repetida no pedido."));
@@ -152,7 +154,17 @@ public sealed class BrokerService : IDisposable
                 return (null, BrokerResponse.Fail(r.Id, "invalid-value", $"'{a.ActionId}' não aceita valor."));
             }
 
-            var instance = chosen.TryInstantiate(parameters, out var reason);
+            var effective = parameters;
+            if (chosen.UserParameters.Count > 0 || a.Arguments is { Count: > 0 })
+            {
+                var args = chosen.ValidateUserArguments(a.Arguments, out var argError);
+                if (args is null)
+                    return (null, BrokerResponse.Fail(r.Id, "invalid-arguments", $"'{Clip(a.ActionId, 128)}': {argError}"));
+                var merged = new Dictionary<string, string>(parameters, StringComparer.Ordinal);
+                foreach (var (k, v) in args) merged[k] = v;
+                effective = merged;
+            }
+            var instance = chosen.TryInstantiate(effective, out var reason);
             if (instance is null)
                 return (null, BrokerResponse.Fail(r.Id, "not-instantiable", $"'{a.ActionId}': {reason}"));
             if (!_handlers.Contains(instance.Definition.HandlerKind))

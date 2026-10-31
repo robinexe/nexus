@@ -12,6 +12,7 @@ namespace Nexus.IntegrationTests;
 [Trait("Category", "LocalBrokerIntegration")]
 public sealed class LocalBrokerIntegrationTests
 {
+    private static readonly string[] Applied = ["Verified", "AlreadyConfigured"];
     private readonly Xunit.Abstractions.ITestOutputHelper _out;
     private static string Sid => WindowsIdentity.GetCurrent().User!.Value;
 
@@ -62,7 +63,7 @@ public sealed class LocalBrokerIntegrationTests
         _out.WriteLine("[admin] " + exec.Message);
         Assert.True(exec.Ok, exec.Message);
         var outcome = Assert.Single(exec.Response!.Results!).Outcome;
-        Assert.Contains(outcome, new[] { "Verified", "AlreadyConfigured" });
+        Assert.Contains(outcome, Applied);
         if (outcome == "Verified")
         {
             Assert.Contains("onto de restauração", exec.Message, StringComparison.Ordinal); // criado, ou o motivo de não ter sido

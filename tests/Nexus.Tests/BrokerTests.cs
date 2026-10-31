@@ -52,6 +52,81 @@ public sealed class BrokerTests : IDisposable
         return (service, coordinator, gate);
     }
 
+    // ---------------------------------------------------------------- parâmetros escolhidos pelo usuário
+
+    private static string ParamCatalog(string target) => "{ \"catalogVersion\": \"p-1\", \"schema\": \"nexus.catalog/1\", \"actions\": [ " +
+        "{ \"id\": \"t.param\", \"version\": 1, \"title\": \"Parametrizada\", \"classification\": \"Experimental\", \"handlerKind\": \"RegistryValue\", " +
+        "\"target\": { \"hive\": \"HKCU\", \"path\": \"" + P.Replace("\\", "\\\\", StringComparison.Ordinal) + "\", \"name\": \"" + target + "\", \"type\": \"DWord\" }, \"desiredValue\": 1, " +
+        "\"userParameters\": { \"entry\": \"Entrada[0-9]{1,3}\" }, " +
+        "\"privileges\": \"User\", \"persistence\": \"Persistent\", \"reboot\": \"None\" } ] }";
+
+    private BrokerService ParamBroker() => new(CatalogLoader.Parse(ParamCatalog("{entry}")), new HandlerRegistry().Add(new RegistryValueHandler(_reg)),
+        _journal, new FileRunCoordinator(_dir), new FixedGate(true), () => T.Ctx, () => new Dictionary<string, string>());
+
+    private static BrokerRequest ParamReq(IReadOnlyDictionary<string, string>? args) =>
+        new(1, Guid.NewGuid(), BrokerOperation.Execute, [new ActionRequest("t.param@1", null, args)]);
+
+    [Fact]
+    public void User_argument_that_matches_the_catalog_rule_selects_the_target()
+    {
+        using var svc = ParamBroker();
+        var r = svc.Handle(ParamReq(new Dictionary<string, string> { ["entry"] = "Entrada7" }));
+        Assert.True(r.Ok, r.Error?.Detail);
+        Assert.Equal("1", Value("Entrada7"));
+        Assert.Equal("Entrada7", _journal.Entries(r.RunId!.Value).Single().Action.Target["name"]);
+    }
+
+    [Theory]
+    [InlineData("entry", "Entrada7x")]          // fora da regra (casamento inteiro)
+    [InlineData("entry", "..\\Lsa")]
+    [InlineData("entry", "Entrada1234")]
+    [InlineData("outro", "Entrada7")]            // não declarado
+    public void User_argument_outside_the_rule_or_undeclared_is_refused(string name, string value)
+    {
+        using var svc = ParamBroker();
+        var r = svc.Handle(ParamReq(new Dictionary<string, string> { [name] = value }));
+        Assert.False(r.Ok);
+        Assert.Equal("invalid-arguments", r.Error!.Code);
+        Assert.Empty(_journal.Runs());
+    }
+
+    [Fact]
+    public void Missing_user_argument_is_refused()
+    {
+        using var svc = ParamBroker();
+        var r = svc.Handle(ParamReq(null));
+        Assert.Equal("invalid-arguments", r.Error!.Code);
+        Assert.Contains("Falta escolher: entry", r.Error.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Tampered_user_argument_in_the_journal_is_refused_on_restore()
+    {
+        var forged = new InMemoryJournal();
+        var run = forged.BeginRun("p", "p-1");
+        var entry = CatalogLoader.Parse(ParamCatalog("{entry}")).Actions.Single();
+        var good = entry.TryInstantiate(new Dictionary<string, string> { ["entry"] = "Entrada7" }, out _)!;
+        var bad = good with { Target = new Dictionary<string, string>(good.Target) { ["name"] = "RunAsPPL" } };
+        var id = forged.AddPlanned(run, 0, bad);
+        forged.Transition(id, JournalState.BackedUp, original: StateSnapshot.Absent());
+        forged.Transition(id, JournalState.Applying);
+        _reg.Seed(T.RT(P, "RunAsPPL"), "DWord", "1");
+        var handlers = CatalogBoundHandler.Wrap(new HandlerRegistry().Add(new RegistryValueHandler(_reg)), [RegistryValueHandler.Kind],
+            CatalogLoader.Parse(ParamCatalog("{entry}")), () => new Dictionary<string, string>());
+
+        var result = new ActionExecutor(handlers, forged).Revert(id, force: true);
+
+        Assert.Equal(RevertOutcome.Failed, result.Outcome);
+        Assert.Contains("Argumento do usuário inválido", result.Detail, StringComparison.Ordinal);
+        Assert.Equal("1", Value("RunAsPPL"));
+    }
+
+    [Fact]
+    public void Catalog_refuses_user_parameters_embedded_inside_a_target_value()
+    {
+        Assert.Throws<InvalidDataException>(() => CatalogLoader.Parse(ParamCatalog("Prefixo{entry}")));
+    }
+
     private BrokerService ServiceMode()
     {
         var coordinator = new FileRunCoordinator(_dir);

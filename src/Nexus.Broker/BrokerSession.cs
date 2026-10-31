@@ -90,11 +90,20 @@ public sealed class BrokerSession
         {
             BrokerOperation.Status when r.Status is { } s =>
                 $"Broker {s.BrokerVersion} · catálogo {s.CatalogVersion} · escrita {(s.ExecutionAllowed ? "LIBERADA" : "BLOQUEADA")}: {s.ExecutionGateReason}",
-            BrokerOperation.Execute => $"Execução {r.RunId}: {Count(r)}{(r.SessionActive == true ? " · sessão aberta (encerre para reverter os ajustes de sessão)" : "")}.",
+            BrokerOperation.Execute => $"Execução {r.RunId}: {Count(r)}{(r.SessionActive == true ? " · sessão aberta (encerre para reverter os ajustes de sessão)" : "")}." + Extra(r.Message),
             BrokerOperation.RevertRun or BrokerOperation.EndSession or BrokerOperation.Recover =>
                 $"{op}: {(r.FullyRestored == true ? "tudo restaurado" : "RESTAURAÇÃO PARCIAL, veja os itens")}. {r.Message}".TrimEnd(),
             _ => r.Message ?? "ok",
         };
+    }
+
+    /// <summary>O que o aplicador acrescentou além das frases padrão (ex.: ponto de restauração criado ou o motivo de não ter sido).</summary>
+    private static string Extra(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message)) return "";
+        var rest = message.Replace("Execução encerrada.", "", StringComparison.Ordinal)
+                          .Replace("Ajustes de sessão aplicados; o broker mantém a trava até EndSession.", "", StringComparison.Ordinal).Trim();
+        return rest.Length == 0 ? "" : " " + rest;
     }
 
     private static string Count(BrokerResponse r) =>
