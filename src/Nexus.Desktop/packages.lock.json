@@ -37,6 +37,25 @@
           "SQLitePCLRaw.core": "2.1.13"
         }
       },
+      "nexus.assistant": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Automation": "[0.9.0, )",
+          "Nexus.Boot": "[0.9.0, )",
+          "Nexus.Broker": "[0.9.0, )",
+          "Nexus.Cleaning": "[0.9.0, )",
+          "Nexus.Core": "[0.9.0, )",
+          "Nexus.DriverUpdates": "[0.9.0, )",
+          "Nexus.HardwareDiscovery": "[0.9.0, )",
+          "Nexus.Lab.Cpu": "[0.9.0, )",
+          "Nexus.Lab.Gpu": "[0.9.0, )",
+          "Nexus.Lab.Memory": "[0.9.0, )",
+          "Nexus.Privacy": "[0.9.0, )",
+          "Nexus.Programs": "[0.9.0, )",
+          "Nexus.Security": "[0.9.0, )",
+          "Nexus.WindowsActions": "[0.9.0, )"
+        }
+      },
       "nexus.automation": {
         "type": "Project",
         "dependencies": {

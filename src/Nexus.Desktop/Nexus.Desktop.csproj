@@ -35,6 +35,7 @@
     <ProjectReference Include="..\Nexus.SystemTools\Nexus.SystemTools.csproj" />
     <ProjectReference Include="..\Nexus.DriverUpdates\Nexus.DriverUpdates.csproj" />
     <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
+    <ProjectReference Include="..\Nexus.Assistant\Nexus.Assistant.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
     <!-- Autoteste da interface (opção selftest-ui) usa o modelo de relatório; e o nexus.exe copiado ao lado precisa desta dll. -->

@@ -37,7 +37,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     public MainViewModel()
     {
-        Pages = [Overview, Hardware, Diagnostics, CpuLab, GpuLab, MemoryLab, MemoryDoctor, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
+        Pages = [Overview, Hardware, Diagnostics, CpuLab, GpuLab, MemoryLab, MemoryDoctor, Assistant, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
             Privacy, Security, Scanner, SystemTools, DriverUpdates, Measure, Monitor, History, Settings, Capabilities];
         Broker.Candidates = Plan.Candidates;
         Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
@@ -133,6 +133,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public IReadOnlyList<PageViewModel> Pages { get; }
 
     // Módulos
+    public AssistantPage Assistant { get; } = new();
     public AutomationPage Automation { get; } = new();
     public StartupPage Startup { get; } = new();
     public ServicesPage Services { get; } = new();
