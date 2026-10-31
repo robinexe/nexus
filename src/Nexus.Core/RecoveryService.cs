@@ -104,6 +104,12 @@ public sealed class RecoveryService
             var key = f.Entry.Action.Definition.Key;
             try
             {
+                // Irreversível: não há original para restaurar. Encerra como aceita (registro no diário) sem chamar o handler.
+                if (f.Entry.Action.Definition.Irreversible)
+                {
+                    results.Add(ActionExecutor.RefuseIrreversible(_journal, _journal.Get(f.Entry.Id)));
+                    continue;
+                }
                 // Superada: uma entrada MAIS NOVA do próprio NEXUS no mesmo alvo, ainda não revertida. Restaurar este backup
                 // desfaria aquela mudança (e deixaria o diário dela mentindo). Não escreve; exige decisão.
                 var newer = Superseding(f.Entry, all, started);

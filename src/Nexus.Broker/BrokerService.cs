@@ -209,7 +209,9 @@ public sealed class BrokerService : IDisposable
         var plan = new DesiredStateResolver(_handlers).Resolve(actions!, _context());
         return new BrokerResponse(r.Id, true, Results: plan.Items.Select(i => new ActionResultDto(i.Action.Definition.Key, i.Status.ToString(), i.Reason,
             i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured ? i.ObservedAtPlan.Describe() : null, i.Action.Desired.Describe())).ToList(),
-            Message: "Simulação: nada foi aplicado.");
+            Message: "Simulação: nada foi aplicado." + (actions!.Any(a => a.Definition.Irreversible)
+                ? " Atenção: há ação IRREVERSÍVEL no pedido; aplicar exige confirmação explícita e não poderá ser desfeito."
+                : ""));
     }
 
     // ------------------------------------------------------------------ escrita (portão + trava)
@@ -236,6 +238,16 @@ public sealed class BrokerService : IDisposable
             return BrokerResponse.Fail(r.Id, "session-active", $"Encerre a sessão {_sessionRun} antes de outra execução.");
         var (actions, error) = Resolve(r, callerSid);
         if (error is not null) return error;
+        // Ações irreversíveis: só com confirmação explícita, ação por ação. Recusa o pedido inteiro antes de travar ou gravar.
+        var confirmedIrreversible = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var (instance, request) in actions!.Zip(r.Actions!))
+        {
+            if (!instance.Definition.Irreversible) continue;
+            if (request.ConfirmIrreversible != true)
+                return BrokerResponse.Fail(r.Id, "irreversible-unconfirmed",
+                    $"'{Clip(request.ActionId, 128)}' é irreversível e o pedido não trouxe a confirmação explícita do usuário (confirmIrreversible). Nada foi feito.");
+            confirmedIrreversible.Add(instance.Definition.Key);
+        }
 
         var (lease, leaseError) = AcquireLease(r, "broker-execute");
         if (leaseError is not null) return leaseError;
@@ -262,7 +274,7 @@ public sealed class BrokerService : IDisposable
                 catch (Exception ex) when (ex is not OutOfMemoryException) { safetyNote = $"Ponto de restauração não criado ({ex.Message}); o diário continua permitindo desfazer."; }
             }
             var runId = exec.BeginRun(string.IsNullOrWhiteSpace(r.Profile) ? "broker" : r.Profile, _catalog.CatalogVersion);
-            var results = exec.Execute(runId, plan, ctx);
+            var results = exec.Execute(runId, plan, ctx, confirmedIrreversible);
 
             var sessionApplied = _journal.Entries(runId).Any(e => e.State == JournalState.Verified &&
                                                                   e.Action.Definition.Persistence == PersistenceKind.Session);

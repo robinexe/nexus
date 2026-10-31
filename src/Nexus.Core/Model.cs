@@ -82,6 +82,19 @@ public sealed record ActionDefinition(
     int? MaxBuild = null)
 {
     public string Key => $"{Id}@{Version}";
+
+    /// <summary>
+    /// Ação IRREVERSÍVEL (campo <c>"irreversible": true</c> do catálogo; ex.: exclusão segura). Contrato:
+    /// <list type="bullet">
+    /// <item>o executor só a aplica com confirmação explícita para esta chave (<see cref="ActionExecutor.Execute(Guid, Plan, SystemContext, IReadOnlyCollection{string})"/>);
+    /// no broker, o pedido precisa trazer <c>ConfirmIrreversible = true</c>;</item>
+    /// <item>Restore nunca é chamado: desfazer devolve <see cref="RevertOutcome.Irreversible"/> com mensagem clara;</item>
+    /// <item>a recuperação não tenta restaurar: encerra a entrada como <see cref="JournalState.Accepted"/>, com nota no diário;</item>
+    /// <item>não pode ser de sessão (a sessão é revertida ao encerrar).</item>
+    /// </list>
+    /// Fica no diário junto da ação (JSON), então uma entrada antiga sem o campo continua reversível como antes.
+    /// </summary>
+    public bool Irreversible { get; init; }
 }
 
 /// <summary>

@@ -234,7 +234,17 @@ public static class CatalogLoader
             StrList(a, "conflictsWith"),
             a.TryGetProperty("allowedValues", out var av) ? av.EnumerateArray().Select(Scalar).ToList() : null,
             compat.ValueKind == JsonValueKind.Object && compat.TryGetProperty("minBuild", out var mi) ? mi.GetInt32() : null,
-            compat.ValueKind == JsonValueKind.Object && compat.TryGetProperty("maxBuild", out var ma) ? ma.GetInt32() : null);
+            compat.ValueKind == JsonValueKind.Object && compat.TryGetProperty("maxBuild", out var ma) ? ma.GetInt32() : null)
+        {
+            Irreversible = a.TryGetProperty("irreversible", out var irr) && irr.ValueKind switch
+            {
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                _ => throw new InvalidDataException($"{id}: \"irreversible\" deve ser true ou false."),
+            },
+        };
+        if (definition.Irreversible && definition.Persistence == PersistenceKind.Session)
+            throw new InvalidDataException($"{id}: ação irreversível não pode ser de sessão (a sessão é revertida ao encerrar).");
 
         var target = new Dictionary<string, string>(StringComparer.Ordinal);
         if (a.TryGetProperty("target", out var t))

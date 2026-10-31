@@ -12,8 +12,12 @@ public enum BrokerOperation { Ping, Status, ReadState, Plan, Execute, EndSession
 /// permitidos, a escolha dentro dela; e, quando o catálogo declara parâmetros do usuário (ex.: qual driver antigo remover),
 /// os argumentos, cada um validado pela regra do catálogo. Não há campo de alvo livre: o cliente não nomeia chave, serviço ou
 /// arquivo fora do que o catálogo permite.
+/// <para><paramref name="ConfirmIrreversible"/>: confirmação explícita do usuário para uma ação marcada como irreversível no
+/// catálogo (<c>"irreversible": true</c>). Sem ela (null ou false), Execute recusa o pedido inteiro com
+/// <c>irreversible-unconfirmed</c>. Nulo não vai para o fio, então pedidos antigos continuam idênticos.</para>
 /// </summary>
-public sealed record ActionRequest([property: JsonRequired] string ActionId, string? Value = null, IReadOnlyDictionary<string, string>? Arguments = null);
+public sealed record ActionRequest([property: JsonRequired] string ActionId, string? Value = null, IReadOnlyDictionary<string, string>? Arguments = null,
+    bool? ConfirmIrreversible = null);
 
 public sealed record BrokerRequest(
     [property: JsonRequired] int V,

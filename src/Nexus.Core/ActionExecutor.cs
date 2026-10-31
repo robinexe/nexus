@@ -18,7 +18,10 @@ public enum ExecutionOutcome
 
 public sealed record ExecutionResult(string ActionKey, ExecutionOutcome Outcome, long? EntryId, string? Detail);
 
-public enum RevertOutcome { Reverted, AlreadyOriginal, Conflict, NothingToRevert, Failed }
+/// <summary>Resultado de desfazer uma entrada.</summary>
+/// <remarks><see cref="Irreversible"/>: a ação foi declarada irreversível no catálogo (<see cref="ActionDefinition.Irreversible"/>);
+/// nada foi escrito e não há como desfazer. Não conta como "restaurado".</remarks>
+public enum RevertOutcome { Reverted, AlreadyOriginal, Conflict, NothingToRevert, Failed, Irreversible }
 
 /// <param name="Inferred">A decisão de restaurar se apoiou numa inferência que a releitura não prova
 /// (interrompido durante o Apply com o valor atual igual ao desejado). Ver docs/07-recovery-cases.md, caso A1.</param>
@@ -75,9 +78,15 @@ public sealed class ActionExecutor
         _lease?.UnbindRun(runId);
     }
 
-    public IReadOnlyList<ExecutionResult> Execute(Guid runId, Plan plan, SystemContext context)
+    /// <summary>Executa sem confirmar nenhuma ação irreversível: toda ação irreversível pendente sai como Blocked.</summary>
+    public IReadOnlyList<ExecutionResult> Execute(Guid runId, Plan plan, SystemContext context) => Execute(runId, plan, context, []);
+
+    /// <param name="confirmedIrreversible">Chaves (id@versão) de ações irreversíveis que o usuário confirmou explicitamente para
+    /// ESTA execução. Uma ação irreversível fora da lista não é aplicada (Blocked), nem chega ao diário.</param>
+    public IReadOnlyList<ExecutionResult> Execute(Guid runId, Plan plan, SystemContext context, IReadOnlyCollection<string> confirmedIrreversible)
     {
         ArgumentNullException.ThrowIfNull(plan);
+        ArgumentNullException.ThrowIfNull(confirmedIrreversible);
         if (_lease is not null)
         {
             _lease.EnsureHeld();
@@ -124,7 +133,10 @@ public sealed class ActionExecutor
             ExecutionResult r;
             try
             {
-                r = ExecuteOne(runId, seq++, item, context);
+                if (item.Action.Definition.Irreversible && !confirmedIrreversible.Contains(key, StringComparer.Ordinal))
+                    r = new(key, ExecutionOutcome.Blocked, null, IrreversibleNotConfirmed);
+                else
+                    r = ExecuteOne(runId, seq++, item, context);
             }
             // Com FaultInjector ativo (testes de recuperação), a exceção simula a morte do processo e precisa propagar.
             catch (Exception ex) when (ex is not OperationCanceledException && FaultInjector is null)
@@ -139,6 +151,9 @@ public sealed class ActionExecutor
         }
         return results;
     }
+
+    public const string IrreversibleNotConfirmed =
+        "Ação irreversível: exige confirmação explícita do usuário para esta execução. Nada foi feito.";
 
     private ExecutionResult ExecuteOne(Guid runId, int seq, PlanItem item, SystemContext context)
     {
@@ -230,6 +245,14 @@ public sealed class ActionExecutor
             _journal.Transition(entry, JournalState.Reverted, observed: current, note: why + " Nada foi escrito: estado original intacto.");
             return new(key, ExecutionOutcome.FailedAndCompensated, entry, why);
         }
+        if (action.Definition.Irreversible)
+        {
+            // Não há original para devolver: o alvo pode ter sido alterado em parte (ex.: arquivo já sobrescrito). Encerrar com o
+            // registro honesto em vez de deixar uma "compensação pendente" que nenhuma recuperação conseguiria cumprir.
+            _journal.Transition(entry, JournalState.Accepted, observed: current,
+                note: why + $" Ação irreversível interrompida: estado atual {current.Describe()} mantido; não há como desfazer.");
+            return new(key, ExecutionOutcome.Failed, entry, why + " Ação irreversível: o alvo pode ter sido alterado em parte e não há como desfazer.");
+        }
         var producedByNexus = current.SameValueAs(action.Desired) || (observedAfterApply is not null && current.SameValueAs(observedAfterApply));
         if (!producedByNexus)
         {
@@ -299,6 +322,8 @@ public sealed class ActionExecutor
             return new(entryId, key, RevertOutcome.NothingToRevert, "Estado Accepted: o usuário manteve o estado atual; o backup não é mais usado.");
         if (e.Original is null)
             return new(entryId, key, RevertOutcome.NothingToRevert, "Sem backup: nada foi escrito.");
+        if (e.Action.Definition.Irreversible)
+            return RefuseIrreversible(_journal, e);
 
         if (!_handlers.Contains(e.Action.Definition.HandlerKind))
             return new(entryId, key, RevertOutcome.Failed,
@@ -346,6 +371,25 @@ public sealed class ActionExecutor
         if (inferred) context = "Inferido: interrompido durante o Apply com o valor desejado presente; presumido escrito pelo NEXUS.";
         return RestoreJournaled(entryId, handler, e.Action, e.Original, current, context, inferred,
             successNote: authorized ? null : "Revertido com confirmação de conflito.");
+    }
+
+    /// <summary>
+    /// Desfazer de uma ação irreversível: nunca chama o handler. Se o Apply nem começou (BackedUp), nada foi feito e a entrada
+    /// é encerrada como Reverted. Senão devolve <see cref="RevertOutcome.Irreversible"/>; entradas que a recuperação veria como
+    /// pendentes (interrompidas, falhas) são encerradas como Accepted, com a nota de que não há como desfazer.
+    /// </summary>
+    internal static RevertResult RefuseIrreversible(IJournal journal, JournalEntry e)
+    {
+        var key = e.Action.Definition.Key;
+        if (e.State == JournalState.BackedUp)
+        {
+            journal.Transition(e.Id, JournalState.Reverted, note: "Ação irreversível interrompida antes de aplicar: nada foi feito.");
+            return new(e.Id, key, RevertOutcome.NothingToRevert, "Interrompida antes de aplicar: nada foi feito.");
+        }
+        const string why = "Ação irreversível: não há como desfazer (não existe cópia do original). Nada foi escrito.";
+        if (e.State is not (JournalState.Verified or JournalState.Reverted or JournalState.Accepted or JournalState.Planned))
+            journal.Transition(e.Id, JournalState.Accepted, note: $"{why} Estava em {e.State}; entrada encerrada sem restaurar.");
+        return new(e.Id, key, RevertOutcome.Irreversible, why);
     }
 
     /// <summary>Reverte uma execução inteira em ordem inversa. Relata cada item; nunca declara sucesso total com falhas parciais.</summary>
