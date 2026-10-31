@@ -271,6 +271,10 @@ begin
   end;
 end;
 
+{ GetFileAttributesW não é exportada pelo Inno Setup: importada do kernel32 (INVALID_FILE_ATTRIBUTES = -1 como Integer). }
+function GetFileAttributes(lpFileName: String): Integer;
+  external 'GetFileAttributesW@kernel32.dll stdcall';
+
 { Apaga uma árvore SEM seguir links/junções: um link é removido como link, o destino dele nunca é tocado.
   (%LocalAppData%\NEXUS é gravável pelo usuário e o desinstalador roda como administrador.) }
 procedure SafeDelTree(Path: String);
