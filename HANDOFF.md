@@ -43,7 +43,7 @@ Em 31/10/2026 (tarde): 741/741 testes no Linux, 0 avisos. Nove módulos novos no
 Programas, Inicialização, Serviços, Privacidade, Segurança, Monitor, Ferramentas do sistema, Automático) + CLI `nexus`.
 A interface aplica neste PC por um aplicador sob demanda (usuário sem aviso; administrador com o aviso do Windows e ponto
 de restauração), sempre com confirmação, diário e desfazer. Revisão de segurança independente feita (8 correções). VM do CI: 741/741 unitários e 29/29 de integração com escrita real (23 dos módulos).
-**Ainda não aberto no Windows real depois dos módulos**; as escritas novas só foram exercitadas na VM do CI.
+Aberto no Windows do responsável às 12:16: todas as páginas novas abrem e leem dados reais (Limpeza 9,6 GB recuperáveis, Defender, monitor ao vivo, 82 programas, 82 redes Wi‑Fi). Dois defeitos achados ali e corrigidos (netsh em UTF‑8 sem recuo; `ipconfig /displaydns` exige admin no build 26200). Nenhuma escrita feita no PC pelo assistente; as escritas novas foram exercitadas na VM do CI.
 
 ## 2. Regras que continuam valendo
 
