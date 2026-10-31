@@ -287,28 +287,13 @@ public static unsafe partial class BalloonNotifier
     /// <summary>Abre um relatório HTML do NEXUS no navegador padrão (só .html dentro da pasta de relatórios).</summary>
     public static bool OpenReport(string path)
     {
-        if (!IsReportFile(path, ScanReport.DefaultDirectory)) return false;
+        if (!ReportFiles.IsReportFile(path, ScanReport.DefaultDirectory)) return false;
         try
         {
             using var _ = Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
             return true;
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or FileNotFoundException) { return false; }
-    }
-
-    /// <summary>Relatório do NEXUS: arquivo .html existente, direto dentro da pasta de relatórios (sem subpastas, sem links).</summary>
-    public static bool IsReportFile(string path, string reportsDirectory)
-    {
-        if (string.IsNullOrWhiteSpace(path) || !path.EndsWith(".html", StringComparison.OrdinalIgnoreCase)) return false;
-        try
-        {
-            var full = Path.GetFullPath(path);
-            var dir = Path.GetFullPath(reportsDirectory).TrimEnd(Path.DirectorySeparatorChar);
-            if (!string.Equals(Path.GetDirectoryName(full), dir, StringComparison.OrdinalIgnoreCase)) return false;
-            var info = new FileInfo(full);
-            return info.Exists && (info.Attributes & FileAttributes.ReparsePoint) == 0;
-        }
-        catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException or UnauthorizedAccessException) { return false; }
     }
 
     [UnmanagedCallersOnly]
@@ -396,4 +381,23 @@ public static partial class ConsoleDetach
     [LibraryImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool FreeConsole();
+}
+
+/// <summary>Quais arquivos a notificação pode abrir (lógica pura, testável em qualquer sistema).</summary>
+public static class ReportFiles
+{
+    /// <summary>Relatório do NEXUS: arquivo .html existente, direto dentro da pasta de relatórios (sem subpastas, sem links).</summary>
+    public static bool IsReportFile(string path, string reportsDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !path.EndsWith(".html", StringComparison.OrdinalIgnoreCase)) return false;
+        try
+        {
+            var full = Path.GetFullPath(path);
+            var dir = Path.GetFullPath(reportsDirectory).TrimEnd(Path.DirectorySeparatorChar);
+            if (!string.Equals(Path.GetDirectoryName(full), dir, StringComparison.OrdinalIgnoreCase)) return false;
+            var info = new FileInfo(full);
+            return info.Exists && (info.Attributes & FileAttributes.ReparsePoint) == 0;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException or UnauthorizedAccessException) { return false; }
+    }
 }

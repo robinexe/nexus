@@ -68,7 +68,7 @@ public static class SafeCleaningSelector
         if (d.Reboot != RebootRequirement.None) return "Pede reinício.";
         if (entry.UserParameters.Count != 1 || !entry.UserParameters.ContainsKey("batch")) return "Pede escolha do usuário.";
         if (rule is null) return "Regra desconhecida por esta versão do NEXUS.";
-        if (entry.TargetTemplate.GetValueOrDefault("rule") != rule.Id) return "Regra não confere com o catálogo.";
+        if (entry.TargetTemplate.GetValueOrDefault("rule") != rule.Id || d.Id != CleaningRuleSet.ActionPrefix + rule.Id) return "Regra não confere com o catálogo.";
         if (rule.Mode != CleaningMode.Quarantine) return "Só medição (usa a ferramenta do Windows).";
         if (rule.Admin || rule.Scope != CleaningScope.User) return "Pasta do sistema (pede administrador).";
         if (rule.Sensitive) return "Dados pessoais (histórico ou cookies): só com você escolhendo.";
