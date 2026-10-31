@@ -36,6 +36,9 @@ public interface IModuleHost
 
     /// <summary>Navega para outra página (ex.: do Automático para Limpeza).</summary>
     void Navigate(PageViewModel page);
+
+    /// <summary>Acha a página de um tipo (ex.: o Automático abrindo a Limpeza). Null se não existir.</summary>
+    PageViewModel? FindPage(Type pageType);
 }
 
 /// <summary>Base das páginas de módulo: recebe o host e é avisada quando a leitura do PC termina.</summary>

@@ -322,7 +322,7 @@ public sealed class PrivacyTests
         var states = new PrivacyScanner(new InMemoryRegistryBackend()).Scan(c, 26100);
         var missing = PrivacyPlanner.MissingFor(states, PrivacyProfile.Strict);
         var batches = PrivacyPlanner.Batches(missing);
-        Assert.True(batches.Count >= 2);
+        Assert.NotEmpty(batches); // limite 64: o perfil rígido cabe numa confirmação só
         Assert.All(batches, b => Assert.InRange(b.Sum(i => i.Pending.Count()), 1, PrivacyPlanner.MaxActionsPerRequest));
         Assert.Equal(missing.Count, batches.Sum(b => b.Count));
         var keys = PrivacyPlanner.ActionKeys(missing);

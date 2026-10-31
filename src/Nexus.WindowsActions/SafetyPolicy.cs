@@ -25,7 +25,17 @@ public static class SafetyPolicy
         @"HKLM\SECURITY",
     ];
 
-    private static readonly string[] ForbiddenServices = ["vgc", "vgk", "WinDefend", "WdNisSvc", "mpssvc", "BFE", "EventLog", "RpcSs", "Winmgmt"];
+    // Mesma lista do módulo Inicialização/Serviços (Nexus.Boot.ServicePolicy): núcleo, segurança, rede básica, som, anticheat.
+    private static readonly string[] ForbiddenServices =
+    [
+        "RpcSs", "RpcEptMapper", "DcomLaunch", "LSM", "SamSs", "ProfSvc", "UserManager", "Power", "PlugPlay", "BrokerInfrastructure",
+        "CoreMessagingRegistrar", "StateRepository", "SystemEventsBroker", "TimeBrokerSvc", "SENS", "gpsvc", "Schedule", "KeyIso",
+        "VaultSvc", "Appinfo", "TrustedInstaller", "EventLog", "EventSystem", "Winmgmt", "CryptSvc", "DeviceInstall", "camsvc",
+        "BFE", "MpsSvc", "WinDefend", "WdNisSvc", "WdFilter", "WdBoot", "Sense", "SecurityHealthService", "wscsvc", "SgrmBroker", "WaaSMedicSvc",
+        "Dhcp", "Dnscache", "nsi", "NlaSvc", "netprofm", "Wcmsvc", "LanmanWorkstation", "WinHttpAutoProxySvc", "BITS",
+        "AudioSrv", "AudioEndpointBuilder",
+        "vgc", "vgk", "EasyAntiCheat", "EasyAntiCheat_EOS", "BEService", "FACEIT", "PnkBstrA", "PnkBstrB", "mhyprot2", "ACE-BASE",
+    ];
 
     public static string? CheckRegistry(string hive, string path, string name)
     {

@@ -17,7 +17,7 @@ namespace Nexus.Broker;
 /// </summary>
 public sealed class BrokerService : IDisposable
 {
-    public const int MaxActionsPerRequest = 32;
+    public const int MaxActionsPerRequest = 64;
     public const int MaxProfileLength = 128;
     /// <summary>Limites de resposta: textos e listas nunca podem fazer o quadro passar de <see cref="BrokerWire.MaxFrameBytes"/>.</summary>
     public const int MaxTextLength = 1024;

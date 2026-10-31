@@ -3,6 +3,7 @@ using Nexus.Core;
 using Nexus.GameProfiles.SourceCfg;
 using Nexus.HardwareDiscovery;
 using Nexus.Persistence;
+using Nexus.WindowsActions;
 using Nexus.WindowsActions.Power;
 using Nexus.WindowsActions.Registry;
 using Nexus.WindowsActions.Services;
@@ -36,7 +37,33 @@ public sealed class NexusServices
             new PowerSettingValueHandler(new WindowsPowerBackend()),
             new ServiceStartTypeHandler(new WindowsServiceBackend()),
             new SourceCfgConvarHandler(() => null),
+            .. ModuleHandlersForPreview(registry),
         ]);
+    }
+
+    /// <summary>Handlers dos módulos, só para a página Catálogo ler o estado e simular (embrulhados acima: nunca escrevem).</summary>
+    private static List<IActionHandler> ModuleHandlersForPreview(WindowsRegistryBackend registry)
+    {
+        var env = new HandlerEnvironment(registry,
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NEXUS"), OtherAccount: false, Elevated: false);
+        var all = new List<IActionHandler>();
+        Func<HandlerEnvironment, IEnumerable<IActionHandler>>[] modules =
+        [
+            Nexus.Cleaning.CleaningHandlers.Create, Nexus.DiskTools.DiskToolsHandlers.Create, Nexus.Programs.ProgramsHandlers.Create,
+            Nexus.Boot.BootHandlers.Create, Nexus.Privacy.PrivacyHandlers.Create, Nexus.Security.SecurityHandlers.Create,
+            Nexus.Monitoring.MonitoringHandlers.Create, Nexus.SystemTools.SystemToolsHandlers.Create, Nexus.Automation.AutomationHandlers.Create,
+        ];
+        var kinds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var create in modules)
+        {
+            try
+            {
+                foreach (var h in create(env))
+                    if (kinds.Add(h.HandlerKind)) all.Add(h);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { } // módulo indisponível neste PC: a página mostra "handler pendente"
+        }
+        return all;
     }
 
     public static SystemContext ContextFrom(SystemFacts f) =>

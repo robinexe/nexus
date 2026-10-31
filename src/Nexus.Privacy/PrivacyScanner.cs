@@ -115,7 +115,7 @@ public sealed class PrivacyScanner
 public static class PrivacyPlanner
 {
     /// <summary>Limite do aplicador por pedido (<c>BrokerService.MaxActionsPerRequest</c>).</summary>
-    public const int MaxActionsPerRequest = 32;
+    public const int MaxActionsPerRequest = 64;
 
     public static PrivacyScore Score(IEnumerable<PrivacyItemState> states)
     {

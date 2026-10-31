@@ -96,6 +96,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     public void Navigate(PageViewModel page) => SelectedPage = page;
 
+    public PageViewModel? FindPage(Type pageType) => Pages.FirstOrDefault(p => p.GetType() == pageType);
+
     public OverviewPage Overview { get; } = new();
     public HardwarePage Hardware { get; } = new();
     public DiagnosticsPage Diagnostics { get; } = new();

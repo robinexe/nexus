@@ -32,6 +32,16 @@
   <ItemGroup>
     <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- nexus.exe (linha de comando) ao lado da interface: a verificação semanal agendada chama este executável. -->
+    <ProjectReference Include="..\Nexus.Cli\Nexus.Cli.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+  </ItemGroup>
+  <Target Name="CopyCli" AfterTargets="Build">
+    <ItemGroup>
+      <CliFiles Include="$(MSBuildThisFileDirectory)..\Nexus.Cli\bin\$(Configuration)\net10.0\nexus.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CliFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
   <Target Name="CopyBrokerHost" AfterTargets="Build">
     <ItemGroup>
       <BrokerHostFiles Include="$(MSBuildThisFileDirectory)..\Nexus.Broker.Host\bin\$(Configuration)\net10.0-windows\**\*" />

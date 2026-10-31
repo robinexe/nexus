@@ -208,8 +208,7 @@ public sealed class AutomationPage : ModulePage
         if (type is null) return null;
         return new RelayCommand(() =>
         {
-            // IModuleHost não expõe a lista de páginas; a janela principal expõe (ver relatório: proposta de IModuleHost.FindPage).
-            if (Host is MainViewModel main && main.Pages.FirstOrDefault(p => p.GetType() == type) is { } page) Host.Navigate(page);
+            if (Host?.FindPage(type) is { } page) Host.Navigate(page);
         });
     }
 
