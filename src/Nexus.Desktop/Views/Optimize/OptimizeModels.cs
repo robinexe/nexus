@@ -15,12 +15,29 @@ public sealed record EvidenceItem(string LevelText, string Source, int Strength)
 public sealed record MythItem(string Id, string Title, string Verdict, string Tone, string Reason, string? Source)
 {
     public bool HasSource => !string.IsNullOrWhiteSpace(Source);
+    /// <summary>Selo: vermelho quando não é recomendado/incompatível; neutro quando só não ajuda.</summary>
+    public Controls.Tone ChipTone => Tone == "bad" ? Controls.Tone.Bad : Controls.Tone.Neutral;
 }
 
 /// <summary>Grupo de resultados da simulação (seria aplicada, já está assim, não se aplica, bloqueada).</summary>
 public sealed record PlanGroup(PlanStatus Kind, string Title, string Hint, IReadOnlyList<PlanRow> Items)
 {
     public int Count => Items.Count;
+    /// <summary>Âmbar muda, verde já está, vermelho bloqueada, neutro não se aplica.</summary>
+    public Controls.Tone Tone => Kind switch
+    {
+        PlanStatus.Pending => Controls.Tone.Warn,
+        PlanStatus.AlreadyConfigured => Controls.Tone.Good,
+        PlanStatus.Blocked => Controls.Tone.Bad,
+        _ => Controls.Tone.Neutral,
+    };
+    public string IconKey => Kind switch
+    {
+        PlanStatus.Pending => "Icon.ArrowRight",
+        PlanStatus.AlreadyConfigured => "Icon.Check",
+        PlanStatus.Blocked => "Icon.Lock",
+        _ => "Icon.Info",
+    };
 }
 
 /// <summary>Capacidades de uma área, com a contagem honesta do que já foi validado.</summary>
@@ -30,6 +47,33 @@ public sealed record CapabilityGroup(string Area, IReadOnlyList<CapabilityRow> I
     public string Tally => Validated == Items.Count
         ? (Items.Count == 1 ? "validado" : $"todos os {Items.Count} validados")
         : $"{Validated} de {Items.Count} validados";
+    /// <summary>Parcela validada da área (0–100), para a barra.</summary>
+    public double Percent => Items.Count == 0 ? 0 : 100.0 * Validated / Items.Count;
+    public string IconKey => ViewModels.PageText.AreaIcon(Area);
+    public IReadOnlyList<CapabilityCard> Cards => Items.Select(i => new CapabilityCard(i)).ToList();
+}
+
+/// <summary>Uma capacidade com o selo do design system (tom + texto curto).</summary>
+public sealed record CapabilityCard(CapabilityRow Row)
+{
+    public string Capability => Row.Capability;
+    public string Note => Row.Note;
+    public bool HasNote => !string.IsNullOrWhiteSpace(Row.Note);
+    public string LabelText => Row.LabelText;
+    public Controls.Tone Tone => Row.Label switch
+    {
+        CapabilityLabel.ImplementedValidated => Controls.Tone.Good,
+        CapabilityLabel.ImplementedNotValidated => Controls.Tone.Info,
+        CapabilityLabel.Pending => Controls.Tone.Warn,
+        _ => Controls.Tone.Neutral,
+    };
+    public string ChipText => Row.Label switch
+    {
+        CapabilityLabel.ImplementedValidated => "Validado",
+        CapabilityLabel.ImplementedNotValidated => "Sem teste real ainda",
+        CapabilityLabel.NotSupportedHere => "Não roda aqui",
+        _ => "Pendente",
+    };
 }
 
 /// <summary>Textos de apoio do catálogo em português de jogador.</summary>

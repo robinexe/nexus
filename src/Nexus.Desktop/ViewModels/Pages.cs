@@ -43,6 +43,19 @@ public sealed class SectionViewModel(DiscoverySection s)
     public string Title { get; } = s.Title;
     public IReadOnlyList<Fact> Facts { get; } = s.Facts;
     public IReadOnlyList<TableViewModel> Tables { get; } = s.Tables.Select(t => new TableViewModel(t)).ToList();
+
+    // ---- apresentação v2 (somente leitura)
+
+    /// <summary>Ícone da seção (Themes/Icons.xaml), escolhido pelo título.</summary>
+    public string IconKey { get; } = PageText.SectionIcon(s.Title);
+    public int DetectedCount => Facts.Count(f => f.Status == FactStatus.Detected);
+    public int UnavailableCount => Facts.Count(f => f.Status == FactStatus.Unavailable);
+    /// <summary>"8 valores · 1 sem leitura".</summary>
+    public string CountText => PageText.Plural(Facts.Count, "valor", "valores") + (UnavailableCount > 0 ? $" · {UnavailableCount} sem leitura" : "");
+    public bool HasTables => Tables.Count > 0;
+    /// <summary>Fontes distintas da seção, para o "De onde vêm estes valores?".</summary>
+    public string Sources => string.Join(" · ", Facts.Select(f => f.Source).Concat(Tables.Select(t => t.Source))
+        .Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.Ordinal));
 }
 
 public sealed class HardwarePage : PageViewModel
@@ -57,10 +70,9 @@ public sealed class HardwarePage : PageViewModel
         set
         {
             if (!Set(ref _sections, value)) return;
-            OnPropertyChanged(nameof(DetectedCount));
-            OnPropertyChanged(nameof(InferredCount));
-            OnPropertyChanged(nameof(UnavailableCount));
-            OnPropertyChanged(nameof(HasData));
+            foreach (var name in (string[])[nameof(DetectedCount), nameof(InferredCount), nameof(UnavailableCount), nameof(HasData), nameof(IsLoading),
+                         nameof(TotalFacts), nameof(DetectedPercent), nameof(DetectedNumber), nameof(InferredNumber), nameof(UnavailableNumber)])
+                OnPropertyChanged(name);
         }
     }
 
@@ -69,6 +81,15 @@ public sealed class HardwarePage : PageViewModel
     public int InferredCount => CountFacts(FactStatus.Inferred);
     public int UnavailableCount => CountFacts(FactStatus.Unavailable);
     public bool HasData => Sections.Count > 0;
+    public bool IsLoading => Sections.Count == 0;
+
+    /// <summary>Total de valores lidos (NaN antes da leitura).</summary>
+    public double TotalFacts => HasData ? Sections.Sum(s => s.Facts.Count) : double.NaN;
+    /// <summary>Parcela lida direto da fonte (0–100; NaN antes da leitura).</summary>
+    public double DetectedPercent => HasData && TotalFacts > 0 ? 100.0 * DetectedCount / TotalFacts : double.NaN;
+    public double DetectedNumber => HasData ? DetectedCount : double.NaN;
+    public double InferredNumber => HasData ? InferredCount : double.NaN;
+    public double UnavailableNumber => HasData ? UnavailableCount : double.NaN;
 
     private int CountFacts(FactStatus status) => Sections.SelectMany(s => s.Facts).Count(f => f.Status == status);
 }
@@ -95,7 +116,22 @@ public sealed class DiagnosticsPage : PageViewModel
     [
         nameof(Summary), nameof(Ordered), nameof(Highlights), nameof(AttentionCount), nameof(InfoCount), nameof(OkCount),
         nameof(UnavailableCount), nameof(Total), nameof(AttentionLabel), nameof(HasFindings), nameof(NoAttention),
+        nameof(IsLoading), nameof(Cards), nameof(HealthScore), nameof(AttentionNumber), nameof(InfoNumber), nameof(OkNumber), nameof(UnavailableNumber),
+        nameof(HealthCaption),
     ];
+
+    // ---- apresentação v2 (somente leitura)
+
+    public bool IsLoading => Findings.Count == 0;
+    /// <summary>Achados como cartões (atenção primeiro), com ícone, tom e a página que resolve.</summary>
+    public IReadOnlyList<FindingCard> Cards => Ordered.Select(f => new FindingCard(f)).ToList();
+    /// <summary>"Itens em ordem" (0–100), a mesma conta do Meu PC; NaN antes da leitura.</summary>
+    public double HealthScore => DesignMath.HealthScore(Findings.Count, AttentionCount) ?? double.NaN;
+    public double AttentionNumber => HasFindings ? AttentionCount : double.NaN;
+    public double InfoNumber => HasFindings ? InfoCount : double.NaN;
+    public double OkNumber => HasFindings ? OkCount : double.NaN;
+    public double UnavailableNumber => HasFindings ? UnavailableCount : double.NaN;
+    public string HealthCaption => !HasFindings ? "" : AttentionCount == 0 ? "Nada pede atenção agora" : $"{AttentionCount} {AttentionLabel}";
 
     // Derivados para a apresentação: atenção primeiro, depois informativo, depois ok.
     public IReadOnlyList<DiagnosticFinding> Ordered => Findings.OrderBy(f => Rank(f.Severity)).ToList();
@@ -117,6 +153,35 @@ public sealed class DiagnosticsPage : PageViewModel
     };
     public string Summary => $"{Findings.Count(f => f.Severity == DiagnosticSeverity.Attention)} ponto(s) de atenção · " +
                              $"{Findings.Count(f => f.Basis == FactStatus.Unavailable)} não avaliável(is) · {Findings.Count} no total";
+}
+
+/// <summary>Achado do diagnóstico pronto para o cartão: ícone do módulo, tom da severidade e a página que resolve.</summary>
+public sealed class FindingCard(DiagnosticFinding finding)
+{
+    public DiagnosticFinding Finding { get; } = finding;
+    public string Title => Finding.Title;
+    public string Evidence => Finding.Evidence;
+    public DiagnosticSeverity Severity => Finding.Severity;
+    public FactStatus Basis => Finding.Basis;
+    public string? RelatedActionId => Finding.RelatedActionId;
+    public bool HasRelatedAction => !string.IsNullOrEmpty(Finding.RelatedActionId);
+    public string IconKey => ShellMap.IconForFinding(Finding.Id);
+    public Tone Tone => Finding.Severity switch
+    {
+        DiagnosticSeverity.Attention => Tone.Warn,
+        DiagnosticSeverity.Info => Tone.Info,
+        _ => Tone.Good,
+    };
+    public string SeverityText => Finding.Severity switch
+    {
+        DiagnosticSeverity.Attention => "Vale conferir",
+        DiagnosticSeverity.Info => "Para saber",
+        _ => "Em ordem",
+    };
+    /// <summary>Página que resolve ou aprofunda (nome do tipo, para ShellCommands.Navigate).</summary>
+    public string Target => ShellMap.PageForFinding(Finding.Id);
+    public string ActionText => ShellMap.ActionFor(Target);
+    public bool HasTarget => Target != "DiagnosticsPage";
 }
 
 // ------------------------------------------------------------------ Catálogo
@@ -214,11 +279,36 @@ public sealed class CatalogRow : ObservableObject
         _ => "Mudaria com este ajuste",
     };
 
+    /// <summary>Tom do selo da leitura: verde já está assim, âmbar mudaria, vermelho falhou, ciano lendo, neutro sem leitura.</summary>
+    public Tone ReadTone => ReadState switch
+    {
+        "same" => Tone.Good,
+        "change" => Tone.Warn,
+        "error" => Tone.Bad,
+        "reading" => Tone.Info,
+        _ => Tone.Neutral,
+    };
+
+    /// <summary>Texto curto do selo ("Já está assim", "Mudaria", "Não deu pra ler").</summary>
+    public string ReadChipText => ReadState switch
+    {
+        "same" => "Já está assim",
+        "change" => "Mudaria",
+        "error" => "Não deu pra ler",
+        "reading" => "Lendo…",
+        _ => "Sem leitura aqui",
+    };
+
+    /// <summary>Ícone do assunto do ajuste (pelo prefixo do id).</summary>
+    public string IconKey => PageText.ActionIcon(Id);
+
     private void RaiseReadState()
     {
         OnPropertyChanged(nameof(CurrentShown));
         OnPropertyChanged(nameof(ReadState));
         OnPropertyChanged(nameof(ReadStateText));
+        OnPropertyChanged(nameof(ReadTone));
+        OnPropertyChanged(nameof(ReadChipText));
     }
 }
 
@@ -231,10 +321,28 @@ public sealed class CatalogPage : PageViewModel
     public override string Title => "O que dá pra ajustar";
     public override string Group => "Otimizar";
     public override string Subtitle => "Cada ajuste mostra o valor lido agora no seu PC e o que ele passaria a ser. Nada é aplicado nesta página.";
+    private bool _isMythsTab;
+
+    public CatalogPage()
+    {
+        ShowMythsCommand = new RelayCommand(() => IsMythsTab = true);
+        ShowActionsCommand = new RelayCommand(() => IsActionsTab = true);
+    }
+
     public IReadOnlyList<CatalogRow> Rows
     {
         get => _rows;
-        set { if (Set(ref _rows, value)) OnPropertyChanged(nameof(RowsTitle)); }
+        set
+        {
+            foreach (var r in _rows) r.PropertyChanged -= OnRowChanged;
+            if (!Set(ref _rows, value)) return;
+            foreach (var r in _rows) r.PropertyChanged += OnRowChanged;
+            OnPropertyChanged(nameof(RowsTitle));
+            OnPropertyChanged(nameof(HasRows));
+            OnPropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(RowsNumber));
+            RaiseCounts();
+        }
     }
     public IReadOnlyList<RejectedCatalogItem> Rejected
     {
@@ -244,7 +352,45 @@ public sealed class CatalogPage : PageViewModel
             if (!Set(ref _rejected, value)) return;
             OnPropertyChanged(nameof(Myths));
             OnPropertyChanged(nameof(MythsTitle));
+            OnPropertyChanged(nameof(MythsNumber));
         }
+    }
+
+    // ---- apresentação v2 (somente leitura, exceto as abas)
+
+    public bool IsActionsTab { get => !_isMythsTab; set { if (value) IsMythsTab = false; } }
+    public bool IsMythsTab
+    {
+        get => _isMythsTab;
+        set { if (Set(ref _isMythsTab, value)) OnPropertyChanged(nameof(IsActionsTab)); }
+    }
+    public RelayCommand ShowMythsCommand { get; }
+    public RelayCommand ShowActionsCommand { get; }
+
+    public bool HasRows => Rows.Count > 0;
+    public bool IsLoading => Rows.Count == 0;
+    public double RowsNumber => HasRows ? Rows.Count : double.NaN;
+    public double MythsNumber => Rejected.Count;
+    /// <summary>Quantos mudariam se aplicados (lidos e diferentes do desejado).</summary>
+    public double ChangeCount => HasRows ? Rows.Count(r => r.ReadState == "change") : double.NaN;
+    /// <summary>Quantos já estão como o desejado neste PC.</summary>
+    public double SameCount => HasRows ? Rows.Count(r => r.ReadState == "same") : double.NaN;
+    /// <summary>Quantos estão marcados para o teste (os mesmos de Testar sem aplicar e Aplicar).</summary>
+    public double IncludedCount => HasRows ? Rows.Count(r => r.Include) : double.NaN;
+
+    /// <summary>Passos do caminho seguro (nenhum é o atual: aqui só se escolhe).</summary>
+    public IReadOnlyList<FlowStep> Flow { get; } = OptimizeFlow.For(null);
+
+    private void OnRowChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(CatalogRow.ReadState) or nameof(CatalogRow.Include)) RaiseCounts();
+    }
+
+    private void RaiseCounts()
+    {
+        OnPropertyChanged(nameof(ChangeCount));
+        OnPropertyChanged(nameof(SameCount));
+        OnPropertyChanged(nameof(IncludedCount));
     }
     public CatalogRow? Selected { get => _selected; set => Set(ref _selected, value); }
     public string Version { get => _version; set => Set(ref _version, value); }
@@ -290,6 +436,18 @@ public sealed class PlanPage : PageViewModel
     public override string Title => "Testar sem aplicar";
     public override string Group => "Otimizar";
     public override string Subtitle => "Simule antes de mexer: a gente relê o estado real do PC e mostra o que mudaria, em ordem e por lote. Nada é aplicado.";
+    public PlanPage()
+    {
+        Candidates.CollectionChanged += (_, e) =>
+        {
+            foreach (var r in e.OldItems?.OfType<CatalogRow>() ?? []) r.PropertyChanged -= OnCandidateChanged;
+            foreach (var r in e.NewItems?.OfType<CatalogRow>() ?? []) r.PropertyChanged += OnCandidateChanged;
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+                foreach (var r in Candidates) { r.PropertyChanged -= OnCandidateChanged; r.PropertyChanged += OnCandidateChanged; }
+            RaiseSelection();
+        };
+    }
+
     public ObservableCollection<CatalogRow> Candidates { get; } = [];
     public IReadOnlyList<PlanRow> Rows
     {
@@ -297,12 +455,43 @@ public sealed class PlanPage : PageViewModel
         set
         {
             if (!Set(ref _rows, value)) return;
-            OnPropertyChanged(nameof(Groups));
-            OnPropertyChanged(nameof(HasResult));
+            foreach (var name in (string[])[nameof(Groups), nameof(HasResult), nameof(NoResult), nameof(HeroNumber), nameof(HeroValueText),
+                         nameof(PendingCount), nameof(AlreadyCount), nameof(NotApplicableCount), nameof(BlockedCount)])
+                OnPropertyChanged(name);
         }
     }
 
     public bool HasResult => Rows.Count > 0;
+
+    // ---- apresentação v2 (somente leitura)
+
+    public bool NoResult => Rows.Count == 0;
+    public bool HasCandidates => Candidates.Count > 0;
+    /// <summary>Destaque: quantos mudariam (depois de simular); antes disso, o texto "Ainda não testado".</summary>
+    public double HeroNumber => HasResult ? Count(PlanStatus.Pending) : double.NaN;
+    public string HeroValueText => HasResult ? "" : "Ainda não testado";
+    public double PendingCount => HasResult ? Count(PlanStatus.Pending) : double.NaN;
+    public double AlreadyCount => HasResult ? Count(PlanStatus.AlreadyConfigured) : double.NaN;
+    public double NotApplicableCount => HasResult ? Count(PlanStatus.NotApplicable) : double.NaN;
+    public double BlockedCount => HasResult ? Count(PlanStatus.Blocked) : double.NaN;
+    /// <summary>Marcados para testar agora (os mesmos da página Aplicar).</summary>
+    public double SelectedCount => Candidates.Count(c => c.Include);
+    public string SelectedCaption => $"de {Candidates.Count} que dá pra ler aqui";
+    public IReadOnlyList<FlowStep> Flow { get; } = OptimizeFlow.For("PlanPage");
+
+    private int Count(PlanStatus s) => Rows.Count(r => r.Kind == s);
+
+    private void OnCandidateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CatalogRow.Include)) RaiseSelection();
+    }
+
+    private void RaiseSelection()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectedCaption));
+        OnPropertyChanged(nameof(HasCandidates));
+    }
 
     /// <summary>Resultado da simulação agrupado na ordem de leitura: o que mudaria primeiro, o que barrou por último.</summary>
     public IReadOnlyList<PlanGroup> Groups =>
@@ -321,16 +510,47 @@ public sealed class PlanPage : PageViewModel
 
 // ------------------------------------------------------------------ Histórico
 
-public sealed record HistoryRun(Guid RunId, string Started, string Status, string Profile, string Catalog);
-public sealed record HistoryEntry(long Id, string State, string Action, string Target, string Original, string Desired, string Observed, string? Note);
+public sealed record HistoryRun(Guid RunId, string Started, string Status, string Profile, string Catalog)
+{
+    /// <summary>Execução ainda sem encerramento registrado (algo dela pode estar valendo).</summary>
+    [JsonIgnore]
+    public bool IsOpen => Status == "não encerrada";
+}
+
+public sealed record HistoryEntry(long Id, string State, string Action, string Target, string Original, string Desired, string Observed, string? Note)
+{
+    [JsonIgnore]
+    public string StateText => OutcomeText.Of(OutcomeText.Split(State).Name);
+    [JsonIgnore]
+    public Tone Tone => PageText.OutcomeTone(State);
+    [JsonIgnore]
+    public string IconKey => PageText.ActionIcon(Action);
+    [JsonIgnore]
+    public bool HasNote => !string.IsNullOrWhiteSpace(Note);
+}
+
+/// <summary>Item da linha do tempo do Histórico: a execução, o selo e o "Desfazer" dela.</summary>
+public sealed class HistoryRunCard(HistoryRun run, RelayCommand undo)
+{
+    public HistoryRun Run { get; } = run;
+    public string Started => Run.Started;
+    public string Profile => Run.Profile;
+    public string Catalog => Run.Catalog;
+    public bool IsOpen => Run.IsOpen;
+    public Tone Tone => Run.IsOpen ? Tone.Warn : Tone.Neutral;
+    public string StatusText => Run.IsOpen ? "Ainda valendo" : Run.Status.Length > 0 ? char.ToUpperInvariant(Run.Status[0]) + Run.Status[1..] : "";
+    public RelayCommand UndoCommand { get; } = undo;
+}
 
 public sealed class HistoryPage : PageViewModel
 {
     private IReadOnlyList<HistoryRun> _runs = [];
+    private IReadOnlyList<HistoryRunCard> _cards = [];
     private IReadOnlyList<HistoryEntry> _entries = [];
     private HistoryRun? _selected;
     private string _status = "";
     private string _coordination = "";
+    private bool _undoing;
     public override string Title => "Histórico";
     public override string Group => "Registro";
     public override string Subtitle => "Tudo o que o serviço registrou no diário, aberto só para leitura, e se há algum executor em uso agora.";
@@ -338,22 +558,99 @@ public sealed class HistoryPage : PageViewModel
     public IReadOnlyList<HistoryRun> Runs
     {
         get => _runs;
-        set { if (Set(ref _runs, value)) OnPropertyChanged(nameof(RunsTitle)); }
+        set
+        {
+            if (!Set(ref _runs, value)) return;
+            Cards = value.Select(r => new HistoryRunCard(r, new RelayCommand(() => _ = UndoAsync(r), () => !_undoing))).ToList();
+            foreach (var name in (string[])[nameof(RunsTitle), nameof(HasRuns), nameof(NoRuns), nameof(RunsNumber), nameof(OpenNumber)])
+                OnPropertyChanged(name);
+        }
     }
     public IReadOnlyList<HistoryEntry> Entries
     {
         get => _entries;
-        set { if (Set(ref _entries, value)) OnPropertyChanged(nameof(EntriesTitle)); }
+        set
+        {
+            if (!Set(ref _entries, value)) return;
+            foreach (var name in (string[])[nameof(EntriesTitle), nameof(AppliedEntries), nameof(RevertedEntries), nameof(ProblemEntries)])
+                OnPropertyChanged(name);
+        }
     }
     public string RunsTitle => Runs.Count == 1 ? "1 execução" : $"{Runs.Count} execuções";
     public string EntriesTitle => Entries.Count == 1 ? "1 ajuste nesta execução" : $"{Entries.Count} ajustes nesta execução";
     public string Status { get => _status; set => Set(ref _status, value); }
-    public string Coordination { get => _coordination; set => Set(ref _coordination, value); }
+    public string Coordination
+    {
+        get => _coordination;
+        set { if (Set(ref _coordination, value)) { OnPropertyChanged(nameof(CoordinationTone)); OnPropertyChanged(nameof(CoordinationChip)); } }
+    }
     public Action<HistoryRun?>? OnSelected { get; set; }
     public HistoryRun? Selected
     {
         get => _selected;
-        set { if (Set(ref _selected, value)) OnSelected?.Invoke(value); }
+        set
+        {
+            if (!Set(ref _selected, value)) return;
+            OnSelected?.Invoke(value);
+            OnPropertyChanged(nameof(SelectedCard));
+            OnPropertyChanged(nameof(HasSelection));
+        }
+    }
+
+    // ---- apresentação v2
+
+    /// <summary>Linha do tempo com o "Desfazer" de cada execução.</summary>
+    public IReadOnlyList<HistoryRunCard> Cards { get => _cards; private set => Set(ref _cards, value); }
+    /// <summary>Cartão escolhido na linha do tempo (espelha <see cref="Selected"/>).</summary>
+    public HistoryRunCard? SelectedCard
+    {
+        get => _cards.FirstOrDefault(c => c.Run == _selected);
+        set => Selected = value?.Run;
+    }
+    public bool HasSelection => _selected is not null;
+    public bool HasRuns => Runs.Count > 0;
+    public bool NoRuns => Runs.Count == 0;
+    public double RunsNumber => Runs.Count;
+    /// <summary>Execuções sem encerramento registrado.</summary>
+    public double OpenNumber => Runs.Count(r => r.IsOpen);
+    public double AppliedEntries => Entries.Count(e => PageText.OutcomeTone(e.State) is Tone.Warn);
+    public double RevertedEntries => Entries.Count(e => PageText.OutcomeTone(e.State) is Tone.Good);
+    public double ProblemEntries => Entries.Count(e => PageText.OutcomeTone(e.State) is Tone.Bad);
+    public Tone CoordinationTone => Coordination.StartsWith("Nenhum executor ativo", StringComparison.Ordinal) ? Tone.Good
+        : Coordination.StartsWith("Executor ativo", StringComparison.Ordinal) ? Tone.Warn : Tone.Neutral;
+    public string CoordinationChip => CoordinationTone switch
+    {
+        Tone.Good => "Nada aplicando agora",
+        Tone.Warn => "Aplicando agora",
+        _ => "Não deu pra conferir",
+    };
+    public IReadOnlyList<FlowStep> Flow { get; } = OptimizeFlow.For("HistoryPage");
+
+    /// <summary>Quem desfaz: a janela (IModuleHost), que pede confirmação e usa o aplicador. Nunca escreve daqui.</summary>
+    public IModuleHost? Host { get; set; }
+
+    /// <summary>
+    /// Desfaz uma execução do diário mostrado (o do aplicador de sistema, em ProgramData): pede confirmação e, como é
+    /// mudança de sistema, o Windows pede permissão. A janela relê o histórico depois.
+    /// </summary>
+    private async Task UndoAsync(HistoryRun run)
+    {
+        var host = Host ?? System.Windows.Application.Current?.MainWindow?.DataContext as IModuleHost;
+        if (host is null || _undoing) return;
+        _undoing = true;
+        try
+        {
+            var level = string.Equals(JournalPath, Nexus.Broker.LocalBroker.JournalPath(Nexus.Broker.BrokerLevel.User), StringComparison.OrdinalIgnoreCase)
+                ? Nexus.Broker.BrokerLevel.User : Nexus.Broker.BrokerLevel.Admin;
+            var r = await host.RevertAsync(run.RunId, level);
+            if (r is not null) Status = r.Message;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"Não foi possível desfazer: {ex.Message}"; }
+        finally
+        {
+            _undoing = false;
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        }
     }
 }
 
@@ -374,6 +671,12 @@ public sealed class CapabilitiesPage : PageViewModel
     public int NotValidatedCount => Rows.Count(r => r.Label == CapabilityLabel.ImplementedNotValidated);
     public int NotSupportedCount => Rows.Count(r => r.Label == CapabilityLabel.NotSupportedHere);
     public int PendingCount => Rows.Count(r => r.Label == CapabilityLabel.Pending);
+
+    // ---- apresentação v2 (somente leitura)
+
+    /// <summary>Parcela validada com teste real (0–100).</summary>
+    public double ValidatedPercent => Rows.Count == 0 ? double.NaN : 100.0 * ValidatedCount / Rows.Count;
+    public string ValidatedSuffix => $" de {Rows.Count}";
 }
 
 /// <summary>Papel do cartão na página "Meu PC".</summary>
@@ -580,7 +883,25 @@ public sealed class OverviewPage : PageViewModel
 
 // ------------------------------------------------------------------ Broker (serviço)
 
-public sealed record BrokerResultRow(string Action, string Outcome, string Detail, string Observed, string Desired);
+public sealed record BrokerResultRow(string Action, string Outcome, string Detail, string Observed, string Desired)
+{
+    /// <summary>Resultado em português de jogador ("Aplicada e conferida", "Revertida"…).</summary>
+    [JsonIgnore]
+    public string OutcomeText
+    {
+        get
+        {
+            var (name, inferred) = Views.Optimize.OutcomeText.Split(Outcome);
+            return Views.Optimize.OutcomeText.Of(name) + (inferred ? " (inferido)" : "");
+        }
+    }
+    [JsonIgnore]
+    public Tone Tone => PageText.OutcomeTone(Outcome);
+    [JsonIgnore]
+    public string IconKey => PageText.ActionIcon(Action);
+    [JsonIgnore]
+    public bool HasDetail => !string.IsNullOrWhiteSpace(Detail);
+}
 
 /// <summary>
 /// Única via de escrita da interface: pedidos ao serviço NexusBroker. A interface não tem executor, trava nem diário gravável;
@@ -605,8 +926,66 @@ public sealed class BrokerPage : PageViewModel
     public override string Subtitle =>
         "Aplique os ajustes marcados neste PC. Cada mudança é registrada antes e pode ser desfeita; as de sistema pedem permissão ao Windows e criam um ponto de restauração.";
 
+    private ObservableCollection<CatalogRow> _candidates = [];
+
     /// <summary>As mesmas ações marcadas na página Simulação.</summary>
-    public ObservableCollection<CatalogRow> Candidates { get; set; } = [];
+    public ObservableCollection<CatalogRow> Candidates
+    {
+        get => _candidates;
+        set
+        {
+            _candidates.CollectionChanged -= OnCandidatesChanged;
+            foreach (var r in _candidates) r.PropertyChanged -= OnCandidateChanged;
+            _candidates = value;
+            _candidates.CollectionChanged += OnCandidatesChanged;
+            foreach (var r in _candidates) r.PropertyChanged += OnCandidateChanged;
+            OnPropertyChanged();
+            RaiseSelection();
+        }
+    }
+
+    // ---- apresentação v2 (somente leitura)
+
+    /// <summary>Marcados para aplicar agora (os mesmos de Testar sem aplicar).</summary>
+    public double SelectedCount => _candidates.Count(c => c.Include);
+    public string SelectedCaption => $"de {_candidates.Count} disponíveis";
+    public bool HasCandidates => _candidates.Count > 0;
+    public bool HasLastRun => LastRun is not null;
+    public bool HasResults => Results.Count > 0;
+    public bool NoResults => Results.Count == 0;
+    public double GoodCount => Results.Count(r => r.Tone == Tone.Good);
+    public double ChangedCount => Results.Count(r => r.Tone == Tone.Warn);
+    public double ProblemCount => Results.Count(r => r.Tone == Tone.Bad);
+    /// <summary>Tom do estado da escrita: verde liberada, ciano recusada (estado, não erro), neutro sem resposta.</summary>
+    public Tone GateTone => GateState switch { "open" => Tone.Good, "blocked" => Tone.Info, _ => Tone.Neutral };
+    public string GateChip => GateState switch { "open" => "Pronto para aplicar", "blocked" => "Aplicador recusou escrever", _ => "Aplicador ainda não consultado" };
+    /// <summary>Legenda de 1 linha do destaque.</summary>
+    public string GateCaption => GateState switch
+    {
+        "open" => "Você confirma antes. Tudo fica no diário e pode ser desfeito.",
+        "blocked" => "O aplicador respondeu, mas não liberou a escrita. Nada foi alterado.",
+        _ => "O aplicador inicia sozinho quando você aplica ou consulta.",
+    };
+    public IReadOnlyList<FlowStep> Flow { get; } = OptimizeFlow.For("BrokerPage");
+
+    private void OnCandidatesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        foreach (var r in e.OldItems?.OfType<CatalogRow>() ?? []) r.PropertyChanged -= OnCandidateChanged;
+        foreach (var r in e.NewItems?.OfType<CatalogRow>() ?? []) r.PropertyChanged += OnCandidateChanged;
+        RaiseSelection();
+    }
+
+    private void OnCandidateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CatalogRow.Include)) RaiseSelection();
+    }
+
+    private void RaiseSelection()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectedCaption));
+        OnPropertyChanged(nameof(HasCandidates));
+    }
 
     public bool Connected
     {
@@ -641,16 +1020,32 @@ public sealed class BrokerPage : PageViewModel
         OnPropertyChanged(nameof(GateState));
         OnPropertyChanged(nameof(GateTitle));
         OnPropertyChanged(nameof(GateExplain));
+        OnPropertyChanged(nameof(GateTone));
+        OnPropertyChanged(nameof(GateChip));
+        OnPropertyChanged(nameof(GateCaption));
     }
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public string ServiceStatus { get => _serviceStatus; set => Set(ref _serviceStatus, value); }
     public string Gate { get => _gate; set => Set(ref _gate, value); }
     public string Coordination { get => _coordination; set => Set(ref _coordination, value); }
     public string LastMessage { get => _lastMessage; set => Set(ref _lastMessage, value); }
-    public Guid? LastRun { get => _lastRun; set { if (Set(ref _lastRun, value)) OnPropertyChanged(nameof(LastRunText)); } }
+    public Guid? LastRun
+    {
+        get => _lastRun;
+        set { if (Set(ref _lastRun, value)) { OnPropertyChanged(nameof(LastRunText)); OnPropertyChanged(nameof(HasLastRun)); } }
+    }
     public bool SessionOpen { get => _sessionOpen; set => Set(ref _sessionOpen, value); }
     public string LastRunText => LastRun is null ? "nenhuma execução nesta sessão da interface" : LastRun.Value.ToString();
-    public IReadOnlyList<BrokerResultRow> Results { get => _results; set => Set(ref _results, value); }
+    public IReadOnlyList<BrokerResultRow> Results
+    {
+        get => _results;
+        set
+        {
+            if (!Set(ref _results, value)) return;
+            foreach (var name in (string[])[nameof(HasResults), nameof(NoResults), nameof(GoodCount), nameof(ChangedCount), nameof(ProblemCount)])
+                OnPropertyChanged(name);
+        }
+    }
 
     public RelayCommand? StatusCommand { get; set; }
     public RelayCommand? PlanCommand { get; set; }
@@ -658,4 +1053,104 @@ public sealed class BrokerPage : PageViewModel
     public RelayCommand? RevertCommand { get; set; }
     public RelayCommand? EndSessionCommand { get; set; }
     public RelayCommand? RecoverCommand { get; set; }
+}
+
+// ------------------------------------------------------------------ apresentação v2 (lógica pura, sem WPF)
+
+/// <summary>Um passo do caminho seguro Simular → Confirmar → Registrar → Desfazer, com a página que o mostra.</summary>
+public sealed record FlowStep(int Number, string Title, string Text, string IconKey, string Target, bool IsCurrent)
+{
+    public Tone Tone => IsCurrent ? Tone.Warn : Tone.Info;
+    public bool IsLast => Number == OptimizeFlow.Count;
+}
+
+/// <summary>O caminho que toda mudança de ajuste percorre, mostrado nas páginas Testar sem aplicar, Aplicar e Histórico.</summary>
+public static class OptimizeFlow
+{
+    public const int Count = 4;
+
+    /// <summary>Os 4 passos; <paramref name="currentPage"/> (nome do tipo) marca o passo "você está aqui".</summary>
+    public static IReadOnlyList<FlowStep> For(string? currentPage) =>
+    [
+        new(1, "Simular", "Relê o PC e mostra o que mudaria. Nada é aplicado.", "Icon.Plan", "PlanPage", currentPage == "PlanPage"),
+        new(2, "Confirmar", "Você aprova. Mudança de sistema pede permissão.", "Icon.Apply", "BrokerPage", currentPage == "BrokerPage"),
+        new(3, "Registrar", "O original fica guardado no diário antes de mudar.", "Icon.History", "HistoryPage", currentPage == "HistoryPage"),
+        new(4, "Desfazer", "Volta ao valor original quando você quiser.", "Icon.Undo", "HistoryPage", false),
+    ];
+}
+
+/// <summary>Textos e ícones de apresentação das páginas de Pages.cs (testáveis sem WPF).</summary>
+public static class PageText
+{
+    public static string Plural(int n, string one, string many) => n == 1 ? $"1 {one}" : $"{n} {many}";
+
+    /// <summary>Ícone de uma seção do Hardware pelo título.</summary>
+    public static string SectionIcon(string title)
+    {
+        var t = title;
+        if (t.Contains("processador", StringComparison.OrdinalIgnoreCase)) return "Icon.Cpu";
+        if (t.Contains("jogo", StringComparison.OrdinalIgnoreCase)) return "Icon.Games";
+        if (t.Contains("gpu", StringComparison.OrdinalIgnoreCase) || t.Contains("vídeo", StringComparison.OrdinalIgnoreCase)) return "Icon.Gpu";
+        if (t.Contains("memória", StringComparison.OrdinalIgnoreCase)) return "Icon.Ram";
+        if (t.Contains("disco", StringComparison.OrdinalIgnoreCase)) return "Icon.Disk";
+        if (t.Contains("rede", StringComparison.OrdinalIgnoreCase)) return "Icon.Network";
+        if (t.Contains("energia", StringComparison.OrdinalIgnoreCase)) return "Icon.Bolt";
+        if (t.Contains("windows", StringComparison.OrdinalIgnoreCase)) return "Icon.Windows";
+        if (t.Contains("serviço", StringComparison.OrdinalIgnoreCase)) return "Icon.Services";
+        if (t.Contains("inicialização", StringComparison.OrdinalIgnoreCase)) return "Icon.Startup";
+        if (t.Contains("placa", StringComparison.OrdinalIgnoreCase) || t.Contains("firmware", StringComparison.OrdinalIgnoreCase)) return "Icon.Hardware";
+        return "Icon.Pc";
+    }
+
+    /// <summary>Ícone do assunto de uma ação do catálogo pelo prefixo do id (aceita "id@versão" e "Título (id@versão)").</summary>
+    public static string ActionIcon(string? idOrKey)
+    {
+        var s = idOrKey ?? "";
+        var open = s.LastIndexOf('(');
+        if (open >= 0 && s.EndsWith(')')) s = s[(open + 1)..^1];
+        var dot = s.IndexOf('.', StringComparison.Ordinal);
+        var prefix = dot > 0 ? s[..dot] : s;
+        return prefix switch
+        {
+            "power" or "cpulab" or "proc" => "Icon.Cpu",
+            "gpu" or "gpulab" or "nvidia" => "Icon.Gpu",
+            "memorylab" => "Icon.Ram",
+            "disk" => "Icon.Disk",
+            "cleaning" => "Icon.Clean",
+            "boot" or "startup" => "Icon.Startup",
+            "svc" => "Icon.Services",
+            "privacy" => "Icon.Privacy",
+            "security" => "Icon.Security",
+            "scanner" => "Icon.Scan",
+            "programs" => "Icon.Programs",
+            "driverupdates" => "Icon.Drivers",
+            "automation" or "sched" => "Icon.Auto",
+            "system" => "Icon.Tools",
+            "win" => "Icon.Windows",
+            _ => "Icon.Settings",
+        };
+    }
+
+    /// <summary>Ícone de uma área da página "O que já funciona".</summary>
+    public static string AreaIcon(string area) => area switch
+    {
+        "Ações" => "Icon.Settings",
+        "Base" => "Icon.Code",
+        "Descoberta" => "Icon.Search",
+        "Execução" => "Icon.Apply",
+        "Interface" => "Icon.Pc",
+        "Jogos" => "Icon.Games",
+        "Medição" => "Icon.Measure",
+        "Recuperação" => "Icon.Undo",
+        _ => "Icon.Capabilities",
+    };
+
+    /// <summary>Tom do design system para um resultado do aplicador ou estado do diário (good/bad/change/neutral).</summary>
+    public static Tone OutcomeTone(string? raw) => OutcomeText.Tone(OutcomeText.Split(raw ?? "").Name) switch
+    {
+        "good" => Tone.Good,
+        "bad" => Tone.Bad,
+        "change" => Tone.Warn,
+        _ => Tone.Neutral,
+    };
 }

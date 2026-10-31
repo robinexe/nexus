@@ -5,6 +5,7 @@ using Nexus.Broker;
 using Nexus.Cleaning;
 using Nexus.Core;
 using Nexus.Desktop.Services;
+using Nexus.Desktop.Views.Controls;
 using Nexus.HardwareDiscovery;
 
 namespace Nexus.Desktop.ViewModels;
@@ -31,7 +32,21 @@ public sealed class RecommendationRow
         if (r.OneClick) meta.Add("entra no Otimizar agora");
         Meta = string.Join(" · ", meta);
         DetailsCommand = details;
+        IconKey = r.ModulePrefix is { } prefix ? PageText.ActionIcon(prefix) : r.Kind == RecommendationKind.Info ? "Icon.Hardware" : "Icon.Sparkle";
+        HasGainOrMeta = Gain.Length > 0 || Meta.Length > 0;
     }
+
+    // ---- apresentação v2
+    /// <summary>Âmbar = recomendado, ciano = revisar/medir, vermelho = evitar, neutro = informação.</summary>
+    public Views.Controls.Tone ToneValue => Tone switch
+    {
+        "action" => Views.Controls.Tone.Warn,
+        "signal" => Views.Controls.Tone.Info,
+        "bad" => Views.Controls.Tone.Bad,
+        _ => Views.Controls.Tone.Neutral,
+    };
+    public string IconKey { get; }
+    public bool HasGainOrMeta { get; }
 
     public string Title { get; }
     public string Reason { get; }
@@ -45,7 +60,13 @@ public sealed class RecommendationRow
 }
 
 /// <summary>Item do plano do "Otimizar agora".</summary>
-public sealed record OneClickRow(string Title, string Detail, string Level);
+public sealed record OneClickRow(string Title, string Detail, string Level)
+{
+    public bool IsAdmin => Level == "administrador";
+    /// <summary>Âmbar quando pede administrador (aviso do Windows); ciano na sua conta.</summary>
+    public Views.Controls.Tone LevelTone => IsAdmin ? Views.Controls.Tone.Warn : Views.Controls.Tone.Info;
+    public string IconKey => IsAdmin ? "Icon.Lock" : "Icon.User";
+}
 
 /// <summary>
 /// Automático: lê o PC, classifica (notebook na bateria, desktop gamer, PC modesto, VM…), recomenda com o motivo, monta o
@@ -94,25 +115,53 @@ public sealed class AutomationPage : ModulePage
     public string Headline { get => _headline; private set => Set(ref _headline, value); }
     public IReadOnlyList<string> ProfileChips { get => _chips; private set => Set(ref _chips, value); }
     public IReadOnlyList<string> ProfileNotes { get => _notes; private set => Set(ref _notes, value); }
-    public IReadOnlyList<RecommendationRow> Recommendations { get => _recommendations; private set => Set(ref _recommendations, value); }
-    public IReadOnlyList<RecommendationRow> AvoidList { get => _avoid; private set => Set(ref _avoid, value); }
-    public IReadOnlyList<RecommendationRow> Advice { get => _advice; private set => Set(ref _advice, value); }
-    public IReadOnlyList<OneClickRow> PlanRows { get => _planRows; private set => Set(ref _planRows, value); }
-    public IReadOnlyList<string> PlanSkipped { get => _planSkipped; private set => Set(ref _planSkipped, value); }
+    public IReadOnlyList<RecommendationRow> Recommendations
+    {
+        get => _recommendations;
+        private set { if (Set(ref _recommendations, value)) Raise(nameof(RecommendCount), nameof(HasRecommendations), nameof(NoRecommendations), nameof(IsLoading)); }
+    }
+    public IReadOnlyList<RecommendationRow> AvoidList { get => _avoid; private set { if (Set(ref _avoid, value)) Raise(nameof(AvoidCount)); } }
+    public IReadOnlyList<RecommendationRow> Advice { get => _advice; private set { if (Set(ref _advice, value)) Raise(nameof(AdviceCount)); } }
+    public IReadOnlyList<OneClickRow> PlanRows { get => _planRows; private set { if (Set(ref _planRows, value)) Raise(nameof(HasPlanRows)); } }
+    public IReadOnlyList<string> PlanSkipped { get => _planSkipped; private set { if (Set(ref _planSkipped, value)) Raise(nameof(HasSkipped), nameof(SkippedTitle)); } }
     public string PlanSummary { get => _planSummary; private set => Set(ref _planSummary, value); }
-    public string PlanGains { get => _planGains; private set => Set(ref _planGains, value); }
+    public string PlanGains { get => _planGains; private set { if (Set(ref _planGains, value)) Raise(nameof(HasGains)); } }
     /// <summary>"prévia" (antes de perguntar ao aplicador) ou "confirmado pelo aplicador".</summary>
     public string PlanState { get => _planState; private set => Set(ref _planState, value); }
     public int PlanCount => _plan.Count;
     public string PlanCountText => (_planVerified ? _plan.Count + _cleaning.Requests.Count : _candidates.Count).ToString(CultureInfo.InvariantCulture);
     /// <summary>"Limpeza segura: 9 regras, 1,2 GB recuperáveis (vão para a quarentena)".</summary>
-    public string CleaningText { get => _cleaningText; private set => Set(ref _cleaningText, value); }
+    public string CleaningText { get => _cleaningText; private set { if (Set(ref _cleaningText, value)) Raise(nameof(HasCleaning)); } }
     public string Result { get => _result; private set => Set(ref _result, value); }
     public bool CanUndo => _runs.Count > 0;
     public bool HasAvoid => _avoid.Count > 0;
     public bool HasAdvice => _advice.Count > 0;
 
-    public string ScheduleText { get => _scheduleText; private set => Set(ref _scheduleText, value); }
+    public string ScheduleText { get => _scheduleText; private set { if (Set(ref _scheduleText, value)) OnPropertyChanged(nameof(ScheduleLines)); } }
+
+    // ---- apresentação v2 (somente leitura)
+
+    public bool IsLoading => _set is null;
+    /// <summary>Ações no plano (o mesmo número de <see cref="PlanCountText"/>); NaN antes da leitura.</summary>
+    public double PlanNumber => _set is null ? double.NaN : _planVerified ? _plan.Count + _cleaning.Requests.Count : _candidates.Count;
+    public bool HasPlanRows => _planRows.Count > 0;
+    public bool HasSkipped => _planSkipped.Count > 0;
+    public bool HasGains => _planGains.Length > 0;
+    public bool HasCleaning => _cleaningText.Length > 0;
+    public string UndoText => CanUndo ? "Desfazer tudo" : "";
+    public double RecommendCount => _recommendations.Count;
+    public double AvoidCount => _avoid.Count;
+    public double AdviceCount => _advice.Count;
+    public bool HasRecommendations => _recommendations.Count > 0;
+    public bool NoRecommendations => _set is not null && _recommendations.Count == 0;
+    public bool IsVerified => _planVerified;
+    public string SkippedTitle => _planSkipped.Count == 1 ? "1 ficou fora do plano" : $"{_planSkipped.Count} ficaram fora do plano";
+    public IReadOnlyList<string> ScheduleLines => _scheduleText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+    private void Raise(params string[] names)
+    {
+        foreach (var n in names) OnPropertyChanged(n);
+    }
 
     public RelayCommand OptimizeCommand { get; }
     public RelayCommand UndoAllCommand { get; }
@@ -226,6 +275,7 @@ public sealed class AutomationPage : ModulePage
         PlanGains = string.Join(Environment.NewLine, _candidates.Select(c => c.Recommendation.Gain).Where(g => g is not null).Distinct());
         PlanState = "prévia";
         OnPropertyChanged(nameof(PlanCountText));
+        Raise(nameof(PlanNumber), nameof(IsVerified));
     }
 
     /// <summary>Pergunta ao aplicador do usuário (sem aviso do Windows) o que de fato mudaria. Nada é escrito.</summary>
@@ -305,6 +355,7 @@ public sealed class AutomationPage : ModulePage
         if (_plan.IsEmpty && _cleaning.Requests.Count > 0) PlanSummary = "Os ajustes de um clique já estão assim; falta só a limpeza segura.";
         OnPropertyChanged(nameof(PlanCount));
         OnPropertyChanged(nameof(PlanCountText));
+        Raise(nameof(PlanNumber), nameof(IsVerified));
     }
 
     // ------------------------------------------------------------------ escrita (só pelo Host)
@@ -346,6 +397,7 @@ public sealed class AutomationPage : ModulePage
         }
         Result = string.Join(Environment.NewLine, lines);
         OnPropertyChanged(nameof(CanUndo));
+        OnPropertyChanged(nameof(UndoText));
         await VerifyPlanCoreAsync(); // o que foi aplicado passa a "já está assim"
     });
 
@@ -395,6 +447,7 @@ public sealed class AutomationPage : ModulePage
         }
         Result = string.Join(Environment.NewLine, lines);
         OnPropertyChanged(nameof(CanUndo));
+        OnPropertyChanged(nameof(UndoText));
         await VerifyPlanCoreAsync();
     });
 

@@ -1,17 +1,67 @@
 <!--
-  Histórico: linha do tempo das execuções registradas no diário (aberto só para leitura) e, ao lado, o que aconteceu com cada
-  ajuste da execução escolhida (estado, original → desejado, observado, nota). Recursos locais no DataTemplate.
+  Histórico (design system v2, docs/10-design-system.md). Terceiro e quarto passos do caminho seguro
+  Simular → Confirmar → Registrar → Desfazer.
+    1. Destaque: relógio com seta de desfazer, quantas execuções estão no diário (conta), quantas ainda valem e se algo está
+       aplicando agora (selo).
+    2. O trilho com "Você está aqui".
+    3. Linha do tempo: cada execução é um nó com data, selo ("Ainda valendo" / encerrada) e o seu próprio "Desfazer".
+       Ao lado, o que aconteceu com cada ajuste da execução escolhida (original → desejado, lido por último, selo do estado).
+  O diário é aberto só para leitura; "Desfazer" pede à janela (IModuleHost.RevertAsync), que confirma e usa o aplicador.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
-                    xmlns:opt="clr-namespace:Nexus.Desktop.Views.Optimize">
+                    xmlns:opt="clr-namespace:Nexus.Desktop.Views.Optimize"
+                    xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
+                    xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell">
   <DataTemplate DataType="{x:Type vm:HistoryPage}">
     <DataTemplate.Resources>
-      <opt:EmptyToCollapsedConverter x:Key="His.Shown"/>
-      <opt:EmptyToCollapsedConverter x:Key="His.ShownWhenEmpty" Invert="True"/>
-      <opt:OutcomeTextConverter x:Key="His.StateText"/>
-      <opt:OutcomeToneConverter x:Key="His.StateTone"/>
+      <!-- Passo do caminho seguro (mesmo desenho de Testar sem aplicar e Aplicar). -->
+      <DataTemplate x:Key="F.Step" DataType="{x:Type vm:FlowStep}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="22"/>
+          </Grid.ColumnDefinitions>
+          <Button Style="{StaticResource Button.Ghost}" Padding="0" Margin="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                  Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Target}"
+                  AutomationProperties.Name="{Binding Title}" ToolTip="{Binding Text}">
+            <Border x:Name="Card" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="1" CornerRadius="{StaticResource Radius.Control}" Padding="12,10">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Width="34" Height="34" Margin="0,0,10,0" VerticalAlignment="Top">
+                  <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
+                  <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="17"
+                          Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
+                </Grid>
+                <StackPanel Grid.Column="1">
+                  <TextBlock Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Display}" TextWrapping="NoWrap">
+                    <Run Text="{Binding Number, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.TextDim}"/>
+                    <Run Text="{Binding Title, Mode=OneWay}"/>
+                  </TextBlock>
+                  <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Small}" MaxHeight="36" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                  <c:StatusChip x:Name="Here" Tone="Warn" Text="Você está aqui" HorizontalAlignment="Left" Margin="0,6,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+              </Grid>
+            </Border>
+          </Button>
+          <c:Icon x:Name="Arrow" Grid.Column="1" Data="{StaticResource Icon.ChevronRight}" Size="16" Foreground="{StaticResource Brush.TextDim}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+            <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource Brush.TraceLine}"/>
+            <Setter TargetName="Card" Property="Background" Value="{StaticResource Brush.TraceSoft}"/>
+            <Setter TargetName="Here" Property="Visibility" Value="Visible"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding IsLast}" Value="True">
+            <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed"/>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
 
       <!-- Item da linha do tempo: sem caixa; selecionado ganha fundo mais alto. -->
       <Style x:Key="His.Item" TargetType="ListBoxItem">
@@ -21,11 +71,14 @@
         <Setter Property="Template">
           <Setter.Value>
             <ControlTemplate TargetType="ListBoxItem">
-              <Border x:Name="Bd" Background="Transparent" CornerRadius="{StaticResource Radius.Control}" Padding="10,0,12,0">
+              <Border x:Name="Bd" Background="Transparent" CornerRadius="{StaticResource Radius.Control}" Padding="8,0,10,0">
                 <ContentPresenter/>
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="Bd" Property="Background" Value="{StaticResource Brush.Surface}"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
                   <Setter TargetName="Bd" Property="Background" Value="{StaticResource Brush.Surface}"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
@@ -37,14 +90,17 @@
         </Setter>
       </Style>
 
-      <!-- Nó da linha do tempo: vazado em ciano; preenchido em âmbar na execução escolhida. -->
+      <!-- Nó da linha do tempo: vazado em ciano; âmbar quando a execução ainda vale; preenchido na escolhida. -->
       <Style x:Key="His.Node" TargetType="Ellipse">
-        <Setter Property="Width" Value="11"/>
-        <Setter Property="Height" Value="11"/>
+        <Setter Property="Width" Value="13"/>
+        <Setter Property="Height" Value="13"/>
         <Setter Property="Fill" Value="{StaticResource Brush.Bg}"/>
         <Setter Property="Stroke" Value="{StaticResource Brush.Signal}"/>
         <Setter Property="StrokeThickness" Value="2"/>
         <Style.Triggers>
+          <DataTrigger Binding="{Binding IsOpen}" Value="True">
+            <Setter Property="Stroke" Value="{StaticResource Brush.Trace}"/>
+          </DataTrigger>
           <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
             <Setter Property="Fill" Value="{StaticResource Brush.Trace}"/>
             <Setter Property="Stroke" Value="{StaticResource Brush.Trace}"/>
@@ -52,43 +108,6 @@
         </Style.Triggers>
       </Style>
 
-      <!-- Situação da execução: "não encerrada" em âmbar (ainda tem algo valendo). -->
-      <Style x:Key="His.RunStatus" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
-        <Style.Triggers>
-          <DataTrigger Binding="{Binding Status}" Value="não encerrada">
-            <Setter Property="Foreground" Value="{StaticResource Brush.Trace}"/>
-          </DataTrigger>
-        </Style.Triggers>
-      </Style>
-
-      <Style x:Key="His.State" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
-        <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
-        <Setter Property="TextWrapping" Value="NoWrap"/>
-        <Style.Triggers>
-          <DataTrigger Binding="{Binding State, Converter={StaticResource His.StateTone}}" Value="good">
-            <Setter Property="Foreground" Value="{StaticResource Brush.Good}"/>
-          </DataTrigger>
-          <DataTrigger Binding="{Binding State, Converter={StaticResource His.StateTone}}" Value="bad">
-            <Setter Property="Foreground" Value="{StaticResource Brush.Bad}"/>
-          </DataTrigger>
-          <DataTrigger Binding="{Binding State, Converter={StaticResource His.StateTone}}" Value="change">
-            <Setter Property="Foreground" Value="{StaticResource Brush.Trace}"/>
-          </DataTrigger>
-        </Style.Triggers>
-      </Style>
-
-      <Style x:Key="His.Arrow" TargetType="Path">
-        <Setter Property="Data" Value="M0,5 L16,5 M11,0 L16,5 L11,10"/>
-        <Setter Property="Stroke" Value="{StaticResource Brush.TextDim}"/>
-        <Setter Property="StrokeThickness" Value="1.5"/>
-        <Setter Property="StrokeStartLineCap" Value="Round"/>
-        <Setter Property="StrokeEndLineCap" Value="Round"/>
-        <Setter Property="Width" Value="18"/>
-        <Setter Property="Height" Value="11"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Margin" Value="8,0"/>
-      </Style>
       <Style x:Key="His.Value" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
         <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
         <Setter Property="FontSize" Value="{StaticResource Size.Body}"/>
@@ -107,151 +126,176 @@
       </Style>
     </DataTemplate.Resources>
 
-    <Grid Margin="24,24,24,16">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition Height="*"/>
-      </Grid.RowDefinitions>
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="320"/>
-        <ColumnDefinition Width="16"/>
-        <ColumnDefinition Width="*"/>
-      </Grid.ColumnDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
 
-      <!-- Cabeçalho -->
-      <StackPanel Grid.ColumnSpan="3">
-        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
-        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
-      </StackPanel>
-
-      <!-- Coordenação e diário -->
-      <Border Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource Panel.Inset}" Margin="0,16,0,16" Padding="14,10">
-        <StackPanel>
-          <TextBlock Text="{Binding Coordination}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Signal}"
-                     Visibility="{Binding Coordination, Converter={StaticResource His.Shown}}"/>
-          <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Small}" Margin="0,2,0,0"
-                     Visibility="{Binding Status, Converter={StaticResource His.Shown}}"/>
-        </StackPanel>
-      </Border>
-
-      <!-- ===== Linha do tempo ===== -->
-      <DockPanel Grid.Row="2">
-        <TextBlock DockPanel.Dock="Top" Text="{Binding RunsTitle}" Style="{StaticResource Text.H2}" Margin="0,0,0,10"/>
-        <Grid>
-          <StackPanel Visibility="{Binding Runs, Converter={StaticResource His.ShownWhenEmpty}}">
-            <TextBlock Text="Nada registrado ainda" Style="{StaticResource Text.Body}" FontFamily="{StaticResource Font.Display}"/>
-            <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0"
-                       Text="Quando o serviço aplicar algo, cada execução aparece aqui com o que mudou e como desfazer."/>
+        <!-- ===== Destaque ===== -->
+        <c:HeroPanel Illustration="{StaticResource Illo.History}" Title="Execuções no diário"
+                     Number="{Binding RunsNumber}"
+                     Caption="Tudo o que o NEXUS mudou, com o valor original guardado para desfazer."
+                     SecondaryText="Testar um ajuste" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="PlanPage">
+          <StackPanel MinWidth="190">
+            <TextBlock Text="Ainda valendo" Style="{StaticResource Text.Small}"/>
+            <c:AnimatedNumber Value="{Binding OpenNumber}" FontFamily="{StaticResource Font.Numbers}" FontSize="26" Foreground="{StaticResource Brush.Trace}"/>
+            <TextBlock Text="sem encerramento registrado" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,0,10"/>
+            <c:StatusChip Tone="{Binding CoordinationTone}" Text="{Binding CoordinationChip}" HorizontalAlignment="Left" ToolTip="{Binding Coordination}"/>
           </StackPanel>
-          <ListBox ItemsSource="{Binding Runs}" SelectedItem="{Binding Selected}" ItemContainerStyle="{StaticResource His.Item}"
-                   Background="Transparent" BorderThickness="0" Padding="0"
-                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                   Visibility="{Binding Runs, Converter={StaticResource His.Shown}}">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <Grid>
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="22"/>
-                    <ColumnDefinition Width="*"/>
-                  </Grid.ColumnDefinitions>
-                  <!-- Trilho vertical contínuo entre os itens -->
-                  <Rectangle Width="1" Fill="{StaticResource Brush.Line}" HorizontalAlignment="Center"/>
-                  <Ellipse Style="{StaticResource His.Node}" VerticalAlignment="Top" Margin="0,16,0,0"/>
-                  <StackPanel Grid.Column="1" Margin="8,12,0,12">
-                    <TextBlock Text="{Binding Started}" Style="{StaticResource Text.Body}" FontFamily="{StaticResource Font.Numbers}"/>
-                    <TextBlock Text="{Binding Status}" Style="{StaticResource His.RunStatus}"/>
-                    <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}">
-                      <Run Text="{Binding Profile, Mode=OneWay}"/>
-                      <Run Text="com catálogo"/>
-                      <Run Text="{Binding Catalog, Mode=OneWay}"/>
-                    </TextBlock>
-                  </StackPanel>
-                </Grid>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-        </Grid>
-      </DockPanel>
+        </c:HeroPanel>
 
-      <!-- ===== Detalhe da execução ===== -->
-      <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource Panel.Card}" Padding="0">
-        <Grid>
-          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="32" MaxWidth="360"
-                      Visibility="{Binding Selected, Converter={StaticResource His.ShownWhenEmpty}}">
-            <TextBlock Text="Escolha uma execução" Style="{StaticResource Text.H2}" TextAlignment="Center"/>
-            <TextBlock Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" TextAlignment="Center" Margin="0,6,0,0"
-                       Text="Aqui aparece o que aconteceu com cada ajuste: o valor original, o desejado e o que foi lido por último."/>
+        <!-- ===== Caminho seguro ===== -->
+        <TextBlock Text="O caminho de toda mudança" Style="{StaticResource Text.H2}" Margin="0,0,0,10"/>
+        <ItemsControl ItemsSource="{Binding Flow}" ItemTemplate="{StaticResource F.Step}" Focusable="False" Margin="0,0,0,22">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Rows="1"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <!-- Sem nada no diário -->
+        <c:EmptyState Illustration="{StaticResource Illo.History}" Text="Nada registrado ainda."
+                      Detail="Quando você aplicar um ajuste, cada execução aparece aqui com o que mudou e um botão para desfazer."
+                      ActionText="Testar sem aplicar" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="PlanPage"
+                      Visibility="{Binding NoRuns, Converter={StaticResource BoolToVis}}"/>
+
+        <Grid Visibility="{Binding HasRuns, Converter={StaticResource BoolToVis}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="360"/>
+            <ColumnDefinition Width="18"/>
+            <ColumnDefinition Width="*" MinWidth="380"/>
+          </Grid.ColumnDefinitions>
+
+          <!-- ===== Linha do tempo ===== -->
+          <StackPanel>
+            <TextBlock Text="{Binding RunsTitle}" Style="{StaticResource Text.H2}" Margin="0,0,0,10"/>
+            <ListBox ItemsSource="{Binding Cards}" SelectedItem="{Binding SelectedCard}" ItemContainerStyle="{StaticResource His.Item}"
+                     Background="Transparent" BorderThickness="0" Padding="0" MaxHeight="640"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Execuções registradas">
+              <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:HistoryRunCard}">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="24"/>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- Trilho vertical contínuo entre os itens -->
+                    <Rectangle Width="2" Fill="{StaticResource Brush.Line}" HorizontalAlignment="Center"/>
+                    <Ellipse Style="{StaticResource His.Node}" VerticalAlignment="Top" Margin="0,17,0,0"/>
+                    <StackPanel Grid.Column="1" Margin="8,12,8,12">
+                      <TextBlock Text="{Binding Started}" Style="{StaticResource Text.Body}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/>
+                      <c:StatusChip Tone="{Binding Tone}" Text="{Binding StatusText}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
+                      <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap">
+                        <Run Text="{Binding Profile, Mode=OneWay}"/>
+                        <Run Text="· catálogo"/>
+                        <Run Text="{Binding Catalog, Mode=OneWay}"/>
+                      </TextBlock>
+                    </StackPanel>
+                    <Button Grid.Column="2" Command="{Binding UndoCommand}" Style="{StaticResource Button.Secondary}" VerticalAlignment="Center" Margin="0"
+                            Padding="10,6" AutomationProperties.Name="{Binding Started, StringFormat='Desfazer a execução de {0}'}"
+                            ToolTip="Volta os ajustes desta execução ao valor original (pede confirmação).">
+                      <StackPanel Orientation="Horizontal">
+                        <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
+                        <TextBlock Text="Desfazer" TextWrapping="NoWrap"/>
+                      </StackPanel>
+                    </Button>
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
           </StackPanel>
 
-          <DockPanel Margin="22,20,22,12" Visibility="{Binding Selected, Converter={StaticResource His.Shown}}"
-                     opt:Reveal.Trigger="{Binding Selected}">
-            <StackPanel DockPanel.Dock="Top" DataContext="{Binding Selected}">
-              <TextBlock Text="{Binding Started}" Style="{StaticResource Text.H1}" FontFamily="{StaticResource Font.Numbers}"/>
-              <TextBlock Style="{StaticResource Text.Small}" Margin="0,2,0,0">
-                <Run Text="{Binding Status, Mode=OneWay}"/>
-                <Run Text="com o perfil"/>
-                <Run Text="{Binding Profile, Mode=OneWay}"/>
-              </TextBlock>
-              <TextBlock Text="{Binding RunId}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"
-                         FontFamily="{StaticResource Font.Numbers}" Margin="0,2,0,0"/>
-            </StackPanel>
-            <TextBlock DockPanel.Dock="Top" Text="{Binding EntriesTitle}" Style="{StaticResource Text.MetricLabel}" Margin="0,16,0,6"/>
+          <!-- ===== Detalhe da execução ===== -->
+          <Border Grid.Column="2" Style="{StaticResource Panel.Card}" Padding="0" VerticalAlignment="Top">
+            <Grid>
+              <c:EmptyState Illustration="{StaticResource Illo.History}" Text="Escolha uma execução."
+                            Detail="Aqui aparece cada ajuste: o valor original, o desejado e o que foi lido por último."
+                            Visibility="{Binding HasSelection, Converter={StaticResource FalseToVisible}}"/>
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-              <ItemsControl ItemsSource="{Binding Entries}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <Border BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0" Padding="0,12"
-                            opt:Reveal.OnLoad="True" opt:Reveal.Stagger="True">
-                      <Grid>
-                        <Grid.RowDefinitions>
-                          <RowDefinition Height="Auto"/>
-                          <RowDefinition Height="Auto"/>
-                          <RowDefinition Height="Auto"/>
-                          <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="*"/>
-                          <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Margin="0,0,12,0">
-                          <TextBlock Text="{Binding Action}" Style="{StaticResource Text.Body}" FontFamily="{StaticResource Font.Numbers}"/>
-                          <TextBlock Text="{Binding Target}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"
-                                     FontFamily="{StaticResource Font.Numbers}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                     ToolTip="{Binding Target}"/>
-                        </StackPanel>
-                        <TextBlock Grid.Column="1" Text="{Binding State, Converter={StaticResource His.StateText}}" Style="{StaticResource His.State}"/>
+              <StackPanel Margin="22,20,22,14" Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding Selected}">
+                <StackPanel DataContext="{Binding Selected}">
+                  <TextBlock Text="{Binding Started}" Style="{StaticResource Text.H1}" FontFamily="{StaticResource Font.Numbers}"/>
+                  <TextBlock Style="{StaticResource Text.Small}" Margin="0,2,0,0">
+                    <Run Text="{Binding Status, Mode=OneWay}"/>
+                    <Run Text="· perfil"/>
+                    <Run Text="{Binding Profile, Mode=OneWay}"/>
+                  </TextBlock>
+                </StackPanel>
 
-                        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0">
+                <UniformGrid Columns="3" Margin="-6,14,-6,4">
+                  <c:StatTile Margin="6,0" Icon="{StaticResource Icon.ArrowRight}" Number="{Binding AppliedEntries}" Tone="Warn"
+                              Label="Aplicados" Detail="Mudaram e valem agora."/>
+                  <c:StatTile Margin="6,0" Icon="{StaticResource Icon.Undo}" Number="{Binding RevertedEntries}" Tone="Good"
+                              Label="Conferidos" Detail="Revertidos ou já no original."/>
+                  <c:StatTile Margin="6,0" Icon="{StaticResource Icon.Error}" Number="{Binding ProblemEntries}" Tone="Bad"
+                              Label="Com problema" Detail="Falha ou conflito."/>
+                </UniformGrid>
+
+                <TextBlock Text="{Binding EntriesTitle}" Style="{StaticResource Text.MetricLabel}" Margin="0,14,0,6"/>
+                <ItemsControl ItemsSource="{Binding Entries}" Focusable="False">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:HistoryEntry}">
+                      <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,12" opt:Reveal.OnLoad="True" opt:Reveal.Stagger="True">
+                        <Grid>
                           <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto" MaxWidth="220"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                           </Grid.ColumnDefinitions>
-                          <TextBlock Text="original" Style="{StaticResource His.Caption}"/>
-                          <TextBlock Grid.Column="1" Text="{Binding Original}" Style="{StaticResource His.Value}" ToolTip="{Binding Original}"/>
-                          <Path Grid.Column="2" Style="{StaticResource His.Arrow}"/>
-                          <TextBlock Grid.Column="3" Text="desejado" Style="{StaticResource His.Caption}"/>
-                          <TextBlock Grid.Column="4" Text="{Binding Desired}" Style="{StaticResource His.ValueNext}" ToolTip="{Binding Desired}"/>
+                          <Grid Width="32" Height="32" Margin="0,0,12,0" VerticalAlignment="Top">
+                            <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
+                            <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="16"
+                                    Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
+                          </Grid>
+                          <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                            <TextBlock Text="{Binding Action}" Style="{StaticResource Text.Body}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"
+                                       TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Action}"/>
+                            <Grid Margin="0,6,0,0">
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto" MaxWidth="200"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                              </Grid.ColumnDefinitions>
+                              <TextBlock Text="original" Style="{StaticResource His.Caption}"/>
+                              <TextBlock Grid.Column="1" Text="{Binding Original}" Style="{StaticResource His.Value}" ToolTip="{Binding Original}"/>
+                              <c:Icon Grid.Column="2" Data="{StaticResource Icon.ArrowRight}" Size="14" Foreground="{StaticResource Brush.TextDim}" Margin="8,0"/>
+                              <TextBlock Grid.Column="3" Text="desejado" Style="{StaticResource His.Caption}"/>
+                              <TextBlock Grid.Column="4" Text="{Binding Desired}" Style="{StaticResource His.ValueNext}" ToolTip="{Binding Desired}"/>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                              <TextBlock Text="lido por último" Style="{StaticResource His.Caption}"/>
+                              <TextBlock Text="{Binding Observed}" Style="{StaticResource His.Value}" Foreground="{StaticResource Brush.Text}" MaxWidth="260" ToolTip="{Binding Observed}"/>
+                            </StackPanel>
+                            <c:ExplainToggle Header="Detalhes" Margin="0,2,0,0">
+                              <StackPanel>
+                                <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Text="{Binding Target}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"/>
+                              </StackPanel>
+                            </c:ExplainToggle>
+                          </StackPanel>
+                          <c:StatusChip Grid.Column="2" Tone="{Binding Tone}" Text="{Binding StateText}" VerticalAlignment="Top"/>
                         </Grid>
-                        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
-                          <TextBlock Text="lido por último" Style="{StaticResource His.Caption}"/>
-                          <TextBlock Text="{Binding Observed}" Style="{StaticResource His.Value}" Foreground="{StaticResource Brush.Text}"/>
-                        </StackPanel>
-                        <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Note}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"
-                                   Visibility="{Binding Note, Converter={StaticResource His.Shown}}"/>
-                      </Grid>
-                    </Border>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </ScrollViewer>
-          </DockPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Grid>
+          </Border>
         </Grid>
-      </Border>
-    </Grid>
+
+        <!-- De onde vem -->
+        <c:ExplainToggle Header="De onde vem isso?" Margin="0,18,0,0">
+          <StackPanel>
+            <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Small}"/>
+            <TextBlock Text="{Binding Coordination}" Style="{StaticResource Text.Small}" Margin="0,4,0,0"/>
+            <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"
+                       Text="O diário é aberto só para leitura. Desfazer passa pelo aplicador, que confere o valor atual antes de devolver o original."/>
+          </StackPanel>
+        </c:ExplainToggle>
+      </StackPanel>
+    </ScrollViewer>
   </DataTemplate>
 </ResourceDictionary>
