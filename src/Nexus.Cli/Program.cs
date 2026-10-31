@@ -5,7 +5,9 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Nexus.Automation;
+using Nexus.Automation.Notifications;
 using Nexus.Broker;
+using Nexus.Cleaning;
 using Nexus.Core;
 using Nexus.HardwareDiscovery;
 using Nexus.Measurement;
@@ -13,6 +15,8 @@ using Nexus.Persistence;
 
 Console.OutputEncoding = Encoding.UTF8;
 var parsed = CliParser.Parse(args);
+// Tarefa agendada: o Agendador abre um console para o nexus.exe; solta-o já (a janela some) e a saída vai para os relatórios.
+if (parsed.Command is { } scheduledCommand && scheduledCommand.Has("--scheduled")) ConsoleDetach.Detach();
 if (parsed.Help)
 {
     Console.WriteLine(CliParser.HelpFor(parsed.HelpTopic));
@@ -50,8 +54,10 @@ namespace Nexus.Cli
 
         public Task<int> RunAsync() => cmd.Name switch
         {
-            "scan" => Task.FromResult(Scan(report: cmd.Has("--report"))),
-            "report" => Task.FromResult(Scan(report: true)),
+            "scan" => Task.FromResult(Scan(report: cmd.Has("--report"), cleaningSection: false)),
+            "report" => Task.FromResult(Scan(report: true, cleaningSection: true)),
+            "clean" => CleanAsync(),
+            "quarantine" => Task.FromResult(Quarantine()),
             "recommend" => Task.FromResult(Recommend()),
             "optimize" => OptimizeAsync(),
             "plan" => Task.FromResult(Plan()),
@@ -87,16 +93,52 @@ namespace Nexus.Cli
             return p;
         }
 
-        private int Scan(bool report)
+        private static string UserDataDirectory => Path.GetDirectoryName(LocalBroker.JournalPath(BrokerLevel.User))!;
+        private static string AdminDataDirectory => Path.GetDirectoryName(LocalBroker.JournalPath(BrokerLevel.Admin))!;
+
+        private int Scan(bool report, bool cleaningSection)
         {
+            var scheduled = cmd.Has("--scheduled");
+            var settings = NexusSettings.Load(NexusSettings.DefaultPath);
+            if (scheduled && RunConditionChecker.WhyNot(new TaskConditions(cmd.Has("--skip-on-battery"), cmd.Has("--skip-when-gaming")),
+                    WindowsPowerSource.Instance, WindowsGameActivity.Instance) is { } why)
+            {
+                ScheduleLog.Write($"verificação pulada: {why}");
+                if (settings.Notifications && settings.NotifySkipped) Notify("Verificação agendada pulada", why, null);
+                return CliExit.Ok;
+            }
             var r = Read();
             var scan = ScanReport.From(r.Facts, r.Findings, r.Set, r.Catalog.CatalogVersion, DateTimeOffset.Now);
+            if (cleaningSection || scheduled) scan = scan with { Cleaning = CleaningOverview.Read(UserDataDirectory, AdminDataDirectory) };
             IReadOnlyList<string> saved = [];
             if (report) saved = scan.Save(cmd.Option("--out") ?? ScanReport.DefaultDirectory, html: true);
             if (cmd.Json) Console.WriteLine(scan.ToJson());
             else if (!Quiet) Console.Write(scan.ToText());
             if (!cmd.Json) foreach (var file in saved) Console.WriteLine($"Relatório: {file}");
+            if (scheduled)
+            {
+                var attention = scan.Findings.Count(f => f.Severity == nameof(DiagnosticSeverity.Attention));
+                var recommended = scan.Recommendations.Count(x => x.Kind == "Recommend");
+                ScheduleLog.Write($"verificação concluída: {attention} atenção, {recommended} recomendação(ões)");
+                if (settings.Notifications)
+                    Notify("Verificação do NEXUS concluída",
+                        $"{attention} ponto(s) pedem atenção · {recommended} recomendação(ões). Clique para abrir o relatório.",
+                        saved.FirstOrDefault(f => f.EndsWith(".html", StringComparison.OrdinalIgnoreCase)));
+            }
             return CliExit.Ok;
+        }
+
+        /// <summary>Notificação do Windows (balão da bandeja) com "abrir relatório" ao clicar. Só no Windows; falha em silêncio.</summary>
+        private static void Notify(string title, string text, string? report, bool warning = false)
+        {
+            if (!OperatingSystem.IsWindows()) return;
+            try
+            {
+                var desktop = Path.Combine(AppContext.BaseDirectory, "Nexus.Desktop.exe");
+                var icon = File.Exists(desktop) ? desktop : Environment.ProcessPath ?? desktop;
+                BalloonNotifier.Show(title, text, report, icon, TimeSpan.FromSeconds(25), warning);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { ScheduleLog.Write($"notificação falhou: {ex.Message}"); }
         }
 
         private int Recommend()
@@ -225,24 +267,294 @@ namespace Nexus.Cli
             var plan = OneClickPlanner.Build(candidates, results);
             Console.WriteLine(plan.Summary);
             foreach (var s in plan.Skipped) Console.WriteLine($"  – fora do plano: {s.Recommendation.Title} ({s.Reason})");
-            if (plan.IsEmpty) return CliExit.Ok;
             foreach (var g in plan.Gains) Console.WriteLine($"  Ganho esperado: {g}");
+
+            // Limpeza segura (quarentena): conferida no aplicador do usuário, medida antes e depois.
+            var cleaning = await PrepareSafeCleaningAsync(r.Catalog, user);
+            if (cleaning.Requests.Count > 0)
+                Console.WriteLine($"Limpeza segura: {cleaning.Requests.Count} regra(s), {SafeCleaningSelector.Bytes(cleaning.Before)} recuperáveis agora (vão para a quarentena).");
+            if (plan.IsEmpty && cleaning.Requests.Count == 0) return CliExit.Ok;
             var exit = CliExit.Ok;
             var runs = new List<(Guid Run, BrokerLevel Level)>();
             foreach (var level in new[] { BrokerLevel.User, BrokerLevel.Admin })
             {
                 var requests = plan.Requests(level);
+                var confirmation = plan.Confirmation(level);
+                if (level == BrokerLevel.User && cleaning.Requests.Count > 0)
+                {
+                    requests = [.. requests, .. cleaning.Requests];
+                    confirmation = (plan.User.Count > 0 ? confirmation + Environment.NewLine + Environment.NewLine : "") + cleaning.Confirmation;
+                }
                 if (requests.Count == 0) continue;
                 Console.WriteLine();
-                if (!Confirm(plan.Confirmation(level))) { Console.WriteLine("Cancelado. Nada mais foi alterado."); return runs.Count == 0 ? CliExit.Cancelled : exit; }
+                if (!Confirm(confirmation)) { Console.WriteLine("Cancelado. Nada mais foi alterado."); return runs.Count == 0 ? CliExit.Cancelled : exit; }
                 var res = (level == BrokerLevel.User ? user : Session(level, Progress)!).Execute(requests, "cli-otimizar");
                 exit = Math.Max(exit, Report(res, "Aplicação"));
                 if (res.Response is { Ok: true, RunId: { } run }) runs.Add((run, level));
                 else break;
             }
+            if (cleaning.Requests.Count > 0 && runs.Any(x => x.Level == BrokerLevel.User) && cleaning.Folders is { } folders)
+            {
+                var after = await SafeCleaningSelector.MeasureAsync(cleaning.Rules, folders, SystemProcessProbe.Instance);
+                var moved = MovedBytes(cleaning.Batch);
+                Console.WriteLine($"Espaço recuperável nas regras seguras: antes {SafeCleaningSelector.Bytes(cleaning.Before)} → depois {SafeCleaningSelector.Bytes(after)} " +
+                                  $"({SafeCleaningSelector.Bytes(moved)} na quarentena; o espaço volta de fato quando ela for esvaziada).");
+            }
             if (runs.Count > 0)
                 Console.WriteLine($"Para desfazer tudo: {string.Join(" ; ", runs.Select(x => $"nexus revert {x.Run}{(x.Level == BrokerLevel.Admin ? " --admin" : "")}"))}");
             return exit;
+        }
+
+        // ------------------------------------------------------------------ limpeza segura
+
+        private sealed record CleaningPrep(IReadOnlyList<ActionRequest> Requests, IReadOnlyList<CleaningRule> Rules, string Batch, long Before,
+            CleaningFolders? Folders, string Confirmation, IReadOnlyList<CleaningRunItem> Skipped);
+
+        /// <summary>Seleciona a limpeza segura, mede (somente leitura) e confere no aplicador do usuário o que de fato mudaria.</summary>
+        private static async Task<CleaningPrep> PrepareSafeCleaningAsync(CatalogDocument catalog, BrokerSession user)
+        {
+            var batch = CleaningBatchId.New(DateTime.UtcNow);
+            if (!OperatingSystem.IsWindows()) return new([], [], batch, 0, null, "", []);
+            var (safe, _) = SafeCleaningSelector.Select(catalog, CleaningRuleSet.BuiltIn, RiskModel.ReadDeclared(CatalogDirectory));
+            if (safe.Count == 0) return new([], [], batch, 0, null, "", []);
+            var folders = SafeCleaningSelector.CurrentUserFolders(UserDataDirectory, AdminDataDirectory);
+            var before = await SafeCleaningSelector.MeasureAsync(safe.Select(s => s.Rule), folders, SystemProcessProbe.Instance);
+            var requests = SafeCleaningSelector.Requests(safe, batch);
+            var (results, problem) = await OneClickPlanner.SimulateAsync(requests, q => Task.FromResult(user.Plan(q)));
+            if (problem is not null) return new([], [], batch, before, folders, "", [new("cleaning", "Limpeza segura", "Unavailable", problem)]);
+            var pending = new List<ActionRequest>();
+            var rules = new List<CleaningRule>();
+            var skipped = new List<CleaningRunItem>();
+            foreach (var item in safe)
+            {
+                var res = results.FirstOrDefault(x => x.ActionKey == item.ActionKey);
+                if (res is { Outcome: "Pending" })
+                {
+                    pending.Add(requests.First(q => q.ActionId == item.ActionKey));
+                    rules.Add(item.Rule);
+                }
+                else skipped.Add(new(item.ActionKey, item.Title, res?.Outcome ?? "NoAnswer", res?.Detail));
+            }
+            var text = new StringBuilder();
+            text.AppendLine(CultureInfo.InvariantCulture, $"Limpeza segura ({pending.Count} regra(s), cerca de {SafeCleaningBytes(before)}):");
+            foreach (var rule in rules) text.AppendLine(CultureInfo.InvariantCulture, $"  • {rule.Title}");
+            text.Append("Tudo vai para a quarentena do NEXUS (nada é apagado) e pode ser desfeito com 'nexus quarantine restore " + batch + "'.");
+            return new(pending, rules, batch, before, folders, text.ToString(), skipped);
+        }
+
+        private static string SafeCleaningBytes(long b) => SafeCleaningSelector.Bytes(b);
+
+        /// <summary>Bytes movidos para a quarentena num lote (lidos dos manifestos; somente leitura).</summary>
+        private static long MovedBytes(string batch) => MovedOf(batch).Bytes;
+
+        private static (long Bytes, long Files) MovedOf(string batch)
+        {
+            long bytes = 0, files = 0;
+            foreach (var dir in new[] { UserDataDirectory, AdminDataDirectory })
+            {
+                try
+                {
+                    foreach (var b in QuarantineStore.ReadBatches(dir).Where(b => b.BatchId == batch))
+                    {
+                        bytes += b.Rules.Sum(x => x.MovedBytes);
+                        files += b.Rules.Sum(x => x.MovedFiles);
+                    }
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+            }
+            return (bytes, files);
+        }
+
+        private async Task<int> CleanAsync()
+        {
+            var scheduled = cmd.Has("--scheduled");
+            var settings = NexusSettings.Load(NexusSettings.DefaultPath);
+            var started = DateTimeOffset.Now;
+            if (scheduled && RunConditionChecker.WhyNot(new TaskConditions(cmd.Has("--skip-on-battery"), cmd.Has("--skip-when-gaming")),
+                    WindowsPowerSource.Instance, WindowsGameActivity.Instance) is { } why)
+            {
+                var skippedReport = new CleaningRunReport(started, true, why, null, null, null, null, 0, 0, [], [], why);
+                ScheduleLog.Write($"limpeza pulada: {why}");
+                SaveQuietly(skippedReport);
+                if (settings.Notifications && settings.NotifySkipped) Notify("Limpeza agendada pulada", why, null);
+                return CliExit.Ok;
+            }
+            if (!OperatingSystem.IsWindows()) return Unsupported();
+
+            var catalog = CatalogLoader.LoadDirectory(CatalogDirectory);
+            var (safe, excluded) = SafeCleaningSelector.Select(catalog, CleaningRuleSet.BuiltIn, RiskModel.ReadDeclared(CatalogDirectory));
+            var chosen = new List<(CatalogEntry Entry, CleaningRule Rule)>();
+            var outside = new List<SafeCleaningExclusion>();
+            if (cmd.Option("--rules") is { } list)
+            {
+                foreach (var id in CliParser.ParseRuleList(list, out _)!)
+                {
+                    var rule = CleaningRuleSet.BuiltIn.Find(id);
+                    var entry = catalog.Actions.Where(a => a.Definition.Id == CleaningRuleSet.ActionPrefix + id && a.Definition.HandlerKind == CleaningRuleSet.HandlerKind)
+                        .MaxBy(a => a.Definition.Version);
+                    if (rule is null || entry is null) { Console.Error.WriteLine($"Regra de limpeza '{id}' não existe. Veja a página Limpeza ou catalog/cleaning.v1.json."); return CliExit.NotFound; }
+                    if (rule.Mode != CleaningMode.Quarantine) { Console.Error.WriteLine($"'{id}' só mede (usa a ferramenta do Windows); não dá para limpar pelo NEXUS."); return CliExit.Usage; }
+                    if (cmd.Has("--safe") && safe.All(s => s.Rule.Id != id))
+                    {
+                        outside.Add(excluded.FirstOrDefault(x => x.ActionId == entry.Definition.Id) ?? new(entry.Definition.Id, rule.Title, "Fora da limpeza segura."));
+                        continue;
+                    }
+                    chosen.Add((entry, rule));
+                }
+            }
+            else chosen.AddRange(safe.Select(s => (s.Entry, s.Rule)));
+            foreach (var x in outside) Console.WriteLine($"  – fora (--safe): {x.Title}: {x.Reason}");
+            if (chosen.Count == 0) { Console.WriteLine("Nada para limpar com essa escolha."); return CliExit.Ok; }
+
+            var batch = CleaningBatchId.New(DateTime.UtcNow);
+            var folders = SafeCleaningSelector.CurrentUserFolders(UserDataDirectory, AdminDataDirectory);
+            var before = await SafeCleaningSelector.MeasureAsync(chosen.Select(c => c.Rule), folders, SystemProcessProbe.Instance);
+            var items = new List<CleaningRunItem>();
+            var exit = CliExit.Ok;
+            Guid? runId = null;
+            var userGroup = chosen.Where(c => c.Entry.Definition.Privileges != PrivilegeLevel.Admin).ToList();
+            var adminGroup = chosen.Where(c => c.Entry.Definition.Privileges == PrivilegeLevel.Admin).ToList();
+            if (scheduled && adminGroup.Count > 0) throw new InvalidOperationException("A limpeza agendada nunca usa o aplicador de administrador.");
+
+            if (userGroup.Count > 0)
+            {
+                var session = Session(BrokerLevel.User, scheduled ? null : Progress)!;
+                var requests = userGroup.Select(c => new ActionRequest(c.Entry.Definition.Key, null, new Dictionary<string, string> { ["batch"] = batch })).ToList();
+                var (results, problem) = await OneClickPlanner.SimulateAsync(requests, q => Task.FromResult(session.Plan(q)));
+                if (problem is not null)
+                {
+                    Console.Error.WriteLine(problem);
+                    ScheduleLog.Write($"limpeza: aplicador indisponível: {problem}");
+                    if (scheduled && settings.Notifications) Notify("Limpeza agendada não rodou", problem, null, warning: true);
+                    return CliExit.BrokerRefused;
+                }
+                var pending = new List<ActionRequest>();
+                foreach (var (entry, rule) in userGroup)
+                {
+                    var res = results.FirstOrDefault(x => x.ActionKey == entry.Definition.Key);
+                    if (res is { Outcome: "Pending" }) pending.Add(requests.First(q => q.ActionId == entry.Definition.Key));
+                    else items.Add(new(entry.Definition.Key, rule.Title, res?.Outcome ?? "NoAnswer", res?.Detail));
+                }
+                if (cmd.Has("--dry-run"))
+                {
+                    Console.WriteLine($"Simulação: {pending.Count} regra(s) limpariam cerca de {SafeCleaningBytes(before)}. Nada foi movido.");
+                    foreach (var q in pending) Console.WriteLine($"  • {chosen.First(c => c.Entry.Definition.Key == q.ActionId).Rule.Title}");
+                    foreach (var i in items) Console.WriteLine($"  – {i.Title}: {i.Outcome}{(i.Detail is null ? "" : $" ({i.Detail})")}");
+                }
+                else if (pending.Count > 0)
+                {
+                    var text = new StringBuilder();
+                    text.AppendLine(CultureInfo.InvariantCulture, $"Limpar {pending.Count} item(ns), cerca de {SafeCleaningBytes(before)}:");
+                    foreach (var q in pending)
+                    {
+                        var rule = chosen.First(c => c.Entry.Definition.Key == q.ActionId).Rule;
+                        text.AppendLine(CultureInfo.InvariantCulture, $"  • {rule.Title}{(rule.Warning is null ? "" : $"  ATENÇÃO: {rule.Warning}")}");
+                    }
+                    text.Append(CultureInfo.InvariantCulture, $"Tudo vai para a quarentena do NEXUS (nada é apagado). Desfazer: nexus quarantine restore {batch}");
+                    if (!scheduled && !Confirm(text.ToString())) { Console.WriteLine("Cancelado. Nada foi alterado."); return CliExit.Cancelled; }
+                    var res = session.Execute(pending, scheduled ? "agendado-limpeza" : "cli-limpeza");
+                    exit = scheduled ? Outcome(res) : Report(res, "Limpeza");
+                    runId = res.Response?.RunId;
+                    foreach (var x in res.Response?.Results ?? [])
+                        items.Add(new(x.ActionKey, chosen.FirstOrDefault(c => c.Entry.Definition.Key == x.ActionKey).Rule?.Title ?? x.ActionKey, x.Outcome, x.Detail));
+                    if (!res.Ok && res.Message is { } m) items.Add(new("cleaning", "Aplicador", "Refused", m));
+                }
+            }
+            if (adminGroup.Count > 0 && !cmd.Has("--dry-run"))
+            {
+                var text = new StringBuilder();
+                text.AppendLine(CultureInfo.InvariantCulture, $"Limpar {adminGroup.Count} pasta(s) do sistema (administrador):");
+                foreach (var (_, rule) in adminGroup) text.AppendLine(CultureInfo.InvariantCulture, $"  • {rule.Title}");
+                text.Append("O Windows vai pedir permissão, e um ponto de restauração é criado antes. Tudo vai para a quarentena.");
+                if (Confirm(text.ToString()))
+                {
+                    var requests = adminGroup.Select(c => new ActionRequest(c.Entry.Definition.Key, null, new Dictionary<string, string> { ["batch"] = batch })).ToList();
+                    var res = Session(BrokerLevel.Admin, Progress)!.Execute(requests, "cli-limpeza");
+                    exit = Math.Max(exit, Report(res, "Limpeza do sistema"));
+                    runId ??= res.Response?.RunId;
+                }
+            }
+            else if (adminGroup.Count > 0) Console.WriteLine($"Simulação: {adminGroup.Count} regra(s) de administrador seriam conferidas pelo aplicador elevado ao aplicar.");
+            if (cmd.Has("--dry-run")) return CliExit.Ok;
+
+            var after = await SafeCleaningSelector.MeasureAsync(chosen.Select(c => c.Rule), folders, SystemProcessProbe.Instance);
+            var (movedBytes, movedFiles) = MovedOf(batch);
+            var report = new CleaningRunReport(started, scheduled, null, batch, runId, before, after, movedBytes, movedFiles, items,
+                cmd.Option("--rules") is null ? excluded : outside, "");
+            report = report with { Message = report.Headline };
+            var saved = SaveQuietly(report);
+            if (cmd.Json) Console.WriteLine(report.ToJson());
+            else if (!Quiet) Console.Write(report.ToText());
+            if (!cmd.Json && saved.Count > 0) Console.WriteLine($"Relatório: {saved[^1]}");
+            if (scheduled)
+            {
+                ScheduleLog.Write($"limpeza concluída: {report.Headline}");
+                if (settings.Notifications) Notify("Limpeza segura do NEXUS", report.Headline + " Clique para abrir o relatório.", saved.Count > 0 ? saved[^1] : null);
+            }
+            return exit;
+        }
+
+        private static IReadOnlyList<string> SaveQuietly(CleaningRunReport report)
+        {
+            try { return report.Save(ScanReport.DefaultDirectory); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return []; }
+        }
+
+        /// <summary>Código de saída de uma chamada ao aplicador, sem escrever nada no console (tarefa agendada).</summary>
+        private static int Outcome(BrokerCallResult r)
+        {
+            if (!r.Connected || r.Response is null || !r.Response.Ok) return CliExit.BrokerRefused;
+            return (r.Response.Results ?? []).Any(x => x.Outcome is "Failed" or "FailedAndCompensated" or "Interrupted" or "Conflict" or "Refused") ? CliExit.Partial : CliExit.Ok;
+        }
+
+        // ------------------------------------------------------------------ quarentena
+
+        /// <summary>Execuções do diário (somente leitura) que limparam cada lote, por nível.</summary>
+        private List<(BrokerLevel Level, Guid Run, string Batch, DateTimeOffset Started, int Items, int Reverted)> CleaningRuns()
+        {
+            var list = new List<(BrokerLevel, Guid, string, DateTimeOffset, int, int)>();
+            foreach (var (level, _, journal) in Journals())
+            {
+                if (journal is null) continue;
+                foreach (var run in journal.Runs())
+                {
+                    var entries = journal.Entries(run.RunId).Where(e => e.Action.Definition.HandlerKind == CleaningRuleSet.HandlerKind && e.Action.Target.ContainsKey("batch")).ToList();
+                    if (entries.Count == 0) continue;
+                    foreach (var g in entries.GroupBy(e => e.Action.Target["batch"], StringComparer.Ordinal))
+                        list.Add((level, run.RunId, g.Key, run.StartedAt, g.Count(), g.Count(e => e.State.ToString() == "Reverted")));
+                }
+            }
+            return list;
+        }
+
+        private int Quarantine()
+        {
+            try
+            {
+                if (cmd.Arguments[0] == "list")
+                {
+                    var overview = CleaningOverview.Read(UserDataDirectory, AdminDataDirectory);
+                    if (cmd.Json) { Console.WriteLine(JsonSerializer.Serialize(overview, Json)); return CliExit.Ok; }
+                    if (overview.Batches == 0) { Console.WriteLine("Quarentena vazia: nenhuma limpeza registrada."); return CliExit.Ok; }
+                    Console.WriteLine($"Na quarentena: {SafeCleaningBytes(overview.BytesInQuarantine)} em {overview.Batches} limpeza(s). (Mostrando as 10 mais recentes.)");
+                    foreach (var b in overview.Recent)
+                        Console.WriteLine($"  {b.CreatedUtc.ToLocalTime():dd/MM HH:mm}  {b.Batch}  {SafeCleaningBytes(b.MovedBytes),9}{(b.Restored ? "  (desfeita)" : "")}  {b.Rules}");
+                    Console.WriteLine("Para devolver: nexus quarantine restore <lote>");
+                    return CliExit.Ok;
+                }
+                if (!OperatingSystem.IsWindows()) return Unsupported();
+                var batch = cmd.Arguments[1];
+                var runs = CleaningRuns().Where(r => r.Batch == batch).ToList();
+                DisposeJournals();
+                if (runs.Count == 0) { Console.Error.WriteLine($"Lote {batch} não encontrado nos diários. Use 'nexus quarantine list'."); return CliExit.NotFound; }
+                if (runs.All(r => r.Reverted == r.Items)) { Console.WriteLine("Essa limpeza já foi desfeita."); return CliExit.Ok; }
+                if (!Confirm($"Devolver os arquivos da limpeza {batch} ao lugar original? Nada é sobrescrito: se já houver um arquivo novo no lugar, o antigo volta com o sufixo \" (restaurado)\".")) return CliExit.Cancelled;
+                var exit = CliExit.Ok;
+                foreach (var (level, run, _, _, items, reverted) in runs.Where(r => r.Reverted < r.Items))
+                    exit = Math.Max(exit, Report(Session(level, Progress)!.RevertRun(run), level == BrokerLevel.Admin ? "Desfazer (sistema)" : "Desfazer"));
+                return exit;
+            }
+            finally { DisposeJournals(); }
         }
 
         private int Revert()
@@ -312,6 +624,7 @@ namespace Nexus.Cli
             {
                 var journals = Journals().Where(j => j.Journal is not null).ToList();
                 if (journals.Count == 0) { Console.WriteLine("Nenhum diário encontrado: nada foi aplicado por este usuário ainda."); return CliExit.NotFound; }
+                if (cmd.Has("--cleaning")) return CleaningHistory();
                 if (cmd.Arguments.Count == 1)
                 {
                     if (!Guid.TryParse(cmd.Arguments[0], out var run)) { Console.Error.WriteLine("Id de execução inválido."); return CliExit.Usage; }
@@ -344,6 +657,32 @@ namespace Nexus.Cli
                 return CliExit.Ok;
             }
             finally { DisposeJournals(); }
+        }
+
+        private int CleaningHistory()
+        {
+            var limit = int.Parse(cmd.Option("--limit") ?? "20", CultureInfo.InvariantCulture);
+            var batches = new Dictionary<string, long>(StringComparer.Ordinal);
+            foreach (var dir in new[] { UserDataDirectory, AdminDataDirectory })
+            {
+                try { foreach (var b in QuarantineStore.ReadBatches(dir)) batches[b.BatchId] = batches.GetValueOrDefault(b.BatchId) + b.Rules.Sum(r => r.MovedBytes); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+            }
+            var runs = CleaningRuns().OrderByDescending(r => r.Started).Take(limit).ToList();
+            if (cmd.Json)
+            {
+                Console.WriteLine(JsonSerializer.Serialize(runs.Select(r => new
+                {
+                    runId = r.Run, level = r.Level.ToString(), batch = r.Batch, startedAt = r.Started, rules = r.Items, reverted = r.Reverted,
+                    movedBytes = batches.GetValueOrDefault(r.Batch),
+                }), Json));
+                return CliExit.Ok;
+            }
+            if (runs.Count == 0) { Console.WriteLine("Nenhuma limpeza registrada no diário."); return CliExit.Ok; }
+            foreach (var r in runs)
+                Console.WriteLine($"{r.Started.ToLocalTime():dd/MM HH:mm}  {r.Batch}  {(r.Level == BrokerLevel.Admin ? "sistema" : "usuário"),-8} {r.Items} regra(s)  {SafeCleaningBytes(batches.GetValueOrDefault(r.Batch)),9}" +
+                                  $"{(r.Reverted == r.Items ? "  desfeita" : r.Reverted > 0 ? "  parcialmente desfeita" : "")}  (desfazer: nexus quarantine restore {r.Batch})");
+            return CliExit.Ok;
         }
 
         // ------------------------------------------------------------------ medição
@@ -389,6 +728,12 @@ namespace Nexus.Cli
         private int Schedule()
         {
             var verb = cmd.Arguments[0];
+            switch (verb)
+            {
+                case "list": return ScheduleList();
+                case "add": return ScheduleSet(NexusTaskKind.Find(cmd.Arguments[1])!, on: true);
+                case "remove": return ScheduleSet(NexusTaskKind.Find(cmd.Arguments[1])!, on: false);
+            }
             if (verb == "status")
             {
                 var (state, error) = AutomationHandlers.ReadScheduledScanState(AutomationScheduledScanHandler.DefaultExecutable);
@@ -406,10 +751,88 @@ namespace Nexus.Cli
             return Apply([$"{AutomationHandlers.ScheduledScanActionId}={value}"]);
         }
 
+        private int ScheduleList()
+        {
+            var statuses = NexusTaskKind.All.Select(k => AutomationHandlers.ReadTaskStatus(k, AutomationScheduledScanHandler.DefaultExecutable)).ToList();
+            var (legacy, legacyError) = AutomationHandlers.ReadScheduledScanState(AutomationScheduledScanHandler.DefaultExecutable);
+            if (cmd.Json)
+            {
+                Console.WriteLine(JsonSerializer.Serialize(new
+                {
+                    tasks = statuses.Select(s => new { kind = s.Kind.Id, task = s.Kind.TaskName, state = s.State, schedule = s.Schedule?.ToString(), conditions = s.Conditions?.ToString(), s.PointsHere, s.Error }),
+                    legacyWeekly = new { state = legacy, error = legacyError },
+                }, Json));
+                return CliExit.Ok;
+            }
+            foreach (var s in statuses) Console.WriteLine($"{s.Kind.Title}: {s.Describe()}");
+            if (legacy != ScanSchedule.Off) Console.WriteLine($"Verificação semanal (antiga): {legacy}. Desligue com 'nexus schedule off'.");
+            if (statuses.Any(s => s.Error is not null)) return OperatingSystem.IsWindows() ? CliExit.Partial : CliExit.Unsupported;
+            return CliExit.Ok;
+        }
+
+        private int ScheduleSet(NexusTaskKind kind, bool on)
+        {
+            if (!OperatingSystem.IsWindows()) return Unsupported();
+            var catalog = CatalogLoader.LoadDirectory(CatalogDirectory);
+            var entry = catalog.Actions.Where(a => a.Definition.Id == kind.ActionId).MaxBy(a => a.Definition.Version);
+            if (entry is null) { Console.Error.WriteLine($"A ação {kind.ActionId} não está no catálogo desta instalação."); return CliExit.NotFound; }
+            TaskSchedule schedule;
+            TaskConditions conditions;
+            string text;
+            if (on)
+            {
+                schedule = CliParser.ScheduleFrom(cmd.Options, out var error) ?? throw new FormatException(error);
+                conditions = CliParser.ConditionsFrom(cmd, kind);
+                var sb = new StringBuilder();
+                sb.AppendLine(CultureInfo.InvariantCulture, $"{kind.Title}: {schedule.Describe()} ({conditions.Describe()}).");
+                sb.AppendLine(kind.Explanation);
+                if (kind == NexusTaskKind.Clean)
+                {
+                    var (safe, _) = SafeCleaningSelector.Select(catalog, CleaningRuleSet.BuiltIn, RiskModel.ReadDeclared(CatalogDirectory));
+                    sb.AppendLine("Vai limpar, sem perguntar, quando chegar a hora:");
+                    foreach (var s in safe) sb.AppendLine(CultureInfo.InvariantCulture, $"  • {s.Title}");
+                    sb.AppendLine("Nunca: pastas de administrador, histórico, cookies, caches de shader ou algo irreversível.");
+                }
+                sb.Append("A tarefa fica no Agendador do Windows, na sua conta, sem administrador. Ligar fica no diário e pode ser desfeito.");
+                text = sb.ToString();
+            }
+            else
+            {
+                var current = AutomationHandlers.ReadTaskStatus(kind, AutomationScheduledScanHandler.DefaultExecutable);
+                if (current.State == AutomationScheduledTaskHandler.Off && current.Error is null) { Console.WriteLine($"{kind.Title}: já está desligada."); return CliExit.Ok; }
+                schedule = current.Schedule ?? TaskSchedule.Weekly(DayOfWeek.Sunday, 19, 0);
+                conditions = current.Conditions ?? TaskConditions.None;
+                text = $"Remover a tarefa {kind.TaskName} do Agendador do Windows?";
+            }
+            if (!Confirm(text)) { Console.WriteLine("Cancelado. Nada foi alterado."); return CliExit.Cancelled; }
+            var request = new ActionRequest(entry.Definition.Key, on ? AutomationScheduledTaskHandler.On : AutomationScheduledTaskHandler.Off,
+                new Dictionary<string, string> { ["schedule"] = schedule.ToString(), ["conditions"] = conditions.ToString() });
+            return Report(Session(BrokerLevel.User, Progress)!.Execute([request], "cli-agendamento"), on ? "Agendamento" : "Remover agendamento");
+        }
+
         private static int Version()
         {
             Console.WriteLine($"nexus {typeof(CliApp).Assembly.GetName().Version} · aplicador {BrokerService.Version}");
             return CliExit.Ok;
+        }
+    }
+}
+
+namespace Nexus.Cli
+{
+    /// <summary>Registro curto das tarefas agendadas em %LocalAppData%\NEXUS\reports\agendamentos.log (o console não aparece).</summary>
+    internal static class ScheduleLog
+    {
+        public static void Write(string line)
+        {
+            try
+            {
+                Directory.CreateDirectory(Nexus.Automation.ScanReport.DefaultDirectory);
+                var file = Path.Combine(Nexus.Automation.ScanReport.DefaultDirectory, "agendamentos.log");
+                if (File.Exists(file) && new FileInfo(file).Length > 256 * 1024) File.Move(file, file + ".old", overwrite: true);
+                File.AppendAllText(file, $"{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz} {line}{Environment.NewLine}");
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
         }
     }
 }

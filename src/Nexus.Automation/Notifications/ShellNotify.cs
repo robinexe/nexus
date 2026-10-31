@@ -365,3 +365,29 @@ public static unsafe partial class BalloonNotifier
     private static partial bool TranslateMessage(ref Msg msg);
     [LibraryImport("user32.dll")] private static partial nint DispatchMessageW(ref Msg msg);
 }
+
+/// <summary>Solta o console quando a tarefa agendada roda (a janela que o Agendador abre some na hora).</summary>
+public static partial class ConsoleDetach
+{
+    public static void Detach()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        try
+        {
+            // Só se o console é só nosso (aberto pelo Agendador); num terminal do usuário, fica.
+            var ids = new uint[4];
+            if (GetConsoleProcessList(ids, (uint)ids.Length) > 1) return;
+            Console.SetOut(TextWriter.Null);
+            Console.SetError(TextWriter.Null);
+            FreeConsole();
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or IOException) { }
+    }
+
+    [LibraryImport("kernel32.dll")]
+    private static partial uint GetConsoleProcessList([Out] uint[] ids, uint count);
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool FreeConsole();
+}
