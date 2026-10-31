@@ -164,6 +164,38 @@ public static class CleaningPaths
     }
 
     /// <summary>
+    /// Primeira pasta entre a pasta-base da regra (inclusive) e a pasta do arquivo (inclusive) que é link simbólico ou junção,
+    /// ou null se nenhuma é. Pastas que não existem são ignoradas. Caminho fora de todas as raízes da regra devolve o próprio
+    /// caminho (recusado). Usado imediatamente antes de mover um arquivo para a quarentena ou de volta: o aplicador pode rodar
+    /// como administrador/SYSTEM, e uma pasta intermediária trocada por uma junção desviaria a escrita para fora da regra
+    /// (ex.: <c>Temp\a</c> → <c>C:\Windows\System32</c>).
+    /// </summary>
+    public static string? ReparseInChain(CleaningRule rule, CleaningFolders folders, string path)
+    {
+        ArgumentNullException.ThrowIfNull(rule);
+        ArgumentNullException.ThrowIfNull(folders);
+        ArgumentNullException.ThrowIfNull(path);
+        if (!Path.IsPathFullyQualified(path)) return path;
+        var full = Normalize(path);
+        string? baseDir = null;
+        foreach (var root in rule.Roots)
+        {
+            var b = BaseOf(Split(root.Template).Placeholder, folders, out _);
+            if (b is not null && full.StartsWith(b + Path.DirectorySeparatorChar, Cmp) && (baseDir is null || b.Length > baseDir.Length)) baseDir = b;
+        }
+        if (baseDir is null) return path;
+        for (var dir = Path.GetDirectoryName(full); dir is not null && dir.Length >= baseDir.Length; dir = Path.GetDirectoryName(dir))
+        {
+            FileAttributes attributes;
+            try { attributes = File.GetAttributes(dir); }
+            catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) { continue; }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return dir; }
+            if ((attributes & FileAttributes.ReparsePoint) != 0) return dir;
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Motivo para recusar uma pasta como raiz de limpeza (ou null). Nunca: raiz de unidade, System32/SysWOW64/WinSxS, a pasta
     /// do perfil inteira, Documentos/Imagens/Área de Trabalho/Vídeos/Músicas/Downloads, Arquivos de Programas, a quarentena.
     /// </summary>

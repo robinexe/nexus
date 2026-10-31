@@ -374,6 +374,66 @@ public sealed class CleaningHandlerTests
     }
 
     [Fact]
+    public void Restore_never_writes_through_a_folder_swapped_for_a_link()
+    {
+        // Revisão de segurança: o aplicador (talvez SYSTEM) devolvia o arquivo por uma pasta intermediária trocada por uma
+        // junção, porque só a pasta mais funda existente era conferida. Ex.: Temp\pasta → C:\Windows, com Temp\pasta\sub
+        // existindo no destino: o arquivo do usuário iria parar dentro da pasta protegida.
+        if (OperatingSystem.IsWindows()) return; // criar link simbólico no Windows exige privilégio
+        using var s = new CleaningSandbox();
+        var b = s.Temp(Path.Combine("pasta", "sub", "b.tmp"), bytes: 20);
+        var (h, _, _) = Handler(s);
+        var act = Action("temp-user", NewBatch());
+        var original = h.Detect(act);
+        h.Apply(act);
+        Assert.False(File.Exists(b));
+
+        var protectedDir = Path.Combine(s.Root, "protegida");
+        Directory.CreateDirectory(Path.Combine(protectedDir, "sub"));
+        Directory.Delete(Path.Combine(s.Folders.UserTemp!, "pasta"), recursive: true);
+        Directory.CreateSymbolicLink(Path.Combine(s.Folders.UserTemp!, "pasta"), protectedDir);
+
+        h.Restore(act, original);
+        Assert.Empty(Directory.EnumerateFileSystemEntries(Path.Combine(protectedDir, "sub")));
+        var ruleDir = QuarantineStore.RuleDirectory(s.Data, act.Target["batch"], "temp-user");
+        Assert.True(File.Exists(QuarantineStore.QuarantinedFile(ruleDir, 0))); // continua guardado
+        Assert.Equal(QuarantineEntryState.RestoreFailed, QuarantineStore.ReadManifest(ruleDir)!.Entries[0].State);
+    }
+
+    /// <summary>Simula a troca de uma pasta por link entre a varredura e o movimento (janela de corrida).</summary>
+    private sealed class SwapBeforeMoveOps(Action swap) : IQuarantineFileOps
+    {
+        public bool IsInUse(string path) { swap(); return false; }
+        public void MoveFile(string source, string destination) => RealQuarantineFileOps.Instance.MoveFile(source, destination);
+    }
+
+    [Fact]
+    public void Apply_rechecks_the_folder_chain_right_before_moving()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        using var s = new CleaningSandbox();
+        s.Temp(Path.Combine("pasta", "b.tmp"), bytes: 20);
+        var outside = Path.Combine(s.Root, "fora");
+        var victim = s.File(Path.Combine(outside, "b.tmp"), bytes: 7);
+        var swapped = false;
+        var ops = new SwapBeforeMoveOps(() =>
+        {
+            if (swapped) return;
+            swapped = true;
+            Directory.Delete(Path.Combine(s.Folders.UserTemp!, "pasta"), recursive: true);
+            Directory.CreateSymbolicLink(Path.Combine(s.Folders.UserTemp!, "pasta"), outside);
+        });
+        var h = new CleaningRuleHandler(Set, s.Data, _ => s.Folders, new FakeProcesses(), false, ops);
+        var act = Action("temp-user", NewBatch());
+        h.Apply(act);
+        Assert.True(swapped);
+        Assert.True(File.Exists(victim)); // o arquivo de fora da regra não foi levado
+        var m = QuarantineStore.ReadManifest(QuarantineStore.RuleDirectory(s.Data, act.Target["batch"], "temp-user"))!;
+        Assert.Equal(0, m.MovedFiles);
+        Assert.Equal(QuarantineEntryState.SkippedError, m.Entries[0].State);
+    }
+
+    [Fact]
     public void Open_app_blocks_its_rule_and_profile_rules_need_a_sid_under_another_account()
     {
         using var s = new CleaningSandbox();

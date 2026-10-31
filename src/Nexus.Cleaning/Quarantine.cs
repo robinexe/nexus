@@ -252,6 +252,14 @@ internal sealed class QuarantineMover
                     continue;
                 }
                 if (_ops.IsInUse(e.Path)) { e.State = QuarantineEntryState.SkippedInUse; continue; }
+                // Imediatamente antes de mover: nenhuma pasta entre a raiz da regra e o arquivo pode ter virado link/junção
+                // (senão o aplicador, talvez como administrador, moveria um arquivo de fora da regra).
+                if (CleaningPaths.ReparseInChain(rule, folders, e.Path) is { } link)
+                {
+                    e.State = QuarantineEntryState.SkippedError;
+                    e.Note = Short($"pasta virou link ou junção ({link})");
+                    continue;
+                }
                 _ops.MoveFile(e.Path, QuarantineStore.QuarantinedFile(ruleDir, e.Index));
                 e.State = QuarantineEntryState.Moved;
             }
@@ -294,6 +302,7 @@ internal sealed class QuarantineMover
                 if (!CleaningPaths.IsWithinRule(rule, folders, e.Path)) throw new IOException("caminho original fora das raízes da regra; recusado");
 
                 var parent = Path.GetDirectoryName(e.Path)!;
+                if (CleaningPaths.ReparseInChain(rule, folders, e.Path) is { } link) throw new IOException($"'{link}' é um link ou junção; recusado");
                 EnsureParent(rule, folders, parent);
                 var dest = e.Path;
                 if (File.Exists(dest) || Directory.Exists(dest))
@@ -308,6 +317,8 @@ internal sealed class QuarantineMover
                     }
                     dest = UniqueName(dest);
                 }
+                // De novo imediatamente antes de escrever (pastas recriadas acima, ou trocadas nesse meio-tempo).
+                if (CleaningPaths.ReparseInChain(rule, folders, dest) is { } late) throw new IOException($"'{late}' é um link ou junção; recusado");
                 _ops.MoveFile(q, dest);
                 e.State = dest == e.Path ? QuarantineEntryState.Restored : QuarantineEntryState.RestoredRenamed;
                 e.RestoredTo = dest;
