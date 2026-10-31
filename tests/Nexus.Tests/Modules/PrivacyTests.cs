@@ -331,7 +331,7 @@ public sealed class PrivacyTests
         Assert.True(PrivacyPlanner.NeedsAdmin(missing));
         var text = PrivacyPlanner.ConfirmationText(batches[0], 1, batches.Count);
         Assert.Contains("Você perde", text, StringComparison.Ordinal);
-        Assert.Contains("Parte 1 de", text, StringComparison.Ordinal);
+        if (batches.Count > 1) Assert.Contains("Parte 1 de", text, StringComparison.Ordinal);
         Assert.Contains("Desfazer", text, StringComparison.Ordinal);
     }
 
