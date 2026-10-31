@@ -22,7 +22,7 @@ public sealed record DriverPackage(
 /// <summary>Leitura de <c>pnputil /enum-drivers</c> e <c>pnputil /enum-devices</c> em português e inglês.</summary>
 public static partial class DriverParsers
 {
-    [GeneratedRegex(@"^oem[0-9]{1,5}\.inf$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^oem[0-9]{1,5}\.inf\z", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex OemInf();
 
     [GeneratedRegex(@"^\{[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}$")]

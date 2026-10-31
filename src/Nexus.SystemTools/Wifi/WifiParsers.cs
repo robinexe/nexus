@@ -46,7 +46,13 @@ public static class WifiParsers
             }
 
             var colon = line.IndexOf(':', StringComparison.Ordinal);
-            if (colon < 0) continue; // "<None>" / "<Nenhum>"
+            if (colon < 0)
+            {
+                // Perfis de política de grupo aparecem só com o nome; "<None>"/"<Nenhum>" = lista vazia.
+                var bare = line.Trim();
+                if (groupPolicy && !bare.StartsWith('<')) list.Add(new WifiProfileInfo(bare, iface, WifiProfileScope.GroupPolicy));
+                continue;
+            }
             var label = Text.Fold(line[..colon]);
             var name = line[(colon + 1)..].Trim();
             if (name.Length == 0) continue;

@@ -108,7 +108,7 @@ public sealed class AppxPackageHandler : IActionHandler, IRestoreValidator
     }
 
     /// <summary>Só reinstala de pastas de apps do Windows (WindowsApps/SystemApps), nunca de um caminho qualquer do backup.</summary>
-    internal static bool IsWindowsAppsPath(string path) =>
+    public static bool IsWindowsAppsPath(string path) =>
         !path.Contains("..", StringComparison.Ordinal) && !path.Contains('\'', StringComparison.Ordinal) &&
         (path.Contains(@"\WindowsApps\", StringComparison.OrdinalIgnoreCase) || path.Contains(@"\SystemApps\", StringComparison.OrdinalIgnoreCase));
 
