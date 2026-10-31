@@ -86,7 +86,9 @@ public sealed class UpdateRow(PackageUpdate update) : ObservableObject
 /// </summary>
 public sealed class ProgramsPage : ModulePage
 {
-    public const int SlotsPerScope = 16;
+    /// <summary>Máximo de sobras por escopo num pedido (limite de ações por pedido do aplicador).</summary>
+    public const int MaxPerRequest = BrokerService.MaxActionsPerRequest;
+    public const string UserAction = "programs.leftover.user@1", MachineAction = "programs.leftover.machine@1";
 
     private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
     private readonly IProcessRunner _runner = new HiddenProcessRunner();
@@ -331,22 +333,23 @@ public sealed class ProgramsPage : ModulePage
         if (chosen.Count == 0) return;
         var user = chosen.Where(c => !c.MachineScope).ToList();
         var machine = chosen.Where(c => c.MachineScope).ToList();
-        if (user.Count > SlotsPerScope || machine.Count > SlotsPerScope)
+        if (user.Count > MaxPerRequest || machine.Count > MaxPerRequest)
         {
-            Say($"Escolha no máximo {SlotsPerScope} sobras do perfil e {SlotsPerScope} de todos os usuários por vez.");
+            Say($"Escolha no máximo {MaxPerRequest} sobras do perfil e {MaxPerRequest} de todos os usuários por vez.");
             return;
         }
 
         var moved = 0;
         var failed = new List<string>();
-        foreach (var (group, level, slot, label) in new[]
+        foreach (var (group, level, actionId, label) in new[]
                  {
-                     (user, BrokerLevel.User, "user", "do seu perfil"),
-                     (machine, BrokerLevel.Admin, "machine", "de todos os usuários (pede administrador e cria um ponto de restauração)"),
+                     (user, BrokerLevel.User, UserAction, "do seu perfil"),
+                     (machine, BrokerLevel.Admin, MachineAction, "de todos os usuários (pede administrador e cria um ponto de restauração)"),
                  })
         {
             if (group.Count == 0) continue;
-            var requests = group.Select((c, i) => new ActionRequest($"programs.leftover.{slot}.{i + 1:00}@1", null,
+            // Lote: a mesma ação, uma instância por sobra (alvo diferente). Uma confirmação, uma execução, um desfazer.
+            var requests = group.Select(c => new ActionRequest(actionId, null,
                 new Dictionary<string, string> { ["kind"] = c.Kind == LeftoverKind.Folder ? "file" : "registry", ["path"] = c.Path })).ToList();
             var text = new StringBuilder().Append(CultureInfo.InvariantCulture, $"Mover {group.Count} sobra(s) {label} para a quarentena do NEXUS?\n\n");
             foreach (var c in group.Take(12)) text.Append(CultureInfo.InvariantCulture, $"• {c.DisplayPath}\n");

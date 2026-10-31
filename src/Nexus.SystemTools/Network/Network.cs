@@ -15,7 +15,7 @@ public interface INetworkBackend
 }
 
 /// <summary>Limpar o cache DNS. Efêmero: não há o que restaurar (o Windows refaz o cache sozinho conforme os nomes são usados).</summary>
-public sealed class DnsFlushHandler(INetworkBackend backend, EphemeralMarker? marker = null) : EphemeralHandler(marker)
+public sealed class DnsFlushHandler(INetworkBackend backend) : EphemeralHandler
 {
     public const string Kind = "SystemDnsFlush";
     public override string HandlerKind => Kind;
@@ -23,7 +23,7 @@ public sealed class DnsFlushHandler(INetworkBackend backend, EphemeralMarker? ma
 }
 
 /// <summary>Limpar o cache ARP. Efêmero: as entradas dinâmicas são reaprendidas em segundos.</summary>
-public sealed class ArpFlushHandler(INetworkBackend backend, EphemeralMarker? marker = null) : EphemeralHandler(marker)
+public sealed class ArpFlushHandler(INetworkBackend backend) : EphemeralHandler
 {
     public const string Kind = "SystemArpFlush";
     public override string HandlerKind => Kind;

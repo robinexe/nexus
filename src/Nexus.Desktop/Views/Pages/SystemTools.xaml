@@ -35,15 +35,18 @@
         </Style.Triggers>
       </Style>
 
-      <!-- Linha de ação: o que é, estado, motivo de proteção e os botões Remover / Desfazer. -->
+      <!-- Linha de ação: seleção para o lote, o que é, estado, motivo de proteção e os botões Remover / Desfazer. -->
       <DataTemplate x:Key="ST.Row" DataType="{x:Type vm:SystemActionRow}">
         <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1" Padding="0,9,0,9">
           <Grid>
             <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="26"/>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel>
+            <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Top" Margin="0,2,0,0" ToolTip="Incluir em Remover selecionados"
+                      Visibility="{Binding CanApply, Converter={StaticResource BoolToVis}}"/>
+            <StackPanel Grid.Column="1">
               <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
                 <TextBlock Text="{Binding Badge}" Style="{StaticResource ST.Tone}" Margin="10,1,0,0" VerticalAlignment="Center"
@@ -55,7 +58,7 @@
               <TextBlock Text="{Binding Status}" Style="{StaticResource ST.Tone}" Margin="0,3,0,0"
                          Visibility="{Binding Status, Converter={StaticResource NullToCollapsed}}"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
               <Button Content="Remover" Style="{StaticResource ST.Small}" Command="{Binding ApplyCommand}"
                       Visibility="{Binding CanApply, Converter={StaticResource BoolToVis}}"/>
               <Button Content="Desfazer" Style="{StaticResource ST.Small}" Command="{Binding RevertCommand}"
@@ -144,6 +147,11 @@
             <ScrollViewer MaxHeight="340" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding WifiProfiles}" ItemTemplate="{StaticResource ST.Row}"/>
             </ScrollViewer>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+              <Button Content="Remover selecionadas" Style="{StaticResource Button.Primary}" Command="{Binding RemoveSelectedWifiCommand}"/>
+              <Button Content="{Binding UndoBatchLabel}" Style="{StaticResource ST.Small}" Command="{Binding UndoBatchCommand}" Margin="10,0,0,0"
+                      Visibility="{Binding CanUndoBatch, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
           </StackPanel>
         </Border>
 
@@ -175,6 +183,11 @@
             <ScrollViewer MaxHeight="420" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding Drivers}" ItemTemplate="{StaticResource ST.Row}"/>
             </ScrollViewer>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+              <Button Content="Remover selecionados" Style="{StaticResource Button.Primary}" Command="{Binding RemoveSelectedDriversCommand}"/>
+              <Button Content="{Binding UndoBatchLabel}" Style="{StaticResource ST.Small}" Command="{Binding UndoBatchCommand}" Margin="10,0,0,0"
+                      Visibility="{Binding CanUndoBatch, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
           </StackPanel>
         </Border>
 
@@ -188,6 +201,11 @@
             <ScrollViewer MaxHeight="420" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding Apps}" ItemTemplate="{StaticResource ST.Row}"/>
             </ScrollViewer>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+              <Button Content="Remover selecionados" Style="{StaticResource Button.Primary}" Command="{Binding RemoveSelectedAppsCommand}"/>
+              <Button Content="{Binding UndoBatchLabel}" Style="{StaticResource ST.Small}" Command="{Binding UndoBatchCommand}" Margin="10,0,0,0"
+                      Visibility="{Binding CanUndoBatch, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
           </StackPanel>
         </Border>
 

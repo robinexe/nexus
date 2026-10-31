@@ -62,7 +62,10 @@ public sealed class OrphanRow(RegistryOrphan o) : ObservableObject
 /// </summary>
 public sealed class SecurityPage : ModulePage
 {
+    /// <summary>Identificadores por instância da ação (regra do catálogo: até 28 por "selection").</summary>
     private const int MaxSelection = 28;
+    /// <summary>Lote: várias instâncias da mesma ação num pedido (até o limite de ações por pedido do aplicador).</summary>
+    private const int MaxPerRequest = MaxSelection * 8;
     private bool _loaded;
     private bool _scanning;
     private bool _inspecting;
@@ -74,8 +77,8 @@ public sealed class SecurityPage : ModulePage
     private string _scanLine = "";
     private string _scanElapsed = "";
     private string _inspectorStatus = "O inspetor só roda quando você pede.";
-    private Guid? _lastRun;
-    private BrokerLevel _lastLevel;
+    /// <summary>Execuções desta sessão da página (ex.: órfãs do PC e do usuário, cada escopo num pedido); Desfazer reverte todas, da mais nova à mais antiga.</summary>
+    private readonly List<(Guid Run, BrokerLevel Level)> _lastRuns = [];
     private Action? _cancelScan;
 
     public SecurityPage()
@@ -91,7 +94,7 @@ public sealed class SecurityPage : ModulePage
         InspectCommand = new RelayCommand(() => _ = InspectAsync(), () => !_inspecting && !Busy);
         RemoveOrphansCommand = new RelayCommand(() => _ = RemoveOrphansAsync(), () => !Busy && Orphans.Any(o => o.IsSelected));
         SelectNoneCommand = new RelayCommand(() => { foreach (var o in Orphans) o.IsSelected = false; });
-        UndoCommand = new RelayCommand(() => _ = UndoAsync(), () => !Busy && _lastRun is not null);
+        UndoCommand = new RelayCommand(() => _ = UndoAsync(), () => !Busy && _lastRuns.Count > 0);
     }
 
     public override string Title => "Segurança";
@@ -115,7 +118,7 @@ public sealed class SecurityPage : ModulePage
     public string InspectorStatus { get => _inspectorStatus; private set => Set(ref _inspectorStatus, value); }
     public bool Scanning { get => _scanning; private set => Set(ref _scanning, value); }
     public bool Inspecting { get => _inspecting; private set => Set(ref _inspecting, value); }
-    public bool CanUndo => _lastRun is not null;
+    public bool CanUndo => _lastRuns.Count > 0;
     public int FindingCount => Findings.Count;
     public int ThreatCount => Threats.Count;
     public int OrphanCount => Orphans.Count;
@@ -271,21 +274,25 @@ public sealed class SecurityPage : ModulePage
         Message = r.Message;
         if (r.Response is { Ok: true, RunId: { } run })
         {
-            _lastRun = run;
-            _lastLevel = level;
+            _lastRuns.Add((run, level));
             OnPropertyChanged(nameof(CanUndo));
         }
     }
 
     private async Task UndoAsync()
     {
-        if (Host is null || _lastRun is not { } run) return;
+        if (Host is null || _lastRuns.Count == 0) return;
         await RunAsync(async () =>
         {
-            var r = await Host.RevertAsync(run, _lastLevel);
-            if (r is null) return;
-            Message = r.Message;
-            if (r.Response?.FullyRestored == true) { _lastRun = null; OnPropertyChanged(nameof(CanUndo)); }
+            foreach (var (run, level) in Enumerable.Reverse(_lastRuns).ToList())
+            {
+                var r = await Host.RevertAsync(run, level);
+                if (r is null) break; // cancelado: mantém para tentar de novo
+                Message = r.Message;
+                if (r.Response?.FullyRestored == true) _lastRuns.Remove((run, level));
+                else break;
+            }
+            OnPropertyChanged(nameof(CanUndo));
             await LoadAsync();
             if (Orphans.Count > 0) await InspectCoreAsync();
         });
@@ -328,17 +335,22 @@ public sealed class SecurityPage : ModulePage
         {
             foreach (var group in selected.GroupBy(o => o.Orphan.Scope))
             {
-                var items = group.Take(MaxSelection).ToList();
+                var items = group.Take(MaxPerRequest).ToList();
                 var machine = group.Key == RegScope.Machine;
                 var actionId = machine ? "security.registry.orphans.machine" : "security.registry.orphans.user";
                 var level = machine ? BrokerLevel.Admin : BrokerLevel.User;
                 var text = $"Remover {items.Count} sobra(s) de registro {(machine ? "de todo o PC" : "do seu usuário")}?\n\n" +
                            string.Join("\n", items.Take(8).Select(i => "• " + i.Display)) + (items.Count > 8 ? $"\n• … e mais {items.Count - 8}" : "") +
                            "\n\nIsso NÃO deixa o PC mais rápido; só arruma listas como Programas e Recursos. Cada entrada é copiada por inteiro antes (todas as subchaves, tipos e dados) e pode ser recriada com Desfazer." +
-                           (group.Count() > MaxSelection ? $"\n\nLimite de {MaxSelection} por vez: as demais ficam para a próxima." : "") +
+                           (group.Count() > MaxPerRequest ? $"\n\nLimite de {MaxPerRequest} por vez: as demais ficam para a próxima." : "") +
                            (machine ? "\n\nVai pedir permissão de administrador (UAC) e criar um ponto de restauração." : "");
-                var args = new Dictionary<string, string> { ["selection"] = string.Join(",", items.Select(i => i.Orphan.Selection)) };
-                var r = await Host.ApplyAsync("Remover sobras de registro", text, [new ActionRequest(actionId + "@1", null, args)], level);
+                // Lote: a regra do catálogo aceita até 28 identificadores por instância; acima disso, a mesma ação vai repetida no
+                // pedido com seleções disjuntas (alvos diferentes). Uma confirmação, uma execução, um desfazer.
+                var requests = items.Chunk(MaxSelection)
+                    .Select(chunk => new ActionRequest(actionId + "@1", null,
+                        new Dictionary<string, string> { ["selection"] = string.Join(",", chunk.Select(i => i.Orphan.Selection)) }))
+                    .ToList();
+                var r = await Host.ApplyAsync("Remover sobras de registro", text, requests, level);
                 AfterWrite(r, level);
             }
             await InspectCoreAsync();

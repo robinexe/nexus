@@ -26,7 +26,7 @@ public interface IRestorePointBackend
 /// pula a criação se já houve um ponto nas últimas 24 h (SystemRestorePointCreationFrequency) — então aceita o ponto
 /// criado há poucos minutos (ex.: o que o aplicador do NEXUS cria antes de mudanças de sistema) e diz quando não há nenhum.
 /// </summary>
-public sealed class RestorePointHandler(IRestorePointBackend backend, Func<DateTime>? clock = null, EphemeralMarker? marker = null) : EphemeralHandler(marker)
+public sealed class RestorePointHandler(IRestorePointBackend backend, Func<DateTime>? clock = null) : EphemeralHandler
 {
     public const string Kind = "SystemRestorePoint";
     public const string Description = "NEXUS: ponto manual";

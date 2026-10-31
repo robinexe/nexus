@@ -1,7 +1,7 @@
 {
-  "catalogVersion": "1.0.0",
+  "catalogVersion": "2.0.0",
   "schema": "nexus.catalog/1",
-  "note": "Módulo Ferramentas do sistema (rede, Wi-Fi, drivers, apps do Windows, pontos de restauração). Handlers em src/Nexus.SystemTools. Ações 'efêmeras' (desiredType Ephemeral) não têm estado anterior a restaurar: desfazer é declarado 'nada a restaurar'. Ver docs/modules/system.md.",
+  "note": "Módulo Ferramentas do sistema (rede, Wi-Fi, drivers, apps do Windows, pontos de restauração). Handlers em src/Nexus.SystemTools. Ações efêmeras (\"persistence\": \"Ephemeral\") não têm estado anterior a restaurar: o aplicador não cria ponto de restauração antes delas, não relê estado e desfazer responde 'nada a desfazer'. Remoções (Wi-Fi, drivers, apps) aceitam lote: a mesma ação várias vezes no pedido, uma por item. Ver docs/modules/system.md.",
   "actions": [
     {
       "id": "system.network.dns-flush",
@@ -18,7 +18,7 @@
       ],
       "risks": "Nenhum risco conhecido. As primeiras aberturas de sites depois da limpeza podem levar alguns milissegundos a mais.",
       "privileges": "User",
-      "persistence": "Persistent",
+      "persistence": "Ephemeral",
       "reboot": "None",
       "verification": "O Windows confirma a limpeza (retorno da função).",
       "revert": "Nada a restaurar: o cache se refaz sozinho conforme os nomes são usados."
@@ -39,7 +39,7 @@
       ],
       "risks": "Muito baixo. A conexão pode pausar por uma fração de segundo enquanto o Windows reaprende o endereço do roteador.",
       "privileges": "Admin",
-      "persistence": "Persistent",
+      "persistence": "Ephemeral",
       "reboot": "None",
       "verification": "Código de saída do netsh.",
       "revert": "Nada a restaurar: as entradas são reaprendidas automaticamente em segundos."
@@ -105,7 +105,7 @@
       ],
       "risks": "Nenhum para o sistema. Ocupa espaço em disco (de dezenas de MB a alguns GB, conforme os drivers).",
       "privileges": "Admin",
-      "persistence": "Persistent",
+      "persistence": "Ephemeral",
       "reboot": "None",
       "verification": "Código de saída do pnputil.",
       "revert": "Nada a desfazer: a cópia fica guardada; apague a pasta quando não precisar mais."
@@ -126,7 +126,7 @@
       ],
       "risks": "Nenhum. Usa parte do espaço reservado para a Proteção do Sistema; os pontos mais antigos são apagados pelo Windows quando o espaço acaba.",
       "privileges": "Admin",
-      "persistence": "Persistent",
+      "persistence": "Ephemeral",
       "reboot": "None",
       "verification": "Lista de pontos (root/default:SystemRestore): um ponto novo ou criado nos últimos 10 minutos.",
       "revert": "Nada a desfazer: o ponto fica disponível na Restauração do Sistema."

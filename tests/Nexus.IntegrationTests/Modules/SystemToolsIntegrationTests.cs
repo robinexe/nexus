@@ -19,7 +19,8 @@ namespace Nexus.IntegrationTests.Modules;
 public sealed class SystemToolsIntegrationTests : IDisposable
 {
     private static readonly string[] RefusedDriver = ["FailedAndCompensated", "Blocked"];
-    private static readonly string[] PointOutcomes = ["Verified", "FailedAndCompensated"];
+    // Ação efêmera: falha do Windows sai como Failed (não há original para compensar).
+    private static readonly string[] PointOutcomes = ["Verified", "Failed"];
     private readonly string _dir;
     private readonly Xunit.Abstractions.ITestOutputHelper _out;
     private string JournalPath => Path.Combine(_dir, "journal.db");
@@ -64,7 +65,12 @@ public sealed class SystemToolsIntegrationTests : IDisposable
             Assert.Equal("Verified", Assert.Single(exec.Results!).Outcome);
             var revert = broker.Handle(Revert(exec.RunId));
             Assert.True(revert.Ok && revert.FullyRestored == true, Details(revert));
-            _out.WriteLine("[dns] limpo e 'desfeito' (nada a restaurar): " + Details(revert));
+            var undo = Assert.Single(revert.Results!);
+            Assert.Equal("NothingToRevert", undo.Outcome);
+            Assert.Contains("nada a desfazer", undo.Detail, StringComparison.Ordinal);
+            // Efêmera não prende sessão nem cria ponto de restauração (BeforeSystemChange não é chamado).
+            Assert.NotEqual(true, exec.SessionActive);
+            _out.WriteLine("[dns] limpo e 'desfeito' (nada a desfazer): " + Details(revert));
         }
     }
 

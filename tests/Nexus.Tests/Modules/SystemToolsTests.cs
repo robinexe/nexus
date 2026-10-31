@@ -568,30 +568,63 @@ public sealed class SystemToolsHandlerTests : IDisposable
     [Fact]
     public void Dns_flush_is_ephemeral_and_revert_is_honest()
     {
-        var now = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
         var net = new FakeNetwork();
-        var handler = new DnsFlushHandler(net, new EphemeralMarker(() => now));
-        var (results, _, exec, run) = Execute(handler, Instance("system.network.dns-flush"));
+        var handler = new DnsFlushHandler(net);
+        var (results, journal, exec, run) = Execute(handler, Instance("system.network.dns-flush"));
         Assert.Equal(ExecutionOutcome.Verified, Assert.Single(results).Outcome);
         Assert.Equal(1, net.Dns);
-        // Desfazer logo depois: nada é escrito no sistema, só o marcador volta a "pronto".
-        Assert.Equal(RevertOutcome.Reverted, Assert.Single(exec.RevertRun(run)).Outcome);
+        Assert.Null(Assert.Single(journal.Entries(run)).Original); // sem backup: não há estado anterior
+        // Desfazer: "nada a desfazer" explícito, sem chamar o handler (nada é escrito, nada é executado de novo).
+        var undo = Assert.Single(exec.RevertRun(run));
+        Assert.Equal(RevertOutcome.NothingToRevert, undo.Outcome);
+        Assert.Equal(ActionExecutor.EphemeralNothingToUndo, undo.Detail);
         Assert.Equal(1, net.Dns);
+        // Repetir logo depois é executar de novo (não há marcador de "feito há poucos segundos").
+        Assert.Equal(ExecutionOutcome.Verified, Execute(handler, Instance("system.network.dns-flush")).Results[0].Outcome);
+        Assert.Equal(2, net.Dns);
+    }
 
-        // Desfazer muito depois: declarado "já no original" (nada a restaurar).
-        var (r2, _, exec2, run2) = Execute(handler, Instance("system.network.dns-flush"));
-        Assert.Equal(ExecutionOutcome.Verified, r2[0].Outcome);
-        now = now.AddMinutes(5);
-        Assert.Equal(RevertOutcome.AlreadyOriginal, Assert.Single(exec2.RevertRun(run2)).Outcome);
+    [Fact]
+    public void Ephemeral_actions_are_declared_ephemeral_in_the_catalog()
+    {
+        foreach (var id in new[] { "system.network.dns-flush", "system.network.arp-flush", "system.driver.backup-all", "system.restore.create-point" })
+            Assert.Equal(PersistenceKind.Ephemeral, Catalog.Actions.Single(a => a.Definition.Id == id).Definition.Persistence);
+        // Uma ação efêmera declarada como Persistent é recusada pelo handler (o executor precisa saber que não há estado).
+        var wrong = Instance("system.network.dns-flush");
+        wrong = wrong with { Definition = wrong.Definition with { Persistence = PersistenceKind.Persistent } };
+        Assert.Equal(ApplicabilityKind.Blocked, new DnsFlushHandler(new FakeNetwork()).Assess(wrong, T.Ctx).Kind);
+    }
+
+    [Fact]
+    public void Old_journal_entry_with_the_15s_marker_still_reverts_without_writing()
+    {
+        // Diário de antes da rodada 2: Persistent, original "Ephemeral:pronto", desejado "Ephemeral:executado".
+        var net = new FakeNetwork();
+        var handlers = new HandlerRegistry().Add(new DnsFlushHandler(net));
+        var journal = new InMemoryJournal();
+        var exec = new ActionExecutor(handlers, journal);
+        var run = exec.BeginRun("antigo", "1");
+        var inst = Instance("system.network.dns-flush");
+        inst = inst with { Definition = inst.Definition with { Persistence = PersistenceKind.Persistent } };
+        var id = journal.AddPlanned(run, 0, inst);
+        journal.Transition(id, JournalState.BackedUp, original: StateSnapshot.Of("Ephemeral", "pronto"));
+        journal.Transition(id, JournalState.Applying);
+        journal.Transition(id, JournalState.Applied);
+        journal.Transition(id, JournalState.Verified, observed: StateSnapshot.Of("Ephemeral", "executado"));
+        Assert.Equal(RevertOutcome.AlreadyOriginal, exec.Revert(id).Outcome);
+        Assert.Equal(0, net.Dns);
     }
 
     [Fact]
     public void Ephemeral_failure_is_reported_not_verified()
     {
         var net = new FakeNetwork { Fail = true };
-        var (results, _, _, _) = Execute(new DnsFlushHandler(net), Instance("system.network.dns-flush"));
-        Assert.Equal(ExecutionOutcome.FailedAndCompensated, results[0].Outcome);
+        var (results, journal, _, run) = Execute(new DnsFlushHandler(net), Instance("system.network.dns-flush"));
+        Assert.Equal(ExecutionOutcome.Failed, results[0].Outcome);
         Assert.Contains("falhou", results[0].Detail, StringComparison.Ordinal);
+        // Falha sem backup não fica pendente para a recuperação.
+        Assert.Empty(RecoveryService.FindInterrupted(journal));
+        Assert.Equal(JournalState.Failed, Assert.Single(journal.Entries(run)).State);
     }
 
     [Fact]
@@ -610,7 +643,7 @@ public sealed class SystemToolsHandlerTests : IDisposable
         // Limite de 24 h e nada recente: falha com explicação.
         sr.Now = sr.Now.AddHours(3);
         var r = Execute(new RestorePointHandler(sr, () => sr.Now), Instance("system.restore.create-point")).Results[0];
-        Assert.Equal(ExecutionOutcome.FailedAndCompensated, r.Outcome);
+        Assert.Equal(ExecutionOutcome.Failed, r.Outcome);
         Assert.Contains("24 horas", r.Detail, StringComparison.Ordinal);
 
         sr.Status = 1058;

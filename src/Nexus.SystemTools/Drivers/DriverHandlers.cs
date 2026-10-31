@@ -147,7 +147,7 @@ public sealed class DriverPackageHandler : IActionHandler, IRestoreValidator
 }
 
 /// <summary>Exporta todos os drivers de terceiros para DataDirectory\backup\drivers\todos-AAAAMMDD-HHMMSS. Efêmero: nada a desfazer (os arquivos ficam).</summary>
-public sealed class DriverBackupAllHandler(IDriverStore store, string dataDirectory, EphemeralMarker? marker = null) : EphemeralHandler(marker)
+public sealed class DriverBackupAllHandler(IDriverStore store, string dataDirectory) : EphemeralHandler
 {
     public const string Kind = "SystemDriverBackup";
     public override string HandlerKind => Kind;

@@ -28,12 +28,22 @@ Parâmetros escolhidos pelo usuário (`userParameters`, validados pelo broker e 
 
 ### Ações "efêmeras"
 
-O núcleo só tem `PersistenceKind.Session` e `Persistent`. Session faria o broker segurar a trava até `EndSession`, então
-estas ações usam `Persistent` e um marcador (`EphemeralMarker`): Detect devolve `Ephemeral:pronto`, ou `Ephemeral:executado`
-por 15 s depois de executar (para a releitura do executor confirmar). Restore não toca o sistema; desfazer logo depois
-aparece como "revertido" e, mais tarde, como "já no original". Isso é honesto: não existe estado anterior a restaurar.
-Efeito colateral: por serem Admin + Persistent, ARP/backup de drivers/ponto disparam o ponto de restauração automático do
-broker (uma vez por processo). Ver "Mudanças sugeridas fora do escopo".
+DNS, ARP, backup de todos os drivers e criar ponto de restauração são `"persistence": "Ephemeral"` (núcleo, rodada 2):
+o executor não lê estado antes nem relê depois; registra a intenção no diário, executa e marca Verified se o handler não
+lançar. Não disparam o ponto de restauração automático do aplicador (antes, ARP/backup/ponto, por serem Admin + Persistent,
+criavam um ponto antes de criar um ponto), não prendem sessão, e "Desfazer" responde explicitamente "ação sem estado: nada a
+desfazer" sem chamar o handler. Interrompidas por queda, a recuperação as encerra como aceitas. O antigo marcador de 15 s
+(`EphemeralMarker`) foi removido; entradas antigas do diário (Persistent, original `Ephemeral:pronto`) continuam
+desfazendo como "já no original", sem escrever nada.
+
+### Lote (várias redes, drivers ou apps numa confirmação)
+
+A página tem caixas de seleção em Wi-Fi, drivers e apps e o botão "Remover selecionados": um pedido só ao aplicador, com a
+mesma ação repetida (uma instância por item, cada uma com seu alvo, seu backup e sua entrada no diário). Uma confirmação, um
+aviso do Windows (UAC) e um ponto de restauração automático para o lote todo. Se um item falha, os outros seguem (falha de
+um item não desfaz os demais; cada um é compensado sozinho). "Desfazer lote" reverte a execução inteira em ordem inversa; o
+"Desfazer" de cada linha continua disponível e também desfaz o lote em que ela foi removida (o diário é por execução).
+Até 64 itens por pedido.
 
 ## Evidências
 
@@ -91,8 +101,7 @@ minutos (ex.: o que o aplicador criou antes de aplicar); senão falha com a expl
 - **Restaurar o sistema pelo NEXUS**: abre o `rstrui.exe`, onde o próprio Windows mostra o que muda e pede confirmação.
 - **Contar o cache DNS por `DnsGetCacheDataTable`** (API não documentada, com risco de vazamento/queda): a contagem vem de
   `ipconfig /displaydns` (linhas de traços, independente do idioma); se não der, mostra "n/d".
-- Removido em lote: o broker recusa a mesma ação repetida num pedido, então cada perfil/driver/app é uma confirmação e
-  um "Desfazer" próprio.
+- Pedir duas vezes o mesmo item no mesmo lote: o broker recusa a duplicata exata (mesma ação e mesmo alvo).
 
 ## Comparação com o Kudu
 

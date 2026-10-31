@@ -18,19 +18,28 @@ public sealed class SystemActionRow : ObservableObject
     private string _tone = "muted";
     private Guid? _runId;
     private bool _applied;
+    private bool _isChecked;
 
     public required string Key { get; init; }
+    /// <summary>Campo do alvo que identifica esta linha no diário (ex.: profileName), para casar resultados do lote.</summary>
+    public string TargetField { get; init; } = "";
+    /// <summary>Marcada para "Remover selecionados" (lote).</summary>
+    public bool IsChecked { get => _isChecked; set => Set(ref _isChecked, value); }
+    public bool Matches(string? target) =>
+        target is not null && target.Split(" | ").Contains(TargetField + "=" + Key, StringComparer.Ordinal);
     public required string Title { get; init; }
     public string Detail { get; init; } = "";
     public string Badge { get; init; } = "";
     /// <summary>Motivo para não oferecer a remoção (proteção), ou null.</summary>
     public string? Blocked { get; init; }
     public bool CanApply => Blocked is null && !_applied;
+    /// <summary>Linha de um lote: confirmação curta usada na lista do lote.</summary>
+    public string ShortTitle => Title.Length > 70 ? string.Concat(Title.AsSpan(0, 70), "…") : Title;
     public string Status { get => _status; set => Set(ref _status, value); }
     /// <summary>good, bad, trace, signal ou muted (cor do selo).</summary>
     public string Tone { get => _tone; set => Set(ref _tone, value); }
     public Guid? RunId { get => _runId; set { if (Set(ref _runId, value)) OnPropertyChanged(nameof(CanRevert)); } }
-    public bool Applied { get => _applied; set { if (Set(ref _applied, value)) { OnPropertyChanged(nameof(CanApply)); OnPropertyChanged(nameof(CanRevert)); } } }
+    public bool Applied { get => _applied; set { if (Set(ref _applied, value)) { if (value) IsChecked = false; OnPropertyChanged(nameof(CanApply)); OnPropertyChanged(nameof(CanRevert)); } } }
     public bool CanRevert => _applied && _runId is not null;
     public ICommand? ApplyCommand { get; set; }
     public ICommand? RevertCommand { get; set; }
@@ -84,7 +93,26 @@ public sealed class SystemToolsPage : ModulePage
             RestoreAction, BrokerLevel.Admin)), () => !Busy);
         OpenRestoreCommand = new RelayCommand(OpenSystemRestore);
         OpenProtectionCommand = new RelayCommand(OpenSystemProtection);
+        RemoveSelectedWifiCommand = new RelayCommand(() => _ = RunAsync(() => RemoveWifiAsync(Selected(WifiProfiles))), () => !Busy && Selected(WifiProfiles).Count > 0);
+        RemoveSelectedDriversCommand = new RelayCommand(() => _ = RunAsync(() => RemoveDriversAsync(Selected(Drivers))), () => !Busy && Selected(Drivers).Count > 0);
+        RemoveSelectedAppsCommand = new RelayCommand(() => _ = RunAsync(() => RemoveAppsAsync(Selected(Apps))), () => !Busy && Selected(Apps).Count > 0);
+        UndoBatchCommand = new RelayCommand(() => _ = RunAsync(UndoBatchAsync), () => !Busy && _lastBatch is not null);
     }
+
+    /// <summary>Máximo de itens por lote (limite de ações por pedido do aplicador).</summary>
+    public const int MaxBatch = BrokerService.MaxActionsPerRequest;
+    private (Guid Run, BrokerLevel Level, string Label)? _lastBatch;
+
+    public ICommand RemoveSelectedWifiCommand { get; }
+    public ICommand RemoveSelectedDriversCommand { get; }
+    public ICommand RemoveSelectedAppsCommand { get; }
+    public ICommand UndoBatchCommand { get; }
+    public bool CanUndoBatch => _lastBatch is not null;
+    public string UndoBatchLabel => _lastBatch is { } b ? $"Desfazer lote ({b.Label})" : "Desfazer lote";
+
+    private static List<SystemActionRow> Selected(IEnumerable<SystemActionRow> rows) => rows.Where(r => r.IsChecked && r.CanApply).ToList();
+
+    private IEnumerable<SystemActionRow> AllRows() => WifiProfiles.Concat(_allDrivers).Concat(Apps);
 
     // ------------------------------------------------------------------ estado lido
 
@@ -167,23 +195,27 @@ public sealed class SystemToolsPage : ModulePage
             var old = r.LastConnected.TryGetValue(p.Name, out var when) && when < DateTime.Now.AddDays(-180);
             var row = new SystemActionRow
             {
-                Key = p.Name, Title = p.Name, Badge = old ? "sem uso há 6+ meses" : "",
+                Key = p.Name, TargetField = "profileName", Title = p.Name, Badge = old ? "sem uso há 6+ meses" : "",
                 Detail = $"{scope} · {last} · {string.Join(", ", g.Select(x => x.Interface).Distinct())}",
                 Blocked = p.Removable ? null : "Definido pela empresa (política de grupo): o NEXUS não remove.",
             };
-            row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveWifiAsync(row)), () => !Busy && row.CanApply);
+            row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveWifiAsync([row])), () => !Busy && row.CanApply);
             row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertRowAsync(row, BrokerLevel.Admin)), () => !Busy && row.CanRevert);
             WifiProfiles.Add(row);
         }
         WifiNote = r.Profiles.Count == 0 ? r.Note ?? "Nenhuma rede Wi-Fi salva." : $"{r.Profiles.Select(p => p.Name).Distinct().Count()} rede(s) salva(s).";
     }
 
-    private Task RemoveWifiAsync(SystemActionRow row) => ApplyRowAsync(row, "Remover rede Wi-Fi salva",
-        $"Remover a rede Wi-Fi salva \"{row.Title}\"?\n\nO NEXUS guarda antes uma cópia do perfil completo (com a senha), protegida pela criptografia do Windows, " +
-        "na pasta de dados do aplicador. Depois remove o perfil: o Windows deixa de se conectar a essa rede sozinho.\n" +
+    private Task RemoveWifiAsync(List<SystemActionRow> rows) => ApplyBatchAsync(rows, "rede(s) Wi-Fi", "Remover rede Wi-Fi salva",
+        (rows.Count == 1 ? $"Remover a rede Wi-Fi salva \"{rows[0].Title}\"?" : $"Remover {rows.Count} redes Wi-Fi salvas?\n\n{List(rows)}") +
+        "\n\nO NEXUS guarda antes uma cópia de cada perfil completo (com a senha), protegida pela criptografia do Windows, " +
+        "na pasta de dados do aplicador. Depois remove: o Windows deixa de se conectar a essas redes sozinho.\n" +
         "Ganho de desempenho: nenhum.\nRisco: se for a rede que você está usando agora, a conexão cai.\n" +
-        "Desfazer: reimporta o perfil guardado (botão Desfazer).\n\nExige administrador.",
-        new ActionRequest(WifiAction, Arguments: new Dictionary<string, string> { ["wifiProfile"] = row.Key }), BrokerLevel.Admin);
+        "Desfazer: reimporta os perfis guardados (botão Desfazer).\n\nExige administrador.",
+        row => new ActionRequest(WifiAction, Arguments: new Dictionary<string, string> { ["wifiProfile"] = row.Key }), BrokerLevel.Admin);
+
+    private static string List(List<SystemActionRow> rows) =>
+        string.Join("\n", rows.Take(10).Select(r => "• " + r.ShortTitle)) + (rows.Count > 10 ? $"\n• … e mais {rows.Count - 10}" : "");
 
     // ------------------------------------------------------------------ drivers
 
@@ -199,6 +231,7 @@ public sealed class SystemToolsPage : ModulePage
             var row = new SystemActionRow
             {
                 Key = p.PublishedName,
+                TargetField = "publishedName",
                 Title = $"{p.Provider} · {p.OriginalName}",
                 Detail = $"{p.ClassName} · versão {p.VersionText}{(p.Date is { } d ? $" de {d:dd/MM/yyyy}" : "")} · {p.PublishedName}" +
                          (newer is not null ? $" · há versão mais nova ({newer.VersionText})" : ""),
@@ -207,7 +240,7 @@ public sealed class SystemToolsPage : ModulePage
                 Tag = newer is not null && blocked is null,
             };
             row.Tone = inUse ? "good" : newer is not null ? "trace" : "muted";
-            row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveDriverAsync(row)), () => !Busy && row.CanApply);
+            row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveDriversAsync([row])), () => !Busy && row.CanApply);
             row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertRowAsync(row, BrokerLevel.Admin)), () => !Busy && row.CanRevert);
             _allDrivers.Add(row);
         }
@@ -224,13 +257,16 @@ public sealed class SystemToolsPage : ModulePage
         foreach (var row in _allDrivers.Where(x => !OnlyCandidates || x.Tag is true || x.Applied)) Drivers.Add(row);
     }
 
-    private Task RemoveDriverAsync(SystemActionRow row) => ApplyRowAsync(row, "Remover driver antigo",
-        $"Remover do repositório de drivers o pacote {row.Key} ({row.Title})?\n\n{row.Detail}\n\n" +
-        "Antes, o NEXUS exporta o pacote (pnputil /export-driver) para a pasta de dados do aplicador. A remoção é feita sem /force: " +
-        "se algum dispositivo usar o pacote, o próprio Windows recusa.\nGanho: espaço em disco; nenhum ganho de desempenho.\n" +
-        "Risco: baixo. Um aparelho desconectado que usava este driver pode pedi-lo de novo.\nDesfazer: reinstala do backup (pnputil /add-driver).\n\n" +
+    private Task RemoveDriversAsync(List<SystemActionRow> rows) => ApplyBatchAsync(rows, "driver(s)", "Remover driver antigo",
+        (rows.Count == 1
+            ? $"Remover do repositório de drivers o pacote {rows[0].Key} ({rows[0].Title})?\n\n{rows[0].Detail}"
+            : $"Remover {rows.Count} pacotes antigos do repositório de drivers?\n\n{string.Join("\n", rows.Take(10).Select(r => $"• {r.Key} · {r.ShortTitle}"))}" +
+              (rows.Count > 10 ? $"\n• … e mais {rows.Count - 10}" : "")) +
+        "\n\nAntes, o NEXUS exporta cada pacote (pnputil /export-driver) para a pasta de dados do aplicador. A remoção é feita sem /force: " +
+        "se algum dispositivo usar o pacote, o próprio Windows recusa (só esse item falha; os outros seguem).\nGanho: espaço em disco; nenhum ganho de desempenho.\n" +
+        "Risco: baixo. Um aparelho desconectado que usava um destes drivers pode pedi-lo de novo.\nDesfazer: reinstala do backup (pnputil /add-driver).\n\n" +
         "Exige administrador.",
-        new ActionRequest(DriverAction, Arguments: new Dictionary<string, string> { ["driverInf"] = row.Key }), BrokerLevel.Admin);
+        row => new ActionRequest(DriverAction, Arguments: new Dictionary<string, string> { ["driverInf"] = row.Key }), BrokerLevel.Admin);
 
     private void OpenDriverBackups()
     {
@@ -257,11 +293,11 @@ public sealed class SystemToolsPage : ModulePage
             var prov = provisioned is null ? "" : provisioned.Contains(p.Name) ? " · também provisionado (fica para contas novas)" : "";
             var row = new SystemActionRow
             {
-                Key = p.Name, Title = entry.Title, Detail = $"{entry.Note} · {p.Name} {p.Version}{prov}",
+                Key = p.Name, TargetField = "packageName", Title = entry.Title, Detail = $"{entry.Note} · {p.Name} {p.Version}{prov}",
                 Badge = cls == AppxClass.Safe ? "seguro remover" : "atenção", Blocked = blocked, Tag = p.PackageFamilyName,
             };
             row.Tone = cls == AppxClass.Safe ? "good" : "trace";
-            row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveAppAsync(row, entry, cls)), () => !Busy && row.CanApply);
+            row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveAppsAsync([row])), () => !Busy && row.CanApply);
             row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertRowAsync(row, BrokerLevel.User)), () => !Busy && row.CanRevert);
             row.ExtraLabel = "Abrir na Store";
             row.ExtraCommand = new RelayCommand(() => OpenStore(row));
@@ -271,14 +307,21 @@ public sealed class SystemToolsPage : ModulePage
                    (provisioned is null ? " · lista de provisionados exige administrador (não lida)." : $" · {provisioned.Count} pacote(s) provisionado(s) (não são removidos).");
     }
 
-    private Task RemoveAppAsync(SystemActionRow row, AppxCatalogEntry entry, AppxClass cls) => ApplyRowAsync(row, "Remover app do Windows",
-        $"Remover \"{entry.Title}\" ({row.Key}) para o seu usuário?\n\n{entry.Note}\n" +
-        (cls == AppxClass.Warn ? "\nATENÇÃO: este app é útil para muita gente. Remova só se não usa.\n" : "") +
-        "\nGanho: espaço e menos atalhos no menu Iniciar; nenhum ganho em jogos.\n" +
-        "Desfazer é LIMITADO: o NEXUS reinstala sozinho só se os arquivos do app ainda estiverem no PC (app provisionado ou de outra conta). " +
-        "Se não estiverem, será preciso reinstalar pela Microsoft Store (o botão \"Abrir na Store\" leva direto à página).\n" +
-        "O pacote provisionado (para contas novas) não é tocado.",
-        new ActionRequest(AppxAction, Arguments: new Dictionary<string, string> { ["appxName"] = row.Key }), BrokerLevel.User);
+    private Task RemoveAppsAsync(List<SystemActionRow> rows)
+    {
+        var warn = rows.Where(r => AppxCatalog.Classify(r.Key).Class == AppxClass.Warn).ToList();
+        var head = rows.Count == 1
+            ? $"Remover \"{rows[0].Title}\" ({rows[0].Key}) para o seu usuário?\n\n{rows[0].Detail}"
+            : $"Remover {rows.Count} apps para o seu usuário?\n\n{List(rows)}";
+        return ApplyBatchAsync(rows, "app(s)", "Remover app do Windows",
+            head + "\n" +
+            (warn.Count > 0 ? $"\nATENÇÃO: {string.Join(", ", warn.Take(5).Select(w => w.ShortTitle))} {(warn.Count == 1 ? "é útil" : "são úteis")} para muita gente. Remova só se não usa.\n" : "") +
+            "\nGanho: espaço e menos atalhos no menu Iniciar; nenhum ganho em jogos.\n" +
+            "Desfazer é LIMITADO: o NEXUS reinstala sozinho só se os arquivos do app ainda estiverem no PC (app provisionado ou de outra conta). " +
+            "Se não estiverem, será preciso reinstalar pela Microsoft Store (o botão \"Abrir na Store\" leva direto à página).\n" +
+            "O pacote provisionado (para contas novas) não é tocado.",
+            row => new ActionRequest(AppxAction, Arguments: new Dictionary<string, string> { ["appxName"] = row.Key }), BrokerLevel.User);
+    }
 
     private void OpenStore(SystemActionRow row)
     {
@@ -340,55 +383,107 @@ public sealed class SystemToolsPage : ModulePage
         Message = outcome switch
         {
             "Verified" => $"{title}: feito.",
-            "AlreadyConfigured" => $"{title}: feito há poucos segundos; nada repetido.",
             "" => r.Message,
             _ => $"{title}: não concluído ({outcome}). {detail}",
         };
         await LoadAsync();
     }
 
-    private async Task ApplyRowAsync(SystemActionRow row, string title, string confirmation, ActionRequest request, BrokerLevel level)
+    /// <summary>
+    /// Lote: a mesma ação uma vez por linha (alvos diferentes), num pedido só — uma confirmação, um aviso do Windows, uma execução
+    /// no diário e um desfazer. Cada resultado volta com a posição do pedido (<see cref="ActionResultDto.Index"/>).
+    /// </summary>
+    private async Task ApplyBatchAsync(List<SystemActionRow> rows, string noun, string title, string confirmation,
+        Func<SystemActionRow, ActionRequest> request, BrokerLevel level)
     {
-        if (Host is null) return;
-        var r = await Host.ApplyAsync(title, confirmation, [request], level);
+        if (Host is null || rows.Count == 0) return;
+        if (rows.Count > MaxBatch) { Message = $"Escolha no máximo {MaxBatch} itens por vez."; return; }
+        var r = await Host.ApplyAsync(rows.Count == 1 ? title : $"{title} ({rows.Count})", confirmation, rows.Select(request).ToList(), level);
         if (r is null) return;
-        var (outcome, detail) = First(r);
-        if (outcome == "Verified")
+        var results = r.Response?.Results ?? [];
+        if (results.Count == 0)
         {
-            row.RunId = r.Response?.RunId;
-            row.Applied = true;
-            row.Status = "removido · backup guardado";
-            row.Tone = "good";
-            Message = $"{row.Title}: removido. Use Desfazer para voltar.";
+            foreach (var row in rows) { row.Status = r.Message; row.Tone = "bad"; }
+            Message = r.Message;
+            return;
         }
-        else
+        var done = 0;
+        for (var i = 0; i < rows.Count; i++)
         {
-            row.Status = outcome.Length == 0 ? r.Message : $"{Translate(outcome)}: {detail}";
-            row.Tone = "bad";
-            Message = row.Status;
+            var row = rows[i];
+            var res = results.FirstOrDefault(x => x.Index == i) ?? (rows.Count == 1 ? results[0] : null);
+            if (res is { Outcome: "Verified" })
+            {
+                row.RunId = r.Response?.RunId;
+                row.Applied = true;
+                row.Status = "removido · backup guardado";
+                row.Tone = "good";
+                done++;
+            }
+            else
+            {
+                row.Status = res is null ? "sem resultado do aplicador" : $"{Translate(res.Outcome)}: {res.Detail}";
+                row.Tone = "bad";
+            }
         }
+        if (done > 0 && r.Response?.RunId is { } run)
+        {
+            _lastBatch = (run, level, $"{done} {noun}");
+            OnPropertyChanged(nameof(CanUndoBatch));
+            OnPropertyChanged(nameof(UndoBatchLabel));
+        }
+        Message = rows.Count == 1
+            ? (done == 1 ? $"{rows[0].Title}: removido. Use Desfazer para voltar." : rows[0].Status)
+            : done == rows.Count ? $"{done} {noun} removido(s). Use Desfazer lote para voltar todos."
+            : $"{done} de {rows.Count} removido(s); os demais mostram o motivo na linha.";
     }
 
+    /// <summary>Desfazer de uma linha: o diário é por execução, então desfaz o lote em que ela foi removida (dito no status).</summary>
     private async Task RevertRowAsync(SystemActionRow row, BrokerLevel level)
     {
-        if (Host is null || row.RunId is not { } run) return;
+        if (row.RunId is not { } run) return;
+        await RevertRunAsync(run, level);
+    }
+
+    private async Task UndoBatchAsync()
+    {
+        if (_lastBatch is not { } b) return;
+        await RevertRunAsync(b.Run, b.Level);
+    }
+
+    private async Task RevertRunAsync(Guid run, BrokerLevel level)
+    {
+        if (Host is null) return;
+        var rows = AllRows().Where(x => x.RunId == run).ToList();
         var r = await Host.RevertAsync(run, level);
         if (r is null) return;
-        var (outcome, detail) = First(r);
-        if (r.Response?.FullyRestored == true)
+        var results = r.Response?.Results ?? [];
+        var all = r.Response?.FullyRestored == true;
+        foreach (var row in rows)
         {
-            row.Applied = false;
-            row.RunId = null;
-            row.Status = "restaurado";
-            row.Tone = "signal";
-            Message = $"{row.Title}: restaurado.";
+            var res = results.FirstOrDefault(x => row.Matches(x.Target));
+            var ok = all || res is { Outcome: "Reverted" or "AlreadyOriginal" or "NothingToRevert" };
+            if (ok)
+            {
+                row.Applied = false;
+                row.RunId = null;
+                row.Status = "restaurado";
+                row.Tone = "signal";
+            }
+            else
+            {
+                row.Status = $"não restaurado: {res?.Detail ?? r.Message}";
+                row.Tone = "bad";
+            }
         }
-        else
+        if (all && _lastBatch?.Run == run)
         {
-            row.Status = $"não restaurado: {detail}";
-            row.Tone = "bad";
-            Message = row.Status;
+            _lastBatch = null;
+            OnPropertyChanged(nameof(CanUndoBatch));
+            OnPropertyChanged(nameof(UndoBatchLabel));
         }
+        Message = all ? (rows.Count == 1 ? $"{rows[0].Title}: restaurado." : $"{rows.Count} itens restaurados.")
+                      : "Desfazer não terminou: veja o motivo em cada linha (ou a página Aplicar > Recuperar).";
     }
 
     private static string Translate(string outcome) => outcome switch

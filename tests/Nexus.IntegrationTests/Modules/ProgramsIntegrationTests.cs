@@ -64,7 +64,7 @@ public sealed class ProgramsIntegrationTests : IDisposable
         {
             using var broker = Broker(Path.Combine(_dir, "journal.db"));
             var exec = broker.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.Execute,
-                [Leftover("user.01", "file", folder), Leftover("user.02", "registry", keyPath)]));
+                [Leftover("user", "file", folder), Leftover("user", "registry", keyPath)]));
             Assert.True(exec.Ok, exec.Error?.Detail);
             Assert.All(exec.Results!, r => Assert.True(r.Outcome == "Verified", $"{r.ActionKey}: {r.Outcome} {r.Detail}"));
             Assert.False(Directory.Exists(folder));
@@ -94,7 +94,7 @@ public sealed class ProgramsIntegrationTests : IDisposable
         using var broker = Broker(Path.Combine(_dir, "journal-refused.db"));
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var exec = broker.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.Execute,
-            [Leftover("user.01", "file", Path.Combine(appData, "Microsoft")), Leftover("user.02", "registry", @"Software\Microsoft\Windows")]));
+            [Leftover("user", "file", Path.Combine(appData, "Microsoft")), Leftover("user", "registry", @"Software\Microsoft\Windows")]));
         Assert.All(exec.Results ?? [], r => Assert.Contains(r.Outcome, Refused));
         Assert.True(Directory.Exists(Path.Combine(appData, "Microsoft")));
     }
@@ -114,7 +114,7 @@ public sealed class ProgramsIntegrationTests : IDisposable
         {
             using var broker = Broker(Path.Combine(_dir, "journal-machine.db"));
             var exec = broker.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.Execute,
-                [Leftover("machine.01", "file", folder), Leftover("machine.02", "registry", keyPath)]));
+                [Leftover("machine", "file", folder), Leftover("machine", "registry", keyPath)]));
             Assert.All(exec.Results!, r => Assert.True(r.Outcome == "Verified", $"{r.ActionKey}: {r.Outcome} {r.Detail}"));
             Assert.False(Directory.Exists(folder));
             var revert = broker.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.RevertRun, RunId: exec.RunId));

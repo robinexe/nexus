@@ -699,8 +699,9 @@ public class ProgramLeftoverHandlerTests
         var exec = new ActionExecutor(handlers, journal);
         var actions = new[]
         {
-            Action("file", "HKCU", Path.GetDirectoryName(folder)!) with { Definition = T.Def("programs.leftover.user.01", ProgramLeftoverHandler.Kind) },
-            Action("registry", "HKCU", @"Software\Zedsoft\Zed Paint") with { Definition = T.Def("programs.leftover.user.02", ProgramLeftoverHandler.Kind) },
+            // Lote: a MESMA ação, duas instâncias (alvos diferentes).
+            Action("file", "HKCU", Path.GetDirectoryName(folder)!) with { Definition = T.Def("programs.leftover.user", ProgramLeftoverHandler.Kind) },
+            Action("registry", "HKCU", @"Software\Zedsoft\Zed Paint") with { Definition = T.Def("programs.leftover.user", ProgramLeftoverHandler.Kind) },
         };
         var run = exec.BeginRun("teste", "t");
         var results = exec.Execute(run, new DesiredStateResolver(handlers).Resolve(actions, T.Ctx), T.Ctx);
@@ -727,13 +728,15 @@ public class ProgramsCatalogTests
     {
         var all = Load();
         var mine = all.Actions.Where(a => a.Definition.Id.StartsWith("programs.", StringComparison.Ordinal)).ToList();
-        Assert.Equal(32, mine.Count);
+        Assert.Equal(2, mine.Count); // uma ação por escopo, repetida em lote (as 16+16 vagas antigas viraram "supersedes")
         Assert.Equal(all.Actions.Count, all.Actions.Select(a => a.Definition.Key).Distinct().Count());
+        Assert.Equal(16, mine.Single(a => a.Definition.Id == "programs.leftover.user").Supersedes.Count);
+        Assert.Equal(16, mine.Single(a => a.Definition.Id == "programs.leftover.machine").Supersedes.Count);
         var kinds = ProgramsHandlers.Create(new HandlerEnvironment(new InMemoryRegistryBackend(), Path.GetTempPath(), false, false))
             .Select(h => h.HandlerKind).ToHashSet();
         Assert.All(mine, a => Assert.Contains(a.Definition.HandlerKind, kinds));
-        Assert.All(mine.Where(a => a.Definition.Id.Contains(".machine.", StringComparison.Ordinal)), a => Assert.Equal(PrivilegeLevel.Admin, a.Definition.Privileges));
-        Assert.All(mine.Where(a => a.Definition.Id.Contains(".user.", StringComparison.Ordinal)), a => Assert.Equal(PrivilegeLevel.User, a.Definition.Privileges));
+        Assert.All(mine.Where(a => a.Definition.Id.EndsWith(".machine", StringComparison.Ordinal)), a => Assert.Equal(PrivilegeLevel.Admin, a.Definition.Privileges));
+        Assert.All(mine.Where(a => a.Definition.Id.EndsWith(".user", StringComparison.Ordinal)), a => Assert.Equal(PrivilegeLevel.User, a.Definition.Privileges));
         Assert.All(mine, a => Assert.False(string.IsNullOrWhiteSpace(a.Definition.Mechanism)));
         Assert.All(mine, a => Assert.NotEmpty(a.Definition.Evidence));
     }
@@ -753,7 +756,7 @@ public class ProgramsCatalogTests
     [InlineData("delete", @"C:\x", false)]
     public void Regex_dos_parametros_do_usuario(string kind, string path, bool ok)
     {
-        var entry = Load().Actions.Single(a => a.Definition.Id == "programs.leftover.user.01");
+        var entry = Load().Actions.Single(a => a.Definition.Id == "programs.leftover.user");
         var args = entry.ValidateUserArguments(new Dictionary<string, string> { ["kind"] = kind, ["path"] = path }, out var reason);
         Assert.Equal(ok, args is not null);
         if (ok)
@@ -771,7 +774,7 @@ public class ProgramsCatalogTests
     {
         using var t = new TempTree();
         var catalog = Load();
-        var entry = catalog.Actions.Single(a => a.Definition.Id == "programs.leftover.machine.03");
+        var entry = catalog.Actions.Single(a => a.Definition.Id == "programs.leftover.machine");
         var instance = entry.TryInstantiate(new Dictionary<string, string> { ["kind"] = "registry", ["path"] = @"Software\Zedsoft\Zed Paint" }, out _)!;
         var inner = new ProgramLeftoverHandler(new InMemoryRegistryTreeBackend(), new FixedRoots(t), _ => [], t.Data, true, false);
         var bound = new CatalogBoundHandler(inner, catalog, () => new Dictionary<string, string>());

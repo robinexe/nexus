@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Versioning;
@@ -135,46 +134,22 @@ public static class PowerShellRunner
 }
 
 /// <summary>
-/// Ações "efêmeras" (limpar cache DNS/ARP, criar ponto de restauração, exportar drivers): não há estado anterior a restaurar.
-/// O núcleo só conhece <see cref="PersistenceKind.Session"/> e <see cref="PersistenceKind.Persistent"/>; estas ações usam
-/// Persistent (Session prenderia a trava do aplicador até EndSession) e o estado lido é um marcador:
-/// <list type="bullet">
-/// <item>Detect = "pronto", ou "executado" por <see cref="Window"/> logo depois de executar (para a releitura confirmar);</item>
-/// <item>Restore não muda nada no sistema (só limpa o marcador): desfazer é declarado "nada a restaurar", nunca simulado.</item>
-/// </list>
+/// Ações efêmeras (limpar cache DNS/ARP, criar ponto de restauração, exportar drivers): não há estado anterior a restaurar.
+/// No catálogo são <see cref="PersistenceKind.Ephemeral"/>: o executor não lê estado nem relê depois; executa, registra no
+/// diário e marca Verified se <see cref="Run"/> não lançar. Não disparam o ponto de restauração automático do aplicador, não
+/// prendem sessão, e desfazer responde "nada a desfazer" sem chamar o handler (docs/02-architecture.md, "Ações efêmeras").
+/// <para>
+/// Compatibilidade: antes do núcleo conhecer <c>Ephemeral</c>, estas ações eram <c>Persistent</c> com um marcador de 15 s
+/// (Detect = "executado" logo depois de executar). Entradas antigas do diário ainda têm original <c>Ephemeral:pronto</c>;
+/// <see cref="Detect"/> devolve sempre esse valor, então desfazê-las dá "já no original" sem escrever nada, e
+/// <see cref="Restore"/> continua sem efeito.
+/// </para>
 /// </summary>
-public sealed class EphemeralMarker
-{
-    public const string Type = "Ephemeral";
-    public const string Ready = "pronto";
-    public const string Done = "executado";
-    public static readonly TimeSpan Window = TimeSpan.FromSeconds(15);
-
-    private readonly ConcurrentDictionary<string, DateTime> _marks = new(StringComparer.Ordinal);
-    private readonly Func<DateTime> _clock;
-
-    public EphemeralMarker(Func<DateTime>? clock = null) => _clock = clock ?? (() => DateTime.UtcNow);
-
-    public static string KeyOf(ActionInstance action)
-    {
-        ArgumentNullException.ThrowIfNull(action);
-        return action.Definition.Id + "|" + action.TargetDescription;
-    }
-
-    public StateSnapshot Read(string key) =>
-        StateSnapshot.Of(Type, _marks.TryGetValue(key, out var at) && _clock() - at <= Window ? Done : Ready);
-
-    public void Mark(string key) => _marks[key] = _clock();
-
-    public void Clear(string key) => _marks.TryRemove(key, out _);
-}
-
-/// <summary>Base dos handlers efêmeros (ver <see cref="EphemeralMarker"/>).</summary>
 public abstract class EphemeralHandler : IActionHandler, IRestoreValidator
 {
-    private readonly EphemeralMarker _marker;
-
-    protected EphemeralHandler(EphemeralMarker? marker) => _marker = marker ?? new EphemeralMarker();
+    public const string StateType = "Ephemeral";
+    public const string Ready = "pronto";
+    public const string Done = "executado";
 
     public abstract string HandlerKind { get; }
 
@@ -186,26 +161,25 @@ public abstract class EphemeralHandler : IActionHandler, IRestoreValidator
     public Applicability Assess(ActionInstance action, SystemContext context)
     {
         ArgumentNullException.ThrowIfNull(action);
-        if (action.Desired.Type != EphemeralMarker.Type || action.Desired.Value != EphemeralMarker.Done)
+        if (action.Desired.Type != StateType || action.Desired.Value != Done)
             return Applicability.Blocked("Valor desejado inválido para uma ação efêmera.");
+        if (action.Definition.Persistence != PersistenceKind.Ephemeral)
+            return Applicability.Blocked("Ação sem estado precisa ser declarada \"persistence\": \"Ephemeral\" no catálogo.");
         return AssessCore(action, context);
     }
 
-    public StateSnapshot Detect(ActionInstance action) => _marker.Read(EphemeralMarker.KeyOf(action));
+    /// <summary>Não há estado a ler: sempre "pronto" (o executor nem chama Detect para ações efêmeras).</summary>
+    public StateSnapshot Detect(ActionInstance action) => StateSnapshot.Of(StateType, Ready);
 
-    public void Apply(ActionInstance action)
-    {
-        Run(action);
-        _marker.Mark(EphemeralMarker.KeyOf(action));
-    }
+    public void Apply(ActionInstance action) => Run(action);
 
     /// <summary>Nada a restaurar no sistema: a operação não guarda estado anterior (documentado em docs/modules/system.md).</summary>
-    public void Restore(ActionInstance action, StateSnapshot original) => _marker.Clear(EphemeralMarker.KeyOf(action));
+    public void Restore(ActionInstance action, StateSnapshot original) { }
 
     public string? CheckRestore(ActionInstance action, StateSnapshot original)
     {
         ArgumentNullException.ThrowIfNull(original);
-        return original.Type == EphemeralMarker.Type && original.Value == EphemeralMarker.Ready ? null : "Original inválido para ação efêmera.";
+        return original.Type == StateType && original.Value == Ready ? null : "Original inválido para ação efêmera.";
     }
 }
 
