@@ -1,0 +1,77 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Laboratório da placa de vídeo (Nexus.Lab.Gpu). Leitura sem driver de kernel; as duas ações abaixo são escolhidas pelo usuário na página e validadas por regex (userParameters). HAGS e Modo de Jogo reaproveitam gpu.hags.lab e win.gamemode.enable do catálogo principal. Ver docs/modules/gpulab.md.",
+  "actions": [
+    {
+      "id": "gpulab.display.mode",
+      "version": 1,
+      "title": "Taxa de atualização do monitor (modo listado pelo monitor)",
+      "classification": "SupportedDocumented",
+      "condition": "Monitor rodando abaixo da maior taxa que ele mesmo anuncia na resolução atual (ex.: monitor de 144 Hz a 60 Hz).",
+      "handlerKind": "GpuLabDisplayMode",
+      "target": {
+        "device": "{device}",
+        "mode": "{mode}"
+      },
+      "userParameters": {
+        "device": "\\\\\\\\\\.\\\\DISPLAY[0-9]{1,2}",
+        "mode": "[0-9]{3,5}x[0-9]{3,5}@[0-9]{2,3}"
+      },
+      "desiredValue": "aplicado",
+      "desiredType": "DisplayMode",
+      "mechanism": "ChangeDisplaySettingsEx no monitor escolhido, primeiro com CDS_TEST (o driver diz se aceita) e depois com CDS_UPDATEREGISTRY (persiste no perfil do usuário). É a mesma troca de Configurações > Sistema > Tela > Tela avançada > Taxa de atualização. Só modos que o próprio monitor lista (EDID via driver) são aceitos; a resolução não muda.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/api/winuser/nf-winuser-changedisplaysettingsexw (CDS_TEST, CDS_UPDATEREGISTRY)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "support.microsoft.com: 'Alterar a taxa de atualização do monitor no Windows'"
+        }
+      ],
+      "risks": "Com cabo antigo (HDMI 1.4, adaptador passivo) a tela pode piscar ou ficar preta numa taxa alta. Se ficar preta, aguarde: o Windows costuma voltar; senão, reinicie em modo de segurança ou desfaça pelo NEXUS com outro monitor.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "EnumDisplaySettingsEx(ENUM_CURRENT_SETTINGS) relido: largura, altura e taxa iguais ao modo pedido.",
+      "revert": "Volta ao modo anterior registrado no diário (também testado antes com CDS_TEST), desde que o monitor ainda o liste."
+    },
+    {
+      "id": "gpulab.app.gpu-preference",
+      "version": 1,
+      "title": "Usar a GPU de alto desempenho neste jogo",
+      "classification": "Conditional",
+      "condition": "Notebook ou PC com duas GPUs (integrada + dedicada). Em PC com uma GPU só, não tem efeito.",
+      "handlerKind": "DirectXUserGpuPreference",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\DirectX\\UserGpuPreferences",
+        "name": "{exePath}",
+        "token": "GpuPreference"
+      },
+      "userParameters": {
+        "exePath": "(?i)[A-Z]:\\\\(?:[^\\\\/:*?\"<>|\\x00-\\x1f]{1,120}\\\\){0,16}[^\\\\/:*?\"<>|\\x00-\\x1f]{1,120}\\.exe"
+      },
+      "desiredValue": "2",
+      "mechanism": "Grava GpuPreference=2 (alto desempenho) para o executável em HKCU\\Software\\Microsoft\\DirectX\\UserGpuPreferences, o mesmo valor de Configurações > Sistema > Tela > Elementos gráficos. Os outros tokens da mesma string (ex.: SwapEffectUpgradeEnable) são preservados.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "support.microsoft.com: 'Gerenciar configurações de desempenho gráfico no Windows' (Elementos gráficos > Preferência de GPU)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/api/dxgi1_6/nf-dxgi1_6-idxgifactory6-enumadapterbygpupreference"
+        }
+      ],
+      "risks": "Mais consumo de bateria quando o jogo está aberto. Jogos OpenGL/Vulkan antigos podem ignorar a preferência do Windows e seguir o painel do driver (NVIDIA/AMD).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do token GpuPreference na string do executável.",
+      "revert": "Restaura só o token GpuPreference ao valor anterior (ou o remove), preservando os demais tokens; remove o valor se ele não existia."
+    }
+  ]
+}
