@@ -74,7 +74,6 @@ public sealed class AssistantPage : ModulePage
     private StepScan? _scan;
     private PcSummary? _pc;
     private StepPlanners.PcMeasurements? _measured;
-    private string _cleaningBatch = "";
     private CancellationTokenSource? _cancel;
     private bool _inFlow, _choosing, _scanning, _hasSaved;
     private string _startText = "";
@@ -353,8 +352,7 @@ public sealed class AssistantPage : ModulePage
             }, ct),
             AssistantStepId.Cleaning => Task.Run(async () =>
             {
-                var (scan, batch) = await AssistantReaders.CleaningAsync(catalog, ct);
-                _cleaningBatch = batch;
+                var (scan, _) = await AssistantReaders.CleaningAsync(catalog, ct);
                 return scan;
             }, ct),
             AssistantStepId.Programs => Task.Run(() => AssistantReaders.ProgramsAsync(checkUpdates: false, ct), ct),
@@ -603,7 +601,7 @@ public sealed class AssistantPage : ModulePage
             foreach (var (key, m) in after)
                 if (_state.Metrics.ContainsKey(key)) _state.SetMetric(key, m.Label, after: m.Value);
             if (_state.Metrics.TryGetValue("boot", out var boot)) _state.Metrics["boot"] = boot with { After = null, Note = "O \"depois\" aparece no próximo boot (página Inicialização)." };
-            _pc ??= AssistantReaders.Summary(facts, null);
+            _pc ??= await Task.Run(() => AssistantReaders.SummaryFor(facts));
             var report = AssistantReport.From(_state, _pc, DateTimeOffset.Now, ReportRedactor.ForCurrentUser());
             var path = await Task.Run(() => report.Save(AssistantReport.DefaultDirectory));
             _state.ReportPath = path;

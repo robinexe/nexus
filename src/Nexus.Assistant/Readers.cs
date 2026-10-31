@@ -89,6 +89,18 @@ public static class AssistantReaders
         catch (Exception ex) when (Expected(ex)) { return new PcReading(StepScan.Unavailable("Laboratórios", ex.Message), summary, null); }
     }
 
+    /// <summary>Perfil do relatório lido na hora (quando a etapa 2 foi pulada ou o assistente foi retomado).</summary>
+    public static PcSummary SummaryFor(SystemFacts facts)
+    {
+        ArgumentNullException.ThrowIfNull(facts);
+        try
+        {
+            var traits = PcTraitsProbe.Read(facts.SystemDrive);
+            return Summary(facts, PcProfiler.Classify(facts, traits, DiagnosticRules.Evaluate(facts)), traits);
+        }
+        catch (Exception ex) when (Expected(ex)) { return Summary(facts, null); }
+    }
+
     /// <summary>Perfil do relatório: hardware e Windows, sem nome do computador, usuário ou números de série.</summary>
     public static PcSummary Summary(SystemFacts facts, PcProfile? profile, PcTraits? traits = null)
     {
