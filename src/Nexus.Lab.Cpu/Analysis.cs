@@ -32,8 +32,9 @@ public static class CacheStepDetector
             else merged.Add(s);
         }
 
-        // Patamar = segmento com 2+ pontos (o último pode ter 1, se a varredura terminou ali). Isolados são transição.
-        var plateaus = merged.Where((s, i) => s.To - s.From >= 1 || (i == merged.Count - 1 && merged.Count > 1)).ToList();
+        // Patamar = segmento com 3+ pontos (uma oitava e meia: até uma L1 de 16 KB tem isso). O último pode ter menos, se a
+        // varredura terminou ali. Segmentos curtos no meio são a rampa de transição entre dois níveis, não um nível.
+        var plateaus = merged.Where((s, i) => s.To - s.From >= 2 || (i == merged.Count - 1 && merged.Count > 1)).ToList();
         var steps = new List<CacheStep>();
         for (var i = 0; i < plateaus.Count; i++)
         {
