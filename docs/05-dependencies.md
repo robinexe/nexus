@@ -50,9 +50,9 @@ projeto). A Etapa 2 não adicionou nenhuma dependência nova.
 
 | Ação | Versão | Licença | Uso | Redistribuído? |
 |---|---|---|---|---|
-| `actions/checkout` | v4 | MIT | `.github/workflows/vm-integracao.yml` | Não |
-| `actions/setup-dotnet` | v4 | MIT | idem (SDK pelo `global.json`) | Não |
-| `actions/upload-artifact` | v4 | MIT | idem (log, `.trx` e descoberta da VM) | Não |
+| `actions/checkout` | v5 | MIT | `.github/workflows/vm-integracao.yml` | Não |
+| `actions/setup-dotnet` | v5 | MIT | idem (SDK pelo `global.json`) | Não |
+| `actions/upload-artifact` | v5 | MIT | idem (log, `.trx` e descoberta da VM) | Não |
 
 Rodam só na VM descartável do GitHub (`windows-latest`); não entram no build nem na distribuição do NEXUS.
 

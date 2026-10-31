@@ -325,7 +325,16 @@ public sealed class CoordinationTests : IDisposable
 
         var scan = Cli("scan");
         Assert.Equal(1, scan.Exit);
-        Assert.Contains("Restauração interrompida", scan.Out, StringComparison.Ordinal);
+        // A saída redirecionada do CLI usa a página de código do console (ex.: 437 numa VM em inglês), então texto
+        // acentuado não pode ser comparado aqui. O motivo exato é conferido pelo diário; na saída, a entrada e o prefixo.
+        using (var ro = SqliteJournal.OpenReadOnly(Journal))
+        {
+            var finding = Assert.Single(RecoveryService.FindInterrupted(ro));
+            Assert.Equal("Restauração interrompida ou não confirmada.", finding.Reason);
+            Assert.Contains($"#{finding.Entry.Id} ", scan.Out, StringComparison.Ordinal);
+        }
+        Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+        Assert.Contains(": Restaura", scan.Out, StringComparison.Ordinal);
         var recovered = Cli("recover");
         Assert.Equal(0, recovered.Exit);
         Assert.Equal("300", FpsMax());
