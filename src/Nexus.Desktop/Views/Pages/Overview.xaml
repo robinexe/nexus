@@ -1,0 +1,31 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
+                    xmlns:v="clr-namespace:Nexus.Desktop.Views">
+  <DataTemplate DataType="{x:Type vm:OverviewPage}">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24">
+          <TextBlock Text="{Binding Title}" Style="{StaticResource H1}"/>
+          <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Sub}"/>
+          <ItemsControl ItemsSource="{Binding Cards}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Style="{StaticResource Card}" Width="290" MinHeight="110">
+                  <StackPanel>
+                    <DockPanel>
+                      <ContentPresenter DockPanel.Dock="Right" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}"/>
+                      <TextBlock Text="{Binding Title}" Style="{StaticResource Small}"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding Value}" FontSize="16" FontWeight="SemiBold" Margin="0,6,0,4"/>
+                    <TextBlock Text="{Binding Detail}" Style="{StaticResource Small}"/>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="{Binding Footer}" Style="{StaticResource Small}" Margin="0,8,0,0"/>
+        </StackPanel>
+      </ScrollViewer>
+    </DataTemplate>
+</ResourceDictionary>

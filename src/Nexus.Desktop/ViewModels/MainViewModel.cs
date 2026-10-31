@@ -29,7 +29,8 @@ public sealed class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
-        Pages = [Overview, Hardware, Diagnostics, Catalog, Plan, Broker, History, Capabilities];
+        Compare = new ComparePage(Measure);
+        Pages = [Overview, Hardware, Diagnostics, Catalog, Plan, Broker, Measure, Compare, History, Capabilities];
         Broker.Candidates = Plan.Candidates;
         Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
         Broker.PlanCommand = new RelayCommand(() => _ = BrokerPlanAsync(), () => !Broker.Busy && Broker.Connected && Chosen().Count > 0);
@@ -50,6 +51,8 @@ public sealed class MainViewModel : ObservableObject
     public CatalogPage Catalog { get; } = new();
     public PlanPage Plan { get; } = new();
     public BrokerPage Broker { get; } = new();
+    public MeasurePage Measure { get; } = new();
+    public ComparePage Compare { get; }
     public HistoryPage History { get; } = new();
     public CapabilitiesPage Capabilities { get; } = new();
     public IReadOnlyList<PageViewModel> Pages { get; }

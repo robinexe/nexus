@@ -45,4 +45,6 @@ public abstract class PageViewModel : ObservableObject
 {
     public abstract string Title { get; }
     public abstract string Subtitle { get; }
+    /// <summary>Grupo da navegação, por tarefa do usuário: "Meu PC", "Otimizar", "Medir", "Registro".</summary>
+    public abstract string Group { get; }
 }

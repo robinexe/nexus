@@ -6,7 +6,17 @@ using Nexus.Persistence;
 //   hold            <journal> <readyFile>
 //   apply-and-hang  <journal> <cfgRoot> <readyFile>
 //   restore-and-hang <journal> <cfgRoot> <readyFile> <runId>
+//   fake-presentmon <csvDeOrigem|--deny> <argumentos do PresentMon...>   (PresentMon falso: copia o CSV para --output_file)
 // "ready" é gravado quando o ponto de parada é atingido; depois o processo dorme até ser morto.
+if (args.Length >= 2 && args[0] == "fake-presentmon")
+{
+    if (args[1] == "--deny") { Console.Error.WriteLine("Error: access denied. Requires elevated privilege or Performance Log Users group."); return 5; }
+    var outIdx = Array.IndexOf(args, "--output_file");
+    if (outIdx < 0 || outIdx + 1 >= args.Length || !args.Contains("--process_name") || !args.Contains("--terminate_after_timed")) return 3;
+    Console.WriteLine("Started recording.");
+    File.Copy(args[1], args[outIdx + 1], overwrite: true);
+    return 0;
+}
 if (args.Length < 3) return 2;
 var journalPath = args[1];
 var coordinator = FileRunCoordinator.ForJournal(journalPath);

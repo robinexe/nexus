@@ -1,0 +1,71 @@
+<!--
+  NEXUS — tokens de design ("bancada de telemetria"). Contrato compartilhado: as chaves abaixo NÃO mudam de nome; os valores podem
+  ser refinados. Ideia: fundo azul-grafite profundo, traço âmbar de fósforo (o que é medido/agora/depois), ciano de sinal
+  (referência/antes), verde e vermelho só para melhora/piora. Tipos nativos do Windows: Bahnschrift (instrumento, DIN) para
+  títulos e números; Segoe UI Variable para texto corrido.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Cores -->
+  <Color x:Key="C.Bg">#0E1320</Color>
+  <Color x:Key="C.Surface">#161D2E</Color>
+  <Color x:Key="C.SurfaceHi">#1F2840</Color>
+  <Color x:Key="C.Line">#2A3550</Color>
+  <Color x:Key="C.Text">#E8ECF5</Color>
+  <Color x:Key="C.TextMuted">#8A96B3</Color>
+  <Color x:Key="C.TextDim">#5C6785</Color>
+  <Color x:Key="C.Trace">#FFB547</Color>
+  <Color x:Key="C.Signal">#4FD1E8</Color>
+  <Color x:Key="C.Good">#5EE6A0</Color>
+  <Color x:Key="C.Bad">#FF6B7A</Color>
+  <Color x:Key="C.WarnBg">#2B2412</Color>
+
+  <SolidColorBrush x:Key="Brush.Bg" Color="{StaticResource C.Bg}"/>
+  <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource C.Surface}"/>
+  <SolidColorBrush x:Key="Brush.SurfaceHi" Color="{StaticResource C.SurfaceHi}"/>
+  <SolidColorBrush x:Key="Brush.Line" Color="{StaticResource C.Line}"/>
+  <SolidColorBrush x:Key="Brush.Text" Color="{StaticResource C.Text}"/>
+  <SolidColorBrush x:Key="Brush.TextMuted" Color="{StaticResource C.TextMuted}"/>
+  <SolidColorBrush x:Key="Brush.TextDim" Color="{StaticResource C.TextDim}"/>
+  <!-- Âmbar: o que é medido agora, "depois", ação principal -->
+  <SolidColorBrush x:Key="Brush.Trace" Color="{StaticResource C.Trace}"/>
+  <!-- Ciano: referência, "antes", informação -->
+  <SolidColorBrush x:Key="Brush.Signal" Color="{StaticResource C.Signal}"/>
+  <SolidColorBrush x:Key="Brush.Good" Color="{StaticResource C.Good}"/>
+  <SolidColorBrush x:Key="Brush.Bad" Color="{StaticResource C.Bad}"/>
+  <SolidColorBrush x:Key="Brush.WarnBg" Color="{StaticResource C.WarnBg}"/>
+
+  <!-- Tipos -->
+  <FontFamily x:Key="Font.Display">Bahnschrift SemiBold</FontFamily>
+  <FontFamily x:Key="Font.Numbers">Bahnschrift SemiCondensed</FontFamily>
+  <FontFamily x:Key="Font.Body">Segoe UI Variable Text, Segoe UI</FontFamily>
+
+  <!-- Escala (px): 12 · 13.5 · 17 · 24 · 32 · 44 (números grandes) -->
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Small">12</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Body">13.5</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.H2">17</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.H1">24</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Display">32</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Metric">44</system:Double>
+
+  <!-- Raios por hierarquia: painel grande 10, cartão 8, controle 6, selo 999 -->
+  <CornerRadius x:Key="Radius.Panel">10</CornerRadius>
+  <CornerRadius x:Key="Radius.Card">8</CornerRadius>
+  <CornerRadius x:Key="Radius.Control">6</CornerRadius>
+
+  <!-- Durações de movimento (respeitar SystemParameters.ClientAreaAnimation: sem animação quando desligada) -->
+  <Duration x:Key="Motion.Fast">0:0:0.12</Duration>
+  <Duration x:Key="Motion.Normal">0:0:0.22</Duration>
+  <Duration x:Key="Motion.Slow">0:0:0.6</Duration>
+
+  <!-- Compatibilidade com as chaves antigas (as páginas migram para as novas) -->
+  <StaticResource x:Key="Bg" ResourceKey="Brush.Bg"/>
+  <StaticResource x:Key="Panel" ResourceKey="Brush.Surface"/>
+  <StaticResource x:Key="PanelAlt" ResourceKey="Brush.SurfaceHi"/>
+  <StaticResource x:Key="Line" ResourceKey="Brush.Line"/>
+  <StaticResource x:Key="Fg" ResourceKey="Brush.Text"/>
+  <StaticResource x:Key="Muted" ResourceKey="Brush.TextMuted"/>
+  <StaticResource x:Key="Accent" ResourceKey="Brush.Trace"/>
+  <StaticResource x:Key="Warn" ResourceKey="Brush.WarnBg"/>
+</ResourceDictionary>

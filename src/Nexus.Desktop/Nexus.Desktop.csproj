@@ -13,6 +13,7 @@
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.Persistence\Nexus.Persistence.csproj" />
     <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
+    <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />

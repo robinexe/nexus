@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "nexus.experimentation": {
+        "type": "Project"
+      },
+      "nexus.traceanalysis": {
+        "type": "Project"
+      }
+    }
+  }
+}

@@ -3,72 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:v="clr-namespace:Nexus.Desktop.Views">
   <Application.Resources>
-    <v:StatusBrushConverter x:Key="StatusBrush"/>
-    <v:StatusTextConverter x:Key="StatusText"/>
-    <v:NullToCollapsedConverter x:Key="NullToCollapsed"/>
-    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
-    <SolidColorBrush x:Key="Bg" Color="#15181D"/>
-    <SolidColorBrush x:Key="Panel" Color="#1D2128"/>
-    <SolidColorBrush x:Key="PanelAlt" Color="#242933"/>
-    <SolidColorBrush x:Key="Line" Color="#323845"/>
-    <SolidColorBrush x:Key="Fg" Color="#E6E8EB"/>
-    <SolidColorBrush x:Key="Muted" Color="#9AA3AF"/>
-    <SolidColorBrush x:Key="Accent" Color="#4C8DFF"/>
-    <SolidColorBrush x:Key="Warn" Color="#4A3A12"/>
-
-    <Style TargetType="TextBlock">
-      <Setter Property="Foreground" Value="{StaticResource Fg}"/>
-      <Setter Property="TextWrapping" Value="Wrap"/>
-    </Style>
-    <Style x:Key="H1" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-      <Setter Property="FontSize" Value="22"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-    </Style>
-    <Style x:Key="Sub" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-      <Setter Property="Foreground" Value="{StaticResource Muted}"/>
-      <Setter Property="Margin" Value="0,4,0,12"/>
-    </Style>
-    <Style x:Key="Small" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-      <Setter Property="Foreground" Value="{StaticResource Muted}"/>
-      <Setter Property="FontSize" Value="11.5"/>
-    </Style>
-    <Style x:Key="Card" TargetType="Border">
-      <Setter Property="Background" Value="{StaticResource Panel}"/>
-      <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
-      <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="6"/>
-      <Setter Property="Padding" Value="12"/>
-      <Setter Property="Margin" Value="0,0,10,10"/>
-    </Style>
-    <Style TargetType="Expander">
-      <Setter Property="Foreground" Value="{StaticResource Fg}"/>
-      <Setter Property="Margin" Value="0,0,0,10"/>
-    </Style>
-    <Style TargetType="CheckBox">
-      <Setter Property="Foreground" Value="{StaticResource Fg}"/>
-    </Style>
-    <Style TargetType="Button">
-      <Setter Property="Padding" Value="14,6"/>
-      <Setter Property="Margin" Value="0,0,8,0"/>
-    </Style>
-    <Style TargetType="ListView">
-      <Setter Property="Background" Value="{StaticResource Panel}"/>
-      <Setter Property="Foreground" Value="{StaticResource Fg}"/>
-      <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
-    </Style>
-    <Style TargetType="ListViewItem">
-      <Setter Property="Foreground" Value="{StaticResource Fg}"/>
-    </Style>
-    <Style TargetType="ToolTip">
-      <Setter Property="MaxWidth" Value="560"/>
-    </Style>
-
-    <!-- Selo de status: fundo colorido + texto -->
-    <DataTemplate x:Key="Chip">
-      <Border Background="{Binding Converter={StaticResource StatusBrush}}" CornerRadius="9" Padding="8,1" HorizontalAlignment="Left" VerticalAlignment="Top">
-        <TextBlock Text="{Binding Converter={StaticResource StatusText}}" FontSize="11" Foreground="White" TextWrapping="NoWrap"/>
-      </Border>
-    </DataTemplate>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Themes/Converters.xaml"/>
+        <ResourceDictionary Source="Themes/Tokens.xaml"/>
+        <ResourceDictionary Source="Themes/Controls.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Overview.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Hardware.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Diagnostics.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Catalog.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Plan.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Broker.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Measure.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Compare.xaml"/>
+        <ResourceDictionary Source="Views/Pages/History.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Capabilities.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
   </Application.Resources>
 </Application>

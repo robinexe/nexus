@@ -160,6 +160,13 @@
       "nexus.hardwarediscovery": {
         "type": "Project"
       },
+      "nexus.measurement": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Experimentation": "[1.0.0, )",
+          "Nexus.TraceAnalysis": "[1.0.0, )"
+        }
+      },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Sessões de medição: importar/capturar (PresentMon), resumir, guardar e comparar. Sem WPF; testável em qualquer SO. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.Measurement</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nexus.TraceAnalysis\Nexus.TraceAnalysis.csproj" />
+    <ProjectReference Include="..\Nexus.Experimentation\Nexus.Experimentation.csproj" />
+  </ItemGroup>
+</Project>

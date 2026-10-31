@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using Nexus.Core;
 using Nexus.Desktop.Services;
@@ -45,6 +45,7 @@ public sealed class HardwarePage : PageViewModel
 {
     private IReadOnlyList<SectionViewModel> _sections = [];
     public override string Title => "Hardware";
+    public override string Group => "Meu PC";
     public override string Subtitle => "Leitura do sistema: cada valor mostra se foi detectado, inferido ou está indisponível, e a fonte.";
     public IReadOnlyList<SectionViewModel> Sections { get => _sections; set => Set(ref _sections, value); }
 }
@@ -55,6 +56,7 @@ public sealed class DiagnosticsPage : PageViewModel
 {
     private IReadOnlyList<DiagnosticFinding> _findings = [];
     public override string Title => "Diagnóstico";
+    public override string Group => "Meu PC";
     public override string Subtitle => "Somente leitura. Cada achado cita a evidência; nenhum presume ganho de desempenho.";
     public IReadOnlyList<DiagnosticFinding> Findings
     {
@@ -118,7 +120,8 @@ public sealed class CatalogPage : PageViewModel
     private IReadOnlyList<RejectedCatalogItem> _rejected = [];
     private CatalogRow? _selected;
     private string _version = "";
-    public override string Title => "Catálogo";
+    public override string Title => "O que dá pra ajustar";
+    public override string Group => "Otimizar";
     public override string Subtitle => "Ações do catalog/actions.v1.json com o estado real lido agora. Nada é aplicado.";
     public IReadOnlyList<CatalogRow> Rows { get => _rows; set => Set(ref _rows, value); }
     public IReadOnlyList<RejectedCatalogItem> Rejected { get => _rejected; set => Set(ref _rejected, value); }
@@ -135,7 +138,8 @@ public sealed class PlanPage : PageViewModel
     private IReadOnlyList<PlanRow> _rows = [];
     private string _summary = "Nenhuma simulação executada.";
     private bool _busy;
-    public override string Title => "Simulação do plano";
+    public override string Title => "Testar sem aplicar";
+    public override string Group => "Otimizar";
     public override string Subtitle => "Dry-run: calcula o que mudaria, na ordem e em lotes, relendo o estado real. Nenhuma alteração é aplicada.";
     public ObservableCollection<CatalogRow> Candidates { get; } = [];
     public IReadOnlyList<PlanRow> Rows { get => _rows; set => Set(ref _rows, value); }
@@ -159,6 +163,7 @@ public sealed class HistoryPage : PageViewModel
     private string _status = "";
     private string _coordination = "";
     public override string Title => "Histórico";
+    public override string Group => "Registro";
     public override string Subtitle => "Execuções registradas no diário (aberto somente leitura) e estado da coordenação entre executores.";
     public string JournalPath { get; set; } = NexusServices.DefaultJournalPath;
     public IReadOnlyList<HistoryRun> Runs { get => _runs; set => Set(ref _runs, value); }
@@ -177,7 +182,8 @@ public sealed class HistoryPage : PageViewModel
 
 public sealed class CapabilitiesPage : PageViewModel
 {
-    public override string Title => "Capacidades";
+    public override string Title => "O que já funciona";
+    public override string Group => "Registro";
     public override string Subtitle => "O que existe nesta versão e o que foi validado. Rótulos: implementado e validado · implementado, não validado · não suportado neste ambiente · pendente.";
     public IReadOnlyList<CapabilityRow> Rows { get; } = CapabilityCatalog.Rows(OperatingSystem.IsWindows());
 }
@@ -188,7 +194,8 @@ public sealed class OverviewPage : PageViewModel
 {
     private IReadOnlyList<OverviewCard> _cards = [];
     private string _footer = "";
-    public override string Title => "Visão geral";
+    public override string Title => "Meu PC";
+    public override string Group => "Meu PC";
     public override string Subtitle => "Resumo do que foi lido deste PC. Modo somente leitura: nada é alterado.";
     public IReadOnlyList<OverviewCard> Cards { get => _cards; set => Set(ref _cards, value); }
     public string Footer { get => _footer; set => Set(ref _footer, value); }
@@ -241,7 +248,8 @@ public sealed class BrokerPage : PageViewModel
     private bool _sessionOpen;
     private IReadOnlyList<BrokerResultRow> _results = [];
 
-    public override string Title => "Broker";
+    public override string Title => "Aplicar";
+    public override string Group => "Otimizar";
     public override string Subtitle =>
         "Aplicar e reverter pelo serviço NexusBroker. A escrita real só acontece se o serviço estiver numa VM de teste liberada; fora dela, ele recusa sem alterar nada.";
 

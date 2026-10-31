@@ -46,6 +46,9 @@
       "nexus.core": {
         "type": "Project"
       },
+      "nexus.experimentation": {
+        "type": "Project"
+      },
       "nexus.gameprofiles": {
         "type": "Project",
         "dependencies": {
@@ -55,12 +58,22 @@
       "nexus.hardwarediscovery": {
         "type": "Project"
       },
+      "nexus.measurement": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Experimentation": "[1.0.0, )",
+          "Nexus.TraceAnalysis": "[1.0.0, )"
+        }
+      },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Data.Sqlite": "[10.0.14, )",
           "Nexus.Core": "[1.0.0, )"
         }
+      },
+      "nexus.traceanalysis": {
+        "type": "Project"
       },
       "nexus.windowsactions": {
         "type": "Project",
