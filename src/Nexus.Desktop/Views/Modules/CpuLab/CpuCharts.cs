@@ -1,23 +1,56 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using Nexus.Desktop.Views.Shell;
 using Nexus.Lab.Cpu;
 
 namespace Nexus.Desktop.Views.Modules.CpuLab;
 
 /// <summary>
 /// Base dos gráficos do Laboratório do processador: desenho direto em OnRender (sem um elemento por ponto), cores do tema
-/// (Brush.*) lidas dos recursos, números em Bahnschrift (Font.Numbers). Sem animação.
+/// (Brush.*) lidas dos recursos, números em Bahnschrift (Font.Numbers). Entrada: o desenho é revelado da esquerda para a direita
+/// (≈ 0,9 s) quando aparece e quando chega uma medição nova; com as animações do Windows desligadas, aparece pronto.
 /// </summary>
 public abstract class CpuChartBase : FrameworkElement
 {
     protected static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
 
+    /// <summary>Fração já revelada (0..1), animada por <see cref="PlayReveal"/>.</summary>
+    public static readonly DependencyProperty RevealProperty = DependencyProperty.Register(nameof(Reveal), typeof(double), typeof(CpuChartBase),
+        new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsRender));
+
     protected CpuChartBase()
     {
         SnapsToDevicePixels = true;
         ClipToBounds = true;
+        Loaded += (_, _) => PlayReveal();
     }
+
+    public double Reveal { get => (double)GetValue(RevealProperty); set => SetValue(RevealProperty, value); }
+
+    /// <summary>Revela o gráfico da esquerda para a direita (uma vez; nada em loop).</summary>
+    public void PlayReveal()
+    {
+        BeginAnimation(RevealProperty, null);
+        if (!ShellMotion.Enabled) { Reveal = 1; return; }
+        BeginAnimation(RevealProperty, new DoubleAnimation(0, 1, new Duration(TimeSpan.FromMilliseconds(900)))
+        {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+        });
+    }
+
+    protected sealed override void OnRender(DrawingContext drawingContext)
+    {
+        ArgumentNullException.ThrowIfNull(drawingContext);
+        var reveal = Math.Clamp(Reveal, 0, 1);
+        if (reveal < 1) drawingContext.PushClip(new RectangleGeometry(new Rect(0, 0, ActualWidth * reveal, ActualHeight)));
+        Draw(drawingContext);
+        if (reveal < 1) drawingContext.Pop();
+    }
+
+    /// <summary>Desenho do gráfico (o recorte da animação de entrada já está aplicado).</summary>
+    protected abstract void Draw(DrawingContext dc);
 
     protected Brush Res(string key, byte r, byte g, byte b) =>
         TryFindResource(key) as Brush ?? Frozen(r, g, b);
@@ -51,7 +84,13 @@ public abstract class CpuChartBase : FrameworkElement
         new(text, Pt, FlowDirection.LeftToRight, new Typeface(Numbers, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal), size, brush,
             VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
-    protected static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((UIElement)d).InvalidateVisual();
+    protected static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var chart = (CpuChartBase)d;
+        chart.InvalidateVisual();
+        // Medição nova (lista/matriz trocada): revela de novo. Mudanças de número (frequência base) só redesenham.
+        if (e.NewValue is System.Collections.IEnumerable or CoreToCoreMatrix && !ReferenceEquals(e.NewValue, e.OldValue) && chart.IsLoaded) chart.PlayReveal();
+    }
 
     protected void Empty(DrawingContext dc, string message)
     {
@@ -81,10 +120,9 @@ public sealed class LatencyCurveChart : CpuChartBase
     /// <summary>Curva da medição anterior (cinza, por baixo).</summary>
     public IReadOnlyList<LatencyPoint>? Previous { get => (IReadOnlyList<LatencyPoint>?)GetValue(PreviousProperty); set => SetValue(PreviousProperty, value); }
 
-    protected override void OnRender(DrawingContext drawingContext)
+    protected override void Draw(DrawingContext dc)
     {
-        ArgumentNullException.ThrowIfNull(drawingContext);
-        var dc = drawingContext;
+        ArgumentNullException.ThrowIfNull(dc);
         dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
         var pts = Points;
         if (pts is not { Count: > 1 }) { Empty(dc, "Meça para ver a curva de latência."); return; }
@@ -167,10 +205,9 @@ public sealed class CoreMatrixHeatmap : CpuChartBase
         return new Size(side, side);
     }
 
-    protected override void OnRender(DrawingContext drawingContext)
+    protected override void Draw(DrawingContext dc)
     {
-        ArgumentNullException.ThrowIfNull(drawingContext);
-        var dc = drawingContext;
+        ArgumentNullException.ThrowIfNull(dc);
         var m = Matrix;
         if (m is null || m.Cores.Count < 2) { Empty(dc, "Precisa de 2+ núcleos medidos."); return; }
         var n = m.Cores.Count;
@@ -233,10 +270,9 @@ public sealed class FrequencyTimeChart : CpuChartBase
     /// <summary>Frequência base anunciada (linha de referência tracejada). 0 = não desenhar.</summary>
     public double BaseGhz { get => (double)GetValue(BaseGhzProperty); set => SetValue(BaseGhzProperty, value); }
 
-    protected override void OnRender(DrawingContext drawingContext)
+    protected override void Draw(DrawingContext dc)
     {
-        ArgumentNullException.ThrowIfNull(drawingContext);
-        var dc = drawingContext;
+        ArgumentNullException.ThrowIfNull(dc);
         var s = Series;
         if (s is not { Count: > 1 }) { Empty(dc, "Rode o teste sustentado para ver a frequência no tempo."); return; }
         double w = ActualWidth - L - R, h = ActualHeight - T - B;

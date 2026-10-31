@@ -4,6 +4,7 @@ using Nexus.Broker;
 using Nexus.Desktop.Views.Modules.CpuLab;
 using Nexus.HardwareDiscovery;
 using Nexus.Lab.Cpu;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -31,6 +32,8 @@ public sealed class CpuLabPage : ModulePage
     private string _topologyText = "", _coreSummary = "", _clusterText = "", _latencySummary = "", _sustainedText = "", _scalingText = "";
     private string _identityNote = "", _historyText = "";
     private double _progress, _baseGhz;
+    private double _coreCount = double.NaN, _threadCount = double.NaN, _l3Bytes = double.NaN;
+    private string _coreThreadText = "", _coreDetail = "";
     private int _sustainedSeconds = 45;
     private IReadOnlyList<LatencyPoint>? _latency, _previousLatency;
     private IReadOnlyList<CacheStep>? _steps;
@@ -101,6 +104,44 @@ public sealed class CpuLabPage : ModulePage
     public bool HasQuick => _quick is not null;
     public bool HasSustained => _sustained is not null;
     public bool HasComparison => Comparison.Count > 0;
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Verdadeiro até a primeira leitura do processador terminar (esqueleto no destaque).</summary>
+    public bool IsLoading => !_loaded;
+    /// <summary>Destaque: o GHz do núcleo mais rápido depois de medir; antes disso, quantos núcleos.</summary>
+    public string HeroTitle => double.IsFinite(BestGhz) ? "Núcleo mais rápido" : "Seu processador";
+    public double HeroNumber => double.IsFinite(BestGhz) ? BestGhz : CoreCount;
+    public int HeroDecimals => double.IsFinite(BestGhz) ? 2 : 0;
+    public string HeroSuffix => double.IsFinite(BestGhz) ? " GHz" : " núcleos";
+    public double CoreCount { get => _coreCount; private set => Set(ref _coreCount, value); }
+    public double ThreadCount { get => _threadCount; private set => Set(ref _threadCount, value); }
+    public double L3Bytes { get => _l3Bytes; private set => Set(ref _l3Bytes, value); }
+    /// <summary>"6 / 12" (núcleos / threads).</summary>
+    public string CoreThreadText { get => _coreThreadText; private set => Set(ref _coreThreadText, value); }
+    public string CoreDetail { get => _coreDetail; private set => Set(ref _coreDetail, value); }
+    /// <summary>GHz do núcleo mais rápido na última medição rápida (NaN = ainda não medido).</summary>
+    public double BestGhz => _quick?.BestCore?.Ghz is { } g && g > 0 ? g : double.NaN;
+    /// <summary>GHz médio com todos os núcleos carregados (NaN = ainda não medido).</summary>
+    public double AllCoreGhz => (_sustained ?? _quick)?.AllCoreGhz is { } g && g > 0 ? g : double.NaN;
+    /// <summary>Latência da RAM medida pela curva (ns; NaN = ainda não medido).</summary>
+    public double RamLatencyNs => _quick?.CacheSteps.FirstOrDefault(s => s.Level == "RAM")?.Ns is { } ns && ns > 0 ? ns : double.NaN;
+    public string MostFastCoreText => _quick?.BestCore is { } b ? $"núcleo {b.Core + 1}" : "";
+    /// <summary>Base anunciada × turbo medido (o BeforeAfter do destaque).</summary>
+    public bool HasTurboCompare => BaseGhz > 0 && double.IsFinite(BestGhz);
+    public bool SingleChannel => _facts?.MemoryModules.Count == 1;
+    public bool HasEfficiencyCores => _topology?.Hybrid == true;
+
+    private void NotifyNumbers()
+    {
+        foreach (var name in new[]
+                 {
+                     nameof(IsLoading), nameof(HeroTitle), nameof(HeroNumber), nameof(HeroDecimals), nameof(HeroSuffix), nameof(BestGhz),
+                     nameof(AllCoreGhz), nameof(RamLatencyNs), nameof(MostFastCoreText), nameof(HasTurboCompare), nameof(SingleChannel),
+                     nameof(HasEfficiencyCores),
+                 })
+            OnPropertyChanged(name);
+    }
 
     public const string MethodText =
         "Frequência: uma cadeia de somas e XOR em que cada operação espera a anterior. Cada uma leva exatamente 1 ciclo, então " +
@@ -188,6 +229,13 @@ public sealed class CpuLabPage : ModulePage
         var l3 = topo.TotalL3Bytes > 0 ? topo.TotalL3Bytes : id.Cache(3)?.SizeBytes ?? 0;
         if (l3 > 0) parts.Add($"{CacheStepDetector.Bytes(l3)} L3");
         HeroLine = string.Join(" · ", parts);
+        CoreCount = topo.Hybrid ? topo.PerformanceCores + topo.EfficiencyCores : cores;
+        ThreadCount = threads;
+        L3Bytes = l3 > 0 ? l3 : double.NaN;
+        CoreThreadText = string.Create(Pt, $"{CoreCount:0} / {threads}");
+        CoreDetail = topo.Hybrid
+            ? $"{topo.PerformanceCores} de desempenho + {topo.EfficiencyCores} de economia"
+            : topo.Smt || threads > cores ? "2 threads por núcleo (SMT)" : "1 thread por núcleo";
         IdentityNote = id.Available ? "" : id.UnavailableReason ?? "";
 
         IdentityRows.Clear();
@@ -211,6 +259,7 @@ public sealed class CpuLabPage : ModulePage
         else if (id.Vendor == CpuVendor.Amd) freq.Add("a AMD não publica o turbo máximo pelo CPUID: a medição mostra o real");
         FrequencyText = freq.Count == 0 ? "Frequências anunciadas indisponíveis." : char.ToUpper(string.Join("; ", freq)[0], Pt) + string.Join("; ", freq)[1..] + ".";
         TopologyText = TopologySummary(topo);
+        NotifyNumbers();
 
         Features.Clear();
         foreach (var f in id.Features) Features.Add(new CpuFeatureChip(f.Name, f.Present, f.Meaning));
@@ -361,6 +410,7 @@ public sealed class CpuLabPage : ModulePage
         OnPropertyChanged(nameof(HasComparison));
         OnPropertyChanged(nameof(HasQuick));
         OnPropertyChanged(nameof(HasSustained));
+        NotifyNumbers();
     }
 
     // ------------------------------------------------------------------ diagnóstico e correções
@@ -455,6 +505,21 @@ public sealed class CpuFindingRow(CpuFinding finding, RelayCommand? apply)
     public string Source => "Fonte: " + Finding.Source;
     public string Instruction => Finding.Instruction ?? "";
     public string ActionLabel => Finding.ActionLabel ?? "Corrigir";
+    /// <summary>Tom do design system (selo e distintivo).</summary>
+    public UiTone ToneKind => Finding.Severity switch
+    {
+        FindingSeverity.Good => UiTone.Good,
+        FindingSeverity.Warn => UiTone.Warn,
+        FindingSeverity.Bad => UiTone.Bad,
+        _ => UiTone.Info,
+    };
+    public string IconKey => Finding.Severity switch
+    {
+        FindingSeverity.Good => "Icon.Check",
+        FindingSeverity.Warn => "Icon.Warning",
+        FindingSeverity.Bad => "Icon.Error",
+        _ => "Icon.Info",
+    };
     /// <summary>"good", "info", "warn" ou "bad" (cores do tema).</summary>
     public string Tone => Finding.Severity switch
     {
