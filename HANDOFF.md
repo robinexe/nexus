@@ -39,7 +39,14 @@ As regras da seção 2 valem também no PC novo. Se ele for de jogos, nada de al
 
 ## 1. Estado em uma linha
 
-Em 31/10/2026 (tarde): 741/741 testes no Linux, 0 avisos. Nove módulos novos no nível do Kudu ou acima (Limpeza, Disco,
+Em 31/10/2026 (noite): 1282 testes unitários verdes (Linux e Windows do CI), 0 avisos. Rodada 2: Laboratório de engenharia
+reversa (Processador, Placa de vídeo, Memória RAM — pedido do responsável que tinha se perdido), Limpeza v2 (esvaziar
+quarentena e Lixeira, regras do usuário em JSON, histórico), Automático v2 (agendas diária/semanal/mensal, limpeza segura
+agendada opt-in, bandeja, iniciar com o Windows, página Ajustes), Verificar arquivos (hash + regras + heurística de PE),
+núcleo v2 (lote, ações efêmeras, SafeFileMover por handle), empacotamento (instalador Inno Setup, ZIP portátil,
+release.yml, ícone). Falta da paridade com o Kudu: 30 idiomas (só pt-BR). Ver `docs/modules/*.md` e `docs/08-packaging.md`.
+
+Rodada 1 (mesmo dia): Em 31/10/2026 (tarde): 741/741 testes no Linux, 0 avisos. Nove módulos novos no nível do Kudu ou acima (Limpeza, Disco,
 Programas, Inicialização, Serviços, Privacidade, Segurança, Monitor, Ferramentas do sistema, Automático) + CLI `nexus`.
 A interface aplica neste PC por um aplicador sob demanda (usuário sem aviso; administrador com o aviso do Windows e ponto
 de restauração), sempre com confirmação, diário e desfazer. Revisão de segurança independente feita (8 correções). VM do CI: 741/741 unitários e 29/29 de integração com escrita real (23 dos módulos).
@@ -172,7 +179,13 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
    ações sem estado (DNS/ARP/ponto de restauração); esvaziar quarentena e Lixeira usando o contrato irreversível; mesma ação
    com argumentos diferentes num pedido (remoção em lote); fechar a corrida restante de junção entre a checagem e o
    `Move` com operações por handle (revisão: médio); toast da verificação semanal.
-10. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+10. **Rodada 2 (31/10 noite):** Laboratório + paridade com o Kudu. Defeitos achados só no Windows do CI e corrigidos:
+    `SetFileInformationByHandle` recusa RootDirectory (trocado por `NtSetInformationFile`), tamanho do FILE_RENAME_INFO,
+    trava do aplicador elevado com `CreateNew` sem direito de escrita (teria bloqueado todas as ações de administrador),
+    constante duplicada no script do Inno Setup. **Pendências:** abrir as páginas novas no Windows do responsável;
+    idiomas (i18n); auto-desfazer da taxa do monitor (precisa de `RevertAsync` sem confirmação no IModuleHost);
+    lançador sem console para a tarefa agendada; `Install-Broker.ps1 -InPlace`.
+11. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
