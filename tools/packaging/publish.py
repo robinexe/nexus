@@ -345,7 +345,8 @@ def main() -> None:
     ap.add_argument("--no-r2r", action="store_true", help="sem ReadyToRun (publicação mais rápida, início mais lento)")
     ap.add_argument("--no-restore-check", action="store_true", help="pula o restore --locked-mode da solução")
     ap.add_argument("--skip-publish", action="store_true", help="reaproveita artifacts/stage (só junta, confere e zipa)")
-    ap.add_argument("--no-zip", action="store_true")
+    ap.add_argument("--no-zip", action="store_true", help="publica e confere, sem zipar (para assinar antes)")
+    ap.add_argument("--zip-only", action="store_true", help="só confere e zipa artifacts/<rid>/NEXUS já publicada (e assinada)")
     ap.add_argument("--checksums", metavar="DIR", help="só grava DIR/SHA256SUMS.txt dos .zip/.exe e sai")
     args = ap.parse_args()
 
@@ -363,6 +364,17 @@ def main() -> None:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     log(f"NEXUS {full_version}+{commit} para {', '.join(rids)}")
+
+    if args.zip_only:
+        # Depois da assinatura (release.yml): a pasta já existe e não pode ser refeita, senão perde as assinaturas.
+        for rid in rids:
+            target = out / rid / "NEXUS"
+            for line in verify(target, rid):
+                log("  " + line)
+            zip_path = out / f"NEXUS-{full_version}-{rid}-portatil.zip"
+            make_zip(target, zip_path)
+            log(f"  zip: {zip_path} ({zip_path.stat().st_size / 1048576:.0f} MB)")
+        return
 
     global SRC_COPY
     SRC_COPY = out / "src"

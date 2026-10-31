@@ -1,4 +1,4 @@
-<#
+﻿<#
   NEXUS — confere se a pasta do programa está protegida contra troca de arquivos por contas sem privilégio.
 
   Por que importa: ações de administrador iniciam nexus-broker.exe ELEVADO (aviso do Windows) a partir da pasta do NEXUS.
@@ -35,6 +35,8 @@ function Get-Problem([string]$Item, [int]$Mask, [bool]$CheckOwner) {
     if ($CheckOwner -and $Privileged -notcontains $owner) { return "dono $owner não é Administradores/SYSTEM: $Item" }
     foreach ($rule in $acl.GetAccessRules($true, $true, [Security.Principal.SecurityIdentifier])) {
         if ($rule.AccessControlType -ne 'Allow') { continue }
+        # Entrada "só herança" (ex.: Usuários Autenticados em C:\) não vale para o próprio objeto, só para o que for criado dentro.
+        if ($rule.PropagationFlags -band [Security.AccessControl.PropagationFlags]::InheritOnly) { continue }
         $sid = $rule.IdentityReference.Value
         if ($Privileged -contains $sid -or $sid -eq $CreatorOwner) { continue }
         if (([int]$rule.FileSystemRights -band $Mask) -ne 0) {

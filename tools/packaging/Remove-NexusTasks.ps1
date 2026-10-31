@@ -1,4 +1,4 @@
-<#
+﻿<#
   NEXUS — remove as tarefas agendadas criadas pelo NEXUS (usado pelo desinstalador; pode ser rodado à mão).
 
   Só remove tarefas cuja descrição tem a marca do NEXUS ("[nexus.automation.scheduled-scan/1]" e futuras "[nexus.*]"),

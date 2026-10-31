@@ -1,0 +1,258 @@
+# NEXUS — gera os pacotes para Windows: ZIP portátil e instalador (Inno Setup), com SHA-256 de tudo.
+#
+# Quando roda:
+#   - tag v* (ex.: v0.9.0 ou v0.9.0-rc.1): a versão da tag precisa bater com <VersionPrefix> de Directory.Build.props;
+#     cria um GitHub Release em RASCUNHO (o responsável revisa e publica à mão).
+#   - manual (Actions → release → Run workflow): mesma coisa, versão 0.9.0-ci.<número da execução>, sem Release; os
+#     pacotes ficam nos artifacts da execução.
+#
+# O que confere antes de entregar (numa VM descartável do GitHub; nada roda no PC de ninguém):
+#   build Release e testes unitários; estrutura da pasta publicada (tools/packaging/publish.py); instala o instalador em
+#   modo silencioso, confere a pasta e a ACL, roda nexus/nexus-recover, simula uma ação pelo aplicador da pasta instalada,
+#   abre a interface por 20 s e desinstala (dados preservados); extrai o ZIP portátil e roda o nexus de lá.
+#
+# Assinatura Authenticode: preparada e DESLIGADA. Para ligar: variável de repositório NEXUS_SIGN=true e segredos
+# NEXUS_SIGN_PFX_BASE64 / NEXUS_SIGN_PFX_PASSWORD (certificado de assinatura de código). Ver docs/08-packaging.md.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      arm64:
+        description: 'Também gerar win-arm64 (experimental: compila, mas não foi testado num PC ARM)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pacotes:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write   # só usado para criar o Release em rascunho quando for tag
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+      ARM64: ${{ github.event_name == 'workflow_dispatch' && inputs.arm64 }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Versão
+        id: versao
+        shell: pwsh
+        run: |
+          $prefix = ([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.VersionPrefix | Where-Object { $_ } | Select-Object -First 1
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $tag = $env:GITHUB_REF_NAME
+            if ($tag -notmatch '^v(\d+\.\d+\.\d+)(?:-([0-9A-Za-z]+(?:\.[0-9A-Za-z]+)*))?$') { Write-Error "Tag inválida: $tag (use v1.2.3 ou v1.2.3-rc.1)"; exit 1 }
+            if ($Matches[1] -ne $prefix) { Write-Error "Tag $tag não bate com VersionPrefix $prefix de Directory.Build.props"; exit 1 }
+            $suffix = "$($Matches[2])"
+          } else {
+            $suffix = "ci.$env:GITHUB_RUN_NUMBER"
+          }
+          $full = if ($suffix) { "$prefix-$suffix" } else { $prefix }
+          $numeric = "$prefix.$env:GITHUB_RUN_NUMBER"
+          $rids = @('win-x64'); if ($env:ARM64 -eq 'true') { $rids += 'win-arm64' }
+          "prefix=$prefix" >> $env:GITHUB_OUTPUT
+          "suffix=$suffix" >> $env:GITHUB_OUTPUT
+          "full=$full" >> $env:GITHUB_OUTPUT
+          "numeric=$numeric" >> $env:GITHUB_OUTPUT
+          "rids=$($rids -join ' ')" >> $env:GITHUB_OUTPUT
+          "NEXUS $full (arquivo $numeric) para $($rids -join ', ')"
+
+      - name: Build e testes unitários
+        shell: pwsh
+        run: |
+          dotnet restore Nexus.slnx --locked-mode
+          dotnet build Nexus.slnx -c Release --no-restore
+          dotnet test Nexus.slnx -c Release --no-build --filter Category=Unit --logger "trx;LogFileName=unit.trx" --results-directory saida
+
+      - name: Publicar (self-contained, pasta única)
+        shell: pwsh
+        run: |
+          $ridArgs = "${{ steps.versao.outputs.rids }}".Split(' ') | ForEach-Object { '--rid'; $_ }
+          $suffixArgs = if ("${{ steps.versao.outputs.suffix }}") { @('--version-suffix', "${{ steps.versao.outputs.suffix }}") } else { @() }
+          python tools/packaging/publish.py @ridArgs @suffixArgs --no-zip --out artifacts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Assinar executáveis (desligado sem certificado)
+        if: vars.NEXUS_SIGN == 'true'
+        shell: pwsh
+        env:
+          PFX_BASE64: ${{ secrets.NEXUS_SIGN_PFX_BASE64 }}
+          PFX_PASSWORD: ${{ secrets.NEXUS_SIGN_PFX_PASSWORD }}
+        run: |
+          if (-not $env:PFX_BASE64) { Write-Error 'NEXUS_SIGN=true, mas o segredo NEXUS_SIGN_PFX_BASE64 não existe.'; exit 1 }
+          $pfx = Join-Path $env:RUNNER_TEMP 'nexus-sign.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:PFX_BASE64))
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $signtool) { Write-Error 'signtool.exe não encontrado'; exit 1 }
+          "SIGNTOOL=$($signtool.FullName)" >> $env:GITHUB_ENV
+          "SIGN_PFX=$pfx" >> $env:GITHUB_ENV
+          # Só os binários do NEXUS; os do runtime .NET já vêm assinados pela Microsoft.
+          $files = Get-ChildItem artifacts\win-*\NEXUS -Include 'Nexus.*.dll','Nexus.Desktop.exe','nexus.exe','nexus.dll','nexus-broker.exe','nexus-broker.dll','nexus-recover.exe','nexus-recover.dll' -Recurse
+          & $signtool.FullName sign /f $pfx /p $env:PFX_PASSWORD /fd sha256 /tr http://timestamp.digicert.com /td sha256 $files.FullName
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: ZIP portátil
+        shell: pwsh
+        run: |
+          $ridArgs = "${{ steps.versao.outputs.rids }}".Split(' ') | ForEach-Object { '--rid'; $_ }
+          $suffixArgs = if ("${{ steps.versao.outputs.suffix }}") { @('--version-suffix', "${{ steps.versao.outputs.suffix }}") } else { @() }
+          python tools/packaging/publish.py @ridArgs @suffixArgs --zip-only --out artifacts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Inno Setup (já instalado no runner? senão via Chocolatey)
+        shell: pwsh
+        run: |
+          $iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if ($iscc) {
+            "Inno Setup já presente no runner: $iscc"
+          } else {
+            "Inno Setup não está no runner; instalando pelo Chocolatey."
+            choco install innosetup -y --no-progress
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+            if (-not $iscc) { Write-Error 'ISCC.exe não encontrado depois do choco install'; exit 1 }
+          }
+          (Get-Item $iscc).VersionInfo.ProductVersion
+          "ISCC=$iscc" >> $env:GITHUB_ENV
+
+      - name: Instalador
+        shell: pwsh
+        run: |
+          $out = (Resolve-Path artifacts).Path
+          foreach ($rid in "${{ steps.versao.outputs.rids }}".Split(' ')) {
+            $src = (Resolve-Path "artifacts\$rid\NEXUS").Path
+            $defs = @("/DAppVersion=${{ steps.versao.outputs.full }}", "/DNumericVersion=${{ steps.versao.outputs.numeric }}", "/DRid=$rid", "/DSourceDir=$src", "/DOutputDir=$out")
+            if ($env:SIGNTOOL) {
+              $defs += '/DSignToolName=nexussign'
+              $defs += "/Snexussign=`"$env:SIGNTOOL`" sign /f `"$env:SIGN_PFX`" /p $env:PFX_PASSWORD /fd sha256 /tr http://timestamp.digicert.com /td sha256 `$f"
+            }
+            & $env:ISCC /Qp @defs tools\packaging\nexus.iss
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Get-ChildItem artifacts -File | Format-Table Name, Length
+        env:
+          PFX_PASSWORD: ${{ secrets.NEXUS_SIGN_PFX_PASSWORD }}
+
+      - name: Teste do instalador nesta VM (instala, confere, desinstala)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path saida | Out-Null
+          $setup = Get-ChildItem artifacts -Filter 'NEXUS-*-win-x64-instalador.exe' | Select-Object -First 1
+          $p = Start-Process $setup.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/LOG=saida\instalacao.log' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { Get-Content saida\instalacao.log -Tail 40; Write-Error "Instalador saiu com $($p.ExitCode)"; exit 1 }
+          $app = Join-Path $env:ProgramFiles 'NEXUS'
+          foreach ($f in 'Nexus.Desktop.exe','nexus-broker.exe','nexus.exe','nexus-recover.exe','catalog\actions.v1.json','unins000.exe','tools\Remove-NexusTasks.ps1','tools\service\Uninstall-Broker.ps1') {
+            if (-not (Test-Path (Join-Path $app $f))) { Write-Error "Falta $f em $app"; exit 1 }
+          }
+          "Atalho no Menu Iniciar: $(Test-Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\NEXUS.lnk")"
+          icacls $app
+          powershell -NoProfile -ExecutionPolicy Bypass -File "$app\tools\Test-NexusFolderSafety.ps1" -Path $app
+          if ($LASTEXITCODE -ne 0) { Write-Error 'A pasta instalada deveria ser protegida (só administradores alteram).'; exit 1 }
+
+          & "$app\nexus.exe" version
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          & "$app\nexus-recover.exe" scan
+          "nexus-recover scan: $LASTEXITCODE (0 ou 3 esperados: nada a recuperar / diário não existe)"
+          if ($LASTEXITCODE -notin 0, 3) { exit 1 }
+          # O nexus inicia o aplicador (nexus-broker.exe) da própria pasta, no nível do usuário, e só simula.
+          & "$app\nexus.exe" plan win.gamemode.enable
+          "nexus plan: $LASTEXITCODE"
+          if ($LASTEXITCODE -notin 0, 1) { Write-Error 'O nexus não conseguiu simular pelo aplicador da pasta instalada.'; exit 1 }
+
+          # A interface abre e continua aberta (falta de dll ou conflito de versão derrubaria logo no início).
+          $ui = Start-Process "$app\Nexus.Desktop.exe" -PassThru
+          Start-Sleep -Seconds 20
+          if ($ui.HasExited) {
+            Get-ChildItem "$env:LOCALAPPDATA\NEXUS" -Filter *.log -ErrorAction SilentlyContinue | ForEach-Object { Get-Content $_.FullName -Tail 60 }
+            Write-Error "A interface fechou sozinha (código $($ui.ExitCode))."; exit 1
+          }
+          "Interface aberta há 20 s (PID $($ui.Id)); fechando."
+          Stop-Process -Id $ui.Id -Force
+          Get-Process nexus-broker -ErrorAction SilentlyContinue | Stop-Process -Force
+          Start-Sleep -Seconds 2
+
+          # Marca nos dados do usuário: a desinstalação silenciosa NÃO pode apagar dados.
+          New-Item -ItemType Directory -Force -Path "$env:LOCALAPPDATA\NEXUS" | Out-Null
+          Set-Content "$env:LOCALAPPDATA\NEXUS\teste-desinstalacao.txt" 'não apagar'
+          $log = Join-Path (Resolve-Path saida).Path 'desinstalacao.log'
+          Start-Process "$app\unins000.exe" -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/LOG=$log" -Wait
+          # O desinstalador continua numa cópia temporária depois que o unins000.exe original sai: espera até 90 s.
+          for ($i = 0; $i -lt 90 -and (Test-Path "$app\Nexus.Desktop.exe"); $i++) { Start-Sleep -Seconds 1 }
+          if (Test-Path "$app\Nexus.Desktop.exe") { if (Test-Path $log) { Get-Content $log -Tail 40 }; Write-Error 'Desinstalação não removeu o programa.'; exit 1 }
+          if (-not (Test-Path "$env:LOCALAPPDATA\NEXUS\teste-desinstalacao.txt")) { Write-Error 'Desinstalação silenciosa apagou os dados do usuário (não deveria).'; exit 1 }
+          if (Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.Description -match '\[nexus\.' }) { Write-Error 'Sobrou tarefa agendada do NEXUS.'; exit 1 }
+          "Desinstalado; dados preservados em $env:LOCALAPPDATA\NEXUS (padrão)."
+
+      - name: Teste do ZIP portátil nesta VM
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem artifacts -Filter 'NEXUS-*-win-x64-portatil.zip' | Select-Object -First 1
+          $dest = Join-Path $env:RUNNER_TEMP 'portatil'
+          Expand-Archive $zip.FullName -DestinationPath $dest -Force
+          & "$dest\NEXUS\nexus.exe" version
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          # Numa pasta do usuário o verificador precisa avisar (código 1): é o motivo de preferir o instalador para modo administrador.
+          powershell -NoProfile -ExecutionPolicy Bypass -File "$dest\NEXUS\tools\Test-NexusFolderSafety.ps1" -Path "$dest\NEXUS"
+          "Test-NexusFolderSafety na pasta portátil: $LASTEXITCODE (1 esperado em pasta do usuário)"
+
+      - name: SHA-256
+        shell: pwsh
+        run: |
+          python tools/packaging/publish.py --checksums artifacts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Artifacts
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: nexus-${{ steps.versao.outputs.full }}
+          path: |
+            artifacts/*.zip
+            artifacts/*.exe
+            artifacts/SHA256SUMS.txt
+            artifacts/version.txt
+            saida/
+          if-no-files-found: warn
+
+      - name: GitHub Release (rascunho, só em tag)
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = @(
+            "NEXUS ${{ steps.versao.outputs.full }} (commit $($env:GITHUB_SHA.Substring(0,10)))",
+            '',
+            '- NEXUS-*-instalador.exe: instala em Arquivos de Programas (pede administrador). Recomendado.',
+            '- NEXUS-*-portatil.zip: extraia e abra Nexus.Desktop.exe. Leia LEIA-ME-PORTATIL.txt.',
+            '',
+            'SHA-256:',
+            '```',
+            (Get-Content artifacts\SHA256SUMS.txt -Raw).Trim(),
+            '```'
+          ) -join "`n"
+          $notes | Out-File notas.md -Encoding utf8
+          $files = @(Get-ChildItem artifacts -File | Where-Object { $_.Extension -in '.zip','.exe' -or $_.Name -eq 'SHA256SUMS.txt' } | ForEach-Object FullName)
+          $ghArgs = @('release', 'create', $env:GITHUB_REF_NAME) + $files + @('--draft', '--title', "NEXUS ${{ steps.versao.outputs.full }}", '--notes-file', 'notas.md')
+          if ("${{ steps.versao.outputs.suffix }}") { $ghArgs += '--prerelease' }
+          gh @ghArgs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
