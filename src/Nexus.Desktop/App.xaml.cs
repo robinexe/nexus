@@ -60,6 +60,9 @@ public partial class App : Application
     }
 
     /// <summary>Erros inesperados não fecham o aplicativo em silêncio: são mostrados e registrados no perfil do usuário.</summary>
+    private readonly HashSet<string> _shownErrors = new(StringComparer.Ordinal);
+    private bool _showingError;
+
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         var text = $"{DateTimeOffset.Now:o} {e.Exception}";
@@ -71,7 +74,17 @@ public partial class App : Application
         }
         catch (IOException) { }
         catch (UnauthorizedAccessException) { }
-        MessageBox.Show(e.Exception.Message, "NEXUS — erro inesperado (nada foi alterado no sistema)", MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true;
+        // Um erro que se repete (ex.: binding a cada atualização) vira UMA janela, não uma pilha: o mesmo texto só aparece uma vez,
+        // e nunca duas janelas ao mesmo tempo. O registro em desktop-erros.log continua completo.
+        var key = e.Exception.GetType().FullName + ":" + e.Exception.Message;
+        if (_showingError || !_shownErrors.Add(key)) return;
+        _showingError = true;
+        try
+        {
+            MessageBox.Show(e.Exception.Message + "\n\nSe repetir, não aparece de novo nesta sessão. Detalhes em %LocalAppData%\\NEXUS\\desktop-erros.log.",
+                "NEXUS — erro inesperado (nada foi alterado no sistema)", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally { _showingError = false; }
     }
 }

@@ -186,7 +186,7 @@
                       Visibility="{Binding Measuring, Converter={StaticResource Cpu.BoolToVis}}"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,16,0,0" Visibility="{Binding Measuring, Converter={StaticResource Cpu.BoolToVis}}">
-              <ProgressBar Minimum="0" Maximum="1" Value="{Binding Progress}" Height="6"/>
+              <ProgressBar Minimum="0" Maximum="1" Value="{Binding Progress, Mode=OneWay}" Height="6"/>
               <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
             </StackPanel>
           </Grid>
