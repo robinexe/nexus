@@ -3,9 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Nexus.Cleaning</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Regras de limpeza (dados) embutidas: o aplicador e a interface leem a mesma cópia. -->
+    <EmbeddedResource Include="Rules\cleaning-rules.json" LogicalName="Nexus.Cleaning.Rules.cleaning-rules.json" />
+    <!-- O motor de quarentena é interno: só o handler do aplicador e os testes o usam; a interface não tem acesso. -->
+    <InternalsVisibleTo Include="Nexus.Tests" />
   </ItemGroup>
 </Project>

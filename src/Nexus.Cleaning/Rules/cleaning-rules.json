@@ -1,0 +1,385 @@
+{
+  "format": 1,
+  "note": "Regras de limpeza do NEXUS. Só dados: o handler CleaningRule resolve os placeholders, nunca segue links/junções, só move (para a quarentena) o que casa com os padrões e a idade mínima, e pula arquivos em uso. Cada regra 'Quarantine' tem uma ação 'cleaning.<id>' em catalog/cleaning.v1.json.",
+  "rules": [
+    {
+      "id": "temp-user", "title": "Arquivos temporários da sua conta", "category": "Sistema", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%UserTemp%" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "defaultSelected": true,
+      "explanation": "Pasta %TEMP% da sua conta. Programas e instaladores deixam arquivos aqui e muitas vezes esquecem de apagar. Só sai o que não foi modificado nas últimas 24 horas e não está aberto.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB a alguns GB). Não deixa o PC mais rápido.",
+      "evidence": "https://support.microsoft.com/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32"
+    },
+    {
+      "id": "temp-windows", "title": "Arquivos temporários do Windows", "category": "Sistema", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%WinDir%\\Temp" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 48,
+      "defaultSelected": true,
+      "explanation": "Pasta Windows\\Temp, usada por serviços e instaladores. Por cautela, só sai o que tem mais de 48 horas sem modificação e não está aberto.",
+      "expectedGain": "Espaço em disco (comum: dezenas a centenas de MB). Não deixa o PC mais rápido.",
+      "evidence": "https://support.microsoft.com/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32"
+    },
+    {
+      "id": "thumbnails", "title": "Cache de miniaturas do Explorador", "category": "Sistema", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Microsoft\\Windows\\Explorer" ], "patterns": [ "thumbcache_*.db" ], "recursive": false, "minAgeHours": 0,
+      "defaultSelected": false,
+      "explanation": "Miniaturas de fotos e vídeos que o Explorador guarda para abrir pastas mais rápido. O Explorador costuma manter esses arquivos abertos: os que estiverem em uso são pulados. A Limpeza de Disco do Windows faz o mesmo (item 'Miniaturas').",
+      "expectedGain": "Pouco espaço (geralmente dezenas de MB). As pastas com fotos abrem mais devagar até as miniaturas serem refeitas.",
+      "evidence": "Limpeza de Disco do Windows, item 'Miniaturas' (cleanmgr.exe)"
+    },
+    {
+      "id": "wer-user", "title": "Relatórios de erro (sua conta)", "category": "Sistema", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Microsoft\\Windows\\WER\\ReportArchive", "%LocalAppData%\\Microsoft\\Windows\\WER\\ReportQueue" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "defaultSelected": true,
+      "explanation": "Relatórios do Relatório de Erros do Windows (WER) sobre programas que travaram. Já enviados ou na fila. Só servem para diagnóstico.",
+      "expectedGain": "Espaço em disco (geralmente pouco; às vezes centenas de MB com despejos de memória).",
+      "evidence": "https://learn.microsoft.com/windows/win32/wer/wer-settings"
+    },
+    {
+      "id": "wer-system", "title": "Relatórios de erro do sistema", "category": "Sistema", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%ProgramData%\\Microsoft\\Windows\\WER\\ReportArchive", "%ProgramData%\\Microsoft\\Windows\\WER\\ReportQueue" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 24,
+      "defaultSelected": true,
+      "explanation": "Relatórios de erro de serviços e de todas as contas, guardados pelo Windows. Só servem para diagnóstico.",
+      "expectedGain": "Espaço em disco (geralmente dezenas de MB; mais se houver despejos).",
+      "evidence": "https://learn.microsoft.com/windows/win32/wer/wer-settings"
+    },
+    {
+      "id": "logs-cbs", "title": "Registros antigos de manutenção do Windows (CBS)", "category": "Sistema", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%WinDir%\\Logs\\CBS" ], "patterns": [ "CbsPersist_*.log", "CbsPersist_*.cab" ], "exclude": [ "CBS.log" ], "recursive": false, "minAgeHours": 720,
+      "defaultSelected": false,
+      "explanation": "Cópias arquivadas do registro de manutenção de componentes (CbsPersist_*), com mais de 30 dias. O registro atual (CBS.log) nunca é tocado. Útil só para investigar falhas antigas de atualização.",
+      "expectedGain": "Espaço em disco (pode chegar a alguns GB em PCs com atualizações que falharam). Não melhora desempenho.",
+      "evidence": "https://learn.microsoft.com/windows-hardware/manufacture/desktop/deployment-troubleshooting-and-log-files"
+    },
+    {
+      "id": "crashdumps-user", "title": "Despejos de travamento de programas (sua conta)", "category": "Sistema", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\CrashDumps" ], "patterns": [ "*.dmp" ], "recursive": false, "minAgeHours": 24,
+      "defaultSelected": true,
+      "explanation": "Arquivos .dmp que o Windows grava quando um programa trava (pasta CrashDumps). Só servem para um desenvolvedor investigar o erro.",
+      "expectedGain": "Espaço em disco (de alguns MB a vários GB).",
+      "evidence": "https://learn.microsoft.com/windows/win32/wer/collecting-user-mode-dumps"
+    },
+    {
+      "id": "crashdumps-system", "title": "Despejos de travamento do sistema (tela azul)", "category": "Sistema", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [
+        { "path": "%WinDir%\\Minidump", "patterns": [ "*.dmp" ], "recursive": false },
+        { "path": "%WinDir%\\LiveKernelReports", "patterns": [ "*.dmp" ], "recursive": true },
+        { "path": "%WinDir%", "patterns": [ "MEMORY.DMP" ], "recursive": false }
+      ],
+      "patterns": [ "*.dmp" ], "recursive": false, "minAgeHours": 24,
+      "defaultSelected": false,
+      "explanation": "Minidumps e MEMORY.DMP gravados depois de telas azuis, e relatórios de travamento do núcleo. Se você ainda investiga uma tela azul, não limpe.",
+      "expectedGain": "Espaço em disco (MEMORY.DMP pode ter vários GB).",
+      "evidence": "https://learn.microsoft.com/troubleshoot/windows-server/performance/memory-dump-file-options"
+    },
+    {
+      "id": "delivery-optimization", "title": "Otimização de Entrega (arquivos de atualização compartilhados)", "category": "Sistema", "scope": "Machine", "mode": "MeasureOnly", "admin": true,
+      "roots": [ "%WinDir%\\ServiceProfiles\\NetworkService\\AppData\\Local\\Microsoft\\Windows\\DeliveryOptimization\\Cache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0,
+      "nativeTool": "ms-settings:storagesense",
+      "explanation": "Cache do serviço de Otimização de Entrega. Ele pertence ao serviço do Windows e é apagado de verdade pela ferramenta oficial (Configurações > Sistema > Armazenamento > Arquivos temporários > 'Arquivos de Otimização de Entrega'). O NEXUS só mede e abre essa tela: mover arquivos de um serviço em execução não é seguro, e a exclusão oficial não volta atrás.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB a alguns GB).",
+      "evidence": "https://learn.microsoft.com/powershell/module/deliveryoptimization/delete-deliveryoptimizationcache"
+    },
+    {
+      "id": "windows-update-download", "title": "Downloads do Windows Update", "category": "Sistema", "scope": "Machine", "mode": "MeasureOnly", "admin": true,
+      "roots": [ "%WinDir%\\SoftwareDistribution\\Download" ], "patterns": [ "*" ], "recursive": true, "minAgeHours": 0,
+      "nativeTool": "ms-settings:storagesense",
+      "explanation": "Pacotes baixados pelo Windows Update. Só podem sair com o serviço parado e sem atualização pendente; mexer nisso no meio de uma instalação pode quebrar a atualização. O NEXUS só mede e abre a ferramenta oficial (Arquivos temporários > 'Limpeza do Windows Update').",
+      "expectedGain": "Espaço em disco (de dezenas de MB a alguns GB).",
+      "evidence": "Limpeza de Disco / Arquivos temporários do Windows, item 'Limpeza do Windows Update'"
+    },
+    {
+      "id": "recycle-bin", "title": "Lixeira", "category": "Sistema", "scope": "User", "mode": "MeasureOnly", "special": "RecycleBin",
+      "roots": [], "patterns": [ "*" ], "recursive": false, "minAgeHours": 0,
+      "nativeTool": "shell:RecycleBinFolder",
+      "explanation": "Esvaziar a Lixeira apaga de vez e não pode ser desfeito, então o NEXUS não faz isso por você: ele mostra quanto ela ocupa e abre a Lixeira para você revisar e esvaziar.",
+      "expectedGain": "Espaço em disco (o que estiver na Lixeira).",
+      "evidence": "https://learn.microsoft.com/windows/win32/api/shellapi/nf-shellapi-shqueryrecyclebinw"
+    },
+
+    {
+      "id": "chrome-cache", "title": "Google Chrome: cache", "category": "Navegadores", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%LocalAppData%\\Google\\Chrome\\User Data\\*\\Cache", "%LocalAppData%\\Google\\Chrome\\User Data\\*\\Code Cache", "%LocalAppData%\\Google\\Chrome\\User Data\\*\\GPUCache",
+        "%LocalAppData%\\Google\\Chrome\\User Data\\ShaderCache", "%LocalAppData%\\Google\\Chrome\\User Data\\GrShaderCache"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "chrome" ],
+      "defaultSelected": true,
+      "explanation": "Cópias de páginas, scripts e shaders que o Chrome guarda para carregar sites mais rápido, em todos os perfis. Cookies, senhas, histórico e sessões não são tocados. O Chrome precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB). Sites abrem um pouco mais devagar na primeira visita.",
+      "evidence": "https://support.google.com/chrome/answer/2392709"
+    },
+    {
+      "id": "edge-cache", "title": "Microsoft Edge: cache", "category": "Navegadores", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%LocalAppData%\\Microsoft\\Edge\\User Data\\*\\Cache", "%LocalAppData%\\Microsoft\\Edge\\User Data\\*\\Code Cache", "%LocalAppData%\\Microsoft\\Edge\\User Data\\*\\GPUCache",
+        "%LocalAppData%\\Microsoft\\Edge\\User Data\\ShaderCache", "%LocalAppData%\\Microsoft\\Edge\\User Data\\GrShaderCache"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "msedge" ],
+      "defaultSelected": true,
+      "explanation": "Cache do Edge em todos os perfis. Cookies, senhas, histórico e sessões não são tocados. O Edge (inclusive em segundo plano) precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB). Sites abrem um pouco mais devagar na primeira visita.",
+      "evidence": "https://support.microsoft.com/microsoft-edge/view-and-delete-browser-history-in-microsoft-edge-00cf7943-a9e1-975a-a33d-ac10ce454ca4"
+    },
+    {
+      "id": "brave-cache", "title": "Brave: cache", "category": "Navegadores", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\*\\Cache", "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\*\\Code Cache",
+        "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\*\\GPUCache", "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\ShaderCache",
+        "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\GrShaderCache"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "brave" ],
+      "defaultSelected": true,
+      "explanation": "Cache do Brave em todos os perfis. Cookies, senhas, histórico e sessões não são tocados. O Brave precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB).",
+      "evidence": "Brave (Chromium): Configurações > Privacidade > Limpar dados de navegação > 'Imagens e arquivos em cache'"
+    },
+    {
+      "id": "opera-cache", "title": "Opera e Opera GX: cache", "category": "Navegadores", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%LocalAppData%\\Opera Software\\Opera*Stable\\Cache", "%LocalAppData%\\Opera Software\\Opera*Stable\\*\\Cache",
+        "%AppData%\\Opera Software\\Opera*Stable\\Code Cache", "%AppData%\\Opera Software\\Opera*Stable\\GPUCache",
+        "%AppData%\\Opera Software\\Opera*Stable\\ShaderCache"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "opera" ],
+      "defaultSelected": true,
+      "explanation": "Cache do Opera e do Opera GX. Cookies, senhas, histórico e sessões não são tocados. O Opera precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB).",
+      "evidence": "https://help.opera.com/en/latest/security-and-privacy/"
+    },
+    {
+      "id": "firefox-cache", "title": "Firefox: cache", "category": "Navegadores", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%LocalAppData%\\Mozilla\\Firefox\\Profiles\\*\\cache2", "%LocalAppData%\\Mozilla\\Firefox\\Profiles\\*\\startupCache",
+        "%LocalAppData%\\Mozilla\\Firefox\\Profiles\\*\\thumbnails"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "firefox" ],
+      "defaultSelected": true,
+      "explanation": "Cache do Firefox em todos os perfis (pasta local; o perfil com favoritos, senhas e histórico fica em outra pasta e não é tocado). O Firefox precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB).",
+      "evidence": "https://support.mozilla.org/kb/how-clear-firefox-cache"
+    },
+    {
+      "id": "chrome-history", "title": "Google Chrome: histórico de navegação", "category": "Navegadores", "scope": "User", "mode": "Quarantine", "sensitive": true,
+      "roots": [ "%LocalAppData%\\Google\\Chrome\\User Data\\*" ], "patterns": [ "History", "History-journal" ], "recursive": false, "minAgeHours": 0, "closeApps": [ "chrome" ],
+      "defaultSelected": false,
+      "warning": "Apaga da vista o histórico de todos os perfis do Chrome (sites visitados e sugestões da barra de endereço). Vai para a quarentena, mas só volta inteiro se você não abrir o Chrome antes de desfazer.",
+      "explanation": "Arquivo de histórico do Chrome. Não libera espaço relevante nem acelera nada: é uma opção de privacidade.",
+      "expectedGain": "Privacidade. Espaço: pouco.",
+      "evidence": "https://support.google.com/chrome/answer/95589"
+    },
+    {
+      "id": "chrome-cookies", "title": "Google Chrome: cookies (desconecta dos sites)", "category": "Navegadores", "scope": "User", "mode": "Quarantine", "sensitive": true,
+      "roots": [
+        { "path": "%LocalAppData%\\Google\\Chrome\\User Data\\*\\Network", "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false },
+        { "path": "%LocalAppData%\\Google\\Chrome\\User Data\\*", "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false }
+      ],
+      "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false, "minAgeHours": 0, "closeApps": [ "chrome" ],
+      "defaultSelected": false,
+      "warning": "Você sai de TODAS as contas nos sites (e-mail, redes sociais, lojas) em todos os perfis do Chrome. Vai para a quarentena, mas só volta se você não abrir o Chrome antes de desfazer.",
+      "explanation": "Banco de cookies do Chrome. Não acelera nada: é uma opção de privacidade.",
+      "expectedGain": "Privacidade. Espaço: pouco.",
+      "evidence": "https://support.google.com/chrome/answer/95647"
+    },
+    {
+      "id": "edge-history", "title": "Microsoft Edge: histórico de navegação", "category": "Navegadores", "scope": "User", "mode": "Quarantine", "sensitive": true,
+      "roots": [ "%LocalAppData%\\Microsoft\\Edge\\User Data\\*" ], "patterns": [ "History", "History-journal" ], "recursive": false, "minAgeHours": 0, "closeApps": [ "msedge" ],
+      "defaultSelected": false,
+      "warning": "Apaga da vista o histórico de todos os perfis do Edge. Vai para a quarentena, mas só volta inteiro se você não abrir o Edge antes de desfazer.",
+      "explanation": "Arquivo de histórico do Edge. Não libera espaço relevante nem acelera nada.",
+      "expectedGain": "Privacidade. Espaço: pouco.",
+      "evidence": "https://support.microsoft.com/microsoft-edge/view-and-delete-browser-history-in-microsoft-edge-00cf7943-a9e1-975a-a33d-ac10ce454ca4"
+    },
+    {
+      "id": "edge-cookies", "title": "Microsoft Edge: cookies (desconecta dos sites)", "category": "Navegadores", "scope": "User", "mode": "Quarantine", "sensitive": true,
+      "roots": [
+        { "path": "%LocalAppData%\\Microsoft\\Edge\\User Data\\*\\Network", "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false },
+        { "path": "%LocalAppData%\\Microsoft\\Edge\\User Data\\*", "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false }
+      ],
+      "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false, "minAgeHours": 0, "closeApps": [ "msedge" ],
+      "defaultSelected": false,
+      "warning": "Você sai de TODAS as contas nos sites em todos os perfis do Edge (inclusive contas Microsoft no navegador). Só volta se você não abrir o Edge antes de desfazer.",
+      "explanation": "Banco de cookies do Edge. Não acelera nada.",
+      "expectedGain": "Privacidade. Espaço: pouco.",
+      "evidence": "https://support.microsoft.com/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09"
+    },
+    {
+      "id": "brave-history", "title": "Brave: histórico de navegação", "category": "Navegadores", "scope": "User", "mode": "Quarantine", "sensitive": true,
+      "roots": [ "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\*" ], "patterns": [ "History", "History-journal" ], "recursive": false, "minAgeHours": 0, "closeApps": [ "brave" ],
+      "defaultSelected": false,
+      "warning": "Apaga da vista o histórico de todos os perfis do Brave. Só volta inteiro se você não abrir o Brave antes de desfazer.",
+      "explanation": "Arquivo de histórico do Brave. Não libera espaço relevante nem acelera nada.",
+      "expectedGain": "Privacidade. Espaço: pouco.",
+      "evidence": "Brave (Chromium): Configurações > Privacidade > Limpar dados de navegação > 'Histórico de navegação'"
+    },
+    {
+      "id": "brave-cookies", "title": "Brave: cookies (desconecta dos sites)", "category": "Navegadores", "scope": "User", "mode": "Quarantine", "sensitive": true,
+      "roots": [
+        { "path": "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\*\\Network", "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false },
+        { "path": "%LocalAppData%\\BraveSoftware\\Brave-Browser\\User Data\\*", "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false }
+      ],
+      "patterns": [ "Cookies", "Cookies-journal" ], "recursive": false, "minAgeHours": 0, "closeApps": [ "brave" ],
+      "defaultSelected": false,
+      "warning": "Você sai de TODAS as contas nos sites em todos os perfis do Brave. Só volta se você não abrir o Brave antes de desfazer.",
+      "explanation": "Banco de cookies do Brave. Não acelera nada.",
+      "expectedGain": "Privacidade. Espaço: pouco.",
+      "evidence": "Brave (Chromium): Configurações > Privacidade > Limpar dados de navegação > 'Cookies e outros dados do site'"
+    },
+
+    {
+      "id": "discord-cache", "title": "Discord: cache", "category": "Apps", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%AppData%\\discord*\\Cache", "%AppData%\\discord*\\Code Cache", "%AppData%\\discord*\\GPUCache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "Discord", "DiscordPTB", "DiscordCanary" ],
+      "defaultSelected": true,
+      "explanation": "Imagens, vídeos e scripts que o Discord guarda (inclusive PTB e Canary). Sua conta e configurações não são tocadas. O Discord precisa estar fechado (inclusive na bandeja).",
+      "expectedGain": "Espaço em disco (comum: centenas de MB a alguns GB).",
+      "evidence": "Discord (Electron/Chromium): pastas Cache, Code Cache e GPUCache são recriadas ao abrir"
+    },
+    {
+      "id": "spotify-cache", "title": "Spotify: cache de músicas", "category": "Apps", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Spotify\\Data", "%LocalAppData%\\Spotify\\Browser\\Cache", "%LocalAppData%\\Packages\\SpotifyAB.SpotifyMusic_*\\LocalCache\\Spotify\\Data" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "Spotify" ],
+      "defaultSelected": true,
+      "explanation": "Trechos de músicas tocadas recentemente. Downloads para ouvir offline ficam em outra pasta (Storage) e não são tocados. O Spotify precisa estar fechado.",
+      "expectedGain": "Espaço em disco (pode passar de 1 GB). Músicas recentes voltam a ser baixadas ao tocar.",
+      "evidence": "https://support.spotify.com/article/storage-and-data-information/"
+    },
+    {
+      "id": "teams-cache", "title": "Microsoft Teams: cache", "category": "Apps", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%LocalAppData%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\EBWebView\\*\\Cache",
+        "%LocalAppData%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\EBWebView\\*\\Code Cache",
+        "%LocalAppData%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\EBWebView\\*\\GPUCache",
+        "%AppData%\\Microsoft\\Teams\\Cache", "%AppData%\\Microsoft\\Teams\\Code Cache", "%AppData%\\Microsoft\\Teams\\GPUCache"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "ms-teams", "Teams" ],
+      "defaultSelected": true,
+      "explanation": "Cache do Teams (novo e clássico). Só as pastas de cache; login e configurações ficam. O Teams precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB). Também é o primeiro passo oficial quando o Teams fica lento ou com erro.",
+      "evidence": "https://learn.microsoft.com/troubleshoot/microsoftteams/teams-administration/clear-teams-cache"
+    },
+    {
+      "id": "slack-cache", "title": "Slack: cache", "category": "Apps", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%AppData%\\Slack\\Cache", "%AppData%\\Slack\\Code Cache", "%AppData%\\Slack\\GPUCache",
+        "%LocalAppData%\\Packages\\91750D7E.Slack_*\\LocalCache\\Roaming\\Slack\\Cache",
+        "%LocalAppData%\\Packages\\91750D7E.Slack_*\\LocalCache\\Roaming\\Slack\\Code Cache"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "slack" ],
+      "defaultSelected": true,
+      "explanation": "Cache do Slack (versão instalada e da Microsoft Store). Login e configurações ficam. O Slack precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: dezenas a centenas de MB).",
+      "evidence": "Slack: Ajuda > Solução de problemas > 'Limpar cache e reiniciar'"
+    },
+
+    {
+      "id": "shader-nvidia", "title": "Cache de shaders NVIDIA", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [
+        "%LocalAppData%\\NVIDIA\\DXCache", "%LocalAppData%\\NVIDIA\\GLCache",
+        "%LocalAppDataLow%\\NVIDIA\\PerDriverVersion\\DXCache", "%LocalAppDataLow%\\NVIDIA\\PerDriverVersion\\GLCache"
+      ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0,
+      "defaultSelected": false,
+      "warning": "Os jogos vão recompilar os shaders: as primeiras partidas depois disso podem engasgar (stutter) por alguns minutos. Só vale para liberar espaço ou depois de trocar de driver com problemas gráficos.",
+      "explanation": "Shaders já compilados pelo driver da NVIDIA para seus jogos. É o que evita engasgos ao ver efeitos pela primeira vez. Feche os jogos antes (arquivos em uso são pulados).",
+      "expectedGain": "Espaço em disco (pode passar de alguns GB). Não aumenta FPS; no começo, piora a fluidez até o cache ser refeito.",
+      "evidence": "Painel de Controle NVIDIA > Configurações 3D > 'Tamanho do cache do shader' (o driver recria o cache)"
+    },
+    {
+      "id": "shader-amd", "title": "Cache de shaders AMD", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\AMD\\DxCache", "%LocalAppData%\\AMD\\DxcCache", "%LocalAppData%\\AMD\\GLCache", "%LocalAppData%\\AMD\\VkCache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0,
+      "defaultSelected": false,
+      "warning": "Os jogos vão recompilar os shaders: as primeiras partidas podem engasgar por alguns minutos.",
+      "explanation": "Shaders compilados pelo driver da AMD. O próprio AMD Software tem a opção 'Redefinir cache de shader', que faz o mesmo de forma permanente; aqui vai para a quarentena.",
+      "expectedGain": "Espaço em disco. Não aumenta FPS; no começo, piora a fluidez até o cache ser refeito.",
+      "evidence": "AMD Software: Adrenalin Edition > Gráficos > Avançado > 'Redefinir cache de shader'"
+    },
+    {
+      "id": "shader-intel", "title": "Cache de shaders Intel", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppDataLow%\\Intel\\ShaderCache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0,
+      "defaultSelected": false,
+      "warning": "Os jogos vão recompilar os shaders: as primeiras partidas podem engasgar por alguns minutos.",
+      "explanation": "Shaders compilados pelo driver gráfico da Intel (integrado e Arc).",
+      "expectedGain": "Espaço em disco. Não aumenta FPS; no começo, piora a fluidez até o cache ser refeito.",
+      "evidence": "Driver gráfico Intel: cache em LocalLow\\Intel\\ShaderCache, recriado sob demanda"
+    },
+    {
+      "id": "shader-directx", "title": "Cache de shaders do DirectX", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\D3DSCache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0,
+      "defaultSelected": false,
+      "warning": "Jogos e apps recompilam os shaders: as primeiras aberturas podem ficar mais lentas.",
+      "explanation": "Cache de shaders do próprio DirectX. A Limpeza de Disco do Windows oferece o mesmo item ('Cache de Sombreador DirectX').",
+      "expectedGain": "Espaço em disco (geralmente dezenas a centenas de MB).",
+      "evidence": "Limpeza de Disco do Windows, item 'Cache de Sombreador DirectX' (cleanmgr.exe)"
+    },
+    {
+      "id": "steam-htmlcache", "title": "Steam: cache do navegador da loja", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Steam\\htmlcache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "steam", "steamwebhelper" ],
+      "defaultSelected": true,
+      "explanation": "Cache das páginas da loja e da comunidade dentro do Steam. Jogos e downloads não são tocados. O Steam precisa estar fechado.",
+      "expectedGain": "Espaço em disco (comum: centenas de MB). Também resolve loja em branco ou lenta.",
+      "evidence": "Steam: Configurações > Navegador > 'Excluir dados do navegador' (mesmo cache)"
+    },
+    {
+      "id": "steam-logs", "title": "Steam: registros e despejos antigos", "category": "Jogos", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%SteamPath%\\logs", "%SteamPath%\\dumps" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 24, "closeApps": [ "steam" ],
+      "defaultSelected": true,
+      "explanation": "Registros de diagnóstico e despejos de travamento do cliente Steam, com mais de 24 horas.",
+      "expectedGain": "Espaço em disco (geralmente dezenas de MB).",
+      "evidence": "Steam: pastas logs e dumps da instalação, usadas só para diagnóstico"
+    },
+    {
+      "id": "steam-shadercache", "title": "Steam: shaders pré-compilados dos jogos", "category": "Jogos", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%SteamPath%\\steamapps\\shadercache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "steam" ],
+      "defaultSelected": false,
+      "warning": "O Steam vai baixar ou recompilar os shaders: as primeiras partidas podem engasgar e a primeira abertura de cada jogo demora mais.",
+      "explanation": "Shaders que o Steam baixa ou compila para cada jogo (biblioteca principal). Só vale para liberar espaço.",
+      "expectedGain": "Espaço em disco (pode ter vários GB). Não aumenta FPS.",
+      "evidence": "Steam: Configurações > Downloads > 'Pré-cache de shaders' (o Steam recria a pasta)"
+    },
+    {
+      "id": "epic-webcache", "title": "Epic Games Launcher: cache web", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\EpicGamesLauncher\\Saved\\webcache*" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "EpicGamesLauncher" ],
+      "defaultSelected": true,
+      "explanation": "Cache das páginas do Epic Games Launcher (pastas webcache*). Jogos e login ficam. O Launcher precisa estar fechado (inclusive na bandeja).",
+      "expectedGain": "Espaço em disco (dezenas a centenas de MB). Também é o passo oficial para Launcher em branco.",
+      "evidence": "Suporte Epic Games: limpar o webcache do Epic Games Launcher"
+    },
+    {
+      "id": "epic-logs", "title": "Epic Games Launcher: registros antigos", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\EpicGamesLauncher\\Saved\\Logs" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 24, "closeApps": [ "EpicGamesLauncher" ],
+      "defaultSelected": true,
+      "explanation": "Registros de diagnóstico do Launcher com mais de 24 horas.",
+      "expectedGain": "Espaço em disco (geralmente pouco).",
+      "evidence": "Epic Games Launcher: pasta Saved\\Logs, usada só para diagnóstico"
+    },
+    {
+      "id": "battlenet-cache", "title": "Battle.net: cache (sua conta)", "category": "Jogos", "scope": "User", "mode": "Quarantine",
+      "roots": [ "%LocalAppData%\\Battle.net\\Cache", "%LocalAppData%\\Battle.net\\BrowserCaches" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "Battle.net" ],
+      "defaultSelected": true,
+      "explanation": "Cache do aplicativo Battle.net. Jogos e login ficam. O Battle.net precisa estar fechado.",
+      "expectedGain": "Espaço em disco (dezenas a centenas de MB).",
+      "evidence": "https://us.battle.net/support/article/27596"
+    },
+    {
+      "id": "battlenet-programdata", "title": "Battle.net: cache compartilhado", "category": "Jogos", "scope": "Machine", "mode": "Quarantine", "admin": true,
+      "roots": [ "%ProgramData%\\Blizzard Entertainment\\Battle.net\\Cache" ],
+      "patterns": [ "*" ], "recursive": true, "minAgeHours": 0, "closeApps": [ "Battle.net", "Agent" ],
+      "defaultSelected": false,
+      "explanation": "Cache do Battle.net em ProgramData, que a Blizzard manda apagar quando o aplicativo apresenta erros. O Battle.net precisa estar fechado.",
+      "expectedGain": "Espaço em disco (geralmente pouco). Útil para corrigir erros do Battle.net.",
+      "evidence": "https://us.battle.net/support/article/27596"
+    }
+  ]
+}
