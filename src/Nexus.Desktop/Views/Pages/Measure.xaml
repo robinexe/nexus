@@ -152,6 +152,7 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Cabeçalho -->
@@ -160,8 +161,21 @@
           <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- (a) Bancada de captura -->
-        <Border Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource Panel.Card}" Margin="0,0,0,20" Padding="20,18">
+        <!-- (a) Bancada de captura. Sem sessões, fica no topo e completa; com sessões, desce para baixo do palco e fica enxuta
+             (o traço é o elemento principal e não pode ficar abaixo da dobra). -->
+        <Border Grid.ColumnSpan="3" Padding="20,18">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource Panel.Card}">
+              <Setter Property="Grid.Row" Value="1"/>
+              <Setter Property="Margin" Value="0,0,0,20"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasSessions}" Value="True">
+                  <Setter Property="Grid.Row" Value="3"/>
+                  <Setter Property="Margin" Value="0,20,0,0"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
           <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" MinWidth="160"/>
@@ -180,8 +194,8 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.ColumnSpan="2" Margin="0,0,24,14">
-              <TextBlock Text="Gravar uma sessão" Style="{StaticResource Text.H2}"/>
-              <TextBlock Style="{StaticResource Text.Small}" Margin="0,3,0,0"
+              <TextBlock Text="{Binding CaptureTitle}" Style="{StaticResource Text.H2}"/>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,3,0,0" Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}"
                          Text="Abra o jogo, entre numa partida ou no treino e grave. O NEXUS só lê o tempo de cada quadro; nada no PC muda."/>
             </StackPanel>
 
@@ -191,6 +205,7 @@
               <TextBox Text="{Binding ProcessName, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Busy, Converter={StaticResource M.Not}, Mode=OneWay}"
                        ToolTip="Nome do executável do jogo, como aparece no Gerenciador de Tarefas (aba Detalhes)."/>
               <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,5,0,0"
+                         Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}"
                          Text="O nome do executável, como cs2.exe ou VALORANT-Win64-Shipping.exe."/>
             </StackPanel>
 
@@ -216,10 +231,11 @@
             </StackPanel>
 
             <!-- Permissão -->
-            <CheckBox Grid.Row="3" Grid.ColumnSpan="2" IsChecked="{Binding RequestElevation}" IsEnabled="{Binding Busy, Converter={StaticResource M.Not}, Mode=OneWay}" Margin="0,16,24,0" VerticalContentAlignment="Top">
+            <CheckBox Grid.Row="3" Grid.ColumnSpan="2" IsChecked="{Binding RequestElevation}" IsEnabled="{Binding Busy, Converter={StaticResource M.Not}, Mode=OneWay}" Margin="0,16,24,0" VerticalContentAlignment="Top"
+                      ToolTip="O PresentMon costuma precisar de permissão de administrador para ler os quadros do jogo. O Windows pergunta antes de abrir. Desmarque só se sua conta já tem esse acesso (grupo Usuários de log de desempenho).">
               <StackPanel Margin="4,0,0,0">
                 <TextBlock Text="Pedir permissão ao Windows" Style="{StaticResource Text.Body}"/>
-                <TextBlock Style="{StaticResource Text.Small}"
+                <TextBlock Style="{StaticResource Text.Small}" Visibility="{Binding HasSessions, Converter={StaticResource M.VisNot}}"
                            Text="O PresentMon costuma precisar de permissão de administrador para ler os quadros do jogo. O Windows pergunta antes de abrir. Desmarque só se sua conta já tem esse acesso (grupo Usuários de log de desempenho)."/>
               </StackPanel>
             </CheckBox>
@@ -289,7 +305,7 @@
 
             <!-- Ajuda quando o PresentMon não foi encontrado -->
             <Border Grid.Row="5" Grid.ColumnSpan="3" Style="{StaticResource Panel.Notice}" Margin="0,12,0,0"
-                    Visibility="{Binding HasPresentMon, Converter={StaticResource M.VisNot}}">
+                    Visibility="{Binding ShowPresentMonHelp, Converter={StaticResource M.Vis}}">
               <TextBlock Text="{Binding PresentMonHelp}" Style="{StaticResource Text.Body}"/>
             </Border>
 

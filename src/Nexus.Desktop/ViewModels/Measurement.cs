@@ -114,7 +114,7 @@ public sealed class MeasurePage : PageViewModel, IDisposable
     public string? PresentMonPath
     {
         get => _presentMonPath;
-        set { if (Set(ref _presentMonPath, value)) { OnPropertyChanged(nameof(HasPresentMon)); OnPropertyChanged(nameof(PresentMonText)); } }
+        set { if (Set(ref _presentMonPath, value)) { OnPropertyChanged(nameof(HasPresentMon)); OnPropertyChanged(nameof(PresentMonText)); OnPropertyChanged(nameof(ShowPresentMonHelp)); } }
     }
     public bool HasPresentMon => PresentMonPath is not null && File.Exists(PresentMonPath);
     public string PresentMonText => HasPresentMon ? System.IO.Path.GetFileName(PresentMonPath!) : "PresentMon não encontrado";
@@ -131,6 +131,10 @@ public sealed class MeasurePage : PageViewModel, IDisposable
     public string Log { get => _log; set => Set(ref _log, value); }
     public SessionRow? Selected { get => _selected; set => Set(ref _selected, value); }
     public bool HasSessions => Sessions.Count > 0;
+    /// <summary>Com sessões, a captura desce para baixo do palco e vira "gravar outra".</summary>
+    public string CaptureTitle => HasSessions ? "Gravar outra sessão" : "Gravar uma sessão";
+    /// <summary>A explicação longa do PresentMon só aparece na primeira vez (sem sessões); depois, o ponto vermelho e "Localizar" bastam.</summary>
+    public bool ShowPresentMonHelp => !HasPresentMon && !HasSessions;
     public string HowTo { get; } =
         "Para uma comparação justa: mesmo mapa ou cena, mesma duração, jogo já aquecido. Grave 3 sessões antes da mudança, " +
         "aplique, grave 3 depois. Alternar (antes, depois, antes...) é ainda melhor.";
@@ -154,6 +158,8 @@ public sealed class MeasurePage : PageViewModel, IDisposable
         foreach (var s in list) Sessions.Add(new SessionRow(s));
         Selected = Sessions.FirstOrDefault(r => r.Session.Id == keep) ?? Sessions.FirstOrDefault();
         OnPropertyChanged(nameof(HasSessions));
+        OnPropertyChanged(nameof(CaptureTitle));
+        OnPropertyChanged(nameof(ShowPresentMonHelp));
         if (bad > 0) Status = $"{bad} arquivo(s) de sessão ilegível(is) em {_store.Folder} foram ignorados.";
         SessionsChanged?.Invoke();
     }
