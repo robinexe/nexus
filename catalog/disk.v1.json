@@ -1,0 +1,63 @@
+{
+  "catalogVersion": "disk-1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Disco. A análise de disco é somente leitura e não usa o catálogo. Única ação que escreve: exclusão segura de um arquivo, IRREVERSÍVEL (ver docs/modules/disk.md, seção \"Ações irreversíveis\").",
+  "actions": [
+    {
+      "id": "disk.secure-delete",
+      "version": 1,
+      "title": "Exclusão segura de um arquivo (irreversível)",
+      "classification": "Conditional",
+      "condition": "Só um arquivo comum escolhido pelo usuário, fora das pastas do Windows, de programas e da raiz do perfil; não pode estar em uso, ser link, junção, arquivo de nuvem, compactado/esparso ou ter vários links físicos. Em SSD/NVMe a sobrescrita não é garantida (TRIM e nivelamento de desgaste).",
+      "handlerKind": "DiskSecureDelete",
+      "irreversible": true,
+      "target": {
+        "path": "{filePath}"
+      },
+      "userParameters": {
+        "filePath": "(?!.*\\\\\\.{1,2}(?:\\\\|$))(?!.*[ .](?:\\\\|$))(?!.*~[0-9])[A-Za-z]:(?:\\\\[^\\\\/:*?\"<>|\\x00-\\x1F]+)+"
+      },
+      "desiredValue": "absent",
+      "desiredType": "FileState",
+      "mechanism": "Abre o arquivo com acesso exclusivo, confere pelo próprio handle que é o arquivo pedido (caminho final, um único link físico, sem reparse point), grava UMA passada de bytes aleatórios por cima de todo o conteúdo e força a gravação no disco (FlushFileBuffers), renomeia para um nome aleatório, trunca para zero, zera as datas e apaga. Uma passada basta em discos atuais: as 35 passadas de Gutmann foram pensadas para codificações de disco dos anos 1990, e o NIST SP 800-88 considera uma sobrescrita suficiente (\"Clear\") para HDDs modernos. Em SSD/NVMe, o controlador grava em outras células (nivelamento de desgaste) e o TRIM pode já ter liberado as antigas: nenhuma sobrescrita por software garante apagar as cópias físicas.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "NIST SP 800-88 Rev. 1, Guidelines for Media Sanitization, seção 2.4 e Apêndice A (sobrescrita única = Clear para HDD; SSD exige métodos do fabricante ou criptografia)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows-server/administration/windows-commands/cipher (cipher /w: sobrescreve o espaço livre do volume)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers e GetFinalPathNameByHandleW / GetFileInformationByHandle (verificação pelo handle)"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Wei et al., Reliably Erasing Data From Flash-Based Solid State Drives (USENIX FAST 2011): sobrescrita de arquivo em SSD deixa cópias recuperáveis"
+        }
+      ],
+      "risks": "IRREVERSÍVEL: não há quarentena, cópia nem ponto de restauração que traga o arquivo de volta. Em SSD/NVMe, restos do conteúdo podem continuar nas células do disco; para isso use BitLocker (o disco inteiro criptografado torna os restos ilegíveis) e cipher /w no espaço livre. Cópias em backup, nuvem, Histórico de Arquivos ou cópias de sombra (pontos de restauração) não são apagadas.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o caminho deixa de existir.",
+      "revert": "Não há como desfazer. O diário registra a exclusão; desfazer e recuperar recusam com mensagem clara."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "disk.secure-delete.multipass",
+      "classification": "Ineffective",
+      "reason": "Múltiplas passadas (DoD 5220.22-M de 3/7 passadas, Gutmann 35) não aumentam a segurança em HDDs atuais e só desgastam SSDs; o NIST SP 800-88 aceita uma passada. Oferecer o modo seria vender um mito.",
+      "source": "NIST SP 800-88 Rev. 1"
+    },
+    {
+      "id": "disk.free-space-wipe",
+      "classification": "Rejected",
+      "reason": "Sobrescrever o espaço livre já existe no Windows (cipher /w:C:\\), visível e controlado pelo usuário; o NEXUS indica o comando em vez de reimplementar.",
+      "source": "https://learn.microsoft.com/windows-server/administration/windows-commands/cipher"
+    }
+  ]
+}
