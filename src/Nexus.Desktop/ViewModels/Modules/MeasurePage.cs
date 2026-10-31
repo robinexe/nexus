@@ -202,7 +202,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public bool OverlayEnabled
     {
         get => _overlay.Enabled;
-        set { if (value != _overlay.Enabled) { _overlay.SetEnabled(value); EnsureSystemLoad(); } }
+        set { if (value != _overlay.Enabled) { _overlay.SetEnabled(value); EnsureSystemLoad(); _ = EnsureCaptureForOverlayAsync(); } }
     }
     public string PreviewText => _overlay.Preview ? "Esconder a prévia" : "Ver a prévia agora";
     public bool OverlayOnGameStart { get => _prefs.OverlayOnGameStart; set { if (value != _prefs.OverlayOnGameStart) SetPrefs(_prefs with { OverlayOnGameStart = value }, null); } }
@@ -358,6 +358,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
                     EnsureSystemLoad();
                     if (ev.CaptureStarted) OnCaptureStarted(ev.Game!);
                     else if (ev.Note is not null) CaptureNote = ev.Note;
+                    if (!ev.CaptureStarted) await EnsureCaptureForOverlayAsync();
                     break;
                 case GameEventKind.Stopped:
                     _overlay.OnGame(false, false);
@@ -394,6 +395,17 @@ public sealed class MeasurePage : ModulePage, IDisposable
         _liveTimer.Start();
         Status = $"Medindo {game.Name}…";
         Notify();
+    }
+
+    /// <summary>
+    /// O mostrador precisa dos quadros: com ele ligado e um jogo aberto, mede mesmo com a medição automática desligada (a
+    /// partida também é guardada, como "ao vivo").
+    /// </summary>
+    private async Task EnsureCaptureForOverlayAsync()
+    {
+        if (_engine is null || !_overlay.Enabled || _detected is not { } game || IsCapturing || !HasPresentMon) return;
+        var ok = await Task.Run(() => { lock (_engineGate) return _engine.StartManual(game, DateTimeOffset.Now); });
+        if (ok) OnCaptureStarted(game);
     }
 
     private async Task StartManualAsync()
@@ -544,7 +556,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             if (_hotkey is null)
             {
                 _hotkey = new GlobalHotkey();
-                _hotkey.Pressed += () => { _overlay.Toggle(); EnsureSystemLoad(); Host?.Notify(_overlay.Enabled ? "Mostrador de FPS ligado." : "Mostrador de FPS desligado."); };
+                _hotkey.Pressed += () => { _overlay.Toggle(); EnsureSystemLoad(); _ = EnsureCaptureForOverlayAsync(); Host?.Notify(_overlay.Enabled ? "Mostrador de FPS ligado." : "Mostrador de FPS desligado."); };
             }
             var key = Hotkey.Parse(_prefs.OverlayHotkey);
             HotkeyStatus = _hotkey.Register(key)
