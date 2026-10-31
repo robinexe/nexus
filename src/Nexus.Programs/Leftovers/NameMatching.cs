@@ -40,7 +40,7 @@ public static partial class NameMatching
     public static string NormalizePublisher(string? publisher)
     {
         var words = Normalize(publisher).Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-        while (words.Count > 1 && CompanySuffixes.Contains(words[^1])) words.RemoveAt(words.Count - 1);
+        while (words.Count > 1 && (CompanySuffixes.Contains(words[^1]) || words[^1].Length == 1)) words.RemoveAt(words.Count - 1); // "S.A." vira "s a"
         return string.Join(' ', words);
     }
 
@@ -87,13 +87,11 @@ public static partial class NameMatching
     public static bool BelongsToInstalled(string folderOrKey, IEnumerable<InstalledProgram> installed) =>
         installed.Any(p => MatchesProgram(folderOrKey, ProgramForms(p.Name, p.Publisher)) || MatchesPublisher(folderOrKey, p.Publisher));
 
-    /// <summary>Palavra principal (≥ 5 letras) do nome, para achados de baixa confiança.</summary>
-    public static string? MainToken(string name, string? publisher)
+    /// <summary>O nome da pasta/chave CONTÉM o nome do programa (≥ 5 letras), ex.: "FooEditorUpdater". Só para achados de baixa confiança.</summary>
+    public static bool ContainsProgram(string folderOrKey, IReadOnlyList<string> programForms)
     {
-        var pub = NormalizePublisher(publisher);
-        return Normalize(name).Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .Where(w => w.Length >= 5 && w != pub && !w.All(char.IsAsciiDigit))
-            .OrderByDescending(w => w.Length).FirstOrDefault();
+        var c = Compact(Normalize(folderOrKey));
+        return programForms.Any(f => !f.Contains(' ', StringComparison.Ordinal) && f.Length >= 5 && c.Contains(f, StringComparison.Ordinal));
     }
 
     private static string RemoveDiacritics(string s)

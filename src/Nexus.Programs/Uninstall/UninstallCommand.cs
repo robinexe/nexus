@@ -54,7 +54,7 @@ public static partial class UninstallCommandParser
             var guid = Guid().Match(rest);
             if (!guid.Success) { error = "Desinstalador MSI sem código de produto válido."; return null; }
             var code = guid.Value.ToUpperInvariant();
-            return Validate(new UninstallCommand(Path.Combine(systemDirectory, "msiexec.exe"), "/x " + code, true, code), fileExists, out error);
+            return Validate(new UninstallCommand(WinCombine(systemDirectory, "msiexec.exe"), "/x " + code, true, code), fileExists, out error);
         }
 
         string file, args;
@@ -70,13 +70,13 @@ public static partial class UninstallCommandParser
             (file, args) = SplitUnquoted(text, fileExists);
         }
 
-        if (!Path.IsPathFullyQualified(file))
+        if (Interpreters.Contains(WinFileName(file), StringComparer.OrdinalIgnoreCase) ||
+            Interpreters.Contains(WinFileName(file) + ".exe", StringComparer.OrdinalIgnoreCase))
+            return Validate(new UninstallCommand(file, args, false, null), _ => false, out error); // mensagem de interpretador
+        if (!IsFullWindowsPath(file))
         {
-            var bare = Path.GetFileName(file);
-            if (string.Equals(Path.GetFileNameWithoutExtension(bare), "rundll32", StringComparison.OrdinalIgnoreCase) &&
-                (Path.GetExtension(bare).Length == 0 || string.Equals(Path.GetExtension(bare), ".exe", StringComparison.OrdinalIgnoreCase)) &&
-                file.Equals(bare, StringComparison.Ordinal))
-                file = Path.Combine(systemDirectory, "rundll32.exe");
+            if (file.Equals("rundll32", StringComparison.OrdinalIgnoreCase) || file.Equals("rundll32.exe", StringComparison.OrdinalIgnoreCase))
+                file = WinCombine(systemDirectory, "rundll32.exe");
             else { error = $"O desinstalador não tem caminho completo ({file})."; return null; }
         }
         return Validate(new UninstallCommand(file, args, false, null), fileExists, out error);
@@ -104,16 +104,23 @@ public static partial class UninstallCommandParser
         return sp < 0 ? (text, "") : (text[..sp], text[(sp + 1)..].Trim());
     }
 
+    /// <summary>Caminho absoluto do Windows com letra de unidade (<c>C:\...</c>). Rede (<c>\\servidor</c>) não é aceita.</summary>
+    internal static bool IsFullWindowsPath(string p) => p.Length >= 4 && char.IsAsciiLetter(p[0]) && p[1] == ':' && p[2] == '\\' && !p.Contains("\\..\\", StringComparison.Ordinal);
+
+    internal static string WinCombine(string dir, string name) => dir.TrimEnd('\\') + "\\" + name;
+
+    internal static string WinFileName(string p) => p[(p.LastIndexOfAny(['\\', '/']) + 1)..];
+
     private static UninstallCommand? Validate(UninstallCommand cmd, Func<string, bool> fileExists, out string? error)
     {
         error = null;
-        var name = Path.GetFileName(cmd.FileName);
-        if (Interpreters.Contains(name, StringComparer.OrdinalIgnoreCase))
+        var name = WinFileName(cmd.FileName);
+        if (Interpreters.Contains(name, StringComparer.OrdinalIgnoreCase) || Interpreters.Contains(name + ".exe", StringComparer.OrdinalIgnoreCase))
         {
             error = $"O desinstalador registrado abre um interpretador de comandos ({name}). Por segurança o NEXUS não o executa: use Configurações > Aplicativos.";
             return null;
         }
-        if (!string.Equals(Path.GetExtension(cmd.FileName), ".exe", StringComparison.OrdinalIgnoreCase))
+        if (!name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
         {
             error = $"O desinstalador registrado não é um programa .exe ({name}).";
             return null;
@@ -147,6 +154,7 @@ public static class UninstallLauncher
             Arguments = command.Arguments,
             UseShellExecute = true,
             WorkingDirectory = Path.GetDirectoryName(command.FileName) ?? Environment.SystemDirectory,
+            ErrorDialog = true,
         };
         return Process.Start(psi);
     }

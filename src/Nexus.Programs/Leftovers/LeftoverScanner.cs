@@ -42,7 +42,6 @@ public static class LeftoverScanner
         ArgumentNullException.ThrowIfNull(roots);
         var others = stillInstalled.Where(p => p.Id != removed.Id).ToList();
         var forms = NameMatching.ProgramForms(removed.Name, removed.Publisher);
-        var token = NameMatching.MainToken(removed.Name, removed.Publisher);
         var found = new Dictionary<string, LeftoverCandidate>(StringComparer.OrdinalIgnoreCase);
 
         void AddFolder(string path, bool machine, int score, string reason)
@@ -91,7 +90,7 @@ public static class LeftoverScanner
                         if (!found.ContainsKey(dir))
                             foreach (var s in matching) AddFolder(s, machine, VendorProgramFolderScore, "Pasta do programa dentro da pasta do editor.");
                     }
-                    else if (token is not null && NameMatching.Normalize(name).Split(' ').Contains(token))
+                    else if (NameMatching.ContainsProgram(name, forms))
                     {
                         AddFolder(dir, machine, SimilarNameScore, "Nome parecido com o do programa: confira antes de marcar.");
                     }

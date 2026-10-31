@@ -97,11 +97,12 @@ public static class LeftoverPolicy
                 if (Overlaps(path, loc))
                     return $"Sobrepõe a pasta de um programa ainda instalado ({p.Name}).";
         }
-        // Nome de um programa/editor ainda instalado em qualquer nível do caminho relativo: pode ser compartilhado.
-        var named = relative.Where(s => !s.Equals("Programs", StringComparison.OrdinalIgnoreCase)).ToList();
-        foreach (var seg in named)
-            if (NameMatching.BelongsToInstalled(seg, stillInstalled))
-                return $"'{seg}' tem o nome de um programa ou editor ainda instalado.";
+        // O próprio item com o nome de um programa/editor ainda instalado: pode ser compartilhado (ex.: a pasta "Mozilla" com o
+        // Thunderbird instalado). Pastas intermediárias não importam: "Acme\Foo" pode sair mesmo com "Acme\Bar" instalado,
+        // porque a sobreposição com as pastas dos instalados já foi conferida acima.
+        var last = relative[^1];
+        if (NameMatching.BelongsToInstalled(last, stillInstalled))
+            return $"'{last}' tem o nome de um programa ou editor ainda instalado.";
         return null;
     }
 
@@ -124,9 +125,8 @@ public static class LeftoverPolicy
             return $"'{named[0]}' é a chave de um editor com vários produtos: só a subchave do programa pode ser removida.";
         if (named.Any(s => s.Length == 0 || s.Trim() != s)) return "Nome de chave inválido.";
         if (SafetyPolicy.CheckRegistry(hive, path, "*") is { } problem) return problem;
-        foreach (var seg in named)
-            if (NameMatching.BelongsToInstalled(seg, stillInstalled))
-                return $"'{seg}' tem o nome de um programa ou editor ainda instalado.";
+        if (NameMatching.BelongsToInstalled(named[^1], stillInstalled))
+            return $"'{named[^1]}' tem o nome de um programa ou editor ainda instalado.";
         return null;
     }
 
