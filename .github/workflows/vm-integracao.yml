@@ -1,0 +1,71 @@
+# NEXUS — testes de integração REAIS (registro, energia, serviços, crash + nexus-recover) numa VM Windows
+# descartável do GitHub Actions (Azure). Substitui o Windows Sandbox, que não existe no Windows Home.
+#
+# Nada disto roda no PC de ninguém: a VM é criada para o job e destruída no fim. O portão do NEXUS continua valendo:
+# só é liberado se o SMBIOS indicar máquina virtual e o arquivo de liberação existir com o nome DESTA máquina,
+# pertencente a Administradores. O script recusa criar a liberação se a descoberta não disser "Máquina virtual: Sim".
+name: vm-integracao
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/vm-integracao.yml'
+      - 'tests/Nexus.IntegrationTests/**'
+
+permissions:
+  contents: read
+
+jobs:
+  integracao:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build (Release, lock files)
+        shell: pwsh
+        run: |
+          dotnet --list-sdks
+          dotnet restore Nexus.slnx --locked-mode
+          dotnet build Nexus.slnx -c Release --no-restore
+          dotnet build tests/Nexus.IntegrationTests -c Release
+          dotnet build tools/Nexus.Discover -c Release
+
+      - name: Testes unitários (Windows Server)
+        shell: pwsh
+        run: dotnet test Nexus.slnx -c Release --no-build --filter Category=Unit --logger "trx;LogFileName=unit.trx" --results-directory saida
+
+      - name: Descoberta e liberação do portão (só se for VM)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path saida | Out-Null
+          $disc = & dotnet tools/Nexus.Discover/bin/Release/net10.0/Nexus.Discover.dll --rows 5 2>&1 | ForEach-Object { "$_" }
+          $disc | Out-File saida/descoberta.txt -Encoding utf8
+          $disc | Select-String 'Máquina virtual|Fabricante do sistema|Modelo do sistema|Processo elevado|Build'
+          if (-not ($disc -match 'Máquina virtual: Sim')) { Write-Error 'SMBIOS não indica máquina virtual: liberação NÃO criada.'; exit 11 }
+          New-Item -ItemType Directory -Force -Path C:\ProgramData\NEXUS | Out-Null
+          $marker = 'C:\ProgramData\NEXUS\vm-test-host.allow'
+          [System.IO.File]::WriteAllText($marker, $env:COMPUTERNAME, (New-Object System.Text.UTF8Encoding($false)))
+          icacls $marker /setowner '*S-1-5-32-544'
+          icacls $marker /inheritance:r /grant:r '*S-1-5-32-544:F' '*S-1-5-18:F' '*S-1-5-32-545:R'
+          "Liberação criada para $env:COMPUTERNAME"
+
+      - name: Testes de integração (handlers reais, elevado)
+        shell: pwsh
+        run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=integracao.trx" --results-directory saida
+
+      - name: Resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vm-integracao
+          path: saida/

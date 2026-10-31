@@ -44,7 +44,17 @@ projeto). A Etapa 2 não adicionou nenhuma dependência nova.
 
 | Recurso | Uso | Observação |
 |---|---|---|
-| Windows Sandbox (recurso opcional do Windows Pro/Enterprise) | Executar `tests/Nexus.IntegrationTests` isolado | Não é dependência do NEXUS e não é redistribuído; ativar é decisão do usuário (administrador + reinício) |
+| Windows Sandbox (recurso opcional do Windows Pro/Enterprise) | Executar `tests/Nexus.IntegrationTests` isolado | Não é dependência do NEXUS e não é redistribuído; ativar é decisão do usuário (administrador + reinício). **Não existe no Windows Home** (o PC atual do responsável) |
+
+## CI (adicionado em 2026-10-31, aviso ao responsável na conversa de 31/10)
+
+| Ação | Versão | Licença | Uso | Redistribuído? |
+|---|---|---|---|---|
+| `actions/checkout` | v4 | MIT | `.github/workflows/vm-integracao.yml` | Não |
+| `actions/setup-dotnet` | v4 | MIT | idem (SDK pelo `global.json`) | Não |
+| `actions/upload-artifact` | v4 | MIT | idem (log, `.trx` e descoberta da VM) | Não |
+
+Rodam só na VM descartável do GitHub (`windows-latest`); não entram no build nem na distribuição do NEXUS.
 
 A Etapa 3 (broker, kit de VM) não adicionou pacotes.
 
