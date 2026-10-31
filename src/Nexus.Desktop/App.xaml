@@ -31,6 +31,7 @@
         <ResourceDictionary Source="Views/Pages/CpuLab.xaml"/>
         <ResourceDictionary Source="Views/Pages/GpuLab.xaml"/>
         <ResourceDictionary Source="Views/Pages/MemoryLab.xaml"/>
+        <ResourceDictionary Source="Views/Pages/MemoryDoctor.xaml"/>
         <ResourceDictionary Source="Views/Pages/Settings.xaml"/>
         <ResourceDictionary Source="Views/Pages/History.xaml"/>
         <ResourceDictionary Source="Views/Pages/Capabilities.xaml"/>

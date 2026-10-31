@@ -58,7 +58,7 @@ public static unsafe partial class WindowsLargePages
         {
             var min = GetLargePageMinimum();
             if (min == 0) { note = "Páginas normais de 4 KB: este processador/Windows não oferece páginas grandes."; return false; }
-            if (!EnableLockMemoryPrivilege())
+            if (!EnablePrivilege("SeLockMemoryPrivilege"))
             {
                 note = "Páginas normais de 4 KB: sua conta não tem o direito \"Bloquear páginas na memória\" (padrão do Windows). " +
                        "Isso soma à latência aleatória o custo de traduzir endereços (falta de TLB); a medida \"por página\" mostra a latência sem esse custo.";
@@ -82,13 +82,13 @@ public static unsafe partial class WindowsLargePages
         }
     }
 
-    /// <summary>Ativa no token do próprio processo o direito de bloquear páginas, se a conta já o tiver. Não altera contas nem políticas.</summary>
-    private static bool EnableLockMemoryPrivilege()
+    /// <summary>Ativa no token do próprio processo um direito que a conta já tenha (ex.: bloquear páginas). Não altera contas nem políticas.</summary>
+    internal static bool EnablePrivilege(string privilege)
     {
         if (!OpenProcessToken(GetCurrentProcess(), TokenAdjustPrivileges | TokenQuery, out var token)) return false;
         try
         {
-            if (!LookupPrivilegeValue(null, "SeLockMemoryPrivilege", out var luid)) return false;
+            if (!LookupPrivilegeValue(null, privilege, out var luid)) return false;
             var tp = new TokenPrivileges { Count = 1, Luid = luid, Attributes = SePrivilegeEnabled };
             if (!AdjustTokenPrivileges(token, false, ref tp, 0, 0, 0)) return false;
             return Marshal.GetLastPInvokeError() != ErrorNotAllAssigned;

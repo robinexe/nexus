@@ -818,13 +818,13 @@ public sealed class MemoryLabHandlerTests : IDisposable
     public void Catalog_loads_and_every_kind_is_registered()
     {
         var mine = Catalog.Actions.Where(a => a.Definition.Id.StartsWith("memorylab.", StringComparison.Ordinal)).ToList();
-        Assert.Single(mine);
+        Assert.Contains(mine, a => a.Definition.Id == MemoryDiagnosis.PageFileActionId);
         Assert.Equal(Catalog.Actions.Count, Catalog.Actions.Select(a => a.Definition.Key).Distinct().Count());
         var kinds = MemoryLabHandlers.Create(new HandlerEnvironment(new InMemoryRegistryBackend(), _dir, false, true)).Select(h => h.HandlerKind).ToHashSet();
         Assert.All(mine, a => Assert.Contains(a.Definition.HandlerKind, kinds));
         Assert.Equal(kinds.Count, mine.Select(a => a.Definition.HandlerKind).Distinct().Count());
         Assert.All(kinds, k => Assert.StartsWith("MemoryLab", k, StringComparison.Ordinal));
-        var d = mine[0].Definition;
+        var d = mine.Single(a => a.Definition.Id == MemoryDiagnosis.PageFileActionId).Definition;
         Assert.Equal(PrivilegeLevel.Admin, d.Privileges);
         Assert.Equal(RebootRequirement.Required, d.Reboot);
         Assert.NotEmpty(d.Evidence);

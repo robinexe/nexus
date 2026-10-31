@@ -60,6 +60,9 @@ DDR4-3200 em um canal: 3200 × 10⁶ × 8 B = **25,6 GB/s** teóricos. Um canal 
 
 ## Ação de catálogo (`catalog/memorylab.v1.json`)
 
+O mesmo arquivo também tem as ações da página Memória: diagnóstico (`memorylab.standby.*`, `memorylab.process.*`,
+`memorylab.service.restart`, `memorylab.compression.enable`, `memorylab.browser.*`), descritas em `docs/modules/memorydoctor.md`.
+
 | Id | Handler | O que escreve | Privilégio | Reinício |
 |---|---|---|---|---|
 | `memorylab.pagefile.automatic` | `MemoryLabPageFile` (`PageFileHandler`) | `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PagingFiles` = `?:\pagefile.sys` (REG_MULTI_SZ) — o mesmo que "Gerenciar automaticamente o tamanho do arquivo de paginação de todas as unidades" | Admin (UAC + ponto de restauração automático) | Necessário |
@@ -79,9 +82,11 @@ DDR4-3200 em um canal: 3200 × 10⁶ × 8 B = **25,6 GB/s** teóricos. Um canal 
   peça (ou da tabela JEDEC, marcada como tal).
 - **Não liga XMP/EXPO**: é ajuste de BIOS; damos o passo a passo por fabricante.
 - **"Limpador de RAM"**: mito. A lista de espera é cache que o Windows devolve na hora; esvaziar à força faz os programas
-  lerem do disco de novo. A página explica.
+  lerem do disco de novo. A página explica. A página **Memória: diagnóstico** (`docs/modules/memorydoctor.md`) oferece esvaziar
+  a lista de espera só como ação explícita, de administrador, efêmera e com a explicação do único caso em que ajuda.
 - **Não mexe em SysMain/Prefetch**: só mostra e remete à página Serviços (o módulo dono).
-- **Não religa a compressão automaticamente**: é raro alguém desligar; mostramos o comando oficial.
+- **Não religa a compressão automaticamente**: é raro alguém desligar; mostramos o comando oficial. A página Memória: diagnóstico
+  tem a ação reversível `memorylab.compression.enable` (com Desfazer), oferecida só quando ela está desligada.
 - **LPDDR4X/LPDDR5X**: o SMBIOS não distingue de LPDDR4/LPDDR5; mostramos o que ele informa.
 
 ## Riscos

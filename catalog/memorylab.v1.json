@@ -1,7 +1,7 @@
 {
   "catalogVersion": "1.0.0",
   "schema": "nexus.catalog/1",
-  "note": "Laboratório da memória RAM. Uma única ação, oferecida só quando o arquivo de paginação está desligado ou fixo e pequeno com pouca RAM. Handler em src/Nexus.Lab.Memory (PageFileHandler): alvo fixo no código. Ver docs/modules/memorylab.md.",
+  "note": "Laboratório da memória RAM e Memória: diagnóstico. Handlers em src/Nexus.Lab.Memory (PageFileHandler e Problems/DoctorHandlers.cs): alvos fixos no código ou validados por regex (userParameters) e revalidados no handler. Ver docs/modules/memorylab.md e docs/modules/memorydoctor.md.",
   "actions": [
     {
       "id": "memorylab.pagefile.automatic",
@@ -10,13 +10,21 @@
       "classification": "Conditional",
       "condition": "Somente quando o arquivo de paginação está desligado, ou fixo com máximo menor que metade da RAM em PCs com até 16 GB.",
       "handlerKind": "MemoryLabPageFile",
-      "target": { "setting": "PagingFiles" },
+      "target": {
+        "setting": "PagingFiles"
+      },
       "desiredType": "MultiString",
       "desiredValue": "?:\\pagefile.sys",
       "mechanism": "Grava PagingFiles = \"?:\\pagefile.sys\" em HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management, que é o que a opção \"Gerenciar automaticamente o tamanho do arquivo de paginação de todas as unidades\" faz. O Windows passa a criar e dimensionar o arquivo conforme a necessidade. Isso não deixa o PC mais rápido: evita que jogos e programas fechem por falta de memória quando a RAM enche, e permite gravar despejo de erro.",
       "evidence": [
-        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/troubleshoot/windows-client/performance/how-to-determine-the-appropriate-page-file-size-for-64-bit-versions-of-windows" },
-        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/troubleshoot/windows-client/performance/introduction-to-the-page-file" }
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/troubleshoot/windows-client/performance/how-to-determine-the-appropriate-page-file-size-for-64-bit-versions-of-windows"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/troubleshoot/windows-client/performance/introduction-to-the-page-file"
+        }
       ],
       "risks": "Baixo. Ocupa espaço no disco do sistema (o Windows decide o tamanho; costuma ser alguns GB). Só vale depois de reiniciar.",
       "privileges": "Admin",
@@ -24,6 +32,304 @@
       "reboot": "Required",
       "verification": "Releitura do valor PagingFiles; depois de reiniciar, o pagefile.sys aparece na raiz da unidade.",
       "revert": "Desfazer regrava o valor anterior exatamente como estava (tipo e conteúdo) ou o remove se não existia. Vale depois de reiniciar."
+    },
+    {
+      "id": "memorylab.standby.purge",
+      "version": 1,
+      "title": "Esvaziar a lista de espera da memória (temporário)",
+      "classification": "Conditional",
+      "condition": "Só quando a memória LIVRE está quase zerada com cache grande e você sente engasgos num jogo com pouca RAM. Fora disso, piora.",
+      "handlerKind": "MemoryLabStandbyPurge",
+      "target": {
+        "list": "standby"
+      },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Pede ao Windows para descartar a lista de espera (NtSetSystemInformation, SystemMemoryListInformation = MemoryPurgeStandbyList), o mesmo que 'Empty Standby List' do RAMMap da Microsoft. A lista de espera é cache de arquivos: memória que o Windows já considera disponível. Não 'libera RAM' que estava presa; só joga o cache fora.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/sysinternals/downloads/rammap"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "https://learn.microsoft.com/windows/win32/memory/memory-management"
+        },
+        {
+          "level": "Community",
+          "source": "https://www.wagnardsoft.com/ (Intelligent Standby List Cleaner: engasgos relatados com a lista de espera cheia)"
+        }
+      ],
+      "risks": "Programas e jogos voltam a ler do disco o que estava em cache: carregamentos mais lentos logo depois. O efeito dura minutos (o cache se enche de novo).",
+      "privileges": "Admin",
+      "persistence": "Ephemeral",
+      "reboot": "None",
+      "verification": "O Windows confirma a operação (código de retorno).",
+      "revert": "Nada a desfazer: o cache se refaz sozinho conforme os arquivos são usados."
+    },
+    {
+      "id": "memorylab.process.trim",
+      "version": 1,
+      "title": "Aparar a memória de um programa (temporário)",
+      "classification": "Conditional",
+      "condition": "Programa escolhido por você, parado em segundo plano, que reservou memória e não usa. Programas do Windows, anticheat e serviços são recusados.",
+      "handlerKind": "MemoryLabProcessTrim",
+      "target": {
+        "pid": "{pid}",
+        "name": "{name}",
+        "started": "{started}"
+      },
+      "userParameters": {
+        "pid": "[1-9][0-9]{0,9}",
+        "name": "[^\\x00-\\x1f\\\\/:*?\"<>|]{1,128}",
+        "started": "[0-9]{1,20}"
+      },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Chama EmptyWorkingSet no processo: as páginas saem da RAM (vão para a lista de espera/modificada), mas continuam comprometidas. O commit não muda; quando o programa usar de novo, elas voltam por falta de página. O NEXUS confere PID + nome + horário de início antes (o PID pode ter sido reaproveitado).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-emptyworkingset"
+        }
+      ],
+      "risks": "Costuma piorar se o programa estiver em uso: ele relê do disco o que foi aparado. Não resolve vazamento (o commit continua igual).",
+      "privileges": "User",
+      "persistence": "Ephemeral",
+      "reboot": "None",
+      "verification": "O Windows confirma a operação.",
+      "revert": "Nada a desfazer: o programa traz de volta para a RAM o que usar."
+    },
+    {
+      "id": "memorylab.process.close",
+      "version": 1,
+      "title": "Fechar um programa (pedir para fechar)",
+      "classification": "Conditional",
+      "condition": "Programa escolhido por você. Jogos e launchers pedem confirmação dupla; programas do Windows, anticheat e serviços são recusados.",
+      "handlerKind": "MemoryLabProcessClose",
+      "target": {
+        "mode": "close",
+        "pid": "{pid}",
+        "name": "{name}",
+        "started": "{started}"
+      },
+      "userParameters": {
+        "pid": "[1-9][0-9]{0,9}",
+        "name": "[^\\x00-\\x1f\\\\/:*?\"<>|]{1,128}",
+        "started": "[0-9]{1,20}"
+      },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Envia o pedido de fechar à janela principal (como clicar no X) e espera até 10 s. Nada é forçado: se o programa perguntar 'salvar?', a pergunta aparece para você. A memória do processo volta ao Windows quando ele termina.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/dotnet/api/system.diagnostics.process.closemainwindow"
+        }
+      ],
+      "risks": "Você perde o que não estiver salvo, se mandar fechar sem salvar. Um vazamento volta a crescer quando o programa for aberto de novo.",
+      "privileges": "User",
+      "persistence": "Ephemeral",
+      "reboot": "None",
+      "verification": "O processo terminou dentro do prazo.",
+      "revert": "Nada a desfazer: abra o programa de novo."
+    },
+    {
+      "id": "memorylab.process.end",
+      "version": 1,
+      "title": "Encerrar um programa à força",
+      "classification": "Conditional",
+      "condition": "Só quando 'fechar' não funcionou (programa travado). Mesmas proteções do 'fechar'.",
+      "handlerKind": "MemoryLabProcessClose",
+      "target": {
+        "mode": "end",
+        "pid": "{pid}",
+        "name": "{name}",
+        "started": "{started}"
+      },
+      "userParameters": {
+        "pid": "[1-9][0-9]{0,9}",
+        "name": "[^\\x00-\\x1f\\\\/:*?\"<>|]{1,128}",
+        "started": "[0-9]{1,20}"
+      },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Encerra o processo (TerminateProcess, o mesmo que 'Finalizar tarefa' do Gerenciador de Tarefas). Só aquele processo, não a árvore.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminateprocess"
+        }
+      ],
+      "risks": "Perde tudo que não foi salvo; o programa não tem chance de gravar configurações.",
+      "privileges": "User",
+      "persistence": "Ephemeral",
+      "reboot": "None",
+      "verification": "O processo deixou de existir.",
+      "revert": "Nada a desfazer: abra o programa de novo."
+    },
+    {
+      "id": "memorylab.service.restart",
+      "version": 1,
+      "title": "Reiniciar um serviço (temporário)",
+      "classification": "Conditional",
+      "condition": "Serviço rodando, escolhido por você no diagnóstico, sem dependentes ativos e fora da lista proibida do NEXUS (núcleo, segurança, rede básica, som, anticheat).",
+      "handlerKind": "MemoryLabServiceRestart",
+      "target": {
+        "service": "{service}"
+      },
+      "userParameters": {
+        "service": "[A-Za-z0-9_.\\-]([A-Za-z0-9_.\\- ]{0,78}[A-Za-z0-9_.\\-])?"
+      },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "mechanism": "Para o serviço (ControlService STOP) e o inicia de novo (StartService), esperando cada etapa até 30 s. Se ele parar e não voltar, o NEXUS tenta iniciar de novo e avisa: o serviço volta ao estado anterior (rodando). Se o serviço divide o processo svchost com outros, a memória só volta se era dele.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/winsvc/nf-winsvc-controlservice"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/winsvc/nf-winsvc-startservicew"
+        }
+      ],
+      "risks": "O recurso do serviço fica fora por alguns segundos. Um vazamento volta a crescer.",
+      "privileges": "Admin",
+      "persistence": "Ephemeral",
+      "reboot": "None",
+      "verification": "O serviço volta ao estado 'Rodando' (QueryServiceStatusEx).",
+      "revert": "Nada a desfazer: o serviço termina rodando, como estava."
+    },
+    {
+      "id": "memorylab.compression.enable",
+      "version": 1,
+      "title": "Ligar a compressão de memória",
+      "classification": "SupportedDocumented",
+      "condition": "Só quando o Windows informa a compressão desligada (padrão do Windows 10/11 é ligada).",
+      "handlerKind": "MemoryLabCompression",
+      "target": {
+        "setting": "MemoryCompression"
+      },
+      "desiredType": "MMAgent",
+      "desiredValue": "True",
+      "mechanism": "Roda Enable-MMAgent -MemoryCompression (módulo MMAgent do Windows). Páginas pouco usadas passam a ser compactadas na RAM em vez de irem para o arquivo de paginação.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/powershell/module/mmagent/enable-mmagent"
+        }
+      ],
+      "risks": "Baixo: um pouco de CPU para compactar. Exige o serviço SysMain ativo. Vale depois de reiniciar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura com Get-MMAgent (MemoryCompression = True).",
+      "revert": "Desfazer roda Disable-MMAgent -MemoryCompression se ela estava desligada antes."
+    },
+    {
+      "id": "memorylab.browser.edge-startupboost-off",
+      "version": 1,
+      "title": "Edge: desligar a Inicialização rápida",
+      "classification": "SupportedDocumented",
+      "condition": "Oferecida no diagnóstico quando o navegador soma muita memória.",
+      "handlerKind": "MemoryLabBrowserPolicy",
+      "target": {
+        "policy": "edge.startupboost"
+      },
+      "desiredType": "DWord",
+      "desiredValue": "0",
+      "mechanism": "Grava a política documentada StartupBoostEnabled = 0 em HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge (lista fechada no código). O Edge deixa de manter processos abertos depois de fechado e no login (que servem só para ele abrir mais rápido).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/deployedge/microsoft-edge-browser-policies/startupboostenabled"
+        }
+      ],
+      "risks": "Vira política do navegador: ele mostra 'gerenciado pela sua organização' e a opção fica travada nas configurações até desfazer.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor; o navegador aplica ao reabrir (edge://policy ou chrome://policy mostra a política).",
+      "revert": "Desfazer devolve o valor anterior ou remove o valor (e a chave, se o NEXUS a criou e ficou vazia)."
+    },
+    {
+      "id": "memorylab.browser.edge-background-off",
+      "version": 1,
+      "title": "Edge: não continuar rodando depois de fechado",
+      "classification": "SupportedDocumented",
+      "condition": "Oferecida no diagnóstico quando o navegador soma muita memória.",
+      "handlerKind": "MemoryLabBrowserPolicy",
+      "target": {
+        "policy": "edge.backgroundmode"
+      },
+      "desiredType": "DWord",
+      "desiredValue": "0",
+      "mechanism": "Grava a política documentada BackgroundModeEnabled = 0 em HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge (lista fechada no código). Extensões e apps do Edge param de rodar com o navegador fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/deployedge/microsoft-edge-browser-policies/backgroundmodeenabled"
+        }
+      ],
+      "risks": "Vira política do navegador: ele mostra 'gerenciado pela sua organização' e a opção fica travada nas configurações até desfazer.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor; o navegador aplica ao reabrir (edge://policy ou chrome://policy mostra a política).",
+      "revert": "Desfazer devolve o valor anterior ou remove o valor (e a chave, se o NEXUS a criou e ficou vazia)."
+    },
+    {
+      "id": "memorylab.browser.edge-sleepingtabs-on",
+      "version": 1,
+      "title": "Edge: guias suspensas sempre ligadas",
+      "classification": "SupportedDocumented",
+      "condition": "Oferecida no diagnóstico quando o navegador soma muita memória.",
+      "handlerKind": "MemoryLabBrowserPolicy",
+      "target": {
+        "policy": "edge.sleepingtabs"
+      },
+      "desiredType": "DWord",
+      "desiredValue": "1",
+      "mechanism": "Grava a política documentada SleepingTabsEnabled = 1 em HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge (lista fechada no código). Abas paradas são suspensas e liberam memória (o usuário não consegue desligar enquanto a política existir).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/deployedge/microsoft-edge-browser-policies/sleepingtabsenabled"
+        }
+      ],
+      "risks": "Vira política do navegador: ele mostra 'gerenciado pela sua organização' e a opção fica travada nas configurações até desfazer.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor; o navegador aplica ao reabrir (edge://policy ou chrome://policy mostra a política).",
+      "revert": "Desfazer devolve o valor anterior ou remove o valor (e a chave, se o NEXUS a criou e ficou vazia)."
+    },
+    {
+      "id": "memorylab.browser.chrome-background-off",
+      "version": 1,
+      "title": "Chrome: não continuar rodando depois de fechado",
+      "classification": "SupportedDocumented",
+      "condition": "Oferecida no diagnóstico quando o navegador soma muita memória.",
+      "handlerKind": "MemoryLabBrowserPolicy",
+      "target": {
+        "policy": "chrome.backgroundmode"
+      },
+      "desiredType": "DWord",
+      "desiredValue": "0",
+      "mechanism": "Grava a política documentada BackgroundModeEnabled = 0 em HKLM\\SOFTWARE\\Policies\\Google\\Chrome (lista fechada no código). O Chrome deixa de ficar aberto na bandeja depois que você fecha a última janela.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://chromeenterprise.google/policies/#BackgroundModeEnabled"
+        }
+      ],
+      "risks": "Vira política do navegador: ele mostra 'gerenciado pela sua organização' e a opção fica travada nas configurações até desfazer.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor; o navegador aplica ao reabrir (edge://policy ou chrome://policy mostra a política).",
+      "revert": "Desfazer devolve o valor anterior ou remove o valor (e a chave, se o NEXUS a criou e ficou vazia)."
     }
   ]
 }

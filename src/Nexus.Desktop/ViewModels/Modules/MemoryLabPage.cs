@@ -454,7 +454,7 @@ public sealed class MemoryLabPage : ModulePage
         var r = await Host.ApplyAsync("Arquivo de paginação automático",
             "O Windows volta a gerenciar o arquivo de paginação sozinho (padrão do sistema).\n\nRisco: baixo; ocupa alguns GB no disco.\n" +
             "Exige administrador e vale depois de reiniciar.\nDesfazer: volta exatamente a configuração anterior.",
-            [new ActionRequest(row.ActionId)], BrokerLevel.Admin);
+            [new ActionRequest(row.ActionId == MemoryDiagnosis.PageFileActionId ? MemoryDiagnosis.PageFileActionKey : row.ActionId)], BrokerLevel.Admin);
         if (r is null) return;
         var outcome = r.Response?.Results is { Count: > 0 } items ? items[0].Outcome : "";
         if (outcome is "Verified" or "AlreadyConfigured")
