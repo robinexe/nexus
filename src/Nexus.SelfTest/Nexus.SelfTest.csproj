@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Autoteste do NEXUS no PC real: roda as LEITURAS de todos os módulos e monta o relatório (texto, JSON, HTML).
+       Nunca escreve no sistema nem em arquivo: produz só texto; quem grava o relatório pedido é o nexus (CLI) ou a
+       interface. SelfTestTests verifica no assembly compilado que nenhuma API de escrita é chamada daqui. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.SelfTest</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
+    <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
+    <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
+    <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
+    <ProjectReference Include="..\Nexus.Cleaning\Nexus.Cleaning.csproj" />
+    <ProjectReference Include="..\Nexus.DiskTools\Nexus.DiskTools.csproj" />
+    <ProjectReference Include="..\Nexus.Programs\Nexus.Programs.csproj" />
+    <ProjectReference Include="..\Nexus.Boot\Nexus.Boot.csproj" />
+    <ProjectReference Include="..\Nexus.Privacy\Nexus.Privacy.csproj" />
+    <ProjectReference Include="..\Nexus.Security\Nexus.Security.csproj" />
+    <ProjectReference Include="..\Nexus.Security.Scanner\Nexus.Security.Scanner.csproj" />
+    <ProjectReference Include="..\Nexus.Monitoring\Nexus.Monitoring.csproj" />
+    <ProjectReference Include="..\Nexus.SystemTools\Nexus.SystemTools.csproj" />
+    <ProjectReference Include="..\Nexus.DriverUpdates\Nexus.DriverUpdates.csproj" />
+    <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Cpu\Nexus.Lab.Cpu.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Memory\Nexus.Lab.Memory.csproj" />
+    <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+  </ItemGroup>
+</Project>

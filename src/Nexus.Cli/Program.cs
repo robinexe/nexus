@@ -14,12 +14,15 @@ using Nexus.Measurement;
 using Nexus.Persistence;
 
 Console.OutputEncoding = Encoding.UTF8;
+// Autoteste no PC real (somente leitura): opções próprias, interpretadas em Nexus.SelfTest.
+if (args.Length > 0 && args[0] == "selftest") return await Nexus.Cli.SelfTestCommand.RunAsync(args[1..]);
 var parsed = CliParser.Parse(args);
 // Tarefa agendada: o Agendador abre um console para o nexus.exe; solta-o já (a janela some) e a saída vai para os relatórios.
 if (parsed.Command is { } scheduledCommand && scheduledCommand.Has("--scheduled")) ConsoleDetach.Detach();
 if (parsed.Help)
 {
     Console.WriteLine(CliParser.HelpFor(parsed.HelpTopic));
+    if (parsed.HelpTopic is null) Console.WriteLine("Autoteste:\n  selftest           Roda as leituras de todos os módulos no PC real e diz OK/AVISO/FALHA (nada é alterado).\n                     'nexus selftest --help' mostra as opções (--json, --html, --with-benchmarks...).");
     return CliExit.Ok;
 }
 if (parsed.Command is null)

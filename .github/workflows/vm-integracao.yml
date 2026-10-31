@@ -47,6 +47,16 @@ jobs:
         shell: pwsh
         run: dotnet test Nexus.slnx -c Release --no-build --filter Category=Unit --logger "trx;LogFileName=unit.trx" --results-directory saida
 
+      - name: Autoteste no PC (nexus selftest, somente leitura, antes de qualquer escrita)
+        shell: pwsh
+        run: |
+          # Lê o estado limpo da VM com todas as leituras dos módulos. O veredito (falhar o job se houver FALHA) fica para o
+          # passo "Veredito dos autotestes", no fim: assim uma falha aqui não esconde os testes de integração.
+          New-Item -ItemType Directory -Force -Path saida | Out-Null
+          & src/Nexus.Cli/bin/Release/net10.0/nexus.exe selftest --json saida/selftest.json --html saida/selftest.html
+          "$LASTEXITCODE" | Out-File saida/selftest.exitcode -Encoding ascii
+          "nexus selftest: código $LASTEXITCODE (0 = sem FALHA)"
+
       - name: Descoberta e liberação do portão (só se for VM)
         shell: pwsh
         run: |
@@ -112,6 +122,47 @@ jobs:
             powershell -NoProfile -ExecutionPolicy Bypass -File tools/service/Uninstall-Broker.ps1
             if (Get-Service NexusBroker -ErrorAction SilentlyContinue) { Write-Error 'Serviço não foi removido.'; exit 1 }
           }
+
+      - name: Autoteste da interface (--selftest-ui, sessão gráfica do runner)
+        if: always()
+        shell: pwsh
+        timeout-minutes: 25
+        run: |
+          # Os runners windows-latest hospedados pelo GitHub rodam numa sessão interativa (com área de trabalho), então a
+          # janela WPF abre de verdade e cada página é aberta, desenhada e fotografada. Se um dia o processo estiver na
+          # sessão 0 (serviço, sem área de trabalho), o passo registra o motivo e não conta como falha.
+          New-Item -ItemType Directory -Force -Path saida/ui | Out-Null
+          $session = (Get-Process -Id $PID).SessionId
+          "Sessão do Windows: $session · interativo: $([Environment]::UserInteractive)"
+          if ($session -eq 0) {
+            Write-Warning 'Sem sessão gráfica (sessão 0): autoteste da interface não executado.'
+            'sem sessao grafica' | Out-File saida/ui/ui.exitcode -Encoding ascii
+            exit 0
+          }
+          $exe = Resolve-Path 'src/Nexus.Desktop/bin/Release/net10.0-windows/Nexus.Desktop.exe'
+          $out = Join-Path $PWD 'saida/ui/ui.json'
+          $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"') -PassThru
+          $null = $p.Handle   # sem isto o ExitCode do Start-Process pode vir vazio
+          if (-not $p.WaitForExit(1200000)) { $p.Kill(); 'tempo' | Out-File saida/ui/ui.exitcode -Encoding ascii; Write-Warning 'A interface não terminou em 20 min.'; exit 0 }
+          $p.WaitForExit()
+          "$($p.ExitCode)" | Out-File saida/ui/ui.exitcode -Encoding ascii
+          if (Test-Path $out) {
+            $ui = Get-Content $out -Raw -Encoding utf8 | ConvertFrom-Json
+            foreach ($pg in $ui.pages) { "{0,-9} {1,-28} {2,5:N1} s  exceções={3} binding={4} parada={5:N1} s" -f $pg.statusText, $pg.title, $pg.loadSeconds, $pg.exceptions.Count, $pg.bindingErrors, $pg.longestFreezeSeconds }
+            & src/Nexus.Cli/bin/Release/net10.0/nexus.exe selftest --only Ajustes --quiet --ui $out --html saida/ui/relatorio.html | Out-Null
+          } else { Write-Warning "ui.json não foi gravado (código $($p.ExitCode))." }
+
+      - name: Veredito dos autotestes
+        if: always()
+        shell: pwsh
+        run: |
+          $cli = if (Test-Path saida/selftest.exitcode) { (Get-Content saida/selftest.exitcode).Trim() } else { 'ausente' }
+          $ui = if (Test-Path saida/ui/ui.exitcode) { (Get-Content saida/ui/ui.exitcode).Trim() } else { 'ausente' }
+          "nexus selftest: $cli · interface: $ui"
+          $bad = @()
+          if ($cli -ne '0') { $bad += "nexus selftest com FALHA ou sem resultado ($cli); veja saida/selftest.html" }
+          if ($ui -notin @('0', 'sem sessao grafica')) { $bad += "autoteste da interface com FALHA ou sem resultado ($ui); veja saida/ui/relatorio.html" }
+          if ($bad.Count -gt 0) { $bad | ForEach-Object { Write-Error $_ }; exit 1 }
 
       - name: Resultados
         if: always()

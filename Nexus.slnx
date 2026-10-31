@@ -20,6 +20,7 @@
     <Project Path="src/Nexus.SystemTools/Nexus.SystemTools.csproj" />
     <Project Path="src/Nexus.DriverUpdates/Nexus.DriverUpdates.csproj" />
     <Project Path="src/Nexus.Automation/Nexus.Automation.csproj" />
+    <Project Path="src/Nexus.SelfTest/Nexus.SelfTest.csproj" />
     <Project Path="src/Nexus.Cli/Nexus.Cli.csproj" />
     <Project Path="src/Nexus.Lab.Cpu/Nexus.Lab.Cpu.csproj" />
     <Project Path="src/Nexus.Lab.Gpu/Nexus.Lab.Gpu.csproj" />

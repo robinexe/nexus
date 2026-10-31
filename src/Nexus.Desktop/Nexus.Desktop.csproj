@@ -37,6 +37,8 @@
     <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
+    <!-- Autoteste da interface (opção selftest-ui) usa o modelo de relatório; e o nexus.exe copiado ao lado precisa desta dll. -->
+    <ProjectReference Include="..\Nexus.SelfTest\Nexus.SelfTest.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

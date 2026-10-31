@@ -33,6 +33,7 @@
     <ProjectReference Include="..\..\src\Nexus.Persistence\Nexus.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Broker\Nexus.Broker.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.SelfTest\Nexus.SelfTest.csproj" />
     <!-- Executáveis iniciados como processos separados pelos testes de coordenação (copiados para a saída dos testes). -->
     <ProjectReference Include="..\Nexus.TestHelper\Nexus.TestHelper.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Recovery.Cli\Nexus.Recovery.Cli.csproj" />
