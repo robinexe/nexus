@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- nexus: linha de comando (varrer, simular, medir, comparar, aplicar pelo aplicador). -->
+  <!-- nexus: linha de comando (varrer, recomendar, simular, aplicar pelo aplicador, desfazer, histórico, medir, comparar).
+       Não escreve no sistema: toda mudança vai pelo aplicador (nexus-broker, copiado ao lado, como na interface). -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,5 +9,20 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
+    <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
+    <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
+    <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
+    <ProjectReference Include="..\Nexus.Persistence\Nexus.Persistence.csproj" />
+    <!-- O aplicador (nexus-broker) vai junto: é iniciado sob demanda para simular e aplicar. Só ordem de build. -->
+    <ProjectReference Include="..\Nexus.Broker.Host\Nexus.Broker.Host.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="CopyBrokerHost" AfterTargets="Build">
+    <ItemGroup>
+      <BrokerHostFiles Include="$(MSBuildThisFileDirectory)..\Nexus.Broker.Host\bin\$(Configuration)\net10.0-windows\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BrokerHostFiles)" DestinationFiles="@(BrokerHostFiles->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

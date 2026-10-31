@@ -1,0 +1,38 @@
+{
+  "catalogVersion": "1.0.0-draft",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Automático. Só a verificação semanal agendada (somente leitura). O NEXUS nunca agenda ações que escrevem no sistema.",
+  "actions": [
+    {
+      "id": "automation.scheduled-scan.weekly",
+      "version": 1,
+      "title": "Verificação semanal agendada (somente leitura)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "AutomationScheduledScan",
+      "target": {
+        "taskName": "NEXUS-VerificacaoSemanal"
+      },
+      "desiredType": "ScanSchedule",
+      "allowedValues": ["SUN 19:00", "SAT 12:00", "WED 20:00", "OFF"],
+      "risk": "Low",
+      "mechanism": "Cria (ou remove, com OFF) uma tarefa no Agendador de Tarefas do Windows, na sua conta e sem privilégios de administrador, que roda \"nexus scan --report\" uma vez por semana. O comando só lê o PC e grava um relatório (JSON e HTML) em %LocalAppData%\\NEXUS\\reports. A tarefa é registrada com schtasks /create /xml a partir de um XML gerado e validado pelo NEXUS (caminho local do nexus.exe, sem aspas nem variáveis).",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "Microsoft Learn: schtasks create (/xml) e Task Scheduler Schema (CalendarTrigger, ScheduleByWeek, Principal LogonType InteractiveToken, RunLevel LeastPrivilege)" }
+      ],
+      "risks": "Baixo. A tarefa não altera nada; roda por até 15 minutos com prioridade baixa. Se o NEXUS for movido de pasta, a tarefa fica apontando para o caminho antigo e aparece como desatualizada. Uma tarefa de terceiros com o mesmo nome nunca é tocada.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura da tarefa no Agendador (schtasks /query /xml): marcador do NEXUS, caminho do nexus.exe, argumentos e horário.",
+      "revert": "Remove a tarefa se ela não existia; se existia uma tarefa do NEXUS com outro horário, recria exatamente o XML anterior guardado no diário."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "automation.scheduled-apply",
+      "classification": "Rejected",
+      "reason": "Agendar ações que alteram o sistema (limpeza, serviços, registro) sem o usuário presente. Decisão de segurança do NEXUS: aplicar é sempre com o usuário vendo o plano e confirmando; o agendamento só faz verificações somente leitura.",
+      "source": "docs/modules/automation.md"
+    }
+  ]
+}
