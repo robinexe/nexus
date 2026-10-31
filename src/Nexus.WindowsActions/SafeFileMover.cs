@@ -236,7 +236,8 @@ public static partial class SafeFileMover
     private static bool SamePath(string final, string expected) =>
         string.Equals(StripPrefix(final), Path.TrimEndingDirectorySeparator(LongPath(expected)), StringComparison.OrdinalIgnoreCase);
 
-    internal static string StripPrefix(string path)
+    /// <summary>Tira o prefixo <c>\\?\</c> / <c>\\?\UNC\</c> de um caminho final (regra pura, testável fora do Windows).</summary>
+    public static string StripPrefix(string path)
     {
         if (path.StartsWith(@"\\?\UNC\", StringComparison.OrdinalIgnoreCase)) path = @"\\" + path[8..];
         else if (path.StartsWith(@"\\?\", StringComparison.Ordinal)) path = path[4..];
