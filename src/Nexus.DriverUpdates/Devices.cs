@@ -34,17 +34,15 @@ public static class DeviceMatching
 {
     /// <summary>
     /// Dispositivos a que a atualização se aplica: o DriverHardwareID do WUA casa (sem diferenciar caixa) um hardware ID ou
-    /// compatible ID do dispositivo. Sem hardware ID na oferta, cai para o modelo (DriverModel = descrição do dispositivo).
+    /// compatible ID do dispositivo. Só sem hardware ID na oferta cai para o modelo (DriverModel = descrição do dispositivo).
     /// </summary>
     public static IReadOnlyList<DeviceDriver> Match(WuDriverUpdate update, IReadOnlyList<DeviceDriver> devices)
     {
         ArgumentNullException.ThrowIfNull(update);
         ArgumentNullException.ThrowIfNull(devices);
+        // Com hardware ID, só ele decide (o modelo é texto livre e poderia casar outro aparelho com o mesmo nome).
         if (update.HardwareId is { } hw)
-        {
-            var byId = devices.Where(d => d.HardwareIds.Concat(d.CompatibleIds).Any(i => string.Equals(i, hw, StringComparison.OrdinalIgnoreCase))).ToList();
-            if (byId.Count > 0) return byId;
-        }
+            return devices.Where(d => d.HardwareIds.Concat(d.CompatibleIds).Any(i => string.Equals(i, hw, StringComparison.OrdinalIgnoreCase))).ToList();
         if (update.Model is { } model)
             return devices.Where(d => string.Equals(d.Description, model, StringComparison.OrdinalIgnoreCase)).ToList();
         return [];
