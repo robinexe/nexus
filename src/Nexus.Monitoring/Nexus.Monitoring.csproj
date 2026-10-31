@@ -1,11 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Módulo Monitoring. net10.0: a lógica roda nos testes em qualquer SO; o que toca o Windows usa [SupportedOSPlatform("windows")]. -->
+  <!-- Módulo Monitoring (somente leitura). net10.0: a lógica (agregação, histórico, gargalo, saúde de disco, nvidia-smi) roda
+       nos testes em qualquer SO com amostras falsas; PDH/kernel32/processos ficam em Windows/*, com [SupportedOSPlatform("windows")]. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Nexus.Monitoring</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
   </ItemGroup>
 </Project>
