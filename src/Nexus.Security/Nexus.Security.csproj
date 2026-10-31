@@ -3,7 +3,12 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Nexus.Security</RootNamespace>
+    <!-- LibraryImport (WinVerifyTrust) gera código com ponteiros. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
