@@ -261,7 +261,16 @@ public sealed class ComparisonRow(MetricComparison m)
     public bool Proven => Model.Verdict is Verdict.Improved or Verdict.Regressed;
     public string Sentence => Model.Sentence;
     public bool HigherIsBetter => Model.Metric.Direction == Direction.HigherIsBetter;
+    /// <summary>Largura relativa das barras (0..1): o maior dos dois lados ocupa a barra inteira.</summary>
+    public double BeforeRatio => Ratio(Model.Before);
+    public double AfterRatio => Ratio(Model.After);
     private string Format(double v) => Model.Metric.Unit == "FPS" ? v.ToString("0", Pt) : v.ToString("0.0", Pt) + " " + Model.Metric.Unit;
+
+    private double Ratio(double v)
+    {
+        var max = Math.Max(Math.Abs(Model.Before), Math.Abs(Model.After));
+        return double.IsFinite(v) && double.IsFinite(max) && max > 0 ? Math.Clamp(Math.Abs(v) / max, 0, 1) : 0;
+    }
 }
 
 /// <summary>Comparar: sessões marcadas "antes" contra "depois", com veredito honesto.</summary>
@@ -292,12 +301,31 @@ public sealed class ComparePage : PageViewModel
     public bool Ready => Result is { Metrics.Count: > 0 };
     public string Headline => Result?.Headline ?? "";
     public string Method => Result?.Method ?? "";
+    /// <summary>Comparação pareada (3+ sessões de cada lado, em igual número): só ela dá veredito.</summary>
+    public bool IsPaired => Result?.Paired == true;
+    public string VerdictLabel => IsPaired ? "Veredito" : "Prévia, ainda sem veredito";
+    public string BeforeCountText => CountText(Before.Count);
+    public string AfterCountText => CountText(After.Count);
+    /// <summary>Tom do veredito para a cor: "Good" (só melhoras comprovadas), "Bad" (só pioras comprovadas) ou "Neutral".</summary>
+    public string Tone
+    {
+        get
+        {
+            if (Result is not { Paired: true } r) return "Neutral";
+            var improved = r.Metrics.Any(m => m.Verdict == Verdict.Improved);
+            var regressed = r.Metrics.Any(m => m.Verdict == Verdict.Regressed);
+            return improved && !regressed ? "Good" : regressed && !improved ? "Bad" : "Neutral";
+        }
+    }
+
+    private static string CountText(int n) => n == 1 ? "1 sessão" : n.ToString(CultureInfo.InvariantCulture) + " sessões";
 
     public void Recompute()
     {
         Result = SessionComparison.Compare(Before.Select(s => s.Session).ToList(), After.Select(s => s.Session).ToList());
         Rows = Result.Metrics.Select(m => new ComparisonRow(m)).ToList();
-        foreach (var p in new[] { nameof(Before), nameof(After), nameof(BeforeTrace), nameof(AfterTrace), nameof(Ready), nameof(Headline), nameof(Method) })
+        foreach (var p in new[] { nameof(Before), nameof(After), nameof(BeforeTrace), nameof(AfterTrace), nameof(Ready), nameof(Headline), nameof(Method),
+                     nameof(IsPaired), nameof(VerdictLabel), nameof(BeforeCountText), nameof(AfterCountText), nameof(Tone) })
             OnPropertyChanged(p);
     }
 }
