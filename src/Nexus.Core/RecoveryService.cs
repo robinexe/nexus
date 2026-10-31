@@ -24,8 +24,7 @@ public sealed record RecoveryReport(
     public RecoveryReport(IReadOnlyList<RecoveryFinding> interrupted, IReadOnlyList<RevertResult> results)
         : this(interrupted, results, []) { }
 
-    public bool FullyRestored => SkippedActive.Count == 0 &&
-        Results.All(r => r.Outcome is RevertOutcome.Reverted or RevertOutcome.AlreadyOriginal or RevertOutcome.NothingToRevert);
+    public bool FullyRestored => SkippedActive.Count == 0 && Results.All(r => r.Settled);
 
     public bool AnyInferred => Results.Any(r => r.Inferred);
 }
@@ -107,7 +106,13 @@ public sealed class RecoveryService
                 // Irreversível: não há original para restaurar. Encerra como aceita (registro no diário) sem chamar o handler.
                 if (f.Entry.Action.Definition.Irreversible)
                 {
-                    results.Add(ActionExecutor.RefuseIrreversible(_journal, _journal.Get(f.Entry.Id)));
+                    results.Add(ActionExecutor.RefuseIrreversible(_journal, _journal.Get(f.Entry.Id)) with { Target = f.Entry.Action.TargetLabel });
+                    continue;
+                }
+                // Efêmera: não há estado anterior. Encerra como aceita (nada a desfazer), sem chamar o handler.
+                if (f.Entry.Action.Definition.Persistence == PersistenceKind.Ephemeral)
+                {
+                    results.Add(ActionExecutor.SettleEphemeral(_journal, _journal.Get(f.Entry.Id)));
                     continue;
                 }
                 // Superada: uma entrada MAIS NOVA do próprio NEXUS no mesmo alvo, ainda não revertida. Restaurar este backup
@@ -117,7 +122,7 @@ public sealed class RecoveryService
                 {
                     results.Add(new RevertResult(f.Entry.Id, key, RevertOutcome.Conflict,
                         $"Superada: a entrada #{newer.Id} ({newer.Action.Definition.Key}, execução {newer.RunId}) alterou o mesmo alvo depois e não foi revertida. " +
-                        "Restaurar este backup desfaria essa mudança; nada foi escrito."));
+                        "Restaurar este backup desfaria essa mudança; nada foi escrito.") { Target = f.Entry.Action.TargetLabel });
                     continue;
                 }
                 results.Add(_executor.Revert(f.Entry.Id, forceConflicts));
@@ -125,7 +130,7 @@ public sealed class RecoveryService
             catch (Exception ex) when (ex is not OperationCanceledException && _executor.FaultInjector is null)
             {
                 // Erro do diário/sistema num item: registra e segue, para o relatório não se perder (nunca vira "completa").
-                results.Add(new RevertResult(f.Entry.Id, key, RevertOutcome.Failed, $"Erro inesperado: {ex.GetType().Name}: {ex.Message}"));
+                results.Add(new RevertResult(f.Entry.Id, key, RevertOutcome.Failed, $"Erro inesperado: {ex.GetType().Name}: {ex.Message}") { Target = f.Entry.Action.TargetLabel });
             }
         }
         return new RecoveryReport(interrupted, results, skipped);
@@ -164,7 +169,7 @@ public sealed class RecoveryService
         var mine = started.GetValueOrDefault(e.RunId);
         foreach (var other in all)
         {
-            if (other.Id == e.Id || other.Original is null || TargetKey(other) != target) continue;
+            if (other.Id == e.Id || other.Original is null || other.Action.Definition.Persistence == PersistenceKind.Ephemeral || TargetKey(other) != target) continue;
             var theirs = started.GetValueOrDefault(other.RunId);
             var isNewer = theirs > mine || (other.RunId == e.RunId && other.Sequence > e.Sequence);
             if (!isNewer) continue;

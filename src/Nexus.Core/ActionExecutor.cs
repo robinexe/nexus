@@ -16,7 +16,11 @@ public enum ExecutionOutcome
     Interrupted,
 }
 
-public sealed record ExecutionResult(string ActionKey, ExecutionOutcome Outcome, long? EntryId, string? Detail);
+/// <remarks><see cref="Target"/>: alvo da instância (sem o SID do perfil), para distinguir instâncias da mesma ação num lote.</remarks>
+public sealed record ExecutionResult(string ActionKey, ExecutionOutcome Outcome, long? EntryId, string? Detail)
+{
+    public string? Target { get; init; }
+}
 
 /// <summary>Resultado de desfazer uma entrada.</summary>
 /// <remarks><see cref="Irreversible"/>: a ação foi declarada irreversível no catálogo (<see cref="ActionDefinition.Irreversible"/>);
@@ -25,7 +29,14 @@ public enum RevertOutcome { Reverted, AlreadyOriginal, Conflict, NothingToRevert
 
 /// <param name="Inferred">A decisão de restaurar se apoiou numa inferência que a releitura não prova
 /// (interrompido durante o Apply com o valor atual igual ao desejado). Ver docs/07-recovery-cases.md, caso A1.</param>
-public sealed record RevertResult(long EntryId, string ActionKey, RevertOutcome Outcome, string Detail, bool Inferred = false);
+/// <remarks><see cref="Target"/>: alvo da entrada (sem o SID do perfil), para distinguir instâncias da mesma ação num lote.</remarks>
+public sealed record RevertResult(long EntryId, string ActionKey, RevertOutcome Outcome, string Detail, bool Inferred = false)
+{
+    public string? Target { get; init; }
+
+    /// <summary>Resultado que não deixa nada pendente (restaurado, já original ou nada a desfazer).</summary>
+    public bool Settled => Outcome is RevertOutcome.Reverted or RevertOutcome.AlreadyOriginal or RevertOutcome.NothingToRevert;
+}
 
 /// <summary>
 /// Executa um plano: reavalia pré-condições e o estado imediatamente antes de aplicar,
@@ -98,12 +109,12 @@ public sealed class ActionExecutor
         foreach (var item in plan.Items.Where(i => i.Status != PlanStatus.Pending))
         {
             var key = item.Action.Definition.Key;
-            results.Add(item.Status switch
+            results.Add((item.Status switch
             {
-                PlanStatus.AlreadyConfigured => new(key, ExecutionOutcome.AlreadyConfigured, null, item.ObservedAtPlan.Describe()),
-                PlanStatus.NotApplicable => new(key, ExecutionOutcome.NotApplicable, null, item.Reason),
-                _ => new(key, ExecutionOutcome.Blocked, null, item.Reason),
-            });
+                PlanStatus.AlreadyConfigured => new ExecutionResult(key, ExecutionOutcome.AlreadyConfigured, null, item.ObservedAtPlan.Describe()),
+                PlanStatus.NotApplicable => new ExecutionResult(key, ExecutionOutcome.NotApplicable, null, item.Reason),
+                _ => new ExecutionResult(key, ExecutionOutcome.Blocked, null, item.Reason),
+            }) with { Target = item.Action.TargetLabel });
         }
 
         // A sequência continua a partir da última entrada da execução: uma execução pode ter vários Execute
@@ -116,9 +127,10 @@ public sealed class ActionExecutor
         foreach (var item in plan.Pending)
         {
             var key = item.Action.Definition.Key;
+            var label = item.Action.TargetLabel;
             if (interruptedBy is not null)
             {
-                results.Add(new(key, ExecutionOutcome.Blocked, null, $"Execução interrompida após erro inesperado em {interruptedBy}; nada mais foi aplicado."));
+                results.Add(new ExecutionResult(key, ExecutionOutcome.Blocked, null, $"Execução interrompida após erro inesperado em {interruptedBy}; nada mais foi aplicado.") { Target = label });
                 continue;
             }
 
@@ -126,7 +138,7 @@ public sealed class ActionExecutor
             if (failedDeps.Count > 0)
             {
                 notSucceeded.Add(item.Action.Definition.Id);
-                results.Add(new(key, ExecutionOutcome.Blocked, null, $"Dependência não concluída nesta execução: {string.Join(", ", failedDeps)}"));
+                results.Add(new ExecutionResult(key, ExecutionOutcome.Blocked, null, $"Dependência não concluída nesta execução: {string.Join(", ", failedDeps)}") { Target = label });
                 continue;
             }
 
@@ -146,7 +158,7 @@ public sealed class ActionExecutor
                 r = new(key, ExecutionOutcome.Interrupted, null, $"Erro inesperado: {ex.Message}. Estado do alvo indeterminado; execute a recuperação.");
                 interruptedBy = key;
             }
-            results.Add(r);
+            results.Add(r with { Target = label });
             if (r.Outcome != ExecutionOutcome.Verified) notSucceeded.Add(item.Action.Definition.Id);
         }
         return results;
@@ -168,6 +180,8 @@ public sealed class ActionExecutor
             return new(key, assess.Kind == ApplicabilityKind.Blocked ? ExecutionOutcome.Blocked : ExecutionOutcome.NotApplicable, null, assess.Reason);
 
         var entry = _journal.AddPlanned(runId, seq, action);
+        if (action.Definition.Persistence == PersistenceKind.Ephemeral)
+            return ExecuteEphemeral(entry, key, handler, action);
 
         StateSnapshot original;
         try
@@ -221,6 +235,35 @@ public sealed class ActionExecutor
 
         _journal.Transition(entry, JournalState.Verified, observed: after);
         return new(key, ExecutionOutcome.Verified, entry, after.Describe());
+    }
+
+    public const string EphemeralNothingToUndo =
+        "Ação sem estado (efêmera): não havia estado anterior para guardar, então não há nada a desfazer. Nada foi escrito.";
+
+    /// <summary>
+    /// Ação efêmera (<see cref="PersistenceKind.Ephemeral"/>): sem backup e sem releitura. O diário registra a intenção (BackedUp,
+    /// Applying) ANTES de executar, como em qualquer ação; sucesso = o handler não lançou. Falha não deixa compensação pendente
+    /// (não há original): a entrada fica Failed sem backup, que a recuperação não precisa tratar.
+    /// </summary>
+    private ExecutionResult ExecuteEphemeral(long entry, string key, IActionHandler handler, ActionInstance action)
+    {
+        _journal.Transition(entry, JournalState.BackedUp, note: "Ação sem estado: nada a guardar.");
+        FaultInjector?.Invoke("after-backup", action);
+        _lease?.EnsureHeld();
+        _journal.Transition(entry, JournalState.Applying);
+        try
+        {
+            handler.Apply(action);
+        }
+        catch (Exception ex)
+        {
+            _journal.Transition(entry, JournalState.Failed, note: $"Ação sem estado não concluída: {ex.Message}. Nada a desfazer.");
+            return new(key, ExecutionOutcome.Failed, entry, ex.Message);
+        }
+        FaultInjector?.Invoke("after-apply", action);
+        _journal.Transition(entry, JournalState.Applied);
+        _journal.Transition(entry, JournalState.Verified, note: "Executada (ação sem estado: o resultado não é relido e não há o que desfazer).");
+        return new(key, ExecutionOutcome.Verified, entry, "Executada (ação sem estado: nada a desfazer).");
     }
 
     /// <param name="observedAfterApply">Valor relido logo após o Apply (produzido pela escrita do NEXUS). É gravado no diário
@@ -313,9 +356,19 @@ public sealed class ActionExecutor
     /// </summary>
     public RevertResult Revert(long entryId, bool force = false)
     {
+        var r = RevertCore(entryId, force);
+        return r.Target is null ? r with { Target = _journal.Get(entryId).Action.TargetLabel } : r;
+    }
+
+    private RevertResult RevertCore(long entryId, bool force)
+    {
         _lease?.EnsureHeld();
         var e = _journal.Get(entryId);
         var key = e.Action.Definition.Key;
+        // Efêmera: decidido pela definição registrada no diário. Um diário adulterado que marque uma ação real como efêmera só
+        // consegue impedir a restauração (nada é escrito), nunca provocar uma escrita.
+        if (e.Action.Definition.Persistence == PersistenceKind.Ephemeral)
+            return SettleEphemeral(_journal, e);
         if (e.State is JournalState.Reverted or JournalState.Planned)
             return new(entryId, key, RevertOutcome.NothingToRevert, $"Estado {e.State}.");
         if (e.State == JournalState.Accepted)
@@ -390,6 +443,26 @@ public sealed class ActionExecutor
         if (e.State is not (JournalState.Verified or JournalState.Reverted or JournalState.Accepted or JournalState.Planned))
             journal.Transition(e.Id, JournalState.Accepted, note: $"{why} Estava em {e.State}; entrada encerrada sem restaurar.");
         return new(e.Id, key, RevertOutcome.Irreversible, why);
+    }
+
+    /// <summary>
+    /// Desfazer de uma ação efêmera: nunca chama o handler (não há estado anterior). Interrompida antes de executar (BackedUp):
+    /// nada foi feito, encerrada como Reverted. Demais estados não terminais: encerrada como Accepted com a nota de que não há o
+    /// que desfazer. Sempre <see cref="RevertOutcome.NothingToRevert"/> com mensagem explícita.
+    /// </summary>
+    internal static RevertResult SettleEphemeral(IJournal journal, JournalEntry e)
+    {
+        var key = e.Action.Definition.Key;
+        if (e.State == JournalState.BackedUp)
+        {
+            journal.Transition(e.Id, JournalState.Reverted, note: "Ação sem estado interrompida antes de executar: nada foi feito.");
+            return new(e.Id, key, RevertOutcome.NothingToRevert, "Ação sem estado interrompida antes de executar: nada foi feito.") { Target = e.Action.TargetLabel };
+        }
+        if (e.State is not (JournalState.Reverted or JournalState.Accepted or JournalState.Planned or JournalState.Failed))
+            journal.Transition(e.Id, JournalState.Accepted,
+                note: $"{EphemeralNothingToUndo} Estava em {e.State}" + (e.State is JournalState.Applying or JournalState.Applied
+                    ? "; o processo parou durante a execução, que pode ou não ter terminado (sem efeito a desfazer)." : "."));
+        return new(e.Id, key, RevertOutcome.NothingToRevert, EphemeralNothingToUndo) { Target = e.Action.TargetLabel };
     }
 
     /// <summary>Reverte uma execução inteira em ordem inversa. Relata cada item; nunca declara sucesso total com falhas parciais.</summary>

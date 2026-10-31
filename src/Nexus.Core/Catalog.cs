@@ -34,6 +34,13 @@ public sealed partial record CatalogEntry(
     /// </summary>
     public IReadOnlyDictionary<string, string> UserParameters { get; init; } = new Dictionary<string, string>();
 
+    /// <summary>
+    /// Chaves id@versão de ações ANTIGAS que esta ação substitui (campo "supersedes"). Servem só para ler o diário: uma entrada
+    /// gravada com a chave antiga é revalidada contra esta ação (mesmo handler, mesmo modelo de alvo, mesmas propriedades de
+    /// segurança) para Revert/Recover de execuções já feitas. Nunca podem ser pedidas de novo.
+    /// </summary>
+    public IReadOnlyList<string> Supersedes { get; init; } = [];
+
     public const int MaxUserArguments = 8;
     public const int MaxUserArgumentLength = 260;
 
@@ -159,8 +166,11 @@ public sealed partial record CatalogEntry(
 public sealed record CatalogDocument(string CatalogVersion, string Schema, IReadOnlyList<CatalogEntry> Actions, IReadOnlyList<RejectedCatalogItem> Rejected);
 
 /// <summary>Lê catalog/actions.v1.json. Campos desconhecidos são ignorados; campos obrigatórios ausentes geram erro.</summary>
-public static class CatalogLoader
+public static partial class CatalogLoader
 {
+    [GeneratedRegex(@"\A[a-z0-9][a-z0-9.\-]{0,126}@[0-9]{1,6}\z", RegexOptions.CultureInvariant)]
+    private static partial Regex LegacyKeyPattern();
+
     public const string MainFile = "actions.v1.json";
 
     public static CatalogDocument Load(string path) => Parse(File.ReadAllText(path));
@@ -189,8 +199,24 @@ public static class CatalogLoader
             rejected.AddRange(m.Rejected);
             modules.Add($"{Path.GetFileNameWithoutExtension(file)}@{m.CatalogVersion}");
         }
+        CheckSupersedes(actions);
         var version = modules.Count == 0 ? main.CatalogVersion : $"{main.CatalogVersion}+{string.Join("+", modules)}";
         return new CatalogDocument(version, main.Schema, actions, rejected);
+    }
+
+    /// <summary>Uma chave antiga só pode ser absorvida por UMA ação e nunca pode ser também uma ação viva do catálogo.</summary>
+    internal static void CheckSupersedes(IReadOnlyList<CatalogEntry> actions)
+    {
+        var live = actions.Select(a => a.Definition.Key).ToHashSet(StringComparer.Ordinal);
+        var owner = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var a in actions)
+            foreach (var old in a.Supersedes)
+            {
+                if (live.Contains(old))
+                    throw new InvalidDataException($"{a.Definition.Key}: \"supersedes\" cita {old}, que ainda é uma ação do catálogo.");
+                if (!owner.TryAdd(old, a.Definition.Key))
+                    throw new InvalidDataException($"{old} aparece em \"supersedes\" de {owner[old]} e de {a.Definition.Key}.");
+            }
     }
 
     public static CatalogDocument Parse(string json)
@@ -201,6 +227,7 @@ public static class CatalogLoader
         foreach (var a in root.GetProperty("actions").EnumerateArray())
             actions.Add(ParseAction(a));
 
+        CheckSupersedes(actions);
         var rejected = new List<RejectedCatalogItem>();
         if (root.TryGetProperty("rejected", out var rej))
             foreach (var r in rej.EnumerateArray())
@@ -246,6 +273,8 @@ public static class CatalogLoader
         };
         if (definition.Irreversible && definition.Persistence == PersistenceKind.Session)
             throw new InvalidDataException($"{id}: ação irreversível não pode ser de sessão (a sessão é revertida ao encerrar).");
+        if (definition.Irreversible && definition.Persistence == PersistenceKind.Ephemeral)
+            throw new InvalidDataException($"{id}: ação irreversível não pode ser efêmera (efêmera = sem estado; irreversível = destrói estado).");
 
         var target = new Dictionary<string, string>(StringComparer.Ordinal);
         if (a.TryGetProperty("target", out var t))
@@ -266,12 +295,18 @@ public static class CatalogLoader
                 userParameters[p.Name] = pattern;
             }
 
+        var supersedes = StrList(a, "supersedes") ?? [];
+        foreach (var old in supersedes)
+            if (!LegacyKeyPattern().IsMatch(old) || old == definition.Key)
+                throw new InvalidDataException($"{id}: \"supersedes\" aceita só chaves id@versão de outras ações (recebido '{old}').");
+
         return new CatalogEntry(definition, target,
             a.TryGetProperty("desiredValue", out var dv) ? Scalar(dv) : null,
             Str(a, "condition"), Str(a, "verification"), Str(a, "revert"), privilegesRaw)
         {
             DesiredType = Str(a, "desiredType"),
             UserParameters = userParameters,
+            Supersedes = supersedes,
         };
     }
 

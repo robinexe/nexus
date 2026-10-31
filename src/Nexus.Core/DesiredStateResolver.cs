@@ -19,6 +19,16 @@ public sealed record Plan(IReadOnlyList<PlanItem> Items)
 /// Calcula apenas as diferenças entre estado atual e estado desejado do perfil.
 /// Ordena por dependências (topológica estável), bloqueia conflitos e agrupa as mudanças
 /// que exigem reinicialização no último lote.
+/// <para>
+/// Cada item é uma INSTÂNCIA (<see cref="ActionInstance.InstanceKey"/>: ação + alvo resolvido). A mesma ação pode aparecer
+/// várias vezes com alvos diferentes (remoção em lote); a mesma ação com o mesmo alvo é recusada. Dependências e conflitos
+/// continuam declarados por id de ação: depender de X exige que TODAS as instâncias de X no plano estejam pendentes ou já
+/// configuradas (e que exista ao menos uma); conflitar com X bloqueia se qualquer instância de X estiver ativa.
+/// </para>
+/// <para>
+/// Ações <see cref="PersistenceKind.Ephemeral"/> não têm estado: o handler não é lido (nem Detect) e o item fica sempre pendente
+/// quando aplicável.
+/// </para>
 /// </summary>
 public sealed class DesiredStateResolver
 {
@@ -26,11 +36,16 @@ public sealed class DesiredStateResolver
 
     public DesiredStateResolver(HandlerRegistry handlers) => _handlers = handlers;
 
+    /// <summary>Estado registrado no plano para ações efêmeras (não há o que ler).</summary>
+    public static StateSnapshot EphemeralObserved { get; } = StateSnapshot.Of("Ephemeral", "sem-estado");
+
     public Plan Resolve(IReadOnlyList<ActionInstance> desired, SystemContext context)
     {
-        var duplicates = desired.GroupBy(a => a.Definition.Id).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+        ArgumentNullException.ThrowIfNull(desired);
+        var duplicates = desired.GroupBy(a => a.InstanceKey, StringComparer.Ordinal).Where(g => g.Count() > 1)
+            .Select(g => $"{g.First().Definition.Id} ({g.First().TargetLabel})").ToList();
         if (duplicates.Count > 0)
-            throw new ArgumentException($"Perfil contém ações repetidas: {string.Join(", ", duplicates)}");
+            throw new ArgumentException($"Perfil contém ações repetidas (mesma ação e mesmo alvo): {string.Join(", ", duplicates)}");
 
         var ordered = TopologicalOrder(desired);
         var items = new List<PlanItem>(ordered.Count);
@@ -55,6 +70,13 @@ public sealed class DesiredStateResolver
                 continue;
             }
 
+            var batch = action.Definition.Reboot == RebootRequirement.Required ? 1 : 0;
+            if (action.Definition.Persistence == PersistenceKind.Ephemeral)
+            {
+                items.Add(new PlanItem(action, PlanStatus.Pending, EphemeralObserved, null, batch));
+                continue;
+            }
+
             var current = handler.Detect(action);
             if (current.Origin is ValueOrigin.PolicyEnforced or ValueOrigin.ThirdPartyManaged)
             {
@@ -69,7 +91,6 @@ public sealed class DesiredStateResolver
                 continue;
             }
 
-            var batch = action.Definition.Reboot == RebootRequirement.Required ? 1 : 0;
             items.Add(new PlanItem(action, PlanStatus.Pending, current, null, batch));
         }
 
@@ -81,19 +102,22 @@ public sealed class DesiredStateResolver
         return new Plan(items);
     }
 
+    private static bool IsActive(PlanItem i) => i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured;
+
     private static void BlockUnsatisfiedDependencies(List<PlanItem> items)
     {
         bool changed;
         do
         {
             changed = false;
-            var ok = items.Where(i => i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured)
-                          .Select(i => i.Action.Definition.Id).ToHashSet(StringComparer.Ordinal);
+            // Satisfeita = há instâncias da dependência no plano e todas estão ativas.
+            var byId = items.GroupBy(i => i.Action.Definition.Id, StringComparer.Ordinal)
+                            .ToDictionary(g => g.Key, g => g.All(IsActive), StringComparer.Ordinal);
             for (var i = 0; i < items.Count; i++)
             {
                 var item = items[i];
                 if (item.Status != PlanStatus.Pending) continue;
-                var missing = (item.Action.Definition.DependsOn ?? []).Where(d => !ok.Contains(d)).ToList();
+                var missing = (item.Action.Definition.DependsOn ?? []).Where(d => !byId.TryGetValue(d, out var allOk) || !allOk).ToList();
                 if (missing.Count == 0) continue;
                 items[i] = item with { Status = PlanStatus.Blocked, Reason = $"Dependência não satisfeita: {string.Join(", ", missing)}" };
                 changed = true;
@@ -104,7 +128,9 @@ public sealed class DesiredStateResolver
     /// <summary>Quem depende de um item do lote de reinício vai para o mesmo lote (a ordem topológica é preservada dentro do lote).</summary>
     private static void PromoteDependentsToLaterBatch(List<PlanItem> items)
     {
-        var batchOf = items.Where(i => i.Status == PlanStatus.Pending).ToDictionary(i => i.Action.Definition.Id, i => i.Batch, StringComparer.Ordinal);
+        var batchOf = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var p in items.Where(i => i.Status == PlanStatus.Pending))
+            batchOf[p.Action.Definition.Id] = Math.Max(batchOf.GetValueOrDefault(p.Action.Definition.Id), p.Batch);
         for (var i = 0; i < items.Count; i++) // items já está em ordem topológica
         {
             var item = items[i];
@@ -113,56 +139,65 @@ public sealed class DesiredStateResolver
             if (required > item.Batch)
             {
                 items[i] = item with { Batch = required };
-                batchOf[item.Action.Definition.Id] = required;
+                batchOf[item.Action.Definition.Id] = Math.Max(batchOf.GetValueOrDefault(item.Action.Definition.Id), required);
             }
         }
     }
 
     private static void BlockConflicts(List<PlanItem> items)
     {
-        var active = items.Where(i => i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured)
-                          .ToDictionary(i => i.Action.Definition.Id, StringComparer.Ordinal);
+        var active = items.Where(IsActive).Select(i => i.Action.Definition.Id).ToHashSet(StringComparer.Ordinal);
         for (var i = 0; i < items.Count; i++)
         {
             var item = items[i];
             if (item.Status != PlanStatus.Pending) continue;
-            var hits = (item.Action.Definition.ConflictsWith ?? []).Where(active.ContainsKey).ToList();
+            var hits = (item.Action.Definition.ConflictsWith ?? []).Where(active.Contains).ToList();
             if (hits.Count > 0)
                 items[i] = item with { Status = PlanStatus.Blocked, Reason = $"Conflito com: {string.Join(", ", hits)}" };
         }
     }
 
-    /// <summary>Ordenação de Kahn estável (preserva a ordem do perfil quando não há dependência).</summary>
+    /// <summary>
+    /// Ordenação de Kahn estável sobre instâncias (preserva a ordem do perfil quando não há dependência). Cada instância que
+    /// depende de X espera todas as instâncias de X.
+    /// </summary>
     private static List<ActionInstance> TopologicalOrder(IReadOnlyList<ActionInstance> actions)
     {
-        var byId = actions.ToDictionary(a => a.Definition.Id, StringComparer.Ordinal);
-        var indegree = actions.ToDictionary(a => a.Definition.Id, _ => 0, StringComparer.Ordinal);
-        var dependents = actions.ToDictionary(a => a.Definition.Id, _ => new List<string>(), StringComparer.Ordinal);
+        var n = actions.Count;
+        var indexesById = new Dictionary<string, List<int>>(StringComparer.Ordinal);
+        for (var i = 0; i < n; i++)
+        {
+            var id = actions[i].Definition.Id;
+            if (!indexesById.TryGetValue(id, out var list)) indexesById[id] = list = [];
+            list.Add(i);
+        }
 
-        foreach (var a in actions)
-            foreach (var dep in a.Definition.DependsOn ?? [])
-                if (byId.ContainsKey(dep))
-                {
-                    indegree[a.Definition.Id]++;
-                    dependents[dep].Add(a.Definition.Id);
-                }
+        var indegree = new int[n];
+        var dependents = new List<int>[n];
+        for (var i = 0; i < n; i++) dependents[i] = [];
+        for (var i = 0; i < n; i++)
+            foreach (var dep in (actions[i].Definition.DependsOn ?? []).Distinct(StringComparer.Ordinal))
+                if (indexesById.TryGetValue(dep, out var sources))
+                    foreach (var s in sources)
+                    {
+                        indegree[i]++; // depender de si mesma vira ciclo, como antes
+                        dependents[s].Add(i);
+                    }
 
-        var position = actions.Select((a, i) => (a.Definition.Id, i)).ToDictionary(x => x.Id, x => x.i, StringComparer.Ordinal);
-        var ready = new SortedSet<(int Pos, string Id)>(actions.Where(a => indegree[a.Definition.Id] == 0)
-                                                              .Select(a => (position[a.Definition.Id], a.Definition.Id)));
-        var result = new List<ActionInstance>(actions.Count);
+        var ready = new SortedSet<int>(Enumerable.Range(0, n).Where(i => indegree[i] == 0));
+        var result = new List<ActionInstance>(n);
         while (ready.Count > 0)
         {
             var next = ready.Min;
             ready.Remove(next);
-            result.Add(byId[next.Id]);
-            foreach (var d in dependents[next.Id])
-                if (--indegree[d] == 0) ready.Add((position[d], d));
+            result.Add(actions[next]);
+            foreach (var d in dependents[next])
+                if (--indegree[d] == 0) ready.Add(d);
         }
 
-        if (result.Count != actions.Count)
+        if (result.Count != n)
         {
-            var cycle = indegree.Where(kv => kv.Value > 0).Select(kv => kv.Key);
+            var cycle = Enumerable.Range(0, n).Where(i => indegree[i] > 0).Select(i => actions[i].Definition.Id).Distinct(StringComparer.Ordinal);
             throw new InvalidOperationException($"Ciclo de dependências no perfil: {string.Join(", ", cycle)}");
         }
         return result;

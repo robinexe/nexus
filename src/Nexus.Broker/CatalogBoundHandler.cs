@@ -44,11 +44,19 @@ public sealed class CatalogBoundHandler : IActionHandler, IRestoreValidator
     public string? CheckRestore(ActionInstance action, StateSnapshot original)
     {
         ArgumentNullException.ThrowIfNull(action);
-        var entry = _catalog.Actions.FirstOrDefault(e => string.Equals(e.Definition.Key, action.Definition.Key, StringComparison.Ordinal));
+        var entry = FindEntry(_catalog, action.Definition.Key);
         if (entry is null)
             return $"A entrada do diário ({action.Definition.Key}) não existe no catálogo do broker ({_catalog.CatalogVersion}).";
         if (!string.Equals(entry.Definition.HandlerKind, action.Definition.HandlerKind, StringComparison.Ordinal))
             return $"Handler do diário ({action.Definition.HandlerKind}) difere do catálogo ({entry.Definition.HandlerKind}).";
+        // Propriedades de segurança da definição gravada no diário (desserializada) precisam ser as do catálogo: um diário
+        // adulterado não pode, por exemplo, tornar reversível uma ação irreversível, nem rebaixar o privilégio declarado.
+        if (entry.Definition.Irreversible != action.Definition.Irreversible)
+            return $"O diário diz irreversível={action.Definition.Irreversible}; o catálogo diz {entry.Definition.Irreversible}. Restauração recusada.";
+        if (entry.Definition.Persistence != action.Definition.Persistence)
+            return $"Persistência do diário ({action.Definition.Persistence}) difere do catálogo ({entry.Definition.Persistence}). Restauração recusada.";
+        if (entry.Definition.Privileges != action.Definition.Privileges)
+            return $"Privilégio do diário ({action.Definition.Privileges}) difere do catálogo ({entry.Definition.Privileges}). Restauração recusada.";
 
         // Alvo esperado: o que o catálogo instancia. O esquema de energia (PowerSettingValue) é capturado no planejamento
         // e pode diferir do ativo agora; ele só precisa ser um GUID válido.
@@ -81,6 +89,17 @@ public sealed class CatalogBoundHandler : IActionHandler, IRestoreValidator
             return "O alvo registrado no diário difere do alvo definido pelo catálogo; restauração recusada.";
 
         return _inner is IRestoreValidator v ? v.CheckRestore(action, original) : null;
+    }
+
+    /// <summary>
+    /// Ação do catálogo para uma chave do diário: a própria, ou a que a substituiu (<see cref="CatalogEntry.Supersedes"/>; ex.: as
+    /// antigas vagas <c>programs.leftover.user.NN</c>). A substituta precisa reconstruir exatamente o mesmo alvo.
+    /// </summary>
+    public static CatalogEntry? FindEntry(CatalogDocument catalog, string key)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        return catalog.Actions.FirstOrDefault(e => string.Equals(e.Definition.Key, key, StringComparison.Ordinal))
+            ?? catalog.Actions.FirstOrDefault(e => e.Supersedes.Contains(key, StringComparer.Ordinal));
     }
 
     private Dictionary<string, string> WithScheme(ActionInstance action)

@@ -14,7 +14,19 @@ public enum Classification
 
 public enum RebootRequirement { None, GameRestart, NextLogon, Recommended, Required }
 
-public enum PersistenceKind { Session, Persistent }
+/// <summary>Como a mudança vive no sistema.</summary>
+/// <remarks>
+/// <list type="bullet">
+/// <item><see cref="Session"/>: revertida ao encerrar a sessão (o broker segura a trava até EndSession).</item>
+/// <item><see cref="Persistent"/>: fica até ser desfeita pelo diário.</item>
+/// <item><see cref="Ephemeral"/>: operação SEM estado anterior a guardar (limpar cache DNS/ARP, exportar drivers, criar ponto de
+/// restauração). O executor não lê nem compara estado: executa, registra no diário e marca Verified se o handler não lançar.
+/// Não dispara o ponto de restauração automático, não prende sessão, desfazer responde "nada a desfazer" explicitamente
+/// (<see cref="ActionExecutor.EphemeralNothingToUndo"/>) sem chamar o handler, e a recuperação encerra entradas interrompidas
+/// como <see cref="JournalState.Accepted"/>. Não pode ser irreversível nem de sessão (o catálogo recusa).</item>
+/// </list>
+/// </remarks>
+public enum PersistenceKind { Session, Persistent, Ephemeral }
 
 public enum PrivilegeLevel { User, Admin }
 
@@ -108,6 +120,17 @@ public sealed record ActionInstance(
 {
     public string TargetDescription =>
         string.Join(" | ", Target.OrderBy(k => k.Key, StringComparer.Ordinal).Select(k => $"{k.Key}={k.Value}"));
+
+    /// <summary>
+    /// Identidade da instância num pedido/plano: (id da ação, alvo resolvido). A mesma ação pode aparecer várias vezes com alvos
+    /// diferentes (remoção em lote); a mesma ação com o MESMO alvo é duplicata exata e é recusada (o valor desejado não entra:
+    /// dois valores para o mesmo alvo são contraditórios).
+    /// </summary>
+    public string InstanceKey => Definition.Id + "\u0001" + TargetDescription;
+
+    /// <summary>Alvo para exibição, sem o SID do perfil (acrescentado pelo broker como serviço).</summary>
+    public string TargetLabel =>
+        string.Join(" | ", Target.Where(k => k.Key != UserProfileScope.TargetKey).OrderBy(k => k.Key, StringComparer.Ordinal).Select(k => $"{k.Key}={k.Value}"));
 }
 
 public enum ApplicabilityKind { Applicable, NotApplicable, Blocked }

@@ -30,7 +30,11 @@ public sealed record BrokerRequest(
 
 public sealed record BrokerError(string Code, string Detail);
 
-public sealed record ActionResultDto(string ActionKey, string Outcome, string? Detail = null, string? Observed = null, string? Desired = null, bool Inferred = false);
+/// <param name="Index">Posição do pedido (em <see cref="BrokerRequest.Actions"/>) a que o resultado corresponde, em ReadState,
+/// Plan e Execute; a ordem dos resultados segue o plano, não o pedido. Nulo em reversões (vêm do diário).</param>
+/// <param name="Target">Alvo da instância (sem o SID do perfil), para distinguir instâncias da mesma ação num lote.</param>
+public sealed record ActionResultDto(string ActionKey, string Outcome, string? Detail = null, string? Observed = null, string? Desired = null, bool Inferred = false,
+    int? Index = null, string? Target = null);
 
 public sealed record BrokerStatus(
     string BrokerVersion,

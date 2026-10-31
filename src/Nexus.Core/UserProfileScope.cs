@@ -17,15 +17,23 @@ public static partial class UserProfileScope
     /// <summary>Só contas locais/de domínio (<c>S-1-5-21-…</c>); nunca SYSTEM, .DEFAULT ou contas de serviço.</summary>
     public static bool IsValidSid(string? sid) => sid is not null && SidPattern().IsMatch(sid);
 
-    /// <summary>A ação escreve no HKCU (hive/escopo HKCU, ou handler que só existe em HKCU).</summary>
+    /// <summary>
+    /// A ação escreve no perfil do usuário: <c>"hive": "HKCU"</c>, <c>"scope": "HKCU"</c> ou <c>"scope": "User"</c> (perfil sem
+    /// registro, ex.: pastas do AppData da Limpeza), ou handler que só existe em HKCU. "HKCU" continua reconhecido, então entradas
+    /// antigas do diário mantêm o mesmo tratamento.
+    /// </summary>
     public static bool IsUserScoped(ActionInstance action)
     {
         ArgumentNullException.ThrowIfNull(action);
         var t = action.Target;
         return (t.TryGetValue("hive", out var hive) && string.Equals(hive, "HKCU", StringComparison.OrdinalIgnoreCase))
-            || (t.TryGetValue("scope", out var scope) && string.Equals(scope, "HKCU", StringComparison.OrdinalIgnoreCase))
+            || (t.TryGetValue("scope", out var scope) && IsUserScopeName(scope))
             || action.Definition.HandlerKind == "DirectXUserGpuPreference";
     }
+
+    /// <summary>Nomes de escopo que significam "perfil de quem pediu".</summary>
+    public static bool IsUserScopeName(string? scope) =>
+        string.Equals(scope, "HKCU", StringComparison.OrdinalIgnoreCase) || string.Equals(scope, "User", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Cópia da ação com o perfil do usuário no alvo.</summary>
     public static ActionInstance Bind(ActionInstance action, string sid)

@@ -21,7 +21,10 @@ public sealed class BrokerService : IDisposable
     public const int MaxProfileLength = 128;
     /// <summary>Limites de resposta: textos e listas nunca podem fazer o quadro passar de <see cref="BrokerWire.MaxFrameBytes"/>.</summary>
     public const int MaxTextLength = 1024;
-    public const int MaxResults = 40;
+    /// <summary>Um resultado por ação de um pedido cheio (lote). Textos são encurtados se a resposta não couber no quadro.</summary>
+    public const int MaxResults = MaxActionsPerRequest;
+    /// <summary>Folga para o restante da resposta (mensagem, ids) dentro de <see cref="BrokerWire.MaxFrameBytes"/>.</summary>
+    private const int ResultsBudgetBytes = BrokerWire.MaxFrameBytes - 6 * 1024;
 
     private readonly CatalogDocument _catalog;
     private readonly HandlerRegistry _handlers;
@@ -126,11 +129,9 @@ public sealed class BrokerService : IDisposable
                                a.Arguments is { Count: > CatalogEntry.MaxUserArguments } ||
                                (a.Arguments?.Any(kv => kv.Key is null || kv.Key.Length > 64 || kv.Value is null || kv.Value.Length > CatalogEntry.MaxUserArgumentLength) ?? false)))
             return (null, BrokerResponse.Fail(r.Id, "invalid-request", "Ação nula, vazia ou com campos longos demais."));
-        if (r.Actions.Select(a => a.ActionId).Distinct(StringComparer.Ordinal).Count() != r.Actions.Count)
-            return (null, BrokerResponse.Fail(r.Id, "invalid-request", "Ação repetida no pedido."));
-
         var parameters = _parameters();
         var list = new List<ActionInstance>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in r.Actions)
         {
             var entry = _catalog.Actions.FirstOrDefault(e => string.Equals(e.Definition.Key, a.ActionId, StringComparison.Ordinal));
@@ -176,10 +177,20 @@ public sealed class BrokerService : IDisposable
                     return (null, BrokerResponse.Fail(r.Id, "caller-unknown", $"'{a.ActionId}' altera o perfil do usuário, e o cliente não foi identificado como conta de usuário."));
                 instance = UserProfileScope.Bind(instance, callerSid!);
             }
+            // Lote: a mesma ação pode vir várias vezes com alvos diferentes. Mesma ação + mesmo alvo = duplicata exata (recusada:
+            // repetir não acrescenta nada, e dois valores para o mesmo alvo seriam contraditórios).
+            if (!seen.Add(instance.InstanceKey))
+                return (null, BrokerResponse.Fail(r.Id, "invalid-request", $"Ação repetida no pedido: '{Clip(a.ActionId, 128)}' com o mesmo alvo ({Clip(instance.TargetLabel, 200)})."));
             list.Add(instance);
         }
         return (list, null);
     }
+
+    /// <summary>Posição de cada instância no pedido (identidade = ação + alvo; única depois de <see cref="Resolve"/>).</summary>
+    private static Dictionary<string, int> IndexOf(IReadOnlyList<ActionInstance> actions) =>
+        actions.Select((a, i) => (a.InstanceKey, i)).ToDictionary(x => x.InstanceKey, x => x.i, StringComparer.Ordinal);
+
+    private static string? Label(ActionInstance a) => Clip(a.TargetLabel, 260);
 
     // ------------------------------------------------------------------ leitura
 
@@ -187,19 +198,19 @@ public sealed class BrokerService : IDisposable
     {
         var (actions, error) = Resolve(r, callerSid);
         if (error is not null) return error;
-        var results = actions!.Select(a =>
+        var results = actions!.Select((a, i) =>
         {
             try
             {
                 var s = _handlers.Get(a.Definition.HandlerKind).Detect(a);
-                return new ActionResultDto(a.Definition.Key, "Read", s.Origin.ToString(), s.Describe(), a.Desired.Describe());
+                return new ActionResultDto(a.Definition.Key, "Read", s.Origin.ToString(), s.Describe(), a.Desired.Describe(), Index: i, Target: Label(a));
             }
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {
-                return new ActionResultDto(a.Definition.Key, "ReadFailed", Clip($"{ex.GetType().Name}: {ex.Message}"));
+                return new ActionResultDto(a.Definition.Key, "ReadFailed", Clip($"{ex.GetType().Name}: {ex.Message}"), Index: i, Target: Label(a));
             }
         }).ToList();
-        return new BrokerResponse(r.Id, true, Results: results);
+        return new BrokerResponse(r.Id, true, Results: Cap(results));
     }
 
     private BrokerResponse PlanOnly(BrokerRequest r, string? callerSid)
@@ -207,8 +218,10 @@ public sealed class BrokerService : IDisposable
         var (actions, error) = Resolve(r, callerSid);
         if (error is not null) return error;
         var plan = new DesiredStateResolver(_handlers).Resolve(actions!, _context());
-        return new BrokerResponse(r.Id, true, Results: plan.Items.Select(i => new ActionResultDto(i.Action.Definition.Key, i.Status.ToString(), i.Reason,
-            i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured ? i.ObservedAtPlan.Describe() : null, i.Action.Desired.Describe())).ToList(),
+        var index = IndexOf(actions!);
+        return new BrokerResponse(r.Id, true, Results: Cap(plan.Items.Select(i => new ActionResultDto(i.Action.Definition.Key, i.Status.ToString(), i.Reason,
+            i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured ? i.ObservedAtPlan.Describe() : null, i.Action.Desired.Describe(),
+            Index: index.GetValueOrDefault(i.Action.InstanceKey), Target: Label(i.Action)))),
             Message: "Simulação: nada foi aplicado." + (actions!.Any(a => a.Definition.Irreversible)
                 ? " Atenção: há ação IRREVERSÍVEL no pedido; aplicar exige confirmação explícita e não poderá ser desfeito."
                 : ""));
@@ -288,7 +301,10 @@ public sealed class BrokerService : IDisposable
             {
                 exec.EndRun(runId);
             }
-            return new BrokerResponse(r.Id, true, Results: Cap(results.Select(x => new ActionResultDto(x.ActionKey, x.Outcome.ToString(), Clip(x.Detail)))),
+            var byTarget = actions!.Select((a, i) => (a, i)).ToLookup(x => (x.a.Definition.Key, x.a.TargetLabel), x => (int?)x.i);
+            int? IndexFor(ExecutionResult x) => byTarget[(x.ActionKey, x.Target ?? "")].FirstOrDefault();
+            return new BrokerResponse(r.Id, true, Results: Cap(results.Select(x => new ActionResultDto(x.ActionKey, x.Outcome.ToString(), Clip(x.Detail),
+                    Index: IndexFor(x), Target: Clip(x.Target, 260)))),
                 RunId: runId, SessionActive: sessionApplied,
                 Message: (sessionApplied ? "Ajustes de sessão aplicados; o broker mantém a trava até EndSession." : "Execução encerrada.") +
                          (safetyNote is null ? "" : " " + safetyNote));
@@ -312,7 +328,7 @@ public sealed class BrokerService : IDisposable
             .OrderByDescending(e => e.Sequence)
             .Select(e => exec.Revert(e.Id, r.Force))
             .ToList();
-        var ok = sessionEntries.All(x => x.Outcome is RevertOutcome.Reverted or RevertOutcome.AlreadyOriginal or RevertOutcome.NothingToRevert);
+        var ok = sessionEntries.All(x => x.Settled);
         if (ok)
         {
             exec.EndRun(runId);
@@ -344,7 +360,7 @@ public sealed class BrokerService : IDisposable
         {
             var exec = new ActionExecutor(_handlers, _journal, lease!);
             var results = exec.RevertRun(r.RunId.Value, r.Force);
-            var ok = results.All(x => x.Outcome is RevertOutcome.Reverted or RevertOutcome.AlreadyOriginal or RevertOutcome.NothingToRevert);
+            var ok = results.All(x => x.Settled);
             if (ok && ownSession)
             {
                 exec.EndRun(r.RunId.Value);
@@ -378,12 +394,29 @@ public sealed class BrokerService : IDisposable
         }
     }
 
-    private static ActionResultDto Map(RevertResult x) => new(x.ActionKey, x.Outcome.ToString(), Clip(x.Detail), Inferred: x.Inferred);
+    private static ActionResultDto Map(RevertResult x) => new(x.ActionKey, x.Outcome.ToString(), Clip(x.Detail), Inferred: x.Inferred, Target: Clip(x.Target, 260));
 
     internal static string? Clip(string? text, int max = MaxTextLength) =>
         text is null || text.Length <= max ? text : string.Concat(text.AsSpan(0, max), "… [truncado]");
 
-    private static List<ActionResultDto> Cap(IEnumerable<ActionResultDto> items) => items.Take(MaxResults).ToList();
+    /// <summary>
+    /// Até <see cref="MaxResults"/> itens; se a lista não couber no quadro, encurta os textos (detalhe, alvo, valores) em passos,
+    /// sem nunca descartar um item: num lote, cada instância precisa do seu resultado.
+    /// </summary>
+    internal static List<ActionResultDto> Cap(IEnumerable<ActionResultDto> items)
+    {
+        var list = items.Take(MaxResults).ToList();
+        foreach (var max in new[] { MaxTextLength, 512, 256, 128, 64 })
+        {
+            var fitted = max == MaxTextLength ? list : list.Select(x => x with
+            {
+                Detail = Clip(x.Detail, max), Target = Clip(x.Target, Math.Min(max, 200)),
+                Observed = Clip(x.Observed, max), Desired = Clip(x.Desired, max),
+            }).ToList();
+            if (System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(fitted, BrokerWire.Json).Length <= ResultsBudgetBytes) return fitted;
+        }
+        return list.Select(x => x with { Detail = Clip(x.Detail, 32), Target = Clip(x.Target, 32), Observed = null, Desired = null }).ToList();
+    }
 
     public void Dispose()
     {
