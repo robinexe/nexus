@@ -1,7 +1,7 @@
 namespace Nexus.Desktop.ViewModels;
 
 /// <summary>Página do módulo SystemTools (esqueleto: o agente do módulo preenche).</summary>
-public sealed class SystemToolsPage : PageViewModel
+public sealed class SystemToolsPage : ModulePage
 {
     public override string Title => "Ferramentas do sistema";
     public override string Group => "Sistema";

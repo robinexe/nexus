@@ -1,0 +1,68 @@
+using Nexus.Broker;
+using Nexus.Core;
+using Nexus.HardwareDiscovery;
+
+namespace Nexus.Desktop.ViewModels;
+
+/// <summary>
+/// O que a janela oferece às páginas dos módulos. É a ÚNICA via de escrita delas: tudo passa pelo aplicador (broker),
+/// com confirmação, diário, reversão e (para mudanças de sistema) aviso do Windows + ponto de restauração.
+/// </summary>
+public interface IModuleHost
+{
+    /// <summary>Leitura do PC (null até a primeira leitura terminar).</summary>
+    SystemFacts? Facts { get; }
+
+    /// <summary>SID de quem usa a interface (para ações no perfil do usuário).</summary>
+    string UserSid { get; }
+
+    /// <summary>Simula no aplicador: mostra o que mudaria, sem escrever.</summary>
+    Task<BrokerCallResult> PlanAsync(IReadOnlyList<ActionRequest> requests, BrokerLevel level);
+
+    /// <summary>
+    /// Pede confirmação (texto <paramref name="confirmation"/>) e aplica pelo aplicador. Retorna null se o usuário cancelar.
+    /// A execução fica disponível para reverter na página Aplicar e em <see cref="RevertAsync"/>.
+    /// </summary>
+    Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level);
+
+    /// <summary>Reverte uma execução (com confirmação).</summary>
+    Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level);
+
+    /// <summary>Mostra uma mensagem na barra de status.</summary>
+    void Notify(string message);
+
+    /// <summary>Pergunta sim/não ao usuário (padrão: não).</summary>
+    bool Confirm(string title, string message);
+
+    /// <summary>Navega para outra página (ex.: do Automático para Limpeza).</summary>
+    void Navigate(PageViewModel page);
+}
+
+/// <summary>Base das páginas de módulo: recebe o host e é avisada quando a leitura do PC termina.</summary>
+public abstract class ModulePage : PageViewModel
+{
+    private bool _busy;
+    private string _message = "";
+
+    public IModuleHost? Host { get; private set; }
+    public bool Busy { get => _busy; protected set => Set(ref _busy, value); }
+    public string Message { get => _message; protected set => Set(ref _message, value); }
+
+    internal void Attach(IModuleHost host) => Host = host;
+
+    /// <summary>Chamado (na thread da interface) depois de cada leitura do PC. Leituras pesadas: use Task.Run.</summary>
+    public virtual Task OnFactsReadyAsync(SystemFacts facts) => Task.CompletedTask;
+
+    /// <summary>Chamado quando o usuário abre a página.</summary>
+    public virtual Task OnShownAsync() => Task.CompletedTask;
+
+    /// <summary>Executa uma tarefa da página marcando Busy e convertendo exceções em mensagem (a interface nunca cai).</summary>
+    protected async Task RunAsync(Func<Task> work)
+    {
+        if (Busy) return;
+        Busy = true;
+        try { await work(); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = $"Não foi possível concluir: {ex.Message}"; }
+        finally { Busy = false; }
+    }
+}

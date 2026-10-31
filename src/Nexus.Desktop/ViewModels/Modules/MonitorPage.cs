@@ -1,7 +1,7 @@
 namespace Nexus.Desktop.ViewModels;
 
 /// <summary>Página do módulo Monitoring (esqueleto: o agente do módulo preenche).</summary>
-public sealed class MonitorPage : PageViewModel
+public sealed class MonitorPage : ModulePage
 {
     public override string Title => "Monitor";
     public override string Group => "Medir";

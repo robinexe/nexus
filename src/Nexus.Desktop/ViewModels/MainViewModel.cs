@@ -10,7 +10,7 @@ using Nexus.Persistence;
 
 namespace Nexus.Desktop.ViewModels;
 
-public sealed class MainViewModel : ObservableObject
+public sealed class MainViewModel : ObservableObject, IModuleHost
 {
     private static readonly JsonSerializerOptions ExportJson = new()
     {
@@ -20,12 +20,12 @@ public sealed class MainViewModel : ObservableObject
     };
 
     private readonly NexusServices _services = new();
-    private static readonly string UserSid = System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value;
+    private static readonly string CurrentUserSid = System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value;
     private BrokerLevel _lastLevel = BrokerLevel.User;
 
     /// <summary>Aplicar neste PC: broker sob demanda do nível pedido (usuário sem aviso; administrador com o aviso do Windows).</summary>
     private BrokerSession Session(BrokerLevel level) =>
-        BrokerSession.ForThisPc(level, AppContext.BaseDirectory, UserSid, m => System.Windows.Application.Current?.Dispatcher.Invoke(() => Broker.LastMessage = m));
+        BrokerSession.ForThisPc(level, AppContext.BaseDirectory, CurrentUserSid, m => System.Windows.Application.Current?.Dispatcher.Invoke(() => Broker.LastMessage = m));
 
     private static BrokerLevel LevelFor(IEnumerable<(CatalogEntry Entry, ActionInstance Instance)> chosen) =>
         chosen.Any(c => c.Entry.Definition.Privileges == PrivilegeLevel.Admin) ? BrokerLevel.Admin : BrokerLevel.User;
@@ -56,7 +56,45 @@ public sealed class MainViewModel : ObservableObject
         ShowCatalogCommand = new RelayCommand(() => SelectedPage = Catalog);
         ShowDiagnosticsCommand = new RelayCommand(() => SelectedPage = Diagnostics);
         ShowHardwareCommand = new RelayCommand(() => SelectedPage = Hardware);
+        foreach (var module in Pages.OfType<ModulePage>()) module.Attach(this);
     }
+
+    // ------------------------------------------------------------------ IModuleHost (páginas dos módulos)
+
+    public SystemFacts? Facts => _snapshot?.Facts;
+    string IModuleHost.UserSid => CurrentUserSid;
+
+    public Task<BrokerCallResult> PlanAsync(IReadOnlyList<ActionRequest> requests, BrokerLevel level) =>
+        CallBrokerAsync(level, b => b.Plan(requests));
+
+    public async Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level)
+    {
+        if (requests.Count == 0) return null;
+        if (!Confirm(title, confirmation)) { Notify("Cancelado. Nada foi alterado."); return null; }
+        var r = await CallBrokerAsync(level, b => b.Execute(requests, "modulo"));
+        if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
+        Notify(r.Message);
+        await LoadAfterWriteAsync();
+        return r;
+    }
+
+    public async Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level)
+    {
+        if (!Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança.")) return null;
+        var r = await CallBrokerAsync(level, b => b.RevertRun(runId));
+        if (r.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
+        Notify(r.Message);
+        await LoadAfterWriteAsync();
+        return r;
+    }
+
+    public void Notify(string message) => Status = message;
+
+    public bool Confirm(string title, string message) =>
+        System.Windows.MessageBox.Show(message, title, System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning,
+            System.Windows.MessageBoxResult.No) == System.Windows.MessageBoxResult.Yes;
+
+    public void Navigate(PageViewModel page) => SelectedPage = page;
 
     public OverviewPage Overview { get; } = new();
     public HardwarePage Hardware { get; } = new();
@@ -82,7 +120,11 @@ public sealed class MainViewModel : ObservableObject
     public SystemToolsPage SystemTools { get; } = new();
     public MonitorPage Monitor { get; } = new();
 
-    public PageViewModel SelectedPage { get => _selectedPage; set => Set(ref _selectedPage, value); }
+    public PageViewModel SelectedPage
+    {
+        get => _selectedPage;
+        set { if (Set(ref _selectedPage, value) && value is ModulePage m) _ = m.OnShownAsync(); }
+    }
     public string Status { get => _status; set => Set(ref _status, value); }
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public RelayCommand RefreshCommand { get; }
@@ -121,6 +163,11 @@ public sealed class MainViewModel : ObservableObject
             Overview.Footer = $"Leitura concluída em {snapshot.Elapsed.TotalSeconds:0.0} s · {unavailable} valor(es) indisponível(is), cada um com o motivo.";
             Status = $"Pronto · leitura de {snapshot.TakenAt:HH:mm:ss}";
             CheckPendingRecovery();
+            foreach (var module in Pages.OfType<ModulePage>())
+            {
+                try { await module.OnFactsReadyAsync(snapshot.Facts); }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"{module.Title}: {ex.Message}"; }
+            }
         }
         catch (Exception ex)
         {

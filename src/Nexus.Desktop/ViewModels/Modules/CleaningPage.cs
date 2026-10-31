@@ -1,7 +1,7 @@
 namespace Nexus.Desktop.ViewModels;
 
 /// <summary>Página do módulo Cleaning (esqueleto: o agente do módulo preenche).</summary>
-public sealed class CleaningPage : PageViewModel
+public sealed class CleaningPage : ModulePage
 {
     public override string Title => "Limpeza";
     public override string Group => "Limpar";

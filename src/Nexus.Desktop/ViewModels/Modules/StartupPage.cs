@@ -1,7 +1,7 @@
 namespace Nexus.Desktop.ViewModels;
 
 /// <summary>Página do módulo Boot (esqueleto: o agente do módulo preenche).</summary>
-public sealed class StartupPage : PageViewModel
+public sealed class StartupPage : ModulePage
 {
     public override string Title => "Inicialização";
     public override string Group => "Sistema";

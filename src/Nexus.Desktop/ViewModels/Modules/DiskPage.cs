@@ -1,7 +1,7 @@
 namespace Nexus.Desktop.ViewModels;
 
 /// <summary>Página do módulo DiskTools (esqueleto: o agente do módulo preenche).</summary>
-public sealed class DiskPage : PageViewModel
+public sealed class DiskPage : ModulePage
 {
     public override string Title => "Espaço em disco";
     public override string Group => "Limpar";
