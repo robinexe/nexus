@@ -39,19 +39,25 @@ As regras da seção 2 valem também no PC novo. Se ele for de jogos, nada de al
 
 ## 1. Estado em uma linha
 
-Em 31/10/2026: 168/168 testes no Linux, na VM Windows do CI e no Windows do responsável, 0 avisos. Na VM descartável do
-GitHub Actions, as ações reais (registro, energia, SysMain, core parking, crash + recuperação) e o **broker como serviço**
-(HKCU do cliente, dono do pipe, ACLs) foram exercitados com escrita e reversão reais. A interface tem a página Broker como
-única via de escrita. No PC físico nada é aplicado: o portão do broker exige VM, e o serviço nem está instalado aqui.
+Em 31/10/2026 (tarde): 741/741 testes no Linux, 0 avisos. Nove módulos novos no nível do Kudu ou acima (Limpeza, Disco,
+Programas, Inicialização, Serviços, Privacidade, Segurança, Monitor, Ferramentas do sistema, Automático) + CLI `nexus`.
+A interface aplica neste PC por um aplicador sob demanda (usuário sem aviso; administrador com o aviso do Windows e ponto
+de restauração), sempre com confirmação, diário e desfazer. Revisão de segurança independente feita (8 correções). VM do CI: 741/741 unitários e 29/29 de integração com escrita real (23 dos módulos).
+**Ainda não aberto no Windows real depois dos módulos**; as escritas novas só foram exercitadas na VM do CI.
 
 ## 2. Regras que continuam valendo
 
-- Este PC é ao mesmo tempo máquina de desenvolvimento e PC de jogos. Não alterar registro, serviços, tarefas, planos de
-  energia, drivers nem arquivos de jogos. Não rodar nada como administrador.
-- Testes de alteração real só em VM Windows isolada.
+- **Mudou em 31/10 por decisão do responsável:** o NEXUS pode aplicar no PC do usuário (qualquer PC), "sem quebrar nada":
+  toda escrita pelo aplicador, catálogo fechado, diário antes de escrever, releitura, desfazer, quarentena em vez de apagar,
+  UAC + ponto de restauração para mudanças de sistema, alvos proibidos, confirmação explícita. Ações irreversíveis
+  (exclusão segura) têm contrato próprio (`docs/modules/disk.md`) com confirmação dupla.
+- O assistente não clica "Aplicar" em mudanças de sistema no PC do responsável por conta própria; testes de escrita
+  automatizados continuam na VM descartável do CI.
 - Não escolher licença para o NEXUS. Dependência nova só com registro em `docs/05-dependencies.md` e aviso ao responsável.
 - Nunca mudar um teste só para fazê-lo passar.
-- Execução de otimizações no hospedeiro fica bloqueada até os testes de integração e recuperação em VM serem aprovados.
+- Módulos: um projeto `src/Nexus.<Módulo>` com `<X>Handlers.Create(HandlerEnvironment)` (registrado em
+  `src/Nexus.Broker.Host/ModuleHandlers.cs`), catálogo `catalog/<módulo>.v1.json`, página `ModulePage` que só escreve por
+  `IModuleHost` (`src/Nexus.Desktop/ViewModels/ModuleHost.cs`), doc em `docs/modules/`.
 
 ## 3. Evidência por ambiente
 
@@ -161,7 +167,12 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
    uma captura real: baixar o PresentMon oficial (github.com/GameTechDev/PresentMon) e indicar o caminho em Medir.
 8. ~~Redesign da interface~~ (feito em 31/10: "bancada de telemetria"; tokens em `src/Nexus.Desktop/Themes/Tokens.xaml`,
    estilos em `Controls.xaml`, uma página por arquivo em `Views/Pages/`). Conferido no Windows do responsável.
-9. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+9. ~~Módulos nível Kudu~~ (feito em 31/10 com 9 agentes em paralelo + revisor; ver `docs/modules/*.md`).
+   **Pendências deles:** abrir cada página no Windows real e conferir bindings/leituras; `PersistenceKind.Ephemeral` para
+   ações sem estado (DNS/ARP/ponto de restauração); esvaziar quarentena e Lixeira usando o contrato irreversível; mesma ação
+   com argumentos diferentes num pedido (remoção em lote); fechar a corrida restante de junção entre a checagem e o
+   `Move` com operações por handle (revisão: médio); toast da verificação semanal.
+10. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
