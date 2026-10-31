@@ -490,6 +490,16 @@ public sealed class DesktopReadOnlyTests
             ("RecoveryService", ".ctor"), ("RecoveryService", "Recover"), ("FileRunCoordinator", "TryAcquire"), ("IRunCoordinator", "TryAcquire"),
             ("SqliteJournal", ".ctor"), ("IActionHandler", "Apply"), ("IActionHandler", "Restore"),
             ("BrokerClient", "Connect"), ("BrokerSession", ".ctor"), ("BrokerService", ".ctor"),
+            // Revisão de segurança: os módulos têm APIs públicas que escrevem sem passar por handler/diário. A lista acima só
+            // cobria o motor; a interface também não pode chamar estas.
+            ("SecureDeleteFileSystem", "OverwriteAndDelete"), ("ISecureDeleteFileSystem", "OverwriteAndDelete"),
+            ("LeftoverQuarantine", "QuarantinePath"), ("LeftoverQuarantine", "RestorePath"), ("LeftoverQuarantine", "Discard"),
+            ("LeftoverQuarantine", "WriteManifest"), ("QuarantineAcl", "Harden"), ("IRegistryTreeBackend", "DeleteTree"),
+            ("IRegistryTreeBackend", "Import"), ("IRegistryBackend", "Write"), ("IRegistryBackend", "DeleteValue"),
+            ("IWifiBackend", "Delete"), ("IWifiBackend", "Import"), ("IDriverStore", "Delete"), ("IDriverStore", "Add"),
+            ("IAppxBackend", "Remove"), ("IAppxBackend", "Register"), ("IScheduledTaskBackend", "SetEnabled"),
+            ("ITaskSchedulerBackend", "CreateOrReplace"), ("ITaskSchedulerBackend", "Delete"), ("IHostsStore", "Write"),
+            ("AdminOnlyDirectory", "Ensure"), ("AdminOnlyDirectory", "RestrictToAdministrators"),
         ];
         var hits = forbidden.Where(refs.Contains).ToList();
         Assert.True(hits.Count == 0, "Caminho de execução na interface: " + string.Join(", ", hits));

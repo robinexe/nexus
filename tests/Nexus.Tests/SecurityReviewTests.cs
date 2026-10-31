@@ -49,3 +49,12 @@ public sealed class AdminOnlyDirectoryRuleTests
         Assert.Null(AdminOnlyDirectory.Evaluate(AdminOnlyDirectory.LocalSystemSid, [E(User, FullControl, allow: false)]));
     }
 }
+
+/// <summary>Constantes duplicadas entre módulos e aplicador: se divergirem, a página manda pedidos que o aplicador recusa.</summary>
+[Trait("Category", "Unit")]
+public sealed class DuplicatedLimitTests
+{
+    [Fact]
+    public void Privacy_batch_limit_matches_the_broker() =>
+        Assert.Equal(Nexus.Broker.BrokerService.MaxActionsPerRequest, Nexus.Privacy.PrivacyPlanner.MaxActionsPerRequest);
+}
