@@ -105,19 +105,21 @@ public sealed class MonitorSession : IDisposable
         }
         _ticks++;
 
-        var snapshot = MonitorAggregator.Aggregate(raw with { At = now }, Top(_lastProcesses), _names);
+        var snapshot = MonitorAggregator.Aggregate(raw with { At = now }, _lastProcesses, _names);
+        snapshot = snapshot with { Processes = Top(snapshot.Processes) };
         History.Add(snapshot);
         var verdict = BottleneckDetector.Evaluate(BottleneckInput.From([.. History.Snapshots.Last(BottleneckWindow)]));
         return new MonitorTick(snapshot, verdict, _lastNvidia);
     }
 
-    /// <summary>Guarda só o que a página mostra (os mais pesados em CPU e em memória), para o histórico não crescer.</summary>
+    /// <summary>Guarda só o que a página mostra (os mais pesados em CPU, memória e GPU), para o histórico não crescer.</summary>
     internal static IReadOnlyList<ProcessUsage> Top(IReadOnlyList<ProcessUsage> all)
     {
         if (all.Count <= TopProcesses * 2) return all;
         var byCpu = all.OrderByDescending(p => p.CpuPercent).Take(TopProcesses);
         var byMem = all.OrderByDescending(p => p.WorkingSetBytes).Take(TopProcesses);
-        return [.. byCpu.Concat(byMem).DistinctBy(p => p.Pid)];
+        var byGpu = all.Where(p => p.GpuPercent > 0).OrderByDescending(p => p.GpuPercent).Take(5);
+        return [.. byCpu.Concat(byMem).Concat(byGpu).DistinctBy(p => p.Pid)];
     }
 
     public void Dispose() => _performance.Dispose();
