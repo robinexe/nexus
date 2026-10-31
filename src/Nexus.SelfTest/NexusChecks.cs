@@ -54,7 +54,7 @@ public static class NexusChecks
         new("Descoberta", "Leitura do hardware e do Windows", Discover) { WindowsOnly = false, Timeout = TimeSpan.FromSeconds(120) },
         new("Diagnóstico", "Regras de diagnóstico", Diagnose) { WindowsOnly = false },
         new("Catálogo", "Carregar catalog/*.json", LoadCatalog) { WindowsOnly = false },
-        new("Catálogo", "Estado atual de cada ação (Detect, simulação)", DetectCatalog) { Timeout = TimeSpan.FromSeconds(120) },
+        new("Catálogo", "Estado atual de cada ação (Detect, simulação)", DetectCatalog) { Timeout = TimeSpan.FromSeconds(180) },
         new("Limpeza", "Medir o que pode ser liberado (varredura)", CleaningScanAsync) { Timeout = TimeSpan.FromSeconds(240) },
         new("Limpeza", "Lixeira", RecycleBin),
         new("Disco", "Unidades", Volumes),
