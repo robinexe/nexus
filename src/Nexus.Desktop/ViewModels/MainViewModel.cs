@@ -51,6 +51,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         ExportCommand = new RelayCommand(Export, () => !Busy && _snapshot is not null);
         Plan.SimulateCommand = new RelayCommand(() => _ = SimulateAsync(), () => !Busy && !Plan.Busy && _snapshot is not null);
         History.OnSelected = LoadHistoryEntries;
+        History.Host = this;
         ShowMeasureCommand = new RelayCommand(() => SelectedPage = Measure);
         ShowCatalogCommand = new RelayCommand(() => SelectedPage = Catalog);
         ShowDiagnosticsCommand = new RelayCommand(() => SelectedPage = Diagnostics);

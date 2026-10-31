@@ -48,6 +48,7 @@ PROJECTS = [  # ordem de publicação; a junção exige arquivos comuns idêntic
 PE_MACHINE = {"win-x64": 0x8664, "win-arm64": 0xAA64}
 EXTRA_FILES = [  # (origem relativa à raiz, destino relativo à pasta publicada)
     ("tools/service/Install-Broker.ps1", "tools/service/Install-Broker.ps1"),
+    ("tools/selftest/Rodar-Autoteste.cmd", "Rodar-Autoteste.cmd"),
     ("tools/service/Uninstall-Broker.ps1", "tools/service/Uninstall-Broker.ps1"),
     ("tools/service/README.md", "tools/service/README.md"),
     ("tools/packaging/Remove-NexusTasks.ps1", "tools/Remove-NexusTasks.ps1"),
