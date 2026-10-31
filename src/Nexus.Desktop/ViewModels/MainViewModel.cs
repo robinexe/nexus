@@ -63,12 +63,35 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public SystemFacts? Facts => _snapshot?.Facts;
     string IModuleHost.UserSid => CurrentUserSid;
 
+    // ------------------------------------------------------------------ modo autoteste (--selftest-ui)
+
+    /// <summary>
+    /// Autoteste da interface: nenhum pedido chega ao aplicador (aplicar, desfazer e simular são recusados sem abrir o
+    /// aplicador), Confirm responde "não" sem janela. Ligado por App antes de criar a janela; nunca desligado na mesma execução.
+    /// </summary>
+    internal static bool SelfTestMode { get; set; }
+
+    /// <summary>Quantos pedidos de escrita/simulação o modo autoteste recusou.</summary>
+    internal int SelfTestRefusals { get; private set; }
+
+    /// <summary>A tarefa do último OnShownAsync disparado pela navegação (o autoteste espera por ela e vê a exceção).</summary>
+    internal Task? LastShownTask { get; private set; }
+
+    private bool RefuseInSelfTest()
+    {
+        if (!SelfTestMode) return false;
+        SelfTestRefusals++;
+        Notify("Autoteste: pedido ao aplicador recusado. Nada foi alterado.");
+        return true;
+    }
+
     public Task<BrokerCallResult> PlanAsync(IReadOnlyList<ActionRequest> requests, BrokerLevel level) =>
-        CallBrokerAsync(level, b => b.Plan(requests));
+        RefuseInSelfTest() ? Task.FromResult(new BrokerCallResult(false, null, "Autoteste: o aplicador não é iniciado."))
+            : CallBrokerAsync(level, b => b.Plan(requests));
 
     public async Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level)
     {
-        if (requests.Count == 0) return null;
+        if (requests.Count == 0 || RefuseInSelfTest()) return null;
         if (!Confirm(title, confirmation)) { Notify("Cancelado. Nada foi alterado."); return null; }
         var r = await CallBrokerAsync(level, b => b.Execute(requests, "modulo"));
         if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
@@ -79,6 +102,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     public async Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level)
     {
+        if (RefuseInSelfTest()) return null;
         if (!Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança.")) return null;
         var r = await CallBrokerAsync(level, b => b.RevertRun(runId));
         if (r.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
@@ -89,7 +113,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     public void Notify(string message) => Status = message;
 
-    public bool Confirm(string title, string message) =>
+    public bool Confirm(string title, string message) => !SelfTestMode &&
         System.Windows.MessageBox.Show(message, title, System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning,
             System.Windows.MessageBoxResult.No) == System.Windows.MessageBoxResult.Yes;
 
@@ -134,7 +158,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             if (!Set(ref _selectedPage, value)) return;
             Nexus.Desktop.Services.Shell.UiWatchdog.Step($"abrindo página {value?.Title}");
-            if (value is ModulePage m) _ = m.OnShownAsync();
+            LastShownTask = value is ModulePage m ? m.OnShownAsync() : null;
         }
     }
     public string Status { get => _status; set => Set(ref _status, value); }

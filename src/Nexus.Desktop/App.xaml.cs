@@ -23,6 +23,17 @@ public partial class App : Application
         Services.Shell.UiWatchdog.Step("interface iniciada");
         base.OnStartup(e);
 
+        // Autoteste da interface: sem instância única (não atrapalha nem é atrapalhado por um NEXUS aberto), sem bandeja
+        // minimizada, sem aplicador e sem janelas de erro. Ver SelfTest/UiSelfTestRunner.cs e docs/09-autoteste.md.
+        if (SelfTest.UiSelfTestRunner.Parse(e.Args) is { } selfTest)
+        {
+            ViewModels.MainViewModel.SelfTestMode = true;
+            var testWindow = new MainWindow();
+            testWindow.Show();
+            SelfTest.UiSelfTestRunner.Start(testWindow, selfTest.Path, selfTest.Screenshots);
+            return;
+        }
+
         _instance = new Mutex(initiallyOwned: true, InstanceName, out var first);
         if (!first)
         {
@@ -75,6 +86,7 @@ public partial class App : Application
         catch (IOException) { }
         catch (UnauthorizedAccessException) { }
         e.Handled = true;
+        if (SelfTest.UiSelfTestRunner.Current is { } selfTest) { selfTest.RecordException(e.Exception); return; } // autoteste: registra, sem janela
         // Um erro que se repete (ex.: binding a cada atualização) vira UMA janela, não uma pilha: o mesmo texto só aparece uma vez,
         // e nunca duas janelas ao mesmo tempo. O registro em desktop-erros.log continua completo.
         var key = e.Exception.GetType().FullName + ":" + e.Exception.Message;

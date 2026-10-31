@@ -13,6 +13,8 @@
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
     <ProjectReference Include="..\Nexus.Persistence\Nexus.Persistence.csproj" />
+    <!-- nexus selftest: leituras de todos os módulos (somente leitura). -->
+    <ProjectReference Include="..\Nexus.SelfTest\Nexus.SelfTest.csproj" />
     <!-- O aplicador (nexus-broker) vai junto: é iniciado sob demanda para simular e aplicar. Só ordem de build. -->
     <ProjectReference Include="..\Nexus.Broker.Host\Nexus.Broker.Host.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
