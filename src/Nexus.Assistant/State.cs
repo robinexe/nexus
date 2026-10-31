@@ -30,7 +30,11 @@ public sealed record ChangeRecord(
 public sealed record SkipRecord(AssistantStepId Step, string What, string Why);
 
 /// <summary>Um número antes/depois (ex.: espaço livre, placar de privacidade). Textos já formatados para o usuário.</summary>
-public sealed record MetricRecord(string Label, string? Before, string? After, string? Note = null);
+public sealed record MetricRecord(string Label, string? Before, string? After, string? Note = null)
+{
+    /// <summary>"12,4 GB → 15,1 GB", ou só o valor quando não mudou ou só há um lado.</summary>
+    public string Display => Before is not null && After is not null && Before != After ? $"{Before} → {After}" : After ?? Before ?? "—";
+}
 
 public sealed record StepRecord(StepStatus Status, string? Summary = null, IReadOnlyList<StepFact>? Facts = null);
 
