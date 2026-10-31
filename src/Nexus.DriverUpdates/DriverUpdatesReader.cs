@@ -68,6 +68,25 @@ public static class DriverUpdatesReader
         return list.OrderBy(o => o.Group).ThenBy(o => o.Device, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 
+    /// <summary>Texto da confirmação: lista tudo, avisa do ponto de restauração, do reinício e do que não tem volta.</summary>
+    public static string ConfirmationText(IReadOnlyList<DriverUpdateOffer> offers)
+    {
+        ArgumentNullException.ThrowIfNull(offers);
+        var lines = offers.Take(15).Select(o => $"• {o.Device}: {o.VersionLine}{(o.Update.Optional ? " (opcional)" : "")}");
+        var noRollback = offers.Where(o => !o.Rollback.Possible).ToList();
+        var text = (offers.Count == 1 ? "Instalar esta atualização de driver do Windows Update?" : $"Instalar {offers.Count} atualizações de driver do Windows Update?") +
+                   "\n\n" + string.Join("\n", lines) + (offers.Count > 15 ? $"\n• … e mais {offers.Count - 15}" : "") +
+                   "\n\nComo: o próprio Windows Update baixa e instala (fonte oficial da Microsoft). Antes, o NEXUS cria um ponto de restauração " +
+                   "e guarda uma cópia do driver atual de cada dispositivo (pnputil /export-driver).\n" +
+                   "Pode pedir reinício: alguns drivers só valem depois de reiniciar. A tela pode piscar ao trocar o driver de vídeo.\n" +
+                   "Ganho: correções e compatibilidade; em geral não muda o desempenho.\n" +
+                   "Desfazer: reinstala o driver anterior guardado.";
+        if (noRollback.Count > 0)
+            text += "\n\nSEM DESFAZER AUTOMÁTICO para: " + string.Join(", ", noRollback.Take(5).Select(o => o.Device)) +
+                    " — " + noRollback[0].Rollback.Explanation + " Nesses casos, só a Restauração do Sistema volta atrás.";
+        return text + "\n\nExige administrador: o Windows vai pedir confirmação.";
+    }
+
     public static string FormatSize(long bytes) => bytes switch
     {
         <= 0 => "tamanho n/d",
