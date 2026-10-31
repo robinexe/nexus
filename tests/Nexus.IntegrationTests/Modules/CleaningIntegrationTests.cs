@@ -128,7 +128,8 @@ public sealed class CleaningIntegrationTests : IDisposable
         Assert.False(Directory.Exists(junction));
 
         var undoPurge = broker.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.RevertRun, RunId: purge.RunId));
-        Assert.Equal("Irreversible", Assert.Single(undoPurge.Results!).Outcome);
+        // Esvaziado por inteiro → "Irreversible"; esvaziamento parcial (arquivos do runner) fica aceito → "NothingToRevert". Nunca restaura.
+        Assert.Contains(Assert.Single(undoPurge.Results!).Outcome, new[] { "Irreversible", "NothingToRevert" });
         var undoClean = broker.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.RevertRun, RunId: clean.RunId));
         Assert.NotEqual(true, undoClean.FullyRestored);
         Assert.False(File.Exists(old));

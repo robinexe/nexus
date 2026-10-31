@@ -106,7 +106,7 @@ Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile
 
 [Code]
 const
-  FILE_ATTRIBUTE_REPARSE_POINT = $400;
+  NX_ATTR_REPARSE_POINT = $400;
   SERVICE_NAME = 'NexusBroker';
 
 var
@@ -258,7 +258,7 @@ begin
   if FindFirst(AddBackslash(Dir) + '*', F) then
   try
     repeat
-      if (F.Name <> '.') and (F.Name <> '..') and ((F.Attributes and FILE_ATTRIBUTE_REPARSE_POINT) = 0) then
+      if (F.Name <> '.') and (F.Name <> '..') and ((F.Attributes and NX_ATTR_REPARSE_POINT) = 0) then
       begin
         if (F.Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0 then
           Result := Result + CountFiles(AddBackslash(Dir) + F.Name, Limit - Result)
@@ -281,7 +281,7 @@ begin
   Attr := GetFileAttributes(Path);
   if Attr = -1 then
     Exit;
-  if (Attr and FILE_ATTRIBUTE_REPARSE_POINT) <> 0 then
+  if (Attr and NX_ATTR_REPARSE_POINT) <> 0 then
   begin
     if (Attr and FILE_ATTRIBUTE_DIRECTORY) <> 0 then
       RemoveDir(Path)
@@ -312,7 +312,7 @@ var
 begin
   if not DirExists(Dir) then
     Exit;
-  if (GetFileAttributes(Dir) and FILE_ATTRIBUTE_REPARSE_POINT) <> 0 then
+  if (GetFileAttributes(Dir) and NX_ATTR_REPARSE_POINT) <> 0 then
   begin
     Log('Pasta de dados é link/junção; não removida: ' + Dir);
     Exit;
