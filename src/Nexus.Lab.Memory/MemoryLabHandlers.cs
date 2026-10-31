@@ -9,6 +9,6 @@ public static class MemoryLabHandlers
     public static IEnumerable<IActionHandler> Create(HandlerEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(environment);
-        return [];
+        return [new PageFileHandler(environment.Registry)];
     }
 }
