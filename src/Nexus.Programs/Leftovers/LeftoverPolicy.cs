@@ -73,6 +73,11 @@ public static class LeftoverPolicy
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException) { return "Caminho inválido."; }
         if (!string.Equals(full, path, StringComparison.Ordinal) || path.EndsWith(Path.DirectorySeparatorChar) || path.Contains("..", StringComparison.Ordinal))
             return "Caminho não canônico (com '..', barra final ou separadores repetidos).";
+        // Nome curto 8.3 ("MICROS~1") e fluxo alternativo (":"): o Windows os resolve para outro nome, e as listas de nomes
+        // protegidos e a sobreposição com programas instalados (comparações de texto) não os reconheceriam. Ex.:
+        // C:\ProgramData\MICROS~1 é C:\ProgramData\Microsoft.
+        if (path.IndexOf(':', 2) >= 0 || HasShortNameSegment(path))
+            return "Caminho com nome curto (~1) ou fluxo alternativo (:): use o caminho completo.";
 
         var root = roots.Where(r => r.Length > 0).Select(TrimSep).FirstOrDefault(r => IsStrictlyUnder(path, r));
         if (root is null) return "Fora das pastas onde o NEXUS procura sobras (Program Files, ProgramData, AppData).";
@@ -140,6 +145,15 @@ public static class LeftoverPolicy
             !dir.Contains(@"\Windows\", StringComparison.OrdinalIgnoreCase) && !dir.EndsWith(@"\Windows", StringComparison.OrdinalIgnoreCase) &&
             !dir.Contains("Package Cache", StringComparison.OrdinalIgnoreCase) && !dir.Contains("Installer", StringComparison.OrdinalIgnoreCase))
             yield return TrimSep(dir);
+    }
+
+    /// <summary>Algum segmento tem a forma de nome curto 8.3 gerado pelo Windows (til seguido de dígito).</summary>
+    public static bool HasShortNameSegment(string path)
+    {
+        ArgumentNullException.ThrowIfNull(path);
+        for (var i = path.IndexOf('~', StringComparison.Ordinal); i >= 0; i = path.IndexOf('~', i + 1))
+            if (i + 1 < path.Length && char.IsAsciiDigit(path[i + 1])) return true;
+        return false;
     }
 
     public static bool IsStrictlyUnder(string path, string root)

@@ -648,6 +648,11 @@ public class ProgramLeftoverHandlerTests
         var h = Handler(t, reg, installed);
 
         Assert.Equal(ApplicabilityKind.Blocked, h.Assess(Action("file", "HKLM", Path.Combine(t.ProgramFiles, "Microsoft")), T.Ctx).Kind);
+        // Revisão de segurança: nome curto 8.3 (C:\ProgramData\MICROS~1 = Microsoft) e fluxo alternativo passavam pela lista.
+        TempTree.Dir(t.ProgramData, "MICROS~1");
+        Assert.Contains("nome curto", h.Assess(Action("file", "HKLM", Path.Combine(t.ProgramData, "MICROS~1")), T.Ctx).Reason, StringComparison.Ordinal);
+        Assert.Contains("nome curto", h.Assess(Action("file", "HKCU", Path.Combine(t.Roaming, "Zed", "STILLI~1")), T.Ctx).Reason, StringComparison.Ordinal);
+        Assert.Contains("nome curto", h.Assess(Action("file", "HKLM", Path.Combine(t.ProgramData, "Old:fluxo")), T.Ctx).Reason, StringComparison.Ordinal);
         Assert.Equal(ApplicabilityKind.Blocked, h.Assess(Action("file", "HKLM", Path.Combine(t.ProgramFiles, "Still Installed")), T.Ctx).Kind);
         Assert.Equal(ApplicabilityKind.Blocked, h.Assess(Action("file", "HKLM", Path.Combine(t.Root, "Outside")), T.Ctx).Kind);
         Assert.Equal(ApplicabilityKind.Blocked, h.Assess(Action("file", "HKLM", t.Data), T.Ctx).Kind);
