@@ -57,4 +57,108 @@
         <TextBlock Text="{Binding Converter={StaticResource StatusText}}" FontSize="11" Foreground="White" TextWrapping="NoWrap"/>
       </Border>
     </DataTemplate>
+
+  <!-- ===== Contrato de estilos (nomes fixos; o visual pode ser refinado) ===== -->
+  <Style x:Key="Text.Display" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
+    <Setter Property="FontSize" Value="{StaticResource Size.Display}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+  </Style>
+  <Style x:Key="Text.H1" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
+    <Setter Property="FontSize" Value="{StaticResource Size.H1}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+  </Style>
+  <Style x:Key="Text.H2" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
+    <Setter Property="FontSize" Value="{StaticResource Size.H2}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+  </Style>
+  <Style x:Key="Text.Body" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Body}"/>
+    <Setter Property="FontSize" Value="{StaticResource Size.Body}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+    <Setter Property="LineHeight" Value="20"/>
+  </Style>
+  <Style x:Key="Text.Small" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Body}"/>
+    <Setter Property="FontSize" Value="{StaticResource Size.Small}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+  </Style>
+  <Style x:Key="Text.Metric" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
+    <Setter Property="FontSize" Value="{StaticResource Size.Metric}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+  </Style>
+  <Style x:Key="Text.MetricLabel" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Body}"/>
+    <Setter Property="FontSize" Value="{StaticResource Size.Small}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+  </Style>
+
+  <Style x:Key="Panel.Card" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource Brush.Surface}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Card}"/>
+    <Setter Property="Padding" Value="16"/>
+  </Style>
+  <Style x:Key="Panel.Hero" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource Brush.SurfaceHi}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Panel}"/>
+    <Setter Property="Padding" Value="24"/>
+  </Style>
+  <Style x:Key="Panel.Inset" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource Brush.Bg}"/>
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Control}"/>
+    <Setter Property="Padding" Value="12"/>
+  </Style>
+  <!-- Aviso: fundo âmbar escuro. Use para "nada é aplicado aqui", limites, cuidados. -->
+  <Style x:Key="Panel.Notice" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource Brush.WarnBg}"/>
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Control}"/>
+    <Setter Property="Padding" Value="12,10"/>
+  </Style>
+
+  <Style x:Key="Button.Primary" TargetType="Button">
+    <Setter Property="Background" Value="{StaticResource Brush.Trace}"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Bg}"/>
+    <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
+    <Setter Property="Padding" Value="16,8"/>
+    <Setter Property="Margin" Value="0,0,8,0"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style x:Key="Button.Secondary" TargetType="Button">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="14,7"/>
+    <Setter Property="Margin" Value="0,0,8,0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style x:Key="Button.Ghost" TargetType="Button">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Signal}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="8,4"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style x:Key="Button.Danger" TargetType="Button">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Bad}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Bad}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="14,7"/>
+    <Setter Property="Margin" Value="0,0,8,0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
 </ResourceDictionary>
