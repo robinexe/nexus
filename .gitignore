@@ -24,3 +24,6 @@ nexus-export*.json
 # Kit de VM: gerados no hospedeiro
 vm-config/
 vm-saida/
+
+# Publicação (tools/packaging/publish.py)
+artifacts/
