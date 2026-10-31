@@ -10,12 +10,16 @@ Ainda **não feitas** pelo responsável:
 
 1. [x] **(Feito em 31/10 02:30.)** **Tornar o repositório privado.** Ele foi criado público: github.com/robinexe/nexus → Settings → "Change
    repository visibility" → Make private. A sessão do assistente não tem permissão para mudar isso.
-2. [ ] **Revogar o token do GitHub colado na conversa de 31/10** (GitHub → Settings → Developer settings → Fine-grained
+2. [x] **(Feito pelo responsável em 31/10 02:49; conferido na lista de tokens.)** **Revogar o token do GitHub colado na conversa de 31/10** (GitHub → Settings → Developer settings → Fine-grained
    tokens). O token nunca foi gravado no repositório. Ele nem foi usado para o envio, mas ficou no histórico da conversa.
 3. [x] **(Feito em 31/10 02:25 no PC novo: 143/143, 0 avisos, coordenação 10/10, descoberta 0 indisponíveis; ver `docs/06-build-log.md`.)** Validar a Etapa 3 no Windows: `powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1`. O
    esperado são 143 testes aprovados e 0 avisos. Devolver o log gerado em `%TEMP%`.
-4. [ ] (Opcional) Ativar o Windows Sandbox (exige administrador e reinício) e rodar `tools\vm\Prepare-Sandbox.ps1`.
-   Depois, duplo clique em `vm-config\nexus-sandbox.wsb`.
+4. [ ] **Testes de integração reais:** o Windows Sandbox **não existe no Windows Home** deste PC. Criado o workflow
+   `.github/workflows/vm-integracao.yml` (VM Windows descartável do GitHub Actions, elevada), mas o GitHub recusou
+   rodar em 31/10: "billing is currently locked" na conta robinexe. Para destravar: GitHub → Settings → Billing and
+   plans → atualizar a forma de pagamento (repositório privado usa a cota gratuita de minutos; o bloqueio é de
+   cadastro). Depois: Actions → vm-integracao → Run workflow. Alternativa sem GitHub: VM local (VirtualBox) com
+   Windows, ver `tools/vm/README.md`. Rodar como administrador no PC físico continua fora de questão.
 5. [x] **(Decidido em 31/10, por delegação do responsável: "faça tudo, não me pergunte nada".)** A1: mantido
    (restaura e marca como inferido). R3: `nexus-recover accept <entryId>` implementado (esquema do diário 3).
    R5: mantido (o `--force` confirmado vale para a nova tentativa da mesma entrada). Detalhes e motivos no fim de
