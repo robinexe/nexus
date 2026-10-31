@@ -8,6 +8,7 @@ using Nexus.SystemTools.Appx;
 using Nexus.SystemTools.Drivers;
 using Nexus.SystemTools.Restore;
 using Nexus.SystemTools.Wifi;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -37,7 +38,10 @@ public sealed class SystemActionRow : ObservableObject
     public string ShortTitle => Title.Length > 70 ? string.Concat(Title.AsSpan(0, 70), "…") : Title;
     public string Status { get => _status; set => Set(ref _status, value); }
     /// <summary>good, bad, trace, signal ou muted (cor do selo).</summary>
-    public string Tone { get => _tone; set => Set(ref _tone, value); }
+    public string Tone { get => _tone; set { if (Set(ref _tone, value)) OnPropertyChanged(nameof(ToneValue)); } }
+    /// <summary><see cref="Tone"/> no design system (selo do item e cor do estado).</summary>
+    public UiTone ToneValue => _tone switch { "good" => UiTone.Good, "bad" => UiTone.Bad, "trace" => UiTone.Warn, "signal" => UiTone.Info, _ => UiTone.Neutral };
+    public bool HasBadge => Badge.Length > 0;
     public Guid? RunId { get => _runId; set { if (Set(ref _runId, value)) OnPropertyChanged(nameof(CanRevert)); } }
     public bool Applied { get => _applied; set { if (Set(ref _applied, value)) { if (value) IsChecked = false; OnPropertyChanged(nameof(CanApply)); OnPropertyChanged(nameof(CanRevert)); } } }
     public bool CanRevert => _applied && _runId is not null;
@@ -70,6 +74,9 @@ public sealed class SystemToolsPage : ModulePage
     private bool _onlyCandidates = true;
     private List<SystemActionRow> _allDrivers = [];
     private int _driverCandidates;
+    private bool _reading;
+    private double _dnsNumber = double.NaN, _arpNumber = double.NaN, _driverPackages = double.NaN, _restoreCount = double.NaN, _oldWifi = double.NaN;
+    private UiTone _protectionTone = UiTone.Neutral;
 
     public SystemToolsPage()
     {
@@ -125,7 +132,7 @@ public sealed class SystemToolsPage : ModulePage
     public ObservableCollection<SystemActionRow> Drivers { get; } = [];
     public string DriverNote { get => _driverNote; private set => Set(ref _driverNote, value); }
     public string DriverBackupInfo { get => _driverBackup; private set => Set(ref _driverBackup, value); }
-    public int DriverCandidates { get => _driverCandidates; private set => Set(ref _driverCandidates, value); }
+    public int DriverCandidates { get => _driverCandidates; private set { if (Set(ref _driverCandidates, value)) { OnPropertyChanged(nameof(DriverCandidatesNumber)); OnPropertyChanged(nameof(FixableNumber)); } } }
     public bool OnlyCandidates
     {
         get => _onlyCandidates;
@@ -136,6 +143,28 @@ public sealed class SystemToolsPage : ModulePage
     public ObservableCollection<RestorePointRow> RestorePoints { get; } = [];
     public string RestoreNote { get => _restoreNote; private set => Set(ref _restoreNote, value); }
     public string ProtectionStatus { get => _protection; private set => Set(ref _protection, value); }
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Lendo (esqueleto no destaque e nas listas).</summary>
+    public bool IsLoading { get => _reading; private set => Set(ref _reading, value); }
+    public double DnsNumber { get => _dnsNumber; private set => Set(ref _dnsNumber, value); }
+    public double ArpNumber { get => _arpNumber; private set => Set(ref _arpNumber, value); }
+    public double WifiNumber => WifiProfiles.Count;
+    /// <summary>Redes salvas sem conexão há 6+ meses.</summary>
+    public double OldWifiNumber { get => _oldWifi; private set => Set(ref _oldWifi, value); }
+    public double DriverPackagesNumber { get => _driverPackages; private set => Set(ref _driverPackages, value); }
+    public double DriverCandidatesNumber => DriverCandidates;
+    public double AppsNumber => Apps.Count;
+    public double RestorePointNumber { get => _restoreCount; private set => Set(ref _restoreCount, value); }
+    /// <summary>O que dá para arrumar: versões antigas de driver sem uso + redes Wi-Fi esquecidas (NaN antes de ler).</summary>
+    public double FixableNumber => double.IsNaN(OldWifiNumber) ? double.NaN : DriverCandidates + OldWifiNumber;
+    /// <summary>Verde: Proteção do Sistema ligada; vermelho: desligada; neutro: não lida.</summary>
+    public UiTone ProtectionTone { get => _protectionTone; private set => Set(ref _protectionTone, value); }
+    public string ProtectionChip => ProtectionTone switch { UiTone.Good => "Proteção do Sistema ligada", UiTone.Bad => "Proteção do Sistema desligada", _ => "Proteção do Sistema: não lida" };
+    public bool HasWifi => WifiProfiles.Count > 0;
+    public bool HasApps => Apps.Count > 0;
+    public bool HasRestorePoints => RestorePoints.Count > 0;
 
     public ICommand RefreshCommand { get; }
     public ICommand FlushDnsCommand { get; }
@@ -159,7 +188,14 @@ public sealed class SystemToolsPage : ModulePage
 
     private async Task LoadAsync()
     {
-        Message = "Lendo rede, Wi-Fi, drivers, apps e pontos de restauração…";
+        Message = "";
+        IsLoading = true;
+        try { await LoadCoreAsync(); }
+        finally { IsLoading = false; }
+    }
+
+    private async Task LoadCoreAsync()
+    {
         var network = Task.Run(SystemToolsReader.Network);
         var wifi = Task.Run(SystemToolsReader.Wifi);
         var drivers = Task.Run(SystemToolsReader.Drivers);
@@ -173,6 +209,8 @@ public sealed class SystemToolsPage : ModulePage
             ? "contar as entradas exige administrador neste Windows (limpar não exige)"
             : "entradas guardadas";
         ArpEntries = N(n.ArpEntries);
+        DnsNumber = n.DnsEntries is { } dn ? dn : double.NaN;
+        ArpNumber = n.ArpEntries is { } an ? an : double.NaN;
         FillWifi(await wifi);
         FillDriverReading(await drivers);
         var b = await backups;
@@ -180,6 +218,8 @@ public sealed class SystemToolsPage : ModulePage
         FillApps(await apps);
         FillRestore(await restore);
         Message = $"Lido às {DateTime.Now:HH:mm}.";
+        foreach (var name in new[] { nameof(WifiNumber), nameof(AppsNumber), nameof(HasWifi), nameof(HasApps), nameof(HasRestorePoints), nameof(FixableNumber) })
+            OnPropertyChanged(name);
     }
 
     // ------------------------------------------------------------------ Wi-Fi
@@ -201,9 +241,11 @@ public sealed class SystemToolsPage : ModulePage
             };
             row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveWifiAsync([row])), () => !Busy && row.CanApply);
             row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertRowAsync(row, BrokerLevel.Admin)), () => !Busy && row.CanRevert);
+            if (old) row.Tone = "trace";
             WifiProfiles.Add(row);
         }
         WifiNote = r.Profiles.Count == 0 ? r.Note ?? "Nenhuma rede Wi-Fi salva." : $"{r.Profiles.Select(p => p.Name).Distinct().Count()} rede(s) salva(s).";
+        OldWifiNumber = WifiProfiles.Count(w => w.HasBadge);
     }
 
     private Task RemoveWifiAsync(List<SystemActionRow> rows) => ApplyBatchAsync(rows, "rede(s) Wi-Fi", "Remover rede Wi-Fi salva",
@@ -245,6 +287,7 @@ public sealed class SystemToolsPage : ModulePage
             _allDrivers.Add(row);
         }
         DriverCandidates = _allDrivers.Count(x => x.Tag is true);
+        DriverPackagesNumber = r.Packages.Count;
         DriverNote = r.InUse is null
             ? $"{r.Packages.Count} pacotes de terceiros. Não foi possível saber quais estão em uso (requer Windows 10 2004+): nenhuma remoção é oferecida."
             : $"{r.Packages.Count} pacotes de terceiros no repositório; {DriverCandidates} versão(ões) antiga(s) sem uso.";
@@ -342,6 +385,9 @@ public sealed class SystemToolsPage : ModulePage
         RestoreNote = r.Points.Items is null
             ? (r.Points.Error ?? "Não foi possível listar.") + " Abra a Restauração do Sistema para ver os pontos."
             : r.Points.Items.Count == 0 ? "Nenhum ponto de restauração no PC." : $"{r.Points.Items.Count} ponto(s) de restauração.";
+        RestorePointNumber = r.Points.Items is { } list ? list.Count : double.NaN;
+        ProtectionTone = r.DisabledByPolicy ? UiTone.Bad : r.ProtectedDrives is null ? UiTone.Neutral : r.ProtectedDrives.Count == 0 ? UiTone.Bad : UiTone.Good;
+        OnPropertyChanged(nameof(ProtectionChip));
         ProtectionStatus = r.DisabledByPolicy ? "Desligada por política (organização)."
             : r.ProtectedDrives is null ? "Estado da Proteção do Sistema não pôde ser lido."
             : r.ProtectedDrives.Count == 0 ? "Proteção do Sistema desligada em todas as unidades: não há como criar pontos."

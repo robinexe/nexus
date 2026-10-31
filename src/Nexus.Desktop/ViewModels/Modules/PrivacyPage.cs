@@ -6,6 +6,7 @@ using Nexus.Core;
 using Nexus.HardwareDiscovery;
 using Nexus.Privacy;
 using Nexus.WindowsActions.Registry;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -34,6 +35,10 @@ public sealed class PrivacyPage : ModulePage
     private int _selectedPending;
     private string _buildNote = "";
     private string _lastResult = "";
+    private double _scorePercent = double.NaN;
+    private double _protectedNumber = double.NaN;
+    private double _applicableNumber = double.NaN;
+    private double _exposedNumber = double.NaN;
 
     public PrivacyPage()
     {
@@ -63,16 +68,31 @@ public sealed class PrivacyPage : ModulePage
     /// <summary>0 a 1, para a barra do placar.</summary>
     public double ScoreFraction { get => _scoreFraction; private set => Set(ref _scoreFraction, value); }
     public string ScoreCaption { get => _scoreCaption; private set => Set(ref _scoreCaption, value); }
-    public int RecommendedPending { get => _recommendedPending; private set { if (Set(ref _recommendedPending, value)) OnPropertyChanged(nameof(RecommendedText)); } }
-    public int StrictPending { get => _strictPending; private set { if (Set(ref _strictPending, value)) OnPropertyChanged(nameof(StrictText)); } }
-    public int SelectedPending { get => _selectedPending; private set { if (Set(ref _selectedPending, value)) OnPropertyChanged(nameof(SelectedText)); } }
+    public int RecommendedPending { get => _recommendedPending; private set { if (Set(ref _recommendedPending, value)) { OnPropertyChanged(nameof(RecommendedText)); OnPropertyChanged(nameof(RecommendedNumber)); } } }
+    public int StrictPending { get => _strictPending; private set { if (Set(ref _strictPending, value)) { OnPropertyChanged(nameof(StrictText)); OnPropertyChanged(nameof(StrictNumber)); } } }
+    public int SelectedPending { get => _selectedPending; private set { if (Set(ref _selectedPending, value)) { OnPropertyChanged(nameof(SelectedText)); OnPropertyChanged(nameof(SelectedNumber)); } } }
     public string RecommendedText => RecommendedPending == 0 ? "Recomendado: tudo aplicado" : $"Recomendado: {Plural(RecommendedPending, "item falta", "itens faltam")}";
     public string StrictText => StrictPending == 0 ? "Rígido: tudo aplicado" : $"Rígido: {Plural(StrictPending, "item falta", "itens faltam")}";
     public string SelectedText => SelectedPending == 0 ? "Nenhum item marcado" : $"{Plural(SelectedPending, "item marcado", "itens marcados")}";
     public string BuildNote { get => _buildNote; private set => Set(ref _buildNote, value); }
     public string LastResult { get => _lastResult; private set { if (Set(ref _lastResult, value)) OnPropertyChanged(nameof(HasLastResult)); } }
     public bool HasLastResult => LastResult.Length > 0;
-    public bool HasRead { get => _hasRead; private set => Set(ref _hasRead, value); }
+    public bool HasRead { get => _hasRead; private set { if (Set(ref _hasRead, value)) OnPropertyChanged(nameof(IsLoading)); } }
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Esqueleto no destaque e na lista: lendo pela primeira vez.</summary>
+    public bool IsLoading => _scanning && !HasRead;
+    /// <summary>Protegidos / que se aplicam, em % (NaN antes da primeira leitura): o anel do destaque.</summary>
+    public double ScorePercent { get => _scorePercent; private set => Set(ref _scorePercent, value); }
+    public double ProtectedNumber { get => _protectedNumber; private set => Set(ref _protectedNumber, value); }
+    public double ApplicableNumber { get => _applicableNumber; private set => Set(ref _applicableNumber, value); }
+    /// <summary>Itens expostos ou parciais (o que ainda dá para proteger).</summary>
+    public double ExposedNumber { get => _exposedNumber; private set => Set(ref _exposedNumber, value); }
+    public double RecommendedNumber => RecommendedPending;
+    public double StrictNumber => StrictPending;
+    public double SelectedNumber => SelectedPending;
+    public string ProtectedCaption => double.IsNaN(ApplicableNumber) ? "" : $"de {ApplicableNumber.ToString("0", CultureInfo.CurrentCulture)} que valem para este Windows";
     public bool CanUndo => _applied.Count > 0;
 
     private static string Plural(int n, string one, string many) => n == 1 ? $"1 {one}" : $"{n.ToString(CultureInfo.CurrentCulture)} {many}";
@@ -92,6 +112,7 @@ public sealed class PrivacyPage : ModulePage
     {
         if (_scanning) return;
         _scanning = true;
+        OnPropertyChanged(nameof(IsLoading));
         try
         {
             if (_build == 0 && Host?.Facts?.WindowsBuild is { } b) _build = b;
@@ -114,7 +135,7 @@ public sealed class PrivacyPage : ModulePage
             ScoreCaption = "Não foi possível ler o estado.";
             Message = $"Leitura falhou: {ex.Message}";
         }
-        finally { _scanning = false; }
+        finally { _scanning = false; OnPropertyChanged(nameof(IsLoading)); }
     }
 
     private void Rebuild(Dictionary<string, string?> consent)
@@ -134,6 +155,11 @@ public sealed class PrivacyPage : ModulePage
         var score = PrivacyPlanner.Score(_states);
         ScoreText = score.ToString();
         ScoreFraction = score.Fraction;
+        ScorePercent = score.Applicable == 0 ? double.NaN : score.Fraction * 100;
+        ProtectedNumber = score.Protected;
+        ApplicableNumber = score.Applicable;
+        ExposedNumber = score.Applicable - score.Protected;
+        OnPropertyChanged(nameof(ProtectedCaption));
         ScoreCaption = score.Applicable == 0 ? "Nenhum item se aplica a este Windows."
             : $"{Plural(score.Protected, "proteção ativa", "proteções ativas")} de {score.Applicable} que se aplicam a este Windows" +
               (score.Partial > 0 ? $" ({Plural(score.Partial, "item parcial", "itens parciais")})." : ".");
@@ -229,6 +255,30 @@ public sealed class PrivacyThemeGroup(string theme, IReadOnlyList<PrivacyItemRow
     public string Theme { get; } = theme;
     public IReadOnlyList<PrivacyItemRow> Items { get; } = items;
     public string Count => $"{Items.Count(i => i.State.Status == PrivacyItemStatus.Protected)}/{Items.Count(i => i.State.Status != PrivacyItemStatus.NotApplicable)}";
+
+    public int ProtectedCount => Items.Count(i => i.State.Status == PrivacyItemStatus.Protected);
+    public int ApplicableCount => Items.Count(i => i.State.Status != PrivacyItemStatus.NotApplicable);
+    /// <summary>0 a 100, para a barra do cartão do tema.</summary>
+    public double Percent => ApplicableCount == 0 ? 0 : 100.0 * ProtectedCount / ApplicableCount;
+    public string CountText => ApplicableCount == 0 ? "não se aplica a este Windows" : $"{ProtectedCount} de {ApplicableCount} protegidos";
+    public UiTone Tone => ApplicableCount == 0 ? UiTone.Neutral : ProtectedCount == ApplicableCount ? UiTone.Good : ProtectedCount == 0 ? UiTone.Bad : UiTone.Warn;
+    /// <summary>Ícone do tema (Icons.xaml), escolhido pelo nome do tema do catálogo.</summary>
+    public string IconKey => IconFor(Theme);
+
+    internal static string IconFor(string theme) => theme switch
+    {
+        _ when theme.StartsWith("Anúncios", StringComparison.Ordinal) => "Icon.Sparkle",
+        _ when theme.StartsWith("Atividade", StringComparison.Ordinal) => "Icon.History",
+        _ when theme.StartsWith("Localização", StringComparison.Ordinal) => "Icon.Network",
+        _ when theme.Contains("Edge", StringComparison.Ordinal) => "Icon.Browser",
+        _ when theme.Contains("Office", StringComparison.Ordinal) => "Icon.Apps",
+        _ when theme.StartsWith("Pesquisa", StringComparison.Ordinal) => "Icon.Search",
+        _ when theme.StartsWith("Telemetria", StringComparison.Ordinal) => "Icon.Diagnostics",
+        _ when theme.StartsWith("Voz", StringComparison.Ordinal) => "Icon.User",
+        _ when theme.StartsWith("Permiss", StringComparison.Ordinal) => "Icon.Lock",
+        _ when theme.StartsWith("Serviços", StringComparison.Ordinal) => "Icon.Services",
+        _ => "Icon.Privacy",
+    };
 }
 
 /// <summary>Um item com interruptor: marcado = entra na próxima aplicação.</summary>
@@ -268,6 +318,14 @@ public sealed class PrivacyItemRow : ObservableObject
     }
 
     public string StatusKey => State.Status.ToString();
+    /// <summary>Tom do selo: verde protegido, âmbar parcial, vermelho exposto.</summary>
+    public UiTone StatusTone => State.Status switch
+    {
+        PrivacyItemStatus.Protected => UiTone.Good,
+        PrivacyItemStatus.Partial => UiTone.Warn,
+        PrivacyItemStatus.Exposed => UiTone.Bad,
+        _ => UiTone.Neutral,
+    };
     public string StatusText => State.Status switch
     {
         PrivacyItemStatus.Protected => "Protegido",
@@ -328,6 +386,7 @@ public sealed class PrivacyInfoRow
     public PrivacyInfo Info { get; }
     public string Title => Info.Title;
     public string Text => Info.Text;
+    public string IconKey => PrivacyThemeGroup.IconFor(Info.Theme);
     public string State { get; }
     public bool CanOpen => Info.SettingsUri is not null;
     public ICommand OpenCommand { get; }
