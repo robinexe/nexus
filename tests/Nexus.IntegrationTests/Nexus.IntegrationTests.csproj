@@ -19,11 +19,18 @@
     <ProjectReference Include="..\..\src\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
     <ProjectReference Include="..\..\src\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Recovery.Cli\Nexus.Recovery.Cli.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Broker.Host\Nexus.Broker.Host.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\catalog\actions.v1.json" Link="catalog\actions.v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+  <Target Name="CopyBrokerHost" AfterTargets="Build">
+    <ItemGroup>
+      <BrokerHostFiles Include="$(MSBuildThisFileDirectory)..\..\src\Nexus.Broker.Host\bin\$(Configuration)\net10.0-windows\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BrokerHostFiles)" DestinationFiles="@(BrokerHostFiles->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

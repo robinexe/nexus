@@ -174,8 +174,10 @@ public sealed class CoordinationTests : IDisposable
     }
 
     [Fact]
-    public void Cli_recover_is_blocked_by_the_gate_outside_a_test_vm()
+    public void Cli_recover_works_on_this_pc_without_special_flags()
     {
+        // Mudança de especificação (31/10/2026, decisão do responsável): recover/revert funcionam no PC físico sem
+        // --host-emergency. Continuam exigindo a trava (exit 5/6) e só desfazem o que o diário registrou.
         File.WriteAllText(Cfg, "fps_max 300\n");
         var ready = Path.Combine(_dir, "ready");
         var child = StartHelper("apply-and-hang", Journal, _dir, ready);
@@ -183,12 +185,12 @@ public sealed class CoordinationTests : IDisposable
         Kill(child); // execução abandonada com 400 aplicado
 
         _withoutEmergency = true;
-        var refused = Cli("recover");
-        Assert.Equal(7, refused.Exit);
-        Assert.Contains("RECUSADO", refused.Out, StringComparison.Ordinal);
-        Assert.Equal("400", FpsMax());                         // nada foi alterado
-        Assert.Equal(JournalState.Applying, StateOf(Journal));
-        Assert.Equal(1, Cli("scan").Exit);                     // consulta continua funcionando
+        Assert.Equal(1, Cli("scan").Exit);
+        var recovered = Cli("recover");
+        Assert.Equal(0, recovered.Exit);
+        Assert.DoesNotContain("RECUSADO", recovered.Out, StringComparison.Ordinal);
+        Assert.Equal("300", FpsMax());
+        Assert.Equal(JournalState.Reverted, StateOf(Journal));
     }
 
     [Fact]

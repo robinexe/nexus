@@ -16,6 +16,7 @@ on:
       - 'src/Nexus.Broker/**'
       - 'src/Nexus.Broker.Host/**'
       - 'tools/service/**'
+      - 'src/Nexus.Broker.Host/**'
 
 permissions:
   contents: read
@@ -76,6 +77,12 @@ jobs:
       - name: Testes de integração (handlers reais, elevado)
         shell: pwsh
         run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter Category=VmIntegration --logger "console;verbosity=detailed" --logger "trx;LogFileName=integracao.trx" --results-directory saida
+
+      - name: Aplicador sob demanda (como a interface aplica neste PC, sem serviço)
+        shell: pwsh
+        run: |
+          dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter Category=LocalBrokerIntegration --logger "console;verbosity=detailed" --logger "trx;LogFileName=sob-demanda.trx" --results-directory saida
+          Start-Sleep -Seconds 10   # o aplicador sob demanda encerra quando o processo de teste termina
 
       - name: Instalar o broker como serviço (LocalSystem)
         shell: pwsh

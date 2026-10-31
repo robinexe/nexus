@@ -78,3 +78,29 @@ public sealed class VmOnlyExecutionGate : IExecutionGate
             : new(false, distrust);
     }
 }
+
+/// <summary>
+/// Execução neste PC autorizada pelo usuário (decisão do responsável em 31/10/2026: o NEXUS aplica de verdade em qualquer PC).
+/// O broker só recebe <c>--allow-host</c> quando é iniciado pela interface (depois da confirmação do usuário e, para ações de
+/// administrador, do aviso do Windows) ou pelo instalador do serviço com <c>-AllowHost</c>. As proteções continuam: catálogo
+/// fechado, política de alvos proibidos, diário antes de escrever, verificação, reversão e ponto de restauração.
+/// </summary>
+public sealed class HostConsentGate : IExecutionGate
+{
+    public GateDecision Evaluate() => new(true, "Aplicação neste PC autorizada pelo usuário. Tudo é registrado no diário e pode ser desfeito.");
+}
+
+/// <summary>Libera se qualquer um dos portões liberar; o motivo é o do primeiro que liberou (ou o do último, se nenhum).</summary>
+public sealed class AnyGate(params IExecutionGate[] gates) : IExecutionGate
+{
+    public GateDecision Evaluate()
+    {
+        GateDecision? last = null;
+        foreach (var g in gates)
+        {
+            last = g.Evaluate();
+            if (last.Allowed) return last;
+        }
+        return last ?? new(false, "Nenhum portão configurado.");
+    }
+}

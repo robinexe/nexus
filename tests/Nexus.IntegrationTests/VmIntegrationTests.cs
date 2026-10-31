@@ -68,7 +68,7 @@ public sealed class VmIntegrationTests : IDisposable
         var ctx = new SystemContext(facts.WindowsBuild ?? 0, facts.CpuModel ?? "?", facts.GpuVendorPrimary, Vm.Elevated);
         var p = new Dictionary<string, string>();
         if (facts.ActivePowerScheme is { } s) p["activeScheme"] = s.ToString("D");
-        var catalog = CatalogLoader.Load(Path.Combine(AppContext.BaseDirectory, "catalog", "actions.v1.json"));
+        var catalog = CatalogLoader.LoadDirectory(Path.Combine(AppContext.BaseDirectory, "catalog"));
         return (new BrokerService(catalog, RealHandlers(), journal, FileRunCoordinator.ForJournal(JournalPath), Vm.Gate, () => ctx, () => p), journal);
     }
 

@@ -466,7 +466,7 @@ public sealed class BrokerTests : IDisposable
         var r = s.Execute([new ActionRequest("t.persist@1")]);
         Assert.False(r.Connected);
         Assert.False(r.Ok);
-        Assert.Contains("não instalado ou parado", r.Message, StringComparison.Ordinal);
+        Assert.Contains("não respondeu", r.Message, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -20,7 +20,15 @@ public sealed class MainViewModel : ObservableObject
     };
 
     private readonly NexusServices _services = new();
-    private readonly BrokerSession _broker = BrokerSession.ForInstalledService();
+    private static readonly string UserSid = System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value;
+    private BrokerLevel _lastLevel = BrokerLevel.User;
+
+    /// <summary>Aplicar neste PC: broker sob demanda do nível pedido (usuário sem aviso; administrador com o aviso do Windows).</summary>
+    private BrokerSession Session(BrokerLevel level) =>
+        BrokerSession.ForThisPc(level, AppContext.BaseDirectory, UserSid, m => System.Windows.Application.Current?.Dispatcher.Invoke(() => Broker.LastMessage = m));
+
+    private static BrokerLevel LevelFor(IEnumerable<(CatalogEntry Entry, ActionInstance Instance)> chosen) =>
+        chosen.Any(c => c.Entry.Definition.Privileges == PrivilegeLevel.Admin) ? BrokerLevel.Admin : BrokerLevel.User;
     private PageViewModel _selectedPage;
     private string _status = "Iniciando…";
     private bool _busy;
@@ -74,7 +82,7 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand ShowHardwareCommand { get; }
 
     public string ModeBanner { get; } =
-        "A interface não muda nada no seu PC por conta própria. Aplicar só acontece pelo serviço NexusBroker (página Aplicar), que recusa qualquer escrita fora de uma VM de teste liberada.";
+        "Nada muda sem você confirmar. Cada alteração fica registrada e pode ser desfeita; mudanças de sistema pedem permissão ao Windows e criam um ponto de restauração.";
 
     public async Task LoadAsync()
     {
@@ -99,6 +107,7 @@ public sealed class MainViewModel : ObservableObject
             var unavailable = snapshot.Sections.SelectMany(s => s.Facts).Count(f => f.Status == FactStatus.Unavailable);
             Overview.Footer = $"Leitura concluída em {snapshot.Elapsed.TotalSeconds:0.0} s · {unavailable} valor(es) indisponível(is), cada um com o motivo.";
             Status = $"Pronto · leitura de {snapshot.TakenAt:HH:mm:ss}";
+            CheckPendingRecovery();
         }
         catch (Exception ex)
         {
@@ -115,7 +124,7 @@ public sealed class MainViewModel : ObservableObject
         CatalogDocument doc;
         try
         {
-            doc = CatalogLoader.Load(NexusServices.CatalogPath);
+            doc = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
         }
         catch (Exception ex) when (ex is IOException or JsonException or InvalidDataException or ArgumentException or UnauthorizedAccessException)
         {
@@ -219,12 +228,15 @@ public sealed class MainViewModel : ObservableObject
     private List<(CatalogEntry Entry, ActionInstance Instance)> Chosen() =>
         Plan.Candidates.Where(c => c.Include && c.Instance is not null).Select(c => (c.Entry, c.Instance!)).ToList();
 
-    private async Task<BrokerCallResult> CallBrokerAsync(Func<BrokerSession, BrokerCallResult> call)
+    private Task<BrokerCallResult> CallBrokerAsync(Func<BrokerSession, BrokerCallResult> call) => CallBrokerAsync(BrokerLevel.User, call);
+
+    private async Task<BrokerCallResult> CallBrokerAsync(BrokerLevel level, Func<BrokerSession, BrokerCallResult> call)
     {
         Broker.Busy = true;
         try
         {
-            var result = await Task.Run(() => call(_broker));
+            var session = Session(level);
+            var result = await Task.Run(() => call(session));
             Broker.LastMessage = $"{DateTime.Now:HH:mm:ss} {result.Message}";
             if (result.Response?.Results is { } items)
                 Broker.Results = items.Select(i => new BrokerResultRow(i.ActionKey, i.Outcome + (i.Inferred ? " [inferido]" : ""), i.Detail ?? "", i.Observed ?? "—", i.Desired ?? "—")).ToList();
@@ -244,8 +256,8 @@ public sealed class MainViewModel : ObservableObject
         {
             Broker.Connected = true;
             Broker.WriteAllowed = s.ExecutionAllowed;
-            Broker.ServiceStatus = $"Conectado ao serviço · broker {s.BrokerVersion} · catálogo {s.CatalogVersion}";
-            Broker.Gate = $"Escrita real: {(s.ExecutionAllowed ? "LIBERADA" : "BLOQUEADA")} — {s.ExecutionGateReason}";
+            Broker.ServiceStatus = $"Aplicador pronto · versão {s.BrokerVersion} · catálogo {s.CatalogVersion}";
+            Broker.Gate = s.ExecutionGateReason;
             Broker.Coordination = $"Coordenação: {s.Coordination}";
             if (s.ActiveSessionRunId is { } run) { Broker.LastRun = run; Broker.SessionOpen = true; }
         }
@@ -266,8 +278,9 @@ public sealed class MainViewModel : ObservableObject
         var answer = System.Windows.MessageBox.Show(BrokerSession.ConfirmationText(chosen), "Confirmar aplicação pelo broker",
             System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning, System.Windows.MessageBoxResult.No);
         if (answer != System.Windows.MessageBoxResult.Yes) { Broker.LastMessage = "Aplicação cancelada. Nada foi enviado."; return; }
-        var r = await CallBrokerAsync(b => b.Execute(BrokerSession.RequestsFor(chosen)));
-        if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; }
+        var level = LevelFor(chosen);
+        var r = await CallBrokerAsync(level, b => b.Execute(BrokerSession.RequestsFor(chosen)));
+        if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
         await LoadAfterWriteAsync();
     }
 
@@ -277,7 +290,7 @@ public sealed class MainViewModel : ObservableObject
         var answer = System.Windows.MessageBox.Show($"Reverter a execução {run}? O broker restaura os valores originais registrados no diário.",
             "Confirmar reversão", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
         if (answer != System.Windows.MessageBoxResult.Yes) return;
-        var r = await CallBrokerAsync(b => b.RevertRun(run));
+        var r = await CallBrokerAsync(_lastLevel, b => b.RevertRun(run));
         if (r.Response?.FullyRestored == true) Broker.SessionOpen = false;
         await LoadAfterWriteAsync();
     }
@@ -285,18 +298,45 @@ public sealed class MainViewModel : ObservableObject
     private async Task BrokerEndSessionAsync()
     {
         if (Broker.LastRun is not { } run) return;
-        var r = await CallBrokerAsync(b => b.EndSession(run));
+        var r = await CallBrokerAsync(_lastLevel, b => b.EndSession(run));
         if (r.Response?.FullyRestored == true) Broker.SessionOpen = false;
         await LoadAfterWriteAsync();
     }
 
     private async Task BrokerRecoverAsync()
     {
-        var answer = System.Windows.MessageBox.Show("Recuperar operações interrompidas registradas no diário do broker?", "Confirmar recuperação",
+        var answer = System.Windows.MessageBox.Show("Desfazer as alterações que ficaram pela metade (registradas no diário)?", "Recuperar",
             System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
         if (answer != System.Windows.MessageBoxResult.Yes) return;
-        await CallBrokerAsync(b => b.Recover());
+        var (user, machine) = PendingRecovery();
+        if (user > 0 || machine == 0) await CallBrokerAsync(BrokerLevel.User, b => b.Recover());
+        if (machine > 0) await CallBrokerAsync(BrokerLevel.Admin, b => b.Recover());
         await LoadAfterWriteAsync();
+    }
+
+    /// <summary>Operações interrompidas nos dois diários (usuário e máquina), lidas sem travar nem escrever.</summary>
+    private static (int User, int Machine) PendingRecovery()
+    {
+        static int Count(string path)
+        {
+            if (!File.Exists(path)) return 0;
+            try
+            {
+                using var j = SqliteJournal.OpenReadOnly(path);
+                return RecoveryService.FindInterrupted(j).Count(f => f.Entry.State is JournalState.BackedUp or JournalState.Applying or JournalState.Applied or JournalState.Restoring);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or Microsoft.Data.Sqlite.SqliteException) { return 0; }
+        }
+        return (Count(LocalBroker.JournalPath(BrokerLevel.User)), Count(LocalBroker.JournalPath(BrokerLevel.Admin)));
+    }
+
+    /// <summary>Ao abrir: avisa se alguma alteração ficou pela metade (ex.: PC desligou no meio).</summary>
+    private void CheckPendingRecovery()
+    {
+        var (user, machine) = PendingRecovery();
+        if (user + machine == 0) return;
+        Broker.LastMessage = $"{user + machine} alteração(ões) ficaram pela metade da última vez. Use \"Recuperar interrompidas\" para desfazer.";
+        Status = $"Atenção: {user + machine} alteração(ões) pela metade. Abra Aplicar → Recuperar interrompidas.";
     }
 
     /// <summary>Depois de uma escrita pelo broker, relê o estado (catálogo e histórico) para a tela mostrar o que mudou.</summary>

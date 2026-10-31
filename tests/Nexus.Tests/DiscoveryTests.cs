@@ -275,6 +275,38 @@ public sealed class CatalogTests
 {
     private static CatalogDocument Real() => CatalogLoader.Load(Path.Combine(AppContext.BaseDirectory, "catalog", "actions.v1.json"));
 
+    [Fact]
+    public void Catalog_directory_merges_modules_and_refuses_duplicate_keys()
+    {
+        var dir = Directory.CreateTempSubdirectory("nexus-catalogo-").FullName;
+        try
+        {
+            File.Copy(Path.Combine(AppContext.BaseDirectory, "catalog", CatalogLoader.MainFile), Path.Combine(dir, CatalogLoader.MainFile));
+            var main = CatalogLoader.Load(Path.Combine(dir, CatalogLoader.MainFile));
+            var module = "{ \"catalogVersion\": \"9\", \"schema\": \"" + main.Schema + "\", \"actions\": [ " +
+                "{ \"id\": \"teste.modulo\", \"version\": 1, \"title\": \"Teste\", \"classification\": \"Experimental\", \"handlerKind\": \"RegistryValue\", " +
+                "\"target\": { \"hive\": \"HKCU\", \"path\": \"Software\\\\NexusTeste\", \"name\": \"X\", \"type\": \"DWord\" }, \"desiredValue\": 1, " +
+                "\"privileges\": \"User\", \"persistence\": \"Persistent\", \"reboot\": \"None\" } ] }";
+            File.WriteAllText(Path.Combine(dir, "zz-teste.v1.json"), module);
+            var all = CatalogLoader.LoadDirectory(dir);
+            Assert.Equal(main.Actions.Count + 1, all.Actions.Count);
+            Assert.Contains(all.Actions, a => a.Definition.Key == "teste.modulo@1");
+            Assert.EndsWith("+zz-teste.v1@9", all.CatalogVersion, StringComparison.Ordinal);
+
+            File.WriteAllText(Path.Combine(dir, "zz-dup.v1.json"), module);
+            Assert.Throws<InvalidDataException>(() => CatalogLoader.LoadDirectory(dir));
+        }
+        finally { Directory.Delete(dir, true); }
+    }
+
+    [Fact]
+    public void Real_catalog_directory_loads_every_module()
+    {
+        var all = CatalogLoader.LoadDirectory(Path.Combine(AppContext.BaseDirectory, "catalog"));
+        Assert.True(all.Actions.Count >= Real().Actions.Count);
+        Assert.Equal(all.Actions.Count, all.Actions.Select(a => a.Definition.Key).Distinct(StringComparer.Ordinal).Count());
+    }
+
     private static readonly Dictionary<string, string> Params = new() { ["activeScheme"] = "381b4222-f694-41f0-9685-ff5bb260df2e" };
 
     [Fact]
@@ -466,6 +498,6 @@ public sealed class DesktopReadOnlyTests
         Assert.Contains(("SimulationOnlyHandler", "Wrap"), refs);
         Assert.Contains(("SqliteJournal", "OpenReadOnly"), refs);
         Assert.Contains(("DesiredStateResolver", "Resolve"), refs);
-        Assert.Contains(("BrokerSession", "ForInstalledService"), refs); // escrita só pelo serviço instalado
+        Assert.Contains(("BrokerSession", "ForThisPc"), refs); // escrita só pelo aplicador (broker), nunca no processo da interface
     }
 }

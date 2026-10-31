@@ -34,6 +34,10 @@ public sealed class BrokerPipeServer
 
     public Action<string>? Log { get; set; }
 
+    private long _lastActivityTicks = DateTime.UtcNow.Ticks;
+    /// <summary>Último pedido atendido (para o broker sob demanda encerrar quando ocioso).</summary>
+    public DateTime LastActivityUtc => new(Interlocked.Read(ref _lastActivityTicks), DateTimeKind.Utc);
+
     /// <summary>
     /// Identifica o cliente pelo próprio pipe (no Windows: SID do token do cliente via impersonação). Chamado depois do
     /// primeiro quadro, porque o Windows só permite impersonar depois de ler dados do pipe. Null = não identificado.
@@ -125,6 +129,7 @@ public sealed class BrokerPipeServer
                     }
                 }
                 if (frame is null) return;
+                Interlocked.Exchange(ref _lastActivityTicks, DateTime.UtcNow.Ticks);
 
                 if (!identified)
                 {

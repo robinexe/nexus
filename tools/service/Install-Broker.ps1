@@ -21,7 +21,9 @@
 param(
     [string]$Source = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'src\Nexus.Broker.Host\bin\Release\net10.0-windows'),
     [string]$AllowSid = ([Security.Principal.WindowsIdentity]::GetCurrent().User.Value),
-    [switch]$Start
+    [switch]$Start,
+    # Aplicar neste PC (decisão do responsável em 31/10/2026). Sem isto, o serviço só escreve em VM de teste liberada.
+    [switch]$AllowHost
 )
 $ErrorActionPreference = 'Stop'
 $ServiceName = 'NexusBroker'
@@ -66,7 +68,7 @@ if ($LASTEXITCODE -ne 0) { throw "icacls falhou em $lock ($LASTEXITCODE)" }
 Write-Host "Trava: $lock (só SYSTEM/Administradores)"
 
 # 4. Serviço. New-Service recebe o caminho como parâmetro: sc.exe pelo PowerShell 5.1 quebra as aspas do binPath (erro 1639).
-$binPath = "`"$(Join-Path $dest 'nexus-broker.exe')`" --service --allow-sid $AllowSid"
+$binPath = "`"$(Join-Path $dest 'nexus-broker.exe')`" --service --allow-sid $AllowSid" + $(if ($AllowHost) { ' --allow-host' } else { '' })
 if ($existing) {
     & sc.exe delete $ServiceName | Out-Null
     for ($i = 0; $i -lt 50 -and (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 200 }

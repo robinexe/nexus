@@ -25,6 +25,13 @@ public sealed class BrokerSession
     public static BrokerSession ForInstalledService(string pipeName = BrokerPipeServer.DefaultPipeName, int timeoutMs = 3000) =>
         new(() => BrokerClient.Connect(pipeName, timeoutMs, BrokerServerKind.Service));
 
+    /// <summary>
+    /// Aplicar neste PC: broker sob demanda do nível pedido (usuário sem aviso; administrador com o aviso do Windows ou pelo
+    /// serviço instalado). Ver <see cref="LocalBroker"/>.
+    /// </summary>
+    public static BrokerSession ForThisPc(BrokerLevel level, string brokerDirectory, string userSid, Action<string>? progress = null) =>
+        new(() => LocalBroker.Connect(level, brokerDirectory, userSid, progress));
+
     public BrokerCallResult Status() => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Status));
     public BrokerCallResult Plan(IReadOnlyList<ActionRequest> actions) => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Plan, actions));
     public BrokerCallResult Execute(IReadOnlyList<ActionRequest> actions, string profile = "interface") =>
@@ -42,7 +49,15 @@ public sealed class BrokerSession
         }
         catch (TimeoutException)
         {
-            return new(false, null, "Serviço do broker não encontrado: não instalado ou parado. Nada foi enviado.");
+            return new(false, null, "O aplicador do NEXUS não respondeu (não instalado, parado ou não iniciou). Nada foi enviado.");
+        }
+        catch (OperationCanceledException ex)
+        {
+            return new(false, null, ex.Message);
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            return new(false, null, $"Não foi possível iniciar o aplicador do NEXUS: {ex.Message}. Nada foi alterado.");
         }
         catch (UnauthorizedAccessException ex)
         {

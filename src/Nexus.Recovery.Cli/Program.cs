@@ -20,9 +20,8 @@ using Nexus.WindowsActions.Startup;
 //                                           com registro no diário; não lê nem escreve no sistema (sem portão).
 //                                           Exige a trava (exit 5/6). Entrada inexistente ou não pendente: exit 4.
 //   Opção global: --journal <caminho>  (padrão: %ProgramData%\NEXUS\journal.db)
-//   recover/revert escrevem no sistema: passam pelo mesmo portão do broker (VM de teste liberada). Fora dela: exit 7.
-//   --host-emergency: exceção explícita para restaurar no PC físico (ex.: algo aplicado fora do NEXUS precisa voltar);
-//                     impressa como aviso. Não afeta runs/show/scan.
+//   recover/revert só desfazem o que o NEXUS registrou no diário; funcionam neste PC (decisão do responsável em 31/10/2026).
+//   --host-emergency: aceito por compatibilidade (não é mais necessário).
 
 var argv = args.ToList();
 if (argv.IndexOf("--journal") is var ji and >= 0 && (ji + 1 >= argv.Count || argv[ji + 1].StartsWith("--", StringComparison.Ordinal)))
@@ -83,15 +82,7 @@ switch (command)
     {
         Guid revertRun = default;
         if (command == "revert" && !Guid.TryParse(argv[1], out revertRun)) { Console.Error.WriteLine("runId inválido."); return 2; }
-        if (hostEmergency)
-        {
-            Console.Error.WriteLine("AVISO: --host-emergency — o portão de execução foi ignorado por decisão explícita. Restaurações reais neste PC.");
-        }
-        else if (WriteGate().Evaluate() is { Allowed: false } blocked)
-        {
-            Console.Error.WriteLine($"RECUSADO: {blocked.Reason} Nada foi alterado. (Para uma restauração de emergência no PC físico: --host-emergency.)");
-            return 7;
-        }
+        _ = hostEmergency; // compatibilidade: recuperar neste PC não exige mais o argumento
         var acquired = coordinator.TryAcquire(command, TimeSpan.FromSeconds(2));
         if (!acquired.Acquired)
             return Refuse(acquired);
@@ -149,14 +140,6 @@ static int Refuse(LeaseAcquireResult r)
             Console.Error.WriteLine($"RECUSADO: não foi possível verificar se há execução ativa ({r.Status}: {r.Detail}). Nada foi alterado.");
             return 6;
     }
-}
-
-static IExecutionGate WriteGate()
-{
-    var marker = VmOnlyExecutionGate.DefaultMarkerPath;
-    if (!OperatingSystem.IsWindows())
-        return new VmOnlyExecutionGate(() => null, marker, Environment.MachineName); // sem SMBIOS: sempre bloqueado
-    return new VmOnlyExecutionGate(() => Discovery.Capture().Facts.IsVirtualMachine, marker, Environment.MachineName, AdminOwnedFile.Check);
 }
 
 static string DescribeProbe(CoordinationProbe p) => p.State switch

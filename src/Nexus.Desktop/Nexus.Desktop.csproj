@@ -13,12 +13,20 @@
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.Persistence\Nexus.Persistence.csproj" />
     <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
+    <!-- O aplicador (nexus-broker) vai junto da interface: é iniciado sob demanda para aplicar neste PC. -->
+    <ProjectReference Include="..\Nexus.Broker.Host\Nexus.Broker.Host.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\catalog\actions.v1.json" Link="catalog\actions.v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <Target Name="CopyBrokerHost" AfterTargets="Build">
+    <ItemGroup>
+      <BrokerHostFiles Include="$(MSBuildThisFileDirectory)..\Nexus.Broker.Host\bin\$(Configuration)\net10.0-windows\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BrokerHostFiles)" DestinationFiles="@(BrokerHostFiles->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

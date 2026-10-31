@@ -104,7 +104,37 @@ public sealed record CatalogDocument(string CatalogVersion, string Schema, IRead
 /// <summary>Lê catalog/actions.v1.json. Campos desconhecidos são ignorados; campos obrigatórios ausentes geram erro.</summary>
 public static class CatalogLoader
 {
+    public const string MainFile = "actions.v1.json";
+
     public static CatalogDocument Load(string path) => Parse(File.ReadAllText(path));
+
+    /// <summary>
+    /// Catálogo completo: <see cref="MainFile"/> mais os módulos (outros <c>*.json</c> da pasta, em ordem alfabética), cada um
+    /// no mesmo formato. Uma chave id@versão repetida entre arquivos é erro (nunca uma ação "sobrescreve" outra em silêncio).
+    /// </summary>
+    public static CatalogDocument LoadDirectory(string directory)
+    {
+        var main = Load(Path.Combine(directory, MainFile));
+        var actions = new List<CatalogEntry>(main.Actions);
+        var rejected = new List<RejectedCatalogItem>(main.Rejected);
+        var modules = new List<string>();
+        foreach (var file in Directory.EnumerateFiles(directory, "*.json").Where(f => !Path.GetFileName(f).Equals(MainFile, StringComparison.OrdinalIgnoreCase)).Order(StringComparer.Ordinal))
+        {
+            var m = Load(file);
+            if (m.Schema != main.Schema)
+                throw new InvalidDataException($"{Path.GetFileName(file)}: esquema {m.Schema}, esperado {main.Schema}.");
+            foreach (var a in m.Actions)
+            {
+                if (actions.Any(x => x.Definition.Key == a.Definition.Key))
+                    throw new InvalidDataException($"{Path.GetFileName(file)}: ação {a.Definition.Key} já existe em outro arquivo do catálogo.");
+                actions.Add(a);
+            }
+            rejected.AddRange(m.Rejected);
+            modules.Add($"{Path.GetFileNameWithoutExtension(file)}@{m.CatalogVersion}");
+        }
+        var version = modules.Count == 0 ? main.CatalogVersion : $"{main.CatalogVersion}+{string.Join("+", modules)}";
+        return new CatalogDocument(version, main.Schema, actions, rejected);
+    }
 
     public static CatalogDocument Parse(string json)
     {

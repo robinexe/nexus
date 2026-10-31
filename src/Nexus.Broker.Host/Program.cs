@@ -14,9 +14,11 @@ using Nexus.WindowsActions.Registry;
 using Nexus.WindowsActions.Services;
 using Nexus.WindowsActions.Startup;
 
-// nexus-broker [--pipe NOME] [--journal CAMINHO] [--allow-sid SID] [--service]
+// nexus-broker [--pipe NOME] [--journal CAMINHO] [--allow-sid SID] [--service] [--allow-host] [--idle-exit SEG] [--parent-pid PID]
 //   Serve o protocolo do broker em \\.\pipe\NOME (padrão NexusBroker.v1).
-//   Escrita (Execute/EndSession/RevertRun/Recover) só em VM de teste liberada (VmOnlyExecutionGate).
+//   Escrita (Execute/EndSession/RevertRun/Recover): em VM de teste liberada, ou neste PC com --allow-host (autorizado pelo usuário:
+//   a interface passa esse argumento depois da confirmação; o instalador, com -AllowHost).
+//   --idle-exit/--parent-pid: broker sob demanda encerra quando ocioso ou quando a interface fecha (nunca com sessão aberta).
 //   Leitura (Ping/Status/ReadState/Plan) sempre.
 //   --service: roda sob o Gerenciador de Serviços (instalado por tools\service\Install-Broker.ps1, conta LocalSystem).
 //              Como LocalSystem, ações de HKCU vão para o perfil de QUEM PEDIU (SID lido do token do cliente no pipe).
@@ -44,7 +46,7 @@ return await BrokerHost.RunAsync(options, Console.WriteLine, cancel.Token);
 
 namespace Nexus.Broker.Host
 {
-    internal sealed record BrokerOptions(string PipeName, string JournalPath, string AllowSid, bool Service)
+    internal sealed record BrokerOptions(string PipeName, string JournalPath, string AllowSid, bool Service, bool AllowHost = false, int IdleExitSeconds = 0, int ParentPid = 0)
     {
         public static BrokerOptions Parse(string[] args)
         {
@@ -63,11 +65,15 @@ namespace Nexus.Broker.Host
                 throw new ArgumentException("--service exige --allow-sid (o usuário que poderá usar o broker).");
             if (allow is not null && !UserProfileScope.IsValidSid(allow))
                 throw new ArgumentException("--allow-sid deve ser o SID de uma conta de usuário (S-1-5-21-…).");
+            int Int(string name) => Opt(name) is { } v ? int.Parse(v, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture) : 0;
             return new BrokerOptions(
                 Opt("--pipe") ?? BrokerPipeServer.DefaultPipeName,
                 Opt("--journal") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "NEXUS", "journal.db"),
                 allow ?? me.User!.Value,
-                service);
+                service,
+                argv.Contains("--allow-host"),
+                Int("--idle-exit"),
+                Int("--parent-pid"));
         }
     }
 
@@ -78,14 +84,15 @@ namespace Nexus.Broker.Host
             var snapshot = Discovery.Capture();
             var facts = snapshot.Facts;
             using var self = WindowsIdentity.GetCurrent();
-            var asSystem = self.IsSystem;
-            // Como LocalSystem, HKCU do processo é o perfil do SYSTEM: o broker grava no alvo o SID de quem pediu (B10) e o
-            // backend recusa HKCU sem SID. O portão é o mesmo nos dois modos.
-            var gate = new VmOnlyExecutionGate(() => facts.IsVirtualMachine, VmOnlyExecutionGate.DefaultMarkerPath, Environment.MachineName, AdminOwnedFile.Check);
+            // Perfil de quem pede (B10) sempre que este processo não é o próprio usuário autorizado: LocalSystem (serviço) ou
+            // elevado com outra conta (usuário comum que digitou a senha de um administrador no aviso do Windows).
+            var asSystem = self.IsSystem || !string.Equals(self.User?.Value, o.AllowSid, StringComparison.Ordinal);
+            var vmGate = new VmOnlyExecutionGate(() => facts.IsVirtualMachine, VmOnlyExecutionGate.DefaultMarkerPath, Environment.MachineName, AdminOwnedFile.Check);
+            IExecutionGate gate = o.AllowHost ? new AnyGate(new HostConsentGate(), vmGate) : vmGate;
             var decision = gate.Evaluate();
 
             log($"NEXUS broker {BrokerService.Version} — pipe \\\\.\\pipe\\{o.PipeName}{(o.Service ? " (serviço)" : "")}");
-            log($"Conta: {self.Name}{(asSystem ? " (LocalSystem: HKCU = perfil de quem pede)" : "")}");
+            log($"Conta: {self.Name}{(asSystem ? " (HKCU = perfil de quem pede)" : "")}");
             log($"Diário: {o.JournalPath}");
             log($"Máquina: {facts.SystemManufacturer} {facts.SystemModel} (VM: {facts.IsVirtualMachine?.ToString() ?? "indeterminado"})");
             log($"Escrita real: {(decision.Allowed ? "LIBERADA" : "BLOQUEADA")} — {decision.Reason}");
@@ -113,7 +120,7 @@ namespace Nexus.Broker.Host
                 .Add(new PowerSettingValueHandler(new WindowsPowerBackend()))
                 .Add(new ServiceStartTypeHandler(new WindowsServiceBackend()))
                 .Add(new SourceCfgConvarHandler(() => null));
-            var catalog = CatalogLoader.Load(Path.Combine(AppContext.BaseDirectory, "catalog", "actions.v1.json"));
+            var catalog = CatalogLoader.LoadDirectory(Path.Combine(AppContext.BaseDirectory, "catalog"));
             var context = new SystemContext(facts.WindowsBuild ?? 0, facts.CpuModel ?? "desconhecido", facts.GpuVendorPrimary, facts.IsElevated ?? false);
             var power = new WindowsPowerBackend();
             IReadOnlyDictionary<string, string> Parameters()
@@ -130,7 +137,10 @@ namespace Nexus.Broker.Host
                 log($"ATENÇÃO: {pending.Count} operação(ões) interrompida(s) no diário; Execute ficará recusado até Recover.");
 
             using var service = new BrokerService(catalog, handlers, journal, FileRunCoordinator.ForJournal(o.JournalPath), gate,
-                () => context, Parameters, bindCallerProfile: asSystem);
+                () => context, Parameters, bindCallerProfile: asSystem)
+            {
+                BeforeSystemChange = facts.IsElevated == true ? RestorePoint.CreateOncePerProcess : null,
+            };
 
             NamedPipeServerStream CreatePipe(bool first)
             {
@@ -150,8 +160,28 @@ namespace Nexus.Broker.Host
                 Log = m => log($"{DateTime.Now:HH:mm:ss} {m}"),
                 IdentifyClient = IdentifyClient,
             };
-            await server.RunAsync(cancel);
+            using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancel);
+            if (o.IdleExitSeconds > 0 || o.ParentPid > 0)
+                _ = Task.Run(async () =>
+                {
+                    while (!stop.IsCancellationRequested)
+                    {
+                        try { await Task.Delay(5000, stop.Token); } catch (OperationCanceledException) { return; }
+                        if (service.HasActiveSession) continue; // nunca encerra com ajustes de sessão aplicados
+                        var idle = o.IdleExitSeconds > 0 && DateTime.UtcNow - server.LastActivityUtc > TimeSpan.FromSeconds(o.IdleExitSeconds);
+                        var orphan = o.ParentPid > 0 && !ProcessAlive(o.ParentPid);
+                        if (idle || orphan) { log(idle ? "Encerrando: ocioso." : "Encerrando: a interface fechou."); stop.Cancel(); }
+                    }
+                }, stop.Token);
+            await server.RunAsync(stop.Token);
             return 0;
+        }
+
+        private static bool ProcessAlive(int pid)
+        {
+            try { using var p = System.Diagnostics.Process.GetProcessById(pid); return !p.HasExited; }
+            catch (ArgumentException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
 
         /// <summary>SID do token do cliente (nível Identification basta). Nunca vem do conteúdo do pedido.</summary>

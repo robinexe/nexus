@@ -20,7 +20,7 @@ public sealed class NexusServices
     public static string DefaultJournalPath =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "NEXUS", "journal.db");
 
-    public static string CatalogPath => Path.Combine(AppContext.BaseDirectory, "catalog", "actions.v1.json");
+    public static string CatalogDirectory => Path.Combine(AppContext.BaseDirectory, "catalog");
 
     public HandlerRegistry Handlers { get; } = BuildReadOnlyHandlers();
 

@@ -26,7 +26,7 @@
     <ProjectReference Include="..\..\src\Nexus.Desktop\Nexus.Desktop.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\catalog\actions.v1.json" Link="catalog\actions.v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

@@ -32,6 +32,15 @@ public sealed class BrokerService : IDisposable
     private readonly Func<IReadOnlyDictionary<string, string>> _parameters;
     private readonly Lock _gateLock = new();
     private readonly bool _bindCallerProfile;
+
+    /// <summary>
+    /// Chamado antes de executar um lote com ação persistente de administrador (mudança de sistema). No Windows, o host cria um
+    /// ponto de restauração. Retorna uma frase para a resposta (ex.: "Ponto de restauração criado."), ou null.
+    /// </summary>
+    public Func<string?>? BeforeSystemChange { get; init; }
+
+    /// <summary>Há ajustes de sessão aplicados (o broker não deve encerrar enquanto isso for verdade).</summary>
+    public bool HasActiveSession { get { lock (_gateLock) return _sessionLease is not null; } }
     private IRunLease? _sessionLease;
     private Guid? _sessionRun;
 
@@ -233,6 +242,13 @@ public sealed class BrokerService : IDisposable
             var exec = new ActionExecutor(_handlers, _journal, lease!);
             var ctx = _context();
             var plan = new DesiredStateResolver(_handlers).Resolve(actions!, ctx); // antes de abrir a execução: falha aqui não deixa execução órfã
+            string? safetyNote = null;
+            if (BeforeSystemChange is not null && plan.Items.Any(i => i.Status == PlanStatus.Pending &&
+                    i.Action.Definition.Privileges == PrivilegeLevel.Admin && i.Action.Definition.Persistence == PersistenceKind.Persistent))
+            {
+                try { safetyNote = BeforeSystemChange(); }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { safetyNote = $"Ponto de restauração não criado ({ex.Message}); o diário continua permitindo desfazer."; }
+            }
             var runId = exec.BeginRun(string.IsNullOrWhiteSpace(r.Profile) ? "broker" : r.Profile, _catalog.CatalogVersion);
             var results = exec.Execute(runId, plan, ctx);
 
@@ -250,7 +266,8 @@ public sealed class BrokerService : IDisposable
             }
             return new BrokerResponse(r.Id, true, Results: Cap(results.Select(x => new ActionResultDto(x.ActionKey, x.Outcome.ToString(), Clip(x.Detail)))),
                 RunId: runId, SessionActive: sessionApplied,
-                Message: sessionApplied ? "Ajustes de sessão aplicados; o broker mantém a trava até EndSession." : "Execução encerrada.");
+                Message: (sessionApplied ? "Ajustes de sessão aplicados; o broker mantém a trava até EndSession." : "Execução encerrada.") +
+                         (safetyNote is null ? "" : " " + safetyNote));
         }
         finally
         {

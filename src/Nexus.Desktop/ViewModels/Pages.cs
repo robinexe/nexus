@@ -156,7 +156,7 @@ public sealed class CatalogRow : ObservableObject
     public string? Verification => Entry.Verification;
     public string? Revert => Entry.Revert;
     public string Target => string.Join("  ·  ", Entry.TargetTemplate.Select(kv => $"{kv.Key}={kv.Value}"));
-    public string ApplyLabel { get; } = "só pelo serviço do broker (escrita exige VM de teste liberada)";
+    public string ApplyLabel { get; } = "aplicável neste PC pela página Aplicar, com confirmação e desfazer";
     public bool CanSimulate => Instance is not null;
 
     public string Current
@@ -314,7 +314,7 @@ public sealed class PlanPage : PageViewModel
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public RelayCommand? SimulateCommand { get; set; }
     public string BlockedNotice { get; } =
-        "Aqui nada é aplicado: a simulação roda só na leitura. Para aplicar, use a página Aplicar. O serviço NexusBroker é a única via de escrita e recusa qualquer alteração fora de uma VM de teste liberada.";
+        "Aqui nada é aplicado: a simulação só lê. Para aplicar de verdade, use a página Aplicar: ela pede confirmação, registra tudo e permite desfazer.";
 }
 
 // ------------------------------------------------------------------ Histórico
@@ -459,7 +459,7 @@ public sealed class BrokerPage : PageViewModel
     public override string Title => "Aplicar";
     public override string Group => "Otimizar";
     public override string Subtitle =>
-        "Aplicar e reverter passam pelo serviço NexusBroker. Ele só escreve numa VM de teste liberada; fora dela, recusa sem mexer em nada.";
+        "Aplique os ajustes marcados neste PC. Cada mudança é registrada antes e pode ser desfeita; as de sistema pedem permissão ao Windows e criam um ponto de restauração.";
 
     /// <summary>As mesmas ações marcadas na página Simulação.</summary>
     public ObservableCollection<CatalogRow> Candidates { get; set; } = [];
@@ -480,16 +480,16 @@ public sealed class BrokerPage : PageViewModel
 
     public string GateTitle => GateState switch
     {
-        "open" => "Escrita liberada",
-        "blocked" => "Escrita bloqueada neste PC",
-        _ => "O serviço ainda não respondeu",
+        "open" => "Pronto para aplicar neste PC",
+        "blocked" => "Aplicação recusada pelo aplicador",
+        _ => "Aplicador ainda não iniciado",
     };
 
     public string GateExplain => GateState switch
     {
-        "open" => "O serviço confirmou que está numa VM de teste liberada. Aplicar continua pedindo a sua confirmação, e tudo fica registrado para reverter.",
-        "blocked" => "É proposital e não indica problema. O serviço só altera o Windows numa VM de teste liberada; no seu PC ele lê e simula, mas recusa qualquer escrita sem tocar em nada.",
-        _ => "Clique em Consultar serviço para saber se o NexusBroker está instalado e se ele pode escrever. Até lá, nada é enviado.",
+        "open" => "Aplicar pede a sua confirmação. Ajustes do seu usuário são aplicados direto; ajustes de sistema pedem permissão no aviso do Windows. Tudo fica no diário para desfazer.",
+        "blocked" => "O aplicador respondeu, mas recusou escrever. O motivo aparece abaixo; nada foi alterado.",
+        _ => "Clique em Consultar para iniciar o aplicador do NEXUS e conferir se está pronto. Ele também inicia sozinho quando você aplicar.",
     };
 
     private void RaiseGate()
