@@ -1,11 +1,360 @@
+<!--
+  Espaço em disco: escolher unidade ou pasta, varredura somente leitura, treemap, maiores arquivos, tipos e pastas conhecidas
+  explicadas. Exclusão segura (irreversível) num cartão separado, botão Danger, pelo aplicador.
+  Do tema, só as chaves do contrato (Tokens.xaml / Controls.xaml / Converters.xaml); estilos locais em DataTemplate.Resources.
+-->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
-                    xmlns:v="clr-namespace:Nexus.Desktop.Views">
+                    xmlns:disk="clr-namespace:Nexus.Desktop.Views.Modules.Disk">
   <DataTemplate DataType="{x:Type vm:DiskPage}">
-    <StackPanel Margin="28,24,28,28">
-      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
-      <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
-    </StackPanel>
+    <DataTemplate.Resources>
+      <!-- Barra fina de proporção (0..1). -->
+      <Style x:Key="D.Bar" TargetType="ProgressBar">
+        <Setter Property="Height" Value="4"/>
+        <Setter Property="Minimum" Value="0"/>
+        <Setter Property="Maximum" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Signal}"/>
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="ProgressBar">
+              <Grid>
+                <Border x:Name="PART_Track" Background="{StaticResource Brush.Bg}" CornerRadius="2"/>
+                <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="2" HorizontalAlignment="Left"/>
+              </Grid>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="D.Section" TargetType="TextBlock" BasedOn="{StaticResource Text.H2}">
+        <Setter Property="Margin" Value="0,0,0,10"/>
+      </Style>
+      <Style x:Key="D.Num" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
+        <Setter Property="FontSize" Value="{StaticResource Size.Body}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+        <Setter Property="TextWrapping" Value="NoWrap"/>
+      </Style>
+      <!-- Cartão de unidade (lista com seleção). -->
+      <Style x:Key="D.VolumeItem" TargetType="ListBoxItem">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="ListBoxItem">
+              <Border x:Name="card" Width="230" Margin="0,0,10,10" Padding="14,10" Background="{StaticResource Brush.Surface}"
+                      BorderBrush="{StaticResource Brush.Line}" BorderThickness="1" CornerRadius="{StaticResource Radius.Card}">
+                <ContentPresenter/>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource Brush.TextDim}"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                  <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource Brush.Signal}"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                  <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource Brush.Trace}"/>
+                  <Setter TargetName="card" Property="Background" Value="{StaticResource Brush.SurfaceHi}"/>
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <!-- Linha clicável sem cara de botão. -->
+      <Style x:Key="D.RowButton" TargetType="Button">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="bg" Background="Transparent" CornerRadius="{StaticResource Radius.Control}" Padding="8,6">
+                <ContentPresenter/>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="bg" Property="Background" Value="{StaticResource Brush.Hover}"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                  <Setter TargetName="bg" Property="Background" Value="{StaticResource Brush.SignalSoft}"/>
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+    </DataTemplate.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="28,24,28,28">
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
+        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,18"/>
+
+        <!-- ===== Herói: uso da unidade escolhida ===== -->
+        <Border Style="{StaticResource Panel.Hero}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel DataContext="{Binding SelectedVolume}">
+              <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}"/>
+              <TextBlock Text="{Binding MediaText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,2,0,10"/>
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding UsedText}" Style="{StaticResource Text.Metric}" Foreground="{StaticResource Brush.Trace}"/>
+                <TextBlock Text="{Binding TotalText, StringFormat='usados de {0}'}" Style="{StaticResource Text.MetricLabel}" VerticalAlignment="Bottom" Margin="10,0,0,8"/>
+              </StackPanel>
+              <ProgressBar Style="{StaticResource D.Bar}" Height="8" Value="{Binding UsedFraction, Mode=OneWay}" Foreground="{StaticResource Brush.Trace}" Margin="0,8,0,6" MaxWidth="560" HorizontalAlignment="Stretch"/>
+              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}">
+                <Run Text="{Binding FreeText, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding UsedPercent, Mode=OneWay}"/><Run Text=" ocupado"/>
+              </TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0" MinWidth="200">
+              <Button Content="Analisar esta unidade" Style="{StaticResource Button.Primary}" Command="{Binding AnalyzeVolumeCommand}" Margin="0,0,0,8"/>
+              <Button Content="Escolher uma pasta…" Style="{StaticResource Button.Secondary}" Command="{Binding AnalyzeFolderCommand}" Margin="0,0,0,8"/>
+              <Button Content="Atualizar unidades" Style="{StaticResource Button.Ghost}" Command="{Binding RefreshVolumesCommand}" HorizontalAlignment="Left"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <!-- ===== Unidades ===== -->
+        <ListBox ItemsSource="{Binding Volumes}" SelectedItem="{Binding SelectedVolume}" ItemContainerStyle="{StaticResource D.VolumeItem}"
+                 Background="Transparent" BorderThickness="0" Margin="0,14,0,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 AutomationProperties.Name="Unidades">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel/>
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                <TextBlock Text="{Binding MediaText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+                <ProgressBar x:Name="bar" Style="{StaticResource D.Bar}" Value="{Binding UsedFraction, Mode=OneWay}" Margin="0,6,0,4"/>
+                <TextBlock Text="{Binding FreeText}" Style="{StaticResource D.Num}" FontSize="{StaticResource Size.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+              </StackPanel>
+              <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding AlmostFull}" Value="True">
+                  <Setter TargetName="bar" Property="Foreground" Value="{StaticResource Brush.Bad}"/>
+                </DataTrigger>
+              </DataTemplate.Triggers>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- ===== Andamento ===== -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,4,0,0" Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+              <TextBlock Text="Lendo o disco (somente leitura)…" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
+              <ProgressBar IsIndeterminate="{Binding Scanning}" Height="3" Margin="0,8,0,8"/>
+              <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="Cancelar" Style="{StaticResource Button.Secondary}" Command="{Binding CancelCommand}" VerticalAlignment="Center" Margin="16,0,0,0"/>
+          </Grid>
+        </Border>
+
+        <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Trace}" Margin="0,8,0,0"
+                   Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}"/>
+
+        <!-- ===== Resultado ===== -->
+        <StackPanel Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}" Margin="0,12,0,0">
+          <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,12"/>
+
+          <!-- Migalhas de pão -->
+          <DockPanel Margin="0,0,0,8">
+            <Button DockPanel.Dock="Left" Content="↑ Subir" Style="{StaticResource Button.Ghost}" Command="{Binding UpCommand}" Margin="0,0,10,0"/>
+            <ItemsControl ItemsSource="{Binding Crumbs}" VerticalAlignment="Center">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal">
+                    <Button Content="{Binding Label}" Style="{StaticResource Button.Ghost}" Padding="4,2"
+                            Command="{Binding DataContext.OpenTileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
+                    <TextBlock Text="›" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center" Margin="2,0"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </DockPanel>
+          <TextBlock Text="{Binding FolderTitle}" Style="{StaticResource D.Num}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,8" TextTrimming="CharacterEllipsis"/>
+
+          <!-- Treemap + subpastas -->
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="2*"/>
+              <ColumnDefinition Width="16"/>
+              <ColumnDefinition Width="*" MinWidth="240"/>
+            </Grid.ColumnDefinitions>
+            <Border Style="{StaticResource Panel.Inset}" Padding="4">
+              <disk:TreemapView Height="440" Tiles="{Binding Tiles}" OpenCommand="{Binding OpenTileCommand}"
+                                AutomationProperties.Name="Mapa do disco: clique numa pasta para entrar"/>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource Panel.Card}">
+              <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Nesta pasta" Style="{StaticResource D.Section}"/>
+                <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                  <ItemsControl ItemsSource="{Binding Children}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Button Style="{StaticResource D.RowButton}" ToolTip="{Binding Path}"
+                                Command="{Binding DataContext.OpenTileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}">
+                          <StackPanel>
+                            <DockPanel>
+                              <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" Style="{StaticResource D.Num}" Margin="8,0,0,0"/>
+                              <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                            </DockPanel>
+                            <ProgressBar Style="{StaticResource D.Bar}" Value="{Binding Fraction, Mode=OneWay}" Margin="0,4,0,0"/>
+                          </StackPanel>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </DockPanel>
+            </Border>
+          </Grid>
+
+          <!-- Pastas conhecidas explicadas -->
+          <Border Style="{StaticResource Panel.Card}" Margin="0,16,0,0" Visibility="{Binding HasInsights, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+              <TextBlock Text="O que são as coisas grandes (e o que fazer)" Style="{StaticResource D.Section}"/>
+              <ItemsControl ItemsSource="{Binding Insights}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1" Padding="0,10">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*"/>
+                          <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                          <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" FontWeight="SemiBold"/>
+                            <Border x:Name="chip" BorderThickness="1" BorderBrush="{StaticResource Brush.Line}" CornerRadius="{StaticResource Radius.Chip}" Padding="8,0,8,1" Margin="10,0,0,0" VerticalAlignment="Center">
+                              <TextBlock x:Name="chipText" Text="{Binding KindLabel}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+                            </Border>
+                          </StackPanel>
+                          <TextBlock Text="{Binding What}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+                          <TextBlock Text="{Binding Advice}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,4,0,0"/>
+                          <TextBox Text="{Binding Command, Mode=OneWay}" IsReadOnly="True" Margin="0,6,0,0" HorizontalAlignment="Left" MinWidth="320"
+                                   FontFamily="Consolas" Visibility="{Binding HasCommand, Converter={StaticResource BoolToVis}}"
+                                   ToolTip="Comando oficial: copie e rode você mesmo (o NEXUS não executa)."/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="16,0,0,0" HorizontalAlignment="Right">
+                          <TextBlock Text="{Binding SizeText}" Style="{StaticResource D.Num}" FontSize="{StaticResource Size.H2}" HorizontalAlignment="Right"/>
+                          <Button Content="Mostrar no Explorer" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Right"
+                                  Command="{Binding DataContext.ShowInExplorerCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Path}"/>
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                    <DataTemplate.Triggers>
+                      <DataTrigger Binding="{Binding DoNotTouch}" Value="True">
+                        <Setter TargetName="chip" Property="BorderBrush" Value="{StaticResource Brush.Bad}"/>
+                        <Setter TargetName="chipText" Property="Foreground" Value="{StaticResource Brush.Bad}"/>
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding IsGame}" Value="True">
+                        <Setter TargetName="chip" Property="BorderBrush" Value="{StaticResource Brush.Good}"/>
+                        <Setter TargetName="chipText" Property="Foreground" Value="{StaticResource Brush.Good}"/>
+                      </DataTrigger>
+                    </DataTemplate.Triggers>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+
+          <!-- Maiores arquivos + tipos -->
+          <Grid Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="3*"/>
+              <ColumnDefinition Width="16"/>
+              <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <Border Style="{StaticResource Panel.Card}">
+              <StackPanel>
+                <TextBlock Text="Os 50 maiores arquivos" Style="{StaticResource D.Section}"/>
+                <ScrollViewer MaxHeight="520" VerticalScrollBarVisibility="Auto">
+                  <ItemsControl ItemsSource="{Binding TopFiles}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Grid Margin="0,0,0,10">
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                          </Grid.ColumnDefinitions>
+                          <StackPanel>
+                            <DockPanel>
+                              <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" Style="{StaticResource D.Num}" Margin="8,0,0,0"/>
+                              <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding Folder}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Path}"/>
+                            <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+                            <ProgressBar Style="{StaticResource D.Bar}" Value="{Binding Fraction, Mode=OneWay}" Foreground="{StaticResource Brush.Trace}" Margin="0,4,0,0"/>
+                          </StackPanel>
+                          <Button Grid.Column="1" Content="Explorer" Style="{StaticResource Button.Ghost}" VerticalAlignment="Top" Margin="8,0,0,0"
+                                  Command="{Binding DataContext.ShowInExplorerCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding Path}"
+                                  ToolTip="Mostrar no Explorer (só abre a pasta)"/>
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource Panel.Card}" VerticalAlignment="Top">
+              <StackPanel>
+                <TextBlock Text="Por tipo" Style="{StaticResource D.Section}"/>
+                <ItemsControl ItemsSource="{Binding Categories}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <StackPanel Margin="0,0,0,10">
+                        <DockPanel>
+                          <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" Style="{StaticResource D.Num}"/>
+                          <TextBlock Text="{Binding Label}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
+                        </DockPanel>
+                        <ProgressBar Style="{StaticResource D.Bar}" Value="{Binding Fraction, Mode=OneWay}" Margin="0,4,0,2"/>
+                        <TextBlock Text="{Binding FilesText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
+                      </StackPanel>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </Grid>
+        </StackPanel>
+
+        <!-- ===== Exclusão segura: separada, vermelha, irreversível ===== -->
+        <Border Style="{StaticResource Panel.Card}" BorderBrush="{StaticResource Brush.Bad}" Background="{StaticResource Brush.BadSoft}" Margin="0,24,0,0">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+              <TextBlock Text="Exclusão segura (irreversível)" Style="{StaticResource Text.H2}" Foreground="{StaticResource Brush.Bad}"/>
+              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,6,0,0"
+                         Text="Para um arquivo sensível que você quer que ninguém recupere. O NEXUS grava dados aleatórios por cima do conteúdo (uma passada basta em discos atuais: várias passadas são mito), renomeia e apaga. Não passa pela Lixeira nem pela quarentena, e o Desfazer não funciona: não existe cópia."/>
+              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                         Text="Em SSD/NVMe a sobrescrita não é garantida (o disco grava em outras células e o TRIM pode já ter liberado as antigas). Para proteção real: BitLocker no disco e cipher /w no espaço livre. Só arquivos comuns fora das pastas do Windows e de programas; nunca pastas, links, arquivos em uso ou de nuvem."/>
+              <TextBlock Text="{Binding SecureDeleteNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="0,8,0,0"
+                         Visibility="{Binding SecureDeleteNote, Converter={StaticResource NullToCollapsed}}"/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="Exclusão segura…" Style="{StaticResource Button.Danger}" Command="{Binding SecureDeleteCommand}"
+                    VerticalAlignment="Center" Margin="20,0,0,0" AutomationProperties.Name="Exclusão segura de um arquivo (irreversível)"/>
+          </Grid>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
   </DataTemplate>
 </ResourceDictionary>
