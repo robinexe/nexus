@@ -297,6 +297,17 @@ Windows do responsável (04:44, não elevado): 168/168, coordenação 11/11. A i
 novo e a página Broker; "Consultar serviço" respondeu "Serviço do broker não encontrado: não instalado ou parado. Nada foi
 enviado." (o serviço não está instalado neste PC, como previsto), com reverter/encerrar/recuperar desabilitados.
 
+## Medição (PresentMon) e redesign da interface — 2026-10-31
+
+- `Nexus.Measurement` (novo): sessões, comparação antes/depois e execução do PresentMon (só leitura de quadros). 11 testes
+  + 10 de escala do gráfico (189/189 no Linux, 0 avisos). PresentMon testado com um executável falso; o real não vem com o NEXUS.
+- Redesign "bancada de telemetria" feito por três agentes em paralelo (design system e casca; Otimizar/Registro; Medir/Comparar),
+  integrado sem conflito; todas as 166 chaves de recurso conferidas.
+- Windows do responsável (05:32–05:48): a interface abriu e todas as 10 páginas renderizaram. Seis capturas sintéticas no
+  formato do PresentMon v2 (`_claude\demo`, 3 "antes" ~139 FPS e 3 "depois" ~151 FPS) foram importadas pela interface;
+  Comparar mostrou "Melhora comprovada em 3 pares" com intervalo de 95% em cada métrica. Ajuste feito depois da conferência:
+  com sessões, o traço vem primeiro e a captura desce (antes ocupava a primeira tela).
+
 ## Pendente no Windows (esta versão)
 
 1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).

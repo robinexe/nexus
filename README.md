@@ -42,6 +42,13 @@ real, simulação do plano (dry-run), histórico e capacidades. Não aplica nada
 máquina virtual de teste liberada; no PC físico ele só responde a leituras e simulações. Para testar aplicação e rollback
 reais com segurança: `tools\vm\README.md` (Windows Sandbox descartável).
 
+## Medir e comparar
+
+Página **Medir**: grava uma partida com o PresentMon (ferramenta gratuita da Intel; baixe em github.com/GameTechDev/PresentMon e
+indique onde salvou) ou importa CSV do PresentMon/CapFrameX. Mostra o traço de cada quadro, FPS médio, 1% low, frametime P99 e
+engasgos. Página **Comparar**: sessões marcadas como "antes" e "depois"; com 3 ou mais de cada lado, diz se a melhora é real
+(intervalo de confiança de 95%); com menos, mostra a diferença e avisa que ela não prova nada. Medir não altera nada no PC.
+
 ## Recuperação sem a interface
 
 ```powershell

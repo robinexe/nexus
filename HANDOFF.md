@@ -157,8 +157,12 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
 6. **Liberar execução real no PC físico:** decisão do responsável, não técnica. Exige (a) instalar o serviço no PC
    (administrador) e (b) mudar o portão, hoje só VM. Recomendação: antes disso, a medição (item 7) para saber se alguma
    ação do catálogo melhora algo neste PC; aplicar sem medir contraria o propósito do laboratório.
-7. **Próximo técnico:** captura PresentMon e comparação de sessões (parser e estatística já existem); depois NVIDIA DRS,
-   VALORANT, investigador de stutters, laboratório A/B, relatórios e, por último, a IA.
+7. ~~Captura PresentMon e comparação de sessões~~ (feito em 31/10: páginas Medir e Comparar; `Nexus.Measurement`). Falta
+   uma captura real: baixar o PresentMon oficial (github.com/GameTechDev/PresentMon) e indicar o caminho em Medir.
+8. ~~Redesign da interface~~ (feito em 31/10: "bancada de telemetria"; tokens em `src/Nexus.Desktop/Themes/Tokens.xaml`,
+   estilos em `Controls.xaml`, uma página por arquivo em `Views/Pages/`). Conferido no Windows do responsável.
+9. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+   relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
 
