@@ -6,6 +6,7 @@ using Nexus.Broker;
 using Nexus.DriverUpdates;
 using Nexus.DriverUpdates.Windows;
 using Nexus.Lab.Gpu;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -33,7 +34,13 @@ public sealed class DriverUpdateRow : ObservableObject
     public bool CanApply => Blocked is null && !_applied;
     public string Status { get => _status; set => Set(ref _status, value); }
     /// <summary>good, bad, trace, signal ou muted (cor do selo).</summary>
-    public string Tone { get => _tone; set => Set(ref _tone, value); }
+    public string Tone { get => _tone; set { if (Set(ref _tone, value)) OnPropertyChanged(nameof(ToneValue)); } }
+    /// <summary><see cref="Tone"/> no design system (cor do estado e do selo).</summary>
+    public UiTone ToneValue => DriverUpdatesPage.UiToneOf(_tone);
+    /// <summary>Selo do tipo: verde recomendada, âmbar opcional, neutro bloqueada.</summary>
+    public UiTone BadgeTone => Blocked is not null ? UiTone.Neutral : Offer.Update.Optional ? UiTone.Warn : UiTone.Good;
+    public UiTone RollbackTone => RollbackPossible ? UiTone.Good : UiTone.Warn;
+    public string RollbackChip => RollbackPossible ? "tem desfazer" : "sem desfazer automático";
     public Guid? RunId { get => _runId; set { if (Set(ref _runId, value)) OnPropertyChanged(nameof(CanRevert)); } }
     public bool Applied
     {
@@ -67,6 +74,12 @@ public sealed class GpuDriverCard
     public string Verdict => Status.Verdict;
     /// <summary>good, info, warn, bad.</summary>
     public string Level => Status.Level;
+    /// <summary>Idade do driver em dias (NaN se o Windows não informa a data): o número do cartão.</summary>
+    public double AgeNumber => Status.AgeDays is { } d ? d : double.NaN;
+    public UiTone LevelTone => Status.Level switch { "good" => UiTone.Good, "warn" => UiTone.Warn, "bad" => UiTone.Bad, _ => UiTone.Info };
+    public string KindChip => Status.Integrated ? "integrada" : "dedicada";
+    public string VendorName => GpuIdentity.VendorName(Status.Vendor);
+    public string DateText => Status.Date is { } d ? "de " + d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture) : "data não informada";
     public bool HasPage => Status.OfficialPage is not null;
     public string PageLabel => $"Página oficial da {GpuIdentity.VendorName(Status.Vendor)}";
     public bool HasApp => Status.App is not null;
@@ -118,8 +131,8 @@ public sealed class DriverUpdatesPage : ModulePage
     public ObservableCollection<DriverUpdateRow> Graphics { get; } = [];
     public ObservableCollection<GpuDriverCard> Gpus { get; } = [];
 
-    public bool Searching { get => _searching; private set => Set(ref _searching, value); }
-    public bool Searched { get => _searched; private set => Set(ref _searched, value); }
+    public bool Searching { get => _searching; private set { if (Set(ref _searching, value)) NotifyOffers(); } }
+    public bool Searched { get => _searched; private set { if (Set(ref _searched, value)) NotifyOffers(); } }
     public string SearchStatus { get => _searchStatus; private set => Set(ref _searchStatus, value); }
     public string Summary { get => _summary; private set => Set(ref _summary, value); }
     public string ErrorText { get => _error; private set => Set(ref _error, value); }
@@ -131,6 +144,36 @@ public sealed class DriverUpdatesPage : ModulePage
     public int RecommendedCount => Recommended.Count;
     public int OptionalCount => Optional.Count;
     public int GraphicsCount => Graphics.Count;
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Atualizações encontradas na última busca (NaN antes de procurar): o número do destaque.</summary>
+    public double UpdatesNumber => Searched ? Recommended.Count + Optional.Count + Graphics.Count : double.NaN;
+    public double RecommendedNumber => Recommended.Count;
+    public double OptionalNumber => Optional.Count;
+    public double GraphicsNumber => Graphics.Count;
+    /// <summary>Texto no lugar do número antes da primeira busca.</summary>
+    public string HeroValueText => Searched || Searching ? "" : "Não procurado";
+    public string HeroCaption => Searched
+        ? "Achadas pelo Windows Update agora. Instalar guarda o driver atual para Desfazer."
+        : "A busca usa o próprio Windows Update e pode levar alguns minutos.";
+    public bool HasOffers => Recommended.Count + Optional.Count + Graphics.Count > 0;
+    /// <summary>Procurou e não há nada: estado vazio "tudo em dia".</summary>
+    public bool ShowNoUpdates => Searched && !Searching && !HasOffers;
+    public bool ShowNotSearched => !Searched && !Searching;
+    public bool HasGpus => Gpus.Count > 0;
+    /// <summary>Lendo as placas de vídeo ao abrir (esqueleto no cartão da GPU).</summary>
+    public bool LoadingGpus { get => _loadingGpus; private set => Set(ref _loadingGpus, value); }
+    private bool _loadingGpus;
+
+    internal static UiTone UiToneOf(string tone) => tone switch { "good" => UiTone.Good, "bad" => UiTone.Bad, "trace" => UiTone.Warn, "signal" => UiTone.Info, _ => UiTone.Neutral };
+
+    private void NotifyOffers()
+    {
+        foreach (var name in new[] { nameof(UpdatesNumber), nameof(RecommendedNumber), nameof(OptionalNumber), nameof(GraphicsNumber), nameof(HeroValueText),
+                     nameof(HeroCaption), nameof(HasOffers), nameof(ShowNoUpdates), nameof(ShowNotSearched) })
+            OnPropertyChanged(name);
+    }
 
     private IEnumerable<DriverUpdateRow> AllRows() => Recommended.Concat(Optional).Concat(Graphics);
     private List<DriverUpdateRow> Selected() => AllRows().Where(r => r.IsChecked && r.CanApply).ToList();
@@ -145,8 +188,11 @@ public sealed class DriverUpdatesPage : ModulePage
     /// <summary>Ao abrir: só o que é local e rápido (placas de vídeo e reinício pendente); a busca online é por botão.</summary>
     private async Task LoadLocalAsync()
     {
-        Message = "Lendo placas de vídeo…";
-        var r = await Task.Run(() => DriverUpdatesReader.Scan(TimeSpan.Zero, CancellationToken.None, searchUpdates: false));
+        Message = "";
+        LoadingGpus = true;
+        DriverUpdatesReading r;
+        try { r = await Task.Run(() => DriverUpdatesReader.Scan(TimeSpan.Zero, CancellationToken.None, searchUpdates: false)); }
+        finally { LoadingGpus = false; }
         FillGpus(r);
         FillReboot(r.RebootPending);
         Message = "";
@@ -222,6 +268,7 @@ public sealed class DriverUpdatesPage : ModulePage
             Gpus.Add(card);
         }
         GpuNote = r.GpuNote ?? "";
+        OnPropertyChanged(nameof(HasGpus));
     }
 
     private void FillOffers(IReadOnlyList<DriverUpdateOffer> offers)
@@ -253,6 +300,7 @@ public sealed class DriverUpdatesPage : ModulePage
         OnPropertyChanged(nameof(RecommendedCount));
         OnPropertyChanged(nameof(OptionalCount));
         OnPropertyChanged(nameof(GraphicsCount));
+        NotifyOffers();
     }
 
     // ------------------------------------------------------------------ instalar / desfazer
