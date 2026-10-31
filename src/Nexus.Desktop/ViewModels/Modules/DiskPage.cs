@@ -6,6 +6,8 @@ using System.Windows.Input;
 using Nexus.Broker;
 using Nexus.DiskTools.Analysis;
 using Nexus.DiskTools.SecureDelete;
+using Nexus.Desktop.Views.Controls;
+using Nexus.Desktop.Views.Modules.Disk;
 using Nexus.DiskTools.Volumes;
 using Nexus.HardwareDiscovery;
 
@@ -20,6 +22,8 @@ public sealed class DiskPage : ModulePage, IDisposable
 {
     public const string SecureDeleteActionId = "disk.secure-delete@1";
     private const int MaxTiles = 250;
+    /// <summary>Quantos dos maiores arquivos aparecem como cartões (o resto fica recolhido).</summary>
+    public const int TopCardCount = 9;
 
     private CancellationTokenSource? _scan;
     private DiskScanResult? _result;
@@ -36,6 +40,10 @@ public sealed class DiskPage : ModulePage, IDisposable
     private IReadOnlyList<DiskCategoryRow> _categories = [];
     private IReadOnlyList<DiskInsightRow> _insights = [];
     private string _folderTitle = "";
+    private bool _volumesLoading = true;
+    private double _scannedBytes = double.NaN, _scannedFiles = double.NaN;
+    private IReadOnlyList<DiskFileRow> _topCards = [];
+    private IReadOnlyList<DiskFileRow> _moreFiles = [];
 
     public DiskPage()
     {
@@ -74,15 +82,51 @@ public sealed class DiskPage : ModulePage, IDisposable
     public DiskVolumeRow? SelectedVolume
     {
         get => _selectedVolume;
-        set { if (Set(ref _selectedVolume, value)) OnPropertyChanged(nameof(HasVolume)); }
+        set
+        {
+            if (!Set(ref _selectedVolume, value)) return;
+            OnPropertyChanged(nameof(HasVolume));
+            OnPropertyChanged(nameof(FreeBytes));
+            OnPropertyChanged(nameof(UsedPercentValue));
+            OnPropertyChanged(nameof(HeroTitle));
+        }
     }
 
     public bool HasVolume => SelectedVolume is not null;
 
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Espaço livre da unidade escolhida (NaN = ainda sem unidade).</summary>
+    public double FreeBytes => SelectedVolume is { } v ? v.Volume.FreeBytes : double.NaN;
+    /// <summary>% usado da unidade escolhida (0..100; NaN = sem unidade).</summary>
+    public double UsedPercentValue => SelectedVolume is { } v ? Math.Round(v.UsedFraction * 100, 1) : double.NaN;
+    public string HeroTitle => SelectedVolume is { } v ? $"Livre em {v.Volume.RootPath.TrimEnd('\\')}" : "Espaço livre";
+    /// <summary>Lendo a lista de unidades (esqueleto no destaque).</summary>
+    public bool VolumesLoading { get => _volumesLoading; private set => Set(ref _volumesLoading, value); }
+    /// <summary>Bytes e arquivos lidos até agora na varredura (contam ao vivo).</summary>
+    public double ScannedBytes { get => _scannedBytes; private set => Set(ref _scannedBytes, value); }
+    public double ScannedFiles { get => _scannedFiles; private set => Set(ref _scannedFiles, value); }
+    public double ResultBytes => _result is { } r ? r.Root.Size : double.NaN;
+    public double ResultFiles => _result is { } r ? r.Files : double.NaN;
+    public double ResultFolders => _result is { } r ? r.Directories : double.NaN;
+    public double ResultSkipped => _result is { } r ? r.AccessDenied : double.NaN;
+    public string ResultSkippedDetail => _result is { } r && r.CloudOnlyFiles > 0
+        ? $"{Format.Bytes(r.CloudOnlyBytes)} só na nuvem não ocupam o disco."
+        : "Sem permissão de leitura: o tamanho delas não entra.";
+    public string ResultTimeText => _result is { } r ? $"Lido em {r.Elapsed.TotalSeconds.ToString("N1", Pt)} s" : "";
+    /// <summary>Sem resultado e sem varredura em andamento: mostra o estado vazio.</summary>
+    public bool ShowEmpty => _result is null && !Scanning;
+    /// <summary>Os maiores arquivos que viram cartões (os primeiros); o resto fica na lista recolhida.</summary>
+    public IReadOnlyList<DiskFileRow> TopCards { get => _topCards; private set => Set(ref _topCards, value); }
+    public IReadOnlyList<DiskFileRow> MoreFiles { get => _moreFiles; private set { if (Set(ref _moreFiles, value)) OnPropertyChanged(nameof(HasMoreFiles)); } }
+    public bool HasMoreFiles => MoreFiles.Count > 0;
+    public string MoreFilesHeader => $"Ver os outros {MoreFiles.Count} maiores";
+    public bool HasTopFiles => TopFiles.Count > 0;
+
     public bool Scanning
     {
         get => _scanning;
-        private set { if (Set(ref _scanning, value)) CommandManager.InvalidateRequerySuggested(); }
+        private set { if (Set(ref _scanning, value)) { OnPropertyChanged(nameof(ShowEmpty)); CommandManager.InvalidateRequerySuggested(); } }
     }
 
     public string ProgressText { get => _progressText; private set => Set(ref _progressText, value); }
@@ -114,6 +158,7 @@ public sealed class DiskPage : ModulePage, IDisposable
 
     private async Task LoadVolumesAsync()
     {
+        VolumesLoading = true;
         try
         {
             var list = await Task.Run(VolumeCatalog.List);
@@ -128,6 +173,10 @@ public sealed class DiskPage : ModulePage, IDisposable
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             Message = $"Não foi possível listar as unidades: {ex.Message}";
+        }
+        finally
+        {
+            VolumesLoading = false;
         }
     }
 
@@ -145,9 +194,15 @@ public sealed class DiskPage : ModulePage, IDisposable
         Scanning = true;
         Message = "";
         ProgressText = "Começando…";
-        var progress = new Progress<ScanProgress>(p => ProgressText =
-            $"{p.Files.ToString("N0", Pt)} arquivos · {Format.Bytes(p.Bytes)} · {p.Directories.ToString("N0", Pt)} pastas" +
-            (p.AccessDenied > 0 ? $" · {p.AccessDenied} sem acesso" : "") + $"\n{p.CurrentPath}");
+        ScannedBytes = 0;
+        ScannedFiles = 0;
+        var progress = new Progress<ScanProgress>(p =>
+        {
+            ScannedBytes = p.Bytes;
+            ScannedFiles = p.Files;
+            ProgressText = $"{p.Files.ToString("N0", Pt)} arquivos · {Format.Bytes(p.Bytes)} · {p.Directories.ToString("N0", Pt)} pastas" +
+                           (p.AccessDenied > 0 ? $" · {p.AccessDenied} sem acesso" : "") + $"\n{p.CurrentPath}";
+        });
         try
         {
             var result = await DiskScanner.ScanAsync(root, new DiskScanOptions(), progress, _scan.Token);
@@ -155,6 +210,13 @@ public sealed class DiskPage : ModulePage, IDisposable
             var insights = await Task.Run(() => KnownFolders.Analyze(result, new KnownFolderContext { EpicNames = GameLibraries.ReadEpicNames(epic) }));
             _result = result;
             OnPropertyChanged(nameof(HasResult));
+            OnPropertyChanged(nameof(ShowEmpty));
+            OnPropertyChanged(nameof(ResultBytes));
+            OnPropertyChanged(nameof(ResultFiles));
+            OnPropertyChanged(nameof(ResultFolders));
+            OnPropertyChanged(nameof(ResultSkipped));
+            OnPropertyChanged(nameof(ResultSkippedDetail));
+            OnPropertyChanged(nameof(ResultTimeText));
             Summary = $"{Format.Bytes(result.Root.Size)} em {result.Files.ToString("N0", Pt)} arquivos e {result.Directories.ToString("N0", Pt)} pastas, " +
                       $"lidos em {result.Elapsed.TotalSeconds.ToString("N1", Pt)} s." +
                       (result.AccessDenied > 0 ? $" {result.AccessDenied} pasta(s) sem permissão de leitura foram puladas (o tamanho delas não entra)." : "") +
@@ -162,6 +224,10 @@ public sealed class DiskPage : ModulePage, IDisposable
                       (result.CloudOnlyFiles > 0 ? $" {Format.Bytes(result.CloudOnlyBytes)} só na nuvem (OneDrive) não ocupam este disco." : "");
             var biggest = Math.Max(1, result.TopFiles.Count > 0 ? result.TopFiles[0].Size : 1);
             TopFiles = result.TopFiles.Select(f => new DiskFileRow(f, (double)f.Size / biggest)).ToList();
+            TopCards = TopFiles.Take(TopCardCount).ToList();
+            MoreFiles = TopFiles.Skip(TopCardCount).ToList();
+            OnPropertyChanged(nameof(MoreFilesHeader));
+            OnPropertyChanged(nameof(HasTopFiles));
             var totalCat = Math.Max(1, result.Categories.Sum(c => c.Bytes));
             Categories = result.Categories.Select(c => new DiskCategoryRow(c, (double)c.Bytes / totalCat)).ToList();
             Insights = insights.Take(40).Select(i => new DiskInsightRow(i)).ToList();
@@ -335,6 +401,8 @@ public sealed class DiskVolumeRow(VolumeInfo volume)
     public string TotalText => Format.Bytes(Volume.TotalBytes);
     public string FreeText => $"{Format.Bytes(Volume.FreeBytes)} livres de {Format.Bytes(Volume.TotalBytes)}";
     public bool AlmostFull => Volume.TotalBytes > 0 && Volume.FreeBytes < Volume.TotalBytes / 10;
+    public double UsedPercentValue => Math.Round(Volume.UsedFraction * 100, 1);
+    public string FreeShort => $"{Format.Bytes(Volume.FreeBytes)} livres";
 }
 
 public sealed class DiskCrumb(DirNode node)
@@ -361,11 +429,19 @@ public sealed class DiskFileRow(FileItem file, double fraction)
     public string Path => File.FullPath;
     public string Detail => $"{FileCategories.Label(File.Category)} · alterado em {File.LastWriteUtc.ToLocalTime():dd/MM/yyyy}";
     public double Fraction { get; } = fraction;
+    public double SizeBytes => File.Size;
+    public string KindText => FileCategories.Label(File.Category);
+    public string DateText => File.LastWriteUtc.ToLocalTime().ToString("dd/MM/yyyy", CultureInfo.GetCultureInfo("pt-BR"));
+    public string IconKey => DiskPalette.IconKey(File.Category);
+    public string ColorHex => DiskPalette.Hex(File.Category);
 }
 
 public sealed class DiskCategoryRow(CategoryTotal total, double fraction)
 {
     public string Label => total.Label;
+    public string IconKey => DiskPalette.IconKey(total.Category);
+    public string ColorHex => DiskPalette.Hex(total.Category);
+    public string PercentText => Fraction.ToString("P0", CultureInfo.GetCultureInfo("pt-BR"));
     public string SizeText => Format.Bytes(total.Bytes);
     public string FilesText => $"{total.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"))} arquivos";
     public double Fraction { get; } = fraction;
@@ -384,4 +460,19 @@ public sealed class DiskInsightRow(FolderInsight insight)
     public string Path => Insight.Path;
     public bool DoNotTouch => Insight.Kind == InsightKind.DoNotTouch;
     public bool IsGame => Insight.Kind == InsightKind.Game;
+    /// <summary>Selo: vermelho = não apague à mão, verde = jogo, âmbar = ferramenta oficial, ciano = decisão sua.</summary>
+    public Tone Tone => Insight.Kind switch
+    {
+        InsightKind.DoNotTouch => Tone.Bad,
+        InsightKind.Game => Tone.Good,
+        InsightKind.OfficialTool => Tone.Warn,
+        _ => Tone.Info,
+    };
+    public string IconKey => Insight.Kind switch
+    {
+        InsightKind.DoNotTouch => "Icon.Lock",
+        InsightKind.Game => "Icon.Games",
+        InsightKind.OfficialTool => "Icon.Windows",
+        _ => "Icon.User",
+    };
 }

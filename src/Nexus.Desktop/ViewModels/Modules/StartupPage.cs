@@ -3,6 +3,7 @@ using Nexus.Boot.Impact;
 using Nexus.Boot.Inventory;
 using Nexus.Boot.Windows;
 using Nexus.Broker;
+using Nexus.Desktop.Views.Controls;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -25,6 +26,9 @@ public sealed class StartupPage : ModulePage
     private string _lastChange = "";
     private List<StartupRow> _all = [];
     private IReadOnlyList<StartupRow> _visible = [];
+    private bool _isLoading = true;
+    private double _bootSeconds = double.NaN, _bootAverageSeconds = double.NaN, _desktopSeconds = double.NaN;
+    private string _bootCaption = "Medido pelo próprio Windows a cada boot.";
 
     public StartupPage()
     {
@@ -42,7 +46,28 @@ public sealed class StartupPage : ModulePage
     public string Summary { get => _summary; private set => Set(ref _summary, value); }
     public ObservableCollection<BootBar> BootBars { get; } = [];
     public ObservableCollection<string> Notes { get; } = [];
-    public IReadOnlyList<StartupRow> Visible { get => _visible; private set => Set(ref _visible, value); }
+    public IReadOnlyList<StartupRow> Visible { get => _visible; private set { if (Set(ref _visible, value)) OnPropertyChanged(nameof(ShowEmpty)); } }
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Primeira leitura em andamento (esqueletos no lugar dos números e da lista).</summary>
+    public bool IsLoading { get => _isLoading; private set { if (Set(ref _isLoading, value)) OnPropertyChanged(nameof(ShowEmpty)); } }
+    /// <summary>Último boot em segundos (NaN = o Windows não registrou).</summary>
+    public double BootSeconds { get => _bootSeconds; private set => Set(ref _bootSeconds, value); }
+    /// <summary>Média dos boots do gráfico (NaN = sem dados).</summary>
+    public double BootAverageSeconds { get => _bootAverageSeconds; private set => Set(ref _bootAverageSeconds, value); }
+    /// <summary>Até a área de trabalho no último boot (NaN = sem dado).</summary>
+    public double DesktopSeconds { get => _desktopSeconds; private set => Set(ref _desktopSeconds, value); }
+    /// <summary>Legenda de 1 linha do destaque.</summary>
+    public string BootCaption { get => _bootCaption; private set => Set(ref _bootCaption, value); }
+    public double ThirdPartyCount => _all.Count(r => !r.Item.IsMicrosoft);
+    public double EnabledCount => _all.Count(r => !r.Item.IsMicrosoft && r.Item.Enabled);
+    public double HighImpactCount => _all.Count(r => r.Item.Enabled && r.Item.Impact.Level == ImpactLevel.High);
+    public double OrphanCount => _all.Count(r => r.Item.IsOrphan);
+    public double WindowsCount => _all.Count(r => r.Item.IsMicrosoft);
+    public Tone HighImpactTone => HighImpactCount > 0 ? Tone.Bad : Tone.Good;
+    public bool HasNotes => Notes.Count > 0;
+    public bool ShowEmpty => !IsLoading && Visible.Count == 0;
 
     public string SearchText
     {
@@ -68,6 +93,19 @@ public sealed class StartupPage : ModulePage
     private async Task LoadAsync()
     {
         Message = "";
+        if (!_loaded) IsLoading = true;
+        try
+        {
+            await ReadAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ReadAsync()
+    {
         var (inventory, report) = await Task.Run(() =>
         {
             var r = WindowsBootEventReader.Read();
@@ -84,6 +122,9 @@ public sealed class StartupPage : ModulePage
         var visible = _all.Where(r => !r.Item.IsMicrosoft).ToList();
         Summary = $"{visible.Count} itens de terceiros · {visible.Count(r => r.Item.Enabled)} ligados · " +
                   $"{_all.Count(r => r.Item.IsOrphan)} órfãos · {_all.Count(r => r.Item.IsMicrosoft)} do Windows";
+        foreach (var name in new[] { nameof(ThirdPartyCount), nameof(EnabledCount), nameof(HighImpactCount), nameof(OrphanCount), nameof(WindowsCount),
+                     nameof(HighImpactTone), nameof(HasNotes) })
+            OnPropertyChanged(name);
         ApplyFilter();
     }
 
@@ -95,6 +136,10 @@ public sealed class StartupPage : ModulePage
             HasBootData = false;
             HeroValue = "—";
             HeroDetail = "Tempo de boot indisponível: " + (report.Unavailable ?? "sem registros.");
+            BootSeconds = double.NaN;
+            BootAverageSeconds = double.NaN;
+            DesktopSeconds = double.NaN;
+            BootCaption = "O Windows não registrou o tempo de boot neste PC.";
             return;
         }
         HasBootData = true;
@@ -107,12 +152,19 @@ public sealed class StartupPage : ModulePage
             ? "o Windows não apontou nenhum atraso específico nesse boot"
             : $"principal atraso: {delay.Label}, {BootEvents.KindLabel(delay.Kind)} ({BootReport.Seconds(delay.TotalMs)})");
         HeroDetail = $"Último boot ({last.TimeUtc.ToLocalTime():dd/MM HH:mm}): " + string.Join("; ", parts) + ".";
+        BootSeconds = Math.Round(last.TotalMs / 1000.0, 1);
+        DesktopSeconds = last.MainPathMs is { } m ? Math.Round(m / 1000.0, 1) : double.NaN;
+        BootCaption = last.MainPathMs is { } mp
+            ? $"Área de trabalho em {BootReport.Seconds(mp)} · {last.TimeUtc.ToLocalTime():dd/MM HH:mm} · medido pelo Windows"
+            : $"Boot de {last.TimeUtc.ToLocalTime():dd/MM HH:mm} · medido pelo Windows";
 
         var recent = report.Boots.TakeLast(12).ToList();
         var max = Math.Max(1, recent.Max(b => b.TotalMs));
+        var average = recent.Average(b => (double)b.TotalMs);
+        BootAverageSeconds = Math.Round(average / 1000.0, 1);
         foreach (var b in recent)
             BootBars.Add(new BootBar(Math.Max(4, 90.0 * b.TotalMs / max), b.TimeUtc.ToLocalTime().ToString("dd/MM", System.Globalization.CultureInfo.CurrentCulture),
-                BootReport.Seconds(b.TotalMs), ReferenceEquals(b, last)));
+                BootReport.Seconds(b.TotalMs), ReferenceEquals(b, last)) { IsSlow = b.TotalMs > average * 1.25 });
     }
 
     private void ApplyFilter()
@@ -215,7 +267,12 @@ public sealed class StartupPage : ModulePage
 }
 
 /// <summary>Barra do gráfico de boots (altura já normalizada para 0..90 px).</summary>
-public sealed record BootBar(double Height, string Label, string Value, bool IsLast);
+public sealed record BootBar(double Height, string Label, string Value, bool IsLast)
+{
+    /// <summary>Bem acima da média dos boots do gráfico (barra vermelha).</summary>
+    public bool IsSlow { get; init; }
+    public string Tooltip => $"{Label}: {Value}" + (IsLast ? " (último)" : "") + (IsSlow ? " · bem acima da média" : "");
+}
 
 /// <summary>Linha da lista de inicialização.</summary>
 public sealed class StartupRow : ObservableObject
@@ -262,6 +319,24 @@ public sealed class StartupRow : ObservableObject
         ImpactLevel.Low => "Good",
         _ => "Muted",
     };
+    /// <summary>Tom do selo de impacto para o StatusChip (desconhecido = neutro).</summary>
+    public Tone ImpactToneValue => Item.Impact.Level switch
+    {
+        ImpactLevel.High => Tone.Bad,
+        ImpactLevel.Medium => Tone.Warn,
+        ImpactLevel.Low => Tone.Good,
+        _ => Tone.Neutral,
+    };
+    /// <summary>Ícone pela origem: programa (Run), atalho (pasta Inicializar), tarefa agendada, serviço.</summary>
+    public string IconKey => Item.Source switch
+    {
+        StartupSource.StartupFolderUser or StartupSource.StartupFolderCommon => "Icon.Page",
+        StartupSource.ScheduledTask => "Icon.History",
+        StartupSource.Service => "Icon.Services",
+        _ => Item.IsOrphan ? "Icon.Warning" : "Icon.Startup",
+    };
+    public string SubLine => $"{Publisher} · {Origin}";
+    public string SwitchName => $"{Name}: {StateText}. Clique para {(IsOn ? "desligar" : "ligar")} na inicialização";
 
     public RelayCommand ToggleCommand { get; }
     public RelayCommand RemoveCommand { get; }
