@@ -1,0 +1,157 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Segurança. Só correções reversíveis de pontos suspeitos e remoção de sobras SELECIONADAS do inspetor de registro. Nada aqui desliga ou altera o Microsoft Defender (Proteção contra Adulteração bloqueia, e com razão): para isso o NEXUS abre a Segurança do Windows.",
+  "actions": [
+    {
+      "id": "security.hosts.disable-hijack", "version": 1,
+      "title": "Desativar linhas do hosts que sequestram domínios de segurança, atualização ou login",
+      "classification": "Conditional",
+      "condition": "Somente quando a análise do hosts encontrar redirecionamento ou bloqueio de domínios de segurança/atualização/login. Linhas de telemetria e anúncios não são tocadas.",
+      "handlerKind": "SecurityHostsFile",
+      "target": { "file": "hosts" },
+      "desiredValue": "clean", "desiredType": "HostsState",
+      "mechanism": "Comenta (prefixo '# [NEXUS desativou]') as linhas do arquivo hosts que mandam domínios da Microsoft, de antivírus, bancos ou lojas de jogos para outro IP ou para 0.0.0.0. Nenhuma linha é apagada.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "Microsoft: How to reset the Hosts file back to the default (https://support.microsoft.com/help/972034)" },
+        { "level": "VendorDocumented", "source": "Microsoft Defender detecta modificação do hosts como SettingsModifier:Win32/HostsFileHijack (https://www.microsoft.com/wdsi/threats)" }
+      ],
+      "risks": "Se você mesmo colocou a linha (ex.: bloquear um site), ela deixa de valer. A cópia original fica guardada e o Desfazer devolve o arquivo byte a byte.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "None",
+      "verification": "Releitura do hosts: nenhuma linha corrigível ativa.",
+      "revert": "Restaura a cópia original (DataDirectory\\quarantine\\security\\hosts), só se o hosts ainda for o que o NEXUS escreveu."
+    },
+    {
+      "id": "security.persistence.machine.remove", "version": 1,
+      "title": "Remover interceptação de programas (IFEO Debugger) escolhida",
+      "classification": "Conditional",
+      "condition": "Só entradas Debugger encontradas agora em Image File Execution Options e escolhidas pelo usuário.",
+      "handlerKind": "SecurityPersistenceValue",
+      "target": { "hive": "HKLM", "selection": "{selection}" },
+      "userParameters": { "selection": "[0-9a-f]{8}(,[0-9a-f]{8}){0,27}" },
+      "desiredValue": "absent", "desiredType": "RegistryEntrySet",
+      "mechanism": "Apaga o valor Debugger de HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\<programa>, que faz o Windows abrir outro executável no lugar do original.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "MITRE ATT&CK T1546.012 Image File Execution Options Injection e T1546.008 Accessibility Features (https://attack.mitre.org/techniques/T1546/012/)" }
+      ],
+      "risks": "Se a interceptação era intencional (ex.: Process Explorer no lugar do Gerenciador de Tarefas), ela deixa de funcionar. Tipo e dados do valor ficam guardados; o Desfazer recria.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "None",
+      "verification": "Releitura: valores escolhidos ausentes.",
+      "revert": "Recria cada valor com o tipo e os dados guardados no manifesto (sem sobrescrever o que existir)."
+    },
+    {
+      "id": "security.persistence.user.remove", "version": 1,
+      "title": "Remover Shell personalizado do perfil do usuário",
+      "classification": "Conditional",
+      "condition": "Só quando HKCU\\...\\Winlogon\\Shell existir e o usuário escolher.",
+      "handlerKind": "SecurityPersistenceValue",
+      "target": { "hive": "HKCU", "selection": "{selection}" },
+      "userParameters": { "selection": "[0-9a-f]{8}(,[0-9a-f]{8}){0,27}" },
+      "desiredValue": "absent", "desiredType": "RegistryEntrySet",
+      "mechanism": "Apaga o valor Shell do Winlogon no perfil do usuário, que substitui o Explorer só para esta conta.",
+      "evidence": [ { "level": "VendorDocumented", "source": "MITRE ATT&CK T1547.004 Winlogon Helper DLL (https://attack.mitre.org/techniques/T1547/004/)" } ],
+      "risks": "Em quiosques configurados de propósito, o shell personalizado deixa de abrir. O Desfazer recria o valor.",
+      "privileges": "User", "persistence": "Persistent", "reboot": "NextLogon",
+      "verification": "Releitura: valor ausente.",
+      "revert": "Recria o valor com o tipo e os dados guardados."
+    },
+    {
+      "id": "security.appinit.clear", "version": 1,
+      "title": "Limpar AppInit_DLLs (64 bits)",
+      "classification": "Conditional",
+      "condition": "Só quando AppInit_DLLs tiver DLLs listadas.",
+      "handlerKind": "RegistryValue",
+      "target": { "hive": "HKLM", "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows", "name": "AppInit_DLLs", "type": "String", "view": "Registry64" },
+      "desiredValue": "",
+      "mechanism": "Esvazia a lista de DLLs que o Windows injeta em todo programa que usa user32.dll (o padrão do Windows é a lista vazia).",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "Microsoft: AppInit DLLs and Secure Boot (https://learn.microsoft.com/windows/win32/dlls/secure-boot-and-appinit-dlls)" },
+        { "level": "VendorDocumented", "source": "MITRE ATT&CK T1546.010 AppInit DLLs" }
+      ],
+      "risks": "Alguns programas antigos (raros) usam AppInit legitimamente e param de funcionar. O Desfazer devolve o valor anterior.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "Recommended",
+      "verification": "Releitura do valor (texto vazio).", "revert": "Restaurar o texto original."
+    },
+    {
+      "id": "security.appinit.clear.wow64", "version": 1,
+      "title": "Limpar AppInit_DLLs (programas de 32 bits)",
+      "classification": "Conditional",
+      "condition": "Só quando AppInit_DLLs (visão 32 bits) tiver DLLs listadas.",
+      "handlerKind": "RegistryValue",
+      "target": { "hive": "HKLM", "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows", "name": "AppInit_DLLs", "type": "String", "view": "Registry32" },
+      "desiredValue": "",
+      "mechanism": "Igual à versão de 64 bits, para a lista usada pelos programas de 32 bits (WOW6432Node).",
+      "evidence": [ { "level": "VendorDocumented", "source": "Microsoft: AppInit DLLs and Secure Boot (https://learn.microsoft.com/windows/win32/dlls/secure-boot-and-appinit-dlls)" } ],
+      "risks": "Iguais aos da versão de 64 bits.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "Recommended",
+      "verification": "Releitura do valor (texto vazio).", "revert": "Restaurar o texto original."
+    },
+    {
+      "id": "security.winlogon.shell.reset", "version": 1,
+      "title": "Voltar o Shell do Windows para explorer.exe",
+      "classification": "Conditional",
+      "condition": "Só quando HKLM\\...\\Winlogon\\Shell for diferente de explorer.exe.",
+      "handlerKind": "RegistryValue",
+      "target": { "hive": "HKLM", "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", "name": "Shell", "type": "String", "view": "Registry64" },
+      "desiredValue": "explorer.exe",
+      "mechanism": "O valor Shell define o que o Windows abre ao entrar. O padrão é explorer.exe; programas extras aqui rodam a cada logon.",
+      "evidence": [ { "level": "VendorDocumented", "source": "MITRE ATT&CK T1547.004 Winlogon Helper DLL (https://attack.mitre.org/techniques/T1547/004/)" } ],
+      "risks": "Se um shell alternativo foi instalado de propósito, ele deixa de abrir. O Desfazer devolve o valor anterior.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "NextLogon",
+      "verification": "Releitura do valor.", "revert": "Restaurar o texto original."
+    },
+    {
+      "id": "security.registry.orphans.machine", "version": 1,
+      "title": "Remover sobras de registro escolhidas (todo o PC)",
+      "classification": "Conditional",
+      "condition": "Só entradas que o inspetor reconhece AGORA como órfãs (desinstalador/arquivo inexistente, disco presente) e que o usuário escolheu.",
+      "handlerKind": "SecurityRegistryOrphan",
+      "target": { "hive": "HKLM", "selection": "{selection}" },
+      "userParameters": { "selection": "[0-9a-f]{8}(,[0-9a-f]{8}){0,27}" },
+      "desiredValue": "absent", "desiredType": "RegistryEntrySet",
+      "mechanism": "Remove entradas de Desinstalação, Caminhos de aplicativo e DLLs compartilhadas que apontam para arquivos que não existem mais. NÃO deixa o PC mais rápido: só arruma listas (Programas e Recursos, Executar).",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "Microsoft support policy for the use of registry cleaning utilities (https://support.microsoft.com/help/2563254): a Microsoft não dá suporte a limpadores de registro" }
+      ],
+      "risks": "Baixo: as regras são conservadoras e o aplicador confere de novo se a entrada ainda é órfã. Cópia completa (todas as subchaves, tipos e dados) guardada; o Desfazer recria.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "None",
+      "verification": "Releitura: entradas escolhidas ausentes.",
+      "revert": "Recria cada chave/valor pelo manifesto (DataDirectory\\quarantine\\security\\registry), sem sobrescrever o que existir."
+    },
+    {
+      "id": "security.registry.orphans.user", "version": 1,
+      "title": "Remover sobras de registro escolhidas (seu usuário)",
+      "classification": "Conditional",
+      "condition": "Só entradas que o inspetor reconhece AGORA como órfãs no seu perfil e que você escolheu.",
+      "handlerKind": "SecurityRegistryOrphan",
+      "target": { "hive": "HKCU", "selection": "{selection}" },
+      "userParameters": { "selection": "[0-9a-f]{8}(,[0-9a-f]{8}){0,27}" },
+      "desiredValue": "absent", "desiredType": "RegistryEntrySet",
+      "mechanism": "Remove entradas de Desinstalação e Caminhos de aplicativo do seu perfil e nomes em cache (MUICache) de programas que não existem mais. NÃO deixa o PC mais rápido.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "Microsoft support policy for the use of registry cleaning utilities (https://support.microsoft.com/help/2563254)" }
+      ],
+      "risks": "Baixo. Cópia completa guardada; o Desfazer recria.",
+      "privileges": "User", "persistence": "Persistent", "reboot": "None",
+      "verification": "Releitura: entradas escolhidas ausentes.",
+      "revert": "Recria cada chave/valor pelo manifesto."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "security.registry-cleaner.speedup", "classification": "Ineffective",
+      "reason": "Limpar o registro não acelera o Windows. O registro é um banco indexado; entradas órfãs não são lidas no uso normal. Limpadores agressivos já quebraram instalações. O NEXUS oferece um inspetor (sobras escolhidas, com cópia e desfazer), não um limpador.",
+      "source": "https://support.microsoft.com/help/2563254"
+    },
+    {
+      "id": "security.defender.disable-for-fps", "classification": "Rejected",
+      "reason": "Desligar o Defender para 'ganhar FPS' troca segurança por um ganho não medido. A Proteção contra Adulteração bloqueia isso de propósito. Se um jogo sofre com varreduras, prefira exclusão pontual da pasta do jogo pela Segurança do Windows.",
+      "source": "https://learn.microsoft.com/defender-endpoint/prevent-changes-to-security-settings-with-tamper-protection"
+    },
+    {
+      "id": "security.own-signature-engine", "classification": "Rejected",
+      "reason": "Um motor de assinaturas próprio seria muito pior que o Microsoft Defender (atualizado várias vezes ao dia, com nuvem e comportamento). O NEXUS usa o Defender e só acrescenta heurísticas de revisão, sem remover nada sozinho.",
+      "source": "https://learn.microsoft.com/defender-endpoint/microsoft-defender-antivirus-windows"
+    }
+  ]
+}
