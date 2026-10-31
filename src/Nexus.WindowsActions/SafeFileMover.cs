@@ -214,17 +214,19 @@ public static partial class SafeFileMover
                 *(IntPtr*)(b + rootOffset) = targetDirectory.DangerousGetHandle();
                 *(uint*)(b + lengthOffset) = (uint)nameBytes;
                 fixed (char* n = newName) Buffer.MemoryCopy(n, b + nameOffset, nameBytes, nameBytes);
-                if (SetFileInformationByHandle(item, FileRenameInfoExClass, b, (uint)buffer.Length)) return;
-                var error = Marshal.GetLastPInvokeError();
-                // Windows 10 anterior à 1709: sem FileRenameInfoEx. Mesmo formato, ReplaceIfExists = FALSE.
-                if (error == ErrorInvalidParameter && SetFileInformationByHandle(item, FileRenameInfoClass, b, (uint)buffer.Length)) return;
-                error = Marshal.GetLastPInvokeError() is var e2 && e2 != 0 ? e2 : error;
-                throw error switch
+                // NtSetInformationFile aceita RootDirectory (renomear relativo ao handle da pasta); SetFileInformationByHandle
+                // recusa com ERROR_INVALID_PARAMETER (visto na VM do CI). FileRenameInformationEx (65), Flags = 0: nunca substitui;
+                // Windows anterior à 1709 não tem Ex → FileRenameInformation (10) com ReplaceIfExists = FALSE (mesmo layout).
+                var status = NtSetInformationFile(item, out _, b, (uint)buffer.Length, FileRenameInformationEx);
+                if (status is StatusInvalidInfoClass or StatusNotSupported or StatusInvalidParameter)
+                    status = NtSetInformationFile(item, out _, b, (uint)buffer.Length, FileRenameInformation);
+                if (status == 0) return;
+                throw (uint)status switch
                 {
-                    ErrorNotSameDevice => new SafeMoveRefusedException("Origem e destino em volumes diferentes; nada foi movido."),
-                    ErrorAlreadyExists or ErrorFileExists => new SafeMoveRefusedException("O destino já existe; nada foi movido (nunca sobrescreve)."),
-                    ErrorAccessDenied or ErrorSharingViolation => new SafeMoveRefusedException($"Em uso ou sem permissão (Win32 {error}); nada foi movido."),
-                    _ => new IOException($"Não foi possível mover (Win32 {error}); nada foi movido."),
+                    StatusNotSameDevice => new SafeMoveRefusedException("Origem e destino em volumes diferentes; nada foi movido."),
+                    StatusObjectNameCollision => new SafeMoveRefusedException("O destino já existe; nada foi movido (nunca sobrescreve)."),
+                    StatusAccessDenied or StatusSharingViolation => new SafeMoveRefusedException($"Em uso ou sem permissão (NTSTATUS 0x{status:X8}); nada foi movido."),
+                    _ => new IOException($"Não foi possível mover (NTSTATUS 0x{status:X8}); nada foi movido."),
                 };
             }
         }
@@ -272,6 +274,23 @@ public static partial class SafeFileMover
     [LibraryImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static unsafe partial bool SetFileInformationByHandle(SafeFileHandle hFile, int fileInformationClass, byte* lpFileInformation, uint dwBufferSize);
+
+    private const int FileRenameInformation = 10, FileRenameInformationEx = 65;
+    private const int StatusInvalidInfoClass = unchecked((int)0xC0000003), StatusNotSupported = unchecked((int)0xC00000BB),
+        StatusInvalidParameter = unchecked((int)0xC000000D);
+    private const uint StatusNotSameDevice = 0xC00000D4, StatusObjectNameCollision = 0xC0000035, StatusAccessDenied = 0xC0000022,
+        StatusSharingViolation = 0xC0000043;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct IoStatusBlock
+    {
+        public IntPtr Status;
+        public IntPtr Information;
+    }
+
+    [LibraryImport("ntdll.dll")]
+    private static unsafe partial int NtSetInformationFile(SafeFileHandle fileHandle, out IoStatusBlock ioStatusBlock, byte* fileInformation,
+        uint length, int fileInformationClass);
 
     [LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     private static unsafe partial uint GetLongPathNameW(string lpszShortPath, char* lpszLongPath, uint cchBuffer);
