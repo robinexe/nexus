@@ -31,6 +31,8 @@ public static class MemoryDiagnosis
 {
     private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
     public const string PageFileActionId = "memorylab.pagefile.automatic";
+    /// <summary>Chave id@versão que o aplicador espera no pedido (o broker procura pela chave, não pelo id).</summary>
+    public const string PageFileActionKey = PageFileActionId + "@1";
     private const ulong GiB = 1024UL * 1024 * 1024;
 
     public static readonly MemorySource TechSpot = new("TechSpot: Single Stick vs. Dual Channel RAM (Ryzen 7 9700X + RTX 5090, DDR5-6000)", "https://www.techspot.com/article/3066-single-stick-vs-dual-channel-ram/");

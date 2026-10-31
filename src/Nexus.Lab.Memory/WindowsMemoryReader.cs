@@ -177,7 +177,7 @@ public static unsafe partial class WindowsMemoryReader
         catch (InvalidOperationException) { return (null, null, "não foi possível ler"); }
     }
 
-    private static string? RunPowerShell(string command, TimeSpan timeout, CancellationToken cancel)
+    internal static string? RunPowerShell(string command, TimeSpan timeout, CancellationToken cancel)
     {
         var exe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
         if (!File.Exists(exe)) return null;
@@ -200,7 +200,7 @@ public static unsafe partial class WindowsMemoryReader
     }
 
     /// <summary>Consulta PDH mínima: duas coletas separadas por <paramref name="interval"/> (taxas precisam de duas amostras).</summary>
-    private static partial class Pdh
+    internal static partial class Pdh
     {
         private const uint FmtDouble = 0x00000200, FmtNoCap100 = 0x00008000;
 
@@ -221,6 +221,41 @@ public static unsafe partial class WindowsMemoryReader
 
         [LibraryImport("pdh.dll")]
         private static partial uint PdhCloseQuery(nint query);
+
+        [LibraryImport("pdh.dll", EntryPoint = "PdhGetFormattedCounterArrayW")]
+        private static partial uint PdhGetFormattedCounterArray(nint counter, uint format, ref uint bufferSize, out uint itemCount, nint buffer);
+
+        /// <summary>Contador com curinga (ex.: <c>\GPU Adapter Memory(*)\Shared Usage</c>): instância → valor, numa única coleta.</summary>
+        public static Dictionary<string, double> SampleInstances(string path)
+        {
+            var result = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            if (PdhOpenQuery(null, 0, out var q) != 0) return result;
+            try
+            {
+                if (PdhAddEnglishCounter(q, path, 0, out var c) != 0) return result;
+                if (PdhCollectQueryData(q) != 0) return result;
+                uint size = 0;
+                const uint moreData = 0x800007D2;
+                if (PdhGetFormattedCounterArray(c, FmtDouble | FmtNoCap100, ref size, out _, 0) != moreData || size == 0) return result;
+                var buf = Marshal.AllocHGlobal((int)size);
+                try
+                {
+                    if (PdhGetFormattedCounterArray(c, FmtDouble | FmtNoCap100, ref size, out var count, buf) != 0) return result;
+                    // PDH_FMT_COUNTERVALUE_ITEM_W: LPWSTR szName; PDH_FMT_COUNTERVALUE FmtValue (Status, pad, double).
+                    var itemSize = IntPtr.Size + sizeof(FmtCounterValue);
+                    for (var i = 0; i < count; i++)
+                    {
+                        var item = buf + i * itemSize;
+                        var name = Marshal.PtrToStringUni(Marshal.ReadIntPtr(item));
+                        var value = Marshal.PtrToStructure<FmtCounterValue>(item + IntPtr.Size);
+                        if (name is not null && value.Status is 0 or 1) result[name] = result.GetValueOrDefault(name) + value.Value;
+                    }
+                }
+                finally { Marshal.FreeHGlobal(buf); }
+                return result;
+            }
+            finally { _ = PdhCloseQuery(q); }
+        }
 
         public static double?[] Sample(string[] paths, TimeSpan interval, CancellationToken cancel)
         {
