@@ -1,7 +1,7 @@
 {
   "catalogVersion": "1.0.0",
   "schema": "nexus.catalog/1",
-  "note": "Módulo Limpeza. Gerado a partir de src/Nexus.Cleaning/Rules/cleaning-rules.json (uma ação por regra de quarentena; o teste de paridade em CleaningTests confere). O cliente só escolhe o lote ('batch', regex fechada); raízes, padrões e idade vêm das regras embutidas no aplicador.",
+  "note": "Módulo Limpeza. Gerado a partir de src/Nexus.Cleaning/Rules/cleaning-rules.json (uma ação por regra de quarentena; o teste de paridade em CleaningTests confere), mais as ações fixas: esvaziar a quarentena e a Lixeira (irreversíveis) e a ação genérica das regras do usuário. O cliente só escolhe o lote ('batch'), a idade ('days'), a unidade ('drive') ou o id da regra do usuário ('rule'), sempre por regex fechada; raízes, padrões e idade vêm das regras validadas no aplicador.",
   "actions": [
     {
       "id": "cleaning.temp-user",
@@ -1011,6 +1011,688 @@
       ],
       "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto Battle.net, Agent estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
       "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.windows-logs-old",
+      "version": 1,
+      "title": "Limpar: Registros antigos de instalação do Windows",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "windows-logs-old",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'windows-logs-old' com mais de 720 horas sem modificação. Registros (texto) de instalações e atualizações do Windows: DISM, instalação de versão (MoSetup) e configuração de rede. Só sai o que não foi escrito há mais de 30 dias; o registro em uso (ex.: dism.log atual) fica. CBS tem regra própria. Panther e WindowsUpdate não são tocados (o Windows usa para diagnóstico).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows-hardware/manufacture/desktop/deployment-troubleshooting-and-log-files (locais dos registros de instalação e do DISM)"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.store-cache",
+      "version": 1,
+      "title": "Limpar: Microsoft Store: cache de imagens",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "store-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'store-cache' com mais de 24 horas sem modificação. Imagens e páginas que a Microsoft Store guarda para abrir mais rápido. A Store recria sozinha. Não usamos o wsreset (ele também apaga a sessão da Store e roda sem mostrar o que faz); só esta pasta de cache conhecida, com mais de 24 horas.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/apps/design/app-settings/store-and-retrieve-app-data (LocalState/LocalCache: dados locais do app; a pasta Cache é recriada pela Store)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto WinStore.App estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.nvidia-nvcache",
+      "version": 1,
+      "title": "Limpar: NVIDIA: cache de shaders global (NV_Cache)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "nvidia-nvcache",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'nvidia-nvcache'. Cache de shaders da NVIDIA para todos os usuários (drivers antigos e alguns programas usam esta pasta). O driver recria. Feche jogos e programas 3D antes (arquivos em uso são pulados).",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Painel de Controle NVIDIA > Configurações 3D > 'Tamanho do cache do shader' (o driver mantém e recria o cache)"
+        }
+      ],
+      "risks": "É cache de shaders: jogos e programas vão recompilar e as primeiras partidas podem engasgar (stutter). Só vale para liberar espaço ou depois de trocar de driver com problemas gráficos. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.nvidia-installers",
+      "version": 1,
+      "title": "Limpar: NVIDIA: instaladores de driver extraídos",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "nvidia-installers",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'nvidia-installers' com mais de 720 horas sem modificação. O instalador do driver NVIDIA extrai os arquivos em C:\\NVIDIA\\DisplayDriver\\<versão> (caminho padrão da tela 'Extraction path') e não apaga depois. O driver já instalado não usa esta pasta; um novo instalador extrai de novo. Só sai o que tem mais de 30 dias e com nenhum instalador ('setup') aberto.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Instalador do driver NVIDIA: pasta de extração padrão C:\\NVIDIA\\DisplayDriver\\<versão>, usada só durante a instalação"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto setup estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.amd-installers",
+      "version": 1,
+      "title": "Limpar: AMD: instaladores extraídos (C:\\AMD)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "amd-installers",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'amd-installers' com mais de 720 horas sem modificação. O AMD Software (vídeo e chipset) extrai os pacotes de instalação em C:\\AMD e não apaga depois. Os drivers instalados não usam esta pasta. Só sai o que tem mais de 30 dias e com nenhum instalador aberto.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "AMD Software: Adrenalin Edition — o instalador extrai para C:\\AMD por padrão (pasta de extração mostrada pelo instalador)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto setup, AMDSoftwareInstaller estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.riot-logs",
+      "version": 1,
+      "title": "Limpar: Riot Client e VALORANT: registros antigos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "riot-logs",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'riot-logs' com mais de 72 horas sem modificação. Registros de diagnóstico do Riot Client e do VALORANT com mais de 3 dias. Configurações, replays e o anti-cheat (Vanguard) não são tocados.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Suporte da Riot: os registros do VALORANT ficam em %LocalAppData%\\VALORANT\\Saved\\Logs e os do Riot Client em %LocalAppData%\\Riot Games\\Riot Client\\Logs (artigos sobre envio de logs)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto RiotClientServices, VALORANT-Win64-Shipping estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.minecraft-logs",
+      "version": 1,
+      "title": "Limpar: Minecraft: registros antigos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "minecraft-logs",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'minecraft-logs' com mais de 72 horas sem modificação. Registros compactados de sessões anteriores do Minecraft (Java Edition), com mais de 3 dias. Mundos, capturas e configurações não são tocados; o latest.log fica.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://minecraft.wiki/w/.minecraft (pasta logs: registros de sessões anteriores, compactados .log.gz)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto javaw, Minecraft, MinecraftLauncher estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.ea-logs",
+      "version": 1,
+      "title": "Limpar: EA app: registros antigos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "ea-logs",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'ea-logs' com mais de 72 horas sem modificação. Registros de diagnóstico do EA app com mais de 3 dias. O cache do EA app não é tocado aqui: o próprio app limpa em Ajuda > Recuperação do aplicativo.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Ajuda da EA: os registros do EA app ficam em %LocalAppData%\\Electronic Arts\\EA Desktop\\Logs (artigo sobre encontrar os logs do EA app)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto EADesktop, EABackgroundService estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.ubisoft-logs",
+      "version": 1,
+      "title": "Limpar: Ubisoft Connect: registros antigos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "ubisoft-logs",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'ubisoft-logs' com mais de 72 horas sem modificação. Registros de diagnóstico do Ubisoft Connect com mais de 3 dias. O cache do launcher fica na pasta de instalação (Arquivos de Programas), que o NEXUS não toca; a Ubisoft orienta limpar por lá com o launcher fechado.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Suporte da Ubisoft: arquivos de log do Ubisoft Connect em %LocalAppData%\\Ubisoft Game Launcher\\logs"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto UbisoftConnect, upc estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.obs-logs",
+      "version": 1,
+      "title": "Limpar: OBS Studio: registros e relatórios de travamento antigos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "obs-logs",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'obs-logs' com mais de 168 horas sem modificação. Registros de sessões e relatórios de travamento do OBS com mais de 7 dias. Cenas, perfis e gravações não são tocados.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "OBS Studio: Ajuda > Arquivos de log > Mostrar arquivos de log abre %AppData%\\obs-studio\\logs (obsproject.com, guia de logs)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto obs64, obs32 estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.dev-vscode-cache",
+      "version": 1,
+      "title": "Limpar: VS Code: caches (desenvolvedor)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "dev-vscode-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'dev-vscode-cache' com mais de 24 horas sem modificação. Caches do Visual Studio Code (Chromium/Electron e cópias de extensões baixadas). Configurações, extensões instaladas e projetos não são tocados. O VS Code recria ao abrir.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "VS Code (Electron): pastas Cache, Code Cache, GPUCache e CachedData em %AppData%\\Code são caches recriados pelo editor"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto Code estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.dev-npm-cache",
+      "version": 1,
+      "title": "Limpar: npm: cache de pacotes (desenvolvedor)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "dev-npm-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'dev-npm-cache' com mais de 24 horas sem modificação. Cópias dos pacotes que o npm já baixou. Equivale ao 'npm cache clean --force'. Os projetos não mudam; o próximo 'npm install' baixa de novo o que faltar.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://docs.npmjs.com/cli/commands/npm-cache (no Windows, o cache fica em %LocalAppData%\\npm-cache)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto node estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.dev-pip-cache",
+      "version": 1,
+      "title": "Limpar: pip (Python): cache (desenvolvedor)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "dev-pip-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'dev-pip-cache' com mais de 24 horas sem modificação. Downloads e pacotes compilados (wheels) que o pip guarda. Equivale ao 'pip cache purge'. Pacotes já instalados continuam funcionando.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://pip.pypa.io/en/stable/topics/caching/ (Windows: %LocalAppData%\\pip\\Cache)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto pip, python estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.dev-nuget-cache",
+      "version": 1,
+      "title": "Limpar: NuGet: cache HTTP (desenvolvedor)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "dev-nuget-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'dev-nuget-cache' com mais de 24 horas sem modificação. Cache HTTP do NuGet (equivale a 'dotnet nuget locals http-cache --clear' e plugins-cache). A pasta de pacotes globais (%UserProfile%\\.nuget\\packages) NÃO é tocada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/nuget/consume-packages/managing-the-global-packages-and-cache-folders (http-cache em %LocalAppData%\\NuGet\\v3-cache)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto dotnet, devenv, MSBuild estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.dev-gradle-cache",
+      "version": 1,
+      "title": "Limpar: Gradle: caches (desenvolvedor)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "dev-gradle-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'dev-gradle-cache' com mais de 168 horas sem modificação. Dependências baixadas e resultados de compilação que o Gradle guarda (inclusive do Android Studio). Só sai o que tem mais de 7 dias; o próximo build baixa de novo o que faltar (pode demorar).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://docs.gradle.org/current/userguide/directory_layout.html (Gradle User Home: caches/ pode ser removido; é recriado)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto java, javaw, studio64 estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.dev-java-cache",
+      "version": 1,
+      "title": "Limpar: Java: cache de implantação (desenvolvedor)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "dev-java-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'dev-java-cache' com mais de 24 horas sem modificação. Arquivos temporários do Java (Web Start e applets antigos), os mesmos que o Painel de Controle Java apaga em Arquivos Temporários da Internet.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Oracle — Painel de Controle Java, guia Geral > Arquivos Temporários da Internet > Excluir Arquivos (docs.oracle.com, Java Deployment Guide)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto java, javaw, javaws estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.quarantine.purge",
+      "version": 1,
+      "title": "Esvaziar um lote da quarentena (sua conta, irreversível)",
+      "classification": "Conditional",
+      "condition": "Só um lote que está na quarentena da sua conta, escolhido e confirmado duas vezes na página Limpeza > Quarentena, com a lista e o tamanho exato.",
+      "handlerKind": "CleaningQuarantinePurge",
+      "irreversible": true,
+      "target": {
+        "level": "user",
+        "batch": "{batch}"
+      },
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "desiredValue": "purged",
+      "desiredType": "CleaningQuarantine",
+      "mechanism": "Apaga de vez os arquivos que estão na quarentena da limpeza (pasta de dados da sua conta, %LocalAppData%\\NEXUS). Antes, marca cada manifesto como 'esvaziando' (o desfazer da limpeza passa a recusar com motivo claro); depois apaga os arquivos sem seguir links ou junções (só a entrada do link sai, nunca o destino) e guarda nos manifestos a data e os bytes apagados, para o histórico.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Quarentena do próprio NEXUS (DataDirectory\\quarantine\\cleaning\\<lote>): no mesmo disco, o espaço só volta quando os arquivos são apagados de vez."
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/dotnet/api/system.io.fileattributes (ReparsePoint: links e junções nunca são seguidos ao apagar)"
+        }
+      ],
+      "risks": "IRREVERSÍVEL: depois disso, a limpeza desses lotes não pode mais ser desfeita. Libera de verdade o espaço que a quarentena ocupava. Não melhora desempenho.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: tamanho da quarentena desses lotes = 0 (arquivos e bytes lidos do disco).",
+      "revert": "Não há como desfazer. O diário registra o esvaziamento; desfazer e recuperar recusam com mensagem clara."
+    },
+    {
+      "id": "cleaning.quarantine.purge.machine",
+      "version": 1,
+      "title": "Esvaziar um lote da quarentena (administrador, irreversível)",
+      "classification": "Conditional",
+      "condition": "Só um lote da quarentena do administrador (pastas do sistema), escolhido e confirmado duas vezes na página Limpeza > Quarentena.",
+      "handlerKind": "CleaningQuarantinePurge",
+      "irreversible": true,
+      "target": {
+        "level": "machine",
+        "batch": "{batch}"
+      },
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "desiredValue": "purged",
+      "desiredType": "CleaningQuarantine",
+      "mechanism": "Apaga de vez os arquivos que estão na quarentena da limpeza (pasta de dados do aplicador administrador, %ProgramData%\\NEXUS). Antes, marca cada manifesto como 'esvaziando' (o desfazer da limpeza passa a recusar com motivo claro); depois apaga os arquivos sem seguir links ou junções (só a entrada do link sai, nunca o destino) e guarda nos manifestos a data e os bytes apagados, para o histórico.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Quarentena do próprio NEXUS (DataDirectory\\quarantine\\cleaning\\<lote>): no mesmo disco, o espaço só volta quando os arquivos são apagados de vez."
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/dotnet/api/system.io.fileattributes (ReparsePoint: links e junções nunca são seguidos ao apagar)"
+        }
+      ],
+      "risks": "IRREVERSÍVEL: depois disso, a limpeza desses lotes não pode mais ser desfeita. Libera de verdade o espaço que a quarentena ocupava. Não melhora desempenho.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: tamanho da quarentena desses lotes = 0 (arquivos e bytes lidos do disco).",
+      "revert": "Não há como desfazer. O diário registra o esvaziamento; desfazer e recuperar recusam com mensagem clara."
+    },
+    {
+      "id": "cleaning.quarantine.purge-older",
+      "version": 1,
+      "title": "Esvaziar lotes da quarentena com mais de N dias (sua conta, irreversível)",
+      "classification": "Conditional",
+      "condition": "N de 1 a 999 dias, escolhido pelo usuário (ou sugerido pela expiração opcional, desligada por padrão). Nunca roda sozinho: sempre com duas confirmações.",
+      "handlerKind": "CleaningQuarantinePurge",
+      "irreversible": true,
+      "target": {
+        "level": "user",
+        "olderThanDays": "{days}"
+      },
+      "userParameters": {
+        "days": "[1-9][0-9]{0,2}"
+      },
+      "desiredValue": "purged",
+      "desiredType": "CleaningQuarantine",
+      "mechanism": "Apaga de vez os arquivos que estão na quarentena da limpeza (lotes da sua conta com mais de N dias). Antes, marca cada manifesto como 'esvaziando' (o desfazer da limpeza passa a recusar com motivo claro); depois apaga os arquivos sem seguir links ou junções (só a entrada do link sai, nunca o destino) e guarda nos manifestos a data e os bytes apagados, para o histórico.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Quarentena do próprio NEXUS (DataDirectory\\quarantine\\cleaning\\<lote>): no mesmo disco, o espaço só volta quando os arquivos são apagados de vez."
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/dotnet/api/system.io.fileattributes (ReparsePoint: links e junções nunca são seguidos ao apagar)"
+        }
+      ],
+      "risks": "IRREVERSÍVEL: depois disso, a limpeza desses lotes não pode mais ser desfeita. Libera de verdade o espaço que a quarentena ocupava. Não melhora desempenho.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: tamanho da quarentena desses lotes = 0 (arquivos e bytes lidos do disco).",
+      "revert": "Não há como desfazer. O diário registra o esvaziamento; desfazer e recuperar recusam com mensagem clara."
+    },
+    {
+      "id": "cleaning.quarantine.purge-older.machine",
+      "version": 1,
+      "title": "Esvaziar lotes da quarentena com mais de N dias (administrador, irreversível)",
+      "classification": "Conditional",
+      "condition": "N de 1 a 999 dias, escolhido pelo usuário. Nunca roda sozinho: sempre com duas confirmações.",
+      "handlerKind": "CleaningQuarantinePurge",
+      "irreversible": true,
+      "target": {
+        "level": "machine",
+        "olderThanDays": "{days}"
+      },
+      "userParameters": {
+        "days": "[1-9][0-9]{0,2}"
+      },
+      "desiredValue": "purged",
+      "desiredType": "CleaningQuarantine",
+      "mechanism": "Apaga de vez os arquivos que estão na quarentena da limpeza (lotes do administrador com mais de N dias). Antes, marca cada manifesto como 'esvaziando' (o desfazer da limpeza passa a recusar com motivo claro); depois apaga os arquivos sem seguir links ou junções (só a entrada do link sai, nunca o destino) e guarda nos manifestos a data e os bytes apagados, para o histórico.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Quarentena do próprio NEXUS (DataDirectory\\quarantine\\cleaning\\<lote>): no mesmo disco, o espaço só volta quando os arquivos são apagados de vez."
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/dotnet/api/system.io.fileattributes (ReparsePoint: links e junções nunca são seguidos ao apagar)"
+        }
+      ],
+      "risks": "IRREVERSÍVEL: depois disso, a limpeza desses lotes não pode mais ser desfeita. Libera de verdade o espaço que a quarentena ocupava. Não melhora desempenho.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: tamanho da quarentena desses lotes = 0 (arquivos e bytes lidos do disco).",
+      "revert": "Não há como desfazer. O diário registra o esvaziamento; desfazer e recuperar recusam com mensagem clara."
+    },
+    {
+      "id": "cleaning.recycle-bin.empty",
+      "version": 1,
+      "title": "Esvaziar a Lixeira (irreversível)",
+      "classification": "Conditional",
+      "condition": "Só na sua conta (a Lixeira é de cada usuário). Uma unidade (letra) ou todas. Duas confirmações na página, com o tamanho exato; recusado no aplicador como serviço ou com outra conta.",
+      "handlerKind": "CleaningRecycleBin",
+      "irreversible": true,
+      "target": {
+        "drive": "{drive}"
+      },
+      "userParameters": {
+        "drive": "[A-Z]|all"
+      },
+      "desiredValue": "empty",
+      "desiredType": "RecycleBin",
+      "mechanism": "Chama a API do Shell SHEmptyRecycleBinW para a unidade escolhida (ou todas), sem a confirmação, a barra de progresso e o som do Explorer (SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND): o NEXUS já confirmou duas vezes. É o mesmo que 'Esvaziar Lixeira' no Explorer.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/shellapi/nf-shellapi-shemptyrecyclebinw"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/shellapi/nf-shellapi-shqueryrecyclebinw (tamanho antes e depois)"
+        }
+      ],
+      "risks": "IRREVERSÍVEL: o que está na Lixeira é apagado de vez (sem quarentena). Confira a Lixeira antes. Não melhora desempenho: só libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura pela SHQueryRecycleBinW: 0 itens e 0 bytes.",
+      "revert": "Não há como desfazer. O diário registra o esvaziamento; desfazer e recuperar recusam com mensagem clara."
+    },
+    {
+      "id": "cleaning.user-rule",
+      "version": 1,
+      "title": "Limpar: regra do usuário (pasta %AppData%\\NEXUS\\rules)",
+      "classification": "Conditional",
+      "condition": "Só regras escritas pelo próprio usuário, carregadas e válidas (mesma validação da página); só no aplicador da sua conta, sem administrador. Nunca no aplicador elevado nem no serviço.",
+      "handlerKind": "CleaningUserRule",
+      "target": {
+        "rule": "{rule}",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "userParameters": {
+        "rule": "[a-z0-9]{1,48}(?:-[a-z0-9]{1,48}){0,15}",
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "mechanism": "Igual às regras embutidas: move para a quarentena do NEXUS os arquivos elegíveis da regra do usuário (raízes só no perfil, padrões, idade mínima, exclusões), nunca seguindo links/junções e pulando arquivos em uso. A regra é relida e revalidada a cada pedido; o manifesto guarda uma cópia dela para o desfazer.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Regras definidas pelo usuário em JSON (como as 'cleaner rules' do Kudu), com a mesma política de alvos proibidos das regras embutidas; guia em docs/modules/cleaning-rules-guide.md."
+        }
+      ],
+      "risks": "Depende da regra que você escreveu: confira as pastas. Tudo vai para a quarentena e pode voltar. Pastas de segredos do Windows, pessoais (Documentos, Área de Trabalho...) e do NEXUS são recusadas.",
+      "privileges": "User",
       "persistence": "Persistent",
       "reboot": "None",
       "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
