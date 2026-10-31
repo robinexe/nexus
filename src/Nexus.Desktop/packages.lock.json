@@ -37,14 +37,42 @@
           "SQLitePCLRaw.core": "2.1.13"
         }
       },
+      "nexus.automation": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
+      "nexus.boot": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.broker": {
         "type": "Project",
         "dependencies": {
           "Nexus.Core": "[1.0.0, )"
         }
       },
+      "nexus.cleaning": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.core": {
         "type": "Project"
+      },
+      "nexus.disktools": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
       },
       "nexus.experimentation": {
         "type": "Project"
@@ -65,11 +93,46 @@
           "Nexus.TraceAnalysis": "[1.0.0, )"
         }
       },
+      "nexus.monitoring": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Data.Sqlite": "[10.0.14, )",
           "Nexus.Core": "[1.0.0, )"
+        }
+      },
+      "nexus.privacy": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
+      "nexus.programs": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
+      "nexus.security": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
+      "nexus.systemtools": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
         }
       },
       "nexus.traceanalysis": {

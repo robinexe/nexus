@@ -13,10 +13,9 @@ on:
     paths:
       - '.github/workflows/vm-integracao.yml'
       - 'tests/Nexus.IntegrationTests/**'
-      - 'src/Nexus.Broker/**'
-      - 'src/Nexus.Broker.Host/**'
+      - 'src/**'
+      - 'catalog/**'
       - 'tools/service/**'
-      - 'src/Nexus.Broker.Host/**'
 
 permissions:
   contents: read

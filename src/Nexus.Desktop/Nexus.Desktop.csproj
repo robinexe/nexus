@@ -17,6 +17,15 @@
     <ProjectReference Include="..\Nexus.Broker.Host\Nexus.Broker.Host.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <ProjectReference Include="..\Nexus.Cleaning\Nexus.Cleaning.csproj" />
+    <ProjectReference Include="..\Nexus.DiskTools\Nexus.DiskTools.csproj" />
+    <ProjectReference Include="..\Nexus.Programs\Nexus.Programs.csproj" />
+    <ProjectReference Include="..\Nexus.Boot\Nexus.Boot.csproj" />
+    <ProjectReference Include="..\Nexus.Privacy\Nexus.Privacy.csproj" />
+    <ProjectReference Include="..\Nexus.Security\Nexus.Security.csproj" />
+    <ProjectReference Include="..\Nexus.Monitoring\Nexus.Monitoring.csproj" />
+    <ProjectReference Include="..\Nexus.SystemTools\Nexus.SystemTools.csproj" />
+    <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
   </ItemGroup>

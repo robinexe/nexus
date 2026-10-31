@@ -38,7 +38,8 @@ public sealed class MainViewModel : ObservableObject
     public MainViewModel()
     {
         Compare = new ComparePage(Measure);
-        Pages = [Overview, Hardware, Diagnostics, Catalog, Plan, Broker, Measure, Compare, History, Capabilities];
+        Pages = [Overview, Hardware, Diagnostics, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
+            Privacy, Security, SystemTools, Measure, Compare, Monitor, History, Capabilities];
         Broker.Candidates = Plan.Candidates;
         Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
         Broker.PlanCommand = new RelayCommand(() => _ = BrokerPlanAsync(), () => !Broker.Busy && Broker.Connected && Chosen().Count > 0);
@@ -68,6 +69,18 @@ public sealed class MainViewModel : ObservableObject
     public HistoryPage History { get; } = new();
     public CapabilitiesPage Capabilities { get; } = new();
     public IReadOnlyList<PageViewModel> Pages { get; }
+
+    // Módulos
+    public AutomationPage Automation { get; } = new();
+    public StartupPage Startup { get; } = new();
+    public ServicesPage Services { get; } = new();
+    public CleaningPage Cleaning { get; } = new();
+    public DiskPage Disk { get; } = new();
+    public ProgramsPage Programs { get; } = new();
+    public PrivacyPage Privacy { get; } = new();
+    public SecurityPage Security { get; } = new();
+    public SystemToolsPage SystemTools { get; } = new();
+    public MonitorPage Monitor { get; } = new();
 
     public PageViewModel SelectedPage { get => _selectedPage; set => Set(ref _selectedPage, value); }
     public string Status { get => _status; set => Set(ref _status, value); }

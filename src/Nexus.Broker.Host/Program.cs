@@ -120,6 +120,9 @@ namespace Nexus.Broker.Host
                 .Add(new PowerSettingValueHandler(new WindowsPowerBackend()))
                 .Add(new ServiceStartTypeHandler(new WindowsServiceBackend()))
                 .Add(new SourceCfgConvarHandler(() => null));
+            // Módulos (limpeza, programas, privacidade...): cada um entrega seus handlers; o catálogo diz o que pode ser pedido.
+            var environment = new HandlerEnvironment(registry, Path.GetDirectoryName(Path.GetFullPath(o.JournalPath))!, asSystem, facts.IsElevated == true);
+            foreach (var handler in ModuleHandlers.All(environment)) handlers.Add(handler);
             var catalog = CatalogLoader.LoadDirectory(Path.Combine(AppContext.BaseDirectory, "catalog"));
             var context = new SystemContext(facts.WindowsBuild ?? 0, facts.CpuModel ?? "desconhecido", facts.GpuVendorPrimary, facts.IsElevated ?? false);
             var power = new WindowsPowerBackend();
