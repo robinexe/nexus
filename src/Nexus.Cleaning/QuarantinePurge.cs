@@ -78,7 +78,13 @@ internal sealed class QuarantinePurger
             {
                 var size = new FileInfo(path).Length;
                 if ((attributes & FileAttributes.ReadOnly) != 0) File.SetAttributes(path, attributes & ~FileAttributes.ReadOnly);
-                File.Delete(path);
+                try { File.Delete(path); }
+                catch (UnauthorizedAccessException)
+                {
+                    // Atributos de sistema/oculto/somente leitura herdados da origem: normaliza e tenta de novo uma vez.
+                    File.SetAttributes(path, FileAttributes.Normal);
+                    File.Delete(path);
+                }
                 files++;
                 bytes += size;
             }
