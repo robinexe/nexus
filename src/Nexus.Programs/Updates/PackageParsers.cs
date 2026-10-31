@@ -116,7 +116,7 @@ public static class FixedWidthTable
     /// <summary>Linhas como o console as mostraria: só o que vem depois do último '\r' (barras de progresso se sobrescrevem).</summary>
     public static List<string> CleanLines(string output) =>
         (output ?? "").Replace("\r\n", "\n", StringComparison.Ordinal).TrimStart('﻿').Split('\n')
-            .Select(l => { var r = l.LastIndexOf('\r'); return (r >= 0 ? l[(r + 1)..] : l).TrimEnd(); })
+            .Select(l => { l = l.TrimEnd('\r'); var r = l.LastIndexOf('\r'); return (r >= 0 ? l[(r + 1)..] : l).TrimEnd(); })
             .Select(StripAnsi).ToList();
 
     private static string StripAnsi(string s) => s.Contains('\u001b', StringComparison.Ordinal) ? Regex.Replace(s, @"\u001b\[[0-9;?]*[A-Za-z]", "") : s;

@@ -824,7 +824,7 @@ public class ProgramsPackageParserTests
     [Fact]
     public void Winget_ingles_com_progresso_nomes_truncados_largura_asiatica_e_tabela_explicita()
     {
-        var list = WingetParser.ParseUpgradeTable(WingetEnglish.Replace("\n", "\r\n", StringComparison.Ordinal));
+        var list = WingetParser.ParseUpgradeTable(WingetEnglish.Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", "\r\n", StringComparison.Ordinal));
         Assert.Equal(5, list.Count);
         Assert.Equal(("Mozilla Firefox (x64 en-US)", "Mozilla.Firefox", "131.0.3", "132.0", "winget"),
             (list[0].Name, list[0].Id, list[0].Current, list[0].Available, list[0].Source));
