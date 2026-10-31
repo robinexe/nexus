@@ -212,7 +212,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
           # Numa pasta do usuário o verificador precisa avisar (código 1): é o motivo de preferir o instalador para modo administrador.
           powershell -NoProfile -ExecutionPolicy Bypass -File "$dest\NEXUS\tools\Test-NexusFolderSafety.ps1" -Path "$dest\NEXUS"
-          "Test-NexusFolderSafety na pasta portátil: $LASTEXITCODE (1 esperado em pasta do usuário)"
+          $safety = $LASTEXITCODE
+          "Test-NexusFolderSafety na pasta portátil: $safety (1 esperado em pasta do usuário)"
+          if ($safety -ne 1) { Write-Error "O verificador deveria avisar (1) numa pasta do usuário; deu $safety"; exit 1 }
+          exit 0
 
       - name: SHA-256
         shell: pwsh
