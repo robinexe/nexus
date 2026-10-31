@@ -16,6 +16,14 @@ public sealed class ResourceKeyConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Binding.DoNothing;
 }
 
+/// <summary>Inverte um booleano (verdadeiro ↔ falso).</summary>
+public sealed class InvertBoolConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is not true;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => value is not true;
+}
+
 /// <summary>
 /// Tom (<see cref="Tone"/>) → pincel do tema. ConverterParameter="soft" devolve o fundo suave; "text" devolve a cor do texto
 /// para o tom neutro (números que só ganham cor quando têm tom).

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using Nexus.Desktop.Services.Shell;
 using Nexus.Desktop.ViewModels;
 using Nexus.Desktop.Views.Shell;
@@ -12,9 +13,6 @@ namespace Nexus.Desktop;
     Justification = "Window não é IDisposable; o ícone da bandeja é liberado em Closed.")]
 public partial class MainWindow : Window
 {
-    /// <summary>Ordem dos grupos da navegação lateral (por tarefa do jogador).</summary>
-    private static readonly string[] GroupOrder = ["Meu PC", "Laboratório", "Automático", "Otimizar", "Limpar", "Proteger", "Sistema", "Medir", "Registro"];
-
     private readonly MainViewModel _vm;
     private TrayIcon? _tray;
     private bool _exiting;
@@ -30,7 +28,7 @@ public partial class MainWindow : Window
 
         // Navegação agrupada por PageViewModel.Group. A lista vai antes do DataContext para o SelectedItem já achar a página.
         var ordered = _vm.Pages
-            .OrderBy(p => Array.IndexOf(GroupOrder, p.Group) is var i && i >= 0 ? i : GroupOrder.Length)
+            .OrderBy(p => ShellMap.GroupRank(p.Group))
             .ToList();
         var view = new ListCollectionView(ordered);
         view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PageViewModel.Group)));
@@ -62,6 +60,28 @@ public partial class MainWindow : Window
     {
         if (e.PropertyName == nameof(MainViewModel.SelectedPage)) ShellMotion.EnterPage(PageHost);
     }
+
+    // ------------------------------------------------------------------ navegação pelas páginas (ShellCommands.Navigate)
+
+    /// <summary>Abre a página cujo tipo do ViewModel tem o nome dado em CommandParameter (ex.: "CleaningPage").</summary>
+    private void OnNavigate(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (FindPage(e.Parameter) is { } page) _vm.SelectedPage = page;
+        e.Handled = true;
+    }
+
+    private void OnCanNavigate(object sender, CanExecuteRoutedEventArgs e)
+    {
+        e.CanExecute = FindPage(e.Parameter) is not null;
+        e.Handled = true;
+    }
+
+    private PageViewModel? FindPage(object? parameter) => parameter switch
+    {
+        PageViewModel p => p,
+        string name => _vm.Pages.FirstOrDefault(p => string.Equals(p.GetType().Name, name, StringComparison.Ordinal)),
+        _ => null,
+    };
 
     /// <summary>Ctrl+clique desmarcaria o item ativo e deixaria a área de conteúdo vazia: volta para a página anterior.</summary>
     private void KeepSelection(object sender, SelectionChangedEventArgs e)

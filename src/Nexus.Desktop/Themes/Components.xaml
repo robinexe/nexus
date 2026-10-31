@@ -6,7 +6,8 @@
   Nas páginas: xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls" e xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell".
   Controles: c:HeroPanel, c:AnimatedNumber, c:RingMeter, c:BeforeAfter, c:HowItWorks + c:StepItem (modelo "StepCard"), c:StatTile,
              c:ExplainToggle, c:StatusChip, c:EmptyState, c:SkeletonLoader, c:Sparkline, c:Icon.
-  Conversores: ResourceByKey (texto → recurso), ToneBrush (Tone → pincel; "soft"/"text"), PageIcon (página → ícone; "illustration").
+  Conversores: ResourceByKey (texto → recurso), ToneBrush (Tone → pincel; "soft"/"text"), PageIcon (página → ícone; "illustration"),
+               InvertBool.
   Estilos: Tab.Underline (RadioButton como aba com sublinhado âmbar), Explain.Toggle (o botão do "Por que isso?").
   Movimento: contagem/preenchimento ShellMotion.Count (0,7 s), revelação ShellMotion.Normal; tudo zera com animações desligadas.
 -->
@@ -19,6 +20,7 @@
   <c:ResourceKeyConverter x:Key="ResourceByKey"/>
   <c:ToneBrushConverter x:Key="ToneBrush"/>
   <shell:PageIconConverter x:Key="PageIcon"/>
+  <c:InvertBoolConverter x:Key="InvertBool"/>
 
   <!-- ===== Ícone: herda a cor do texto ===== -->
   <Style TargetType="c:Icon">

@@ -84,6 +84,23 @@ public static class ShellMap
         return "DiagnosticsPage";
     }
 
+    private static readonly Dictionary<string, string> Actions = new(StringComparer.Ordinal)
+    {
+        ["MemoryLabPage"] = "Ver a memória",
+        ["GpuLabPage"] = "Ver a placa de vídeo",
+        ["CpuLabPage"] = "Ver o processador",
+        ["CleaningPage"] = "Liberar espaço",
+        ["DiskPage"] = "Ver o disco",
+        ["SecurityPage"] = "Ver a segurança",
+        ["CatalogPage"] = "Ver os ajustes",
+        ["MeasurePage"] = "Medir uma partida",
+        ["DiagnosticsPage"] = "Ver o diagnóstico",
+    };
+
+    /// <summary>Verbo do botão que abre a página ("Liberar espaço", "Ver a memória"). Sem mapa: "Abrir".</summary>
+    public static string ActionFor(string? pageTypeName) =>
+        pageTypeName is not null && Actions.TryGetValue(pageTypeName, out var a) ? a : "Abrir";
+
     /// <summary>Ícone do achado, pela mesma regra de <see cref="PageForFinding"/>.</summary>
     public static string IconForFinding(string? findingId) => IconFor(PageForFinding(findingId));
 }

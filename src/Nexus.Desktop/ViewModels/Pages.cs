@@ -3,7 +3,9 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Nexus.Core;
 using Nexus.Desktop.Services;
+using Nexus.Desktop.Views.Controls;
 using Nexus.Desktop.Views.Optimize;
+using Nexus.Desktop.Views.Shell;
 using Nexus.HardwareDiscovery;
 
 namespace Nexus.Desktop.ViewModels;
@@ -374,7 +376,43 @@ public sealed class CapabilitiesPage : PageViewModel
     public int PendingCount => Rows.Count(r => r.Label == CapabilityLabel.Pending);
 }
 
-public sealed record OverviewCard(string Title, string Value, FactStatus Status, string Detail);
+/// <summary>Papel do cartão na página "Meu PC".</summary>
+public enum OverviewCardKind
+{
+    /// <summary>Valor lido (Windows, plano de energia, sistema…), aparece em "Tudo o que foi lido".</summary>
+    Fact,
+    /// <summary>Peça com ilustração e 1 número (processador, placa de vídeo, memória, disco).</summary>
+    Hardware,
+    /// <summary>"Itens em ordem" do diagnóstico (anel do destaque).</summary>
+    Health,
+    /// <summary>"O que o NEXUS recomenda agora": título curto, motivo e ação (abre uma página).</summary>
+    Recommendation,
+}
+
+/// <summary>
+/// Cartão da página "Meu PC". Os campos extras (init) alimentam a apresentação v2: número, sufixo, página de destino
+/// (nome do tipo, para ShellCommands.Navigate), ilustração/ícone (chaves de recurso) e tendência.
+/// </summary>
+public sealed record OverviewCard(string Title, string Value, FactStatus Status, string Detail)
+{
+    public OverviewCardKind Kind { get; init; } = OverviewCardKind.Fact;
+    /// <summary>Número principal (NaN = sem número; mostra <see cref="Value"/>).</summary>
+    public double Number { get; init; } = double.NaN;
+    public string Suffix { get; init; } = "";
+    /// <summary>Página que resolve/aprofunda (nome do tipo do ViewModel, ex.: "MemoryLabPage").</summary>
+    public string Target { get; init; } = "";
+    public string ActionText { get; init; } = "";
+    public string IconKey { get; init; } = "";
+    public string IllustrationKey { get; init; } = "";
+    public string Trend { get; init; } = "";
+    /// <summary>Linha de detalhe do cartão de peça (modelo, tipo e velocidade, unidade e tamanho).</summary>
+    public string Note { get; init; } = "";
+    /// <summary>Tendência é um aviso (âmbar) e não uma informação (ciano)?</summary>
+    public bool TrendWarns { get; init; }
+    public Tone TrendTone => Trend.Length == 0 ? Tone.Neutral : TrendWarns ? Tone.Warn : Tone.Good;
+    /// <summary>Recomendação vinda de um ponto de atenção (âmbar) ou sugestão geral (ciano).</summary>
+    public Tone Tone => TrendWarns ? Tone.Warn : Tone.Info;
+}
 
 public sealed class OverviewPage : PageViewModel
 {
@@ -383,7 +421,7 @@ public sealed class OverviewPage : PageViewModel
     public override string Title => "Meu PC";
     public override string Group => "Meu PC";
     public override string Subtitle => "Resumo do que foi lido deste PC. Modo somente leitura: nada é alterado.";
-    private static readonly string[] HeroOrder = ["Processador", "GPU", "Memória", "Windows"];
+    private static readonly string[] HardwareOrder = ["Processador", "GPU", "Memória", "Disco"];
 
     public IReadOnlyList<OverviewCard> Cards
     {
@@ -391,22 +429,40 @@ public sealed class OverviewPage : PageViewModel
         set
         {
             if (!Set(ref _cards, value)) return;
-            OnPropertyChanged(nameof(HeroCards));
-            OnPropertyChanged(nameof(OtherCards));
-            OnPropertyChanged(nameof(Reading));
-            OnPropertyChanged(nameof(HasData));
+            foreach (var name in (string[])[nameof(HeroCards), nameof(OtherCards), nameof(Reading), nameof(HasData), nameof(IsLoading),
+                         nameof(Cpu), nameof(Gpu), nameof(Ram), nameof(Disk), nameof(Recommendations), nameof(HealthScore),
+                         nameof(HealthCaption), nameof(HeroTitle), nameof(HeroCaption)])
+                OnPropertyChanged(name);
         }
     }
 
     public string Footer { get => _footer; set => Set(ref _footer, value); }
 
-    // Derivados para a apresentação: o destaque (CPU, GPU, memória, Windows), o resto do que foi lido e a leitura em si.
+    // Derivados para a apresentação.
     public IReadOnlyList<OverviewCard> HeroCards =>
-        HeroOrder.Select(t => Cards.FirstOrDefault(c => c.Title == t)).OfType<OverviewCard>().ToList();
-    public IReadOnlyList<OverviewCard> OtherCards =>
-        Cards.Where(c => !HeroOrder.Contains(c.Title) && c.Title is not ("Diagnóstico" or "Leitura")).ToList();
+        HardwareOrder.Select(t => Cards.FirstOrDefault(c => c.Title == t)).OfType<OverviewCard>().ToList();
+    public IReadOnlyList<OverviewCard> OtherCards => Cards.Where(c => c.Kind == OverviewCardKind.Fact && c.Title != "Leitura").ToList();
     public OverviewCard? Reading => Cards.FirstOrDefault(c => c.Title == "Leitura");
     public bool HasData => Cards.Count > 0;
+    public bool IsLoading => Cards.Count == 0;
+
+    public OverviewCard? Cpu => Hardware("Processador");
+    public OverviewCard? Gpu => Hardware("GPU");
+    public OverviewCard? Ram => Hardware("Memória");
+    public OverviewCard? Disk => Hardware("Disco");
+    private OverviewCard? Hardware(string title) => Cards.FirstOrDefault(c => c.Kind == OverviewCardKind.Hardware && c.Title == title);
+
+    public IReadOnlyList<OverviewCard> Recommendations => Cards.Where(c => c.Kind == OverviewCardKind.Recommendation).ToList();
+
+    /// <summary>"Itens em ordem" (0–100) do diagnóstico; NaN antes da leitura.</summary>
+    public double HealthScore => Cards.FirstOrDefault(c => c.Kind == OverviewCardKind.Health)?.Number ?? double.NaN;
+    public string HealthCaption => Cards.FirstOrDefault(c => c.Kind == OverviewCardKind.Health)?.Value ?? "";
+
+    /// <summary>Nome do PC (fabricante e modelo), ou "Seu PC".</summary>
+    public string HeroTitle => Cards.FirstOrDefault(c => c.Title == "Sistema") is { Status: not FactStatus.Unavailable } s ? s.Value : "Seu PC";
+    public string HeroCaption => Cards.FirstOrDefault(c => c.Title == "Windows") is { Status: not FactStatus.Unavailable } w
+        ? $"Windows {w.Value}. Ler não muda nada."
+        : "Tudo o que o NEXUS leu do seu PC. Ler não muda nada.";
 
     public static IReadOnlyList<OverviewCard> Build(SystemSnapshot s, IReadOnlyList<DiagnosticFinding> findings)
     {
@@ -415,22 +471,110 @@ public sealed class OverviewPage : PageViewModel
             new(title, value ?? "indisponível", value is null ? FactStatus.Unavailable : ok, detail);
 
         var gpu = f.Gpus.FirstOrDefault(g => g.Vendor is not "Microsoft") ?? (f.Gpus.Count > 0 ? f.Gpus[0] : null);
-        var installed = f.MemoryModules.Where(m => m.SizeBytes is not null).Aggregate(0UL, (a, m) => a + m.SizeBytes!.Value);
-        return
-        [
+        var sized = f.MemoryModules.Where(m => m.SizeBytes is not null).ToList();
+        var installed = sized.Aggregate(0UL, (a, m) => a + m.SizeBytes!.Value);
+        var attention = findings.Count(x => x.Severity == DiagnosticSeverity.Attention);
+        var cards = new List<OverviewCard>
+        {
             Card("Windows", f.WindowsEdition is null && f.WindowsBuild is null ? null : $"{f.WindowsEdition} · build {f.WindowsBuild}", "Registro CurrentVersion"),
-            Card("Processador", f.CpuModel, f.PhysicalCores is null ? "Topologia indisponível" : $"{f.PhysicalCores} núcleos / {f.LogicalProcessors} threads"),
-            Card("GPU", gpu?.Name, gpu is null ? "SetupAPI" : $"Driver {gpu.DriverVersion ?? "?"} ({gpu.DriverDate ?? "?"})"),
-            Card("Memória", f.TotalMemoryBytes is null ? null : Units.Bytes(f.TotalMemoryBytes),
-                f.MemoryModules.Count == 0 ? "Módulos indisponíveis" : $"{f.MemoryModules.Count} módulo(s), {Units.Bytes(installed)} instalados"),
+            Card("Processador", f.CpuModel, f.PhysicalCores is null ? "Topologia indisponível" : $"{f.PhysicalCores} núcleos / {f.LogicalProcessors} threads") with
+            {
+                Kind = OverviewCardKind.Hardware, Number = f.PhysicalCores ?? double.NaN, Suffix = " núcleos", Target = "CpuLabPage",
+                IllustrationKey = "Illo.Cpu", Trend = f.LogicalProcessors is { } t ? $"{t} threads" : "", Note = f.CpuModel ?? "",
+            },
+            Card("GPU", gpu?.Name, gpu is null ? "SetupAPI" : $"Driver {gpu.DriverVersion ?? "?"} ({gpu.DriverDate ?? "?"})") with
+            {
+                Kind = OverviewCardKind.Hardware, Number = gpu?.MemoryBytes is { } vram and > 0 ? vram : double.NaN, Target = "GpuLabPage",
+                IllustrationKey = "Illo.Gpu", Trend = f.Gpus.Count > 1 ? $"{f.Gpus.Count} placas" : "",
+                Note = gpu?.MemoryBytes is > 0 ? gpu.Name : gpu is null ? "" : $"Driver {gpu.DriverVersion ?? "?"}",
+            },
+            Card("Memória", f.TotalMemoryBytes is null ? null : Units.Bytes(f.TotalMemoryBytes), MemoryDetail(f)) with
+            {
+                Kind = OverviewCardKind.Hardware, Number = f.TotalMemoryBytes is { } total ? total : double.NaN, Target = "MemoryLabPage",
+                IllustrationKey = "Illo.Ram", Trend = MemoryTrend(f.MemoryModules.Count, sized.Count), TrendWarns = sized.Count == 1,
+                Note = MemoryDetail(f),
+            },
+            DiskCard(f),
             Card("Plano de energia", f.ActivePowerSchemeName ?? f.ActivePowerScheme?.ToString("D"), "PowerGetActiveScheme"),
             Card("Sistema", f.SystemModel is null ? null : $"{f.SystemManufacturer} {f.SystemModel}",
                 f.IsVirtualMachine switch { true => "Máquina virtual (inferido)", false => "Hardware físico (inferido)", null => "SMBIOS" }),
-            new("Diagnóstico", $"{findings.Count(x => x.Severity == DiagnosticSeverity.Attention)} ponto(s) de atenção", FactStatus.Detected,
-                $"{findings.Count} achados; veja a página Diagnóstico"),
+            new("Diagnóstico", $"{attention} ponto(s) de atenção", FactStatus.Detected, $"{findings.Count} achados; veja a página Diagnóstico"),
             new("Leitura", s.Elapsed.TotalSeconds.ToString("0.0", CultureInfo.InvariantCulture) + " s", FactStatus.Detected,
                 $"Capturado em {s.TakenAt:dd/MM/yyyy HH:mm:ss}"),
-        ];
+        };
+        if (installed > 0 && cards.FindIndex(c => c.Title == "Memória") is var mi and >= 0 && cards[mi].Status == FactStatus.Unavailable)
+            cards[mi] = cards[mi] with { Number = installed };
+
+        var score = DesignMath.HealthScore(findings.Count, attention);
+        cards.Add(new OverviewCard("Itens em ordem", attention == 0 ? "Nada pede atenção agora" : attention == 1 ? "1 ponto para conferir" : $"{attention} pontos para conferir",
+            FactStatus.Detected, $"{findings.Count} verificações")
+        { Kind = OverviewCardKind.Health, Number = score ?? double.NaN, Target = "DiagnosticsPage" });
+
+        cards.AddRange(Recommend(f, findings));
+        return cards;
+    }
+
+    private static string MemoryDetail(SystemFacts f)
+    {
+        var m = f.MemoryModules.FirstOrDefault(x => x.SizeBytes is not null);
+        if (m is null) return f.MemoryModules.Count == 0 ? "Módulos indisponíveis" : $"{f.MemoryModules.Count} módulo(s)";
+        var speed = m.ConfiguredSpeedMts ?? m.MaxSpeedMts;
+        return string.Join(" · ", new[] { m.Type, speed is null ? null : $"{speed} MT/s" }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    }
+
+    /// <summary>"1 de 2 slots" quando a leitura mostra slots vazios; senão "1 pente: canal único" / "2 pentes".</summary>
+    internal static string MemoryTrend(int slotsListed, int modules) => modules switch
+    {
+        0 => "",
+        _ when slotsListed > modules => $"{modules} de {slotsListed} slots",
+        1 => "1 pente: canal único",
+        _ => $"{modules} pentes",
+    };
+
+    private static OverviewCard DiskCard(SystemFacts f)
+    {
+        var letter = string.IsNullOrEmpty(f.SystemDrive) ? 'C' : char.ToUpperInvariant(f.SystemDrive[0]);
+        var d = f.Drives.FirstOrDefault(x => x.Name.Length > 0 && char.ToUpperInvariant(x.Name[0]) == letter);
+        if (d is not { TotalBytes: { } total and > 0, FreeBytes: { } free })
+            return new OverviewCard("Disco", "indisponível", FactStatus.Unavailable, $"Unidade {letter}:")
+            { Kind = OverviewCardKind.Hardware, Target = "DiskPage", IllustrationKey = "Illo.Disk", Note = $"Unidade {letter}:" };
+        var used = 100.0 * (total - free) / total;
+        return new OverviewCard("Disco", Units.Bytes(free) + " livres", FactStatus.Detected, $"Unidade {letter}: de {Units.Bytes(total)}")
+        {
+            Kind = OverviewCardKind.Hardware, Number = free, Target = "DiskPage", IllustrationKey = "Illo.Disk",
+            Note = $"livres na unidade {letter}: de {Units.Bytes(total)}",
+            Trend = $"{used.ToString("0", CultureInfo.GetCultureInfo("pt-BR"))}% usado", TrendWarns = used >= 85,
+        };
+    }
+
+    /// <summary>
+    /// Até três recomendações: primeiro os pontos de atenção do diagnóstico (cada um abre a página que resolve), depois
+    /// sugestões gerais seguras (liberar espaço, medir uma partida, ver ajustes). Uma por página de destino.
+    /// </summary>
+    internal static IReadOnlyList<OverviewCard> Recommend(SystemFacts f, IReadOnlyList<DiagnosticFinding> findings)
+    {
+        var list = new List<OverviewCard>();
+        void Add(OverviewCard c)
+        {
+            if (list.Count < 3 && list.All(x => x.Target != c.Target)) list.Add(c);
+        }
+        foreach (var x in findings.Where(x => x.Severity == DiagnosticSeverity.Attention))
+        {
+            var target = ShellMap.PageForFinding(x.Id);
+            Add(new OverviewCard(x.Title, "Vale conferir", x.Basis, "Não é garantia de FPS: meça antes e depois.")
+            {
+                Kind = OverviewCardKind.Recommendation, Target = target, ActionText = ShellMap.ActionFor(target),
+                IconKey = ShellMap.IconFor(target), TrendWarns = true,
+            });
+        }
+        OverviewCard Tip(string title, string detail, string target) => new(title, "", FactStatus.Detected, detail)
+        {
+            Kind = OverviewCardKind.Recommendation, Target = target, ActionText = ShellMap.ActionFor(target), IconKey = ShellMap.IconFor(target),
+        };
+        Add(Tip("Libere espaço com segurança", "Tudo vai para a quarentena e pode voltar.", "CleaningPage"));
+        Add(Tip("Meça uma partida", "FPS e engasgos, quadro a quadro, antes de mexer.", "MeasurePage"));
+        Add(Tip("Veja o que dá pra ajustar", "Cada ajuste mostra o risco e como desfazer.", "CatalogPage"));
+        return list;
     }
 }
 

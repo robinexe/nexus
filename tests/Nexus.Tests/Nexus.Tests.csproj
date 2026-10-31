@@ -40,6 +40,11 @@
     <ProjectReference Include="..\..\src\Nexus.Desktop\Nexus.Desktop.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Lógica pura do design system (sem WPF), compilada também aqui para os testes (DesignSystemTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\Views\Controls\DesignMath.cs" Link="DesignSystem\DesignMath.cs" />
+    <Compile Include="..\..\src\Nexus.Desktop\Views\Shell\ShellMap.cs" Link="DesignSystem\ShellMap.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>

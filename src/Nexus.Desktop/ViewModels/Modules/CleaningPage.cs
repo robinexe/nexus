@@ -50,6 +50,10 @@ public sealed class CleaningPage : ModulePage
     private CleaningOption _purgeAge;
     private CleaningOption _expiry;
     private RecycleDriveOption? _recycleDrive;
+    private double _recoverableBytes = double.NaN;
+    private double _selectedBytes;
+    private double _freeBytes = double.NaN;
+    private string _systemDrive = "C:";
 
     public CleaningPage()
     {
@@ -144,6 +148,22 @@ public sealed class CleaningPage : ModulePage
     public string RulesFolderProblem { get => _rulesFolderProblem; private set => Set(ref _rulesFolderProblem, value); }
     public string RulesFolder { get; } = UserRulesFolder ?? "(pasta de dados do Windows indisponível)";
 
+    // Números para a apresentação (design system v2): o HeroPanel conta, o BeforeAfter compara, os StatTiles do histórico.
+    /// <summary>Total recuperável medido agora (NaN antes da primeira medição).</summary>
+    public double RecoverableBytes { get => _recoverableBytes; private set => Set(ref _recoverableBytes, value); }
+    /// <summary>Soma dos itens marcados.</summary>
+    public double SelectedBytes { get => _selectedBytes; private set { if (Set(ref _selectedBytes, value)) OnPropertyChanged(nameof(FreeAfterBytes)); } }
+    /// <summary>Espaço livre agora no disco do Windows (somente leitura; NaN se não deu para ler).</summary>
+    public double FreeBytes { get => _freeBytes; private set { if (Set(ref _freeBytes, value)) OnPropertyChanged(nameof(FreeAfterBytes)); } }
+    /// <summary>Livre depois de limpar os marcados e esvaziar a quarentena (o espaço só volta de verdade ao esvaziar).</summary>
+    public double FreeAfterBytes => double.IsFinite(FreeBytes) ? FreeBytes + SelectedBytes : double.NaN;
+    public string SystemDrive { get => _systemDrive; private set => Set(ref _systemDrive, value); }
+    public bool HasBatches => Batches.Count > 0;
+    public double RecoveredMonthBytes => _report is null ? double.NaN : _report.RecoveredThisMonth;
+    public double RecoveredTotalBytes => _report is null ? double.NaN : _report.RecoveredTotal;
+    public double RecoverableQuarantineBytes => _report is null ? double.NaN : _report.Recoverable;
+    public double CleanedMonthBytes => _report is null ? double.NaN : _report.CleanedThisMonth;
+
     public string RecoveredMonthText => _report is null ? "—" : Bytes(_report.RecoveredThisMonth);
     public string RecoveredTotalText => _report is null ? "—" : Bytes(_report.RecoveredTotal);
     public string RecoverableQuarantineText => _report is null ? "—" : Bytes(_report.Recoverable);
@@ -206,6 +226,7 @@ public sealed class CleaningPage : ModulePage
     internal void SelectionChanged()
     {
         var selected = SelectedRows().ToList();
+        SelectedBytes = selected.Sum(r => r.Bytes);
         SelectedText = selected.Count == 0 ? "Nada selecionado."
             : $"{selected.Count} item(ns) selecionado(s): {Bytes(selected.Sum(r => r.Bytes))}" + (selected.Any(r => !r.Measured) ? " + itens sem medição" : "") + ".";
         foreach (var c in Categories) c.Refresh();
@@ -235,6 +256,7 @@ public sealed class CleaningPage : ModulePage
             _scanned = true;
             await MeasureRecycleBinAsync();
             await LoadHistoryAsync();
+            await MeasureFreeSpaceAsync();
         }
         catch (OperationCanceledException) { RecoverableCaption = "Medição cancelada."; }
         catch (Exception ex) when (ex is not OutOfMemoryException) { RecoverableCaption = $"Não foi possível medir: {ex.Message}"; }
@@ -243,6 +265,24 @@ public sealed class CleaningPage : ModulePage
             if (ReferenceEquals(_scanCancel, cancel)) _scanCancel = null;
             Scanning = false;
         }
+    }
+
+    /// <summary>Espaço livre do disco do Windows (só leitura, DriveInfo).</summary>
+    private async Task MeasureFreeSpaceAsync()
+    {
+        var read = await Task.Run(() =>
+        {
+            try
+            {
+                var root = Path.GetPathRoot(Environment.SystemDirectory);
+                if (string.IsNullOrEmpty(root)) return ((double, string)?)null;
+                var d = new DriveInfo(root);
+                return d.IsReady ? ((double, string)?)(d.AvailableFreeSpace, root.TrimEnd('\\')) : null;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { return null; }
+        });
+        FreeBytes = read?.Item1 ?? double.NaN;
+        if (read is { } r) SystemDrive = r.Item2;
     }
 
     private static string CategoryName(RuleScanResult r) => r.Rule.IsUserRule ? "Suas regras" : r.Rule.Category switch
@@ -279,6 +319,7 @@ public sealed class CleaningPage : ModulePage
         var cleanable = AllRows().Where(r => r.CanClean).ToList();
         var total = cleanable.Sum(r => r.Bytes);
         RecoverableText = Bytes(total);
+        RecoverableBytes = total;
         var unmeasured = cleanable.Count(r => !r.Measured);
         RecoverableCaption = "recuperáveis com segurança" + (unmeasured > 0 ? $" (mais {unmeasured} item(ns) que só o administrador consegue medir)" : "") +
                              ". Medido agora, sem mexer em nada.";
@@ -453,6 +494,11 @@ public sealed class CleaningPage : ModulePage
         QuarantineText = inQuarantine == 0 ? "Quarentena vazia." : $"Na quarentena: {Bytes(inQuarantine)} em {Batches.Count(r => r.BytesInQuarantine > 0)} limpeza(s).";
         HistoryEmptyText = data.Report.Sessions.Count == 0 && data.Report.RecycleBin.Count == 0 ? "Nenhuma limpeza ainda." : "";
         OnPropertyChanged(nameof(HasHistory));
+        OnPropertyChanged(nameof(HasBatches));
+        OnPropertyChanged(nameof(RecoveredMonthBytes));
+        OnPropertyChanged(nameof(RecoveredTotalBytes));
+        OnPropertyChanged(nameof(RecoverableQuarantineBytes));
+        OnPropertyChanged(nameof(CleanedMonthBytes));
         OnPropertyChanged(nameof(RecoveredMonthText));
         OnPropertyChanged(nameof(RecoveredTotalText));
         OnPropertyChanged(nameof(RecoverableQuarantineText));
@@ -697,6 +743,19 @@ public sealed class CleaningCategoryGroup : ObservableObject
 
     public string Name { get; }
     public ObservableCollection<CleaningRuleRow> Rows { get; } = [];
+
+    /// <summary>Ícone da categoria (Themes/Icons.xaml), para o cartão.</summary>
+    public string IconKey => Name switch
+    {
+        "Sistema" => "Icon.Windows",
+        "Navegadores" => "Icon.Browser",
+        "Apps" => "Icon.Apps",
+        "Jogos" => "Icon.Games",
+        "Suas regras" => "Icon.User",
+        _ => "Icon.Code",
+    };
+
+    public string CountText => Rows.Count == 1 ? "1 item" : $"{Rows.Count} itens";
     public string NotFoundText { get => _notFound; set { if (Set(ref _notFound, value)) OnPropertyChanged(nameof(HasNotFound)); } }
     public bool HasNotFound => _notFound.Length > 0;
     public string TotalText => CleaningPage.Bytes(Rows.Where(r => r.CanClean || r.Rule.Mode == CleaningMode.MeasureOnly).Sum(r => r.Bytes));
