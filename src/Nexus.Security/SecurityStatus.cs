@@ -189,7 +189,8 @@ public static class SecurityStatus
                                     : new("Proteção na nuvem", Tone.Good, "Ligada", maps == 2 ? "Associação avançada." : "Associação básica.", null, UriThreatSettings));
 
             // Assinaturas
-            if (w.SignatureAgeDays is { } age)
+            // 65535 = "nunca atualizado" no MSFT_MpComputerStatus.
+            if (w.SignatureAgeDays is { } age and < 65535)
             {
                 var tone = age <= 1 ? Tone.Good : age <= 7 ? Tone.Warn : Tone.Bad;
                 var when = w.SignatureUpdated is { } u ? $"atualizadas em {u.ToLocalTime():dd/MM HH:mm}" : $"{age} dia(s)";
