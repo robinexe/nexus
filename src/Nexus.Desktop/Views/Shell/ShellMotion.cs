@@ -22,6 +22,29 @@ public static class ShellMotion
     /// <summary>Troca de página e entradas.</summary>
     public static Duration Normal => Enabled ? new Duration(TimeSpan.FromMilliseconds(220)) : Zero;
 
+    /// <summary>Contagem de números (AnimatedNumber) e preenchimento de anéis e barras (RingMeter, BeforeAfter).</summary>
+    public static Duration Count => Enabled ? new Duration(TimeSpan.FromMilliseconds(700)) : Zero;
+
+    /// <summary>
+    /// Revela um elemento que acabou de aparecer por ação do usuário (ex.: "Por que isso?" aberto): fade + 4 px para baixo.
+    /// Sem animações no Windows, só aparece.
+    /// </summary>
+    public static void RevealIn(FrameworkElement element)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+        element.BeginAnimation(UIElement.OpacityProperty, null);
+        if (!Enabled)
+        {
+            element.Opacity = 1;
+            return;
+        }
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        var shift = new TranslateTransform(0, -4);
+        element.RenderTransform = shift;
+        element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, Normal) { EasingFunction = ease });
+        shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-4, 0, Normal) { EasingFunction = ease });
+    }
+
     /// <summary>Início/fim do segmento do indicador de ocupado (ProgressBar indeterminado); com animações desligadas fica parado.</summary>
     public static double SweepFrom => Enabled ? -1d : 0d;
 

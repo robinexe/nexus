@@ -1,0 +1,112 @@
+<!--
+  NEXUS — ilustrações de hardware: PC, processador, placa de vídeo, memória RAM (1 de 2 slots ocupados) e SSD.
+  Desenhos vetoriais próprios (nada baixado de terceiros), 160x120, no idioma da "bancada de telemetria": placa redonda
+  escura com marcas de mostrador, corpo grafite (#1F2840), traço ciano (#4FD1E8) = estrutura/sinal, âmbar (#FFB547) = a
+  parte medida/ativa, verde (#5EE6A0) = ok, vermelho (#FF6B7A) = problema. Cores literais de propósito: o dicionário não
+  depende da ordem de carga. Uso: <Image Source="{StaticResource Illo.Cpu}" Width="160"/>, ou nas propriedades
+  Illustration de HeroPanel/StatTile/EmptyState. Catálogo e mapa por módulo: docs/10-design-system.md.
+  Gerado por um script (lista de traços por ilustração); para uma nova, copie um bloco e siga a mesma paleta e grade.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="po">
+
+  <DrawingImage x:Key="Illo.Pc" po:Freeze="True">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Geometry="M0,0 H160 V120 H0 Z" Brush="#00000000"/>
+        <GeometryDrawing Geometry="M40,108 a40,5 0 1 0 80,0 a40,5 0 1 0 -80,0" Brush="#990A0E18"/>
+        <GeometryDrawing Geometry="M34,58 a46,46 0 1 0 92,0 a46,46 0 1 0 -92,0" Brush="#131B2C"><GeometryDrawing.Pen><Pen Brush="#1E2638" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M80,4 V9 M80,107 V112 M26,58 H31 M129,58 H134"><GeometryDrawing.Pen><Pen Brush="#2A3550" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M22,30 H86 V76 H22 Z" Brush="#1F2840"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M27,35 H81 V71 H27 Z" Brush="#0E1320"/>
+        <GeometryDrawing Geometry="M30,62 H78"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"><Pen.DashStyle><DashStyle Dashes="2 2"/></Pen.DashStyle></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M30,62 H42 L45,58 L48,62 H58 L61,44 L64,62 H78"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="1.8" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M50,76 L47,88 H61 L58,76" Brush="#2A3550"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M96,22 H132 V98 H96 Z" Brush="#1F2840"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M101,27 V93"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M107,44 a9,9 0 1 0 18,0 a9,9 0 1 0 -18,0 M107,70 a9,9 0 1 0 18,0 a9,9 0 1 0 -18,0" Brush="#182033"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="1.6" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M113.5,44 a2.5,2.5 0 1 0 5.0,0 a2.5,2.5 0 1 0 -5.0,0 M113.5,70 a2.5,2.5 0 1 0 5.0,0 a2.5,2.5 0 1 0 -5.0,0" Brush="#FFB547"/>
+        <GeometryDrawing Geometry="M110,88 H122"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M124.4,28 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0" Brush="#5EE6A0"/>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+
+  <DrawingImage x:Key="Illo.Cpu" po:Freeze="True">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Geometry="M0,0 H160 V120 H0 Z" Brush="#00000000"/>
+        <GeometryDrawing Geometry="M40,108 a40,5 0 1 0 80,0 a40,5 0 1 0 -80,0" Brush="#990A0E18"/>
+        <GeometryDrawing Geometry="M34,58 a46,46 0 1 0 92,0 a46,46 0 1 0 -92,0" Brush="#131B2C"><GeometryDrawing.Pen><Pen Brush="#1E2638" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M80,4 V9 M80,107 V112 M26,58 H31 M129,58 H134"><GeometryDrawing.Pen><Pen Brush="#2A3550" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M55,33 H105 V83 H55 Z" Brush="#1F2840"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M63,33 V25 M71.5,33 V25 M80,33 V25 M88.5,33 V25 M97,33 V25 M63,83 V91 M71.5,83 V91 M80,83 V91 M88.5,83 V91 M97,83 V91 M55,41 H47 M55,49.5 H47 M55,58 H47 M55,66.5 H47 M55,75 H47 M105,41 H113 M105,49.5 H113 M105,58 H113 M105,66.5 H113 M105,75 H113"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M66,44 H94 V72 H66 Z" Brush="#33FFB547"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M80,44 V72 M66,58 H94"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="1.2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M57.9,37.5 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0" Brush="#E8ECF5"/>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+
+  <DrawingImage x:Key="Illo.Gpu" po:Freeze="True">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Geometry="M0,0 H160 V120 H0 Z" Brush="#00000000"/>
+        <GeometryDrawing Geometry="M40,108 a40,5 0 1 0 80,0 a40,5 0 1 0 -80,0" Brush="#990A0E18"/>
+        <GeometryDrawing Geometry="M34,58 a46,46 0 1 0 92,0 a46,46 0 1 0 -92,0" Brush="#131B2C"><GeometryDrawing.Pen><Pen Brush="#1E2638" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M80,4 V9 M80,107 V112 M26,58 H31 M129,58 H134"><GeometryDrawing.Pen><Pen Brush="#2A3550" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M24,36 H30 V90 H24 Z" Brush="#2A3550"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M30,40 H130 A4,4 0 0 1 134,44 V76 A4,4 0 0 1 130,80 H30 Z" Brush="#1F2840"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M46,60 a14,14 0 1 0 28,0 a14,14 0 1 0 -28,0" Brush="#182033"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M88,60 a14,14 0 1 0 28,0 a14,14 0 1 0 -28,0" Brush="#182033"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M60,60 Q66,50 60,47 M60,60 Q70,64 72,58 M60,60 Q52,68 55,72 M102,60 Q108,50 102,47 M102,60 Q112,64 114,58 M102,60 Q94,68 97,72"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="1.6" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M56.5,60 a3.5,3.5 0 1 0 7.0,0 a3.5,3.5 0 1 0 -7.0,0 M98.5,60 a3.5,3.5 0 1 0 7.0,0 a3.5,3.5 0 1 0 -7.0,0" Brush="#FFB547"/>
+        <GeometryDrawing Geometry="M46,80 H96 V87 H46 Z" Brush="#33FFB547"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M52,80 V87 M58,80 V87 M64,80 V87 M70,80 V87 M76,80 V87 M82,80 V87 M88,80 V87"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M122,46 H128"><GeometryDrawing.Pen><Pen Brush="#5EE6A0" Thickness="2.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+
+  <DrawingImage x:Key="Illo.Ram" po:Freeze="True">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Geometry="M0,0 H160 V120 H0 Z" Brush="#00000000"/>
+        <GeometryDrawing Geometry="M40,108 a40,5 0 1 0 80,0 a40,5 0 1 0 -80,0" Brush="#990A0E18"/>
+        <GeometryDrawing Geometry="M34,58 a46,46 0 1 0 92,0 a46,46 0 1 0 -92,0" Brush="#131B2C"><GeometryDrawing.Pen><Pen Brush="#1E2638" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M80,4 V9 M80,107 V112 M26,58 H31 M129,58 H134"><GeometryDrawing.Pen><Pen Brush="#2A3550" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M34,48 H126 M34,88 H126"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M34,44 V52 M126,44 V52 M34,84 V92 M126,84 V92"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M38,22 H122 V46 H38 Z" Brush="#1F2840"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M44,27 H56 V38 H44 Z M60,27 H72 V38 H60 Z M88,27 H100 V38 H88 Z M104,27 H116 V38 H104 Z" Brush="#2A3550"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M42,43 H76 M84,43 H118"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="3" StartLineCap="Flat" EndLineCap="Flat" DashCap="Flat" LineJoin="Round"><Pen.DashStyle><DashStyle Dashes="0.5 0.6"/></Pen.DashStyle></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M38,62 H122 V86 H38 Z" Brush="#00000000"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="1.6" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"><Pen.DashStyle><DashStyle Dashes="3 2.5"/></Pen.DashStyle></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M80,68 V80 M74,74 H86"><GeometryDrawing.Pen><Pen Brush="#5C6785" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M26,34 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0" Brush="#5EE6A0"/>
+        <GeometryDrawing Geometry="M26,74 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0" Brush="#00000000"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="1.6" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+
+  <DrawingImage x:Key="Illo.Disk" po:Freeze="True">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Geometry="M0,0 H160 V120 H0 Z" Brush="#00000000"/>
+        <GeometryDrawing Geometry="M40,108 a40,5 0 1 0 80,0 a40,5 0 1 0 -80,0" Brush="#990A0E18"/>
+        <GeometryDrawing Geometry="M34,58 a46,46 0 1 0 92,0 a46,46 0 1 0 -92,0" Brush="#131B2C"><GeometryDrawing.Pen><Pen Brush="#1E2638" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M80,4 V9 M80,107 V112 M26,58 H31 M129,58 H134"><GeometryDrawing.Pen><Pen Brush="#2A3550" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M40,30 H120 V37 H40 Z" Brush="#182033"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M40,30 H94 V37 H40 Z" Brush="#FFB547"/>
+        <GeometryDrawing Geometry="M24,48 H132 A4,4 0 0 1 136,52 V68 A4,4 0 0 1 132,72 H24 Z" Brush="#1F2840"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="2" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M24,51 V69"><GeometryDrawing.Pen><Pen Brush="#FFB547" Thickness="4" StartLineCap="Flat" EndLineCap="Flat" DashCap="Flat" LineJoin="Round"><Pen.DashStyle><DashStyle Dashes="0.5 0.5"/></Pen.DashStyle></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M38,53 H54 V67 H38 Z" Brush="#2A3550"><GeometryDrawing.Pen><Pen Brush="#4FD1E8" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M62,52 H88 V68 H62 Z M94,52 H120 V68 H94 Z" Brush="#2A3550"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="1" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M126.5,60 a3.5,3.5 0 1 0 7.0,0 a3.5,3.5 0 1 0 -7.0,0" Brush="#0E1320"><GeometryDrawing.Pen><Pen Brush="#3A4868" Thickness="1.5" StartLineCap="Round" EndLineCap="Round" DashCap="Round" LineJoin="Round"></Pen></GeometryDrawing.Pen></GeometryDrawing>
+        <GeometryDrawing Geometry="M44,60 a2,2 0 1 0 4,0 a2,2 0 1 0 -4,0" Brush="#5EE6A0"/>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+</ResourceDictionary>

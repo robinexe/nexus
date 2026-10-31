@@ -8,6 +8,11 @@
         <ResourceDictionary Source="Themes/Converters.xaml"/>
         <ResourceDictionary Source="Themes/Tokens.xaml"/>
         <ResourceDictionary Source="Themes/Controls.xaml"/>
+        <!-- Design system v2 (docs/10-design-system.md): ícones, ilustrações e componentes. Antes das páginas. -->
+        <ResourceDictionary Source="Themes/Icons.xaml"/>
+        <ResourceDictionary Source="Assets/Illustrations/Hardware.xaml"/>
+        <ResourceDictionary Source="Assets/Illustrations/Modules.xaml"/>
+        <ResourceDictionary Source="Themes/Components.xaml"/>
         <ResourceDictionary Source="Views/Pages/Overview.xaml"/>
         <ResourceDictionary Source="Views/Pages/Hardware.xaml"/>
         <ResourceDictionary Source="Views/Pages/Diagnostics.xaml"/>

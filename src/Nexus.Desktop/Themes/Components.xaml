@@ -1,0 +1,406 @@
+<!--
+  NEXUS — componentes do design system v2 (Views/Controls). Modelos e estilos implícitos de cada controle, conversores do
+  design system e o estilo de abas. Usa só chaves de Tokens.xaml, Controls.xaml, Converters.xaml e Icons.xaml (carregados
+  antes em App.xaml). Catálogo com exemplos: docs/10-design-system.md.
+
+  Nas páginas: xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls" e xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell".
+  Controles: c:HeroPanel, c:AnimatedNumber, c:RingMeter, c:BeforeAfter, c:HowItWorks + c:StepItem (modelo "StepCard"), c:StatTile,
+             c:ExplainToggle, c:StatusChip, c:EmptyState, c:SkeletonLoader, c:Sparkline, c:Icon.
+  Conversores: ResourceByKey (texto → recurso), ToneBrush (Tone → pincel; "soft"/"text"), PageIcon (página → ícone; "illustration").
+  Estilos: Tab.Underline (RadioButton como aba com sublinhado âmbar), Explain.Toggle (o botão do "Por que isso?").
+  Movimento: contagem/preenchimento ShellMotion.Count (0,7 s), revelação ShellMotion.Normal; tudo zera com animações desligadas.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
+                    xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell">
+
+  <!-- ===== Conversores ===== -->
+  <c:ResourceKeyConverter x:Key="ResourceByKey"/>
+  <c:ToneBrushConverter x:Key="ToneBrush"/>
+  <shell:PageIconConverter x:Key="PageIcon"/>
+
+  <!-- ===== Ícone: herda a cor do texto ===== -->
+  <Style TargetType="c:Icon">
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+
+  <!-- ===== Abas (RadioButton): sublinhado âmbar na ativa ===== -->
+  <Style x:Key="Tab.Underline" TargetType="RadioButton">
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+    <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
+    <Setter Property="FontSize" Value="15.5"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Margin" Value="0,0,26,0"/>
+    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <StackPanel Background="Transparent">
+            <ContentPresenter Margin="0,0,0,8"/>
+            <Border x:Name="Underline" Height="2" Background="{StaticResource Brush.Trace}" Opacity="0" CornerRadius="1"/>
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Underline" Property="Background" Value="{StaticResource Brush.Signal}"/>
+              <Setter TargetName="Underline" Property="Opacity" Value="0.8"/>
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+              <Setter TargetName="Underline" Property="Opacity" Value="1"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== HeroPanel ===== -->
+  <Style TargetType="c:HeroPanel">
+    <Setter Property="Accent" Value="{StaticResource Brush.Trace}"/>
+    <Setter Property="Margin" Value="0,0,0,20"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:HeroPanel">
+          <Border Background="{StaticResource Brush.SurfaceHi}" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+                  CornerRadius="{StaticResource Radius.Panel}" SnapsToDevicePixels="True">
+            <Grid>
+              <Rectangle Fill="{StaticResource Brush.Graticule}" Opacity="0.28" IsHitTestVisible="False" RadiusX="10" RadiusY="10"/>
+              <Grid Margin="22,18,28,22">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Image x:Name="Illo" Source="{TemplateBinding Illustration}" Width="176" Height="132" Margin="0,0,22,0"
+                       VerticalAlignment="Center" Stretch="Uniform" AutomationProperties.Name="" Focusable="False"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                  <TextBlock Text="{TemplateBinding Title}" Style="{StaticResource Text.H2}" Foreground="{StaticResource Brush.TextMuted}"
+                             Visibility="{TemplateBinding Title, Converter={StaticResource NullToCollapsed}}"/>
+                  <Grid Margin="0,2,0,2" MinHeight="60">
+                    <c:AnimatedNumber Value="{TemplateBinding Number}" Kind="{TemplateBinding Kind}" Decimals="{TemplateBinding Decimals}"
+                                      Suffix="{TemplateBinding Suffix}" Style="{StaticResource Text.Metric}" FontSize="56"
+                                      Foreground="{TemplateBinding Accent}" VerticalAlignment="Center"
+                                      Visibility="{TemplateBinding ShowsNumber, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="{TemplateBinding ValueText}" Style="{StaticResource Text.Display}" Foreground="{TemplateBinding Accent}"
+                               VerticalAlignment="Center" Visibility="{TemplateBinding ShowsText, Converter={StaticResource BoolToVis}}"/>
+                    <c:SkeletonLoader Shape="Hero" Height="52" ClipToBounds="True" VerticalAlignment="Center"
+                                      Visibility="{TemplateBinding IsLoading, Converter={StaticResource BoolToVis}}"/>
+                  </Grid>
+                  <TextBlock Text="{TemplateBinding Caption}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}"
+                             MaxHeight="42" TextTrimming="CharacterEllipsis"
+                             Visibility="{TemplateBinding Caption, Converter={StaticResource NullToCollapsed}}"/>
+                  <WrapPanel Margin="0,14,0,0">
+                    <Button Style="{StaticResource Button.Primary}" Content="{TemplateBinding ActionText}" Margin="0,4,8,0"
+                            Command="{TemplateBinding Command}" CommandParameter="{TemplateBinding CommandParameter}"
+                            Visibility="{TemplateBinding ActionText, Converter={StaticResource NullToCollapsed}}"/>
+                    <Button Style="{StaticResource Button.Secondary}" Content="{TemplateBinding SecondaryText}" Margin="0,4,8,0"
+                            Command="{TemplateBinding SecondaryCommand}" CommandParameter="{TemplateBinding SecondaryCommandParameter}"
+                            Visibility="{TemplateBinding SecondaryText, Converter={StaticResource NullToCollapsed}}"/>
+                  </WrapPanel>
+                </StackPanel>
+                <ContentPresenter Grid.Column="2" VerticalAlignment="Center" Margin="24,0,0,0"/>
+              </Grid>
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Illustration" Value="{x:Null}">
+              <Setter TargetName="Illo" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== RingMeter ===== -->
+  <Style TargetType="c:RingMeter">
+    <Setter Property="Width" Value="132"/>
+    <Setter Property="Height" Value="132"/>
+    <Setter Property="FontSize" Value="30"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:RingMeter">
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}">
+            <c:AnimatedNumber Value="{TemplateBinding Value}" Kind="{TemplateBinding Kind}" FontFamily="{StaticResource Font.Numbers}"
+                              FontSize="{TemplateBinding FontSize}" Foreground="{TemplateBinding ToneBrush}" HorizontalAlignment="Center"/>
+            <TextBlock Text="{TemplateBinding Label}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" TextAlignment="Center"
+                       MaxWidth="96" Margin="0,-2,0,0" Visibility="{TemplateBinding Label, Converter={StaticResource NullToCollapsed}}"/>
+          </StackPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== BeforeAfter ===== -->
+  <Style TargetType="c:BeforeAfter">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:BeforeAfter">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" MinWidth="118"/>
+              <ColumnDefinition Width="*" MinWidth="80"/>
+              <ColumnDefinition Width="Auto" MinWidth="78"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="10"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="{TemplateBinding BeforeLabel}" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+            <Grid Grid.Column="1" Height="10" VerticalAlignment="Center">
+              <Border Background="{StaticResource Brush.SurfaceHi}" CornerRadius="5"/>
+              <Border Background="{StaticResource Brush.Signal}" CornerRadius="5" RenderTransformOrigin="0,0.5">
+                <Border.RenderTransform>
+                  <ScaleTransform ScaleX="{Binding BeforeScale, RelativeSource={RelativeSource TemplatedParent}}"/>
+                </Border.RenderTransform>
+              </Border>
+            </Grid>
+            <TextBlock Grid.Column="2" Text="{TemplateBinding BeforeText}" FontFamily="{StaticResource Font.Numbers}" FontSize="16"
+                       Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="NoWrap"/>
+
+            <TextBlock Grid.Row="2" Text="{TemplateBinding AfterLabel}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"
+                       VerticalAlignment="Center" Margin="0,0,12,0"/>
+            <Grid Grid.Row="2" Grid.Column="1" Height="10" VerticalAlignment="Center">
+              <Border Background="{StaticResource Brush.SurfaceHi}" CornerRadius="5"/>
+              <Border Background="{StaticResource Brush.Trace}" CornerRadius="5" RenderTransformOrigin="0,0.5">
+                <Border.RenderTransform>
+                  <ScaleTransform ScaleX="{Binding AfterScale, RelativeSource={RelativeSource TemplatedParent}}"/>
+                </Border.RenderTransform>
+              </Border>
+            </Grid>
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="{TemplateBinding AfterText}" FontFamily="{StaticResource Font.Numbers}" FontSize="16"
+                       Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="NoWrap"/>
+
+            <Border Grid.Column="3" Grid.RowSpan="3" Background="{TemplateBinding DeltaSoftBrush}" CornerRadius="{StaticResource Radius.Card}"
+                    Padding="12,8" Margin="16,0,0,0" VerticalAlignment="Center" MinWidth="76">
+              <StackPanel HorizontalAlignment="Center">
+                <c:Icon Data="{TemplateBinding DeltaIcon}" Size="18" Foreground="{TemplateBinding DeltaBrush}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{TemplateBinding DeltaText}" FontFamily="{StaticResource Font.Numbers}" FontSize="18"
+                           Foreground="{TemplateBinding DeltaBrush}" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+              </StackPanel>
+            </Border>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== HowItWorks + StepCard ===== -->
+  <DataTemplate x:Key="StepCard" DataType="{x:Type c:StepItem}">
+    <Grid Margin="0,0,14,0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+      <!-- Linha até o próximo passo -->
+      <Border x:Name="Connector" Height="2" Margin="50,0,-14,0" VerticalAlignment="Center" Background="{StaticResource Brush.Line}" CornerRadius="1"/>
+      <Grid Width="44" Height="44" HorizontalAlignment="Left">
+        <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"
+                 Stroke="{Binding Tone, Converter={StaticResource ToneBrush}}" StrokeThickness="1.5"/>
+        <c:Icon Data="{Binding Icon}" Size="20" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
+        <Border Width="18" Height="18" CornerRadius="9" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-4,-6,0"
+                Background="{StaticResource Brush.Bg}" BorderBrush="{Binding Tone, Converter={StaticResource ToneBrush}}" BorderThickness="1">
+          <TextBlock Text="{Binding Number}" FontFamily="{StaticResource Font.Numbers}" FontSize="11" Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="NoWrap"/>
+        </Border>
+      </Grid>
+      <TextBlock Grid.Row="1" Text="{Binding Title}" Style="{StaticResource Text.H2}" FontSize="15" Margin="0,12,0,2"/>
+      <TextBlock Grid.Row="2" Text="{Binding Text}" Style="{StaticResource Text.Small}" MaxHeight="36" TextTrimming="CharacterEllipsis"/>
+    </Grid>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding IsLast}" Value="True">
+        <Setter TargetName="Connector" Property="Visibility" Value="Collapsed"/>
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <Style TargetType="c:HowItWorks">
+    <Setter Property="ItemTemplate" Value="{StaticResource StepCard}"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="ItemsPanel">
+      <Setter.Value>
+        <ItemsPanelTemplate>
+          <UniformGrid Rows="1"/>
+        </ItemsPanelTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== StatTile ===== -->
+  <Style TargetType="c:StatTile">
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Focus.Ring}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:StatTile">
+          <Grid SnapsToDevicePixels="True">
+            <Border x:Name="Bd" Background="{StaticResource Brush.Surface}" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Card}"/>
+            <Border x:Name="Wash" Background="{StaticResource Brush.Text}" CornerRadius="{StaticResource Radius.Card}" Opacity="0" IsHitTestVisible="False"/>
+            <Grid Margin="18,14,18,16">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <DockPanel LastChildFill="False">
+                <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="{StaticResource Radius.Chip}" Padding="8,2,9,3"
+                        Background="{Binding TrendTone, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"
+                        Visibility="{TemplateBinding Trend, Converter={StaticResource NullToCollapsed}}">
+                  <TextBlock Text="{TemplateBinding Trend}" FontSize="11.5" TextWrapping="NoWrap"
+                             Foreground="{Binding TrendTone, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ToneBrush}}"/>
+                </Border>
+                <Image x:Name="Illo" Source="{TemplateBinding Illustration}" Height="78" Width="104" Stretch="Uniform" Margin="-10,-4,0,4"
+                       HorizontalAlignment="Left"/>
+                <Grid x:Name="IconBadge" Width="36" Height="36" Margin="0,0,0,10" HorizontalAlignment="Left" Visibility="Collapsed">
+                  <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+                  <c:Icon Data="{TemplateBinding Icon}" Size="18" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+                </Grid>
+              </DockPanel>
+              <Grid Grid.Row="1">
+                <c:AnimatedNumber Value="{TemplateBinding Number}" Kind="{TemplateBinding Kind}" Decimals="{TemplateBinding Decimals}"
+                                  Suffix="{TemplateBinding Suffix}" FontFamily="{StaticResource Font.Numbers}" FontSize="30"
+                                  Foreground="{Binding Tone, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ToneBrush}, ConverterParameter=text}"
+                                  Visibility="{TemplateBinding ShowsNumber, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Text="{TemplateBinding Value}" FontFamily="{StaticResource Font.Numbers}" FontSize="30" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                           Foreground="{Binding Tone, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ToneBrush}, ConverterParameter=text}"
+                           Visibility="{TemplateBinding ShowsNumber, Converter={StaticResource FalseToVisible}}"/>
+              </Grid>
+              <TextBlock Grid.Row="2" Text="{TemplateBinding Label}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.Text}" Margin="0,2,0,0"/>
+              <TextBlock Grid.Row="3" Text="{TemplateBinding Detail}" Style="{StaticResource Text.Small}" Margin="0,3,0,0" MaxHeight="34" TextTrimming="CharacterEllipsis"
+                         Visibility="{TemplateBinding Detail, Converter={StaticResource NullToCollapsed}}"/>
+            </Grid>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Illustration" Value="{x:Null}">
+              <Setter TargetName="Illo" Property="Visibility" Value="Collapsed"/>
+              <Setter TargetName="IconBadge" Property="Visibility" Value="Visible"/>
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsMouseOver" Value="True"/>
+                <Condition Property="Focusable" Value="True"/>
+              </MultiTrigger.Conditions>
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Brush.TraceLine}"/>
+              <MultiTrigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Wash" Storyboard.TargetProperty="Opacity" To="0.04" Duration="{x:Static shell:ShellMotion.Fast}"/>
+                  </Storyboard>
+                </BeginStoryboard>
+              </MultiTrigger.EnterActions>
+              <MultiTrigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Wash" Storyboard.TargetProperty="Opacity" To="0" Duration="{x:Static shell:ShellMotion.Fast}"/>
+                  </Storyboard>
+                </BeginStoryboard>
+              </MultiTrigger.ExitActions>
+            </MultiTrigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== StatusChip ===== -->
+  <Style TargetType="c:StatusChip">
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:StatusChip">
+          <Border Background="{TemplateBinding ToneSoftBrush}" CornerRadius="{StaticResource Radius.Chip}" Padding="7,3,10,4" SnapsToDevicePixels="True">
+            <StackPanel Orientation="Horizontal">
+              <c:Icon Data="{TemplateBinding ToneIcon}" Size="13" StrokeThickness="2.4" Foreground="{TemplateBinding ToneBrush}" Margin="0,0,5,0"/>
+              <TextBlock Text="{TemplateBinding Text}" FontFamily="{StaticResource Font.Body}" FontSize="12" Foreground="{TemplateBinding ToneBrush}"
+                         TextWrapping="NoWrap" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== EmptyState ===== -->
+  <Style TargetType="c:EmptyState">
+    <Setter Property="Margin" Value="0,12"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:EmptyState">
+          <StackPanel HorizontalAlignment="Center" MaxWidth="440">
+            <Image x:Name="Illo" Source="{TemplateBinding Illustration}" Width="160" Height="120" HorizontalAlignment="Center"/>
+            <TextBlock Text="{TemplateBinding Text}" Style="{StaticResource Text.H2}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            <TextBlock Text="{TemplateBinding Detail}" Style="{StaticResource Text.Small}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,4,0,0"
+                       Visibility="{TemplateBinding Detail, Converter={StaticResource NullToCollapsed}}"/>
+            <Button Style="{StaticResource Button.Primary}" Content="{TemplateBinding ActionText}" HorizontalAlignment="Center" Margin="0,14,0,0"
+                    Command="{TemplateBinding Command}" CommandParameter="{TemplateBinding CommandParameter}"
+                    Visibility="{TemplateBinding ActionText, Converter={StaticResource NullToCollapsed}}"/>
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Illustration" Value="{x:Null}">
+              <Setter TargetName="Illo" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== ExplainToggle ===== -->
+  <Style x:Key="Explain.Toggle" TargetType="ToggleButton" BasedOn="{StaticResource Button.Base}">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Signal}"/>
+    <Setter Property="FontSize" Value="12.5"/>
+    <Setter Property="Padding" Value="6,4"/>
+    <Setter Property="Margin" Value="-6,0,0,0"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
+
+  <Style TargetType="c:ExplainToggle">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:ExplainToggle">
+          <StackPanel>
+            <ToggleButton Style="{StaticResource Explain.Toggle}" AutomationProperties.Name="{TemplateBinding Header}"
+                          IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+              <StackPanel Orientation="Horizontal">
+                <c:Icon Data="{StaticResource Icon.Info}" Size="14" Margin="0,0,6,0"/>
+                <TextBlock Text="{TemplateBinding Header}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                <c:Icon x:Name="Chevron" Data="{StaticResource Icon.ChevronDown}" Size="14" Margin="4,0,0,0"/>
+              </StackPanel>
+            </ToggleButton>
+            <Border x:Name="PART_Body" Visibility="Collapsed" Margin="0,6,0,2" Padding="12,8,12,9" Background="{StaticResource Brush.SurfaceLow}"
+                    BorderBrush="{StaticResource Brush.SignalSoft}" BorderThickness="2,0,0,0" CornerRadius="0,6,6,0">
+              <ContentPresenter>
+                <ContentPresenter.Resources>
+                  <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
+                    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+                  </Style>
+                </ContentPresenter.Resources>
+              </ContentPresenter>
+            </Border>
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsExpanded" Value="True">
+              <Setter TargetName="PART_Body" Property="Visibility" Value="Visible"/>
+              <Setter TargetName="Chevron" Property="Data" Value="{StaticResource Icon.ChevronUp}"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
