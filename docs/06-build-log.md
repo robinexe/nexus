@@ -284,6 +284,19 @@ avisos, **163/163**, coordenação 11/11, descoberta 0 indisponíveis, CLI 0/1/0
 do B3, que exige processo não elevado: `Client_in_service_mode_refuses_a_pipe_owned_by_an_ordinary_user` **aprovado**
 (o cliente recusou um pipe criado pelo usuário comum com o nome do broker).
 
+## Interface → broker (página Broker) — 2026-10-31
+
+Linux: build 0 avisos, **168/168** (5 novos da `BrokerSession`). Teste do binário da interface endurecido (sem executor,
+trava, diário gravável, nem `BrokerClient.Connect`/`BrokerSession.ctor`/`BrokerService.ctor`; exige
+`BrokerSession.ForInstalledService`). Mutação "interface abre o pipe direto": detectada.
+
+VM do CI (8287c1a): 168/168; integração 6/6; serviço 3/3, incluindo `Interface_path_applies_and_reverts_through_the_installed_service`
+(a mesma via da interface): status "escrita LIBERADA", Execute 1 Verified, RevertRun "tudo restaurado".
+
+Windows do responsável (04:44, não elevado): 168/168, coordenação 11/11. A interface abriu (`Abrir NEXUS.cmd`) com o banner
+novo e a página Broker; "Consultar serviço" respondeu "Serviço do broker não encontrado: não instalado ou parado. Nada foi
+enviado." (o serviço não está instalado neste PC, como previsto), com reverter/encerrar/recuperar desabilitados.
+
 ## Pendente no Windows (esta versão)
 
 1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).

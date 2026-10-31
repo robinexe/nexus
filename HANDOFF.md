@@ -39,11 +39,10 @@ As regras da seção 2 valem também no PC novo. Se ele for de jogos, nada de al
 
 ## 1. Estado em uma linha
 
-Etapa 2 validada no Windows: 0 erros, 0 avisos, 99/99, inclusive coordenação entre processos reais. A interface
-**somente leitura** abriu no PC do usuário. A Etapa 3 (broker e kit de VM) passa em 143/143 em Linux e, desde 31/10, também no
-Windows (PC novo; 149/149 com o `accept`). Os testes de integração rodaram numa VM Windows descartável (GitHub Actions)
-em 31/10: **6/6 com alteração e reversão reais**. A aplicação de otimizações reais continua **bloqueada** no Windows
-hospedeiro: o portão exige VM, e a interface ainda não tem caminho de execução (itens 4–6 da seção 7).
+Em 31/10/2026: 168/168 testes no Linux, na VM Windows do CI e no Windows do responsável, 0 avisos. Na VM descartável do
+GitHub Actions, as ações reais (registro, energia, SysMain, core parking, crash + recuperação) e o **broker como serviço**
+(HKCU do cliente, dono do pipe, ACLs) foram exercitados com escrita e reversão reais. A interface tem a página Broker como
+única via de escrita. No PC físico nada é aplicado: o portão do broker exige VM, e o serviço nem está instalado aqui.
 
 ## 2. Regras que continuam valendo
 
@@ -151,11 +150,15 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
 4. ~~Broker como serviço~~ (feito em 31/10: B10, B3, B7, R1/B1; validado na VM do CI com o serviço instalado, ver
    `tools/service/README.md`; impostor do B3 recusado no Windows do responsável, 163/163). Pendente só a assinatura
    Authenticode do cliente (exige certificado de assinatura de código).
-5. **Interface → broker (próximo):** a interface fala com o serviço por `BrokerClient` (`BrokerServerKind.Service`):
-   simulação pelo broker, depois aplicar/reverter com confirmação. A execução real continua presa ao portão de VM.
-6. Só depois da VM aprovada: liberar execução real (hoje não existe caminho de execução na interface).
-7. Captura PresentMon e comparação de sessões; depois NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B,
-   relatórios e, por último, a IA.
+5. ~~Interface → broker~~ (feito em 31/10): página Broker, única via de escrita da interface, por
+   `BrokerSession.ForInstalledService` (dono do pipe conferido); aplicar com confirmação, só com escrita liberada pelo
+   serviço. Validado na VM (mesma via contra o serviço instalado) e aberto no Windows do responsável (sem serviço: mensagem
+   correta). A execução real continua presa ao portão de VM.
+6. **Liberar execução real no PC físico:** decisão do responsável, não técnica. Exige (a) instalar o serviço no PC
+   (administrador) e (b) mudar o portão, hoje só VM. Recomendação: antes disso, a medição (item 7) para saber se alguma
+   ação do catálogo melhora algo neste PC; aplicar sem medir contraria o propósito do laboratório.
+7. **Próximo técnico:** captura PresentMon e comparação de sessões (parser e estatística já existem); depois NVIDIA DRS,
+   VALORANT, investigador de stutters, laboratório A/B, relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
 
