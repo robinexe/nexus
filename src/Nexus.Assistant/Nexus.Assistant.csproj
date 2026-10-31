@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Assistente completo: o passo a passo que percorre todas as funções do NEXUS com o usuário (etapas, estado para retomar,
+       agrupamento das mudanças por etapa e nível, registro para "Desfazer tudo" e o relatório final).
+       Só LÊ o sistema (pelas bibliotecas dos módulos) e PLANEJA ações do catálogo; toda escrita é pedida pela interface ao
+       aplicador (IAssistantWriter → IModuleHost.ApplyAsync). net10.0: a lógica roda nos testes em qualquer SO. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.Assistant</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
+    <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
+    <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
+    <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
+    <ProjectReference Include="..\Nexus.Cleaning\Nexus.Cleaning.csproj" />
+    <ProjectReference Include="..\Nexus.Programs\Nexus.Programs.csproj" />
+    <ProjectReference Include="..\Nexus.Boot\Nexus.Boot.csproj" />
+    <ProjectReference Include="..\Nexus.Privacy\Nexus.Privacy.csproj" />
+    <ProjectReference Include="..\Nexus.Security\Nexus.Security.csproj" />
+    <ProjectReference Include="..\Nexus.DriverUpdates\Nexus.DriverUpdates.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Cpu\Nexus.Lab.Cpu.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Memory\Nexus.Lab.Memory.csproj" />
+  </ItemGroup>
+</Project>
