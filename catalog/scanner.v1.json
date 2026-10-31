@@ -1,0 +1,567 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Verificador de arquivos (página Verificar arquivos). A verificação em si é só leitura e não passa pelo aplicador; aqui fica apenas a quarentena reversível de um arquivo escolhido. Nada é apagado: o NEXUS nunca exclui arquivos suspeitos (remoção definitiva é com o Microsoft Defender).",
+  "actions": [
+    {
+      "id": "scanner.quarantine.user.01",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 01",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.02",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 02",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.03",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 03",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.04",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 04",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.05",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 05",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.06",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 06",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.07",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 07",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.08",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 08",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.09",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 09",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.user.10",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (seu usuário) — vaga 10",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; Arquivos de Programas, ProgramData e perfis de outras contas exigem a vaga de administrador; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.machine.01",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (todo o PC, administrador) — vaga 01",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo. Vaga para arquivos de Arquivos de Programas/ProgramData ou do perfil de outra conta.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKLM",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; qualquer outra pasta local; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro. Mexe em pasta de todos os usuários: pede administrador e cria ponto de restauração.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.machine.02",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (todo o PC, administrador) — vaga 02",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo. Vaga para arquivos de Arquivos de Programas/ProgramData ou do perfil de outra conta.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKLM",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; qualquer outra pasta local; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro. Mexe em pasta de todos os usuários: pede administrador e cria ponto de restauração.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.machine.03",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (todo o PC, administrador) — vaga 03",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo. Vaga para arquivos de Arquivos de Programas/ProgramData ou do perfil de outra conta.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKLM",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; qualquer outra pasta local; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro. Mexe em pasta de todos os usuários: pede administrador e cria ponto de restauração.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "scanner.quarantine.machine.04",
+      "version": 1,
+      "title": "Isolar arquivo suspeito na quarentena do NEXUS (todo o PC, administrador) — vaga 04",
+      "classification": "Conditional",
+      "condition": "Só para um arquivo apontado pela verificação de arquivos e escolhido pelo usuário, com o mesmo SHA-256 que a verificação viu. Cada vaga isola UM arquivo. Vaga para arquivos de Arquivos de Programas/ProgramData ou do perfil de outra conta.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKLM",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,7}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Move o arquivo para DataDirectory\\quarantine\\scanner\\<id>\\payload.bin (renomeação no mesmo disco; em outro disco: cópia conferida por SHA-256 e só então remoção da origem), com manifesto (caminho original, tamanho, SHA-256). O aplicador revalida: pasta do Windows e dados do NEXUS nunca; qualquer outra pasta local; nunca links/junções; e o SHA-256 precisa ser o da verificação, conferido antes e depois de mover.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Defender Antivirus: verificar um arquivo pela linha de comando (MpCmdRun -Scan -ScanType 3 -File), https://learn.microsoft.com/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "MITRE ATT&CK T1036 Masquerading, T1059 Command and Scripting Interpreter, T1055 Process Injection (técnicas que as regras e a heurística procuram), https://attack.mitre.org/"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Mover para a quarentena tira o arquivo do caminho que atalhos, tarefas e a inicialização usam, sem apagá-lo: o Desfazer devolve byte a byte (SHA-256 conferido)."
+        }
+      ],
+      "risks": "Se o arquivo for de um programa legítimo (falso positivo), esse programa para de funcionar até você desfazer. Arquivo em uso faz a operação falhar sem mudar nada. Não substitui o Microsoft Defender: peça a opinião dele primeiro. Mexe em pasta de todos os usuários: pede administrador e cria ponto de restauração.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    }
+  ]
+}

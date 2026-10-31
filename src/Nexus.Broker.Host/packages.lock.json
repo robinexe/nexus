@@ -158,6 +158,14 @@
           "Nexus.WindowsActions": "[1.0.0, )"
         }
       },
+      "nexus.security.scanner": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.Security": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.systemtools": {
         "type": "Project",
         "dependencies": {

@@ -81,6 +81,8 @@ public sealed class ScanEngine
     }
 
     public ScanOptions Options => _options;
+    public HashDatabase Hashes => _hashes;
+    public RuleSet Rules => _rules;
 
     // ------------------------------------------------------------------ avaliação de um conteúdo (puro, testável)
 
@@ -91,8 +93,8 @@ public sealed class ScanEngine
         ArgumentNullException.ThrowIfNull(path);
         var now = _options.UtcNow();
         var hits = new List<ScanHit>();
-        var fileName = Path.GetFileName(path);
-        var ext = Path.GetExtension(path).ToLowerInvariant();
+        var fileName = PeHeuristics.FileNameOf(path);
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
         hits.AddRange(NameHeuristics.Analyze(fileName));
 
         var hash = _hashes.Lookup(sha256);

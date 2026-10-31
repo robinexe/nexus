@@ -68,6 +68,14 @@ public static class PeHeuristics
 
     private static readonly DateTime Year1992 = new(1992, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
+    /// <summary>Nome do arquivo num caminho do Windows (aceita \ e /, em qualquer SO).</summary>
+    public static string FileNameOf(string path)
+    {
+        ArgumentNullException.ThrowIfNull(path);
+        var i = path.LastIndexOfAny(['\\', '/']);
+        return i >= 0 ? path[(i + 1)..] : path;
+    }
+
     public static bool IsRiskZone(PathZone z) => z is PathZone.Temp or PathZone.Downloads or PathZone.UserAppData or PathZone.Public;
 
     /// <summary>Sinais que não dependem da assinatura (rápidos). A assinatura entra depois em <see cref="ApplySignature"/>.</summary>
@@ -123,15 +131,16 @@ public static class PeHeuristics
         }
 
         // Nome imitando processo do Windows fora da pasta do sistema.
-        var name = Path.GetFileNameWithoutExtension(ctx.Path).ToLowerInvariant();
+        var fileName = FileNameOf(ctx.Path);
+        var name = Path.GetFileNameWithoutExtension(fileName).ToLowerInvariant();
         if (ctx.Zone != PathZone.System)
         {
             if (SystemProcessNames.Contains(name) && ctx.Zone != PathZone.ProgramFiles)
                 hits.Add(new ScanHit(ScanLayer.Heuristic, "pe.system-name", "Nome de processo do Windows fora da pasta do Windows",
-                    $"\"{Path.GetFileName(ctx.Path)}\" é o nome de um processo do Windows, que só existe em C:\\Windows (System32). Uma cópia em outra pasta é disfarce comum: no Gerenciador de Tarefas ela parece parte do sistema (MITRE ATT&CK T1036.005).", 35));
+                    $"\"{fileName}\" é o nome de um processo do Windows, que só existe em C:\\Windows (System32). Uma cópia em outra pasta é disfarce comum: no Gerenciador de Tarefas ela parece parte do sistema (MITRE ATT&CK T1036.005).", 35));
             else if (LookalikeOf(name) is { } original)
                 hits.Add(new ScanHit(ScanLayer.Heuristic, "pe.lookalike-name", "Nome parecido com processo do Windows",
-                    $"\"{Path.GetFileName(ctx.Path)}\" difere de \"{original}.exe\" por uma letra trocada ou um caractere parecido (0 por o, 1 por l...). É o disfarce de \"erro de digitação\" para passar despercebido na lista de processos (MITRE ATT&CK T1036.005).", 40));
+                    $"\"{fileName}\" difere de \"{original}.exe\" por uma letra trocada ou um caractere parecido (0 por o, 1 por l...). É o disfarce de \"erro de digitação\" para passar despercebido na lista de processos (MITRE ATT&CK T1036.005).", 40));
         }
 
         // Executável recém-criado em pasta de risco.
