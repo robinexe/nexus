@@ -3,6 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using Nexus.Desktop.Views.Shell;
 using Nexus.DiskTools.Analysis;
 
 namespace Nexus.Desktop.Views.Modules.Disk;
@@ -11,6 +13,8 @@ namespace Nexus.Desktop.Views.Modules.Disk;
 /// Treemap do disco: cada bloco tem área proporcional ao tamanho (layout "squarified" de <see cref="Treemap"/>, na biblioteca do
 /// módulo). Pastas em ciano (clicáveis: entram na pasta), arquivos coloridos pelo tipo, "outros arquivos" em cinza. Um único
 /// elemento desenhado em OnRender (centenas de blocos sem um elemento por bloco). Somente leitura.
+/// Quando os blocos mudam (nova análise, entrar numa pasta), eles crescem do centro até o tamanho real em 0,45 s; com as
+/// animações do Windows desligadas, aparecem prontos.
 /// </summary>
 public sealed class TreemapView : FrameworkElement
 {
@@ -18,7 +22,11 @@ public sealed class TreemapView : FrameworkElement
     private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
 
     public static readonly DependencyProperty TilesProperty = DependencyProperty.Register(nameof(Tiles), typeof(IReadOnlyList<DiskTile>), typeof(TreemapView),
-        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, (d, _) => ((TreemapView)d)._hover = -1));
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, (d, _) => ((TreemapView)d).OnTilesChanged()));
+
+    /// <summary>Quanto os blocos já cresceram (0..1), animado a cada troca de blocos.</summary>
+    private static readonly DependencyProperty GrowProperty = DependencyProperty.Register("Grow", typeof(double), typeof(TreemapView),
+        new FrameworkPropertyMetadata(1d, FrameworkPropertyMetadataOptions.AffectsRender));
 
     public static readonly DependencyProperty OpenCommandProperty = DependencyProperty.Register(nameof(OpenCommand), typeof(ICommand), typeof(TreemapView));
 
@@ -43,6 +51,21 @@ public sealed class TreemapView : FrameworkElement
         MouseLeave += (_, _) => SetHover(-1);
     }
 
+    private void OnTilesChanged()
+    {
+        _hover = -1;
+        BeginAnimation(GrowProperty, null);
+        if (!ShellMotion.Enabled)
+        {
+            SetValue(GrowProperty, 1d);
+            return;
+        }
+        BeginAnimation(GrowProperty, new DoubleAnimation(0.15, 1, new Duration(TimeSpan.FromMilliseconds(450)))
+        {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+        });
+    }
+
     public IReadOnlyList<DiskTile>? Tiles { get => (IReadOnlyList<DiskTile>?)GetValue(TilesProperty); set => SetValue(TilesProperty, value); }
 
     /// <summary>Executado com o <see cref="DiskTile"/> clicado.</summary>
@@ -62,28 +85,18 @@ public sealed class TreemapView : FrameworkElement
         return pen;
     }
 
-    /// <summary>Cores por tipo: âmbar = vídeo, verde = jogos, e tons distintos para o resto (texto escuro por cima).</summary>
-    private static Brush FileFill(FileCategory? c) => c switch
-    {
-        FileCategory.Video => CategoryBrushes[0],
-        FileCategory.Game => CategoryBrushes[1],
-        FileCategory.DiskImage => CategoryBrushes[2],
-        FileCategory.Installer => CategoryBrushes[3],
-        FileCategory.Archive => CategoryBrushes[4],
-        FileCategory.Image => CategoryBrushes[5],
-        FileCategory.Audio => CategoryBrushes[6],
-        FileCategory.Document => CategoryBrushes[7],
-        FileCategory.Development => CategoryBrushes[8],
-        FileCategory.System => CategoryBrushes[9],
-        _ => CategoryBrushes[10],
-    };
+    /// <summary>Cores por tipo (as mesmas da legenda e dos cartões: <see cref="DiskPalette"/>), texto escuro por cima.</summary>
+    private static readonly Dictionary<FileCategory, Brush> CategoryBrushes = Enum.GetValues<FileCategory>()
+        .ToDictionary(c => c, c => (Brush)FrozenColor((Color)ColorConverter.ConvertFromString(DiskPalette.Hex(c))));
 
-    private static readonly Brush[] CategoryBrushes =
-    [
-        Frozen(0xFF, 0xB5, 0x47), Frozen(0x5E, 0xE6, 0xA0), Frozen(0xB4, 0x8C, 0xFF), Frozen(0xFF, 0x96, 0x6B), Frozen(0xE8, 0xD3, 0x6B),
-        Frozen(0x6B, 0xB7, 0xFF), Frozen(0xD0, 0x86, 0xF0), Frozen(0xA9, 0xB4, 0xCC), Frozen(0x8F, 0xD8, 0x9A), Frozen(0x77, 0x82, 0xA0),
-        Frozen(0x9A, 0xA4, 0xBC),
-    ];
+    private static Brush FileFill(FileCategory? c) => CategoryBrushes[c ?? FileCategory.Other];
+
+    private static SolidColorBrush FrozenColor(Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return brush;
+    }
 
     protected override Size MeasureOverride(Size availableSize) =>
         new(double.IsInfinity(availableSize.Width) ? 600 : availableSize.Width, double.IsInfinity(availableSize.Height) ? 420 : availableSize.Height);
@@ -103,6 +116,7 @@ public sealed class TreemapView : FrameworkElement
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         var typeface = new Typeface(TryFindResource("Font.Body") as FontFamily ?? new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
         var numbers = new Typeface(TryFindResource("Font.Numbers") as FontFamily ?? new FontFamily("Bahnschrift SemiCondensed"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+        var grow = Math.Clamp((double)GetValue(GrowProperty), 0, 1);
 
         for (var i = 0; i < tiles.Count; i++)
         {
@@ -110,6 +124,12 @@ public sealed class TreemapView : FrameworkElement
             if (r.Width < 1 || r.Height < 1) continue;
             var rect = new Rect(r.X + Gap / 2, r.Y + Gap / 2, Math.Max(0, r.Width - Gap), Math.Max(0, r.Height - Gap));
             if (rect.Width <= 0 || rect.Height <= 0) continue;
+            if (grow < 1)
+            {
+                var cx = rect.X + rect.Width / 2;
+                var cy = rect.Y + rect.Height / 2;
+                rect = new Rect(cx - rect.Width * grow / 2, cy - rect.Height * grow / 2, rect.Width * grow, rect.Height * grow);
+            }
             var tile = tiles[i];
             var hover = i == _hover;
             var (fill, pen, label) = tile.Kind switch
@@ -120,7 +140,7 @@ public sealed class TreemapView : FrameworkElement
             };
             drawingContext.DrawRoundedRectangle(fill, pen, rect, 3, 3);
 
-            if (rect.Width < 54 || rect.Height < 20) continue;
+            if (grow < 1 || rect.Width < 54 || rect.Height < 20) continue;
             drawingContext.PushClip(new RectangleGeometry(rect));
             var name = new FormattedText(tile.Label, Pt, FlowDirection.LeftToRight, typeface, 12, label, dpi)
             {

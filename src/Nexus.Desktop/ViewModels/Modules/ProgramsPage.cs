@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
 using Nexus.Broker;
+using Nexus.Desktop.Views.Controls;
 using Nexus.Programs;
 using Nexus.Programs.Inventory;
 using Nexus.Programs.Leftovers;
@@ -38,6 +39,11 @@ public sealed class ProgramRow(InstalledProgram program, BulkEligibility? eligib
     public bool IsBlocked => !Eligibility.Selectable;
     public bool IsChecked { get => _isChecked; set { if (Set(ref _isChecked, value && CanCheck)) checkedChanged?.Invoke(); } }
 
+    /// <summary>Selo do lote: vermelho = fora, âmbar = atenção (biblioteca/driver), nenhum quando pode entrar.</summary>
+    public Tone FlagTone => IsBlocked ? Tone.Bad : IsCritical ? Tone.Warn : Tone.Neutral;
+    public bool HasFlag => Flag.Length > 0;
+    public string ScopeAndKind => $"{Scope} · {Kind}";
+
     /// <summary>Marca curta da coluna "Lote".</summary>
     public string Flag => IsBlocked ? "fora" : IsCritical ? "atenção" : "";
 
@@ -53,7 +59,8 @@ public sealed class ProgramRow(InstalledProgram program, BulkEligibility? eligib
 public sealed class BulkItemRow(BulkQueueItem item) : ObservableObject
 {
     private string _state = "Na fila", _detail = "";
-    private bool _active, _good, _bad;
+    private bool _active, _good, _bad, _skipped;
+    private double _progress;
     public string Name => item.Program.Name;
     public string Mode => item.ModeText + (item.Note is { } n ? $" · {n}" : "");
     public string Size => ProgramInventory.FormatSize(item.Program.SizeBytes);
@@ -62,6 +69,12 @@ public sealed class BulkItemRow(BulkQueueItem item) : ObservableObject
     public bool Active { get => _active; private set => Set(ref _active, value); }
     public bool Good { get => _good; private set => Set(ref _good, value); }
     public bool Bad { get => _bad; private set => Set(ref _bad, value); }
+    public bool Skipped { get => _skipped; private set => Set(ref _skipped, value); }
+    /// <summary>Barra do item: 0 = na fila, 100 = terminou (a barra do item ativo fica em movimento).</summary>
+    public double ProgressValue { get => _progress; private set => Set(ref _progress, value); }
+    /// <summary>Tom do item: âmbar = agora, verde = removido, vermelho = falhou, neutro = na fila ou pulado.</summary>
+    public Tone Tone => Bad ? Tone.Bad : Good ? Tone.Good : Active ? Tone.Warn : Tone.Neutral;
+    public string IconKey => Bad ? "Icon.Error" : Good ? "Icon.Check" : Active ? "Icon.Refresh" : Skipped ? "Icon.ChevronRight" : "Icon.History";
 
     public void Update(BulkItemStatus s, bool current)
     {
@@ -71,6 +84,10 @@ public sealed class BulkItemRow(BulkQueueItem item) : ObservableObject
         Active = current && !s.Finished;
         Good = s.State == BulkItemState.Removed;
         Bad = s.State == BulkItemState.Failed;
+        Skipped = s.State == BulkItemState.Skipped;
+        ProgressValue = s.Finished ? 100 : 0;
+        OnPropertyChanged(nameof(Tone));
+        OnPropertyChanged(nameof(IconKey));
     }
 }
 
@@ -96,6 +113,12 @@ public sealed class LeftoverRow(LeftoverCandidate candidate, string programName 
     public string Reason => Candidate.Reason;
     public bool High => Candidate.Score >= 75;
     public bool Low => Candidate.Score < 50;
+    /// <summary>Selo de confiança: verde = alta, ciano = média, âmbar = baixa (confira antes de marcar).</summary>
+    public Tone Tone => High ? Tone.Good : Low ? Tone.Warn : Tone.Info;
+    public string ConfidenceLabel => High ? $"Alta · {Candidate.Score}" : Low ? $"Baixa · {Candidate.Score}" : $"Média · {Candidate.Score}";
+    public string IconKey => Candidate.Kind == LeftoverKind.Folder ? "Icon.Catalog" : "Icon.Code";
+    public double SizeBytes => Candidate.Kind == LeftoverKind.Folder ? Candidate.SizeBytes ?? 0 : 0;
+    public string SubLine => string.IsNullOrEmpty(programName) ? Kind : $"{programName} · {Kind}";
 }
 
 public sealed class ManagerRow(PackageManagerStatus status) : ObservableObject
@@ -107,6 +130,25 @@ public sealed class ManagerRow(PackageManagerStatus status) : ObservableObject
     public bool Installed => Status.Installed;
     public string Explanation => Status.Explanation;
     public string Detail { get => _detail; set => Set(ref _detail, value); }
+    /// <summary>As atualizações deste gerenciador (o cartão mostra só as dele).</summary>
+    public ObservableCollection<UpdateRow> Updates { get; } = [];
+    public bool HasUpdates => Updates.Count > 0;
+    public Tone Tone => !Installed ? Tone.Neutral : Updates.Count > 0 ? Tone.Warn : Tone.Good;
+    public string CountText => !Installed ? "Não instalado" : Updates.Count == 0 ? "Em dia" : Updates.Count == 1 ? "1 nova" : $"{Updates.Count} novas";
+    public string IconKey => Status.Kind switch
+    {
+        PackageManagerKind.Winget => "Icon.Windows",
+        PackageManagerKind.Npm => "Icon.Code",
+        _ => "Icon.Programs",
+    };
+
+    internal void AddUpdates(IEnumerable<UpdateRow> rows)
+    {
+        foreach (var r in rows) Updates.Add(r);
+        OnPropertyChanged(nameof(HasUpdates));
+        OnPropertyChanged(nameof(Tone));
+        OnPropertyChanged(nameof(CountText));
+    }
 }
 
 public sealed class UpdateRow(PackageUpdate update) : ObservableObject
@@ -125,6 +167,7 @@ public sealed class UpdateRow(PackageUpdate update) : ObservableObject
         : Update.Manager == PackageManagerKind.Winget && string.IsNullOrWhiteSpace(Update.Source) ? "Sem origem conhecida"
         : Update.RequiresExplicit ? "Exige pedido explícito (o NEXUS pede por ID)"
         : "";
+    public bool HasNote => Note.Length > 0;
 }
 
 /// <summary>
@@ -167,6 +210,8 @@ public sealed class ProgramsPage : ModulePage
     private string _programsHeadline = "—";
     private string _programsDetail = "";
     private readonly List<(Guid Run, BrokerLevel Level)> _lastRuns = [];
+    private bool _loadingPrograms = true, _checkingUpdates, _updatesChecked, _leftoversScanned;
+    private double _selectedBytes, _selectedCount, _bulkPending, _bulkRemoved, _bulkFailed, _bulkSkipped;
 
     public ProgramsPage()
     {
@@ -191,6 +236,7 @@ public sealed class ProgramsPage : ModulePage
         UpdateSelectedCommand = new RelayCommand(() => StartUpdates(Updates.Where(u => u.IsChecked && u.CanUpgrade).ToList(), "Atualizar selecionados"),
             () => !Busy && Updates.Any(u => u.IsChecked && u.CanUpgrade));
         UpdateAllCommand = new RelayCommand(() => StartUpdates(Updates.Where(u => u.CanUpgrade).ToList(), "Atualizar tudo"), () => !Busy && Updates.Any(u => u.CanUpgrade));
+        ShowProgramsCommand = new RelayCommand(() => IsProgramsTab = true);
         PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Message)) OnPropertyChanged(nameof(HasMessage)); };
     }
 
@@ -218,6 +264,33 @@ public sealed class ProgramsPage : ModulePage
     public string LeftoversTabLabel => Leftovers.Count > 0 ? $"Sobras · {Leftovers.Count}" : "Sobras";
 
     public bool HasMessage => Message.Length > 0;
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Primeira leitura do inventário (esqueletos).</summary>
+    public bool IsLoadingPrograms { get => _loadingPrograms; private set => Set(ref _loadingPrograms, value); }
+    public double ProgramCount => _loaded ? _all.Count : double.NaN;
+    public double TotalBytes => _loaded ? _all.Sum(p => p.SizeBytes ?? 0) : double.NaN;
+    public double SelectedBytes { get => _selectedBytes; private set => Set(ref _selectedBytes, value); }
+    public double SelectedCount { get => _selectedCount; private set => Set(ref _selectedCount, value); }
+    public double BulkPending { get => _bulkPending; private set => Set(ref _bulkPending, value); }
+    public double BulkRemoved { get => _bulkRemoved; private set => Set(ref _bulkRemoved, value); }
+    public double BulkFailed { get => _bulkFailed; private set => Set(ref _bulkFailed, value); }
+    public double BulkSkipped { get => _bulkSkipped; private set => Set(ref _bulkSkipped, value); }
+    public bool HasPrograms => Programs.Count > 0;
+    public bool ShowNoPrograms => _loaded && Programs.Count == 0;
+    public RelayCommand ShowProgramsCommand { get; }
+
+    public bool CheckingUpdates { get => _checkingUpdates; private set => Set(ref _checkingUpdates, value); }
+    public bool UpdatesChecked { get => _updatesChecked; private set { if (Set(ref _updatesChecked, value)) OnPropertyChanged(nameof(ShowUpdatesNotChecked)); } }
+    public bool ShowUpdatesNotChecked => !UpdatesChecked && !CheckingUpdates;
+    public double UpdatesCount => UpdatesChecked ? Updates.Count : double.NaN;
+    public bool ShowAllUpToDate => UpdatesChecked && Updates.Count == 0;
+
+    public bool LeftoversScanned { get => _leftoversScanned; private set => Set(ref _leftoversScanned, value); }
+    public double LeftoverCount => LeftoversScanned ? Leftovers.Count : double.NaN;
+    public double LeftoverBytes => LeftoversScanned ? Leftovers.Sum(l => l.SizeBytes) : double.NaN;
+    public bool HasLeftovers => Leftovers.Count > 0;
 
     private void Say(string message) => Message = message;
 
@@ -266,6 +339,18 @@ public sealed class ProgramsPage : ModulePage
 
     private async Task LoadProgramsAsync()
     {
+        try
+        {
+            await ReadProgramsAsync();
+        }
+        finally
+        {
+            IsLoadingPrograms = false;
+        }
+    }
+
+    private async Task ReadProgramsAsync()
+    {
         var list = await ReadInventoryAsync();
         _all = list.Select(x => x.Program).ToList();
         // As marcações sobrevivem a "ler de novo" (mesma chave do registro).
@@ -287,6 +372,8 @@ public sealed class ProgramsPage : ModulePage
         ApplyFilter();
         UpdateSelection();
         OnPropertyChanged(nameof(ProgramsTabLabel));
+        OnPropertyChanged(nameof(ProgramCount));
+        OnPropertyChanged(nameof(TotalBytes));
     }
 
     private void ApplyFilter()
@@ -298,6 +385,8 @@ public sealed class ProgramsPage : ModulePage
         Programs.Clear();
         foreach (var r in rows) Programs.Add(r);
         Selected = Programs.FirstOrDefault(r => r.Program.Id == keep);
+        OnPropertyChanged(nameof(HasPrograms));
+        OnPropertyChanged(nameof(ShowNoPrograms));
     }
 
     private async Task LoadStoreAsync()
@@ -411,6 +500,8 @@ public sealed class ProgramsPage : ModulePage
         var chosen = _rows.Values.Where(r => r.IsChecked).ToList();
         var bytes = chosen.Sum(r => r.Program.SizeBytes ?? 0);
         var critical = chosen.Count(r => r.IsCritical);
+        SelectedBytes = bytes;
+        SelectedCount = chosen.Count;
         SelectionText = chosen.Count == 0 ? "Nenhum selecionado"
             : string.Create(PtBr, $"{chosen.Count} selecionado(s) · {(bytes > 0 ? ProgramInventory.FormatSize(bytes) : "tamanho não informado")}") +
               (critical > 0 ? string.Create(PtBr, $" · {critical} pede(m) atenção") : "");
@@ -565,6 +656,10 @@ public sealed class ProgramsPage : ModulePage
     {
         for (var i = 0; i < s.Items.Count && i < BulkItems.Count; i++) BulkItems[i].Update(s.Items[i], s.CurrentIndex == i);
         BulkPercent = s.Total == 0 ? 0 : 100.0 * s.Done / s.Total;
+        BulkPending = s.Pending;
+        BulkRemoved = s.Removed;
+        BulkFailed = s.Failed;
+        BulkSkipped = s.Skipped;
         BulkCounts = string.Create(PtBr, $"Na fila {s.Pending} · Removidos {s.Removed} · Falhas {s.Failed} · Pulados {s.Skipped}") +
                      (s.StopRequested && BulkRunning ? " · para depois do atual" : "");
         if (s.Current is { Finished: false } c)
@@ -598,6 +693,7 @@ public sealed class ProgramsPage : ModulePage
         if (gone.Count == 0)
         {
             LeftoversHeadline = "Ainda instalado";
+            NotifyLeftovers();
             Say(targets.Count == 1
                 ? $"{targets[0].Name} ainda está instalado. Desinstale primeiro: o NEXUS só procura sobras de programas que já saíram da lista."
                 : "Todos ainda aparecem como instalados. O NEXUS só procura sobras de programas que já saíram da lista.");
@@ -617,12 +713,21 @@ public sealed class ProgramsPage : ModulePage
             return list;
         });
         foreach (var (program, candidate) in found) Leftovers.Add(new LeftoverRow(candidate, program.Name));
+        LeftoversScanned = true;
+        NotifyLeftovers();
         LeftoversHeadline = found.Count == 0 ? "Nada sobrou" : LeftoverScanner.Summary(found.Select(f => f.Candidate).ToList());
         var stillNote = still.Count == 0 ? "" : string.Create(PtBr, $" {still.Count} ainda instalado(s), sem busca: {string.Join(", ", still.Take(3).Select(p => p.Name))}.");
         Say((found.Count == 0
                 ? (gone.Count == 1 ? $"Nenhuma sobra de {gone[0].Name} encontrada nas pastas e chaves que o NEXUS confere." : "Nenhuma sobra encontrada nas pastas e chaves que o NEXUS confere.")
                 : "Confira a lista. As de confiança alta já vêm marcadas; as baixas, não. Nada sai do lugar sem você confirmar.") + stillNote);
         OnPropertyChanged(nameof(LeftoversTabLabel));
+    }
+
+    private void NotifyLeftovers()
+    {
+        OnPropertyChanged(nameof(LeftoverCount));
+        OnPropertyChanged(nameof(LeftoverBytes));
+        OnPropertyChanged(nameof(HasLeftovers));
     }
 
     private async Task RemoveLeftoversAsync()
@@ -702,6 +807,24 @@ public sealed class ProgramsPage : ModulePage
 
     private async Task CheckUpdatesAsync()
     {
+        CheckingUpdates = true;
+        OnPropertyChanged(nameof(ShowUpdatesNotChecked));
+        try
+        {
+            await ReadUpdatesAsync();
+        }
+        finally
+        {
+            CheckingUpdates = false;
+            UpdatesChecked = true;
+            OnPropertyChanged(nameof(ShowUpdatesNotChecked));
+            OnPropertyChanged(nameof(UpdatesCount));
+            OnPropertyChanged(nameof(ShowAllUpToDate));
+        }
+    }
+
+    private async Task ReadUpdatesAsync()
+    {
         UpdatesHeadline = "Verificando…";
         UpdatesDetail = "Perguntando a cada gerenciador (pode levar até alguns minutos na primeira vez).";
         Managers.Clear();
@@ -716,7 +839,9 @@ public sealed class ProgramsPage : ModulePage
                 : list.Problem is { } problem ? problem
                 : list.Updates.Count == 0 ? "Tudo em dia."
                 : string.Create(PtBr, $"{list.Updates.Count} com versão nova.");
-            foreach (var u in list.Updates) Updates.Add(new UpdateRow(u));
+            var mine = list.Updates.Select(u => new UpdateRow(u)).ToList();
+            foreach (var u in mine) Updates.Add(u);
+            row.AddUpdates(mine);
         }
         var n = Updates.Count;
         UpdatesHeadline = n == 0 ? "Tudo em dia" : string.Create(PtBr, $"{n} {(n == 1 ? "atualização disponível" : "atualizações disponíveis")}");

@@ -4,6 +4,7 @@ using Nexus.Boot;
 using Nexus.Boot.Inventory;
 using Nexus.Boot.Windows;
 using Nexus.Broker;
+using Nexus.Desktop.Views.Controls;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -23,6 +24,7 @@ public sealed class ServicesPage : ModulePage
     private string _summary = "";
     private Guid? _lastRun;
     private string _lastChange = "";
+    private bool _isLoading = true;
 
     public ServicesPage()
     {
@@ -37,6 +39,19 @@ public sealed class ServicesPage : ModulePage
     public override string Subtitle => "Serviços do Windows explicados, com ajustes seguros e reversíveis.";
 
     public string Summary { get => _summary; private set => Set(ref _summary, value); }
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Primeira leitura em andamento (esqueletos).</summary>
+    public bool IsLoading { get => _isLoading; private set => Set(ref _isLoading, value); }
+    public double TotalCount => _loaded ? _all.Count : double.NaN;
+    public double RunningCount => _loaded ? _all.Count(r => r.Info.IsRunning) : double.NaN;
+    public double AutomaticCount => _loaded ? _all.Count(r => r.Info.IsAutomatic) : double.NaN;
+    public double ThirdPartyCount => _loaded ? _all.Count(r => !r.IsMicrosoft) : double.NaN;
+    public double ProtectedCount => _loaded ? _all.Count(r => !r.CanChange) : double.NaN;
+    /// <summary>% dos serviços rodando agora (anel do destaque).</summary>
+    public double RunningPercent => _loaded && _all.Count > 0 ? Math.Round(100.0 * _all.Count(r => r.Info.IsRunning) / _all.Count) : double.NaN;
+    public bool HasVisible => Visible.Count > 0;
     public IReadOnlyList<ServiceRow> Visible { get => _visible; private set => Set(ref _visible, value); }
     public ObservableCollection<PresetRow> Presets { get; } = [];
     public IReadOnlyList<StartTypeOption> StartTypes { get; } =
@@ -72,6 +87,19 @@ public sealed class ServicesPage : ModulePage
 
     public override Task OnShownAsync() => _loaded ? Task.CompletedTask : RunAsync(LoadAsync);
 
+    private async Task LoadAsync()
+    {
+        if (!_loaded) IsLoading = true;
+        try
+        {
+            await ReadAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
     private void SetFilter(int f)
     {
         _filter = f;
@@ -82,7 +110,7 @@ public sealed class ServicesPage : ModulePage
         ApplyFilter();
     }
 
-    private async Task LoadAsync()
+    private async Task ReadAsync()
     {
         var selectedName = _selected?.Info.Name;
         var (rows, presets) = await Task.Run(() =>
@@ -111,6 +139,8 @@ public sealed class ServicesPage : ModulePage
             Presets.Add(new PresetRow(p, byName, this, previous.TryGetValue(p.Id, out var old) ? old : null));
         Summary = $"{rows.Count} serviços · {rows.Count(r => r.Info.IsRunning)} em execução · {rows.Count(r => r.Info.IsAutomatic)} automáticos · " +
                   $"{rows.Count(r => !r.IsMicrosoft)} de terceiros";
+        foreach (var name in new[] { nameof(TotalCount), nameof(RunningCount), nameof(AutomaticCount), nameof(ThirdPartyCount), nameof(ProtectedCount), nameof(RunningPercent) })
+            OnPropertyChanged(name);
         ApplyFilter();
         if (selectedName is not null && byName.TryGetValue(selectedName, out var again)) Selected = again;
     }
@@ -130,6 +160,7 @@ public sealed class ServicesPage : ModulePage
                              r.Info.Name.Contains(_search, StringComparison.CurrentCultureIgnoreCase) ||
                              (r.Info.Description?.Contains(_search, StringComparison.CurrentCultureIgnoreCase) ?? false));
         Visible = q.ToList();
+        OnPropertyChanged(nameof(HasVisible));
     }
 
     private async Task ApplySelectedAsync()
@@ -212,6 +243,17 @@ public sealed class ServiceRow
     public string ProtectionText => Protection ?? (Info.Name.Equals("wuauserv", StringComparison.OrdinalIgnoreCase)
         ? "Windows Update: pode ir para Manual, nunca Desativado."
         : "");
+    /// <summary>Selo do estado: verde = rodando agora, neutro = parado.</summary>
+    public Tone StateTone => Info.IsRunning ? Tone.Good : Tone.Neutral;
+    /// <summary>Selo do tipo de início: âmbar = inicia sozinho, vermelho = desativado, ciano = manual.</summary>
+    public Tone StartTone => Info.StartType switch
+    {
+        "Automatic" or "AutomaticDelayed" => Tone.Warn,
+        "Disabled" => Tone.Bad,
+        _ => Tone.Info,
+    };
+    public bool IsProtected => !CanChange;
+    public string IconKey => IsProtected ? "Icon.Lock" : IsMicrosoft ? "Icon.Windows" : "Icon.Services";
 }
 
 /// <summary>Preset na página: cada item com antes (lido agora) e depois (proposto).</summary>
@@ -240,7 +282,19 @@ public sealed class PresetRow : ObservableObject
     public IReadOnlyList<PresetItemRow> Items { get; }
     public Guid? RunId => _runId;
     public bool CanUndo => _runId is not null;
-    public string Status { get => _status; private set => Set(ref _status, value); }
+    public string Status { get => _status; private set { if (Set(ref _status, value)) OnPropertyChanged(nameof(StatusTone)); } }
+    public double PendingCount => Items.Count(i => i.Pending);
+    public string ChangeText => PendingCount == 0 ? "Nada muda" : $"{PendingCount} de {Items.Count} mudam";
+    /// <summary>Selo do estado: verde = aplicado ou já assim, âmbar = há mudanças a fazer.</summary>
+    public Tone StatusTone => _runId is not null || Items.All(i => !i.Pending) ? Tone.Good : Tone.Warn;
+    public string IconKey => Preset.Id switch
+    {
+        "sem-impressora" => "Icon.Page",
+        "sem-xbox" => "Icon.Games",
+        "privacidade" => "Icon.Privacy",
+        "jogos-ssd" => "Icon.Disk",
+        _ => "Icon.Services",
+    };
     public RelayCommand ApplyCommand { get; }
     public RelayCommand UndoCommand { get; }
 
@@ -269,4 +323,7 @@ public sealed class PresetItemRow(ServicePresetItem item, ServiceRow? service)
     public bool Pending => service is not null && service.Info.StartType != Item.StartType;
     public string Why => Item.Why;
     public string Line => $"{DisplayName}: {Before} → {After}" + (Pending ? "" : " (sem mudança)");
+    /// <summary>Selo do "depois": âmbar = muda, verde = já está assim, neutro = não existe neste PC.</summary>
+    public Tone AfterTone => !Exists ? Tone.Neutral : Pending ? Tone.Warn : Tone.Good;
+    public string StateText => !Exists ? "não existe aqui" : Pending ? "muda" : "já está assim";
 }

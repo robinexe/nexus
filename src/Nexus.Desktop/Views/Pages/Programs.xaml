@@ -1,46 +1,24 @@
 <!--
-  Programas e atualizações: abas Programas / Atualizações / Sobras. Leitura direta (inventário, gerenciadores, varredura);
-  escrita só pelas sobras (Host.ApplyAsync → handler ProgramLeftover, reversível) e pelo ponto de restauração antes do lote
-  (system.restore.create-point). Desinstalar (um ou vários, em fila) e atualizar abrem a ferramenta do próprio fornecedor depois
-  da confirmação. Do tema, só as chaves do contrato (Tokens/Controls/Converters).
+  Programas e atualizações (design system v2, docs/10-design-system.md). Três abas com ícone:
+    Programas ..... destaque "N programas" contando + quanto ocupam + o que está marcado; como funciona (marca → ponto de
+                    restauração → desinstalador oficial → sobras); fila da desinstalação em massa com anel geral, quatro números e
+                    um cartão por item com barra própria (na fila / desinstalando, em movimento / removido / falhou); barra de
+                    seleção em massa (modo silencioso, ponto de restauração, "Desinstalar selecionados" em vermelho); lista com
+                    avatar e selo do lote; detalhe com os dados técnicos recolhidos; apps da Store (só leitura).
+    Atualizações .. destaque com quantas há; um cartão por gerenciador (winget, Chocolatey, Scoop, npm) com as atualizações dele
+                    (atual → nova em selos); estado vazio antes de verificar e "tudo em dia".
+    Sobras ........ destaque com quantas e quanto ocupam; cartões com selo de confiança (alta/média/baixa), motivo recolhido;
+                    "Mover escolhidas para a quarentena" e Desfazer sempre visível depois.
+  Escrita só pelas sobras (Host.ApplyAsync → ProgramLeftover, reversível) e pelo ponto de restauração antes do lote. Desinstalar
+  e atualizar abrem a ferramenta do próprio fornecedor depois da confirmação. A lógica é a mesma do ProgramsPage (só foram
+  expostos números para a apresentação: ProgramCount, SelectedBytes, BulkRemoved, ManagerRow.Updates, LeftoverBytes…).
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels">
+                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
+                    xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls">
   <DataTemplate DataType="{x:Type vm:ProgramsPage}">
     <DataTemplate.Resources>
-      <!-- Aba: botão de opção com cara de segmento (âmbar quando escolhida). -->
-      <Style x:Key="P.Tab" TargetType="RadioButton">
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Margin" Value="0,0,8,0"/>
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-        <Setter Property="Template">
-          <Setter.Value>
-            <ControlTemplate TargetType="RadioButton">
-              <Border x:Name="seg" Background="Transparent" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
-                      CornerRadius="{StaticResource Radius.Control}" Padding="16,8">
-                <TextBlock x:Name="label" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
-                           FontFamily="{StaticResource Font.Body}" FontSize="{StaticResource Size.Body}" Foreground="{StaticResource Brush.TextMuted}"/>
-              </Border>
-              <ControlTemplate.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.TextDim}"/>
-                  <Setter TargetName="label" Property="Foreground" Value="{StaticResource Brush.Text}"/>
-                </Trigger>
-                <Trigger Property="IsKeyboardFocused" Value="True">
-                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.Signal}"/>
-                </Trigger>
-                <Trigger Property="IsChecked" Value="True">
-                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.Trace}"/>
-                  <Setter TargetName="seg" Property="Background" Value="{StaticResource Brush.SurfaceHi}"/>
-                  <Setter TargetName="label" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
-                </Trigger>
-              </ControlTemplate.Triggers>
-            </ControlTemplate>
-          </Setter.Value>
-        </Setter>
-      </Style>
-
       <Style TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource Brush.Bg}"/>
         <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
@@ -54,357 +32,586 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
       </Style>
 
-      <Style x:Key="P.Big" TargetType="TextBlock" BasedOn="{StaticResource Text.Display}">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
-        <Setter Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+      <!-- Conteúdo da aba: ícone + nome. -->
+      <DataTemplate x:Key="P.TabHeader">
+        <StackPanel Orientation="Horizontal">
+          <c:Icon Data="{Binding Tag, RelativeSource={RelativeSource AncestorType=RadioButton}}" Size="16" Margin="0,0,8,0"/>
+          <TextBlock Text="{Binding}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+        </StackPanel>
+      </DataTemplate>
+
+      <!-- Selo pequeno de versão (texto puro). -->
+      <Style x:Key="P.Pill" TargetType="Border">
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Chip}"/>
+        <Setter Property="Padding" Value="8,1,8,2"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
       </Style>
-      <Style x:Key="P.Key" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
-        <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
-        <Setter Property="Margin" Value="0,8,0,0"/>
-      </Style>
-      <Style x:Key="P.Value" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
-        <Setter Property="TextWrapping" Value="Wrap"/>
-      </Style>
-      <Style x:Key="P.Mono" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
-        <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
-        <Setter Property="TextWrapping" Value="Wrap"/>
-      </Style>
+
+      <!-- Avatar com a inicial do programa. -->
+      <DataTemplate x:Key="P.Avatar" DataType="{x:Type vm:ProgramRow}">
+        <Grid Width="30" Height="30">
+          <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+          <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource Font.Display}" FontSize="14" Foreground="{StaticResource Brush.Signal}"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+      </DataTemplate>
+
+      <!-- Cartão de item da fila: ícone de estado, nome, barra própria, estado e detalhe. -->
+      <DataTemplate x:Key="P.QueueItem" DataType="{x:Type vm:BulkItemRow}">
+        <Border Background="{StaticResource Brush.SurfaceLow}" CornerRadius="{StaticResource Radius.Control}" Padding="12,10" Margin="0,0,0,8">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Width="34" Height="34" Margin="0,0,12,0" VerticalAlignment="Top">
+              <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
+              <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="17"
+                      Foreground="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=text}" HorizontalAlignment="Center"/>
+            </Grid>
+            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+              <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+              <ProgressBar Height="5" Margin="0,6,0,6" Minimum="0" Maximum="100" Value="{Binding ProgressValue, Mode=OneWay}"
+                           IsIndeterminate="{Binding Active, Mode=OneWay}"
+                           Foreground="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"
+                           AutomationProperties.Name="{Binding Name, StringFormat='Andamento: {0}'}"/>
+              <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" MaxHeight="36" TextTrimming="CharacterEllipsis"
+                         Visibility="{Binding Detail, Converter={StaticResource NullToCollapsed}}" ToolTip="{Binding Detail}"/>
+              <TextBlock Text="{Binding Mode}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                         ToolTip="{Binding Mode}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" HorizontalAlignment="Right" MinWidth="120">
+              <c:StatusChip Tone="{Binding Tone}" Text="{Binding State}" HorizontalAlignment="Right"/>
+              <TextBlock Text="{Binding Size}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.TextMuted}" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </DataTemplate>
+
+      <!-- Linha de atualização dentro do cartão do gerenciador. -->
+      <DataTemplate x:Key="P.UpdateItem" DataType="{x:Type vm:UpdateRow}">
+        <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,8">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="28"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" IsEnabled="{Binding CanUpgrade, Mode=OneWay}" VerticalAlignment="Top" Margin="0,2,0,0"
+                      AutomationProperties.Name="{Binding Name, StringFormat='Atualizar {0}'}"/>
+            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+              <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                         ToolTip="{Binding Id}"/>
+              <TextBlock Text="{Binding Manager}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+              <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="0,2,0,0"
+                         Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
+              <Border Style="{StaticResource P.Pill}" BorderBrush="{StaticResource Brush.Signal}" Background="{StaticResource Brush.SignalSoft}">
+                <TextBlock Text="{Binding Current}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Signal}"
+                           TextWrapping="NoWrap" MaxWidth="110" TextTrimming="CharacterEllipsis"/>
+              </Border>
+              <c:Icon Data="{StaticResource Icon.ArrowRight}" Size="14" Foreground="{StaticResource Brush.TextDim}" Margin="6,0" VerticalAlignment="Center"/>
+              <Border Style="{StaticResource P.Pill}" BorderBrush="{StaticResource Brush.Trace}" Background="{StaticResource Brush.TraceSoft}">
+                <TextBlock Text="{Binding Available}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}"
+                           TextWrapping="NoWrap" MaxWidth="110" TextTrimming="CharacterEllipsis"/>
+              </Border>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </DataTemplate>
+
+      <!-- Cartão de sobra: caixa, ícone, onde está, selo de confiança, tamanho, motivo recolhido. -->
+      <DataTemplate x:Key="P.LeftoverItem" DataType="{x:Type vm:LeftoverRow}">
+        <Border Style="{StaticResource Panel.Card}" Padding="14,12" Margin="0,0,0,8">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="28"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" VerticalAlignment="Top" Margin="0,10,0,0" AutomationProperties.Name="{Binding Path}"/>
+            <Grid Grid.Column="1" Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Top">
+              <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+              <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="18" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+            </Grid>
+            <StackPanel Grid.Column="2" Margin="0,0,12,0">
+              <TextBlock Text="{Binding Path}" Style="{StaticResource Text.Body}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"
+                         TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Path}"/>
+              <TextBlock Text="{Binding SubLine}" Style="{StaticResource Text.Small}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+              <c:ExplainToggle Margin="0,2,0,0" Content="{Binding Reason}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="3" HorizontalAlignment="Right" MinWidth="120">
+              <c:StatusChip Tone="{Binding Tone}" Text="{Binding ConfidenceLabel}" HorizontalAlignment="Right"/>
+              <TextBlock Text="{Binding Size}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </DataTemplate>
     </DataTemplate.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel Margin="28,24,28,28">
-        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
-        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180">
 
         <!-- Abas -->
-        <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
-          <RadioButton Style="{StaticResource P.Tab}" GroupName="ProgramsTabs" Content="{Binding ProgramsTabLabel}" IsChecked="{Binding IsProgramsTab, Mode=TwoWay}"/>
-          <RadioButton Style="{StaticResource P.Tab}" GroupName="ProgramsTabs" Content="{Binding UpdatesTabLabel}" IsChecked="{Binding IsUpdatesTab, Mode=TwoWay}"/>
-          <RadioButton Style="{StaticResource P.Tab}" GroupName="ProgramsTabs" Content="{Binding LeftoversTabLabel}" IsChecked="{Binding IsLeftoversTab, Mode=TwoWay}"/>
-          <TextBlock Text="Lendo…" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" VerticalAlignment="Center" Margin="12,0,0,0"
-                     Visibility="{Binding Busy, Converter={StaticResource BoolToVis}}"/>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+          <RadioButton Style="{StaticResource Tab.Underline}" GroupName="ProgramsTabs" Content="{Binding ProgramsTabLabel}" Tag="{StaticResource Icon.Programs}"
+                       ContentTemplate="{StaticResource P.TabHeader}" IsChecked="{Binding IsProgramsTab, Mode=TwoWay}"/>
+          <RadioButton Style="{StaticResource Tab.Underline}" GroupName="ProgramsTabs" Content="{Binding UpdatesTabLabel}" Tag="{StaticResource Icon.Refresh}"
+                       ContentTemplate="{StaticResource P.TabHeader}" IsChecked="{Binding IsUpdatesTab, Mode=TwoWay}"/>
+          <RadioButton Style="{StaticResource Tab.Underline}" GroupName="ProgramsTabs" Content="{Binding LeftoversTabLabel}" Tag="{StaticResource Icon.Quarantine}"
+                       ContentTemplate="{StaticResource P.TabHeader}" IsChecked="{Binding IsLeftoversTab, Mode=TwoWay}"/>
         </StackPanel>
 
-        <Border Style="{StaticResource Panel.Notice}" Margin="0,14,0,0" Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
-          <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Body}"/>
+        <!-- Resultado da última ação -->
+        <Border Background="{StaticResource Brush.SignalSoft}" CornerRadius="{StaticResource Radius.Control}" Padding="12,8" Margin="0,0,0,14"
+                Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
+          <DockPanel>
+            <c:Icon Data="{StaticResource Icon.Info}" Size="16" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0" VerticalAlignment="Top"/>
+            <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+          </DockPanel>
         </Border>
 
-        <!-- ===================== Programas ===================== -->
-        <StackPanel Visibility="{Binding IsProgramsTab, Converter={StaticResource BoolToVis}}" Margin="0,16,0,0">
-          <Border Style="{StaticResource Panel.Hero}">
+        <!-- ================================================================ PROGRAMAS -->
+        <StackPanel Visibility="{Binding IsProgramsTab, Converter={StaticResource BoolToVis}}">
+          <c:HeroPanel Illustration="{StaticResource Illo.Programs}" Title="Programas instalados"
+                       Number="{Binding ProgramCount}" Decimals="0" IsLoading="{Binding IsLoadingPrograms}"
+                       Caption="Quem remove é o desinstalador oficial. Depois, o NEXUS acha o que sobrou."
+                       SecondaryText="Ler de novo" SecondaryCommand="{Binding RefreshCommand}">
+            <StackPanel MinWidth="190">
+              <TextBlock Text="Ocupam (declarado)" Style="{StaticResource Text.Small}"/>
+              <c:AnimatedNumber Value="{Binding TotalBytes}" Kind="Bytes" FontFamily="{StaticResource Font.Numbers}" FontSize="24" Foreground="{StaticResource Brush.Text}"/>
+              <TextBlock Text="Marcado para desinstalar" Style="{StaticResource Text.Small}" Margin="0,10,0,0"/>
+              <StackPanel Orientation="Horizontal">
+                <c:AnimatedNumber Value="{Binding SelectedCount}" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="24" Foreground="{StaticResource Brush.Trace}"/>
+                <TextBlock Text=" · " FontFamily="{StaticResource Font.Numbers}" FontSize="18" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
+                <c:AnimatedNumber Value="{Binding SelectedBytes}" Kind="Bytes" FontFamily="{StaticResource Font.Numbers}" FontSize="18" Foreground="{StaticResource Brush.Trace}"
+                                  VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+              </StackPanel>
+            </StackPanel>
+          </c:HeroPanel>
+
+          <!-- Como funciona -->
+          <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,20">
             <StackPanel>
-              <TextBlock Text="{Binding ProgramsHeadline}" Style="{StaticResource P.Big}"/>
-              <TextBlock Text="{Binding ProgramsDetail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"/>
+              <c:HowItWorks>
+                <c:StepItem Icon="{StaticResource Icon.Check}" Title="Marca" Text="Escolha um ou vários. Bibliotecas e drivers só um a um."/>
+                <c:StepItem Icon="{StaticResource Icon.Undo}" Title="Protege" Text="Cria um ponto de restauração antes do lote." Tone="Good"/>
+                <c:StepItem Icon="{StaticResource Icon.Programs}" Title="Desinstala" Text="Desinstalador oficial, um por vez. Não tem desfazer." Tone="Bad"/>
+                <c:StepItem Icon="{StaticResource Icon.Quarantine}" Title="Limpa sobras" Text="O que ficou vai para a quarentena e pode voltar." Tone="Warn"/>
+              </c:HowItWorks>
+              <c:ExplainToggle Margin="0,12,0,0" Content="{Binding ProgramsDetail}"/>
             </StackPanel>
           </Border>
 
-          <!-- Fila da desinstalação em massa: progresso enquanto roda, resumo depois. -->
-          <Border Style="{StaticResource Panel.Card}" Margin="0,16,0,0" Visibility="{Binding ShowBulkPanel, Converter={StaticResource BoolToVis}}">
+          <!-- Fila da desinstalação em massa: progresso por item enquanto roda, resumo depois. -->
+          <Border Style="{StaticResource Panel.Card}" Padding="18,16" Margin="0,0,0,16" Visibility="{Binding ShowBulkPanel, Converter={StaticResource BoolToVis}}">
             <StackPanel>
-              <TextBlock Text="Desinstalação em massa" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
-              <TextBlock Text="{Binding BulkHeadline}" Style="{StaticResource Text.H2}" FontFamily="{StaticResource Font.Numbers}" Margin="0,2,0,0"/>
-              <ProgressBar Height="6" Margin="0,10,0,0" Minimum="0" Maximum="100" Value="{Binding BulkPercent, Mode=OneWay}"/>
-              <TextBlock Text="{Binding BulkCounts}" Style="{StaticResource P.Mono}" Margin="0,8,0,0"/>
-              <TextBlock Text="{Binding BulkCurrent}" Style="{StaticResource Text.Body}" Margin="0,6,0,0"
-                         Visibility="{Binding BulkRunning, Converter={StaticResource BoolToVis}}"/>
-              <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding BulkRunning, Converter={StaticResource BoolToVis}}">
-                <Button Style="{StaticResource Button.Secondary}" Content="Parar depois do atual" Command="{Binding StopAfterCurrentCommand}"
-                        ToolTip="Deixa o desinstalador atual terminar e não abre os próximos. O NEXUS nunca fecha um desinstalador."/>
-                <Button Style="{StaticResource Button.Ghost}" Margin="10,0,0,0" Content="Pular este (parar de esperar)" Command="{Binding SkipCurrentCommand}"
-                        ToolTip="Segue para o próximo sem fechar o desinstalador atual. Se ele ainda estiver aberto, termine por lá."/>
-              </StackPanel>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <c:RingMeter Value="{Binding BulkPercent}" Label="feito" Width="104" Height="104" Thickness="9" FontSize="22" Margin="0,0,20,0" VerticalAlignment="Top"/>
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="Desinstalação em massa" Style="{StaticResource Text.Small}"/>
+                  <TextBlock Text="{Binding BulkHeadline}" Style="{StaticResource Text.H2}" FontFamily="{StaticResource Font.Numbers}" Margin="0,2,0,8" TextTrimming="CharacterEllipsis"/>
+                  <UniformGrid Columns="4" Margin="-4,0">
+                    <StackPanel Margin="4,0">
+                      <c:AnimatedNumber Value="{Binding BulkPending}" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.Text}"/>
+                      <TextBlock Text="na fila" Style="{StaticResource Text.Small}"/>
+                    </StackPanel>
+                    <StackPanel Margin="4,0">
+                      <c:AnimatedNumber Value="{Binding BulkRemoved}" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.Good}"/>
+                      <TextBlock Text="removidos" Style="{StaticResource Text.Small}"/>
+                    </StackPanel>
+                    <StackPanel Margin="4,0">
+                      <c:AnimatedNumber Value="{Binding BulkFailed}" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.Bad}"/>
+                      <TextBlock Text="falharam" Style="{StaticResource Text.Small}"/>
+                    </StackPanel>
+                    <StackPanel Margin="4,0">
+                      <c:AnimatedNumber Value="{Binding BulkSkipped}" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.TextMuted}"/>
+                      <TextBlock Text="pulados" Style="{StaticResource Text.Small}"/>
+                    </StackPanel>
+                  </UniformGrid>
+                  <TextBlock Text="{Binding BulkCurrent}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,10,0,0"
+                             Visibility="{Binding BulkRunning, Converter={StaticResource BoolToVis}}" MaxHeight="36" TextTrimming="CharacterEllipsis" ToolTip="{Binding BulkCurrent}"/>
+                  <TextBlock Text="{Binding BulkCounts}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"
+                             Visibility="{Binding BulkRunning, Converter={StaticResource BoolToVis}}"/>
+                  <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding BulkRunning, Converter={StaticResource BoolToVis}}">
+                    <Button Style="{StaticResource Button.Secondary}" Content="Parar depois do atual" Command="{Binding StopAfterCurrentCommand}"
+                            ToolTip="Deixa o desinstalador atual terminar e não abre os próximos. O NEXUS nunca fecha um desinstalador."/>
+                    <Button Style="{StaticResource Button.Ghost}" Margin="10,0,0,0" Content="Pular este" Command="{Binding SkipCurrentCommand}"
+                            ToolTip="Segue para o próximo sem fechar o desinstalador atual. Se ele ainda estiver aberto, termine por lá."/>
+                  </StackPanel>
+                </StackPanel>
+              </Grid>
 
-              <StackPanel Visibility="{Binding HasBulkSummary, Converter={StaticResource BoolToVis}}" Margin="0,10,0,0">
-                <TextBlock Text="{Binding BulkFreed}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Good}"/>
-                <Border Style="{StaticResource Panel.Notice}" Margin="0,8,0,0" Visibility="{Binding BulkReboot, Converter={StaticResource BoolToVis}}">
-                  <TextBlock Style="{StaticResource Text.Body}" Text="Reinicie o PC para concluir: um desinstalador pediu (código 3010/1641) ou o Windows marcou arquivos para trocar no reinício."/>
+              <!-- Resumo depois de terminar -->
+              <StackPanel Visibility="{Binding HasBulkSummary, Converter={StaticResource BoolToVis}}" Margin="0,14,0,0">
+                <c:StatusChip Tone="Good" Text="{Binding BulkFreed}" HorizontalAlignment="Left" Visibility="{Binding BulkFreed, Converter={StaticResource NullToCollapsed}}"/>
+                <Border Style="{StaticResource Panel.Notice}" Padding="10,8" Margin="0,8,0,0" Visibility="{Binding BulkReboot, Converter={StaticResource BoolToVis}}">
+                  <DockPanel>
+                    <c:Icon Data="{StaticResource Icon.Warning}" Size="16" Foreground="{StaticResource Brush.Trace}" Margin="0,0,10,0" VerticalAlignment="Top"/>
+                    <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"
+                               Text="Reinicie o PC para concluir: um desinstalador pediu ou o Windows marcou arquivos para trocar no reinício."/>
+                  </DockPanel>
                 </Border>
-                <TextBlock Text="{Binding BulkSummary}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,8,0,0"/>
-                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                  <Button Style="{StaticResource Button.Primary}" Content="{Binding BulkLeftoversLabel}" Command="{Binding BulkLeftoversCommand}"
-                          Visibility="{Binding HasBatchRemoved, Converter={StaticResource BoolToVis}}"/>
+                <c:ExplainToggle Header="Ver o resumo completo" Margin="0,4,0,0" Content="{Binding BulkSummary}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding BulkLeftoversCommand}" Visibility="{Binding HasBatchRemoved, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                      <c:Icon Data="{StaticResource Icon.Search}" Size="14" Margin="0,0,6,0"/>
+                      <TextBlock Text="{Binding BulkLeftoversLabel}" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                  </Button>
                   <Button Style="{StaticResource Button.Ghost}" Margin="10,0,0,0" Content="Fechar resumo" Command="{Binding CloseBulkCommand}"/>
                 </StackPanel>
               </StackPanel>
 
-              <ItemsControl ItemsSource="{Binding BulkItems}" Margin="0,12,0,0">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,6">
-                      <Grid>
-                        <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="220"/>
-                          <ColumnDefinition Width="80"/>
-                          <ColumnDefinition Width="200"/>
-                          <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Name}" Style="{StaticResource Text.Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Size}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.TextMuted}"/>
-                        <TextBlock Grid.Column="2" x:Name="state" Text="{Binding State}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.TextMuted}"/>
-                        <StackPanel Grid.Column="3">
-                          <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
-                          <TextBlock Text="{Binding Mode}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
-                        </StackPanel>
-                      </Grid>
-                    </Border>
-                    <DataTemplate.Triggers>
-                      <DataTrigger Binding="{Binding Active}" Value="True">
-                        <Setter TargetName="state" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
-                      </DataTrigger>
-                      <DataTrigger Binding="{Binding Good}" Value="True">
-                        <Setter TargetName="state" Property="Foreground" Value="{StaticResource Brush.Good}"/>
-                      </DataTrigger>
-                      <DataTrigger Binding="{Binding Bad}" Value="True">
-                        <Setter TargetName="state" Property="Foreground" Value="{StaticResource Brush.Bad}"/>
-                      </DataTrigger>
-                    </DataTemplate.Triggers>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
+              <ItemsControl ItemsSource="{Binding BulkItems}" ItemTemplate="{StaticResource P.QueueItem}" Focusable="False" Margin="0,14,0,0"/>
             </StackPanel>
           </Border>
 
-          <!-- Seleção para a desinstalação em massa. -->
-          <Border Style="{StaticResource Panel.Inset}" Margin="0,16,0,0">
+          <!-- Seleção para a desinstalação em massa -->
+          <Border Style="{StaticResource Panel.Card}" Padding="16,14" Margin="0,0,0,12">
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
               </Grid.ColumnDefinitions>
-              <StackPanel Grid.Column="0">
-                <StackPanel Orientation="Horizontal">
-                  <Button Style="{StaticResource Button.Secondary}" Content="Selecionar visíveis" Command="{Binding SelectVisibleCommand}"
-                          ToolTip="Marca os programas da busca atual que podem entrar no lote. Bibliotecas e drivers só se marcam um a um."/>
-                  <Button Style="{StaticResource Button.Ghost}" Margin="8,0,0,0" Content="Limpar seleção" Command="{Binding ClearSelectionCommand}"/>
+              <StackPanel>
+                <WrapPanel>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding SelectVisibleCommand}" Margin="0,0,8,0"
+                          ToolTip="Marca os programas da busca atual que podem entrar no lote. Bibliotecas e drivers só se marcam um a um.">
+                    <StackPanel Orientation="Horizontal">
+                      <c:Icon Data="{StaticResource Icon.Check}" Size="14" Margin="0,0,6,0"/>
+                      <TextBlock Text="Selecionar visíveis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                  </Button>
+                  <Button Style="{StaticResource Button.Ghost}" Content="Limpar seleção" Command="{Binding ClearSelectionCommand}" Margin="0,0,12,0"/>
                   <TextBlock Text="{Binding SelectionText}" FontFamily="{StaticResource Font.Numbers}" FontSize="{StaticResource Size.Body}"
-                             Foreground="{StaticResource Brush.Trace}" VerticalAlignment="Center" Margin="14,0,0,0"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                  <CheckBox IsChecked="{Binding UseQuietMode, Mode=TwoWay}" Content="Modo silencioso quando o fornecedor declarar"
+                             Foreground="{StaticResource Brush.Trace}" VerticalAlignment="Center"/>
+                </WrapPanel>
+                <WrapPanel Margin="0,10,0,0">
+                  <CheckBox IsChecked="{Binding UseQuietMode, Mode=TwoWay}" Content="Modo silencioso quando o fornecedor declarar" Margin="0,0,18,4"
                             ToolTip="Usa o comando sem perguntas que o próprio fornecedor gravou no registro, ou o Windows Installer só com a barra de progresso. Desligado: todos abrem a janela do fornecedor."/>
-                  <CheckBox IsChecked="{Binding CreateRestorePoint, Mode=TwoWay}" Margin="18,0,0,0" Content="Criar ponto de restauração antes"
+                  <CheckBox IsChecked="{Binding CreateRestorePoint, Mode=TwoWay}" Content="Criar ponto de restauração antes" Margin="0,0,0,4"
                             ToolTip="Usa a ação 'Criar ponto de restauração' das Ferramentas do sistema (pede administrador). Exige a Proteção do Sistema ligada."/>
-                </StackPanel>
+                </WrapPanel>
               </StackPanel>
-              <Button Grid.Column="1" Style="{StaticResource Button.Danger}" VerticalAlignment="Center" Content="Desinstalar selecionados" Command="{Binding BulkUninstallCommand}"/>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                <Button Style="{StaticResource Button.Danger}" Content="Desinstalar selecionados" Command="{Binding BulkUninstallCommand}" Margin="0"/>
+                <c:StatusChip Tone="Bad" Text="Não tem desfazer" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+              </StackPanel>
             </Grid>
           </Border>
 
-          <Grid Margin="0,12,0,0">
+          <!-- Busca e ordem -->
+          <Grid Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar por nome ou editor"/>
-            <ComboBox Grid.Column="1" Width="200" Margin="10,0,0,0" ItemsSource="{Binding SortOptions}" SelectedIndex="{Binding SortIndex, Mode=TwoWay}"/>
-            <Button Grid.Column="2" Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Ler de novo" Command="{Binding RefreshCommand}"/>
+            <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar por nome ou editor" AutomationProperties.Name="Buscar programas"/>
+            <ComboBox Grid.Column="1" Width="200" Margin="10,0,0,0" ItemsSource="{Binding SortOptions}" SelectedIndex="{Binding SortIndex, Mode=TwoWay}"
+                      AutomationProperties.Name="Ordem da lista"/>
+            <Button Grid.Column="2" Style="{StaticResource Button.Ghost}" Margin="10,0,0,0" Command="{Binding RefreshCommand}">
+              <StackPanel Orientation="Horizontal">
+                <c:Icon Data="{StaticResource Icon.Refresh}" Size="14" Margin="0,0,6,0"/>
+                <TextBlock Text="Ler de novo" TextWrapping="NoWrap"/>
+              </StackPanel>
+            </Button>
           </Grid>
 
-          <Grid Margin="0,12,0,0">
+          <c:SkeletonLoader Shape="Lines" Lines="8" Margin="4,4,4,16" Visibility="{Binding IsLoadingPrograms, Converter={StaticResource BoolToVis}}"/>
+          <c:EmptyState Illustration="{StaticResource Illo.Programs}" Text="Nenhum programa com essa busca." Detail="Apague a busca ou leia a lista de novo."
+                        ActionText="Ler de novo" Command="{Binding RefreshCommand}" Margin="0,0,0,12"
+                        Visibility="{Binding ShowNoPrograms, Converter={StaticResource BoolToVis}}"/>
+
+          <Grid Visibility="{Binding HasPrograms, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="340"/>
             </Grid.ColumnDefinitions>
-            <ListView Grid.Column="0" Height="460" ItemsSource="{Binding Programs}" SelectedItem="{Binding Selected, Mode=TwoWay}"
-                      VirtualizingPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <ListView Grid.Column="0" Height="480" ItemsSource="{Binding Programs}" SelectedItem="{Binding Selected, Mode=TwoWay}"
+                      VirtualizingPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" AutomationProperties.Name="Programas instalados">
               <ListView.View>
                 <GridView>
                   <GridViewColumn Width="40">
                     <GridViewColumn.CellTemplate>
-                      <DataTemplate>
+                      <DataTemplate DataType="{x:Type vm:ProgramRow}">
                         <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" IsEnabled="{Binding CanCheck, Mode=OneWay}" ToolTip="{Binding BulkNote}"
-                                  ToolTipService.ShowOnDisabled="True"/>
+                                  ToolTipService.ShowOnDisabled="True" AutomationProperties.Name="{Binding Name, StringFormat='Marcar {0}'}"/>
                       </DataTemplate>
                     </GridViewColumn.CellTemplate>
                   </GridViewColumn>
-                  <GridViewColumn Header="Programa" Width="250" DisplayMemberBinding="{Binding Name}"/>
-                  <GridViewColumn Header="Lote" Width="70">
+                  <GridViewColumn Header="Programa" Width="290">
                     <GridViewColumn.CellTemplate>
-                      <DataTemplate>
-                        <TextBlock x:Name="flag" Text="{Binding Flag}" ToolTip="{Binding BulkNote}" FontSize="{StaticResource Size.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
-                        <DataTemplate.Triggers>
-                          <DataTrigger Binding="{Binding IsCritical}" Value="True">
-                            <Setter TargetName="flag" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
-                          </DataTrigger>
-                          <DataTrigger Binding="{Binding IsBlocked}" Value="True">
-                            <Setter TargetName="flag" Property="Foreground" Value="{StaticResource Brush.Bad}"/>
-                          </DataTrigger>
-                        </DataTemplate.Triggers>
+                      <DataTemplate DataType="{x:Type vm:ProgramRow}">
+                        <DockPanel>
+                          <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource P.Avatar}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Name}"/>
+                            <TextBlock Text="{Binding Publisher}" Style="{StaticResource Text.Small}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                          </StackPanel>
+                        </DockPanel>
                       </DataTemplate>
                     </GridViewColumn.CellTemplate>
                   </GridViewColumn>
-                  <GridViewColumn Header="Editor" Width="170" DisplayMemberBinding="{Binding Publisher}"/>
+                  <GridViewColumn Header="Lote" Width="100">
+                    <GridViewColumn.CellTemplate>
+                      <DataTemplate DataType="{x:Type vm:ProgramRow}">
+                        <c:StatusChip Tone="{Binding FlagTone}" Text="{Binding Flag}" ToolTip="{Binding BulkNote}"
+                                      Visibility="{Binding HasFlag, Converter={StaticResource BoolToVis}}"/>
+                      </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                  </GridViewColumn>
+                  <GridViewColumn Header="Tamanho" Width="90">
+                    <GridViewColumn.CellTemplate>
+                      <DataTemplate DataType="{x:Type vm:ProgramRow}">
+                        <TextBlock Text="{Binding Size}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}" TextWrapping="NoWrap"/>
+                      </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                  </GridViewColumn>
                   <GridViewColumn Header="Versão" Width="110" DisplayMemberBinding="{Binding Version}"/>
-                  <GridViewColumn Header="Tamanho" Width="90" DisplayMemberBinding="{Binding Size}"/>
                   <GridViewColumn Header="Instalado em" Width="100" DisplayMemberBinding="{Binding Installed}"/>
                 </GridView>
               </ListView.View>
             </ListView>
 
-            <Border Grid.Column="1" Style="{StaticResource Panel.Card}" Margin="12,0,0,0" VerticalAlignment="Top">
+            <!-- Detalhe do programa escolhido -->
+            <Border Grid.Column="1" Style="{StaticResource Panel.Card}" Padding="16,14" Margin="12,0,0,0" VerticalAlignment="Top">
               <StackPanel>
-                <TextBlock Text="Escolha um programa na lista." Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}"
-                           Visibility="{Binding HasSelection, Converter={StaticResource FalseToVisible}}"/>
-                <StackPanel DataContext="{Binding Selected}" Visibility="{Binding DataContext.HasSelection, RelativeSource={RelativeSource AncestorType=Border}, Converter={StaticResource BoolToVis}}">
-                  <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}"/>
-                  <TextBlock Text="{Binding Publisher}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
-                  <TextBlock Text="Versão · tamanho" Style="{StaticResource P.Key}"/>
-                  <TextBlock Style="{StaticResource P.Value}"><Run Text="{Binding Version, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Size, Mode=OneWay}"/></TextBlock>
-                  <TextBlock Text="Instalado para" Style="{StaticResource P.Key}"/>
-                  <TextBlock Text="{Binding Scope}" Style="{StaticResource P.Value}"/>
-                  <TextBlock Text="Pasta" Style="{StaticResource P.Key}"/>
-                  <TextBlock Text="{Binding Location}" Style="{StaticResource P.Mono}"/>
-                  <TextBlock Text="Tipo de instalador" Style="{StaticResource P.Key}"/>
-                  <TextBlock Text="{Binding Kind}" Style="{StaticResource P.Value}"/>
-                  <TextBlock Text="Desinstalador registrado" Style="{StaticResource P.Key}"/>
-                  <TextBlock Text="{Binding Uninstaller}" Style="{StaticResource P.Mono}"/>
-                  <TextBlock Text="Modo silencioso disponível" Style="{StaticResource P.Key}"/>
-                  <TextBlock Text="{Binding Quiet}" Style="{StaticResource P.Value}"/>
-                  <TextBlock Text="Desinstalação em massa" Style="{StaticResource P.Key}"/>
-                  <TextBlock Text="{Binding BulkNote}" Style="{StaticResource P.Value}"/>
+                <StackPanel Visibility="{Binding HasSelection, Converter={StaticResource FalseToVisible}}">
+                  <Grid Width="40" Height="40" HorizontalAlignment="Left">
+                    <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+                    <c:Icon Data="{StaticResource Icon.Programs}" Size="20" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+                  </Grid>
+                  <TextBlock Text="Escolha um programa na lista." Style="{StaticResource Text.H2}" FontSize="15" Margin="0,10,0,4"/>
+                  <TextBlock Text="Você vê o tamanho, quem fez e pode desinstalar." Style="{StaticResource Text.Small}"/>
                 </StackPanel>
-                <Button Style="{StaticResource Button.Primary}" Margin="0,16,0,0" Content="Desinstalar (desinstalador oficial)" Command="{Binding UninstallCommand}"/>
-                <Button Style="{StaticResource Button.Secondary}" Margin="0,8,0,0" Content="Procurar sobras deste programa" Command="{Binding LeftoversForSelectedCommand}"/>
-                <Button Style="{StaticResource Button.Ghost}" Margin="0,8,0,0" Content="Abrir Configurações > Aplicativos" Command="{Binding OpenSettingsCommand}"/>
-                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,12,0,0"
-                           Text="Quem remove é o desinstalador do fornecedor, numa janela que você vê. O NEXUS não desfaz uma desinstalação; depois, ele procura o que sobrou e só move para a quarentena o que você escolher."/>
+                <StackPanel DataContext="{Binding Selected}" Visibility="{Binding Converter={StaticResource NullToCollapsed}}">
+                  <DockPanel>
+                    <Grid Width="44" Height="44" Margin="0,0,12,0" VerticalAlignment="Top">
+                      <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+                      <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource Font.Display}" FontSize="20" Foreground="{StaticResource Brush.Signal}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <StackPanel>
+                      <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}" FontSize="15"/>
+                      <TextBlock Text="{Binding Publisher}" Style="{StaticResource Text.Small}"/>
+                    </StackPanel>
+                  </DockPanel>
+                  <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <TextBlock Text="{Binding Size}" FontFamily="{StaticResource Font.Numbers}" FontSize="24" Foreground="{StaticResource Brush.Trace}"/>
+                    <TextBlock Text="{Binding Version, StringFormat='versão {0}'}" Style="{StaticResource Text.Small}" VerticalAlignment="Bottom" Margin="10,0,0,4"
+                               TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                  </StackPanel>
+                  <TextBlock Text="{Binding ScopeAndKind}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,4,0,0"/>
+                  <Border Style="{StaticResource Panel.Notice}" Padding="8,6" Margin="0,8,0,0" Visibility="{Binding HasFlag, Converter={StaticResource BoolToVis}}">
+                    <DockPanel>
+                      <c:Icon Data="{StaticResource Icon.Warning}" Size="14" Foreground="{StaticResource Brush.Trace}" Margin="0,1,8,0" VerticalAlignment="Top"/>
+                      <TextBlock Text="{Binding BulkNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
+                    </DockPanel>
+                  </Border>
+                  <c:ExplainToggle Header="Dados técnicos" Margin="0,4,0,0">
+                    <StackPanel>
+                      <TextBlock Style="{StaticResource Text.Small}"><Run Text="Instalado em: " Foreground="{StaticResource Brush.TextDim}"/><Run Text="{Binding Installed, Mode=OneWay}"/></TextBlock>
+                      <TextBlock Style="{StaticResource Text.Small}" Margin="0,2,0,0"><Run Text="Pasta: " Foreground="{StaticResource Brush.TextDim}"/><Run Text="{Binding Location, Mode=OneWay}"/></TextBlock>
+                      <TextBlock Style="{StaticResource Text.Small}" Margin="0,2,0,0"><Run Text="Desinstalador: " Foreground="{StaticResource Brush.TextDim}"/><Run Text="{Binding Uninstaller, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}"/></TextBlock>
+                      <TextBlock Style="{StaticResource Text.Small}" Margin="0,2,0,0"><Run Text="Modo silencioso: " Foreground="{StaticResource Brush.TextDim}"/><Run Text="{Binding Quiet, Mode=OneWay}"/></TextBlock>
+                      <TextBlock Style="{StaticResource Text.Small}" Margin="0,2,0,0"><Run Text="Lote: " Foreground="{StaticResource Brush.TextDim}"/><Run Text="{Binding BulkNote, Mode=OneWay}"/></TextBlock>
+                    </StackPanel>
+                  </c:ExplainToggle>
+                </StackPanel>
+                <Button Style="{StaticResource Button.Danger}" Margin="0,14,0,0" Command="{Binding UninstallCommand}">
+                  <StackPanel Orientation="Horizontal">
+                    <c:Icon Data="{StaticResource Icon.Trash}" Size="14" Margin="0,0,6,0"/>
+                    <TextBlock Text="Desinstalar (oficial)" TextWrapping="NoWrap"/>
+                  </StackPanel>
+                </Button>
+                <Button Style="{StaticResource Button.Secondary}" Margin="0,8,0,0" Command="{Binding LeftoversForSelectedCommand}">
+                  <StackPanel Orientation="Horizontal">
+                    <c:Icon Data="{StaticResource Icon.Search}" Size="14" Margin="0,0,6,0"/>
+                    <TextBlock Text="Procurar sobras deste" TextWrapping="NoWrap"/>
+                  </StackPanel>
+                </Button>
+                <Button Style="{StaticResource Button.Ghost}" Margin="0,8,0,0" Content="Abrir Configurações › Aplicativos" Command="{Binding OpenSettingsCommand}"/>
+                <c:ExplainToggle Margin="0,6,0,0"
+                                 Content="Quem remove é o desinstalador do fornecedor, numa janela que você vê. O NEXUS não desfaz uma desinstalação; depois, ele procura o que sobrou e só move para a quarentena o que você escolher."/>
               </StackPanel>
             </Border>
           </Grid>
 
-          <CheckBox Margin="0,16,0,0" IsChecked="{Binding IncludeStore, Mode=TwoWay}" Content="Mostrar também os apps da Microsoft Store deste usuário (só leitura)"/>
-          <StackPanel Visibility="{Binding IncludeStore, Converter={StaticResource BoolToVis}}" Margin="0,8,0,0">
-            <TextBlock Text="{Binding StoreHeadline}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
-            <ListView Height="240" Margin="0,8,0,0" ItemsSource="{Binding StoreApps}">
-              <ListView.View>
-                <GridView>
-                  <GridViewColumn Header="App" Width="260" DisplayMemberBinding="{Binding Name}"/>
-                  <GridViewColumn Header="Editor" Width="200" DisplayMemberBinding="{Binding Publisher}"/>
-                  <GridViewColumn Header="Versão" Width="130" DisplayMemberBinding="{Binding Version}"/>
-                </GridView>
-              </ListView.View>
-            </ListView>
-          </StackPanel>
-        </StackPanel>
-
-        <!-- ===================== Atualizações ===================== -->
-        <StackPanel Visibility="{Binding IsUpdatesTab, Converter={StaticResource BoolToVis}}" Margin="0,16,0,0">
-          <Border Style="{StaticResource Panel.Hero}">
+          <!-- Apps da Store (só leitura) -->
+          <Border Style="{StaticResource Panel.Inset}" Padding="14,10" Margin="0,16,0,0">
             <StackPanel>
-              <TextBlock Text="{Binding UpdatesHeadline}" Style="{StaticResource P.Big}"/>
-              <TextBlock Text="{Binding UpdatesDetail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"/>
-              <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                <Button Style="{StaticResource Button.Primary}" Content="Procurar atualizações" Command="{Binding CheckUpdatesCommand}"/>
-                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Atualizar selecionados" Command="{Binding UpdateSelectedCommand}"/>
-                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Atualizar tudo" Command="{Binding UpdateAllCommand}"/>
+              <CheckBox IsChecked="{Binding IncludeStore, Mode=TwoWay}" Content="Mostrar também os apps da Microsoft Store deste usuário (só leitura)"/>
+              <StackPanel Visibility="{Binding IncludeStore, Converter={StaticResource BoolToVis}}" Margin="0,8,0,0">
+                <TextBlock Text="{Binding StoreHeadline}" Style="{StaticResource Text.Small}"/>
+                <ListView Height="240" Margin="0,8,0,0" ItemsSource="{Binding StoreApps}" AutomationProperties.Name="Apps da Microsoft Store">
+                  <ListView.View>
+                    <GridView>
+                      <GridViewColumn Header="App" Width="260" DisplayMemberBinding="{Binding Name}"/>
+                      <GridViewColumn Header="Editor" Width="200" DisplayMemberBinding="{Binding Publisher}"/>
+                      <GridViewColumn Header="Versão" Width="130" DisplayMemberBinding="{Binding Version}"/>
+                    </GridView>
+                  </ListView.View>
+                </ListView>
               </StackPanel>
             </StackPanel>
           </Border>
+        </StackPanel>
 
-          <ItemsControl ItemsSource="{Binding Managers}" Margin="0,14,0,0">
+        <!-- ================================================================ ATUALIZAÇÕES -->
+        <StackPanel Visibility="{Binding IsUpdatesTab, Converter={StaticResource BoolToVis}}">
+          <c:HeroPanel Illustration="{StaticResource Illo.Drivers}" Title="Atualizações disponíveis"
+                       Number="{Binding UpdatesCount}" Decimals="0" IsLoading="{Binding CheckingUpdates}"
+                       Caption="Corrige falhas de segurança. Não deixa o PC mais rápido."
+                       ActionText="Procurar atualizações" Command="{Binding CheckUpdatesCommand}"
+                       SecondaryText="Atualizar selecionados" SecondaryCommand="{Binding UpdateSelectedCommand}">
+            <StackPanel MinWidth="200">
+              <TextBlock Text="{Binding UpdatesHeadline}" Style="{StaticResource Text.H2}" FontSize="15"/>
+              <TextBlock Text="{Binding UpdatesDetail}" Style="{StaticResource Text.Small}" Margin="0,4,0,10" MaxWidth="240" MaxHeight="54" TextTrimming="CharacterEllipsis"
+                         ToolTip="{Binding UpdatesDetail}"/>
+              <Button Style="{StaticResource Button.Secondary}" Content="Atualizar tudo" Command="{Binding UpdateAllCommand}" HorizontalAlignment="Left" Margin="0"/>
+              <c:StatusChip Tone="Bad" Text="Não tem desfazer" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+            </StackPanel>
+          </c:HeroPanel>
+
+          <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,20">
+            <StackPanel>
+              <c:HowItWorks>
+                <c:StepItem Icon="{StaticResource Icon.Search}" Title="Pergunta" Text="Cada gerenciador diz o que tem versão nova. Só lê."/>
+                <c:StepItem Icon="{StaticResource Icon.ArrowRight}" Title="Mostra" Text="Versão atual → nova, separado por gerenciador." Tone="Warn"/>
+                <c:StepItem Icon="{StaticResource Icon.Refresh}" Title="Atualiza" Text="Abre a janela do gerenciador. Você vê tudo. Sem desfazer." Tone="Bad"/>
+              </c:HowItWorks>
+              <c:ExplainToggle Margin="0,12,0,0"
+                               Content="Atualizar abre a janela do próprio gerenciador (winget, Chocolatey, Scoop ou npm), que você acompanha. Chocolatey pede administrador com o aviso do Windows; Scoop e npm nunca são elevados. Atualizar programas corrige falhas de segurança; não deixa o PC mais rápido."/>
+            </StackPanel>
+          </Border>
+
+          <c:SkeletonLoader Shape="Tiles" Columns="2" Height="200" Margin="0,0,0,16" Visibility="{Binding CheckingUpdates, Converter={StaticResource BoolToVis}}"/>
+          <c:EmptyState Illustration="{StaticResource Illo.Drivers}" Text="Ainda não verificado."
+                        Detail="O NEXUS pergunta a winget, Chocolatey, Scoop e npm o que tem versão nova. Só lê."
+                        ActionText="Procurar atualizações" Command="{Binding CheckUpdatesCommand}"
+                        Visibility="{Binding ShowUpdatesNotChecked, Converter={StaticResource BoolToVis}}"/>
+          <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="Tudo em dia."
+                        Detail="Nenhum gerenciador encontrado relatou versão nova."
+                        ActionText="Procurar de novo" Command="{Binding CheckUpdatesCommand}" Margin="0,0,0,16"
+                        Visibility="{Binding ShowAllUpToDate, Converter={StaticResource BoolToVis}}"/>
+
+          <!-- Um cartão por gerenciador, com as atualizações dele -->
+          <ItemsControl ItemsSource="{Binding Managers}" Focusable="False" Margin="-7,0,-7,0">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <UniformGrid Columns="2"/>
               </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Border Style="{StaticResource Panel.Card}" Margin="0,0,10,10">
+              <DataTemplate DataType="{x:Type vm:ManagerRow}">
+                <Border Style="{StaticResource Panel.Card}" Padding="16,14" Margin="7,0,7,14">
                   <StackPanel>
-                    <TextBlock Style="{StaticResource Text.H2}"><Run Text="{Binding Name, Mode=OneWay}"/><Run Text="  "/><Run Text="{Binding State, Mode=OneWay}" Foreground="{StaticResource Brush.Signal}" FontSize="{StaticResource Size.Small}"/></TextBlock>
-                    <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Body}" Margin="0,4,0,0"/>
-                    <TextBlock Text="{Binding Explanation}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"/>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                      </Grid.ColumnDefinitions>
+                      <Grid Width="40" Height="40" Margin="0,0,12,0">
+                        <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
+                        <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="20"
+                                Foreground="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=text}" HorizontalAlignment="Center"/>
+                      </Grid>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+                        <TextBlock Text="{Binding State}" Style="{StaticResource Text.Small}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding State}"/>
+                      </StackPanel>
+                      <c:StatusChip Grid.Column="2" Tone="{Binding Tone}" Text="{Binding CountText}" VerticalAlignment="Top"/>
+                    </Grid>
+                    <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,10,0,0"
+                               MaxHeight="36" TextTrimming="CharacterEllipsis" ToolTip="{Binding Detail}"/>
+                    <ItemsControl ItemsSource="{Binding Updates}" ItemTemplate="{StaticResource P.UpdateItem}" Focusable="False" Margin="0,8,0,0"
+                                  Visibility="{Binding HasUpdates, Converter={StaticResource BoolToVis}}"/>
+                    <c:ExplainToggle Margin="0,4,0,0" Content="{Binding Explanation}"/>
                   </StackPanel>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-
-          <ListView Height="380" Margin="0,4,0,0" ItemsSource="{Binding Updates}">
-            <ListView.View>
-              <GridView>
-                <GridViewColumn Width="40">
-                  <GridViewColumn.CellTemplate>
-                    <DataTemplate>
-                      <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" IsEnabled="{Binding CanUpgrade}"/>
-                    </DataTemplate>
-                  </GridViewColumn.CellTemplate>
-                </GridViewColumn>
-                <GridViewColumn Header="Pacote" Width="230" DisplayMemberBinding="{Binding Name}"/>
-                <GridViewColumn Header="ID" Width="200" DisplayMemberBinding="{Binding Id}"/>
-                <GridViewColumn Header="Atual" Width="110" DisplayMemberBinding="{Binding Current}"/>
-                <GridViewColumn Header="Nova" Width="110" DisplayMemberBinding="{Binding Available}"/>
-                <GridViewColumn Header="Fonte" Width="130" DisplayMemberBinding="{Binding Manager}"/>
-                <GridViewColumn Header="Observação" Width="260" DisplayMemberBinding="{Binding Note}"/>
-              </GridView>
-            </ListView.View>
-          </ListView>
-          <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,10,0,0"
-                     Text="Atualizar abre a janela do próprio gerenciador (winget, Chocolatey, Scoop ou npm), que você acompanha. Chocolatey pede administrador com o aviso do Windows; Scoop e npm nunca são elevados. Atualizar programas corrige falhas de segurança; não deixa o PC mais rápido."/>
         </StackPanel>
 
-        <!-- ===================== Sobras ===================== -->
-        <StackPanel Visibility="{Binding IsLeftoversTab, Converter={StaticResource BoolToVis}}" Margin="0,16,0,0">
-          <Border Style="{StaticResource Panel.Hero}">
+        <!-- ================================================================ SOBRAS -->
+        <StackPanel Visibility="{Binding IsLeftoversTab, Converter={StaticResource BoolToVis}}">
+          <c:HeroPanel Illustration="{StaticResource Illo.Scanner}" Title="{Binding LeftoversTitle}"
+                       Number="{Binding LeftoverCount}" Decimals="0" Suffix=" sobras" IsLoading="{Binding Busy}"
+                       Caption="{Binding LeftoversHeadline}"
+                       ActionText="Mover escolhidas para a quarentena" Command="{Binding RemoveLeftoversCommand}"
+                       SecondaryText="Desfazer" SecondaryCommand="{Binding UndoLeftoversCommand}">
+            <StackPanel MinWidth="180">
+              <TextBlock Text="Pastas somam" Style="{StaticResource Text.Small}"/>
+              <c:AnimatedNumber Value="{Binding LeftoverBytes}" Kind="Bytes" FontFamily="{StaticResource Font.Numbers}" FontSize="24" Foreground="{StaticResource Brush.Text}"/>
+              <c:StatusChip Tone="Good" Text="Vai para a quarentena" HorizontalAlignment="Left" Margin="0,8,0,8"/>
+              <Button Command="{Binding ScanLeftoversCommand}" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,0,0,0">
+                <StackPanel Orientation="Horizontal">
+                  <c:Icon Data="{StaticResource Icon.Refresh}" Size="14" Margin="0,0,6,0"/>
+                  <TextBlock Text="Procurar de novo" TextWrapping="NoWrap"/>
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </c:HeroPanel>
+
+          <!-- Desfazer visível depois de mover -->
+          <Border Style="{StaticResource Panel.Notice}" Padding="14,10" Margin="0,0,0,14" Visibility="{Binding CanUndo, Converter={StaticResource BoolToVis}}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <c:Icon Data="{StaticResource Icon.Quarantine}" Size="16" Foreground="{StaticResource Brush.Trace}" Margin="0,0,10,0"/>
+              <TextBlock Grid.Column="1" Text="Sobras na quarentena. Se algo fizer falta, volte tudo com um clique." Style="{StaticResource Text.Small}"
+                         Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+              <Button Grid.Column="2" Command="{Binding UndoLeftoversCommand}" Style="{StaticResource Button.Secondary}" Margin="12,0,0,0">
+                <StackPanel Orientation="Horizontal">
+                  <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
+                  <TextBlock Text="Desfazer" TextWrapping="NoWrap"/>
+                </StackPanel>
+              </Button>
+            </Grid>
+          </Border>
+
+          <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,20">
             <StackPanel>
-              <TextBlock Text="{Binding LeftoversTitle}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
-              <TextBlock Text="{Binding LeftoversHeadline}" Style="{StaticResource P.Big}" Margin="0,2,0,0"/>
-              <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                <Button Style="{StaticResource Button.Primary}" Content="Mover escolhidas para a quarentena" Command="{Binding RemoveLeftoversCommand}"/>
-                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Procurar de novo" Command="{Binding ScanLeftoversCommand}"/>
-                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Desfazer" Command="{Binding UndoLeftoversCommand}"
-                        Visibility="{Binding CanUndo, Converter={StaticResource BoolToVis}}"/>
-              </StackPanel>
+              <c:HowItWorks>
+                <c:StepItem Icon="{StaticResource Icon.Search}" Title="Procura" Text="Pastas e chaves com o nome do programa. Só lê."/>
+                <c:StepItem Icon="{StaticResource Icon.Check}" Title="Classifica" Text="Alta já vem marcada. Baixa: confira antes."/>
+                <c:StepItem Icon="{StaticResource Icon.Quarantine}" Title="Guarda" Text="Vai para a quarentena, com tudo anotado." Tone="Warn"/>
+                <c:StepItem Icon="{StaticResource Icon.Undo}" Title="Desfaz" Text="Volta cada sobra para onde estava." Tone="Good"/>
+              </c:HowItWorks>
+              <c:ExplainToggle Header="Como o NEXUS decide" Margin="0,12,0,0">
+                <StackPanel>
+                  <TextBlock Style="{StaticResource Text.Small}"
+                             Text="Procura, só lendo, pastas com o nome do programa ou do editor em Program Files, ProgramData e AppData, e chaves Software\Editor\Programa no registro. Alta (75+): a pasta que o próprio instalador registrou ou o nome exato. Média: chave com o nome do programa. Baixa: nome parecido — confira antes de marcar."/>
+                  <TextBlock Style="{StaticResource Text.Small}" Margin="0,6,0,0"
+                             Text="Nunca entram: pastas do Windows e da Microsoft, Common Files, drivers (NVIDIA, AMD, Intel), a pasta de um editor que ainda tem outro programa instalado, nada que contenha ou esteja dentro da pasta de um programa instalado, e links/junções. O aplicador confere tudo de novo antes de mover."/>
+                  <TextBlock Style="{StaticResource Text.Small}" Margin="0,6,0,0"
+                             Text="Remover sobras libera espaço e organiza; não deixa o PC mais rápido. Nada é apagado: vai para a quarentena do NEXUS e volta com Desfazer."/>
+                </StackPanel>
+              </c:ExplainToggle>
             </StackPanel>
           </Border>
 
-          <ListView Height="400" Margin="0,14,0,0" ItemsSource="{Binding Leftovers}">
-            <ListView.View>
-              <GridView>
-                <GridViewColumn Width="40">
-                  <GridViewColumn.CellTemplate>
-                    <DataTemplate>
-                      <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"/>
-                    </DataTemplate>
-                  </GridViewColumn.CellTemplate>
-                </GridViewColumn>
-                <GridViewColumn Header="Confiança" Width="100">
-                  <GridViewColumn.CellTemplate>
-                    <DataTemplate>
-                      <TextBlock x:Name="conf" Text="{Binding Confidence}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Signal}"/>
-                      <DataTemplate.Triggers>
-                        <DataTrigger Binding="{Binding High}" Value="True">
-                          <Setter TargetName="conf" Property="Foreground" Value="{StaticResource Brush.Good}"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Low}" Value="True">
-                          <Setter TargetName="conf" Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
-                        </DataTrigger>
-                      </DataTemplate.Triggers>
-                    </DataTemplate>
-                  </GridViewColumn.CellTemplate>
-                </GridViewColumn>
-                <GridViewColumn Header="Programa" Width="160" DisplayMemberBinding="{Binding Program}"/>
-                <GridViewColumn Header="Tipo" Width="160" DisplayMemberBinding="{Binding Kind}"/>
-                <GridViewColumn Header="Onde" Width="380" DisplayMemberBinding="{Binding Path}"/>
-                <GridViewColumn Header="Tamanho" Width="120" DisplayMemberBinding="{Binding Size}"/>
-                <GridViewColumn Header="Por quê" Width="300" DisplayMemberBinding="{Binding Reason}"/>
-              </GridView>
-            </ListView.View>
-          </ListView>
-
-          <Border Style="{StaticResource Panel.Inset}" Margin="0,14,0,0">
-            <StackPanel>
-              <TextBlock Text="Como o NEXUS decide" Style="{StaticResource Text.H2}"/>
-              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
-                         Text="Procura, só lendo, pastas com o nome do programa ou do editor em Program Files, ProgramData e AppData, e chaves Software\Editor\Programa no registro. Alta (75+): a pasta que o próprio instalador registrou ou o nome exato. Média: chave com o nome do programa. Baixa: nome parecido — confira antes de marcar."/>
-              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
-                         Text="Nunca entram: pastas do Windows e da Microsoft, Common Files, drivers (NVIDIA, AMD, Intel), a pasta de um editor que ainda tem outro programa instalado, nada que contenha ou esteja dentro da pasta de um programa instalado, e links/junções. O aplicador confere tudo de novo antes de mover."/>
-              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
-                         Text="Remover sobras libera espaço e organiza; não deixa o PC mais rápido. Nada é apagado: vai para a quarentena do NEXUS e volta com Desfazer."/>
-            </StackPanel>
-          </Border>
+          <c:EmptyState Illustration="{StaticResource Illo.Programs}" Text="Nenhuma sobra para mostrar."
+                        Detail="Desinstale um programa (ou escolha um na lista) e o NEXUS procura o que ficou para trás."
+                        ActionText="Ir para Programas" Command="{Binding ShowProgramsCommand}"
+                        Visibility="{Binding HasLeftovers, Converter={StaticResource FalseToVisible}}"/>
+          <ItemsControl ItemsSource="{Binding Leftovers}" ItemTemplate="{StaticResource P.LeftoverItem}" Focusable="False"/>
         </StackPanel>
       </StackPanel>
     </ScrollViewer>
