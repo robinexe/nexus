@@ -3,7 +3,12 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Nexus.Boot</RootNamespace>
+    <!-- LibraryImport (wevtapi, advapi32, wintrust) gera código unsafe. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
