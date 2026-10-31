@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
         xmlns:v="clr-namespace:Nexus.Desktop.Views"
-        Title="NEXUS Performance Lab — somente leitura" Width="1280" Height="820" MinWidth="980" MinHeight="600"
+        Title="NEXUS Performance Lab" Width="1280" Height="820" MinWidth="980" MinHeight="600"
         Background="{StaticResource Bg}" Foreground="{StaticResource Fg}" FontFamily="Segoe UI" FontSize="13"
         WindowStartupLocation="CenterScreen">
   <Window.Resources>
@@ -322,6 +322,80 @@
             </GridView>
           </ListView.View>
         </ListView>
+      </Grid>
+    </DataTemplate>
+    <!-- ===================== Broker (serviço) ===================== -->
+    <DataTemplate DataType="{x:Type vm:BrokerPage}">
+      <Grid Margin="24">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="360"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.ColumnSpan="2">
+          <TextBlock Text="{Binding Title}" Style="{StaticResource H1}"/>
+          <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Sub}"/>
+          <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+            <StackPanel>
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Consultar serviço" Command="{Binding StatusCommand}" Margin="0"/>
+                <TextBlock Text="{Binding ServiceStatus}" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"/>
+              </DockPanel>
+              <TextBlock Text="{Binding Gate}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+              <TextBlock Text="{Binding Coordination}" Style="{StaticResource Small}" Margin="0,2,0,0"/>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+        <Border Grid.Row="1" Style="{StaticResource Card}">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Ações (as mesmas marcadas em Simulação)" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+              <WrapPanel>
+                <Button Content="Simular pelo broker" Command="{Binding PlanCommand}"/>
+                <Button Content="Aplicar…" Command="{Binding ApplyCommand}"/>
+              </WrapPanel>
+              <TextBlock Text="Aplicar pede confirmação e só fica disponível quando o serviço informa escrita liberada." Style="{StaticResource Small}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+            </StackPanel>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding Candidates}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <CheckBox IsChecked="{Binding Include}" Margin="0,3">
+                      <TextBlock><Run Text="{Binding Title, Mode=OneWay}"/><LineBreak/><Run Text="{Binding Desired, Mode=OneWay}" Foreground="{StaticResource Muted}" FontSize="11"/></TextBlock>
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </DockPanel>
+        </Border>
+        <DockPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0">
+          <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Margin="0,0,0,10">
+            <StackPanel>
+              <TextBlock><Run Text="Última execução: " FontWeight="SemiBold"/><Run Text="{Binding LastRunText, Mode=OneWay}"/></TextBlock>
+              <WrapPanel Margin="0,8,0,0">
+                <Button Content="Reverter esta execução…" Command="{Binding RevertCommand}"/>
+                <Button Content="Encerrar sessão" Command="{Binding EndSessionCommand}"/>
+                <Button Content="Recuperar interrompidas…" Command="{Binding RecoverCommand}"/>
+              </WrapPanel>
+              <TextBlock Text="{Binding LastMessage}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+            </StackPanel>
+          </Border>
+          <ListView ItemsSource="{Binding Results}">
+            <ListView.View>
+              <GridView>
+                <GridViewColumn Header="Ação" Width="260" DisplayMemberBinding="{Binding Action}"/>
+                <GridViewColumn Header="Resultado" Width="130" DisplayMemberBinding="{Binding Outcome}"/>
+                <GridViewColumn Header="Lido" Width="130" DisplayMemberBinding="{Binding Observed}"/>
+                <GridViewColumn Header="Desejado" Width="120" DisplayMemberBinding="{Binding Desired}"/>
+                <GridViewColumn Header="Detalhe" Width="420" DisplayMemberBinding="{Binding Detail}"/>
+              </GridView>
+            </ListView.View>
+          </ListView>
+        </DockPanel>
       </Grid>
     </DataTemplate>
   </Window.Resources>

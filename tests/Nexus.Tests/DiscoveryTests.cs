@@ -419,8 +419,10 @@ public sealed class ReadOnlyGuaranteeTests
 }
 
 /// <summary>
-/// A interface desktop não pode ter caminho de execução: inspeciona o Nexus.Desktop.dll compilado e falha se ele
+/// A interface desktop não pode ter caminho de execução LOCAL: inspeciona o Nexus.Desktop.dll compilado e falha se ele
 /// construir ActionExecutor/RecoveryService, adquirir a trava, abrir o diário para escrita ou chamar Execute/Revert.
+/// Desde 31/10/2026 a única via de escrita é o serviço NexusBroker, e só por <c>BrokerSession.ForInstalledService</c>
+/// (que confere o dono do pipe): abrir o pipe diretamente (<c>BrokerClient.Connect</c>) também é proibido.
 /// </summary>
 [Trait("Category", "Unit")]
 public sealed class DesktopReadOnlyTests
@@ -455,6 +457,7 @@ public sealed class DesktopReadOnlyTests
             ("ActionExecutor", ".ctor"), ("ActionExecutor", "Execute"), ("ActionExecutor", "Revert"), ("ActionExecutor", "RevertRun"),
             ("RecoveryService", ".ctor"), ("RecoveryService", "Recover"), ("FileRunCoordinator", "TryAcquire"), ("IRunCoordinator", "TryAcquire"),
             ("SqliteJournal", ".ctor"), ("IActionHandler", "Apply"), ("IActionHandler", "Restore"),
+            ("BrokerClient", "Connect"), ("BrokerSession", ".ctor"), ("BrokerService", ".ctor"),
         ];
         var hits = forbidden.Where(refs.Contains).ToList();
         Assert.True(hits.Count == 0, "Caminho de execução na interface: " + string.Join(", ", hits));
@@ -463,5 +466,6 @@ public sealed class DesktopReadOnlyTests
         Assert.Contains(("SimulationOnlyHandler", "Wrap"), refs);
         Assert.Contains(("SqliteJournal", "OpenReadOnly"), refs);
         Assert.Contains(("DesiredStateResolver", "Resolve"), refs);
+        Assert.Contains(("BrokerSession", "ForInstalledService"), refs); // escrita só pelo serviço instalado
     }
 }

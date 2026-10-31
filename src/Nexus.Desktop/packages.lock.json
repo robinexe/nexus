@@ -37,6 +37,12 @@
           "SQLitePCLRaw.core": "2.1.13"
         }
       },
+      "nexus.broker": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )"
+        }
+      },
       "nexus.core": {
         "type": "Project"
       },

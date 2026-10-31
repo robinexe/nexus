@@ -2,6 +2,7 @@ using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Nexus.Broker;
 using Nexus.Core;
 using Nexus.Desktop.Services;
 using Nexus.HardwareDiscovery;
@@ -19,6 +20,7 @@ public sealed class MainViewModel : ObservableObject
     };
 
     private readonly NexusServices _services = new();
+    private readonly BrokerSession _broker = BrokerSession.ForInstalledService();
     private PageViewModel _selectedPage;
     private string _status = "Iniciando…";
     private bool _busy;
@@ -27,7 +29,14 @@ public sealed class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
-        Pages = [Overview, Hardware, Diagnostics, Catalog, Plan, History, Capabilities];
+        Pages = [Overview, Hardware, Diagnostics, Catalog, Plan, Broker, History, Capabilities];
+        Broker.Candidates = Plan.Candidates;
+        Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
+        Broker.PlanCommand = new RelayCommand(() => _ = BrokerPlanAsync(), () => !Broker.Busy && Broker.Connected && Chosen().Count > 0);
+        Broker.ApplyCommand = new RelayCommand(() => _ = BrokerApplyAsync(), () => !Broker.Busy && Broker.Connected && Broker.WriteAllowed && Chosen().Count > 0);
+        Broker.RevertCommand = new RelayCommand(() => _ = BrokerRevertAsync(), () => !Broker.Busy && Broker.WriteAllowed && Broker.LastRun is not null);
+        Broker.EndSessionCommand = new RelayCommand(() => _ = BrokerEndSessionAsync(), () => !Broker.Busy && Broker.SessionOpen && Broker.LastRun is not null);
+        Broker.RecoverCommand = new RelayCommand(() => _ = BrokerRecoverAsync(), () => !Broker.Busy && Broker.Connected && Broker.WriteAllowed);
         _selectedPage = Overview;
         RefreshCommand = new RelayCommand(() => _ = LoadAsync(), () => !Busy);
         ExportCommand = new RelayCommand(Export, () => !Busy && _snapshot is not null);
@@ -40,6 +49,7 @@ public sealed class MainViewModel : ObservableObject
     public DiagnosticsPage Diagnostics { get; } = new();
     public CatalogPage Catalog { get; } = new();
     public PlanPage Plan { get; } = new();
+    public BrokerPage Broker { get; } = new();
     public HistoryPage History { get; } = new();
     public CapabilitiesPage Capabilities { get; } = new();
     public IReadOnlyList<PageViewModel> Pages { get; }
@@ -51,7 +61,7 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand ExportCommand { get; }
 
     public string ModeBanner { get; } =
-        "MODO SOMENTE LEITURA — esta versão não altera nada neste PC. Aplicação de otimizações bloqueada até a aprovação dos testes em VM Windows.";
+        "A interface não altera nada por conta própria. Aplicar só pelo serviço do broker (página Broker), que recusa escrita fora de VM de teste liberada.";
 
     public async Task LoadAsync()
     {
@@ -189,6 +199,99 @@ public sealed class MainViewModel : ObservableObject
         {
             Plan.Busy = false;
         }
+    }
+
+    // ------------------------------------------------------------------ broker (única via de escrita)
+
+    private List<(CatalogEntry Entry, ActionInstance Instance)> Chosen() =>
+        Plan.Candidates.Where(c => c.Include && c.Instance is not null).Select(c => (c.Entry, c.Instance!)).ToList();
+
+    private async Task<BrokerCallResult> CallBrokerAsync(Func<BrokerSession, BrokerCallResult> call)
+    {
+        Broker.Busy = true;
+        try
+        {
+            var result = await Task.Run(() => call(_broker));
+            Broker.LastMessage = $"{DateTime.Now:HH:mm:ss} {result.Message}";
+            if (result.Response?.Results is { } items)
+                Broker.Results = items.Select(i => new BrokerResultRow(i.ActionKey, i.Outcome + (i.Inferred ? " [inferido]" : ""), i.Detail ?? "", i.Observed ?? "—", i.Desired ?? "—")).ToList();
+            if (!result.Connected) { Broker.Connected = false; Broker.WriteAllowed = false; }
+            return result;
+        }
+        finally
+        {
+            Broker.Busy = false;
+        }
+    }
+
+    private async Task BrokerStatusAsync()
+    {
+        var r = await CallBrokerAsync(b => b.Status());
+        if (r.Response?.Status is { } s)
+        {
+            Broker.Connected = true;
+            Broker.WriteAllowed = s.ExecutionAllowed;
+            Broker.ServiceStatus = $"Conectado ao serviço · broker {s.BrokerVersion} · catálogo {s.CatalogVersion}";
+            Broker.Gate = $"Escrita real: {(s.ExecutionAllowed ? "LIBERADA" : "BLOQUEADA")} — {s.ExecutionGateReason}";
+            Broker.Coordination = $"Coordenação: {s.Coordination}";
+            if (s.ActiveSessionRunId is { } run) { Broker.LastRun = run; Broker.SessionOpen = true; }
+        }
+        else
+        {
+            Broker.ServiceStatus = r.Message;
+            Broker.Gate = "";
+            Broker.Coordination = "";
+        }
+    }
+
+    private async Task BrokerPlanAsync() => await CallBrokerAsync(b => b.Plan(BrokerSession.RequestsFor(Chosen())));
+
+    private async Task BrokerApplyAsync()
+    {
+        var chosen = Chosen();
+        if (chosen.Count == 0) return;
+        var answer = System.Windows.MessageBox.Show(BrokerSession.ConfirmationText(chosen), "Confirmar aplicação pelo broker",
+            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning, System.Windows.MessageBoxResult.No);
+        if (answer != System.Windows.MessageBoxResult.Yes) { Broker.LastMessage = "Aplicação cancelada. Nada foi enviado."; return; }
+        var r = await CallBrokerAsync(b => b.Execute(BrokerSession.RequestsFor(chosen)));
+        if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; }
+        await LoadAfterWriteAsync();
+    }
+
+    private async Task BrokerRevertAsync()
+    {
+        if (Broker.LastRun is not { } run) return;
+        var answer = System.Windows.MessageBox.Show($"Reverter a execução {run}? O broker restaura os valores originais registrados no diário.",
+            "Confirmar reversão", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
+        if (answer != System.Windows.MessageBoxResult.Yes) return;
+        var r = await CallBrokerAsync(b => b.RevertRun(run));
+        if (r.Response?.FullyRestored == true) Broker.SessionOpen = false;
+        await LoadAfterWriteAsync();
+    }
+
+    private async Task BrokerEndSessionAsync()
+    {
+        if (Broker.LastRun is not { } run) return;
+        var r = await CallBrokerAsync(b => b.EndSession(run));
+        if (r.Response?.FullyRestored == true) Broker.SessionOpen = false;
+        await LoadAfterWriteAsync();
+    }
+
+    private async Task BrokerRecoverAsync()
+    {
+        var answer = System.Windows.MessageBox.Show("Recuperar operações interrompidas registradas no diário do broker?", "Confirmar recuperação",
+            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
+        if (answer != System.Windows.MessageBoxResult.Yes) return;
+        await CallBrokerAsync(b => b.Recover());
+        await LoadAfterWriteAsync();
+    }
+
+    /// <summary>Depois de uma escrita pelo broker, relê o estado (catálogo e histórico) para a tela mostrar o que mudou.</summary>
+    private async Task LoadAfterWriteAsync()
+    {
+        if (_snapshot is not null) await LoadCatalogAsync(_snapshot.Facts);
+        LoadHistory();
+        await BrokerStatusAsync();
     }
 
     private void LoadHistory()

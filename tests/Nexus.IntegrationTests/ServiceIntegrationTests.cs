@@ -68,6 +68,31 @@ public sealed class ServiceIntegrationTests
     }
 
     [Fact]
+    public void Interface_path_applies_and_reverts_through_the_installed_service()
+    {
+        if (!Installed) return;
+        Vm.Require();
+        const string path = @"Software\Microsoft\GameBar", name = "AutoGameModeEnabled";
+        var before = Read(Registry.CurrentUser, path, name);
+        var session = BrokerSession.ForInstalledService(); // exatamente o que a interface usa
+
+        var status = session.Status();
+        _out.WriteLine($"[interface] {status.Message}");
+        Assert.True(status.Ok, status.Message);
+        Assert.Contains("LIBERADA", status.Message, StringComparison.Ordinal);
+
+        var exec = session.Execute([new ActionRequest("win.gamemode.enable@1")]);
+        _out.WriteLine($"[interface] {exec.Message}");
+        Assert.True(exec.Ok, exec.Message);
+        Assert.Equal("1", Read(Registry.CurrentUser, path, name));
+
+        var revert = session.RevertRun(exec.Response!.RunId!.Value);
+        _out.WriteLine($"[interface] {revert.Message}");
+        Assert.True(revert.Ok && revert.Response!.FullyRestored == true, revert.Message);
+        Assert.Equal(before, Read(Registry.CurrentUser, path, name));
+    }
+
+    [Fact]
     public void Installer_acls_keep_ordinary_users_away_from_the_lock_and_read_only_on_data()
     {
         if (!Installed) return;

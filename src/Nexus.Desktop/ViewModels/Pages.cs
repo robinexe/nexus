@@ -104,7 +104,7 @@ public sealed class CatalogRow : ObservableObject
     public string? Verification => Entry.Verification;
     public string? Revert => Entry.Revert;
     public string Target => string.Join("  ·  ", Entry.TargetTemplate.Select(kv => $"{kv.Key}={kv.Value}"));
-    public string ApplyLabel { get; } = "bloqueado: somente leitura até validação em VM";
+    public string ApplyLabel { get; } = "só pelo serviço do broker (escrita exige VM de teste liberada)";
     public bool CanSimulate => Instance is not null;
 
     public string Current { get => _current; set => Set(ref _current, value); }
@@ -143,7 +143,7 @@ public sealed class PlanPage : PageViewModel
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public RelayCommand? SimulateCommand { get; set; }
     public string BlockedNotice { get; } =
-        "Aplicação real desativada neste PC: a execução de otimizações continua bloqueada até os testes de integração e recuperação em VM Windows serem aprovados.";
+        "Esta página só simula, localmente. Para aplicar, use a página Broker: o serviço NexusBroker é a única via de escrita e recusa qualquer alteração fora de uma VM de teste liberada.";
 }
 
 // ------------------------------------------------------------------ Histórico
@@ -217,4 +217,53 @@ public sealed class OverviewPage : PageViewModel
                 $"Capturado em {s.TakenAt:dd/MM/yyyy HH:mm:ss}"),
         ];
     }
+}
+
+// ------------------------------------------------------------------ Broker (serviço)
+
+public sealed record BrokerResultRow(string Action, string Outcome, string Detail, string Observed, string Desired);
+
+/// <summary>
+/// Única via de escrita da interface: pedidos ao serviço NexusBroker. A interface não tem executor, trava nem diário gravável;
+/// o serviço decide (catálogo, portão de VM, trava, diário). Aplicar só fica disponível quando o próprio serviço diz que a
+/// escrita está liberada, e sempre depois de uma confirmação.
+/// </summary>
+public sealed class BrokerPage : PageViewModel
+{
+    private bool _connected;
+    private bool _writeAllowed;
+    private bool _busy;
+    private string _serviceStatus = "Não consultado. Clique em \"Consultar serviço\".";
+    private string _gate = "";
+    private string _coordination = "";
+    private string _lastMessage = "";
+    private Guid? _lastRun;
+    private bool _sessionOpen;
+    private IReadOnlyList<BrokerResultRow> _results = [];
+
+    public override string Title => "Broker";
+    public override string Subtitle =>
+        "Aplicar e reverter pelo serviço NexusBroker. A escrita real só acontece se o serviço estiver numa VM de teste liberada; fora dela, ele recusa sem alterar nada.";
+
+    /// <summary>As mesmas ações marcadas na página Simulação.</summary>
+    public ObservableCollection<CatalogRow> Candidates { get; set; } = [];
+
+    public bool Connected { get => _connected; set => Set(ref _connected, value); }
+    public bool WriteAllowed { get => _writeAllowed; set => Set(ref _writeAllowed, value); }
+    public bool Busy { get => _busy; set => Set(ref _busy, value); }
+    public string ServiceStatus { get => _serviceStatus; set => Set(ref _serviceStatus, value); }
+    public string Gate { get => _gate; set => Set(ref _gate, value); }
+    public string Coordination { get => _coordination; set => Set(ref _coordination, value); }
+    public string LastMessage { get => _lastMessage; set => Set(ref _lastMessage, value); }
+    public Guid? LastRun { get => _lastRun; set { if (Set(ref _lastRun, value)) OnPropertyChanged(nameof(LastRunText)); } }
+    public bool SessionOpen { get => _sessionOpen; set => Set(ref _sessionOpen, value); }
+    public string LastRunText => LastRun is null ? "nenhuma execução nesta sessão da interface" : LastRun.Value.ToString();
+    public IReadOnlyList<BrokerResultRow> Results { get => _results; set => Set(ref _results, value); }
+
+    public RelayCommand? StatusCommand { get; set; }
+    public RelayCommand? PlanCommand { get; set; }
+    public RelayCommand? ApplyCommand { get; set; }
+    public RelayCommand? RevertCommand { get; set; }
+    public RelayCommand? EndSessionCommand { get; set; }
+    public RelayCommand? RecoverCommand { get; set; }
 }

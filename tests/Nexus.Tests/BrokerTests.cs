@@ -404,6 +404,99 @@ public sealed class BrokerTests : IDisposable
         Assert.Empty(_journal.Runs());
     }
 
+    // ---------------------------------------------------------------- BrokerSession (via da interface)
+
+    private static async Task WithPipe(BrokerService svc, Func<BrokerSession, Task> body)
+    {
+        var name = "nexus-test-" + Guid.NewGuid().ToString("N")[..12];
+        var server = new BrokerPipeServer(svc, first => BrokerPipeServer.CurrentUserPipe(name, first));
+        using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        var running = server.RunAsync(cancel.Token);
+        try { await body(new BrokerSession(() => BrokerClient.Connect(name, 10_000))); }
+        finally { cancel.Cancel(); await running; }
+    }
+
+    [Fact]
+    public async Task Session_reports_blocked_writes_without_touching_anything()
+    {
+        var (svc, _, _) = Broker(allowed: false);
+        using (svc)
+            await WithPipe(svc, s =>
+            {
+                var status = s.Status();
+                Assert.True(status.Ok);
+                Assert.Contains("BLOQUEADA", status.Message, StringComparison.Ordinal);
+                Assert.True(s.Plan([new ActionRequest("t.persist@1")]).Ok);
+                var exec = s.Execute([new ActionRequest("t.persist@1")]);
+                Assert.True(exec.Connected);
+                Assert.False(exec.Ok);
+                Assert.Contains("execution-blocked", exec.Message, StringComparison.Ordinal);
+                return Task.CompletedTask;
+            });
+        Assert.Empty(_journal.Runs());
+        Assert.Null(Value("Persist"));
+    }
+
+    [Fact]
+    public async Task Session_applies_and_reverts_through_the_broker_when_writes_are_allowed()
+    {
+        _reg.Seed(T.RT(P, "Persist"), "DWord", "0");
+        var (svc, _, _) = Broker(allowed: true);
+        using (svc)
+            await WithPipe(svc, s =>
+            {
+                var exec = s.Execute([new ActionRequest("t.persist@1")]);
+                Assert.True(exec.Ok, exec.Message);
+                Assert.Contains("1 Verified", exec.Message, StringComparison.Ordinal);
+                Assert.Equal("1", Value("Persist"));
+
+                var revert = s.RevertRun(exec.Response!.RunId!.Value);
+                Assert.True(revert.Ok, revert.Message);
+                Assert.Contains("tudo restaurado", revert.Message, StringComparison.Ordinal);
+                Assert.Equal("0", Value("Persist"));
+                return Task.CompletedTask;
+            });
+    }
+
+    [Fact]
+    public void Session_without_a_running_broker_says_so_and_sends_nothing()
+    {
+        var name = "nexus-ausente-" + Guid.NewGuid().ToString("N")[..12];
+        var s = new BrokerSession(() => BrokerClient.Connect(name, 300));
+        var r = s.Execute([new ActionRequest("t.persist@1")]);
+        Assert.False(r.Connected);
+        Assert.False(r.Ok);
+        Assert.Contains("não instalado ou parado", r.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Requests_carry_only_catalog_ids_and_the_chosen_value_when_the_catalog_allows_one()
+    {
+        var catalog = Catalog();
+        var persist = catalog.Actions.Single(e => e.Definition.Id == "t.persist");
+        var choice = catalog.Actions.Single(e => e.Definition.Id == "t.choice") is var c ? c with { DesiredValue = "38" } : null!;
+        var noParams = new Dictionary<string, string>();
+        var requests = BrokerSession.RequestsFor([
+            (persist, persist.TryInstantiate(noParams, out _)!),
+            (catalog.Actions.Single(e => e.Definition.Id == "t.choice"), choice.TryInstantiate(noParams, out _)!),
+        ]);
+
+        Assert.Equal(new ActionRequest("t.persist@1", null), requests[0]); // valor fixo no catálogo: não é enviado
+        Assert.Equal(new ActionRequest("t.choice@1", "38"), requests[1]);  // valor escolhido entre os permitidos
+    }
+
+    [Fact]
+    public void Confirmation_lists_each_change_and_its_conditions()
+    {
+        var catalog = Catalog();
+        var session = catalog.Actions.Single(e => e.Definition.Id == "t.session");
+        var text = BrokerSession.ConfirmationText([(session, session.TryInstantiate(new Dictionary<string, string>(), out _)!)]);
+        Assert.Contains("Aplicar 1 ação(ões)", text, StringComparison.Ordinal);
+        Assert.Contains("Sessão", text, StringComparison.Ordinal);
+        Assert.Contains("sessão: revertida ao encerrar", text, StringComparison.Ordinal);
+        Assert.Contains("VM de teste liberada", text, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task Named_pipe_round_trip_and_malformed_frames()
     {
