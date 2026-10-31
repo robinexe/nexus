@@ -226,3 +226,17 @@ public sealed class WindowsRegistryTreeBackend(bool requireUserProfileForHkcu) :
         _ => value,
     };
 }
+
+/// <summary>Só leitura de nomes de subchaves (HKCU do usuário atual e HKLM 64 bits), para a varredura feita pela interface.</summary>
+[SupportedOSPlatform("windows")]
+public sealed class WindowsRegistryKeyReader : IRegistryKeyReader
+{
+    public IReadOnlyList<string> SubKeyNames(RegHive hive, string path)
+    {
+        using var root = hive == RegHive.HKLM
+            ? RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
+            : RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
+        using var key = root.OpenSubKey(path, writable: false);
+        return key?.GetSubKeyNames() ?? [];
+    }
+}

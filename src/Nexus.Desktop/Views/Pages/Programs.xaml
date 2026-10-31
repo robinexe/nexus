@@ -1,11 +1,293 @@
+<!--
+  Programas e atualizações: abas Programas / Atualizações / Sobras. Leitura direta (inventário, gerenciadores, varredura);
+  escrita só pelas sobras (Host.ApplyAsync → handler ProgramLeftover, reversível). Desinstalar e atualizar abrem a ferramenta
+  do próprio fornecedor, visível, depois da confirmação. Do tema, só as chaves do contrato (Tokens/Controls/Converters).
+-->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
-                    xmlns:v="clr-namespace:Nexus.Desktop.Views">
+                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels">
   <DataTemplate DataType="{x:Type vm:ProgramsPage}">
-    <StackPanel Margin="28,24,28,28">
-      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
-      <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
-    </StackPanel>
+    <DataTemplate.Resources>
+      <!-- Aba: botão de opção com cara de segmento (âmbar quando escolhida). -->
+      <Style x:Key="P.Tab" TargetType="RadioButton">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="RadioButton">
+              <Border x:Name="seg" Background="Transparent" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+                      CornerRadius="{StaticResource Radius.Control}" Padding="16,8">
+                <TextBlock x:Name="label" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                           FontFamily="{StaticResource Font.Body}" FontSize="{StaticResource Size.Body}" Foreground="{StaticResource Brush.TextMuted}"/>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.TextDim}"/>
+                  <Setter TargetName="label" Property="Foreground" Value="{StaticResource Brush.Text}"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.Signal}"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                  <Setter TargetName="seg" Property="BorderBrush" Value="{StaticResource Brush.Trace}"/>
+                  <Setter TargetName="seg" Property="Background" Value="{StaticResource Brush.SurfaceHi}"/>
+                  <Setter TargetName="label" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+
+      <Style TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource Brush.Bg}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
+        <Setter Property="CaretBrush" Value="{StaticResource Brush.Trace}"/>
+        <Setter Property="SelectionBrush" Value="{StaticResource Brush.Signal}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font.Body}"/>
+        <Setter Property="FontSize" Value="{StaticResource Size.Body}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+      </Style>
+
+      <Style x:Key="P.Big" TargetType="TextBlock" BasedOn="{StaticResource Text.Display}">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+      </Style>
+      <Style x:Key="P.Key" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+        <Setter Property="Margin" Value="0,8,0,0"/>
+      </Style>
+      <Style x:Key="P.Value" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
+        <Setter Property="TextWrapping" Value="Wrap"/>
+      </Style>
+      <Style x:Key="P.Mono" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+      </Style>
+    </DataTemplate.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="28,24,28,28">
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
+        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+
+        <!-- Abas -->
+        <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+          <RadioButton Style="{StaticResource P.Tab}" GroupName="ProgramsTabs" Content="{Binding ProgramsTabLabel}" IsChecked="{Binding IsProgramsTab, Mode=TwoWay}"/>
+          <RadioButton Style="{StaticResource P.Tab}" GroupName="ProgramsTabs" Content="{Binding UpdatesTabLabel}" IsChecked="{Binding IsUpdatesTab, Mode=TwoWay}"/>
+          <RadioButton Style="{StaticResource P.Tab}" GroupName="ProgramsTabs" Content="{Binding LeftoversTabLabel}" IsChecked="{Binding IsLeftoversTab, Mode=TwoWay}"/>
+          <TextBlock Text="Lendo…" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" VerticalAlignment="Center" Margin="12,0,0,0"
+                     Visibility="{Binding Busy, Converter={StaticResource BoolToVis}}"/>
+        </StackPanel>
+
+        <Border Style="{StaticResource Panel.Notice}" Margin="0,14,0,0" Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
+          <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Body}"/>
+        </Border>
+
+        <!-- ===================== Programas ===================== -->
+        <StackPanel Visibility="{Binding IsProgramsTab, Converter={StaticResource BoolToVis}}" Margin="0,16,0,0">
+          <Border Style="{StaticResource Panel.Hero}">
+            <StackPanel>
+              <TextBlock Text="{Binding ProgramsHeadline}" Style="{StaticResource P.Big}"/>
+              <TextBlock Text="{Binding ProgramsDetail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"/>
+            </StackPanel>
+          </Border>
+
+          <Grid Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar por nome ou editor"/>
+            <ComboBox Grid.Column="1" Width="200" Margin="10,0,0,0" ItemsSource="{Binding SortOptions}" SelectedIndex="{Binding SortIndex, Mode=TwoWay}"/>
+            <Button Grid.Column="2" Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Ler de novo" Command="{Binding RefreshCommand}"/>
+          </Grid>
+
+          <Grid Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="340"/>
+            </Grid.ColumnDefinitions>
+            <ListView Grid.Column="0" Height="460" ItemsSource="{Binding Programs}" SelectedItem="{Binding Selected, Mode=TwoWay}"
+                      VirtualizingPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+              <ListView.View>
+                <GridView>
+                  <GridViewColumn Header="Programa" Width="270" DisplayMemberBinding="{Binding Name}"/>
+                  <GridViewColumn Header="Editor" Width="170" DisplayMemberBinding="{Binding Publisher}"/>
+                  <GridViewColumn Header="Versão" Width="110" DisplayMemberBinding="{Binding Version}"/>
+                  <GridViewColumn Header="Tamanho" Width="90" DisplayMemberBinding="{Binding Size}"/>
+                  <GridViewColumn Header="Instalado em" Width="100" DisplayMemberBinding="{Binding Installed}"/>
+                </GridView>
+              </ListView.View>
+            </ListView>
+
+            <Border Grid.Column="1" Style="{StaticResource Panel.Card}" Margin="12,0,0,0" VerticalAlignment="Top">
+              <StackPanel>
+                <TextBlock Text="Escolha um programa na lista." Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}"
+                           Visibility="{Binding HasSelection, Converter={StaticResource FalseToVisible}}"/>
+                <StackPanel DataContext="{Binding Selected}" Visibility="{Binding DataContext.HasSelection, RelativeSource={RelativeSource AncestorType=Border}, Converter={StaticResource BoolToVis}}">
+                  <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}"/>
+                  <TextBlock Text="{Binding Publisher}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+                  <TextBlock Text="Versão · tamanho" Style="{StaticResource P.Key}"/>
+                  <TextBlock Style="{StaticResource P.Value}"><Run Text="{Binding Version, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Size, Mode=OneWay}"/></TextBlock>
+                  <TextBlock Text="Instalado para" Style="{StaticResource P.Key}"/>
+                  <TextBlock Text="{Binding Scope}" Style="{StaticResource P.Value}"/>
+                  <TextBlock Text="Pasta" Style="{StaticResource P.Key}"/>
+                  <TextBlock Text="{Binding Location}" Style="{StaticResource P.Mono}"/>
+                  <TextBlock Text="Tipo de instalador" Style="{StaticResource P.Key}"/>
+                  <TextBlock Text="{Binding Kind}" Style="{StaticResource P.Value}"/>
+                  <TextBlock Text="Desinstalador registrado" Style="{StaticResource P.Key}"/>
+                  <TextBlock Text="{Binding Uninstaller}" Style="{StaticResource P.Mono}"/>
+                  <TextBlock Text="Modo silencioso disponível" Style="{StaticResource P.Key}"/>
+                  <TextBlock Text="{Binding Quiet}" Style="{StaticResource P.Value}"/>
+                </StackPanel>
+                <Button Style="{StaticResource Button.Primary}" Margin="0,16,0,0" Content="Desinstalar (desinstalador oficial)" Command="{Binding UninstallCommand}"/>
+                <Button Style="{StaticResource Button.Secondary}" Margin="0,8,0,0" Content="Procurar sobras deste programa" Command="{Binding LeftoversForSelectedCommand}"/>
+                <Button Style="{StaticResource Button.Ghost}" Margin="0,8,0,0" Content="Abrir Configurações > Aplicativos" Command="{Binding OpenSettingsCommand}"/>
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,12,0,0"
+                           Text="Quem remove é o desinstalador do fornecedor, numa janela que você vê. O NEXUS não desfaz uma desinstalação; depois, ele procura o que sobrou e só move para a quarentena o que você escolher."/>
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <CheckBox Margin="0,16,0,0" IsChecked="{Binding IncludeStore, Mode=TwoWay}" Content="Mostrar também os apps da Microsoft Store deste usuário (só leitura)"/>
+          <StackPanel Visibility="{Binding IncludeStore, Converter={StaticResource BoolToVis}}" Margin="0,8,0,0">
+            <TextBlock Text="{Binding StoreHeadline}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+            <ListView Height="240" Margin="0,8,0,0" ItemsSource="{Binding StoreApps}">
+              <ListView.View>
+                <GridView>
+                  <GridViewColumn Header="App" Width="260" DisplayMemberBinding="{Binding Name}"/>
+                  <GridViewColumn Header="Editor" Width="200" DisplayMemberBinding="{Binding Publisher}"/>
+                  <GridViewColumn Header="Versão" Width="130" DisplayMemberBinding="{Binding Version}"/>
+                </GridView>
+              </ListView.View>
+            </ListView>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- ===================== Atualizações ===================== -->
+        <StackPanel Visibility="{Binding IsUpdatesTab, Converter={StaticResource BoolToVis}}" Margin="0,16,0,0">
+          <Border Style="{StaticResource Panel.Hero}">
+            <StackPanel>
+              <TextBlock Text="{Binding UpdatesHeadline}" Style="{StaticResource P.Big}"/>
+              <TextBlock Text="{Binding UpdatesDetail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"/>
+              <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                <Button Style="{StaticResource Button.Primary}" Content="Procurar atualizações" Command="{Binding CheckUpdatesCommand}"/>
+                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Atualizar selecionados" Command="{Binding UpdateSelectedCommand}"/>
+                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Atualizar tudo" Command="{Binding UpdateAllCommand}"/>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <ItemsControl ItemsSource="{Binding Managers}" Margin="0,14,0,0">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Columns="2"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Style="{StaticResource Panel.Card}" Margin="0,0,10,10">
+                  <StackPanel>
+                    <TextBlock Style="{StaticResource Text.H2}"><Run Text="{Binding Name, Mode=OneWay}"/><Run Text="  "/><Run Text="{Binding State, Mode=OneWay}" Foreground="{StaticResource Brush.Signal}" FontSize="{StaticResource Size.Small}"/></TextBlock>
+                    <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Body}" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding Explanation}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"/>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <ListView Height="380" Margin="0,4,0,0" ItemsSource="{Binding Updates}">
+            <ListView.View>
+              <GridView>
+                <GridViewColumn Width="40">
+                  <GridViewColumn.CellTemplate>
+                    <DataTemplate>
+                      <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" IsEnabled="{Binding CanUpgrade}"/>
+                    </DataTemplate>
+                  </GridViewColumn.CellTemplate>
+                </GridViewColumn>
+                <GridViewColumn Header="Pacote" Width="230" DisplayMemberBinding="{Binding Name}"/>
+                <GridViewColumn Header="ID" Width="200" DisplayMemberBinding="{Binding Id}"/>
+                <GridViewColumn Header="Atual" Width="110" DisplayMemberBinding="{Binding Current}"/>
+                <GridViewColumn Header="Nova" Width="110" DisplayMemberBinding="{Binding Available}"/>
+                <GridViewColumn Header="Fonte" Width="130" DisplayMemberBinding="{Binding Manager}"/>
+                <GridViewColumn Header="Observação" Width="260" DisplayMemberBinding="{Binding Note}"/>
+              </GridView>
+            </ListView.View>
+          </ListView>
+          <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,10,0,0"
+                     Text="Atualizar abre a janela do próprio gerenciador (winget, Chocolatey, Scoop ou npm), que você acompanha. Chocolatey pede administrador com o aviso do Windows; Scoop e npm nunca são elevados. Atualizar programas corrige falhas de segurança; não deixa o PC mais rápido."/>
+        </StackPanel>
+
+        <!-- ===================== Sobras ===================== -->
+        <StackPanel Visibility="{Binding IsLeftoversTab, Converter={StaticResource BoolToVis}}" Margin="0,16,0,0">
+          <Border Style="{StaticResource Panel.Hero}">
+            <StackPanel>
+              <TextBlock Text="{Binding LeftoversTitle}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+              <TextBlock Text="{Binding LeftoversHeadline}" Style="{StaticResource P.Big}" Margin="0,2,0,0"/>
+              <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                <Button Style="{StaticResource Button.Primary}" Content="Mover escolhidas para a quarentena" Command="{Binding RemoveLeftoversCommand}"/>
+                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Procurar de novo" Command="{Binding ScanLeftoversCommand}"/>
+                <Button Style="{StaticResource Button.Secondary}" Margin="10,0,0,0" Content="Desfazer" Command="{Binding UndoLeftoversCommand}"
+                        Visibility="{Binding CanUndo, Converter={StaticResource BoolToVis}}"/>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <ListView Height="400" Margin="0,14,0,0" ItemsSource="{Binding Leftovers}">
+            <ListView.View>
+              <GridView>
+                <GridViewColumn Width="40">
+                  <GridViewColumn.CellTemplate>
+                    <DataTemplate>
+                      <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"/>
+                    </DataTemplate>
+                  </GridViewColumn.CellTemplate>
+                </GridViewColumn>
+                <GridViewColumn Header="Confiança" Width="100">
+                  <GridViewColumn.CellTemplate>
+                    <DataTemplate>
+                      <TextBlock x:Name="conf" Text="{Binding Confidence}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Signal}"/>
+                      <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding High}" Value="True">
+                          <Setter TargetName="conf" Property="Foreground" Value="{StaticResource Brush.Good}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Low}" Value="True">
+                          <Setter TargetName="conf" Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+                        </DataTrigger>
+                      </DataTemplate.Triggers>
+                    </DataTemplate>
+                  </GridViewColumn.CellTemplate>
+                </GridViewColumn>
+                <GridViewColumn Header="Tipo" Width="160" DisplayMemberBinding="{Binding Kind}"/>
+                <GridViewColumn Header="Onde" Width="380" DisplayMemberBinding="{Binding Path}"/>
+                <GridViewColumn Header="Tamanho" Width="120" DisplayMemberBinding="{Binding Size}"/>
+                <GridViewColumn Header="Por quê" Width="300" DisplayMemberBinding="{Binding Reason}"/>
+              </GridView>
+            </ListView.View>
+          </ListView>
+
+          <Border Style="{StaticResource Panel.Inset}" Margin="0,14,0,0">
+            <StackPanel>
+              <TextBlock Text="Como o NEXUS decide" Style="{StaticResource Text.H2}"/>
+              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                         Text="Procura, só lendo, pastas com o nome do programa ou do editor em Program Files, ProgramData e AppData, e chaves Software\Editor\Programa no registro. Alta (75+): a pasta que o próprio instalador registrou ou o nome exato. Média: chave com o nome do programa. Baixa: nome parecido — confira antes de marcar."/>
+              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                         Text="Nunca entram: pastas do Windows e da Microsoft, Common Files, drivers (NVIDIA, AMD, Intel), a pasta de um editor que ainda tem outro programa instalado, nada que contenha ou esteja dentro da pasta de um programa instalado, e links/junções. O aplicador confere tudo de novo antes de mover."/>
+              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                         Text="Remover sobras libera espaço e organiza; não deixa o PC mais rápido. Nada é apagado: vai para a quarentena do NEXUS e volta com Desfazer."/>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
   </DataTemplate>
 </ResourceDictionary>
