@@ -7,6 +7,8 @@ using Nexus.Automation;
 using Nexus.Broker;
 using Nexus.Core;
 using Nexus.Desktop.Services;
+using Nexus.Desktop.Views.Controls;
+using Tone = Nexus.Desktop.Views.Controls.Tone;
 using Nexus.HardwareDiscovery;
 using Nexus.Persistence;
 using Nexus.Security;
@@ -22,6 +24,113 @@ public sealed class StepChip(StepInfo info, string state, RelayCommand go)
     /// <summary>current, done, skipped ou pending.</summary>
     public string State { get; } = state;
     public RelayCommand GoCommand { get; } = go;
+
+    // ---- apresentação v2
+    /// <summary>Ícone de linha da etapa (Themes/Icons.xaml).</summary>
+    public string IconKey => AssistantVisuals.IconFor(info.Id);
+    /// <summary>Âmbar = atual, verde = feita, neutro = pulada ou ainda não feita.</summary>
+    public Tone Tone => State switch { "current" => Tone.Warn, "done" => Tone.Good, _ => Tone.Neutral };
+    public bool IsDone => State == "done";
+    public bool IsCurrent => State == "current";
+    public bool IsSkipped => State == "skipped";
+    public bool IsFirst => info.Number == 1;
+    public bool IsLast => info.Number == AssistantSteps.Count;
+    /// <summary>"Limpeza: feita" para o leitor de tela e a dica.</summary>
+    public string Tip => $"Etapa {info.Number}: {info.Title}" + State switch { "current" => " (agora)", "done" => " (feita)", "skipped" => " (pulada)", _ => "" };
+}
+
+/// <summary>Número do que a etapa encontrou, pronto para o StatTile (tom do design system e ícone pelo tom).</summary>
+public sealed class FactCard(StepFact fact)
+{
+    public string Label => fact.Label;
+    public string Value => fact.Value;
+    public string? Detail => fact.Detail;
+    public Tone Tone => fact.Tone switch { "good" => Tone.Good, "warn" => Tone.Warn, "bad" => Tone.Bad, _ => Tone.Info };
+    /// <summary>Ícone pelo tom (✓, !, ×, i), para ResourceByKey.</summary>
+    public string IconKey => DesignMath.IconKey(Tone);
+}
+
+/// <summary>
+/// Número do relatório final. Quando o antes e o depois são números da mesma unidade (GB, "x de y", GHz…), vira barras
+/// antes → depois (BeforeAfter); senão, um cartão com o texto.
+/// </summary>
+public sealed record ReportMetricCard(string Label, string Display, string? Note, double Before, double After, NumberKind Kind, bool HigherIsBetter)
+{
+    public bool HasBars => !double.IsNaN(Before) && !double.IsNaN(After);
+    public bool NoBars => !HasBars;
+    public bool HasNote => !string.IsNullOrWhiteSpace(Note);
+}
+
+/// <summary>Ícones, ilustrações e leitura de números do Assistente (lógica pura, testável).</summary>
+public static class AssistantVisuals
+{
+    public static string IconFor(AssistantStepId id) => id switch
+    {
+        AssistantStepId.Welcome => "Icon.Sparkle",
+        AssistantStepId.MyPc => "Icon.Pc",
+        AssistantStepId.Cleaning => "Icon.Clean",
+        AssistantStepId.Programs => "Icon.Programs",
+        AssistantStepId.Startup => "Icon.Startup",
+        AssistantStepId.Privacy => "Icon.Privacy",
+        AssistantStepId.Security => "Icon.Security",
+        AssistantStepId.Drivers => "Icon.Drivers",
+        AssistantStepId.Memory => "Icon.Ram",
+        AssistantStepId.Performance => "Icon.Bolt",
+        AssistantStepId.Measurement => "Icon.Measure",
+        AssistantStepId.Schedules => "Icon.Auto",
+        _ => "Icon.Export",
+    };
+
+    public static string IllustrationFor(AssistantStepId id) => id switch
+    {
+        AssistantStepId.MyPc => "Illo.Pc",
+        AssistantStepId.Cleaning => "Illo.Cleaning",
+        AssistantStepId.Programs => "Illo.Programs",
+        AssistantStepId.Startup => "Illo.Startup",
+        AssistantStepId.Privacy => "Illo.Privacy",
+        AssistantStepId.Security => "Illo.Security",
+        AssistantStepId.Drivers => "Illo.Drivers",
+        AssistantStepId.Memory => "Illo.Ram",
+        AssistantStepId.Performance => "Illo.Automation",
+        AssistantStepId.Measurement => "Illo.Measure",
+        AssistantStepId.Schedules => "Illo.Settings",
+        AssistantStepId.Report => "Illo.History",
+        _ => "Illo.Assistant",
+    };
+
+    private static readonly System.Globalization.CultureInfo Pt = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+
+    /// <summary>
+    /// Lê "12,4 GB" (bytes), "3 de 10" (3), "2,35 GHz" ou "15" (número). Devolve o valor, o tipo e a unidade (para só comparar
+    /// lados com a mesma unidade); NaN quando não é número.
+    /// </summary>
+    public static (double Value, NumberKind Kind, string Unit) Parse(string? text)
+    {
+        var t = (text ?? "").Trim();
+        if (t.Length == 0) return (double.NaN, NumberKind.Number, "");
+        var de = t.IndexOf(" de ", StringComparison.Ordinal);
+        if (de > 0) t = t[..de];
+        var end = 0;
+        while (end < t.Length && (char.IsDigit(t[end]) || t[end] is ',' or '.')) end++;
+        if (end == 0 || !double.TryParse(t[..end], System.Globalization.NumberStyles.Number, Pt, out var value)) return (double.NaN, NumberKind.Number, "");
+        var unit = t[end..].Trim();
+        var factor = unit.ToUpperInvariant() switch
+        {
+            "B" => 1d, "KB" => 1024d, "MB" => 1024d * 1024, "GB" => 1024d * 1024 * 1024, "TB" => 1024d * 1024 * 1024 * 1024, _ => 0d,
+        };
+        return factor > 0 ? (value * factor, NumberKind.Bytes, "bytes") : (value, NumberKind.Number, unit);
+    }
+
+    /// <summary>Menor é melhor para espaço ainda recuperável e tempo de boot; para o resto, maior é melhor.</summary>
+    public static bool HigherIsBetter(string key) => key is not ("cleaning" or "boot");
+
+    public static ReportMetricCard Card(string key, MetricRecord m)
+    {
+        var (b, kind, bu) = Parse(m.Before);
+        var (a, _, au) = Parse(m.After);
+        var bars = !double.IsNaN(b) && !double.IsNaN(a) && string.Equals(bu, au, StringComparison.Ordinal);
+        return new ReportMetricCard(m.Label, m.Display, m.Note, bars ? b : double.NaN, bars ? a : double.NaN, kind, HigherIsBetter(key));
+    }
 }
 
 /// <summary>Uma mudança proposta, com a marcação do usuário.</summary>
@@ -39,6 +148,11 @@ public sealed class ChangeRow(ProposedChange change) : ObservableObject
                           (Change.OptIn ? " · opcional" : "");
     /// <summary>good (risco baixo), warn (médio/opcional), bad (alto/experimental).</summary>
     public string Tone => Change.Experimental || Change.Risk == ActionRisk.High ? "bad" : Change.Risk == ActionRisk.Medium || Change.OptIn ? "warn" : "good";
+    /// <summary>Tom do selo de risco no design system.</summary>
+    public Views.Controls.Tone RiskTone => Tone switch { "bad" => Views.Controls.Tone.Bad, "warn" => Views.Controls.Tone.Warn, _ => Views.Controls.Tone.Good };
+    public string RiskChip => $"risco {Change.RiskText}";
+    public string LevelChip => Change.LevelText;
+    public bool Undoable => Change.Undoable;
     public void Reset() => IsSelected = Change.SelectedByDefault;
 }
 
@@ -113,7 +227,17 @@ public sealed class AssistantPage : ModulePage
     public bool InFlow { get => _inFlow; private set { if (Set(ref _inFlow, value)) OnPropertyChanged(nameof(ShowStart)); } }
     public bool ShowStart => !_inFlow;
     public string StartText { get => _startText; private set => Set(ref _startText, value); }
-    public bool HasSaved { get => _hasSaved; private set => Set(ref _hasSaved, value); }
+    public bool HasSaved
+    {
+        get => _hasSaved;
+        private set
+        {
+            if (!Set(ref _hasSaved, value)) return;
+            OnPropertyChanged(nameof(StartActionText));
+            OnPropertyChanged(nameof(StartActionCommand));
+            OnPropertyChanged(nameof(RestartText));
+        }
+    }
 
     public IReadOnlyList<StepChip> StepBar { get => _stepBar; private set => Set(ref _stepBar, value); }
     public string StepCounter => $"Etapa {_flow.CurrentInfo.Number} de {AssistantSteps.Count}";
@@ -127,7 +251,7 @@ public sealed class AssistantPage : ModulePage
     public bool Scanning { get => _scanning; private set { if (Set(ref _scanning, value)) OnPropertyChanged(nameof(ShowStep)); } }
     public bool ShowStep => _inFlow && !_scanning;
     public string ScanStatus { get => _scanStatus; private set => Set(ref _scanStatus, value); }
-    public IReadOnlyList<StepFact> Facts { get => _facts; private set => Set(ref _facts, value); }
+    public IReadOnlyList<StepFact> Facts { get => _facts; private set { if (Set(ref _facts, value)) OnPropertyChanged(nameof(FactCards)); } }
     public string Recommendation { get => _recommendation; private set => Set(ref _recommendation, value); }
     public ObservableCollection<ChangeRow> Changes { get; } = [];
     public bool HasChanges => Changes.Count > 0;
@@ -164,6 +288,28 @@ public sealed class AssistantPage : ModulePage
 
     private bool CanAct => _inFlow && !Busy && !_scanning;
 
+    // ---- apresentação v2 (somente leitura)
+
+    /// <summary>Ícone e ilustração da etapa atual (chaves de recurso, para ResourceByKey).</summary>
+    public string StepIconKey => AssistantVisuals.IconFor(_state.Current);
+    public string StepIllustrationKey => AssistantVisuals.IllustrationFor(_state.Current);
+    /// <summary>Etapas concluídas (0–100), para o anel que enche a cada etapa.</summary>
+    public double ProgressPercent => 100.0 * _flow.Completed / AssistantSteps.Count;
+    public static double StepCount => AssistantSteps.Count;
+    public IReadOnlyList<FactCard> FactCards => _facts.Select(f => new FactCard(f)).ToList();
+    public bool HasFacts => _facts.Count > 0;
+    /// <summary>Botão principal da tela inicial: retomar (quando há progresso salvo) ou começar.</summary>
+    public string StartActionText => _hasSaved ? "Retomar de onde parei" : "Começar";
+    public RelayCommand StartActionCommand => _hasSaved ? ResumeCommand : StartCommand;
+    public string RestartText => _hasSaved ? "Começar de novo" : "";
+
+    // Relatório como números (para StatTile) e métricas com antes → depois.
+    public double ReportAppliedNumber => _report?.AppliedCount ?? double.NaN;
+    public double ReportSkippedNumber => _report?.Skipped.Count ?? double.NaN;
+    public double ReportUserActionsNumber => _report?.UserActions.Count ?? double.NaN;
+    public IReadOnlyList<ReportMetricCard> ReportCards => _report is null ? []
+        : _state.Metrics.Select(kv => AssistantVisuals.Card(kv.Key, kv.Value)).ToList();
+
     public RelayCommand StartCommand { get; }
     public RelayCommand ResumeCommand { get; }
     public RelayCommand ApplyRecommendedCommand { get; }
@@ -194,6 +340,12 @@ public sealed class AssistantPage : ModulePage
     }
 
     private void RefreshStart()
+    {
+        RefreshStartCore();
+        BuildStepBar();
+    }
+
+    private void RefreshStartCore()
     {
         HasSaved = false;
         try
@@ -265,13 +417,17 @@ public sealed class AssistantPage : ModulePage
 
     // ------------------------------------------------------------------ etapas
 
-    private void RefreshHeader()
+    private void RefreshHeader() => BuildStepBar();
+
+    /// <summary>Trilha das 13 etapas (também na tela inicial, mostrando o que já foi feito numa rodada salva).</summary>
+    private void BuildStepBar()
     {
         StepBar = AssistantSteps.All.Select(s => new StepChip(s,
             s.Id == _state.Current ? "current" : _state.StatusOf(s.Id) switch { StepStatus.Done => "done", StepStatus.Skipped => "skipped", _ => "pending" },
             new RelayCommand(() => _ = RunAsync(() => GoToAsync(s.Id)), () => CanAct))).ToList();
         foreach (var name in new[] { nameof(StepCounter), nameof(StepTitle), nameof(StepChecks), nameof(StepWhy), nameof(StepGlyph), nameof(Progress),
-                     nameof(ProgressText), nameof(IsReportStep), nameof(IsNormalStep), nameof(CanUndoAll), nameof(ShowStep) })
+                     nameof(ProgressText), nameof(IsReportStep), nameof(IsNormalStep), nameof(CanUndoAll), nameof(ShowStep),
+                     nameof(StepIconKey), nameof(StepIllustrationKey), nameof(ProgressPercent) })
             OnPropertyChanged(name);
     }
 
@@ -619,7 +775,7 @@ public sealed class AssistantPage : ModulePage
             ? new RelayCommand(() => OpenLink(link)) : null)).ToList();
         Recommendation = _report?.NextStep ?? "";
         foreach (var n in new[] { nameof(ReportApplied), nameof(ReportSkipped), nameof(ReportUserActions), nameof(ReportMetrics), nameof(ReportNextStep), nameof(ReportPath),
-                     nameof(HasChanges), nameof(NoChanges) })
+                     nameof(HasChanges), nameof(NoChanges), nameof(ReportAppliedNumber), nameof(ReportSkippedNumber), nameof(ReportUserActionsNumber), nameof(ReportCards) })
             OnPropertyChanged(n);
     }
 

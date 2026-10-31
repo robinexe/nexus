@@ -58,8 +58,25 @@ public sealed class ScheduleEditor : ObservableObject
     public bool SkipOnBattery { get => _skipOnBattery; set => Set(ref _skipOnBattery, value); }
     public bool SkipWhenGaming { get => _skipWhenGaming; set => Set(ref _skipWhenGaming, value); }
     public string Status { get => _status; private set => Set(ref _status, value); }
-    public bool IsOn { get => _isOn; private set { if (Set(ref _isOn, value)) OnPropertyChanged(nameof(SaveText)); } }
+    public bool IsOn
+    {
+        get => _isOn;
+        private set
+        {
+            if (!Set(ref _isOn, value)) return;
+            OnPropertyChanged(nameof(SaveText));
+            OnPropertyChanged(nameof(Tone));
+            OnPropertyChanged(nameof(StateText));
+            _page.RaiseSchedules();
+        }
+    }
     public string SaveText => IsOn ? "Salvar horário" : "Ligar";
+
+    // ---- apresentação v2
+    public Views.Controls.Tone Tone => IsOn ? Views.Controls.Tone.Good : Views.Controls.Tone.Neutral;
+    public string StateText => IsOn ? "Ligada" : "Desligada";
+    public string IconKey => Kind == NexusTaskKind.Clean ? "Icon.Clean" : "Icon.Search";
+    public bool IsClean => Kind == NexusTaskKind.Clean;
 
     public RelayCommand SaveCommand { get; }
     public RelayCommand TurnOffCommand { get; }
@@ -151,7 +168,28 @@ public sealed class SettingsPage : ModulePage
     public string LegacyText { get => _legacyText; private set => Set(ref _legacyText, value); }
     public bool LegacyOn { get => _legacyOn; private set => Set(ref _legacyOn, value); }
     public string StartText { get => _startText; private set => Set(ref _startText, value); }
-    public bool StartOn { get => _startOn; private set { if (Set(ref _startOn, value)) OnPropertyChanged(nameof(StartButtonText)); } }
+    public bool StartOn
+    {
+        get => _startOn;
+        private set
+        {
+            if (!Set(ref _startOn, value)) return;
+            OnPropertyChanged(nameof(StartButtonText));
+            OnPropertyChanged(nameof(StartTone));
+            OnPropertyChanged(nameof(StartChip));
+        }
+    }
+
+    // ---- apresentação v2 (somente leitura)
+
+    /// <summary>Agendamentos ligados (verificação e limpeza segura).</summary>
+    public double ActiveSchedules => (Scan.IsOn ? 1 : 0) + (Clean.IsOn ? 1 : 0);
+    public Views.Controls.Tone StartTone => StartOn ? Views.Controls.Tone.Good : Views.Controls.Tone.Neutral;
+    public string StartChip => StartOn ? "Abre com o Windows" : "Não abre sozinho";
+    public Views.Controls.Tone NotificationsTone => Notifications ? Views.Controls.Tone.Good : Views.Controls.Tone.Neutral;
+    public string NotificationsChip => Notifications ? "Avisos ligados" : "Sem avisos";
+
+    internal void RaiseSchedules() => OnPropertyChanged(nameof(ActiveSchedules));
     public string StartButtonText => StartOn ? "Desligar" : "Ligar";
     public string CleaningRules { get => _cleaningRules; private set => Set(ref _cleaningRules, value); }
     public string CleaningExcluded { get => _cleaningExcluded; private set => Set(ref _cleaningExcluded, value); }
@@ -174,6 +212,8 @@ public sealed class SettingsPage : ModulePage
         OnPropertyChanged(nameof(TrayIcon));
         OnPropertyChanged(nameof(MinimizeToTray));
         OnPropertyChanged(nameof(CloseToTray));
+        OnPropertyChanged(nameof(NotificationsTone));
+        OnPropertyChanged(nameof(NotificationsChip));
     }
 
     // ----- pastas e sobre
