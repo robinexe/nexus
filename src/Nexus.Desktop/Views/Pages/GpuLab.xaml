@@ -88,7 +88,7 @@
 
         <!-- ===== 1. Destaque ===== -->
         <c:HeroPanel Illustration="{StaticResource Illo.Gpu}" Title="Memória de vídeo"
-                     Number="{Binding VramBytes}" Kind="Bytes" IsLoading="{Binding IsLoading}" Caption="{Binding HeroCaption}"
+                     Number="{Binding VramBytes}" Kind="Bytes" ValueText="{Binding HeroFallback}" IsLoading="{Binding IsLoading}" Caption="{Binding HeroCaption}"
                      ActionText="{Binding RecordButtonText}" Command="{Binding RecordCommand}"
                      SecondaryText="Ler de novo" SecondaryCommand="{Binding RefreshCommand}">
           <StackPanel Width="190">

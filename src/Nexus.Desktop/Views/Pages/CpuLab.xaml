@@ -225,11 +225,11 @@
         <c:SkeletonLoader Shape="Tiles" Columns="4" Height="170" Margin="0,0,0,20" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         <UniformGrid Columns="4" Margin="-7,0,-7,20" Visibility="{Binding IsLoading, Converter={StaticResource FalseToVisible}}">
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Cpu}" Label="Núcleos / threads" Value="{Binding CoreThreadText}" Detail="{Binding CoreDetail}"/>
-          <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Bolt}" Label="Com todos trabalhando" Number="{Binding AllCoreGhz}" Decimals="2" Suffix=" GHz"
+          <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Bolt}" Label="Com todos trabalhando" Value="—" Number="{Binding AllCoreGhz}" Decimals="2" Suffix=" GHz"
                       Detail="Média de todos os núcleos juntos. Meça para ver."/>
-          <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Hardware}" Label="Cache L3" Number="{Binding L3Bytes}" Kind="Bytes"
+          <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Hardware}" Label="Cache L3" Value="—" Number="{Binding L3Bytes}" Kind="Bytes"
                       Detail="Memória rapidíssima dentro do chip."/>
-          <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Ram}" Label="Ida até a RAM" Number="{Binding RamLatencyNs}" Decimals="0" Suffix=" ns"
+          <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Ram}" Label="Ida até a RAM" Value="—" Number="{Binding RamLatencyNs}" Decimals="0" Suffix=" ns"
                       Detail="Quanto o processador espera a memória. Menor é melhor."/>
         </UniformGrid>
         <Border Style="{StaticResource Panel.Notice}" Padding="14,10" Margin="0,-6,0,20" Visibility="{Binding SingleChannel, Converter={StaticResource BoolToVis}}">

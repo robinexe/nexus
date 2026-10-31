@@ -58,17 +58,19 @@ public sealed class GpuLabPage : ModulePage
     public string HeroDetail { get => _heroDetail; private set => Set(ref _heroDetail, value); }
     public string HybridText { get => _hybridText; private set => Set(ref _hybridText, value); }
     public string VendorNote { get => _vendorNote; private set => Set(ref _vendorNote, value); }
-    public bool HasReport { get => _hasReport; private set { if (Set(ref _hasReport, value)) { OnPropertyChanged(nameof(IsLoading)); OnPropertyChanged(nameof(ShowNoFindings)); } } }
+    public bool HasReport { get => _hasReport; private set { if (Set(ref _hasReport, value)) { OnPropertyChanged(nameof(IsLoading)); OnPropertyChanged(nameof(ShowNoFindings)); OnPropertyChanged(nameof(HeroFallback)); } } }
 
     // ------------------------------------------------------------------ números para a apresentação (design system v2)
 
     /// <summary>Verdadeiro até a primeira leitura terminar (esqueleto no destaque e nos cartões).</summary>
     public bool IsLoading => !HasReport;
     /// <summary>Memória de vídeo da GPU principal (bytes; NaN = sem leitura).</summary>
-    public double VramBytes { get => _vramBytes; private set => Set(ref _vramBytes, value); }
+    public double VramBytes { get => _vramBytes; private set { if (Set(ref _vramBytes, value)) OnPropertyChanged(nameof(HeroFallback)); } }
     /// <summary>% da VRAM em uso agora (NaN = o driver não informa).</summary>
     public double VramUsedPercent { get => _vramUsedPercent; private set { if (Set(ref _vramUsedPercent, value)) OnPropertyChanged(nameof(HasVramUse)); } }
     public bool HasVramUse => double.IsFinite(VramUsedPercent);
+    /// <summary>"—" no destaque quando a leitura terminou sem memória de vídeo para mostrar.</summary>
+    public string HeroFallback => HasReport && !double.IsFinite(VramBytes) ? "—" : "";
     /// <summary>Uma linha: nome da placa e o papel dela.</summary>
     public string HeroCaption { get => _heroCaption; private set => Set(ref _heroCaption, value); }
     /// <summary>Recursos (HAGS, Resizable BAR, MPO, Modo de Jogo, energia) como selos.</summary>

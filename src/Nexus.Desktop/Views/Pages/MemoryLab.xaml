@@ -255,7 +255,7 @@
 
         <!-- ===== 1. Destaque ===== -->
         <c:HeroPanel Illustration="{StaticResource Illo.Ram}" Title="Memória instalada"
-                     Number="{Binding InstalledBytes}" Kind="Bytes" IsLoading="{Binding IsLoading}" Caption="{Binding Headline}"
+                     Number="{Binding InstalledBytes}" Kind="Bytes" ValueText="{Binding HeroFallback}" IsLoading="{Binding IsLoading}" Caption="{Binding Headline}"
                      ActionText="Medir velocidade (≈ 15 s)" Command="{Binding MeasureCommand}"
                      SecondaryText="{Binding CancelText}" SecondaryCommand="{Binding CancelCommand}">
           <StackPanel Width="230">
@@ -365,9 +365,9 @@
             </StackPanel>
           </Border>
           <StackPanel Grid.Column="2">
-            <c:StatTile Icon="{StaticResource Icon.Bolt}" Label="Leitura" Number="{Binding ReadGbps}" Decimals="1" Suffix=" GB/s"
+            <c:StatTile Icon="{StaticResource Icon.Bolt}" Label="Leitura" Value="—" Number="{Binding ReadGbps}" Decimals="1" Suffix=" GB/s"
                         Detail="Quanto o processador consegue puxar por segundo." Margin="0,0,0,14"/>
-            <c:StatTile Icon="{StaticResource Icon.History}" Label="Latência da RAM" Number="{Binding LatencyNs}" Decimals="1" Suffix=" ns"
+            <c:StatTile Icon="{StaticResource Icon.History}" Label="Latência da RAM" Value="—" Number="{Binding LatencyNs}" Decimals="1" Suffix=" ns"
                         Detail="Espera por cada ida à memória. Menor é melhor."/>
           </StackPanel>
         </Grid>

@@ -173,6 +173,8 @@ public sealed class MemoryLabPage : ModulePage
     /// <summary>Memória instalada (bytes; NaN = ainda não lida).</summary>
     public double InstalledBytes => _analysis is { } a ? a.Inventory.InstalledBytes : double.NaN;
     public bool IsSingleChannel => _analysis?.Layout.Mode == ChannelMode.SingleChannel;
+    /// <summary>"—" no destaque quando a leitura terminou sem tamanho.</summary>
+    public string HeroFallback => _attempted && !double.IsFinite(InstalledBytes) ? "—" : "";
     /// <summary>Há um slot livre (não soldado) para um segundo pente.</summary>
     public bool HasFreeSlot => _analysis?.Inventory.Empty.Any(d => !d.LooksSoldered) == true;
     public bool ShowUpgradeSteps => IsSingleChannel && HasFreeSlot;
@@ -215,7 +217,7 @@ public sealed class MemoryLabPage : ModulePage
     {
         foreach (var name in new[]
                  {
-                     nameof(IsLoading), nameof(InstalledBytes), nameof(IsSingleChannel), nameof(HasFreeSlot), nameof(ShowUpgradeSteps),
+                     nameof(IsLoading), nameof(InstalledBytes), nameof(HeroFallback), nameof(IsSingleChannel), nameof(HasFreeSlot), nameof(ShowUpgradeSteps),
                      nameof(ChannelTone), nameof(ChannelModeText), nameof(SlotsText), nameof(TheoryGbps), nameof(DualTheoryGbps),
                      nameof(ShowDualDemo), nameof(ReadGbps), nameof(ReadPercentOfTheory), nameof(LatencyNs), nameof(UsedPercent),
                      nameof(CommitPercent), nameof(StandbyBytes), nameof(HasState),
