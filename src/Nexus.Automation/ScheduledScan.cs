@@ -62,14 +62,18 @@ public static partial class ScheduledScanTask
     /// <c>%</c> (o Agendador expandiria variáveis), sem caracteres de controle, sem "." ou ".." como pasta, terminando em nexus.exe.
     /// Null = válido; senão, o motivo.
     /// </summary>
-    public static string? ValidateExecutable(string? path)
+    public static string? ValidateExecutable(string? path) => ValidateExecutable(path, ExecutableName);
+
+    /// <summary>Mesma validação para outro executável do NEXUS (ex.: Nexus.Desktop.exe ao iniciar com o Windows).</summary>
+    public static string? ValidateExecutable(string? path, string expectedName)
     {
-        if (string.IsNullOrWhiteSpace(path)) return "Caminho do nexus.exe vazio.";
-        if (path.Length > 260) return "Caminho do nexus.exe longo demais.";
-        if (!LocalPath().IsMatch(path)) return "O nexus.exe precisa estar numa pasta local (C:\\...) sem aspas, % ou caracteres especiais.";
+        ArgumentNullException.ThrowIfNull(expectedName);
+        if (string.IsNullOrWhiteSpace(path)) return $"Caminho do {expectedName} vazio.";
+        if (path.Length > 260) return $"Caminho do {expectedName} longo demais.";
+        if (!LocalPath().IsMatch(path)) return $"O {expectedName} precisa estar numa pasta local (C:\\...) sem aspas, % ou caracteres especiais.";
         var parts = path.Split('\\');
-        if (parts.Any(p => p is "." or ".." || p != p.Trim() || p.EndsWith('.'))) return "Caminho do nexus.exe com pastas relativas ou nomes inválidos.";
-        if (!parts[^1].Equals(ExecutableName, StringComparison.OrdinalIgnoreCase)) return "A tarefa só pode rodar o nexus.exe.";
+        if (parts.Any(p => p is "." or ".." || p != p.Trim() || p.EndsWith('.'))) return $"Caminho do {expectedName} com pastas relativas ou nomes inválidos.";
+        if (!parts[^1].Equals(expectedName, StringComparison.OrdinalIgnoreCase)) return $"Só o {expectedName} é aceito aqui.";
         return null;
     }
 

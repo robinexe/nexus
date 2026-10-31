@@ -1,10 +1,202 @@
+<!--
+  Ajustes: agendamentos (verificação somente leitura e limpeza segura opt-in), notificações, bandeja, iniciar com o Windows,
+  pastas e sobre. Do tema, só chaves do contrato de Controls.xaml (Text.*, Panel.*, Button.*, Brush.*, Font.*, Size.*,
+  BoolToVis, NullToCollapsed).
+-->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels">
-  <DataTemplate DataType="{x:Type vm:SettingsPage}">
-    <StackPanel Margin="28,24,28,28">
-      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
-      <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+
+  <!-- Uma tarefa agendada: estado, frequência, dia, hora, condições e os botões. -->
+  <DataTemplate DataType="{x:Type vm:ScheduleEditor}">
+    <StackPanel>
+      <DockPanel>
+        <Border DockPanel.Dock="Right" BorderThickness="1" CornerRadius="{StaticResource Radius.Chip}" Padding="9,2,10,3" VerticalAlignment="Top">
+          <Border.Style>
+            <Style TargetType="Border">
+              <Setter Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IsOn}" Value="True">
+                  <Setter Property="BorderBrush" Value="{StaticResource Brush.Good}"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock FontFamily="{StaticResource Font.Body}" FontSize="{StaticResource Size.Small}" TextWrapping="NoWrap">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock">
+                <Setter Property="Text" Value="desligada"/>
+                <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsOn}" Value="True">
+                    <Setter Property="Text" Value="ligada"/>
+                    <Setter Property="Foreground" Value="{StaticResource Brush.Good}"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </Border>
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H2}"/>
+      </DockPanel>
+      <TextBlock Text="{Binding Explanation}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+      <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" Margin="0,8,0,0"/>
+
+      <WrapPanel Margin="0,12,0,0">
+        <ComboBox ItemsSource="{x:Static vm:ScheduleEditor.Frequencies}" SelectedIndex="{Binding Frequency}" MinWidth="130" Margin="0,0,10,8"/>
+        <ComboBox ItemsSource="{x:Static vm:ScheduleEditor.Days}" SelectedIndex="{Binding Day}" MinWidth="110" Margin="0,0,10,8"
+                  Visibility="{Binding IsWeekly, Converter={StaticResource BoolToVis}}"/>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,8" Visibility="{Binding IsMonthly, Converter={StaticResource BoolToVis}}">
+          <TextBlock Text="dia" Style="{StaticResource Text.Body}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+          <ComboBox ItemsSource="{x:Static vm:ScheduleEditor.MonthDays}" SelectedItem="{Binding MonthDay}" MinWidth="64"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,10,8">
+          <TextBlock Text="às" Style="{StaticResource Text.Body}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+          <ComboBox ItemsSource="{x:Static vm:ScheduleEditor.Hours}" SelectedItem="{Binding Hour}" MinWidth="64"/>
+          <TextBlock Text=":" Style="{StaticResource Text.Body}" VerticalAlignment="Center" Margin="4,0"/>
+          <ComboBox ItemsSource="{x:Static vm:ScheduleEditor.Minutes}" SelectedItem="{Binding Minute}" MinWidth="64"/>
+        </StackPanel>
+      </WrapPanel>
+      <CheckBox Content="Não rodar na bateria" IsChecked="{Binding SkipOnBattery}" Margin="0,4,0,0"/>
+      <CheckBox Content="Não rodar com jogo aberto ou app em tela cheia" IsChecked="{Binding SkipWhenGaming}" Margin="0,6,0,0"/>
+      <WrapPanel Margin="0,12,0,0">
+        <Button Content="{Binding SaveText}" Style="{StaticResource Button.Primary}" Command="{Binding SaveCommand}" Margin="0,0,10,0"/>
+        <Button Content="Desligar" Style="{StaticResource Button.Secondary}" Command="{Binding TurnOffCommand}"
+                Visibility="{Binding IsOn, Converter={StaticResource BoolToVis}}"/>
+      </WrapPanel>
     </StackPanel>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type vm:SettingsPage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1000" HorizontalAlignment="Stretch">
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Display}"/>
+        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,18"/>
+
+        <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="0,0,0,10"
+                   Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}"/>
+        <Border Style="{StaticResource Panel.Notice}" Margin="0,0,0,12" Visibility="{Binding SettingsProblem, Converter={StaticResource NullToCollapsed}}">
+          <TextBlock Text="{Binding SettingsProblem}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
+        </Border>
+
+        <!-- ===== Agendamentos ===== -->
+        <TextBlock Text="Agendamentos" Style="{StaticResource Text.H1}" Margin="0,4,0,4"/>
+        <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,10"
+                   Text="Tarefas no Agendador do Windows, na sua conta e sem administrador. Ligar, mudar e desligar passam pelo aplicador: ficam no diário e podem ser desfeitos em Histórico."/>
+
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,12">
+          <ContentControl Content="{Binding Scan}" Focusable="False"/>
+        </Border>
+
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,12" BorderBrush="{StaticResource Brush.TraceLine}">
+          <StackPanel>
+            <ContentControl Content="{Binding Clean}" Focusable="False"/>
+            <Border Style="{StaticResource Panel.Inset}" Margin="0,14,0,0">
+              <StackPanel>
+                <TextBlock Text="O que entra (só regras de risco baixo da sua conta):" Style="{StaticResource Text.Label}"/>
+                <TextBlock Text="{Binding CleaningRules}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,4,0,0"/>
+                <TextBlock Text="{Binding CleaningExcluded}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,8,0,0"/>
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,8,0,0"
+                           Text="Desligada por padrão. Programa aberto (ex.: navegador) faz a regra dele ser pulada. Nada é apagado: vai para a quarentena, e cada limpeza volta em Limpeza &gt; Histórico. Não acelera o PC: só libera espaço."/>
+                <WrapPanel Margin="0,10,0,0">
+                  <TextBlock Text="{Binding LastCleaning}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                  <Button Content="Abrir relatório" Style="{StaticResource Button.Ghost}" Command="{Binding OpenLastCleaningCommand}"/>
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource Panel.Notice}" Margin="0,0,0,12" Visibility="{Binding LegacyOn, Converter={StaticResource BoolToVis}}">
+          <DockPanel>
+            <Button DockPanel.Dock="Right" Content="Desligar a antiga" Style="{StaticResource Button.Secondary}" Command="{Binding LegacyOffCommand}" Margin="12,0,0,0"/>
+            <TextBlock Text="{Binding LegacyText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+          </DockPanel>
+        </Border>
+
+        <!-- ===== Notificações e bandeja ===== -->
+        <TextBlock Text="Notificações e bandeja" Style="{StaticResource Text.H1}" Margin="0,14,0,10"/>
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,12">
+          <StackPanel>
+            <CheckBox Content="Avisar quando uma verificação ou limpeza agendada terminar (clique abre o relatório)" IsChecked="{Binding Notifications}"/>
+            <CheckBox Content="Avisar também quando a tarefa for pulada (bateria ou jogo aberto)" IsChecked="{Binding NotifySkipped}" Margin="24,8,0,0"
+                      IsEnabled="{Binding Notifications}"/>
+            <CheckBox Content="Mostrar o ícone do NEXUS na bandeja do sistema" IsChecked="{Binding TrayIcon}" Margin="0,14,0,0"/>
+            <CheckBox Content="Minimizar esconde na bandeja" IsChecked="{Binding MinimizeToTray}" Margin="24,8,0,0" IsEnabled="{Binding TrayIcon}"/>
+            <CheckBox Content="Fechar (X) esconde na bandeja; para sair, use Sair no menu do ícone" IsChecked="{Binding CloseToTray}" Margin="24,8,0,0" IsEnabled="{Binding TrayIcon}"/>
+            <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,12,0,0"
+                       Text="Menu do ícone: Abrir, Otimizar agora (mostra o plano e pede confirmação), Verificar agora (só leitura, avisa com o relatório) e Sair. Preferências da interface ficam em settings.json; nada aqui muda o sistema."/>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Iniciar com o Windows ===== -->
+        <TextBlock Text="Iniciar com o Windows" Style="{StaticResource Text.H1}" Margin="0,14,0,10"/>
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,12">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,16,0">
+              <TextBlock Text="{Binding StartText}" Style="{StaticResource Text.Body}"/>
+              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                         Text="Abre minimizado na bandeja. É uma entrada no Run da sua conta (sem administrador), com diário e desfazer; também aparece no Gerenciador de Tarefas e na página Inicialização."/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="{Binding StartButtonText}" Style="{StaticResource Button.Secondary}" Command="{Binding ToggleStartCommand}"
+                    VerticalAlignment="Center" MinWidth="100"/>
+          </Grid>
+        </Border>
+
+        <!-- ===== Pastas ===== -->
+        <TextBlock Text="Dados e relatórios" Style="{StaticResource Text.H1}" Margin="0,14,0,10"/>
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,12">
+          <StackPanel>
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Content="Abrir" Style="{StaticResource Button.Ghost}" Command="{Binding OpenDataCommand}"/>
+              <StackPanel>
+                <TextBlock Text="Pasta de dados (diário, quarentena, preferências)" Style="{StaticResource Text.Label}"/>
+                <TextBlock Text="{x:Static vm:SettingsPage.DataDirectory}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+              </StackPanel>
+            </DockPanel>
+            <DockPanel Margin="0,12,0,0">
+              <Button DockPanel.Dock="Right" Content="Abrir" Style="{StaticResource Button.Ghost}" Command="{Binding OpenReportsCommand}"/>
+              <StackPanel>
+                <TextBlock Text="Relatórios (verificações e limpezas)" Style="{StaticResource Text.Label}"/>
+                <TextBlock Text="{x:Static vm:SettingsPage.ReportsDirectory}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+              </StackPanel>
+            </DockPanel>
+            <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,12,0,0">
+              <Run Text="Preferências:"/>
+              <Run Text="{x:Static vm:SettingsPage.SettingsFile}"/>
+            </TextBlock>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Sobre ===== -->
+        <TextBlock Text="Sobre" Style="{StaticResource Text.H1}" Margin="0,14,0,10"/>
+        <Border Style="{StaticResource Panel.Card}">
+          <StackPanel>
+            <TextBlock Text="{x:Static vm:SettingsPage.Version}" Style="{StaticResource Text.Body}"/>
+            <TextBlock Text="{Binding CatalogText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+            <TextBlock Text="Dependências redistribuídas" Style="{StaticResource Text.Label}" Margin="0,14,0,6"/>
+            <ItemsControl ItemsSource="{Binding Licenses}" Focusable="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Style="{StaticResource Text.Small}" Margin="0,0,0,4">
+                    <Run Text="{Binding Name, Mode=OneWay}" Foreground="{StaticResource Brush.Text}"/>
+                    <Run Text="·" Foreground="{StaticResource Brush.TextDim}"/>
+                    <Run Text="{Binding License, Mode=OneWay}" Foreground="{StaticResource Brush.Signal}"/>
+                    <Run Text="·" Foreground="{StaticResource Brush.TextDim}"/>
+                    <Run Text="{Binding Note, Mode=OneWay}" Foreground="{StaticResource Brush.TextMuted}"/>
+                  </TextBlock>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="{x:Static vm:SettingsPage.LicenseNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,8,0,0"/>
+            <TextBlock Text="Sem telemetria, sem contas, sem downloads automáticos." Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"/>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
   </DataTemplate>
 </ResourceDictionary>

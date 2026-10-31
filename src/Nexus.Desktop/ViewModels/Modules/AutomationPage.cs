@@ -2,6 +2,7 @@ using System.IO;
 using System.Globalization;
 using Nexus.Automation;
 using Nexus.Broker;
+using Nexus.Cleaning;
 using Nexus.Core;
 using Nexus.Desktop.Services;
 using Nexus.HardwareDiscovery;
@@ -48,16 +49,14 @@ public sealed record OneClickRow(string Title, string Detail, string Level);
 
 /// <summary>
 /// Automático: lê o PC, classifica (notebook na bateria, desktop gamer, PC modesto, VM…), recomenda com o motivo, monta o
-/// "Otimizar agora" (só risco baixo, confirmado pelo aplicador) e liga a verificação semanal SOMENTE LEITURA.
-/// Escrita só por Host.PlanAsync/ApplyAsync/RevertAsync.
+/// "Otimizar agora" (só risco baixo, confirmado pelo aplicador, com a limpeza segura e o espaço antes/depois) e resume os
+/// agendamentos (configurados em Ajustes). Escrita só por Host.PlanAsync/ApplyAsync/RevertAsync.
 /// </summary>
 public sealed class AutomationPage : ModulePage
 {
     public override string Title => "Otimização automática";
     public override string Group => "Automático";
     public override string Subtitle => "O NEXUS lê o seu PC, propõe o que vale a pena e aplica com segurança.";
-
-    public static IReadOnlyList<string> ScheduleChoices { get; } = ["SUN 19:00", "SAT 12:00", "WED 20:00"];
 
     private CatalogDocument? _catalog;
     private RecommendationSet? _set;
@@ -78,15 +77,18 @@ public sealed class AutomationPage : ModulePage
     private string _planState = "";
     private string _result = "";
     private string _scheduleText = "Lendo o Agendador…";
-    private string _scheduleState = ScanSchedule.Off;
-    private string _selectedSchedule = ScheduleChoices[0];
+    private CleaningPlan _cleaning = CleaningPlan.None;
+    private string _cleaningText = "";
 
     public AutomationPage()
     {
         OptimizeCommand = new RelayCommand(() => _ = OptimizeAsync(), () => !Busy && Host is not null && _set is not null);
         UndoAllCommand = new RelayCommand(() => _ = UndoAllAsync(), () => !Busy && _runs.Count > 0);
         RefreshPlanCommand = new RelayCommand(() => _ = RunAsync(VerifyPlanCoreAsync), () => !Busy && _set is not null);
-        ToggleScheduleCommand = new RelayCommand(() => _ = ToggleScheduleAsync(), () => !Busy && Host is not null);
+        OpenSettingsCommand = new RelayCommand(() =>
+        {
+            if (Host?.FindPage(typeof(SettingsPage)) is { } page) Host.Navigate(page);
+        });
     }
 
     public string Headline { get => _headline; private set => Set(ref _headline, value); }
@@ -102,20 +104,20 @@ public sealed class AutomationPage : ModulePage
     /// <summary>"prévia" (antes de perguntar ao aplicador) ou "confirmado pelo aplicador".</summary>
     public string PlanState { get => _planState; private set => Set(ref _planState, value); }
     public int PlanCount => _plan.Count;
-    public string PlanCountText => _planVerified ? _plan.Count.ToString(CultureInfo.InvariantCulture) : _candidates.Count.ToString(CultureInfo.InvariantCulture);
+    public string PlanCountText => (_planVerified ? _plan.Count + _cleaning.Requests.Count : _candidates.Count).ToString(CultureInfo.InvariantCulture);
+    /// <summary>"Limpeza segura: 9 regras, 1,2 GB recuperáveis (vão para a quarentena)".</summary>
+    public string CleaningText { get => _cleaningText; private set => Set(ref _cleaningText, value); }
     public string Result { get => _result; private set => Set(ref _result, value); }
     public bool CanUndo => _runs.Count > 0;
     public bool HasAvoid => _avoid.Count > 0;
     public bool HasAdvice => _advice.Count > 0;
 
     public string ScheduleText { get => _scheduleText; private set => Set(ref _scheduleText, value); }
-    public bool ScheduleOn => ScanSchedule.TryParse(_scheduleState) is not null || _scheduleState == AutomationScheduledScanHandler.Stale;
-    public string SelectedSchedule { get => _selectedSchedule; set => Set(ref _selectedSchedule, value); }
 
     public RelayCommand OptimizeCommand { get; }
     public RelayCommand UndoAllCommand { get; }
     public RelayCommand RefreshPlanCommand { get; }
-    public RelayCommand ToggleScheduleCommand { get; }
+    public RelayCommand OpenSettingsCommand { get; }
 
     // ------------------------------------------------------------------ leitura
 
@@ -229,13 +231,66 @@ public sealed class AutomationPage : ModulePage
     private async Task VerifyPlanCoreAsync()
     {
         if (Host is null || _set is null) return;
-        if (_candidates.Count == 0) { _plan = OneClickPlan.Empty; _planVerified = true; ShowPlan(); return; }
         var host = Host;
+        _cleaning = await PrepareCleaningAsync(host);
+        if (_candidates.Count == 0) { _plan = OneClickPlan.Empty; _planVerified = true; ShowPlan(); return; }
         var (results, problem) = await OneClickPlanner.SimulateAsync(_candidates.Select(c => c.Request).ToList(), q => host.PlanAsync(q, BrokerLevel.User));
         if (problem is not null) { PlanState = "prévia (aplicador indisponível)"; Message = problem; return; }
         _plan = OneClickPlanner.Build(_candidates, results);
         _planVerified = true;
         ShowPlan();
+    }
+
+    // ------------------------------------------------------------------ limpeza segura (seleção, medição, simulação)
+
+    /// <summary>Limpeza segura conferida no aplicador: pedidos pendentes (um lote), regras, medição antes e o texto da confirmação.</summary>
+    private sealed record CleaningPlan(IReadOnlyList<ActionRequest> Requests, IReadOnlyList<CleaningRule> Rules, string Batch, long Before, CleaningFolders? Folders, IReadOnlyList<string> Skipped)
+    {
+        public static readonly CleaningPlan None = new([], [], "", 0, null, []);
+    }
+
+    private static string UserDataDirectory => Path.GetDirectoryName(LocalBroker.JournalPath(BrokerLevel.User))!;
+    private static string AdminDataDirectory => Path.GetDirectoryName(LocalBroker.JournalPath(BrokerLevel.Admin))!;
+
+    private async Task<CleaningPlan> PrepareCleaningAsync(IModuleHost host)
+    {
+        if (_catalog is null) return CleaningPlan.None;
+        var catalog = _catalog;
+        var prep = await Task.Run(async () =>
+        {
+            var (safe, _) = SafeCleaningSelector.Select(catalog, CleaningRuleSet.BuiltIn, RiskModel.ReadDeclared(NexusServices.CatalogDirectory));
+            var folders = SafeCleaningSelector.CurrentUserFolders(UserDataDirectory, AdminDataDirectory);
+            var before = safe.Count == 0 ? 0 : await SafeCleaningSelector.MeasureAsync(safe.Select(x => x.Rule), folders, SystemProcessProbe.Instance);
+            return (safe, folders, before);
+        });
+        if (prep.safe.Count == 0) { CleaningText = ""; return CleaningPlan.None; }
+        var batch = CleaningBatchId.New(DateTime.UtcNow);
+        var requests = SafeCleaningSelector.Requests(prep.safe, batch);
+        var (results, problem) = await OneClickPlanner.SimulateAsync(requests, q => host.PlanAsync(q, BrokerLevel.User));
+        if (problem is not null) { CleaningText = $"Limpeza segura: {SafeCleaningSelector.Bytes(prep.before)} recuperáveis (aplicador indisponível para conferir)."; return CleaningPlan.None; }
+        var pending = new List<ActionRequest>();
+        var rules = new List<CleaningRule>();
+        var skipped = new List<string>();
+        foreach (var item in prep.safe)
+        {
+            var r = results.FirstOrDefault(x => x.ActionKey == item.ActionKey);
+            if (r is { Outcome: "Pending" }) { pending.Add(requests.First(q => q.ActionId == item.ActionKey)); rules.Add(item.Rule); }
+            else if (r is { Outcome: "Blocked" }) skipped.Add($"{item.Title}: {r.Detail}");
+        }
+        CleaningText = pending.Count == 0
+            ? "Limpeza segura: nada para limpar agora."
+            : $"Limpeza segura: {pending.Count} {(pending.Count == 1 ? "regra" : "regras")}, {SafeCleaningSelector.Bytes(prep.before)} recuperáveis (vão para a quarentena, com desfazer)."
+              + (skipped.Count > 0 ? $" {skipped.Count} pulada(s) por programa aberto." : "");
+        return new CleaningPlan(pending, rules, batch, prep.before, prep.folders, skipped);
+    }
+
+    private string CleaningConfirmation()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine(CultureInfo.InvariantCulture, $"Limpeza segura ({_cleaning.Requests.Count} {(_cleaning.Requests.Count == 1 ? "regra" : "regras")}, cerca de {SafeCleaningSelector.Bytes(_cleaning.Before)}):");
+        foreach (var rule in _cleaning.Rules) sb.AppendLine(CultureInfo.InvariantCulture, $"• {rule.Title}");
+        sb.Append("Só caches e temporários da sua conta. Nada é apagado: vai para a quarentena do NEXUS e volta em \"Desfazer tudo\" ou em Limpeza > Histórico.");
+        return sb.ToString();
     }
 
     private void ShowPlan()
@@ -246,6 +301,7 @@ public sealed class AutomationPage : ModulePage
         PlanSummary = _plan.Summary;
         PlanGains = string.Join(Environment.NewLine, _plan.Gains);
         PlanState = "confirmado pelo aplicador";
+        if (_plan.IsEmpty && _cleaning.Requests.Count > 0) PlanSummary = "Os ajustes de um clique já estão assim; falta só a limpeza segura.";
         OnPropertyChanged(nameof(PlanCount));
         OnPropertyChanged(nameof(PlanCountText));
     }
@@ -257,24 +313,72 @@ public sealed class AutomationPage : ModulePage
         if (Host is null) return;
         await VerifyPlanCoreAsync();
         if (!_planVerified) return; // aplicador indisponível: mensagem já mostrada
-        if (_plan.IsEmpty) { Message = _plan.Summary; return; }
+        if (_plan.IsEmpty && _cleaning.Requests.Count == 0) { Message = _plan.Summary; return; }
         _runs.Clear();
         var lines = new List<string>();
+        var cleaning = _cleaning;
+        var cleaned = false;
         foreach (var level in new[] { BrokerLevel.User, BrokerLevel.Admin })
         {
             var requests = _plan.Requests(level);
+            var confirmation = _plan.Confirmation(level);
+            if (level == BrokerLevel.User && cleaning.Requests.Count > 0)
+            {
+                requests = [.. requests, .. cleaning.Requests];
+                confirmation = (_plan.User.Count > 0 ? confirmation + Environment.NewLine + Environment.NewLine : "") + CleaningConfirmation();
+            }
             if (requests.Count == 0) continue;
             var title = level == BrokerLevel.User ? "Otimizar agora" : "Otimizar agora: mudanças de sistema";
-            var r = await Host.ApplyAsync(title, _plan.Confirmation(level), requests, level);
+            var r = await Host.ApplyAsync(title, confirmation, requests, level);
+            if (level == BrokerLevel.User && r is { Response.Ok: true } && cleaning.Requests.Count > 0) cleaned = true;
             if (r is null) { lines.Add(level == BrokerLevel.User ? "Cancelado. Nada foi alterado." : "Mudanças de sistema canceladas; as da sua conta continuam aplicadas."); break; }
             lines.Add(r.Message);
             if (r.Response is { Ok: true, RunId: { } run }) _runs.Add((run, level));
             else break;
         }
+        if (cleaned && cleaning.Folders is { } folders)
+        {
+            var after = await Task.Run(() => SafeCleaningSelector.MeasureAsync(cleaning.Rules, folders, SystemProcessProbe.Instance));
+            var moved = await Task.Run(() => MovedBytes(cleaning.Batch));
+            lines.Add($"Espaço recuperável nas regras seguras: antes {SafeCleaningSelector.Bytes(cleaning.Before)} → depois {SafeCleaningSelector.Bytes(after)}. " +
+                      $"{SafeCleaningSelector.Bytes(moved)} foram para a quarentena (no mesmo disco: o espaço volta de fato quando ela for esvaziada).");
+        }
         Result = string.Join(Environment.NewLine, lines);
         OnPropertyChanged(nameof(CanUndo));
         await VerifyPlanCoreAsync(); // o que foi aplicado passa a "já está assim"
     });
+
+    private static long MovedBytes(string batch)
+    {
+        long total = 0;
+        foreach (var dir in new[] { UserDataDirectory, AdminDataDirectory })
+        {
+            try { total += QuarantineStore.ReadBatches(dir).Where(b => b.BatchId == batch).Sum(b => b.Rules.Sum(r => r.MovedBytes)); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// "Verificar agora" (bandeja): grava o relatório da leitura atual (somente leitura) em %LocalAppData%\NEXUS\reports.
+    /// Devolve o HTML (ou null) e um resumo de uma linha.
+    /// </summary>
+    public async Task<(string? Report, string Summary)> SaveReportAsync()
+    {
+        var facts = Host?.Facts;
+        if (facts is null || _set is null || _catalog is null) return (null, "A leitura do PC ainda não terminou.");
+        var set = _set;
+        var version = _catalog.CatalogVersion;
+        return await Task.Run(() =>
+        {
+            var findings = DiagnosticRules.Evaluate(facts);
+            var scan = ScanReport.From(facts, findings, set, version, DateTimeOffset.Now) with { Cleaning = CleaningOverview.Read(UserDataDirectory, AdminDataDirectory) };
+            var files = scan.Save(ScanReport.DefaultDirectory, html: true);
+            var attention = findings.Count(f => f.Severity == DiagnosticSeverity.Attention);
+            return ((string?)files.FirstOrDefault(f => f.EndsWith(".html", StringComparison.OrdinalIgnoreCase)),
+                $"{attention} ponto(s) pedem atenção · {set.Actionable.Count()} recomendação(ões).");
+        });
+    }
 
     private Task UndoAllAsync() => RunAsync(async () =>
     {
@@ -293,46 +397,15 @@ public sealed class AutomationPage : ModulePage
         await VerifyPlanCoreAsync();
     });
 
+    /// <summary>Resumo dos agendamentos (somente leitura). Ligar, mudar e desligar ficam em Ajustes.</summary>
     private async Task ReadScheduleAsync()
     {
-        var (state, error) = await Task.Run(() => AutomationHandlers.ReadScheduledScanState(AutomationScheduledScanHandler.DefaultExecutable));
-        _scheduleState = state;
-        ScheduleText = error is not null
-            ? $"Não foi possível ler o Agendador: {error}"
-            : state switch
-            {
-                ScanSchedule.Off => "Desligada. Ligue para o NEXUS verificar o PC uma vez por semana, sem mudar nada.",
-                AutomationScheduledScanHandler.Stale => "Ligada, mas apontando para outra pasta do NEXUS. Desligue e ligue de novo para atualizar.",
-                AutomationScheduledScanHandler.Foreign => $"Existe uma tarefa \"{ScheduledScanTask.TaskName}\" que não é do NEXUS; ela não será tocada.",
-                _ => $"Ligada: {ScanSchedule.TryParse(state)?.Describe()}. Relatórios em {ScanReport.DefaultDirectory}.",
-            };
-        if (ScanSchedule.TryParse(state) is { } s && ScheduleChoices.Contains(s.ToString())) SelectedSchedule = s.ToString();
-        OnPropertyChanged(nameof(ScheduleOn));
+        var (scan, clean, legacy) = await Task.Run(() => (
+            AutomationHandlers.ReadTaskStatus(NexusTaskKind.Scan, AutomationScheduledScanHandler.DefaultExecutable),
+            AutomationHandlers.ReadTaskStatus(NexusTaskKind.Clean, AutomationScheduledScanHandler.DefaultExecutable),
+            AutomationHandlers.ReadScheduledScanState(AutomationScheduledScanHandler.DefaultExecutable).State));
+        var lines = new List<string> { $"Verificação: {scan.Describe()}", $"Limpeza segura: {clean.Describe()}" };
+        if (legacy != ScanSchedule.Off) lines.Add("A verificação semanal antiga também está ligada (dá para desligar em Ajustes).");
+        ScheduleText = string.Join(Environment.NewLine, lines);
     }
-
-    private string ScheduledScanKey() =>
-        _catalog?.Actions.Where(a => a.Definition.Id == AutomationHandlers.ScheduledScanActionId).MaxBy(a => a.Definition.Version)?.Definition.Key
-        ?? AutomationHandlers.ScheduledScanActionId + "@1";
-
-    private Task ToggleScheduleAsync() => RunAsync(async () =>
-    {
-        if (Host is null) return;
-        try
-        {
-            var turnOn = !ScheduleOn;
-            var value = turnOn ? SelectedSchedule : ScanSchedule.Off;
-            var confirmation = turnOn
-                ? $"Criar uma tarefa no Agendador do Windows (na sua conta, sem administrador) que roda \"nexus scan --report\" toda {ScanSchedule.TryParse(value)?.Describe()}?\n\n" +
-                  "A verificação só LÊ o PC e grava um relatório. O NEXUS nunca agenda mudanças: aplicar é sempre com você presente.\n" +
-                  "Dá para desligar aqui a qualquer momento."
-                : "Remover a verificação semanal do Agendador do Windows?";
-            var r = await Host.ApplyAsync(turnOn ? "Verificação semanal" : "Desligar verificação semanal", confirmation,
-                [new ActionRequest(ScheduledScanKey(), value)], BrokerLevel.User);
-            if (r is not null) Message = r.Message;
-        }
-        finally
-        {
-            await ReadScheduleAsync(); // ressincroniza o interruptor com o estado real
-        }
-    });
 }

@@ -35,6 +35,9 @@ public sealed record ScanReport(
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
+    /// <summary>Resumo da quarentena da limpeza (opcional; "nexus report --html" preenche).</summary>
+    public CleaningOverview? Cleaning { get; init; }
+
     public static ScanReport From(SystemFacts facts, IReadOnlyList<DiagnosticFinding> findings, RecommendationSet set, string catalogVersion, DateTimeOffset takenAt)
     {
         ArgumentNullException.ThrowIfNull(facts);
@@ -89,6 +92,13 @@ public sealed record ScanReport(
                 if (r.Gain is not null) sb.AppendLine(CultureInfo.InvariantCulture, $"    Ganho esperado: {r.Gain}");
             }
         }
+        if (Cleaning is { } c)
+        {
+            sb.AppendLine();
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Limpeza: {c.Batches} limpeza(s) registradas, {SafeCleaningSelector.Bytes(c.BytesInQuarantine)} na quarentena.");
+            foreach (var b in c.Recent)
+                sb.AppendLine(CultureInfo.InvariantCulture, $"  {b.CreatedUtc.ToLocalTime():dd/MM HH:mm}  {b.Batch}  {SafeCleaningSelector.Bytes(b.MovedBytes)}{(b.Restored ? " (desfeita)" : "")}  {b.Rules}");
+        }
         return sb.ToString();
     }
 
@@ -96,17 +106,7 @@ public sealed record ScanReport(
     {
         static string E(string? s) => WebUtility.HtmlEncode(s ?? "");
         var sb = new StringBuilder();
-        sb.Append("""
-            <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-            <title>NEXUS — verificação</title>
-            <style>
-            body{background:#0E1320;color:#E6EAF2;font:15px/1.5 "Segoe UI",system-ui,sans-serif;margin:0;padding:24px;max-width:960px}
-            h1{font:600 26px "Bahnschrift","Segoe UI",sans-serif;margin:0 0 4px}h2{font:600 18px "Bahnschrift","Segoe UI",sans-serif;margin:28px 0 8px}
-            .muted{color:#8A94A8}.card{background:#161D2E;border:1px solid #26304A;border-radius:10px;padding:12px 16px;margin:8px 0}
-            .tag{display:inline-block;border:1px solid #26304A;border-radius:9px;padding:0 8px;margin:2px;font-size:12px;color:#8A94A8}
-            .att{color:#FFB547}.ok{color:#4ADE80}.bad{color:#F87171}.sig{color:#38BDF8}
-            </style></head><body>
-            """);
+        sb.Append(ReportStyle.Head("NEXUS — verificação"));
         sb.Append(CultureInfo.InvariantCulture, $"<h1>Seu PC: {E(Profile)}</h1><div class=\"muted\">Verificação somente leitura em {E(TakenAt.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))} · catálogo {E(CatalogVersion)}</div><div>");
         foreach (var t in Tags) sb.Append(CultureInfo.InvariantCulture, $"<span class=\"tag\">{E(t)}</span>");
         sb.Append("</div>");
@@ -128,6 +128,12 @@ public sealed record ScanReport(
                 if (r.Gain is not null) sb.Append(CultureInfo.InvariantCulture, $"<div class=\"muted\">Ganho esperado: {E(r.Gain)}</div>");
                 sb.Append("</div>");
             }
+        }
+        if (Cleaning is { } c)
+        {
+            sb.Append(CultureInfo.InvariantCulture, $"<h2>Limpeza</h2><div class=\"card\">{c.Batches} limpeza(s) registradas · <b class=\"att\">{E(SafeCleaningSelector.Bytes(c.BytesInQuarantine))}</b> na quarentena (o espaço volta quando ela for esvaziada)</div>");
+            foreach (var b in c.Recent)
+                sb.Append(CultureInfo.InvariantCulture, $"<div class=\"card\"><b>{E(b.CreatedUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))}</b> <span class=\"muted\">lote {E(b.Batch)} · {E(SafeCleaningSelector.Bytes(b.MovedBytes))}{(b.Restored ? " · desfeita" : "")}</span><div class=\"muted\">{E(b.Rules)}</div></div>");
         }
         sb.Append("<p class=\"muted\">Nada foi alterado. Para aplicar, abra o NEXUS ou use \"nexus optimize\": tudo pede confirmação e pode ser desfeito.</p></body></html>");
         return sb.ToString();

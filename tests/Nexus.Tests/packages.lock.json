@@ -143,6 +143,7 @@
         "type": "Project",
         "dependencies": {
           "Nexus.Broker": "[1.0.0, )",
+          "Nexus.Cleaning": "[1.0.0, )",
           "Nexus.Core": "[1.0.0, )",
           "Nexus.HardwareDiscovery": "[1.0.0, )",
           "Nexus.WindowsActions": "[1.0.0, )"
