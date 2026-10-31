@@ -18,6 +18,9 @@ public sealed record MeasurePreferences
     public bool DetectFullscreen { get; init; }
     public IReadOnlyList<string> UserGames { get; init; } = [];
     public IReadOnlyList<string> ExcludedGames { get; init; } = [];
+    /// <summary>Atalho global ligado. Desligado por padrão: Ctrl+Shift+F é usado por outros programas (buscar em arquivos), e um
+    /// atalho global "rouba" a combinação de todos eles enquanto estiver registrado.</summary>
+    public bool HotkeyEnabled { get; init; }
     public string OverlayHotkey { get; init; } = "Ctrl+Shift+F";
     public OverlayCorner OverlayCorner { get; init; } = OverlayCorner.TopLeft;
     public bool OverlayShowSystem { get; init; } = true;

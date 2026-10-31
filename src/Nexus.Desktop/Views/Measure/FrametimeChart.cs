@@ -37,6 +37,10 @@ public sealed class FrametimeChart : FrameworkElement
     public static readonly DependencyProperty LabelBrushProperty = DependencyProperty.Register(nameof(LabelBrush), typeof(Brush), typeof(FrametimeChart),
         new FrameworkPropertyMetadata(Frozen(0x5C, 0x67, 0x85), FrameworkPropertyMetadataOptions.AffectsRender));
 
+    /// <summary>Gráfico ao vivo (atualiza várias vezes por segundo): sem a animação de revelar a curva.</summary>
+    public static readonly DependencyProperty IsLiveProperty = DependencyProperty.Register(nameof(IsLive), typeof(bool), typeof(FrametimeChart),
+        new FrameworkPropertyMetadata(false));
+
     private readonly DrawingVisual _secondary = new();
     private readonly DrawingVisual _primary = new();
     private readonly ScaleTransform _reveal = new(1, 1);
@@ -70,6 +74,7 @@ public sealed class FrametimeChart : FrameworkElement
         set => SetValue(SecondaryPointsProperty, value);
     }
 
+    public bool IsLive { get => (bool)GetValue(IsLiveProperty); set => SetValue(IsLiveProperty, value); }
     public Brush? Stroke { get => (Brush?)GetValue(StrokeProperty); set => SetValue(StrokeProperty, value); }
     public Brush? SecondaryStroke { get => (Brush?)GetValue(SecondaryStrokeProperty); set => SetValue(SecondaryStrokeProperty, value); }
     public Brush? GridBrush { get => (Brush?)GetValue(GridBrushProperty); set => SetValue(GridBrushProperty, value); }
@@ -95,7 +100,7 @@ public sealed class FrametimeChart : FrameworkElement
     {
         var chart = (FrametimeChart)d;
         chart._scale = ChartScale.For(chart.Points, chart.SecondaryPoints);
-        if (e.NewValue is IReadOnlyList<TracePoint> { Count: > 1 }) chart.StartReveal();
+        if (e.NewValue is IReadOnlyList<TracePoint> { Count: > 1 } && !chart.IsLive) chart.StartReveal();
     }
 
     /// <summary>Revela a curva da esquerda para a direita (~600 ms). Sem animação quando o Windows pede menos movimento.</summary>

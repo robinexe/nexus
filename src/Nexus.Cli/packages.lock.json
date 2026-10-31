@@ -40,24 +40,24 @@
       "nexus.automation": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Broker": "[1.0.0, )",
-          "Nexus.Cleaning": "[1.0.0, )",
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Broker": "[0.9.0, )",
+          "Nexus.Cleaning": "[0.9.0, )",
+          "Nexus.Core": "[0.9.0, )",
+          "Nexus.HardwareDiscovery": "[0.9.0, )",
+          "Nexus.WindowsActions": "[0.9.0, )"
         }
       },
       "nexus.broker": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[0.9.0, )"
         }
       },
       "nexus.cleaning": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[0.9.0, )",
+          "Nexus.WindowsActions": "[0.9.0, )"
         }
       },
       "nexus.core": {
@@ -69,18 +69,27 @@
       "nexus.hardwarediscovery": {
         "type": "Project"
       },
+      "nexus.lab.gpu": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[0.9.0, )",
+          "Nexus.HardwareDiscovery": "[0.9.0, )",
+          "Nexus.WindowsActions": "[0.9.0, )"
+        }
+      },
       "nexus.measurement": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Experimentation": "[1.0.0, )",
-          "Nexus.TraceAnalysis": "[1.0.0, )"
+          "Nexus.Experimentation": "[0.9.0, )",
+          "Nexus.Lab.Gpu": "[0.9.0, )",
+          "Nexus.TraceAnalysis": "[0.9.0, )"
         }
       },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Data.Sqlite": "[10.0.14, )",
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[0.9.0, )"
         }
       },
       "nexus.traceanalysis": {
@@ -89,7 +98,7 @@
       "nexus.windowsactions": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[0.9.0, )"
         }
       },
       "Microsoft.Data.Sqlite": {

@@ -113,6 +113,20 @@ public static class AutoCompare
         return new(reference, before, after, between, $"Última partida antes de {what} ({change.At.ToLocalTime().ToString("dd/MM HH:mm", Pt)}).");
     }
 
+    /// <summary>
+    /// Referência para a partida AO VIVO (ainda sem sessão salva): mesma regra de <see cref="ChooseReference"/> — a última
+    /// partida antes da mudança mais recente do NEXUS, ou a última partida se não houve mudança.
+    /// </summary>
+    public static MeasuredSession? LiveReference(string gameKey, DateTimeOffset now, IEnumerable<MeasuredSession> all, IReadOnlyList<AppliedChange> changes)
+    {
+        ArgumentNullException.ThrowIfNull(all);
+        ArgumentNullException.ThrowIfNull(changes);
+        var earlier = all.Where(s => s.Game == GameKey.Of(gameKey) && Usable(s) && s.CapturedAt < now).OrderByDescending(s => s.CapturedAt).ToList();
+        if (earlier.Count == 0) return null;
+        var change = changes.Where(c => c.At < now && c.At > earlier[^1].CapturedAt).MaxBy(c => c.At);
+        return change is null ? earlier[0] : earlier.FirstOrDefault(s => s.CapturedAt < change.At) ?? earlier[0];
+    }
+
     /// <summary>Avisos quando as duas partidas não são comparáveis em pé de igualdade.</summary>
     public static IReadOnlyList<string> Warnings(MeasuredSession reference, MeasuredSession current, IReadOnlyList<AppliedChange> between)
     {
