@@ -185,6 +185,12 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     constante duplicada no script do Inno Setup. **Pendências:** abrir as páginas novas no Windows do responsável;
     idiomas (i18n); auto-desfazer da taxa do monitor (precisa de `RevertAsync` sem confirmação no IModuleHost);
     lançador sem console para a tarefa agendada; `Install-Broker.ps1 -InPlace`.
+    **Estado ao fim do dia 31/10:** VM do CI 44/44 de integração; `release.yml` verde (instalador instalado e desinstalado
+    em silêncio na VM, ZIP testado; artifact `nexus-0.9.0-ci.5`). No PC do responsável a versão nova abriu uma vez e
+    **travou a interface por ~2–3 min** logo depois da leitura; numa segunda tentativa não apareceu (causa não achada).
+    Diagnóstico permanente adicionado: `%LocalAppData%\NEXUS\desktop-diag.log` (etapa atual + "INTERFACE PARADA há X s").
+    Próximo passo: abrir pelo `Abrir NEXUS.cmd`, reproduzir e ler esse log; `_claude\diag-start.cmd` abre esperando e
+    anota código de saída + erros do .NET no Visualizador de Eventos.
 11. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
