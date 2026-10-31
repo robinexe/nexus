@@ -1,6 +1,6 @@
 <!--
   Automático: o PC detectado (destaque), o "Otimizar agora" com o plano resumido, as recomendações com o motivo, o que NÃO
-  fazer neste PC, conselhos de hardware e a verificação semanal (somente leitura). Do tema, só chaves do contrato.
+  fazer neste PC, conselhos de hardware e o resumo dos agendamentos (configurados em Ajustes). Do tema, só chaves do contrato.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -116,6 +116,10 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
+              <TextBlock Style="{StaticResource Text.Body}" Margin="0,2,0,0" Visibility="{Binding CleaningText, Converter={StaticResource NullToCollapsed}}">
+                <Run Text="•" Foreground="{StaticResource Brush.Trace}"/>
+                <Run Text="{Binding CleaningText, Mode=OneWay}"/>
+              </TextBlock>
               <TextBlock Text="{Binding PlanGains}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
                          Visibility="{Binding PlanGains, Converter={StaticResource NullToCollapsed}}"/>
               <ItemsControl ItemsSource="{Binding PlanSkipped}" Focusable="False" Margin="0,6,0,0">
@@ -159,7 +163,7 @@
           <ItemsControl ItemsSource="{Binding AvoidList}" ItemTemplate="{StaticResource A.Recommendation}" Focusable="False"/>
         </StackPanel>
 
-        <!-- ===== Verificação semanal ===== -->
+        <!-- ===== Agendamentos (resumo; configurar em Ajustes) ===== -->
         <Border Style="{StaticResource Panel.Card}" Margin="0,20,0,0">
           <Grid>
             <Grid.ColumnDefinitions>
@@ -167,26 +171,13 @@
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Margin="0,0,16,0">
-              <TextBlock Text="Verificação semanal" Style="{StaticResource Text.H2}"/>
+              <TextBlock Text="Agendamentos" Style="{StaticResource Text.H2}"/>
               <TextBlock Text="{Binding ScheduleText}" Style="{StaticResource Text.Body}" Margin="0,4,0,0"/>
               <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
-                         Text="Somente leitura: gera um relatório e não muda nada. O NEXUS nunca agenda mudanças; aplicar é sempre com você presente."/>
+                         Text="A verificação só lê o PC. A limpeza segura agendada é opcional (desligada por padrão): só caches e temporários da sua conta, para a quarentena, com desfazer."/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-              <ComboBox ItemsSource="{x:Static vm:AutomationPage.ScheduleChoices}" SelectedItem="{Binding SelectedSchedule}" MinWidth="120" Margin="0,0,10,0"/>
-              <ToggleButton IsChecked="{Binding ScheduleOn, Mode=OneWay}" Command="{Binding ToggleScheduleCommand}" MinWidth="110">
-                <ToggleButton.Style>
-                  <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-                    <Setter Property="Content" Value="Desligada"/>
-                    <Style.Triggers>
-                      <Trigger Property="IsChecked" Value="True">
-                        <Setter Property="Content" Value="Ligada"/>
-                      </Trigger>
-                    </Style.Triggers>
-                  </Style>
-                </ToggleButton.Style>
-              </ToggleButton>
-            </StackPanel>
+            <Button Grid.Column="1" Content="Configurar em Ajustes" Style="{StaticResource Button.Secondary}" VerticalAlignment="Center"
+                    Command="{Binding OpenSettingsCommand}"/>
           </Grid>
         </Border>
       </StackPanel>

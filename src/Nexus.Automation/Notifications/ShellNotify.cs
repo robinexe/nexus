@@ -127,6 +127,12 @@ public sealed unsafe partial class NotifyIconHandle : IDisposable
         return new NotifyIconHandle(hwnd, id, callbackMessage, icon, tip) { _ownsIcon = owns };
     }
 
+    /// <summary>Mensagem que o Explorador envia a todas as janelas quando a barra de tarefas é recriada (re-adicionar o ícone).</summary>
+    public static uint TaskbarCreatedMessage() => RegisterWindowMessageW("TaskbarCreated");
+
+    [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial uint RegisterWindowMessageW(string message);
+
     /// <summary>Evento (LOWORD de lParam) de uma mensagem do ícone na versão 4.</summary>
     public static int EventOf(nint lParam) => (int)(lParam & 0xFFFF);
 
