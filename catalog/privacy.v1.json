@@ -1,0 +1,2490 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Privacidade. Cada ação tem fonte real em 'evidence'. Escritas em SOFTWARE\\Policies usam o handler PrivacyPolicyValue, que só aceita a lista fechada de chaves e valores codificada em Nexus.Privacy (o catálogo não consegue ampliá-la). 'privacyItems' agrupa ações em itens da página; 'privacyInfo' são itens só de leitura. Gerado por ferramenta de autoria e revisado à mão.",
+  "actions": [
+    {
+      "id": "privacy.telemetry.required",
+      "version": 1,
+      "title": "Dados de diagnóstico: só os obrigatórios",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "name": "AllowTelemetry",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Política AllowTelemetry = 1 (Required). O valor 0 (Security) só é aceito no Enterprise/Education/Server; em Home/Pro o Windows o trata como 1. A política também impede que o nível seja aumentado pelas Configurações.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system#allowtelemetry"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/configure-windows-diagnostic-data-in-your-organization#diagnostic-data-settings"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-feedback"
+        }
+      ],
+      "risks": "Baixo. Não afeta o Windows Update nem a segurança: os dados obrigatórios continuam sendo enviados (é o mínimo do Home/Pro). Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.feedback.frequency.never",
+      "version": 1,
+      "title": "Frequência de feedback: nunca (contagem)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Siuf\\Rules",
+        "name": "NumberOfSIUFInPeriod",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "NumberOfSIUFInPeriod = 0 junto com PeriodInNanoSeconds = 0 corresponde a \"Nunca\" em Configurações > Privacidade > Diagnóstico e comentários > Frequência de comentários.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-feedback"
+        }
+      ],
+      "risks": "Nenhum conhecido.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.feedback.period.never",
+      "version": 1,
+      "title": "Frequência de feedback: nunca (período)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Siuf\\Rules",
+        "name": "PeriodInNanoSeconds",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Par do valor anterior: período 0 = nunca perguntar.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-feedback"
+        }
+      ],
+      "risks": "Nenhum conhecido.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.feedback.notifications.off",
+      "version": 1,
+      "title": "Não mostrar notificações de feedback",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "name": "DoNotShowFeedbackNotifications",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Não mostrar notificações de comentários\" (DoNotShowFeedbackNotifications = 1).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-feedback"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#donotshowfeedbacknotifications"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.tailored.user-setting.off",
+      "version": 1,
+      "title": "Experiências personalizadas: desligado (Configurações)",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Privacy",
+        "name": "TailoredExperiencesWithDiagnosticDataEnabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "É o valor que o interruptor \"Experiências personalizadas\" das Configurações grava. O registro em si não é documentado pela Microsoft (o efeito é o mesmo da política abaixo, que é documentada).",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowtailoredexperienceswithdiagnosticdata"
+        }
+      ],
+      "risks": "Nenhum conhecido.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.tailored.policy.off",
+      "version": 1,
+      "title": "Não usar diagnóstico para experiências personalizadas (política)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+        "name": "DisableTailoredExperiencesWithDiagnosticData",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 15063
+      },
+      "mechanism": "Política de usuário \"Não usar dados de diagnóstico para experiências personalizadas\". Vale no Pro, Enterprise e Education.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-feedback"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowtailoredexperienceswithdiagnosticdata"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.ceip.off",
+      "version": 1,
+      "title": "Desligar o CEIP do Windows",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\SQMClient\\Windows",
+        "name": "CEIPEnable",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Desativar o Programa de Aperfeiçoamento da Experiência do Usuário do Windows\" (CEIPEnable = 0).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-icm#ceipenable"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.appdiag.deny",
+      "version": 1,
+      "title": "Negar diagnóstico de apps a outros apps",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+        "name": "LetAppsGetDiagnosticInfo",
+        "type": "DWord"
+      },
+      "desiredValue": 2,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Permitir que aplicativos do Windows acessem informações de diagnóstico sobre outros aplicativos\" = Forçar negação (2).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-diag"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#letappsgetdiagnosticinfo"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.wer.off",
+      "version": 1,
+      "title": "Desligar o Relatório de Erros (usuário)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\Windows Error Reporting",
+        "name": "Disabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 1,
+      "mechanism": "Valor Disabled = 1 em HKCU\\Software\\Microsoft\\Windows\\Windows Error Reporting (configuração documentada do WER, por usuário).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/wer/wer-settings"
+        }
+      ],
+      "risks": "Médio para diagnóstico: travamentos deixam de gerar relatório. Não afeta despejos de tela azul do sistema.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.adid.user.off",
+      "version": 1,
+      "title": "ID de publicidade desligado (Configurações)",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",
+        "name": "Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Valor por usuário que o interruptor \"Permitir que aplicativos mostrem anúncios personalizados usando meu ID de publicidade\" grava. A Microsoft documenta o mesmo valor na chave de máquina (HKLM).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-general"
+        },
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Nenhum conhecido.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.adid.policy.off",
+      "version": 1,
+      "title": "Desativar o ID de publicidade (política)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AdvertisingInfo",
+        "name": "DisabledByGroupPolicy",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Desativar a ID de publicidade\" (DisabledByGroupPolicy = 1): vale para todos os usuários do PC.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-general"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#disableadvertisingid"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.language-list.optout",
+      "version": 1,
+      "title": "Não enviar lista de idiomas aos sites",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\International\\User Profile",
+        "name": "HttpAcceptLanguageOptOut",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 1,
+      "mechanism": "HttpAcceptLanguageOptOut = 1 (Configurações > Privacidade > Geral).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-general"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.start.off",
+      "version": 1,
+      "title": "Sugestões no Iniciar desligadas",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338388Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "compatibility": {
+        "maxBuild": 19045
+      },
+      "mechanism": "Valor do ContentDeliveryManager que o interruptor \"Mostrar sugestões ocasionalmente no Iniciar\" grava. Não documentado pela Microsoft; a política equivalente (experiências do consumidor) só vale no Enterprise/Education.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_10/Module/Sophia.psm1"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowwindowsconsumerfeatures"
+        }
+      ],
+      "risks": "Baixo. Atualizações grandes do Windows às vezes religam: o NEXUS mostra o item como exposto de novo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.start-iris.off",
+      "version": 1,
+      "title": "Recomendações no Iniciar desligadas",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "Start_IrisRecommendations",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "compatibility": {
+        "minBuild": 22621
+      },
+      "mechanism": "Valor que o interruptor de Configurações > Personalização > Iniciar grava (Windows 11 22H2+). Não documentado pela Microsoft como registro.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#33-recommendations"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.tips.off",
+      "version": 1,
+      "title": "Dicas e sugestões desligadas",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338389Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Valor do ContentDeliveryManager do interruptor \"Obter dicas e sugestões ao usar o Windows\". A política equivalente (DisableSoftLanding) só vale no Enterprise/Education.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowwindowstips"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.settings-338393.off",
+      "version": 1,
+      "title": "Conteúdo sugerido nas Configurações (1/3)",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338393Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Um dos três valores do interruptor \"Mostrar conteúdo sugerido no app Configurações\" (ContentDeliveryManager). Não documentado pela Microsoft como registro.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.settings-353694.off",
+      "version": 1,
+      "title": "Conteúdo sugerido nas Configurações (2/3)",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-353694Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Um dos três valores do interruptor \"Mostrar conteúdo sugerido no app Configurações\" (ContentDeliveryManager). Não documentado pela Microsoft como registro.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.settings-353696.off",
+      "version": 1,
+      "title": "Conteúdo sugerido nas Configurações (3/3)",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-353696Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Um dos três valores do interruptor \"Mostrar conteúdo sugerido no app Configurações\" (ContentDeliveryManager). Não documentado pela Microsoft como registro.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.silent-apps.off",
+      "version": 1,
+      "title": "Não instalar apps sugeridos automaticamente",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SilentInstalledAppsEnabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "SilentInstalledAppsEnabled = 0 no ContentDeliveryManager. A política equivalente (experiências do consumidor) só vale no Enterprise/Education.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowwindowsconsumerfeatures"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.welcome.off",
+      "version": 1,
+      "title": "Sem experiência de boas-vindas após atualizações",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-310093Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Valor do interruptor \"Mostrar a experiência de boas-vindas do Windows após atualizações\" (ContentDeliveryManager).",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.finish-setup.off",
+      "version": 1,
+      "title": "Sem \"concluir a configuração do dispositivo\"",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\UserProfileEngagement",
+        "name": "ScoobeSystemSettingEnabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Valor do interruptor \"Sugerir maneiras de concluir a configuração do dispositivo\".",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.third-party.off",
+      "version": 1,
+      "title": "Não sugerir conteúdo de terceiros",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+        "name": "DisableThirdPartySuggestions",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Política de usuário \"Não sugerir conteúdo de terceiros no Windows Spotlight\" (vale no Pro).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowthirdpartysuggestionsinwindowsspotlight"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.suggestions.explorer-sync.off",
+      "version": 1,
+      "title": "Sem notificações do provedor de sincronização",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "ShowSyncProviderNotifications",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Valor da opção \"Mostrar notificações do provedor de sincronização\" em Opções de Pasta > Modo de Exibição.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.activity.feed.off",
+      "version": 1,
+      "title": "Desativar o feed de atividades",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "EnableActivityFeed",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Habilita o Feed de Atividades\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-act-history"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#enableactivityfeed"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.activity.publish.off",
+      "version": 1,
+      "title": "Não publicar atividades do usuário",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "PublishUserActivities",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Permitir a publicação de Atividades do Usuário\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-act-history"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#publishuseractivities"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.activity.upload.off",
+      "version": 1,
+      "title": "Não enviar atividades do usuário",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "UploadUserActivities",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Permitir upload de Atividades do Usuário\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-act-history"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#uploaduseractivities"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.clipboard.cloud.off",
+      "version": 1,
+      "title": "Desativar sincronização da área de transferência",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "AllowCrossDeviceClipboard",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 17763
+      },
+      "mechanism": "Política \"Permitir sincronização da área de transferência entre dispositivos\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-clcp"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#allowcrossdeviceclipboard"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.activity.app-launch.off",
+      "version": 1,
+      "title": "Não rastrear inicialização de apps",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "Start_TrackProgs",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Start_TrackProgs = 0 (Configurações > Privacidade > Geral > \"Permitir que o Windows rastreie inicializações de aplicativos\").",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-general"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.activity.recent-docs.off",
+      "version": 1,
+      "title": "Não rastrear documentos recentes",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "Start_TrackDocs",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Start_TrackDocs = 0, o mesmo do interruptor \"Mostrar itens abertos recentemente no Iniciar, nas Listas de Atalhos e no Explorador de Arquivos\".",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#33-recommendations"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.search.bing.off",
+      "version": 1,
+      "title": "Pesquisa do Iniciar sem Bing (Configurações)",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        "name": "BingSearchEnabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "BingSearchEnabled = 0. Funciona no Windows 10; versões recentes do Windows 11 podem ignorar (por isso o item também usa a política abaixo).",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.search.box-suggestions.off",
+      "version": 1,
+      "title": "Desativar sugestões da caixa de pesquisa (política)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
+        "name": "DisableSearchBoxSuggestions",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 19041
+      },
+      "mechanism": "Política de usuário \"Desativar a exibição de entradas de pesquisa recentes na caixa de pesquisa do Explorador de Arquivos\". A documentação descreve as sugestões do Explorador; no Windows 10 2004+ e no 11 ela também tira os resultados da web do Iniciar (comportamento observado, não documentado).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-windowsexplorer#disablesearchboxsuggestions"
+        },
+        {
+          "level": "Observed",
+          "source": "https://github.com/farag2/Sophia-Script-for-Windows/blob/master/src/Sophia_Script_for_Windows_11/Module/Sophia.psm1"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.search.highlights.off",
+      "version": 1,
+      "title": "Desativar destaques da pesquisa",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+        "name": "EnableDynamicContentInWSB",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 19042
+      },
+      "mechanism": "Política \"Permitir destaques da pesquisa\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search#allowsearchhighlights"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.search.location.off",
+      "version": 1,
+      "title": "Pesquisa sem localização",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+        "name": "AllowSearchToUseLocation",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Permitir que a pesquisa e a Cortana usem o local\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-cortana-gp"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search#allowsearchtouselocation"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.cortana.off",
+      "version": 1,
+      "title": "Desativar a Cortana",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+        "name": "AllowCortana",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Permitir a Cortana\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-cortana-gp"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowcortana"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.search.cloud.off",
+      "version": 1,
+      "title": "Pesquisa sem fontes da nuvem",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+        "name": "AllowCloudSearch",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 16299
+      },
+      "mechanism": "Política \"Permitir a Pesquisa na Nuvem\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search#allowcloudsearch"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.copilot.off",
+      "version": 1,
+      "title": "Desativar o Windows Copilot",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+        "name": "TurnOffWindowsCopilot",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 19044
+      },
+      "mechanism": "Política de usuário \"Desativar o Windows Copilot\" (obsoleta segundo a Microsoft; ainda respeitada nas versões que têm o painel).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai#turnoffwindowscopilot"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.recall.snapshots.off",
+      "version": 1,
+      "title": "Não salvar capturas para o Recall",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+        "name": "DisableAIDataAnalysis",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 26100
+      },
+      "mechanism": "Política \"Desativar o salvamento de instantâneos para uso com o Recall\" (DisableAIDataAnalysis = 1), escopo de usuário.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai#disableaidataanalysis"
+        }
+      ],
+      "risks": "Capturas existentes do Recall são apagadas pelo Windows e não voltam ao desfazer. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.widgets.off",
+      "version": 1,
+      "title": "Desativar Widgets",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Dsh",
+        "name": "AllowNewsAndInterests",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 22000
+      },
+      "mechanism": "Política \"Permitir widgets\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-newsandinterests#allownewsandinterests"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-widgets"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.news-interests.off",
+      "version": 1,
+      "title": "Desativar notícias e interesses",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Feeds",
+        "name": "EnableFeeds",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "compatibility": {
+        "maxBuild": 19045
+      },
+      "mechanism": "Política \"Habilitar notícias e interesses na barra de tarefas\" desabilitada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-news"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.inking.text-collection.off",
+      "version": 1,
+      "title": "Restringir coleta implícita de texto",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\InputPersonalization",
+        "name": "RestrictImplicitTextCollection",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 1,
+      "mechanism": "RestrictImplicitTextCollection = 1.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-ink"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.inking.ink-collection.off",
+      "version": 1,
+      "title": "Restringir coleta implícita de escrita à mão",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\InputPersonalization",
+        "name": "RestrictImplicitInkCollection",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 1,
+      "mechanism": "RestrictImplicitInkCollection = 1.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-ink"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.inking.linguistic-data.off",
+      "version": 1,
+      "title": "Não enviar dados linguísticos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\TextInput",
+        "name": "AllowLinguisticDataCollection",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Política \"Melhorar o reconhecimento de escrita à tinta e digitação\" desabilitada. O valor fica fora de SOFTWARE\\Policies (CurrentVersion\\Policies\\TextInput), como documentado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-textinput#allowlinguisticdatacollection"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-ink"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.speech.online.off",
+      "version": 1,
+      "title": "Reconhecimento de fala online desligado",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Speech_OneCore\\Settings\\OnlineSpeechPrivacy",
+        "name": "HasAccepted",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "HasAccepted = 0 (Configurações > Privacidade > Fala).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-speech"
+        }
+      ],
+      "risks": "Baixo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.voice.activation.deny",
+      "version": 1,
+      "title": "Negar ativação por voz",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+        "name": "LetAppsActivateWithVoice",
+        "type": "DWord"
+      },
+      "desiredValue": 2,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 17134
+      },
+      "mechanism": "Política \"Permitir que aplicativos do Windows sejam ativados por voz\" = Forçar negação.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-voice-act"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#letappsactivatewithvoice"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.voice.activation-lock.deny",
+      "version": 1,
+      "title": "Negar ativação por voz com o PC bloqueado",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+        "name": "LetAppsActivateWithVoiceAboveLock",
+        "type": "DWord"
+      },
+      "desiredValue": 2,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 17134
+      },
+      "mechanism": "Política \"Permitir que aplicativos do Windows sejam ativados por voz enquanto o sistema está bloqueado\" = Forçar negação.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-voice-act"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#letappsactivatewithvoiceabovelock"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.maps.auto-update.off",
+      "version": 1,
+      "title": "Não atualizar mapas automaticamente",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Maps",
+        "name": "AutoDownloadAndUpdateMapData",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Desativar o download e a atualização automáticos de dados de mapas\".",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-offlinemaps"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.maps.settings-traffic.off",
+      "version": 1,
+      "title": "Sem tráfego de mapas na página de Configurações",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Maps",
+        "name": "AllowUntriggeredNetworkTrafficOnSettingsPage",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Desativar o tráfego de rede não solicitado na página de configurações de Mapas Offline\".",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-offlinemaps"
+        }
+      ],
+      "risks": "Nenhum conhecido. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.messaging.cloud-sync.off",
+      "version": 1,
+      "title": "Sem sincronização de mensagens na nuvem",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Microsoft\\Messaging",
+        "name": "CloudServiceSyncEnabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "CloudServiceSyncEnabled = 0.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-syncsettings"
+        }
+      ],
+      "risks": "Nenhum conhecido.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.sync.disable",
+      "version": 1,
+      "title": "Não sincronizar configurações",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync",
+        "name": "DisableSettingSync",
+        "type": "DWord"
+      },
+      "desiredValue": 2,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Não sincronizar\" (DisableSettingSync = 2).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-syncsettings"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-settingsync#disablesettingsync"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.sync.no-user-override",
+      "version": 1,
+      "title": "Não deixar o usuário religar a sincronização",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync",
+        "name": "DisableSettingSyncUserOverride",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Complemento da política: caixa \"Permitir que os usuários ativem a sincronização\" desmarcada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-syncsettings"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.background-apps.deny",
+      "version": 1,
+      "title": "Negar apps em segundo plano",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+        "name": "LetAppsRunInBackground",
+        "type": "DWord"
+      },
+      "desiredValue": 2,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Permitir que aplicativos do Windows sejam executados em segundo plano\" = Forçar negação.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-background"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#letappsruninbackground"
+        }
+      ],
+      "risks": "Médio: notificações de apps da Store param. Não melhora o FPS de forma mensurável. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.location.off",
+      "version": 1,
+      "title": "Desativar a localização",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\LocationAndSensors",
+        "name": "DisableLocation",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Desativar a localização\".",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#bkmk-priv-location"
+        }
+      ],
+      "risks": "Médio: perda real de funções. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.findmydevice.off",
+      "version": 1,
+      "title": "Desativar Encontrar meu dispositivo",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\FindMyDevice",
+        "name": "AllowFindMyDevice",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 15063
+      },
+      "mechanism": "Política \"Ativar/desativar Encontrar meu dispositivo\" desativada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#find-my-device"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience#allowfindmydevice"
+        }
+      ],
+      "risks": "Médio para notebooks. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.edge.diagnostic.required",
+      "version": 1,
+      "title": "Edge: diagnóstico só obrigatório",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "DiagnosticData",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Política DiagnosticData = 1 (RequiredData). Requer Edge 122 ou mais novo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/diagnosticdata"
+        }
+      ],
+      "risks": "Baixo. Por ser política do Edge, o navegador passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é só um aviso; nenhuma empresa passa a controlar o PC). Sem o Edge instalado, o valor fica guardado e não faz nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.edge.personalization.off",
+      "version": 1,
+      "title": "Edge: sem personalização por histórico",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "PersonalizationReportingEnabled",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política PersonalizationReportingEnabled = 0. Requer Edge 80 ou mais novo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/personalizationreportingenabled"
+        }
+      ],
+      "risks": "Baixo. Por ser política do Edge, o navegador passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é só um aviso; nenhuma empresa passa a controlar o PC). Sem o Edge instalado, o valor fica guardado e não faz nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.edge.recommendations.off",
+      "version": 1,
+      "title": "Edge: sem recomendações",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "ShowRecommendationsEnabled",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política ShowRecommendationsEnabled = 0. Requer Edge 89 ou mais novo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/showrecommendationsenabled"
+        }
+      ],
+      "risks": "Baixo. Por ser política do Edge, o navegador passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é só um aviso; nenhuma empresa passa a controlar o PC). Sem o Edge instalado, o valor fica guardado e não faz nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.edge.feedback.off",
+      "version": 1,
+      "title": "Edge: sem feedback",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "UserFeedbackAllowed",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política UserFeedbackAllowed = 0. Requer Edge 77 ou mais novo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/userfeedbackallowed"
+        }
+      ],
+      "risks": "Baixo. Por ser política do Edge, o navegador passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é só um aviso; nenhuma empresa passa a controlar o PC). Sem o Edge instalado, o valor fica guardado e não faz nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.edge.shopping.off",
+      "version": 1,
+      "title": "Edge: sem assistente de compras",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "EdgeShoppingAssistantEnabled",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política EdgeShoppingAssistantEnabled = 0. Requer Edge 87 ou mais novo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/edgeshoppingassistantenabled"
+        }
+      ],
+      "risks": "Baixo. Por ser política do Edge, o navegador passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é só um aviso; nenhuma empresa passa a controlar o PC). Sem o Edge instalado, o valor fica guardado e não faz nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.edge.dnt.on",
+      "version": 1,
+      "title": "Edge: enviar Do Not Track",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "ConfigureDoNotTrack",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "mechanism": "Política ConfigureDoNotTrack = 1. Requer Edge 77 ou mais novo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/configuredonottrack"
+        }
+      ],
+      "risks": "Baixo. Por ser política do Edge, o navegador passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é só um aviso; nenhuma empresa passa a controlar o PC). Sem o Edge instalado, o valor fica guardado e não faz nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.edge.search-suggest.off",
+      "version": 1,
+      "title": "Edge: sem sugestões de pesquisa",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "SearchSuggestEnabled",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Política SearchSuggestEnabled = 0. Requer Edge 77 ou mais novo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/searchsuggestenabled"
+        }
+      ],
+      "risks": "Baixo. Por ser política do Edge, o navegador passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é só um aviso; nenhuma empresa passa a controlar o PC). Sem o Edge instalado, o valor fica guardado e não faz nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.office.telemetry.neither",
+      "version": 1,
+      "title": "Office: diagnóstico \"Nenhum\"",
+      "classification": "Conditional",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Policies\\Microsoft\\office\\common\\clienttelemetry",
+        "name": "SendTelemetry",
+        "type": "DWord"
+      },
+      "desiredValue": 3,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Configurar o nível de dados de diagnóstico do software cliente enviados pelo Office\" = 3 (Neither). Documentada para o Microsoft 365 Apps; em outras edições do Office o efeito pode variar. Dados de serviço obrigatórios continuam sendo enviados.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/microsoft-365-apps/privacy/manage-privacy-controls#control-privacy-settings-by-editing-the-registry"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    },
+    {
+      "id": "privacy.office.optional-connected.off",
+      "version": 1,
+      "title": "Office: sem experiências conectadas opcionais",
+      "classification": "Conditional",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "SOFTWARE\\Policies\\Microsoft\\office\\16.0\\common\\privacy",
+        "name": "ControllerConnectedServicesEnabled",
+        "type": "DWord"
+      },
+      "desiredValue": 2,
+      "desiredType": "DWord",
+      "mechanism": "Política \"Permitir o uso de experiências conectadas opcionais adicionais no Office\" = 2 (desabilitado). Documentada para o Microsoft 365 Apps.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/microsoft-365-apps/privacy/manage-privacy-controls#control-privacy-settings-by-editing-the-registry"
+        }
+      ],
+      "risks": "Baixo. Por ser uma política, a tela correspondente das Configurações passa a mostrar \"Algumas configurações são gerenciadas pela sua organização\" e o ajuste não muda mais por lá enquanto ela existir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no registro.",
+      "revert": "Restaurar o valor anterior registrado no diário; se não existia, remover o valor (e a chave, se o NEXUS a criou e ela continua vazia)."
+    }
+  ],
+  "privacyItems": [
+    {
+      "id": "privacy.item.telemetry",
+      "theme": "Telemetria e diagnóstico",
+      "title": "Dados de diagnóstico no mínimo (Obrigatórios)",
+      "summary": "Fixa os dados de diagnóstico do Windows em \"Obrigatórios\" e desliga os opcionais (uso de apps, sites, despejos de memória completos). No Windows Home e Pro o mínimo possível é \"Obrigatórios\": o nível \"Desligado (Segurança)\" só existe no Enterprise, Education e Server, por isso o NEXUS não o usa.",
+      "loses": "O Programa Windows Insider exige dados opcionais. O Visualizador de Dados de Diagnóstico fica com menos coisa para mostrar.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.telemetry.required"
+      ],
+      "protectedValues": {
+        "privacy.telemetry.required": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "id": "privacy.item.feedback",
+      "theme": "Telemetria e diagnóstico",
+      "title": "Pedidos de feedback do Windows",
+      "summary": "Para de perguntar \"Como está sua experiência com o Windows?\" e similares.",
+      "loses": "Nada relevante. O Hub de Feedback continua funcionando quando você o abre por conta própria.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.feedback.frequency.never",
+        "privacy.feedback.period.never",
+        "privacy.feedback.notifications.off"
+      ]
+    },
+    {
+      "id": "privacy.item.tailored",
+      "theme": "Telemetria e diagnóstico",
+      "title": "Experiências personalizadas com seus dados de diagnóstico",
+      "summary": "Impede que a Microsoft use os dados de diagnóstico para escolher dicas, ofertas e recomendações para você.",
+      "loses": "Nada relevante: as dicas podem continuar aparecendo, só deixam de ser personalizadas.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.tailored.user-setting.off",
+        "privacy.tailored.policy.off"
+      ]
+    },
+    {
+      "id": "privacy.item.ceip",
+      "theme": "Telemetria e diagnóstico",
+      "title": "Programa de Aperfeiçoamento da Experiência (CEIP)",
+      "summary": "Desliga o antigo Programa de Aperfeiçoamento da Experiência do Usuário do Windows.",
+      "loses": "Nada. No Windows 10/11 o CEIP foi praticamente substituído pelos dados de diagnóstico: o efeito é pequeno, mas não há perda.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.ceip.off"
+      ]
+    },
+    {
+      "id": "privacy.item.appdiag",
+      "theme": "Telemetria e diagnóstico",
+      "title": "Apps lendo diagnóstico de outros apps",
+      "summary": "Bloqueia que apps da Microsoft Store leiam informações de diagnóstico sobre outros apps em execução.",
+      "loses": "Apps da Store que monitoram outros apps (raros) deixam de ver essas informações. Programas tradicionais (.exe) não são afetados.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.appdiag.deny"
+      ]
+    },
+    {
+      "id": "privacy.item.wer",
+      "theme": "Telemetria e diagnóstico",
+      "title": "Relatório de Erros do Windows (WER)",
+      "summary": "Desliga o envio de relatórios de travamento de programas para a Microsoft na sua conta.",
+      "loses": "Você perde as soluções sugeridas após travamentos e o histórico de problemas no Monitor de Confiabilidade. Fabricantes deixam de receber o relatório do seu travamento, o que pode atrasar correções de jogos e drivers.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.wer.off"
+      ],
+      "warning": "Se você costuma pedir ajuda ao suporte de jogos, deixe ligado: os relatórios ajudam a diagnosticar."
+    },
+    {
+      "id": "privacy.item.adid",
+      "theme": "Anúncios e sugestões",
+      "title": "ID de publicidade",
+      "summary": "Desliga o identificador que apps usam para mostrar anúncios personalizados entre apps.",
+      "loses": "Nada: apps com anúncios continuam com anúncios, só deixam de cruzar seus dados entre apps.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.adid.user.off",
+        "privacy.adid.policy.off"
+      ]
+    },
+    {
+      "id": "privacy.item.language",
+      "theme": "Anúncios e sugestões",
+      "title": "Sites lendo sua lista de idiomas",
+      "summary": "Impede que sites usem a lista de idiomas do Windows para escolher conteúdo local.",
+      "loses": "Alguns sites podem abrir no idioma errado na primeira visita.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.language-list.optout"
+      ]
+    },
+    {
+      "id": "privacy.item.start-suggestions",
+      "theme": "Anúncios e sugestões",
+      "title": "Sugestões de apps no Iniciar (Windows 10)",
+      "summary": "Remove os apps \"sugeridos\" (propaganda) da lista do Iniciar no Windows 10.",
+      "loses": "Nada.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.start.off"
+      ]
+    },
+    {
+      "id": "privacy.item.start-recommendations",
+      "theme": "Anúncios e sugestões",
+      "title": "Recomendações de dicas e apps no Iniciar (Windows 11)",
+      "summary": "Desliga \"Mostrar recomendações de dicas, atalhos, novos aplicativos e muito mais\" no Iniciar do Windows 11.",
+      "loses": "Nada relevante: arquivos recentes continuam (são outro item).",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.start-iris.off"
+      ]
+    },
+    {
+      "id": "privacy.item.tips",
+      "theme": "Anúncios e sugestões",
+      "title": "Dicas e sugestões ao usar o Windows",
+      "summary": "Para de mostrar notificações de \"dicas, truques e sugestões\".",
+      "loses": "Nada relevante.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.tips.off"
+      ]
+    },
+    {
+      "id": "privacy.item.settings-suggestions",
+      "theme": "Anúncios e sugestões",
+      "title": "Conteúdo sugerido no app Configurações",
+      "summary": "Remove sugestões e propagandas que aparecem dentro do app Configurações.",
+      "loses": "Nada.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.settings-338393.off",
+        "privacy.suggestions.settings-353694.off",
+        "privacy.suggestions.settings-353696.off"
+      ]
+    },
+    {
+      "id": "privacy.item.silent-apps",
+      "theme": "Anúncios e sugestões",
+      "title": "Instalação automática de apps sugeridos",
+      "summary": "Impede que o Windows instale sozinho apps promovidos (jogos casuais, apps parceiros) no seu perfil.",
+      "loses": "Nada. Não desinstala o que já veio; para isso use a página Programas.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.silent-apps.off"
+      ]
+    },
+    {
+      "id": "privacy.item.welcome",
+      "theme": "Anúncios e sugestões",
+      "title": "Boas-vindas e \"concluir configuração\" após atualizações",
+      "summary": "Para de mostrar a tela \"Vamos terminar de configurar seu dispositivo\" e a experiência de boas-vindas depois de atualizações, que empurram conta Microsoft, OneDrive e Microsoft 365.",
+      "loses": "Nada relevante.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.welcome.off",
+        "privacy.suggestions.finish-setup.off"
+      ]
+    },
+    {
+      "id": "privacy.item.third-party",
+      "theme": "Anúncios e sugestões",
+      "title": "Sugestões de terceiros no Windows Spotlight",
+      "summary": "Bloqueia sugestões de apps e conteúdo de outros fabricantes na tela de bloqueio, no Iniciar e nas dicas.",
+      "loses": "Nada. Sugestões de produtos da própria Microsoft podem continuar.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.third-party.off"
+      ]
+    },
+    {
+      "id": "privacy.item.explorer-ads",
+      "theme": "Anúncios e sugestões",
+      "title": "Notificações do provedor de sincronização no Explorador",
+      "summary": "Remove os avisos de OneDrive e Microsoft 365 que aparecem no topo do Explorador de Arquivos.",
+      "loses": "Nada. O OneDrive continua funcionando normalmente.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.suggestions.explorer-sync.off"
+      ]
+    },
+    {
+      "id": "privacy.item.activity",
+      "theme": "Atividade e histórico",
+      "title": "Histórico de atividades (Linha do Tempo)",
+      "summary": "Impede o Windows de registrar e enviar seu histórico de atividades (apps, arquivos e sites abertos).",
+      "loses": "A Linha do Tempo do Windows 10 e o \"continuar de onde parou\" entre PCs deixam de funcionar. No Windows 11 a Linha do Tempo já não existe.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.activity.feed.off",
+        "privacy.activity.publish.off",
+        "privacy.activity.upload.off"
+      ]
+    },
+    {
+      "id": "privacy.item.clipboard",
+      "theme": "Atividade e histórico",
+      "title": "Área de transferência na nuvem",
+      "summary": "Impede que o que você copia seja enviado à nuvem para colar em outros dispositivos.",
+      "loses": "Copiar num PC e colar em outro deixa de funcionar. O histórico local (Win+V) continua.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.clipboard.cloud.off"
+      ]
+    },
+    {
+      "id": "privacy.item.app-tracking",
+      "theme": "Atividade e histórico",
+      "title": "Rastreamento de apps abertos",
+      "summary": "Para de registrar quais programas você abre para montar a lista \"Mais usados\" e priorizar a pesquisa.",
+      "loses": "A lista \"Mais usados\" do Iniciar fica vazia e a pesquisa deixa de priorizar seus apps frequentes.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.activity.app-launch.off"
+      ]
+    },
+    {
+      "id": "privacy.item.recent-docs",
+      "theme": "Atividade e histórico",
+      "title": "Itens abertos recentemente",
+      "summary": "Para de mostrar arquivos recentes no Iniciar, nas Listas de Atalhos e no Acesso rápido do Explorador.",
+      "loses": "Você perde os atalhos para arquivos recentes (Iniciar, barra de tarefas, Explorador). É conveniência, não segurança.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.activity.recent-docs.off"
+      ]
+    },
+    {
+      "id": "privacy.item.web-search",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Bing e resultados da web na pesquisa do Iniciar",
+      "summary": "Faz a pesquisa do Iniciar procurar só no PC, sem mandar o que você digita para o Bing.",
+      "loses": "A pesquisa do Iniciar deixa de mostrar resultados da web. O Explorador para de sugerir pesquisas recentes na caixa de busca.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.search.bing.off",
+        "privacy.search.box-suggestions.off"
+      ]
+    },
+    {
+      "id": "privacy.item.search-highlights",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Destaques da pesquisa",
+      "summary": "Remove as imagens e \"curiosidades do dia\" da caixa e da página inicial da pesquisa.",
+      "loses": "Nada relevante.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.search.highlights.off"
+      ]
+    },
+    {
+      "id": "privacy.item.search-location",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Pesquisa usando sua localização",
+      "summary": "Impede que a pesquisa do Windows use sua localização.",
+      "loses": "Resultados \"perto de você\" na pesquisa deixam de existir.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.search.location.off"
+      ]
+    },
+    {
+      "id": "privacy.item.cortana",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Cortana",
+      "summary": "Desativa a Cortana. A pesquisa no PC continua funcionando.",
+      "loses": "Nada para a maioria: o app Cortana foi descontinuado em 2023.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.cortana.off"
+      ]
+    },
+    {
+      "id": "privacy.item.cloud-search",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Pesquisa em OneDrive e contas na nuvem",
+      "summary": "Impede a pesquisa do Windows de buscar no OneDrive, Outlook e SharePoint das suas contas.",
+      "loses": "Arquivos que estão só na nuvem deixam de aparecer na pesquisa do Iniciar.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.search.cloud.off"
+      ]
+    },
+    {
+      "id": "privacy.item.copilot",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Copilot no Windows (painel antigo)",
+      "summary": "Desativa o painel do Copilot no Windows e o ícone na barra de tarefas.",
+      "loses": "Você perde o Copilot integrado. A Microsoft avisa que esta política é obsoleta e não cobre o novo app Copilot (que pode ser desinstalado na página Programas).",
+      "profile": "Strict",
+      "actions": [
+        "privacy.copilot.off"
+      ]
+    },
+    {
+      "id": "privacy.item.recall",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Recall (capturas de tela com IA)",
+      "summary": "Impede o Recall de salvar capturas da tela para pesquisa com IA (só existe em PCs Copilot+).",
+      "loses": "Você perde o Recall. ATENÇÃO: a Microsoft documenta que, ao ativar esta política, as capturas já salvas são apagadas. Desfazer a política não as traz de volta.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.recall.snapshots.off"
+      ],
+      "warning": "Se você usa o Recall, as capturas já salvas serão apagadas pelo Windows."
+    },
+    {
+      "id": "privacy.item.widgets",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Widgets (Windows 11)",
+      "summary": "Desliga o painel de Widgets, que carrega notícias e anúncios da MSN.",
+      "loses": "Você perde o painel de Widgets (clima, notícias, placares) e o botão na barra de tarefas.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.widgets.off"
+      ]
+    },
+    {
+      "id": "privacy.item.news",
+      "theme": "Pesquisa, Copilot e IA",
+      "title": "Notícias e interesses na barra de tarefas (Windows 10)",
+      "summary": "Desliga o bloco de notícias e clima da barra de tarefas do Windows 10.",
+      "loses": "Você perde o clima e as manchetes na barra de tarefas.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.news-interests.off"
+      ]
+    },
+    {
+      "id": "privacy.item.inking",
+      "theme": "Voz, digitação e escrita",
+      "title": "Personalização de escrita à mão e digitação",
+      "summary": "Para de coletar o que você digita e escreve para montar um dicionário pessoal.",
+      "loses": "As sugestões de texto e o reconhecimento de escrita à mão deixam de aprender palavras suas (nomes, gírias).",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.inking.text-collection.off",
+        "privacy.inking.ink-collection.off"
+      ]
+    },
+    {
+      "id": "privacy.item.linguistic",
+      "theme": "Voz, digitação e escrita",
+      "title": "Envio de dados de digitação para a Microsoft",
+      "summary": "Impede o envio de amostras de digitação e escrita para melhorar o reconhecimento da Microsoft.",
+      "loses": "Nada para você; só deixa de contribuir para os modelos da Microsoft.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.inking.linguistic-data.off"
+      ]
+    },
+    {
+      "id": "privacy.item.speech",
+      "theme": "Voz, digitação e escrita",
+      "title": "Reconhecimento de fala online",
+      "summary": "Para de enviar sua voz aos servidores da Microsoft.",
+      "loses": "A digitação por voz (Win+H) e assistentes que dependem do reconhecimento na nuvem deixam de funcionar ou pioram muito. O Acesso por Voz offline continua.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.speech.online.off"
+      ]
+    },
+    {
+      "id": "privacy.item.voice-activation",
+      "theme": "Voz, digitação e escrita",
+      "title": "Apps ativados por voz",
+      "summary": "Impede que apps (assistentes de voz) fiquem escutando a palavra de ativação, inclusive com o PC bloqueado.",
+      "loses": "Assistentes ativados por voz (\"Ei, ...\") deixam de responder à palavra de ativação.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.voice.activation.deny",
+        "privacy.voice.activation-lock.deny"
+      ]
+    },
+    {
+      "id": "privacy.item.maps",
+      "theme": "Localização, sincronização e apps",
+      "title": "Download automático de mapas offline",
+      "summary": "Impede o Windows de baixar e atualizar mapas offline sozinho.",
+      "loses": "Mapas offline só atualizam quando você pedir.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.maps.auto-update.off",
+        "privacy.maps.settings-traffic.off"
+      ]
+    },
+    {
+      "id": "privacy.item.messaging",
+      "theme": "Localização, sincronização e apps",
+      "title": "Backup de mensagens na nuvem",
+      "summary": "Desliga o backup de mensagens de texto na nuvem (recurso antigo do app Mensagens).",
+      "loses": "Nada para a maioria dos PCs.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.messaging.cloud-sync.off"
+      ]
+    },
+    {
+      "id": "privacy.item.sync",
+      "theme": "Localização, sincronização e apps",
+      "title": "Sincronizar configurações entre PCs",
+      "summary": "Para de enviar tema, idiomas, senhas e outras preferências para sua conta Microsoft.",
+      "loses": "Ao entrar em outro PC com a mesma conta, suas preferências não vêm junto. No Windows 11 o \"Backup do Windows\" pode continuar oferecendo parte disso.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.sync.disable",
+        "privacy.sync.no-user-override"
+      ]
+    },
+    {
+      "id": "privacy.item.background-apps",
+      "theme": "Localização, sincronização e apps",
+      "title": "Apps da Store em segundo plano",
+      "summary": "Impede que apps da Microsoft Store rodem em segundo plano.",
+      "loses": "Apps da Store deixam de receber notificações e de atualizar em segundo plano (Mail, Phone Link, Xbox, WhatsApp da Store...). Programas tradicionais (.exe), Steam e launchers não são afetados.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.background-apps.deny"
+      ],
+      "warning": "Se você usa Phone Link, WhatsApp ou Xbox da Store, as notificações deles param."
+    },
+    {
+      "id": "privacy.item.location",
+      "theme": "Localização, sincronização e apps",
+      "title": "Serviço de localização (opcional)",
+      "summary": "Desliga a localização do Windows para todos os apps e para o próprio Windows.",
+      "loses": "Clima e mapas não acham sua cidade, o fuso horário automático e o \"Encontrar meu dispositivo\" param, e apps que pedem localização deixam de recebê-la.",
+      "profile": "Optional",
+      "actions": [
+        "privacy.location.off"
+      ],
+      "warning": "Fora dos perfis: só aplique se não usa nada que dependa de localização."
+    },
+    {
+      "id": "privacy.item.findmydevice",
+      "theme": "Localização, sincronização e apps",
+      "title": "Encontrar meu dispositivo (opcional)",
+      "summary": "Para de registrar o PC e a localização dele na nuvem para o recurso \"Encontrar meu dispositivo\".",
+      "loses": "Se o notebook for perdido ou roubado, você não consegue localizá-lo pela conta Microsoft.",
+      "profile": "Optional",
+      "actions": [
+        "privacy.findmydevice.off"
+      ],
+      "warning": "Em notebook, pense bem: é o que permite achar o aparelho roubado."
+    },
+    {
+      "id": "privacy.item.edge-diagnostic",
+      "theme": "Microsoft Edge",
+      "title": "Edge: dados de diagnóstico só obrigatórios",
+      "summary": "Desliga os dados opcionais do Edge (uso do navegador, sites visitados, relatórios de falha).",
+      "loses": "Nada relevante. O Edge continua seguro e atualizado.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.edge.diagnostic.required"
+      ],
+      "protectedValues": {
+        "privacy.edge.diagnostic.required": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "id": "privacy.item.edge-personalization",
+      "theme": "Microsoft Edge",
+      "title": "Edge: anúncios e notícias personalizados",
+      "summary": "Impede o Edge de usar seu histórico de navegação para personalizar anúncios, pesquisa e notícias.",
+      "loses": "Nada relevante: o conteúdo só fica menos personalizado.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.edge.personalization.off"
+      ]
+    },
+    {
+      "id": "privacy.item.edge-recommendations",
+      "theme": "Microsoft Edge",
+      "title": "Edge: recomendações e notificações promocionais",
+      "summary": "Desliga notificações de recomendações e promoções dentro do Edge.",
+      "loses": "Nada.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.edge.recommendations.off"
+      ]
+    },
+    {
+      "id": "privacy.item.edge-feedback",
+      "theme": "Microsoft Edge",
+      "title": "Edge: pedidos de feedback",
+      "summary": "Remove o botão e os pedidos de feedback do Edge.",
+      "loses": "Você não consegue mais enviar feedback pelo próprio Edge.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.edge.feedback.off"
+      ]
+    },
+    {
+      "id": "privacy.item.edge-shopping",
+      "theme": "Microsoft Edge",
+      "title": "Edge: assistente de compras",
+      "summary": "Desliga cupons, comparação de preços e cashback, que analisam as páginas de lojas que você visita.",
+      "loses": "Você perde os cupons e as comparações automáticas do Edge.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.edge.shopping.off"
+      ]
+    },
+    {
+      "id": "privacy.item.edge-dnt",
+      "theme": "Microsoft Edge",
+      "title": "Edge: enviar \"Não rastrear\"",
+      "summary": "Faz o Edge pedir aos sites para não rastrear você.",
+      "loses": "Nada. Honestamente, a maioria dos sites ignora esse pedido; é um sinal, não um bloqueio.",
+      "profile": "Recommended",
+      "actions": [
+        "privacy.edge.dnt.on"
+      ]
+    },
+    {
+      "id": "privacy.item.edge-search-suggest",
+      "theme": "Microsoft Edge",
+      "title": "Edge: sugestões de pesquisa enquanto digita",
+      "summary": "Para de enviar ao mecanismo de busca cada letra digitada na barra de endereço.",
+      "loses": "A barra de endereço deixa de sugerir pesquisas da web enquanto você digita (histórico e favoritos continuam).",
+      "profile": "Strict",
+      "actions": [
+        "privacy.edge.search-suggest.off"
+      ]
+    },
+    {
+      "id": "privacy.item.office-telemetry",
+      "theme": "Microsoft Office",
+      "title": "Office: dados de diagnóstico",
+      "summary": "Pede ao Office para não enviar dados de diagnóstico do cliente (nível \"Nenhum\").",
+      "loses": "Nada no uso normal. A Microsoft avisa que isso limita a capacidade dela de diagnosticar problemas do seu Office.",
+      "profile": "Strict",
+      "actions": [
+        "privacy.office.telemetry.neither"
+      ],
+      "protectedValues": {
+        "privacy.office.telemetry.neither": [
+          "1",
+          "3"
+        ]
+      }
+    },
+    {
+      "id": "privacy.item.office-optional",
+      "theme": "Microsoft Office",
+      "title": "Office: experiências conectadas opcionais",
+      "summary": "Desliga recursos opcionais do Office que dependem de serviços como o Bing (ex.: Mapas 3D, imagens online).",
+      "loses": "Você perde esses recursos opcionais (inserir imagens online, Mapas 3D, alguns recursos de pesquisa).",
+      "profile": "Strict",
+      "actions": [
+        "privacy.office.optional-connected.off"
+      ]
+    }
+  ],
+  "privacyInfo": [
+    {
+      "id": "privacy.info.camera",
+      "theme": "Permissões de apps (só leitura)",
+      "title": "Câmera",
+      "text": "Quais apps podem usar a câmera é uma escolha sua, app por app. O NEXUS só mostra o estado geral e abre a tela certa: bloquear às cegas quebra chamadas de vídeo e transmissões.",
+      "settingsUri": "ms-settings:privacy-webcam",
+      "consentStore": "webcam"
+    },
+    {
+      "id": "privacy.info.microphone",
+      "theme": "Permissões de apps (só leitura)",
+      "title": "Microfone",
+      "text": "Discord, jogos com chat de voz e OBS precisam do microfone. Revise app por app nas Configurações em vez de bloquear tudo.",
+      "settingsUri": "ms-settings:privacy-microphone",
+      "consentStore": "microphone"
+    },
+    {
+      "id": "privacy.info.location",
+      "theme": "Permissões de apps (só leitura)",
+      "title": "Localização por app",
+      "text": "Além do interruptor geral (item opcional acima), cada app pode ter a localização ligada ou desligada.",
+      "settingsUri": "ms-settings:privacy-location",
+      "consentStore": "location"
+    },
+    {
+      "id": "privacy.info.diagtrack",
+      "theme": "Serviços (outra página)",
+      "title": "Serviço de telemetria (DiagTrack)",
+      "text": "O serviço \"Experiências do Usuário Conectado e Telemetria\" é tratado na página Serviços, com detecção, aviso e desfazer próprios. Aqui ele não é duplicado: o item \"Dados de diagnóstico no mínimo\" já limita o que ele envia.",
+      "settingsUri": null,
+      "consentStore": null
+    }
+  ]
+}
