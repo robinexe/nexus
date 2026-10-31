@@ -11,6 +11,7 @@ using Nexus.Measurement.Windows;
 using Nexus.Monitoring;
 using Nexus.Monitoring.Windows;
 using Nexus.Persistence;
+using Tone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -47,6 +48,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private string _heroTitle = "Nenhum jogo aberto";
     private string _heroDetail = "";
     private string _captureNote = "";
+    private string _heroKicker = "Nenhum jogo aberto", _heroGame = "Pronto para medir", _heroFpsLabel = "Abra um jogo para ver o FPS aqui";
+    private double _heroFps = double.NaN;
     private string _liveFps = "—", _liveLow1 = "—", _liveFrametime = "—", _liveAverage = "—", _liveDelta = "", _liveClock = "";
     private IReadOnlyList<TracePoint> _liveTrace = [], _referenceTrace = [];
     private string _referenceText = "";
@@ -117,6 +120,18 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public string CaptureNote { get => _captureNote; private set => Set(ref _captureNote, value); }
     public string ManualExe { get => _manualExe; set => Set(ref _manualExe, value); }
 
+    // ------------------------------------------------------------------ destaque (só apresentação)
+
+    /// <summary>"Medindo agora", "Aberto agora", "Último jogo medido" ou "Nenhum jogo aberto".</summary>
+    public string HeroKicker { get => _heroKicker; private set => Set(ref _heroKicker, value); }
+    /// <summary>Nome do jogo em destaque (aberto, medido ou o último medido).</summary>
+    public string HeroGame { get => _heroGame; private set => Set(ref _heroGame, value); }
+    /// <summary>O número gigante: FPS do último segundo durante a medição; fora dela, o FPS médio da última partida (NaN = nenhuma).</summary>
+    public double HeroFps { get => _heroFps; private set => Set(ref _heroFps, value); }
+    public string HeroFpsLabel { get => _heroFpsLabel; private set => Set(ref _heroFpsLabel, value); }
+    /// <summary>"Como funciona" só enquanto não há nenhuma partida (e o PresentMon já está pronto).</summary>
+    public bool ShowIntro => HasPresentMon && !HasSessions;
+
     // ------------------------------------------------------------------ ao vivo
 
     public string LiveFps { get => _liveFps; private set => Set(ref _liveFps, value); }
@@ -144,7 +159,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             if (!Set(ref _comparison, value)) return;
             foreach (var p in new[] { nameof(HasComparison), nameof(ComparisonTitle), nameof(ComparisonVerdict), nameof(ComparisonTone), nameof(ComparisonRows),
                          nameof(ComparisonWarnings), nameof(ComparisonChanges), nameof(ComparisonMethod), nameof(ComparisonWhy), nameof(ComparisonBeforeTrace),
-                         nameof(ComparisonAfterTrace), nameof(ComparisonModeText) })
+                         nameof(ComparisonAfterTrace), nameof(ComparisonModeText), nameof(ComparisonToneValue), nameof(ComparisonIconKey) })
                 OnPropertyChanged(p);
         }
     }
@@ -154,6 +169,11 @@ public sealed class MeasurePage : ModulePage, IDisposable
         : "";
     public string ComparisonVerdict => Comparison?.Verdict ?? "";
     public string ComparisonTone => Comparison?.Tone ?? "Neutral";
+    /// <summary>Tom do veredito para o selo e o distintivo (verde melhorou, vermelho piorou, ciano sem diferença comprovada).</summary>
+    public Tone ComparisonToneValue => ComparisonTone switch { "Good" => Tone.Good, "Bad" => Tone.Bad, _ => Tone.Info };
+    public string ComparisonIconKey => ComparisonTone switch { "Good" => "Icon.TrendUp", "Bad" => "Icon.TrendDown", _ => "Icon.Info" };
+    /// <summary>Botão do estado vazio: só aparece enquanto a medição automática está desligada.</summary>
+    public string ComparisonEmptyAction => AutoMeasure ? "" : "Medir automaticamente";
     public string ComparisonModeText => Comparison?.Mode == "partidas" ? "Comparando partidas inteiras" : "Comparando trechos equivalentes de duas partidas";
     public IReadOnlyList<ComparisonRow> ComparisonRows => Comparison?.Result.Metrics.Select(m => new ComparisonRow(m)).ToList() ?? [];
     public IReadOnlyList<string> ComparisonWarnings => Comparison?.Warnings ?? [];
@@ -435,6 +455,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
         }
         var r = session.Read();
         LiveFps = Num(r.CurrentFps, "0");
+        HeroFps = double.IsFinite(r.CurrentFps) ? r.CurrentFps : double.NaN;
+        HeroKicker = $"Medindo agora · {TimeSpan.FromSeconds(r.ElapsedSeconds).ToString(r.ElapsedSeconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss", Pt)}";
         LiveLow1 = Num(r.Low1Fps, "0");
         LiveFrametime = Num(r.FrametimeMs, "0.0");
         LiveAverage = Num(r.AverageFps, "0");
@@ -533,8 +555,38 @@ public sealed class MeasurePage : ModulePage, IDisposable
                 ? (AutoMeasure ? "Abra um jogo: o NEXUS começa a medir sozinho." : "Ligue \"Medir automaticamente\" e abra um jogo.")
                 : $"Último jogo medido: {last.DisplayName}, em {last.CapturedAt.ToLocalTime().ToString("dd/MM 'às' HH:mm", Pt)}.";
         }
+        UpdateHeroNumbers();
         OnPropertyChanged(nameof(IsPlaying));
         OnPropertyChanged(nameof(IsCapturing));
+        OnPropertyChanged(nameof(ShowIntro));
+        OnPropertyChanged(nameof(ComparisonEmptyAction));
+    }
+
+    /// <summary>Destaque: o que está aberto/medindo e o número gigante. Só apresentação; a captura não muda.</summary>
+    private void UpdateHeroNumbers()
+    {
+        var capturing = _engine?.Session;
+        var last = _all.MaxBy(x => x.CapturedAt);
+        if (capturing is not null)
+        {
+            HeroGame = _detected?.Name ?? capturing.Game.Name;
+            if (!HeroKicker.StartsWith("Medindo", StringComparison.Ordinal)) HeroKicker = "Medindo agora";
+            HeroFpsLabel = "FPS agora";
+            return;
+        }
+        if (_detected is { } g)
+        {
+            var previous = _all.Where(x => x.Game == GameKey.Of(g.ExeName)).MaxBy(x => x.CapturedAt);
+            HeroKicker = "Aberto agora";
+            HeroGame = g.Name;
+            HeroFps = previous?.Summary.AverageFps ?? double.NaN;
+            HeroFpsLabel = previous is null ? "Primeira partida deste jogo: o FPS aparece ao medir" : "FPS médio na última partida deste jogo";
+            return;
+        }
+        HeroKicker = last is null ? "Nenhum jogo aberto" : "Último jogo medido";
+        HeroGame = last?.DisplayName ?? "Pronto para medir";
+        HeroFps = last?.Summary.AverageFps ?? double.NaN;
+        HeroFpsLabel = last is null ? "Abra um jogo para ver o FPS aqui" : "FPS médio na última partida";
     }
 
     private static string LiveClockOr(LiveSession s) => TimeSpan.FromSeconds(s.Seconds).ToString(s.Seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture);

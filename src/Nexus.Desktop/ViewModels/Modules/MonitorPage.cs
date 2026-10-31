@@ -6,6 +6,7 @@ using System.Windows.Threading;
 using Nexus.HardwareDiscovery;
 using Nexus.Monitoring;
 using Nexus.Monitoring.Windows;
+using Tone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels
 {
@@ -30,7 +31,7 @@ namespace Nexus.Desktop.ViewModels
         private string _diskHealthNote = "Lendo a saúde dos discos…";
         private string _unavailableNote = "";
         private string _cpuName = "";
-        private bool _sortByMemory;
+        private bool _sortByMemory, _warmingUp = true, _healthLoading;
         private double _gpuDedicatedTotal;
 
         public MonitorPage()
@@ -76,7 +77,18 @@ namespace Nexus.Desktop.ViewModels
         public string BottleneckTitle { get => _bottleneckTitle; private set => Set(ref _bottleneckTitle, value); }
         public string BottleneckText { get => _bottleneckText; private set => Set(ref _bottleneckText, value); }
         /// <summary>"good", "warn" ou "info".</summary>
-        public string BottleneckTone { get => _bottleneckTone; private set => Set(ref _bottleneckTone, value); }
+        public string BottleneckTone
+        {
+            get => _bottleneckTone;
+            private set { if (Set(ref _bottleneckTone, value)) { OnPropertyChanged(nameof(BottleneckToneValue)); OnPropertyChanged(nameof(BottleneckIconKey)); } }
+        }
+        /// <summary>Tom do cartão-veredito (verde folgado, âmbar limitando, ciano informação).</summary>
+        public Tone BottleneckToneValue => BottleneckTone switch { "good" => Tone.Good, "warn" => Tone.Warn, "bad" => Tone.Bad, _ => Tone.Info };
+        public string BottleneckIconKey => BottleneckTone switch { "good" => "Icon.Check", "warn" => "Icon.Warning", "bad" => "Icon.Error", _ => "Icon.Info" };
+        /// <summary>Até a primeira leitura chegar (esqueleto no lugar dos números).</summary>
+        public bool IsWarmingUp { get => _warmingUp; private set => Set(ref _warmingUp, value); }
+        /// <summary>Lendo a saúde dos discos (esqueleto no lugar da lista).</summary>
+        public bool HealthLoading { get => _healthLoading; private set => Set(ref _healthLoading, value); }
         public string TemperatureNote { get => _temperatureNote; private set => Set(ref _temperatureNote, value); }
         public string DiskHealthNote { get => _diskHealthNote; private set => Set(ref _diskHealthNote, value); }
         public string UnavailableNote { get => _unavailableNote; private set => Set(ref _unavailableNote, value); }
@@ -176,7 +188,9 @@ namespace Nexus.Desktop.ViewModels
             var s = tick.Snapshot;
 
             // CPU
+            IsWarmingUp = false;
             Cpu.Value = N0(s.Cpu.TotalPercent);
+            Cpu.Number = s.Cpu.TotalPercent;
             Cpu.Detail = s.Cpu.EffectiveMhz is { } mhz
                 ? $"{Ghz(mhz)} efetivo{(s.Cpu.BaseMhz is { } b ? $" · base {Ghz(b)}" : "")} · {s.Cpu.Cores.Count} lógicos"
                 : $"{s.Cpu.Cores.Count} processadores lógicos";
@@ -187,6 +201,7 @@ namespace Nexus.Desktop.ViewModels
             if (s.Gpu is { } g)
             {
                 Gpu.Value = N0(g.OverallPercent);
+                Gpu.Number = g.OverallPercent;
                 var mem = g.DedicatedBytes is { } d
                     ? _gpuDedicatedTotal > d ? $"VRAM {Bytes(d)} de {Bytes(_gpuDedicatedTotal)}" : $"VRAM em uso {Bytes(d)}"
                     : "VRAM sem leitura";
@@ -197,6 +212,7 @@ namespace Nexus.Desktop.ViewModels
             else
             {
                 Gpu.Value = "—";
+                Gpu.Number = double.NaN;
                 Gpu.Detail = "O Windows não expôs os contadores de GPU (exige driver WDDM 2.x).";
                 GpuEngines.Clear();
             }
@@ -206,6 +222,7 @@ namespace Nexus.Desktop.ViewModels
             if (s.Memory is { } m)
             {
                 Ram.Value = N0(m.UsedPercent);
+                Ram.Number = m.UsedPercent;
                 Ram.Detail = $"{Bytes(m.UsedBytes)} de {Bytes(m.TotalBytes)} · disponível {Bytes(m.AvailableBytes)} · cache {Bytes(m.CacheBytes)} · " +
                              $"comprometida {Bytes(m.CommitBytes)}/{Bytes(m.CommitLimitBytes)}";
             }
@@ -213,6 +230,7 @@ namespace Nexus.Desktop.ViewModels
 
             // Disco
             Disk.Value = N0(s.DiskActiveMax);
+            Disk.Number = s.DiskActiveMax;
             var read = s.Disks.Sum(x => x.ReadBytesPerSec);
             var write = s.Disks.Sum(x => x.WriteBytesPerSec);
             Disk.Detail = s.Disks.Count == 0 ? "Sem contadores de disco" : $"ativo (o mais ocupado) · leitura {Rate(read)} · escrita {Rate(write)}";
@@ -327,7 +345,10 @@ namespace Nexus.Desktop.ViewModels
         {
             _healthLoaded = true;
             DiskHealthNote = "Lendo a saúde dos discos (pode levar alguns segundos)…";
-            var report = await new WindowsDiskHealthSource().ReadAsync(CancellationToken.None);
+            HealthLoading = true;
+            DiskHealthReport report;
+            try { report = await new WindowsDiskHealthSource().ReadAsync(CancellationToken.None); }
+            finally { HealthLoading = false; }
             DiskHealth.Clear();
             foreach (var e in report.Disks) DiskHealth.Add(DiskHealthRow.From(e));
             var notes = new List<string>();
@@ -404,6 +425,7 @@ namespace Nexus.Desktop.ViewModels
     public sealed class MonitorGauge : ObservableObject
     {
         private string _value = "—", _detail = "", _unit;
+        private double _number = double.NaN;
 
         public MonitorGauge(string label, string unit, double maximum)
         {
@@ -416,6 +438,8 @@ namespace Nexus.Desktop.ViewModels
         public double Maximum { get; }
         public SparkSeries Series { get; } = new();
         public string Value { get => _value; set => Set(ref _value, value); }
+        /// <summary>O mesmo valor como número (anel do medidor); NaN = sem leitura.</summary>
+        public double Number { get => _number; set => Set(ref _number, value); }
         public string Unit { get => _unit; set => Set(ref _unit, value); }
         public string Detail { get => _detail; set => Set(ref _detail, value); }
     }
@@ -501,6 +525,15 @@ namespace Nexus.Desktop.ViewModels
     public sealed record DiskHealthRow(string Name, string Kind, string LevelText, string Tone, string Readings, string Reasons)
     {
         private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+
+        /// <summary>Tom do selo (verde ok, âmbar atenção, vermelho crítico, ciano sem leitura).</summary>
+        public Views.Controls.Tone ToneValue => Tone switch
+        {
+            "good" => Views.Controls.Tone.Good,
+            "warn" => Views.Controls.Tone.Warn,
+            "bad" => Views.Controls.Tone.Bad,
+            _ => Views.Controls.Tone.Info,
+        };
 
         public static DiskHealthRow From(DiskHealthEntry e)
         {

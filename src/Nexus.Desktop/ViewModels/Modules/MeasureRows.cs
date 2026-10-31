@@ -1,6 +1,7 @@
 using System.Globalization;
 using Nexus.Experimentation;
 using Nexus.Measurement;
+using Tone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -92,6 +93,24 @@ public sealed class ComparisonRow(MetricComparison m)
     public bool? Better => Model.Better;
     public bool Proven => Model.Verdict is Verdict.Improved or Verdict.Regressed;
     public string Sentence => Model.Sentence;
+    /// <summary>Rótulos das barras do antes/depois com a unidade ("Antes · ms").</summary>
+    public string BeforeLabel => Model.Metric.Unit == "FPS" ? "Antes" : $"Antes · {Model.Metric.Unit.TrimStart('/')}";
+    public string AfterLabel => Model.Metric.Unit == "FPS" ? "Depois" : $"Depois · {Model.Metric.Unit.TrimStart('/')}";
+    /// <summary>Selo honesto: só "Melhorou"/"Piorou" quando o teste comprova; o resto fica neutro.</summary>
+    public string VerdictText => Model.Verdict switch
+    {
+        Verdict.Improved => "Melhorou",
+        Verdict.Regressed => "Piorou",
+        Verdict.NoMeaningfulChange => "Igual na prática",
+        Verdict.Inconclusive => "Dentro da variação",
+        _ => Model.Better switch { true => "A favor do depois, sem prova", false => "A favor do antes, sem prova", _ => "Diferença pequena" },
+    };
+    public Tone VerdictTone => Model.Verdict switch
+    {
+        Verdict.Improved => Tone.Good,
+        Verdict.Regressed => Tone.Bad,
+        _ => Model.Better == false ? Tone.Warn : Tone.Info,
+    };
     public bool HigherIsBetter => Model.Metric.Direction == Direction.HigherIsBetter;
     /// <summary>Largura relativa das barras (0..1): o maior dos dois lados ocupa a barra inteira.</summary>
     public double BeforeRatio => Ratio(Model.Before);
@@ -117,6 +136,9 @@ public sealed class GameRow(GameHistory h)
     public IReadOnlyList<double> FpsTrend => Model.AverageFpsTrend;
     public IReadOnlyList<double> Low1Trend => Model.Low1Trend;
     public string LastFpsText => Model.LastAverageFps.ToString("0", Pt);
+    public double LastFps => Model.LastAverageFps;
+    /// <summary>Tendência do 1% low: verde subindo, âmbar caindo (tendência, não prova), neutro com uma partida só.</summary>
+    public Tone TrendTone => Model.Low1ChangePercent switch { >= 3 => Tone.Good, <= -3 => Tone.Warn, null => Tone.Neutral, _ => Tone.Info };
     public string LastLow1Text => Model.LastLow1Fps.ToString("0", Pt);
     /// <summary>"1% low +8% na tendência" (descritivo: tendência, não prova).</summary>
     public string TrendText => Model.Low1ChangePercent is { } c ? $"1% low {c.ToString("+0;-0;0", Pt)}% na tendência" : "uma partida só";
