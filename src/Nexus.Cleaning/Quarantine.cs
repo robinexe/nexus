@@ -274,7 +274,8 @@ internal sealed class RealQuarantineFileOps : IQuarantineFileOps
         var sameVolume = string.Equals(Path.GetPathRoot(Path.GetFullPath(source)), Path.GetPathRoot(Path.GetFullPath(destination)), StringComparison.OrdinalIgnoreCase);
         if (sameVolume)
         {
-            File.Move(source, destination, overwrite: false);
+            // Por handle (Windows): pasta-mãe sem seguir junção, presa contra renomeação, caminho final conferido, rename relativo.
+            Nexus.WindowsActions.SafeFileMover.Move(source, destination);
             return;
         }
         var partial = destination + ".partial";

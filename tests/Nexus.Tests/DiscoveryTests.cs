@@ -489,6 +489,7 @@ public sealed class DesktopReadOnlyTests
             ("ActionExecutor", ".ctor"), ("ActionExecutor", "Execute"), ("ActionExecutor", "Revert"), ("ActionExecutor", "RevertRun"),
             ("RecoveryService", ".ctor"), ("RecoveryService", "Recover"), ("FileRunCoordinator", "TryAcquire"), ("IRunCoordinator", "TryAcquire"),
             ("SqliteJournal", ".ctor"), ("IActionHandler", "Apply"), ("IActionHandler", "Restore"),
+            ("ScannerQuarantineStore", "Quarantine"), ("ScannerQuarantineStore", "Restore"), ("ScannerQuarantineStore", "WriteManifest"), ("ScannerQuarantineStore", "Discard"),
             ("BrokerClient", "Connect"), ("BrokerSession", ".ctor"), ("BrokerService", ".ctor"),
             // Revisão de segurança: os módulos têm APIs públicas que escrevem sem passar por handler/diário. A lista acima só
             // cobria o motor; a interface também não pode chamar estas.

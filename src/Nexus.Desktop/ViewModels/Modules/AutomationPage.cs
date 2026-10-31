@@ -202,6 +202,7 @@ public sealed class AutomationPage : ModulePage
             "disk." => typeof(DiskPage),
             "programs." or "apps." => typeof(ProgramsPage),
             "security." => typeof(SecurityPage),
+            "scanner." => typeof(ScannerPage),
             "system." => typeof(SystemToolsPage),
             "monitor." => typeof(MonitorPage),
             null => null,

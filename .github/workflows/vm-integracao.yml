@@ -79,6 +79,8 @@ jobs:
 
       - name: Aplicador sob demanda (como a interface aplica neste PC, sem serviço)
         shell: pwsh
+        env:
+          NEXUS_ALLOW_WRITABLE_BROKER_DIR: '1'   # a pasta bin do checkout é gravável; no produto instalado não é
         run: |
           dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter Category=LocalBrokerIntegration --logger "console;verbosity=detailed" --logger "trx;LogFileName=sob-demanda.trx" --results-directory saida
           Start-Sleep -Seconds 10   # o aplicador sob demanda encerra quando o processo de teste termina
