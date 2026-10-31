@@ -131,7 +131,11 @@ public sealed class HostsFileHandler : IActionHandler, IRestoreValidator
         var backup = _store.Load(hash, Extension);
         var current = _hosts.Read();
         var expected = _store.LoadSidecar(hash, "written");
-        if (current is not null && expected is not null && BackupStore.Hash(current) != expected.Trim())
+        // Sem o registro do que o NEXUS escreveu não há como provar que o hosts atual é o dele: recusar em vez de sobrescrever
+        // (revisão de segurança, baixo). Antes, faltando o ".written", a cópia era devolvida por cima de qualquer edição.
+        if (expected is null)
+            throw new InvalidOperationException("Falta o registro do conteúdo que o NEXUS escreveu (.written); para não apagar edições posteriores, o hosts não foi restaurado. A cópia original está em " + _store.Directory + ".");
+        if (current is not null && BackupStore.Hash(current) != expected.Trim())
             throw new InvalidOperationException("O hosts mudou depois da correção (outra edição). Para não apagar essa edição, o NEXUS não restaurou; a cópia original está em " + _store.Directory + ".");
         if (_hosts.IsReparsePoint()) throw new InvalidOperationException("O arquivo hosts virou um link; nada foi restaurado.");
         _hosts.Write(backup);
@@ -141,7 +145,14 @@ public sealed class HostsFileHandler : IActionHandler, IRestoreValidator
     {
         ArgumentNullException.ThrowIfNull(original);
         if (original.Value is null || !original.Value.StartsWith("suspicious:", StringComparison.Ordinal)) return null;
-        try { return _store.Exists(original.Value["suspicious:".Length..], Extension) ? null : "Cópia do hosts original não encontrada."; }
+        try
+        {
+            var hash = original.Value["suspicious:".Length..];
+            if (!_store.Exists(hash, Extension)) return "Cópia do hosts original não encontrada.";
+            return _store.LoadSidecar(hash, "written") is null
+                ? "Falta o registro do conteúdo que o NEXUS escreveu (.written); restaurar poderia apagar edições posteriores. Nada foi escrito."
+                : null;
+        }
         catch (ArgumentException ex) { return ex.Message; }
     }
 }

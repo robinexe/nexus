@@ -98,6 +98,14 @@ namespace Nexus.Broker.Host
                 gate = new BlockedGate("Pasta de dados do aplicador não protegida: " + unsafeData);
                 decision = gate.Evaluate();
             }
+            // A trava (nexus.lock) também: com a ACL herdada da pasta, Usuários a abririam para leitura e a segurariam (B7).
+            // O instalador do serviço já a cria assim; o aplicador elevado sob demanda cria/corrige aqui.
+            if (decision.Allowed && (self.IsSystem || facts.IsElevated == true) &&
+                AdminOnlyDirectory.EnsureLockFile(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(o.JournalPath))!, FileRunCoordinator.LockFileName)) is { } unsafeLock)
+            {
+                gate = new BlockedGate("Trava do aplicador não protegida: " + unsafeLock);
+                decision = gate.Evaluate();
+            }
 
             log($"NEXUS broker {BrokerService.Version} — pipe \\\\.\\pipe\\{o.PipeName}{(o.Service ? " (serviço)" : "")}");
             log($"Conta: {self.Name}{(asSystem ? " (HKCU = perfil de quem pede)" : "")}");

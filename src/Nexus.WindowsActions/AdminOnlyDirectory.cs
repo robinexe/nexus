@@ -100,6 +100,83 @@ public static class AdminOnlyDirectory
     }
 
     /// <summary>
+    /// Regra pura do arquivo de trava (<c>nexus.lock</c>): dono privilegiado e NENHUMA permissão (nem leitura) para contas sem
+    /// privilégio. A trava é obtida abrindo o arquivo com <c>FileShare.None</c>; quem consegue abri-lo, mesmo só para leitura,
+    /// consegue segurá-la para sempre e impedir toda recuperação (achado B7).
+    /// </summary>
+    /// <returns>null se confiável; senão o motivo.</returns>
+    public static string? EvaluateLock(string? ownerSid, IEnumerable<AccessEntry> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        if (ownerSid is null || !IsPrivileged(ownerSid)) return $"o dono ({ownerSid ?? "desconhecido"}) não é Administradores/SYSTEM";
+        foreach (var e in entries)
+            if (e.Allow && e.Rights != 0 && !IsPrivileged(e.Sid) && e.Sid != CreatorOwnerSid)
+                return $"a conta {e.Sid} consegue abrir a trava (e segurá-la)";
+        return null;
+    }
+
+    /// <summary>
+    /// Garante <c>nexus.lock</c> para o aplicador elevado sob demanda (sem o instalador do serviço, que já cria o arquivo assim):
+    /// se não existe, cria com ACL protegida só para SYSTEM e Administradores; se existe com dono privilegiado e ACL herdada
+    /// (ex.: Usuários com leitura, vinda da pasta), corrige; se o dono não é privilegiado (alguém criou antes), recusa.
+    /// Nunca segue link. Retorna null se ficou confiável; senão o motivo (o aplicador então não escreve nada).
+    /// </summary>
+    [SupportedOSPlatform("windows")]
+    public static string? EnsureLockFile(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        var file = new FileInfo(Path.GetFullPath(path));
+        try
+        {
+            if (!file.Exists && file.LinkTarget is null && !Directory.Exists(file.FullName))
+            {
+                try
+                {
+                    // Criado já com a ACL final (CreateNew: se alguém criou no meio tempo, cai na conferência abaixo).
+                    using var _ = file.Create(FileMode.CreateNew, FileSystemRights.Read | FileSystemRights.Synchronize, FileShare.ReadWrite, 4096, FileOptions.None, LockSecurity());
+                }
+                catch (IOException) when (File.Exists(file.FullName)) { }
+                file.Refresh();
+            }
+            if (!file.Exists) return $"{file.FullName} não é um arquivo.";
+            if ((file.Attributes & FileAttributes.ReparsePoint) != 0 || file.LinkTarget is not null)
+                return $"{file.FullName} é um link; o aplicador elevado não usa essa trava.";
+            var problem = CheckLock(file.GetAccessControl());
+            if (problem is null) return null;
+            var owner = file.GetAccessControl().GetOwner(typeof(SecurityIdentifier))?.Value;
+            if (owner is null || !IsPrivileged(owner))
+                return $"{file.FullName}: {problem}. Apague o arquivo (como administrador) ou reinstale o serviço do NEXUS.";
+            file.SetAccessControl(LockSecurity());
+            return CheckLock(file.GetAccessControl()) is { } still ? $"{file.FullName}: {still}." : null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or PrivilegeNotHeldException)
+        {
+            return $"Não foi possível proteger {file.FullName}: {ex.Message}";
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static FileSecurity LockSecurity()
+    {
+        var fs = new FileSecurity();
+        fs.SetOwner(new SecurityIdentifier(AdministratorsSid));
+        fs.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+        fs.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(LocalSystemSid), FileSystemRights.FullControl, AccessControlType.Allow));
+        fs.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(AdministratorsSid), FileSystemRights.FullControl, AccessControlType.Allow));
+        return fs;
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static string? CheckLock(FileSystemSecurity security)
+    {
+        var owner = security.GetOwner(typeof(SecurityIdentifier))?.Value;
+        var entries = security.GetAccessRules(includeExplicit: true, includeInherited: true, typeof(SecurityIdentifier))
+            .Cast<FileSystemAccessRule>()
+            .Select(r => new AccessEntry(r.IdentityReference.Value, (int)r.FileSystemRights, r.AccessControlType == AccessControlType.Allow));
+        return EvaluateLock(owner, entries);
+    }
+
+    /// <summary>
     /// Pasta com segredos (ex.: backups de Wi-Fi com a senha): SYSTEM e Administradores com controle total, mais ninguém (nem
     /// leitura para Usuários). Os arquivos dentro herdam. Lança exceção se não conseguir: o handler então não grava o segredo.
     /// </summary>

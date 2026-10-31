@@ -26,7 +26,7 @@ internal sealed record AppxBackup(string Name, string PackageFullName, string Pa
 /// Restore (LIMITADO): reinstala do manifesto se o pacote ainda estiver no disco (provisionado ou instalado para outra conta);
 /// senão falha com o link da Microsoft Store para reinstalar. A confirmação da página diz isso antes de remover.
 /// </summary>
-public sealed class AppxPackageHandler : IActionHandler, IRestoreValidator
+public sealed partial class AppxPackageHandler : IActionHandler, IRestoreValidator
 {
     public const string Kind = "SystemAppxPackage";
     public const string StateType = "AppxPackage";
@@ -107,10 +107,17 @@ public sealed class AppxPackageHandler : IActionHandler, IRestoreValidator
         _appx.Register(manifest);
     }
 
-    /// <summary>Só reinstala de pastas de apps do Windows (WindowsApps/SystemApps), nunca de um caminho qualquer do backup.</summary>
-    public static bool IsWindowsAppsPath(string path) =>
-        !path.Contains("..", StringComparison.Ordinal) && !path.Contains('\'', StringComparison.Ordinal) &&
-        (path.Contains(@"\WindowsApps\", StringComparison.OrdinalIgnoreCase) || path.Contains(@"\SystemApps\", StringComparison.OrdinalIgnoreCase));
+    /// <summary>
+    /// Só reinstala de pastas de apps do Windows, nunca de um caminho qualquer do backup. Estrito (revisão de segurança, baixo):
+    /// exatamente <c>X:\Program Files\WindowsApps\&lt;pacote&gt;</c>, <c>X:\WindowsApps\&lt;pacote&gt;</c> (apps movidos para outra
+    /// unidade) ou <c>X:\Windows\SystemApps\&lt;pacote&gt;</c>, com o nome da pasta do pacote sem separadores, "..", aspas ou
+    /// espaços. Antes bastava conter "\WindowsApps\" em qualquer ponto (ex.: <c>C:\Users\x\WindowsApps\evil</c>).
+    /// </summary>
+    public static bool IsWindowsAppsPath(string path) => path is not null && WindowsAppsPathPattern().IsMatch(path) && !path.Contains("..", StringComparison.Ordinal);
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"\A[A-Za-z]:\\(?:Program Files\\WindowsApps|WindowsApps|Windows\\SystemApps)\\[A-Za-z0-9][A-Za-z0-9._\-]{1,250}\z",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant)]
+    private static partial System.Text.RegularExpressions.Regex WindowsAppsPathPattern();
 
     public string? CheckRestore(ActionInstance action, StateSnapshot original)
     {

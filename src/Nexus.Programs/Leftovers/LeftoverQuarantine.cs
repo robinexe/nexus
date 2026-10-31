@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Nexus.WindowsActions;
 
 namespace Nexus.Programs.Leftovers;
 
@@ -64,6 +65,9 @@ public sealed class LeftoverQuarantine
 
     /// <summary>Protege pasta e manifesto de sobras da máquina (Windows: <see cref="QuarantineAcl.Harden"/>).</summary>
     public Action<string>? Harden { get; init; }
+
+    /// <summary>Só testes: ponto entre a conferência e o move do <see cref="SafeFileMover"/> (simula a troca por link).</summary>
+    public Action<SafeMoveStage>? Interpose { get; init; }
 
     public static string IdOf(LeftoverTarget t)
     {
@@ -214,8 +218,9 @@ public sealed class LeftoverQuarantine
         var sameVolume = !ForceCrossVolume && string.Equals(Path.GetPathRoot(Path.GetFullPath(from)), Path.GetPathRoot(Path.GetFullPath(to)), StringComparison.OrdinalIgnoreCase);
         if (sameVolume)
         {
-            if (isDir) Directory.Move(from, to);
-            else File.Move(from, to);
+            // Por handle no Windows: pasta-mãe aberta sem seguir links, caminho final conferido e rename relativo ao handle.
+            // Fecha a corrida "conferiu o caminho, uma junção entrou no lugar, moveu pelo caminho" (revisão de segurança).
+            SafeFileMover.Move(from, to, Interpose);
             return;
         }
         // Outro volume: copiar tudo, conferir cada arquivo, só então apagar a origem.
