@@ -8,6 +8,7 @@ using Nexus.Core;
 using Nexus.Desktop.Services;
 using Nexus.Security;
 using Nexus.Security.Scanner;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -40,6 +41,12 @@ public sealed class ScanFindingRow : ObservableObject
         Nexus.Security.Scanner.Verdict.Suspicious => "Warn",
         _ => "Unknown",
     };
+    /// <summary>Tom do design system: vermelho muito suspeito/na lista, âmbar suspeito, ciano teste, neutro para revisar.</summary>
+    public UiTone Tone => ScannerPage.UiToneOf(ToneKey);
+    public string IconKey => ScannerPage.IconOf(ToneKey);
+    /// <summary>Pontos de 0 a 100 (para a barrinha do cartão).</summary>
+    public double ScorePercent => Verdict.Verdict == Nexus.Security.Scanner.Verdict.KnownBad ? 100 : Math.Clamp(Verdict.Score, 0, 100);
+    public bool HasStatus => Status.Length > 0;
     public string Meta => $"{SizeText(Verdict.Size)} · " + (Verdict.ValidSignature switch
     {
         true => "assinatura digital válida",
@@ -49,7 +56,7 @@ public sealed class ScanFindingRow : ObservableObject
     public IReadOnlyList<ScanHitRow> Hits { get; init; } = [];
     public bool CanQuarantine => Verdict.Sha256 is not null;
     public bool IsSelected { get => _selected; set => Set(ref _selected, value && CanQuarantine); }
-    public string Status { get => _status; set => Set(ref _status, value); }
+    public string Status { get => _status; set { if (Set(ref _status, value)) OnPropertyChanged(nameof(HasStatus)); } }
 
     public RelayCommand? DefenderCommand { get; init; }
     public RelayCommand? ExplorerCommand { get; init; }
@@ -75,6 +82,8 @@ public sealed class ScanFindingGroup(string key, string title, string toneKey, s
     public string Note => note;
     public ObservableCollection<ScanFindingRow> Items { get; } = [];
     public int Count => Items.Count;
+    public UiTone Tone => ScannerPage.UiToneOf(toneKey);
+    public string IconKey => ScannerPage.IconOf(toneKey);
     internal void Changed() => OnPropertyChanged(nameof(Count));
 }
 
@@ -115,6 +124,9 @@ public sealed class ScannerPage : ModulePage, IDisposable
     private string _elapsedText = "";
     private string _databaseText = "Carregando regras…";
     private string _liveText = "";
+    private double _scannedFiles, _filesPerSecond = double.NaN;
+    private double _ruleCount = double.NaN, _hashCount = double.NaN, _ignoreCount = double.NaN;
+    private bool _hasScanned;
     private Guid? _lastRun;
     private BrokerLevel _lastLevel;
 
@@ -130,7 +142,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
         QuarantineSelectedCommand = new RelayCommand(() => _ = QuarantineAsync(AllRows().Where(r => r.IsSelected).ToList()),
             () => !Busy && !_scanning && AllRows().Any(r => r.IsSelected));
         UndoCommand = new RelayCommand(() => _ = UndoAsync(), () => !Busy && _lastRun is not null);
-        ClearResultsCommand = new RelayCommand(() => { Groups.Clear(); OnPropertyChanged(nameof(FindingCount)); OnPropertyChanged(nameof(ResultSummary)); }, () => !_scanning);
+        ClearResultsCommand = new RelayCommand(() => { Groups.Clear(); NotifyResults(); }, () => !_scanning);
     }
 
     public override string Title => "Verificar arquivos";
@@ -152,7 +164,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
     public RelayCommand UndoCommand { get; }
     public RelayCommand ClearResultsCommand { get; }
 
-    public bool Scanning { get => _scanning; private set => Set(ref _scanning, value); }
+    public bool Scanning { get => _scanning; private set { if (Set(ref _scanning, value)) NotifyResults(); } }
     public string ScanStatus { get => _scanStatus; private set => Set(ref _scanStatus, value); }
     public string CurrentFile { get => _currentFile; private set => Set(ref _currentFile, value); }
     public string FilesText { get => _filesText; private set => Set(ref _filesText, value); }
@@ -161,6 +173,34 @@ public sealed class ScannerPage : ModulePage, IDisposable
     public string DatabaseText { get => _databaseText; private set => Set(ref _databaseText, value); }
     public string LiveText { get => _liveText; private set => Set(ref _liveText, value); }
     public bool CanUndo => _lastRun is not null;
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Arquivos lidos na verificação atual/última (0 antes da primeira): o número do destaque.</summary>
+    public double ScannedFiles { get => _scannedFiles; private set => Set(ref _scannedFiles, value); }
+    public double FilesPerSecond { get => _filesPerSecond; private set => Set(ref _filesPerSecond, value); }
+    public double RuleCount { get => _ruleCount; private set => Set(ref _ruleCount, value); }
+    public double HashCount { get => _hashCount; private set => Set(ref _hashCount, value); }
+    public double IgnoreCount { get => _ignoreCount; private set => Set(ref _ignoreCount, value); }
+    public double FindingNumber => FindingCount;
+    /// <summary>Carregando regras e listas (esqueleto nos cartões do motor).</summary>
+    public bool EngineLoading => _engine is null;
+    public bool HasScanned { get => _hasScanned; private set { if (Set(ref _hasScanned, value)) NotifyResults(); } }
+    public bool HasResults => FindingCount > 0;
+    /// <summary>Verificou e nada apareceu: estado vazio "nenhum sinal".</summary>
+    public bool ShowClean => HasScanned && !Scanning && FindingCount == 0;
+    /// <summary>Ainda não verificou nada: estado vazio com o primeiro passo.</summary>
+    public bool ShowNeverScanned => !HasScanned && !Scanning && FindingCount == 0;
+
+    private void NotifyResults()
+    {
+        foreach (var name in new[] { nameof(FindingCount), nameof(ResultSummary), nameof(FindingNumber), nameof(HasResults), nameof(ShowClean), nameof(ShowNeverScanned) })
+            OnPropertyChanged(name);
+    }
+
+    internal static UiTone UiToneOf(string toneKey) => toneKey switch { "Bad" => UiTone.Bad, "Warn" => UiTone.Warn, "Info" => UiTone.Info, _ => UiTone.Neutral };
+    internal static string IconOf(string toneKey) => toneKey switch { "Bad" => "Icon.Error", "Warn" => "Icon.Warning", "Info" => "Icon.Info", _ => "Icon.Search" };
+
     public int FindingCount => Groups.Sum(g => g.Count);
     public string ResultSummary => FindingCount == 0
         ? "Nenhum achado ainda. Achados aparecem aqui agrupados por gravidade, com o porquê de cada um."
@@ -229,6 +269,10 @@ public sealed class ScannerPage : ModulePage, IDisposable
         _engine = engine;
         _ignore = ignore;
         DatabaseText = text;
+        RuleCount = engine.Rules.Rules.Count;
+        HashCount = engine.Hashes.RealCount;
+        IgnoreCount = ignore.Count;
+        OnPropertyChanged(nameof(EngineLoading));
         Notes.Clear();
         foreach (var n in notes) Notes.Add(n);
         Drives.Clear();
@@ -281,8 +325,9 @@ public sealed class ScannerPage : ModulePage, IDisposable
         var engine = new ScanEngine(baseEngine.Hashes, baseEngine.Rules, new AuthenticodeSignatureChecker(), options, _ignore);
         Scanning = true;
         Groups.Clear();
-        OnPropertyChanged(nameof(FindingCount));
-        OnPropertyChanged(nameof(ResultSummary));
+        NotifyResults();
+        ScannedFiles = 0;
+        FilesPerSecond = double.NaN;
         ScanStatus = $"{label} em andamento… Só leitura: nada é alterado.";
         CurrentFile = "";
         FilesText = "0 arquivos";
@@ -298,11 +343,14 @@ public sealed class ScannerPage : ModulePage, IDisposable
             RateText = p.FilesPerSecond > 0 ? $"{p.FilesPerSecond:N0} arquivos/s" : "";
             ElapsedText = p.Elapsed.ToString(p.Elapsed.TotalHours >= 1 ? @"h\:mm\:ss" : @"mm\:ss", CultureInfo.InvariantCulture);
             CurrentFile = p.Current ?? "";
+            ScannedFiles = p.Files;
+            FilesPerSecond = p.FilesPerSecond > 0 ? p.FilesPerSecond : double.NaN;
         });
         try
         {
             var summary = await Task.Run(() => engine.Scan(roots(), progress, v => dispatcher?.BeginInvoke(() => AddFinding(v)), token));
             CurrentFile = "";
+            ScannedFiles = summary.Files;
             var found = summary.Findings.Count;
             ScanStatus = (summary.Cancelled ? $"{label} cancelada. " : $"{label} concluída. ") +
                          $"{summary.Files:N0} arquivos em {summary.Elapsed.TotalSeconds:N0} s; " +
@@ -317,6 +365,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
         finally
         {
             Scanning = false;
+            HasScanned = true;
             if (ReferenceEquals(_cts, cts)) _cts = null;
             cts.Dispose();
         }
@@ -363,8 +412,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
         while (at < group.Items.Count && group.Items[at].Verdict.Score >= v.Score) at++;
         group.Items.Insert(at, row);
         group.Changed();
-        OnPropertyChanged(nameof(FindingCount));
-        OnPropertyChanged(nameof(ResultSummary));
+        NotifyResults();
     }
 
     private IEnumerable<ScanFindingRow> AllRows() => Groups.SelectMany(g => g.Items);
@@ -377,8 +425,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
             g.Changed();
             if (g.Items.Count == 0) Groups.Remove(g);
         }
-        OnPropertyChanged(nameof(FindingCount));
-        OnPropertyChanged(nameof(ResultSummary));
+        NotifyResults();
     }
 
     private void Ignore(ScanFindingRow row)
