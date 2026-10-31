@@ -1,10 +1,319 @@
+<!--
+  Laboratório do processador: identidade (CPUID + topologia do Windows), medições (frequência por núcleo, latência de cache/RAM,
+  núcleo a núcleo, carga sustentada), o que segura o processador e comparação com a medição anterior.
+  Medir não muda nada no PC. As correções do plano de energia vão pelo aplicador (Host.ApplyAsync), com confirmação e desfazer.
+  Recursos locais em DataTemplate.Resources; do tema, só as chaves do contrato (Tokens.xaml / Controls.xaml). Gráficos em
+  Views/Modules/CpuLab/CpuCharts.cs (desenho direto, sem animação).
+-->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels">
+                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
+                    xmlns:cpu="clr-namespace:Nexus.Desktop.Views.Modules.CpuLab">
   <DataTemplate DataType="{x:Type vm:CpuLabPage}">
-    <StackPanel Margin="28,24,28,28">
-      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
-      <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
-    </StackPanel>
+    <DataTemplate.Resources>
+
+      <BooleanToVisibilityConverter x:Key="Cpu.BoolToVis"/>
+
+      <Style x:Key="Cpu.Num" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Numbers}"/>
+        <Setter Property="FontSize" Value="{StaticResource Size.Body}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+        <Setter Property="TextWrapping" Value="NoWrap"/>
+      </Style>
+
+      <!-- Some quando o texto está vazio. -->
+      <Style x:Key="Cpu.SmallHideEmpty" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}">
+        <Style.Triggers>
+          <Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger>
+        </Style.Triggers>
+      </Style>
+      <Style x:Key="Cpu.NoticeHideEmpty" TargetType="Border" BasedOn="{StaticResource Panel.Notice}">
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding PowerNotice}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+        </Style.Triggers>
+      </Style>
+
+      <!-- Achado: faixa colorida pelo tom, título, evidência, explicação, fonte, instrução e (se houver) botão de correção. -->
+      <DataTemplate x:Key="Cpu.Finding" DataType="{x:Type vm:CpuFindingRow}">
+        <Border Style="{StaticResource Panel.Inset}" Margin="0,0,0,10" Padding="0">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="4"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border x:Name="stripe" Background="{StaticResource Brush.Signal}" CornerRadius="2,0,0,2"/>
+            <StackPanel Grid.Column="1" Margin="16,12,16,14">
+              <TextBlock x:Name="sev" Text="{Binding SeverityText}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.Signal}"/>
+              <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H2}" Margin="0,2,0,0"/>
+              <TextBlock Text="{Binding Evidence}" Style="{StaticResource Text.Body}" Margin="0,6,0,0"/>
+              <TextBlock Text="{Binding Explanation}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+              <TextBlock Text="{Binding Instruction}" Style="{StaticResource Text.Body}" Margin="0,6,0,0"
+                         Visibility="{Binding HasInstruction, Converter={StaticResource Cpu.BoolToVis}}"/>
+              <TextBlock Text="{Binding Source}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
+              <Button Content="{Binding ActionLabel}" Command="{Binding ApplyCommand}" Style="{StaticResource Button.Primary}"
+                      HorizontalAlignment="Left" Margin="0,10,0,0"
+                      Visibility="{Binding HasAction, Converter={StaticResource Cpu.BoolToVis}}"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding Tone}" Value="good">
+            <Setter TargetName="stripe" Property="Background" Value="{StaticResource Brush.Good}"/>
+            <Setter TargetName="sev" Property="Foreground" Value="{StaticResource Brush.Good}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding Tone}" Value="warn">
+            <Setter TargetName="stripe" Property="Background" Value="{StaticResource Brush.Trace}"/>
+            <Setter TargetName="sev" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding Tone}" Value="bad">
+            <Setter TargetName="stripe" Property="Background" Value="{StaticResource Brush.Bad}"/>
+            <Setter TargetName="sev" Property="Foreground" Value="{StaticResource Brush.Bad}"/>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
+
+      <!-- Barra de um núcleo: rótulo, barra proporcional ao mais rápido, GHz. O preferido em âmbar; núcleos E em ciano. -->
+      <DataTemplate x:Key="Cpu.CoreBar" DataType="{x:Type vm:CpuCoreBar}">
+        <Grid Margin="0,0,0,8" ToolTip="{Binding Tip}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="110"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="80"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{Binding Label}" Style="{StaticResource Text.Body}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+          <Grid Grid.Column="1" Height="10" VerticalAlignment="Center">
+            <Border Background="{StaticResource Brush.Bg}" CornerRadius="3"/>
+            <Rectangle x:Name="bar" Fill="{StaticResource Brush.TextDim}" RadiusX="3" RadiusY="3" RenderTransformOrigin="0,0.5">
+              <Rectangle.RenderTransform>
+                <ScaleTransform ScaleX="{Binding Fraction}"/>
+              </Rectangle.RenderTransform>
+            </Rectangle>
+          </Grid>
+          <TextBlock Grid.Column="2" Text="{Binding ValueText}" Style="{StaticResource Cpu.Num}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        </Grid>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding Efficiency}" Value="True">
+            <Setter TargetName="bar" Property="Fill" Value="{StaticResource Brush.Signal}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding Best}" Value="True">
+            <Setter TargetName="bar" Property="Fill" Value="{StaticResource Brush.Trace}"/>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
+
+      <!-- Recurso do processador: verde se presente, apagado se ausente. -->
+      <DataTemplate x:Key="Cpu.Feature" DataType="{x:Type vm:CpuFeatureChip}">
+        <Border x:Name="chip" BorderThickness="1" BorderBrush="{StaticResource Brush.Line}" Background="{StaticResource Brush.SurfaceLow}"
+                CornerRadius="{StaticResource Radius.Chip}" Padding="10,4" Margin="0,0,8,8" ToolTip="{Binding Tip}">
+          <TextBlock x:Name="name" Text="{Binding Name}" Style="{StaticResource Text.Small}" TextWrapping="NoWrap" Foreground="{StaticResource Brush.TextDim}"/>
+        </Border>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding Present}" Value="True">
+            <Setter TargetName="chip" Property="BorderBrush" Value="{StaticResource Brush.Good}"/>
+            <Setter TargetName="name" Property="Foreground" Value="{StaticResource Brush.Good}"/>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
+
+      <DataTemplate x:Key="Cpu.Fact" DataType="{x:Type vm:CpuFactRow}">
+        <Grid Margin="0,0,0,8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="160"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{Binding Label}" Style="{StaticResource Text.Label}" VerticalAlignment="Top" Margin="0,2,12,0"/>
+          <StackPanel Grid.Column="1">
+            <TextBlock Text="{Binding Value}" Style="{StaticResource Text.Body}"/>
+            <TextBlock Text="{Binding Source}" Style="{StaticResource Text.Small}"/>
+          </StackPanel>
+        </Grid>
+      </DataTemplate>
+
+      <DataTemplate x:Key="Cpu.Line">
+        <TextBlock Text="{Binding}" Style="{StaticResource Text.Body}" Margin="0,0,0,6"/>
+      </DataTemplate>
+    </DataTemplate.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="28,24,28,28">
+
+        <!-- Cabeçalho -->
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
+            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+            <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0"
+                       Text="Medir não muda nada no PC. Sem driver de kernel: só CPUID, APIs do Windows e cronômetro. Correções do plano de energia só com a sua confirmação, e com desfazer."/>
+          </StackPanel>
+          <Button Grid.Column="1" Content="Ler de novo" Command="{Binding RefreshCommand}" Style="{StaticResource Button.Ghost}" VerticalAlignment="Top" Margin="16,4,0,0"/>
+        </Grid>
+
+        <TextBlock Text="{Binding Message}" Style="{StaticResource Cpu.SmallHideEmpty}" Foreground="{StaticResource Brush.Bad}" Margin="0,8,0,0"/>
+
+        <!-- Hero: identidade + ações principais -->
+        <Border Style="{StaticResource Panel.Hero}" Margin="0,14,0,14">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel>
+              <TextBlock Text="Seu processador" Style="{StaticResource Text.Label}"/>
+              <TextBlock Text="{Binding HeroName}" Style="{StaticResource Text.Display}" Margin="0,4,0,0"/>
+              <TextBlock Text="{Binding HeroLine}" Style="{StaticResource Text.H2}" Foreground="{StaticResource Brush.Signal}" Margin="0,6,0,0"/>
+              <TextBlock Text="{Binding FrequencyText}" Style="{StaticResource Text.Small}" Margin="0,8,0,0"/>
+              <TextBlock Text="{Binding IdentityNote}" Style="{StaticResource Cpu.SmallHideEmpty}" Foreground="{StaticResource Brush.Trace}" Margin="0,6,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="24,4,0,0" MinWidth="220">
+              <Button Content="Medir (≈ 20 s)" Command="{Binding MeasureCommand}" Style="{StaticResource Button.Primary}"
+                      ToolTip="Frequência de cada núcleo, latência de cache e memória, núcleo a núcleo e alguns segundos com todos carregados."/>
+              <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Content="Teste sustentado" Command="{Binding SustainedCommand}" Style="{StaticResource Button.Secondary}"
+                        ToolTip="Todos os núcleos no máximo por 30 a 60 s para ver se a frequência cai (temperatura ou potência)."/>
+                <ComboBox ItemsSource="{Binding SustainedChoices}" SelectedItem="{Binding SustainedSeconds}" Width="64" Margin="8,0,0,0"
+                          IsEnabled="{Binding Idle}" ToolTip="Duração em segundos"/>
+                <TextBlock Text="s" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="6,0,0,0"/>
+              </StackPanel>
+              <Button Content="Cancelar" Command="{Binding CancelCommand}" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                      Visibility="{Binding Measuring, Converter={StaticResource Cpu.BoolToVis}}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,16,0,0" Visibility="{Binding Measuring, Converter={StaticResource Cpu.BoolToVis}}">
+              <ProgressBar Minimum="0" Maximum="1" Value="{Binding Progress}" Height="6"/>
+              <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <Border Style="{StaticResource Cpu.NoticeHideEmpty}" Margin="0,0,0,14">
+          <TextBlock Text="{Binding PowerNotice}" Style="{StaticResource Text.Body}"/>
+        </Border>
+
+        <!-- O que segura o processador -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,14">
+          <StackPanel>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Text="O que está segurando o processador" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="Cada item mostra o que foi lido ou medido, de onde vem a explicação e o que fazer. Depois de corrigir, meça de novo para comparar."
+                           Style="{StaticResource Text.Small}" Margin="0,4,0,12"/>
+              </StackPanel>
+              <Button Grid.Column="1" Content="Desfazer a última correção" Command="{Binding UndoCommand}" Style="{StaticResource Button.Secondary}"
+                      VerticalAlignment="Top" Visibility="{Binding CanUndo, Converter={StaticResource Cpu.BoolToVis}}"/>
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Findings}" ItemTemplate="{StaticResource Cpu.Finding}" Focusable="False"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Frequência por núcleo + núcleo a núcleo -->
+        <Grid Margin="0,0,0,14">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="14"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Border Style="{StaticResource Panel.Card}">
+            <StackPanel>
+              <TextBlock Text="Frequência real por núcleo" Style="{StaticResource Text.H2}"/>
+              <TextBlock Text="Cada núcleo cronometrado sozinho, com a thread fixada nele. Âmbar: o mais rápido (preferido)." Style="{StaticResource Text.Small}" Margin="0,4,0,12"/>
+              <ItemsControl ItemsSource="{Binding CoreBars}" ItemTemplate="{StaticResource Cpu.CoreBar}" Focusable="False"/>
+              <TextBlock Text="{Binding CoreSummary}" Style="{StaticResource Text.Body}" Margin="0,6,0,0"/>
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="2" Style="{StaticResource Panel.Card}">
+            <StackPanel>
+              <TextBlock Text="Núcleo a núcleo" Style="{StaticResource Text.H2}"/>
+              <TextBlock Text="Tempo (ns) para um dado ir de um núcleo a outro. Verde: perto (mesma L3). Âmbar e vermelho: longe." Style="{StaticResource Text.Small}" Margin="0,4,0,12"/>
+              <cpu:CoreMatrixHeatmap Matrix="{Binding Matrix}" HorizontalAlignment="Left" MinHeight="120"/>
+              <TextBlock Text="{Binding ClusterText}" Style="{StaticResource Text.Body}" Margin="0,10,0,0"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <!-- Latência de cache e memória -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,14">
+          <StackPanel>
+            <TextBlock Text="Latência de cache e memória" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="Tempo de cada leitura conforme os dados crescem (escala log). Cada degrau é um nível: L1, L2, L3 e a RAM. Tracejado ciano: o que o CPUID declara. Cinza: medição anterior."
+                       Style="{StaticResource Text.Small}" Margin="0,4,0,12"/>
+            <Border Style="{StaticResource Panel.Inset}" Padding="4">
+              <cpu:LatencyCurveChart Height="300" Points="{Binding Latency}" Steps="{Binding Steps}" Declared="{Binding Declared}" Previous="{Binding PreviousLatency}"/>
+            </Border>
+            <TextBlock Text="{Binding LatencySummary}" Style="{StaticResource Text.Body}" Margin="0,10,0,6"/>
+            <ItemsControl ItemsSource="{Binding CacheComparisons}" ItemTemplate="{StaticResource Cpu.Line}" Focusable="False"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Frequência no tempo -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,14">
+          <StackPanel>
+            <TextBlock Text="Frequência no tempo, com todos os núcleos carregados" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="Média de todos os núcleos a cada segundo. Uma queda depois do início é o limite de potência ou de temperatura. Cinza: teste sustentado anterior."
+                       Style="{StaticResource Text.Small}" Margin="0,4,0,12"/>
+            <Border Style="{StaticResource Panel.Inset}" Padding="4">
+              <cpu:FrequencyTimeChart Height="220" Series="{Binding Series}" Previous="{Binding PreviousSeries}" BaseGhz="{Binding BaseGhz}"/>
+            </Border>
+            <TextBlock Text="{Binding SustainedText}" Style="{StaticResource Text.Body}" Margin="0,10,0,0"/>
+            <TextBlock Text="{Binding ScalingText}" Style="{StaticResource Cpu.SmallHideEmpty}" Margin="0,6,0,0"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Comparação -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,14" Visibility="{Binding HasComparison, Converter={StaticResource Cpu.BoolToVis}}">
+          <StackPanel>
+            <TextBlock Text="Comparado com a medição anterior" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="Diferenças abaixo de 2% são ruído de medição." Style="{StaticResource Text.Small}" Margin="0,4,0,12"/>
+            <ItemsControl ItemsSource="{Binding Comparison}" ItemTemplate="{StaticResource Cpu.Line}" Focusable="False"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Identidade detalhada -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,14">
+          <StackPanel>
+            <TextBlock Text="Identidade (CPUID e Windows)" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="Lido da instrução CPUID do próprio processador e da topologia que o Windows informa." Style="{StaticResource Text.Small}" Margin="0,4,0,12"/>
+            <ItemsControl ItemsSource="{Binding IdentityRows}" ItemTemplate="{StaticResource Cpu.Fact}" Focusable="False"/>
+
+            <TextBlock Text="Caches" Style="{StaticResource Text.Label}" Margin="0,10,0,6"/>
+            <ListView ItemsSource="{Binding Caches}" Focusable="False" MaxHeight="220">
+              <ListView.View>
+                <GridView>
+                  <GridViewColumn Header="Nível" DisplayMemberBinding="{Binding Level}" Width="70"/>
+                  <GridViewColumn Header="Tamanho" DisplayMemberBinding="{Binding Size}" Width="100"/>
+                  <GridViewColumn Header="Associatividade" DisplayMemberBinding="{Binding Ways}" Width="130"/>
+                  <GridViewColumn Header="Linha" DisplayMemberBinding="{Binding Line}" Width="90"/>
+                  <GridViewColumn Header="Compartilhada por" DisplayMemberBinding="{Binding SharedBy}" Width="150"/>
+                </GridView>
+              </ListView.View>
+            </ListView>
+
+            <TextBlock Text="Recursos" Style="{StaticResource Text.Label}" Margin="0,14,0,6"/>
+            <ItemsControl ItemsSource="{Binding Features}" ItemTemplate="{StaticResource Cpu.Feature}" Focusable="False">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- Método -->
+        <Expander Header="Como cada medição funciona" Margin="0,0,0,14">
+          <TextBlock Text="{x:Static vm:CpuLabPage.MethodText}" Style="{StaticResource Text.Body}" Margin="0,8,0,0"/>
+        </Expander>
+
+        <TextBlock Text="{Binding HistoryText}" Style="{StaticResource Text.Small}"/>
+      </StackPanel>
+    </ScrollViewer>
   </DataTemplate>
 </ResourceDictionary>

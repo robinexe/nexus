@@ -1,0 +1,37 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Laboratório do processador. Só duas correções do plano de energia, ambas no valor da tomada (AC) do esquema ativo capturado no planejamento, pelo handler PowerSettingValue (já existente em Nexus.WindowsActions). A página só oferece cada ação quando a leitura mostra o limite, e sugere medir antes e depois. Ver docs/modules/cpulab.md.",
+  "actions": [
+    {
+      "id": "cpulab.power.max-state.ac", "version": 1,
+      "title": "Estado máximo do processador em 100% (na tomada)",
+      "classification": "Conditional",
+      "condition": "Somente quando a leitura do plano ativo mostrar PROCTHROTTLEMAX abaixo de 100% no valor AC.",
+      "handlerKind": "PowerSettingValue",
+      "target": { "subgroup": "54533251-82be-4824-96c1-47b60b740d00", "setting": "bc5038f7-23e0-4960-96da-33abaf5935ec", "acdc": "AC" },
+      "desiredValue": 100,
+      "mechanism": "PROCTHROTTLEMAX limita a fração do desempenho máximo que o Windows pede ao processador. Abaixo de 100%, a frequência fica presa abaixo da base e o turbo não acontece. 100% é o padrão dos planos Equilibrado e Alto desempenho na tomada.",
+      "evidence": [ { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-hardware/customize/power-settings/options-for-perf-state-engine-maxperformance" } ],
+      "risks": "Mais calor e consumo quando o processador trabalha (é o comportamento normal do Windows). Não muda nada na bateria.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "None",
+      "verification": "PowerReadACValueIndex no esquema capturado; medir de novo no Laboratório do processador.",
+      "revert": "Restaurar o valor anterior no mesmo esquema."
+    },
+    {
+      "id": "cpulab.power.boost-mode.ac", "version": 1,
+      "title": "Modo de aumento de desempenho (turbo) do processador (na tomada)",
+      "classification": "Conditional",
+      "condition": "Somente quando a leitura do plano ativo mostrar PERFBOOSTMODE = 0 (desativado) no valor AC.",
+      "handlerKind": "PowerSettingValue",
+      "target": { "subgroup": "54533251-82be-4824-96c1-47b60b740d00", "setting": "be337238-0d82-4146-a960-4f3749d470c7", "acdc": "AC" },
+      "allowedValues": [1, 2],
+      "mechanism": "PERFBOOSTMODE diz se o Windows pode pedir frequências acima da base (turbo). 0 = desativado prende o processador na base; 1 = ativado; 2 = agressivo (o padrão do Windows na tomada).",
+      "evidence": [ { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-hardware/customize/power-settings/options-for-perf-state-engine-perfboostmode" } ],
+      "risks": "Mais calor e consumo sob carga; em notebook, a ventoinha gira mais. Alguém pode ter desligado de propósito para esfriar: o desfazer volta ao valor anterior.",
+      "privileges": "Admin", "persistence": "Persistent", "reboot": "None",
+      "verification": "PowerReadACValueIndex no esquema capturado; medir de novo (a frequência do núcleo mais rápido deve passar da base).",
+      "revert": "Restaurar o valor anterior no mesmo esquema."
+    }
+  ]
+}
