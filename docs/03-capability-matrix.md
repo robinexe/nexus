@@ -31,6 +31,11 @@ arquivos temporários e processos auxiliares. Nenhum teste toca registro, energi
 | Instalador do serviço (`tools/service`) | **implementado e validado em VM** | Instala, inicia e desinstala na VM do CI; preserva o diário | Só em VM enquanto a execução real estiver bloqueada no hospedeiro |
 | Portão de execução (VM + liberação com dono administrador) | implementado, não validado | Testes em Linux; no Windows o SMBIOS do PC físico já bloqueia | |
 | Testes de integração em VM (registro, energia, serviço, crash + `nexus-recover`) | **implementado e validado em VM** | GitHub Actions windows-latest, elevado, 31/10: 6/6 com alteração e reversão reais | Rodar de novo a cada mudança (workflow `vm-integracao`) |
+| **Lote** (mesma ação com alvos diferentes num pedido; duplicata exata recusada; diário, `RevertRun` e recuperação por instância) | implementado, não validado | Testado em Linux (`CoreV2Tests`); na VM do CI pelo `ProgramsIntegrationTests` (duas instâncias de `programs.leftover.user` num pedido, com reversão) | Usado por Programas (sobras), Ferramentas (Wi-Fi, drivers, apps) e Segurança (órfãs acima de 28) |
+| **Ações efêmeras** (`PersistenceKind.Ephemeral`: sem ponto automático, sem sessão, desfazer "nada a desfazer", recuperação aceita) | implementado, não validado | Testado em Linux; `SystemToolsIntegrationTests` (DNS real) na VM | DNS, ARP, backup de drivers, criar ponto de restauração |
+| Chaves antigas do catálogo (`supersedes`) para desfazer/recuperar execuções feitas antes da troca | implementado, não validado | Testado em Linux com o catálogo real (vagas de Programas) | |
+| **`SafeFileMover`** (move por handle: sem reparse point, caminho final conferido, rename relativo ao handle) | implementado, não validado | Linux: simulação com symlink; Windows: `CoreV2IntegrationTests` (junção, troca bloqueada, arquivo em uso) a rodar na VM | Programas usa; Limpeza ainda move por caminho (adoção sugerida) |
+| `nexus.lock` com ACL restrita criado pelo aplicador elevado sob demanda | implementado, não validado | Regra testada em Linux; criação real em `CoreV2IntegrationTests` (VM) | O instalador do serviço já fazia (B7) |
 | Handler EcoQoS (ProcessPowerThrottling) | pendente | | |
 | NVIDIA DRS | pendente | | |
 | Tarefas agendadas (descoberta e handler) | pendente | | |

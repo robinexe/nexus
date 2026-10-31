@@ -77,6 +77,52 @@ Regras invariantes (implementadas em `Nexus.Core` e cobertas por testes):
 - Antes de reverter, o estado atual é comparado ao `AppliedState`; se diferente, o resultado é `RevertConflict` (o usuário ou outro software mudou depois) e nada é sobrescrito sem confirmação.
 - Valores impostos por política (`HKLM\SOFTWARE\Policies`, GPO) → estado `Blocked`; o motor não disputa.
 
+### Instâncias e lote (núcleo v2, 31/10)
+
+Uma ação do catálogo pode aparecer **várias vezes no mesmo pedido** com alvos diferentes (remoção em lote: várias sobras,
+redes Wi-Fi, drivers, apps). A identidade de cada item é a **instância** = (id da ação, alvo resolvido)
+(`ActionInstance.InstanceKey`; o alvo inclui os `userParameters` já validados e, no serviço, o `userSid`).
+
+- **Duplicata exata** (mesma ação, mesmo alvo — mesmo que com outro valor desejado) é recusada: no broker
+  (`invalid-request`, antes de travar ou gravar qualquer coisa) e no `DesiredStateResolver` (`ArgumentException`).
+- **Dependências e conflitos** continuam por id de ação: depender de X exige que **todas** as instâncias de X no plano
+  estejam pendentes/configuradas (e ao menos uma exista); se uma instância de X falha na execução, quem depende de X é
+  bloqueado; conflitar com X bloqueia se qualquer instância de X estiver ativa. A ordem topológica é por instância.
+- **Diário por instância**: cada instância tem sua entrada (backup, verificação, compensação). Falha de uma instância não
+  desfaz as outras (cada uma é compensada sozinha). `RevertRun` desfaz todas, em ordem inversa; a recuperação trata cada
+  entrada interrompida isoladamente (alvos diferentes não se "superam").
+- **Resultados**: `ExecutionResult.Target`/`RevertResult.Target` (alvo sem o SID) e, no protocolo,
+  `ActionResultDto.Index` (posição do pedido; em ReadState/Plan/Execute) e `Target`. Até 64 ações por pedido e até 64
+  resultados por resposta; se não couber em 64 KiB, os textos são encurtados (nunca um item é descartado).
+- **Chaves antigas** (`"supersedes"` no catálogo): uma ação pode absorver chaves `id@versão` que deixaram de existir (ex.:
+  as 16+16 vagas `programs.leftover.{user|machine}.NN@1`). Elas **não podem ser pedidas**; servem só para o
+  `CatalogBoundHandler` validar a restauração de entradas antigas do diário contra a ação nova (mesmo handler, mesmo alvo
+  reconstruído, mesmas propriedades de segurança). Uma chave antiga só pode ter uma dona e nunca pode ser ação viva.
+
+### Ações efêmeras (`PersistenceKind.Ephemeral`)
+
+Operações **sem estado anterior a guardar** (limpar cache DNS/ARP, exportar drivers, criar ponto de restauração):
+
+- o resolvedor não chama `Detect` (o item é sempre pendente quando aplicável); o executor grava `Planned → BackedUp`
+  (sem original) `→ Applying`, executa, e grava `Applied → Verified` se o handler não lançar (sem releitura). Falha →
+  `Failed` sem backup, que não fica pendente para a recuperação;
+- **não disparam o ponto de restauração automático** (`BeforeSystemChange` só para Admin + `Persistent`) e **não prendem
+  sessão** (só `Session` prende);
+- desfazer responde `NothingToRevert` com a mensagem explícita `ActionExecutor.EphemeralNothingToUndo`, **sem chamar o
+  handler**; a entrada é encerrada como `Accepted` (ou `Reverted`, se parou antes de executar);
+- a recuperação encerra entradas interrompidas da mesma forma (aceitas, nada a desfazer) e a recuperação conta como completa;
+- o catálogo recusa `Ephemeral` + `irreversible`. A decisão "efêmera" vem da definição gravada no diário: um diário
+  adulterado só conseguiria impedir uma restauração (nada é escrito), nunca provocar uma escrita; e o `CatalogBoundHandler`
+  recusa restaurar quando `Irreversible`, `Persistence` ou `Privileges` do diário diferem do catálogo.
+
+### Mover arquivos sem seguir junções (`SafeFileMover`)
+
+Quarentenas no mesmo volume movem por handle: pastas-mãe abertas com `FILE_FLAG_OPEN_REPARSE_POINT |
+FILE_FLAG_BACKUP_SEMANTICS` e sem `FILE_SHARE_DELETE` (ninguém as renomeia enquanto o NEXUS as segura), conferência de
+reparse point (`GetFileInformationByHandleEx`) e do caminho final (`GetFinalPathNameByHandle`), e rename da origem pelo
+próprio handle com `SetFileInformationByHandle(FileRenameInfoEx)` relativo ao handle da pasta de destino, sem substituir.
+Usado pela quarentena de Programas; a Limpeza deve adotar (ver `docs/modules/cleaning.md` quando o módulo migrar).
+
 ## Protocolo do broker (v1)
 
 > **Revisão de 2026-10-30 (implementação):** em vez de o cliente pedir passos soltos (`Backup`, `Apply`, `Verify`), o

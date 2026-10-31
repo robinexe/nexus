@@ -53,9 +53,11 @@ Só procura sobras de um programa que **já saiu** da lista de instalados.
 
 ### Handler `ProgramLeftover` (aplicador)
 
-Catálogo `catalog/programs.v1.json`: 16 vagas `programs.leftover.user.NN` (privilégio User, `scope=HKCU`) e 16
-`programs.leftover.machine.NN` (Admin, `scope=HKLM` → aviso do Windows + ponto de restauração automático). Vagas porque o
-broker recusa a mesma ação repetida num pedido. Alvo `{kind, scope, path}`; `kind` (`file|registry`) e `path` são
+Catálogo `catalog/programs.v1.json` (2.0.0): `programs.leftover.user` (privilégio User, `scope=HKCU`) e
+`programs.leftover.machine` (Admin, `scope=HKLM` → aviso do Windows + ponto de restauração automático), cada uma repetida
+no mesmo pedido, uma instância por sobra (lote do núcleo v2; até 64 por escopo). As antigas 16+16 vagas
+`programs.leftover.{user|machine}.NN@1` ficam em `"supersedes"`: não podem mais ser pedidas, mas execuções feitas com elas
+continuam desfazendo e recuperando (o broker as valida contra a ação nova). Alvo `{kind, scope, path}`; `kind` (`file|registry`) e `path` são
 `userParameters` com regex estrita (caminho `X:\…` sem `..`, sem barra final, sem caracteres proibidos/controle, até 8 níveis;
 ou `Software\…` com 1–4 níveis). Como serviço, o broker acrescenta o `userSid` (escopo HKCU) e o handler usa `HKU\<SID>` e a
 pasta do perfil pelo `ProfileList`; com outra conta e sem SID, recusa.
@@ -63,8 +65,10 @@ pasta do perfil pelo `ProfileList`; com outra conta e sem SID, recusa.
 - **Revalida tudo** (Assess, Apply e CheckRestore): forma do alvo, raízes do escopo certo, `LeftoverPolicy`, `SafetyPolicy`,
   programas instalados (lidos de novo no aplicador), pasta de dados do NEXUS, links; HKLM exige aplicador elevado.
 - **Pasta/arquivo** → `DataDirectory\quarantine\programs\<id>\payload` + `manifest.json` (gravado ANTES de mover: lista de
-  arquivos com tamanho e SHA-256; recusa links dentro, mais de 20 mil arquivos ou 4 GB). Mesmo volume: renomear (atômico; arquivo
-  em uso → o Windows recusa e nada muda). Outro volume: copia, confere tamanho + hash de cada arquivo, só então apaga a origem.
+  arquivos com tamanho e SHA-256; recusa links dentro, mais de 20 mil arquivos ou 4 GB). Mesmo volume: renomear por handle
+  com `SafeFileMover` (pasta-mãe aberta sem seguir junção e presa contra renomeação, caminho final conferido, rename relativo
+  ao handle — fecha a corrida "conferiu, trocaram por junção, moveu"; arquivo em uso → recusa e nada muda). Outro volume:
+  copia, confere tamanho + hash de cada arquivo, só então apaga a origem.
 - **Chave** → árvore completa exportada para o manifesto (valores com tipo: String, ExpandString, DWord, QWord, Binary,
   MultiString, None; valor padrão incluído; tipos que não sabemos recriar exatamente fazem a remoção ser recusada), depois
   `DeleteSubKeyTree` e releitura.

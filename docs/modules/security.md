@@ -52,7 +52,10 @@
    (MSI, componentes do sistema, atualizações e discos ausentes nunca contam), App Paths quebrados, MUICache e SharedDLLs de
    arquivos inexistentes, e extensões do usuário sem programa (só informativo). A página mostra o mito com clareza:
    **remover sobras não acelera o PC** (Microsoft, KB 2563254, "Microsoft support policy for the use of registry cleaning
-   utilities"). O usuário escolhe; até 28 por vez.
+   utilities"). O usuário escolhe; até 28 identificadores por instância da ação e até 224 por pedido (núcleo v2: a
+   página manda a mesma ação várias vezes no pedido, com seleções disjuntas — uma confirmação, uma execução, um Desfazer).
+   O Desfazer da página reverte todas as execuções feitas nela (órfãs do PC e do usuário vão em pedidos separados, por nível).
+   Hosts: sem o registro `.written` do conteúdo escrito, a restauração é recusada em vez de sobrescrever.
 
 ## Segurança do desenho (escolha por identificador, nunca por caminho)
 
