@@ -199,7 +199,7 @@ public sealed class VmIntegrationTests : IDisposable
             var revert = broker.Handle(Req(BrokerOperation.RevertRun, run: exec.RunId));
             Assert.True(revert.FullyRestored, string.Join("; ", revert.Results?.Select(x => x.Detail) ?? []));
             Assert.Equal(before, svc.GetStartType("SysMain"));
-            _out.WriteLine("[SysMain] RAMO: Manual aplicado e revertido");
+            _out.WriteLine(r.Outcome == "AlreadyConfigured" ? "[SysMain] RAMO: já estava em Manual (nada escrito)" : "[SysMain] RAMO: Manual aplicado e revertido");
         }
     }
 
@@ -229,7 +229,7 @@ public sealed class VmIntegrationTests : IDisposable
             var revert = broker.Handle(Req(BrokerOperation.RevertRun, run: exec.RunId));
             Assert.True(revert.FullyRestored, string.Join("; ", revert.Results?.Select(x => x.Detail) ?? []));
             Assert.Equal(before, power.ReadAcValue(scheme, sub, setting));
-            _out.WriteLine("[core parking AC] RAMO: aplicado e revertido");
+            _out.WriteLine(r.Outcome == "AlreadyConfigured" ? "[core parking AC] RAMO: já estava no valor desejado (nada escrito)" : "[core parking AC] RAMO: aplicado e revertido");
         }
     }
 

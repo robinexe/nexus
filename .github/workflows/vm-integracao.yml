@@ -59,6 +59,17 @@ jobs:
           icacls $marker /inheritance:r /grant:r '*S-1-5-32-544:F' '*S-1-5-18:F' '*S-1-5-32-545:R'
           "Liberação criada para $env:COMPUTERNAME"
 
+      - name: Estado inicial diferente do desejado (só nesta VM descartável)
+        shell: pwsh
+        run: |
+          # A imagem do runner já vem em Alto desempenho e com core parking AC no valor desejado: sem isto, os testes de
+          # energia caem no ramo "já configurado" e não exercitam aplicação/reversão real.
+          powercfg /setactive 381b4222-f694-41f0-9685-ff5bb260df2e
+          powercfg /setacvalueindex SCHEME_CURRENT 54533251-82be-4824-96c1-47b60b740d00 0cc5b647-c1df-4637-891a-dec35c318583 50
+          powercfg /setactive SCHEME_CURRENT
+          powercfg /getactivescheme
+          powercfg /query SCHEME_CURRENT 54533251-82be-4824-96c1-47b60b740d00 0cc5b647-c1df-4637-891a-dec35c318583
+
       - name: Testes de integração (handlers reais, elevado)
         shell: pwsh
         run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --logger "console;verbosity=detailed" --logger "trx;LogFileName=integracao.trx" --results-directory saida
