@@ -8,6 +8,10 @@
     <RootNamespace>Nexus.Desktop</RootNamespace>
     <AssemblyName>Nexus.Desktop</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Ícone gerado de tools/packaging/icon/nexus.svg por build_icon.py (versionado; não precisa regenerar no build). -->
+    <ApplicationIcon>Assets\nexus.ico</ApplicationIcon>
+    <!-- Publicação (tools/packaging/publish.py): self-contained por RID, sem trimming (WPF e reflexão não suportam). -->
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />

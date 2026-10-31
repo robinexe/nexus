@@ -10,4 +10,15 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
+  <!-- Versão única de todos os executáveis (interface, aplicador, nexus, nexus-recover). A publicação
+       (tools/packaging/publish.py) passa SourceRevisionId com o hash do commit: InformationalVersion = 0.9.0+<hash>.
+       Pré-lançamento: -p:VersionSuffix=rc.1 (ou a tag v0.9.0-rc.1 no release.yml). -->
+  <PropertyGroup>
+    <VersionPrefix>0.9.0</VersionPrefix>
+    <Product>NEXUS</Product>
+    <Company>NEXUS</Company>
+    <Authors>robinexe</Authors>
+    <Description>NEXUS: utilitário de desempenho e manutenção para Windows, com diário, confirmação e desfazer.</Description>
+    <Copyright>Copyright (c) 2026 robinexe</Copyright>
+  </PropertyGroup>
 </Project>
