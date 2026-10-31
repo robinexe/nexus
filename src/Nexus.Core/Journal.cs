@@ -17,6 +17,12 @@ public enum JournalState
     /// que o NEXUS estava autorizado a sobrescrever (ou que ele próprio produziu numa restauração não confirmada).
     /// </summary>
     Restoring,
+    /// <summary>
+    /// Encerrada por decisão explícita do usuário (<c>nexus-recover accept</c>): o estado atual do alvo é mantido, o
+    /// backup original deixa de ser usado e nada é escrito no sistema. Terminal, como <see cref="Reverted"/>, mas não
+    /// significa que o original foi restaurado (por isso continua contando como mudança viva para entradas mais antigas).
+    /// </summary>
+    Accepted,
 }
 
 public static class JournalTransitions
@@ -24,15 +30,16 @@ public static class JournalTransitions
     private static readonly Dictionary<JournalState, JournalState[]> Allowed = new()
     {
         [JournalState.Planned] = [JournalState.BackedUp, JournalState.Failed],
-        [JournalState.BackedUp] = [JournalState.Applying, JournalState.Failed, JournalState.Reverted, JournalState.RevertConflict],
-        [JournalState.Applying] = [JournalState.Applied, JournalState.Failed, JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring],
-        [JournalState.Applied] = [JournalState.Verified, JournalState.Failed, JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring],
-        [JournalState.Verified] = [JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring],
-        [JournalState.RevertConflict] = [JournalState.Reverted, JournalState.Restoring],
-        [JournalState.Failed] = [JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring],
+        [JournalState.BackedUp] = [JournalState.Applying, JournalState.Failed, JournalState.Reverted, JournalState.RevertConflict, JournalState.Accepted],
+        [JournalState.Applying] = [JournalState.Applied, JournalState.Failed, JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring, JournalState.Accepted],
+        [JournalState.Applied] = [JournalState.Verified, JournalState.Failed, JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring, JournalState.Accepted],
+        [JournalState.Verified] = [JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring, JournalState.Accepted],
+        [JournalState.RevertConflict] = [JournalState.Reverted, JournalState.Restoring, JournalState.Accepted],
+        [JournalState.Failed] = [JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring, JournalState.Accepted],
         // Restoring → Restoring registra uma nova tentativa (e o valor que a anterior deixou).
-        [JournalState.Restoring] = [JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring],
+        [JournalState.Restoring] = [JournalState.Reverted, JournalState.RevertConflict, JournalState.Restoring, JournalState.Accepted],
         [JournalState.Reverted] = [],
+        [JournalState.Accepted] = [],
     };
 
     public static bool IsAllowed(JournalState from, JournalState to) => Allowed[from].Contains(to);

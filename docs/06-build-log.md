@@ -197,6 +197,18 @@ Executado pelo assistente por meio do PC vinculado (PowerShell **não elevado**,
 Testes de integração continuam **não executados** (só em VM). Conferência visual da interface contra o Gerenciador de
 Tarefas: pendente.
 
+## `nexus-recover accept` (R3) — Linux (contêiner), 2026-10-31
+
+| Comando | Exit | Resumo |
+|---|---|---|
+| `dotnet build Nexus.slnx -c Release --no-restore` | 0 | **0 avisos, 0 erros** (SDK 10.0.403) |
+| `dotnet test ... --filter Category=Unit` | 0 | **149 aprovados** (143 + 6 novos), 0 falhos |
+| `dotnet build tests/Nexus.IntegrationTests` | 0 | 0 avisos; não executado |
+
+Teste de esquema ajustado por mudança de especificação (esquema 3): agora compara com `SqliteJournal.SchemaVersion`,
+exige que seja 3, migra v1 e v2 e recusa `SchemaVersion + 1`. Mutações: 3 de 3 detectadas; a quarta (CLI sem trava)
+não compila.
+
 ## Pendente no Windows (esta versão)
 
 1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).

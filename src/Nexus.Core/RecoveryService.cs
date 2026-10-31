@@ -2,6 +2,20 @@ namespace Nexus.Core;
 
 public sealed record RecoveryFinding(JournalEntry Entry, string Reason);
 
+public enum AcceptOutcome
+{
+    /// <summary>Entrada encerrada como <see cref="JournalState.Accepted"/>; nada foi escrito no sistema.</summary>
+    Accepted,
+    /// <summary>A entrada não existe no diário.</summary>
+    NotFound,
+    /// <summary>A entrada não está pendente (já encerrada ou nunca aplicada): nada a aceitar.</summary>
+    NotPending,
+    /// <summary>A entrada pertence à execução vinculada à própria trava (execução ativa): nunca é tocada.</summary>
+    ActiveRun,
+}
+
+public sealed record AcceptResult(long EntryId, AcceptOutcome Outcome, string Detail);
+
 public sealed record RecoveryReport(
     IReadOnlyList<RecoveryFinding> Interrupted,
     IReadOnlyList<RevertResult> Results,
@@ -109,6 +123,33 @@ public sealed class RecoveryService
             }
         }
         return new RecoveryReport(interrupted, results, skipped);
+    }
+
+    /// <summary>
+    /// Decisão explícita do usuário para uma entrada pendente (superada, em conflito ou interrompida): mantém o estado
+    /// atual do alvo e encerra a entrada como <see cref="JournalState.Accepted"/>, com registro no diário.
+    /// Não chama nenhum handler: não lê nem escreve no sistema. Exige a trava, como a recuperação.
+    /// </summary>
+    public AcceptResult Accept(long entryId)
+    {
+        var lease = _executor.Lease;
+        lease?.EnsureHeld();
+
+        var pending = FindInterrupted().FirstOrDefault(f => f.Entry.Id == entryId);
+        if (pending is null)
+        {
+            var exists = _journal.Runs().SelectMany(r => _journal.Entries(r.RunId)).FirstOrDefault(e => e.Id == entryId);
+            return exists is null
+                ? new(entryId, AcceptOutcome.NotFound, "Entrada não encontrada no diário.")
+                : new(entryId, AcceptOutcome.NotPending, $"Entrada em {exists.State}: não está pendente, nada a aceitar.");
+        }
+        if (lease?.ActiveRunId is { } active && pending.Entry.RunId == active)
+            return new(entryId, AcceptOutcome.ActiveRun, "A entrada pertence à execução ativa desta trava; não foi tocada.");
+
+        var previous = pending.Entry.State;
+        _journal.Transition(entryId, JournalState.Accepted,
+            note: $"Aceito pelo usuário (estava em {previous}: {pending.Reason}). Estado atual mantido; backup original descartado. Nada foi escrito no sistema.");
+        return new(entryId, AcceptOutcome.Accepted, $"Encerrada (estava em {previous}). Nada foi escrito no sistema.");
     }
 
     private JournalEntry? Superseding(JournalEntry e, IReadOnlyList<JournalEntry> all, IReadOnlyDictionary<Guid, DateTimeOffset> started)

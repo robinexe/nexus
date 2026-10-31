@@ -109,6 +109,152 @@ public sealed class ReviewFindingsTests
         Assert.Equal("1", reg.Read(t).Value); // a mudança de B foi preservada
     }
 
+    // ---------- R3: nexus-recover accept ----------
+
+    private sealed class CountingRegistry(IRegistryBackend inner) : IRegistryBackend
+    {
+        public int Calls { get; private set; }
+        public RegistryRead Read(RegistryTarget target) { Calls++; return inner.Read(target); }
+        public void Write(RegistryTarget target, string kind, string value) { Calls++; inner.Write(target, kind, value); }
+        public void DeleteValue(RegistryTarget target) { Calls++; inner.DeleteValue(target); }
+        public bool DeleteKeyIfEmpty(RegHive hive, string path, RegView view) { Calls++; return inner.DeleteKeyIfEmpty(hive, path, view); }
+    }
+
+    /// <summary>Mesmo cenário do teste acima: A (Failed, original 0) superada por B (5 → 1, verificada).</summary>
+    private static (InMemoryRegistryBackend Reg, InMemoryJournal Journal, HandlerRegistry Handlers, long IdA, Guid RunB, RegistryTarget T) SupersededScenario()
+    {
+        var reg = new InMemoryRegistryBackend();
+        var handlers = new HandlerRegistry().Add(new RegistryValueHandler(reg));
+        var journal = new InMemoryJournal();
+        var t = T.RT(P, "V");
+        reg.Seed(t, "DWord", "0");
+        var runA = journal.BeginRun("A", "1");
+        var idA = journal.AddPlanned(runA, 0, T.RegAction("a", P, "V", 1));
+        journal.Transition(idA, JournalState.BackedUp, original: StateSnapshot.Of("DWord", "0"));
+        journal.Transition(idA, JournalState.Applying);
+        journal.Transition(idA, JournalState.Failed, note: "releitura falhou");
+        reg.Write(t, "DWord", "5");
+        var runB = journal.BeginRun("B", "1");
+        Thread.Sleep(5);
+        var exec = new ActionExecutor(handlers, journal);
+        Assert.Equal(ExecutionOutcome.Verified,
+            exec.Execute(runB, new DesiredStateResolver(handlers).Resolve([T.RegAction("b", P, "V", 1)], T.Ctx), T.Ctx).Single().Outcome);
+        journal.EndRun(runB);
+        return (reg, journal, handlers, idA, runB, t);
+    }
+
+    [Fact]
+    public void Accept_closes_a_superseded_entry_without_touching_the_system_and_recovery_becomes_complete()
+    {
+        var (reg, journal, _, idA, _, t) = SupersededScenario();
+        var counting = new CountingRegistry(reg);
+        var recovery = new RecoveryService(journal, new ActionExecutor(new HandlerRegistry().Add(new RegistryValueHandler(counting)), journal));
+        Assert.False(recovery.Recover().FullyRestored); // antes: pendente para sempre
+
+        var calls = counting.Calls;
+        var r = recovery.Accept(idA);
+
+        Assert.Equal(AcceptOutcome.Accepted, r.Outcome);
+        Assert.Equal(calls, counting.Calls); // não leu nem escreveu no sistema
+        var e = journal.Get(idA);
+        Assert.Equal(JournalState.Accepted, e.State);
+        Assert.Contains("Aceito pelo usuário", e.Note, StringComparison.Ordinal);
+        Assert.Equal(StateSnapshot.Of("DWord", "0"), e.Original); // o backup fica registrado, só não é mais usado
+        Assert.Equal("1", reg.Read(t).Value);
+
+        Assert.DoesNotContain(RecoveryService.FindInterrupted(journal), f => f.Entry.Id == idA);
+        var after = recovery.Recover();
+        Assert.Empty(after.Results);
+        Assert.True(after.FullyRestored);
+    }
+
+    [Fact]
+    public void Accepted_entry_is_never_restored_later_even_with_force()
+    {
+        var (reg, journal, handlers, idA, _, t) = SupersededScenario();
+        var exec = new ActionExecutor(handlers, journal);
+        new RecoveryService(journal, exec).Accept(idA);
+
+        var r = exec.Revert(idA, force: true);
+        Assert.Equal(RevertOutcome.NothingToRevert, r.Outcome);
+        Assert.Equal(JournalState.Accepted, journal.Get(idA).State);
+        Assert.Equal("1", reg.Read(t).Value);
+        Assert.Throws<InvalidOperationException>(() => journal.Transition(idA, JournalState.Restoring)); // terminal
+    }
+
+    [Fact]
+    public void Accept_refuses_entries_that_are_not_pending_or_do_not_exist()
+    {
+        var (_, journal, handlers, idA, runB, _) = SupersededScenario();
+        var recovery = new RecoveryService(journal, new ActionExecutor(handlers, journal));
+        var idB = journal.Entries(runB).Single().Id; // verificada numa execução encerrada: não é pendência
+
+        Assert.Equal(AcceptOutcome.NotPending, recovery.Accept(idB).Outcome);
+        Assert.Equal(JournalState.Verified, journal.Get(idB).State);
+        Assert.Equal(AcceptOutcome.NotFound, recovery.Accept(9999).Outcome);
+        Assert.Equal(AcceptOutcome.Accepted, recovery.Accept(idA).Outcome);
+        Assert.Equal(AcceptOutcome.NotPending, recovery.Accept(idA).Outcome); // segunda vez: já encerrada
+    }
+
+    [Fact]
+    public void Accepted_newer_entry_still_counts_as_a_live_change_for_older_entries()
+    {
+        // B é mais nova e foi aceita (a mudança dela continua no sistema). A, mais antiga, continua superada por B.
+        var reg = new InMemoryRegistryBackend();
+        var handlers = new HandlerRegistry().Add(new RegistryValueHandler(reg));
+        var journal = new InMemoryJournal();
+        var t = T.RT(P, "V");
+        reg.Seed(t, "DWord", "0");
+        var runA = journal.BeginRun("A", "1");
+        var idA = journal.AddPlanned(runA, 0, T.RegAction("a", P, "V", 1));
+        journal.Transition(idA, JournalState.BackedUp, original: StateSnapshot.Of("DWord", "0"));
+        journal.Transition(idA, JournalState.Applying);
+        journal.Transition(idA, JournalState.Failed, note: "releitura falhou");
+        Thread.Sleep(5);
+        var runB = journal.BeginRun("B", "1");
+        var idB = journal.AddPlanned(runB, 0, T.RegAction("b", P, "V", 7));
+        journal.Transition(idB, JournalState.BackedUp, original: StateSnapshot.Of("DWord", "0"));
+        journal.Transition(idB, JournalState.Applying);
+        reg.Write(t, "DWord", "7");
+        var recovery = new RecoveryService(journal, new ActionExecutor(handlers, journal));
+        Assert.Equal(AcceptOutcome.Accepted, recovery.Accept(idB).Outcome);
+
+        var report = recovery.Recover();
+
+        var r = Assert.Single(report.Results);
+        Assert.Equal(idA, r.EntryId);
+        Assert.Equal(RevertOutcome.Conflict, r.Outcome);
+        Assert.Contains("Superada", r.Detail, StringComparison.Ordinal);
+        Assert.Equal("7", reg.Read(t).Value);
+    }
+
+    [Fact]
+    public void Accepted_state_round_trips_through_the_sqlite_journal()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"nexus-accept-{Guid.NewGuid():N}.db");
+        try
+        {
+            long id;
+            using (var j = new SqliteJournal(path))
+            {
+                var run = j.BeginRun("p", "1");
+                id = j.AddPlanned(run, 0, T.RegAction("a", P, "V", 1));
+                j.Transition(id, JournalState.BackedUp, original: StateSnapshot.Of("DWord", "0"));
+                j.Transition(id, JournalState.Applying);
+                Assert.Equal(AcceptOutcome.Accepted,
+                    new RecoveryService(j, new ActionExecutor(new HandlerRegistry(), j)).Accept(id).Outcome);
+            }
+            using var ro = SqliteJournal.OpenReadOnly(path);
+            Assert.Equal(JournalState.Accepted, ro.Get(id).State);
+            Assert.Empty(RecoveryService.FindInterrupted(ro));
+        }
+        finally
+        {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            foreach (var f in new[] { path, path + "-wal", path + "-shm" }) if (File.Exists(f)) File.Delete(f);
+        }
+    }
+
     [Fact]
     public void Recovery_records_unexpected_errors_per_item_and_keeps_the_report()
     {

@@ -49,6 +49,7 @@ nexus-recover scan                      # operações interrompidas e se há exe
 nexus-recover recover                   # restaura; recusa (exit 5) se houver execução ativa; conflitos ficam pendentes
 nexus-recover recover --force           # restaura também itens alterados externamente
 nexus-recover show <runId>
+nexus-recover accept <entryId>          # mantém o estado atual e encerra uma entrada pendente (só grava no diário)
 ```
 
 Regras: nunca escreve sobre algo que o NEXUS não escreveu sem `--force`; nunca declara "recuperação completa" com

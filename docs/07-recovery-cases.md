@@ -82,7 +82,16 @@ Segundo revisor independente, focado na fronteira de privilégio. Os achados B1 
 teste correspondente falhou. A primeira tentativa da mutação de alvo foi inválida, por precedência de operadores
 (`false && A || B`), e foi refeita corretamente.
 
-## Decisões que dependem de você
+## Decisões (tomadas em 2026-10-31)
+
+> O responsável delegou as decisões ("faça tudo, não me pergunte nada"). Foram adotadas as opções abaixo; qualquer
+> uma pode ser revista. O texto original de cada pergunta foi mantido logo abaixo da tabela.
+
+| # | Decisão | Motivo |
+|---|---|---|
+| A1 | **Mantido:** restaura e marca como inferido | A janela é a própria chamada ao Apply e a coincidência exata é improvável; marcar como conflito deixaria no sistema, quase sempre, uma mudança do próprio NEXUS (inclusive ajustes de sessão). O aviso "[inferido]" no CLI e a nota no diário continuam. |
+| R3 | **Implementado:** `nexus-recover accept <entryId>` | Novo estado terminal `Accepted` (esquema do diário 3). Só aceita entradas que a recuperação considera pendentes; exige a trava (exit 5/6); não chama handler nenhum (não lê nem escreve no sistema), por isso não passa pelo portão; exit 4 para entrada inexistente ou já encerrada. Uma entrada aceita nunca é restaurada depois, nem com `--force`, e continua contando como mudança viva para entradas mais antigas no mesmo alvo. Testes: `ReviewFindingsTests.Accept*` (5) e `CoordinationTests.Cli_accept_*` (processos reais). Mutações (ignorar `Accepted` no Revert, tratar `Accepted` como `Reverted` na detecção de superada, aceitar entrada não pendente) detectadas; CLI sem trava não compila. |
+| R5 | **Mantido:** o `--force` confirmado vale para a nova tentativa da mesma entrada em `Restoring` | A nova tentativa só conclui a mesma restauração (mesmo alvo, mesmo original); o valor autorizado fica no diário. Qualquer valor diferente do registrado continua sendo conflito novo e exige `--force` outra vez. |
 
 1. **A1 — restaurar ou preservar quando o processo morreu durante o Apply e o valor atual é o desejado.**
    Hoje: **restaura e marca como inferido**. A alternativa é marcar como conflito e exigir `--force`. Isso nunca

@@ -16,6 +16,9 @@ using Nexus.WindowsActions.Startup;
 //   nexus-recover recover [--force]         restaura as interrompidas; --force sobrescreve conflitos
 //                                           (recusa se houver execução ativa: exit 5; indeterminado: exit 6)
 //   nexus-recover revert <runId> [--force]  reverte uma execução inteira
+//   nexus-recover accept <entryId>          mantém o estado atual e encerra uma entrada pendente (superada/conflito),
+//                                           com registro no diário; não lê nem escreve no sistema (sem portão).
+//                                           Exige a trava (exit 5/6). Entrada inexistente ou não pendente: exit 4.
 //   Opção global: --journal <caminho>  (padrão: %ProgramData%\NEXUS\journal.db)
 //   recover/revert escrevem no sistema: passam pelo mesmo portão do broker (VM de teste liberada). Fora dela: exit 7.
 //   --host-emergency: exceção explícita para restaurar no PC físico (ex.: algo aplicado fora do NEXUS precisa voltar);
@@ -32,7 +35,7 @@ var journalPath = TakeOption(argv, "--journal")
 var force = argv.Remove("--force");
 var hostEmergency = argv.Remove("--host-emergency");
 
-if (argv.Count == 0) { Console.Error.WriteLine("Uso: nexus-recover runs|show|scan|recover|revert ..."); return 2; }
+if (argv.Count == 0) { Console.Error.WriteLine("Uso: nexus-recover runs|show|scan|recover|revert|accept ..."); return 2; }
 if (!File.Exists(journalPath)) { Console.Error.WriteLine($"Diário não encontrado: {journalPath}"); return 3; }
 
 // runs/show/scan abrem o diário em modo somente leitura (sem migração; o SQLite pode criar -wal/-shm auxiliares para ler).
@@ -108,6 +111,24 @@ switch (command)
         var results = executor.RevertRun(revertRun, force);
         Print(results);
         return results.All(r => r.Outcome is RevertOutcome.Reverted or RevertOutcome.AlreadyOriginal or RevertOutcome.NothingToRevert) ? 0 : 1;
+    }
+
+    case "accept" when argv.Count > 1:
+    {
+        if (!long.TryParse(argv[1], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var entryId))
+        {
+            Console.Error.WriteLine("entryId inválido (use o número mostrado como #N em scan/show).");
+            return 2;
+        }
+        var acquired = coordinator.TryAcquire(command, TimeSpan.FromSeconds(2));
+        if (!acquired.Acquired)
+            return Refuse(acquired);
+        using var lease = acquired.Lease!;
+        using var journal = new SqliteJournal(journalPath);
+        var executor = new ActionExecutor(new HandlerRegistry(), journal, lease); // sem handlers: accept não toca o sistema
+        var result = new RecoveryService(journal, executor).Accept(entryId);
+        Console.WriteLine($"#{result.EntryId}: {result.Outcome} — {result.Detail}");
+        return result.Outcome == AcceptOutcome.Accepted ? 0 : 4;
     }
 
     default:

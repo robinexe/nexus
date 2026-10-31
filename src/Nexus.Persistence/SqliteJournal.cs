@@ -18,8 +18,9 @@ public sealed class SqliteJournal : IJournal, IDisposable
     /// <summary>
     /// 1 = esquema inicial. 2 = estado <see cref="JournalState.Restoring"/> (sem mudança de tabela; o número impede que
     /// uma versão antiga, que não conhece o estado, abra o diário e falhe no meio de uma recuperação).
+    /// 3 = estado <see cref="JournalState.Accepted"/> (mesmo motivo; sem mudança de tabela).
     /// </summary>
-    public const int SchemaVersion = 2;
+    public const int SchemaVersion = 3;
     private const int OldestReadableSchema = 1;
 
     public static readonly JsonSerializerOptions Json = new()
@@ -110,8 +111,8 @@ public sealed class SqliteJournal : IJournal, IDisposable
             tx.Commit();
             version = 1;
         }
-        if (version < 2)
-            Exec("PRAGMA user_version = 2;");
+        if (version < SchemaVersion)
+            Exec($"PRAGMA user_version = {SchemaVersion};");
     }
 
     /// <summary>Versão da biblioteca SQLite nativa efetivamente carregada (ex.: "3.49.1").</summary>

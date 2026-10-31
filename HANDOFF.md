@@ -16,8 +16,10 @@ Ainda **não feitas** pelo responsável:
    esperado são 143 testes aprovados e 0 avisos. Devolver o log gerado em `%TEMP%`.
 4. [ ] (Opcional) Ativar o Windows Sandbox (exige administrador e reinício) e rodar `tools\vm\Prepare-Sandbox.ps1`.
    Depois, duplo clique em `vm-config\nexus-sandbox.wsb`.
-5. [ ] Decidir: A1 (restaurar e marcar como inferido, ou tratar como conflito); comando `accept` para entradas
-   superadas; validade do `--force` entre invocações. Detalhes no fim de `docs/07-recovery-cases.md`.
+5. [x] **(Decidido em 31/10, por delegação do responsável: "faça tudo, não me pergunte nada".)** A1: mantido
+   (restaura e marca como inferido). R3: `nexus-recover accept <entryId>` implementado (esquema do diário 3).
+   R5: mantido (o `--force` confirmado vale para a nova tentativa da mesma entrada). Detalhes e motivos no fim de
+   `docs/07-recovery-cases.md`. Pode ser revisto a qualquer momento.
 
 ### Começar num PC novo
 
@@ -71,13 +73,13 @@ Windows (PC novo). Os testes de integração compilam e nunca foram executados. 
 | `src/Nexus.GameProfiles` | CS2 `.cfg` (escrita atômica, anti-symlink) | **Sim** (arquivos `.cfg`) |
 | `src/Nexus.HardwareDiscovery` | Descoberta **somente leitura** + diagnóstico | Não (garantido por teste de metadados) |
 | `src/Nexus.Desktop` | Interface WPF somente leitura | Não executa nada (garantido por teste); grava só o próprio log de erros e o JSON exportado pelo usuário |
-| `src/Nexus.Recovery.Cli` | `nexus-recover` | `recover`/`revert` **sim**, com a trava e o portão (fora de VM liberada: exit 7; `--host-emergency` é exceção explícita); `runs`/`show`/`scan` não |
+| `src/Nexus.Recovery.Cli` | `nexus-recover` | `recover`/`revert` **sim**, com a trava e o portão (fora de VM liberada: exit 7; `--host-emergency` é exceção explícita); `accept` só o diário (com a trava, sem portão); `runs`/`show`/`scan` não |
 | `src/Nexus.Broker` | Protocolo fechado, `BrokerService` (motor completo do lado do broker), `CatalogBoundHandler`, portão `VmOnlyExecutionGate`, transporte por pipe | Só via portão + trava |
 | `src/Nexus.Broker.Host` | `nexus-broker` (console; serviço pendente), pipe com ACL | No PC físico: nada (nem cria arquivos) |
 | `tests/Nexus.IntegrationTests` | Testes com handlers **reais**, fora da solução | Só em VM liberada (portão antes de tudo) |
 | `tools/vm` | Windows Sandbox: `Prepare-Sandbox.ps1` (hospedeiro), `Inside-Sandbox.ps1` (dentro) | Hospedeiro: só builds e `vm-saida`/`vm-config` |
 | `src/Nexus.TraceAnalysis`, `src/Nexus.Experimentation` | Parser PresentMon, métricas, comparação estatística | Não |
-| `tests/Nexus.Tests` | 143 testes (todos `Category=Unit`; isolados em memória/%TEMP%) | Só em %TEMP% |
+| `tests/Nexus.Tests` | 149 testes (todos `Category=Unit`; isolados em memória/%TEMP%) | Só em %TEMP% |
 | `tests/Nexus.TestHelper` | Processo auxiliar dos testes de coordenação | Só no diretório temporário do teste |
 | `tools/Nexus.SmokeJournal` | Gera diário de teste (registro em memória) | Só o arquivo `.db` pedido |
 | `tools/Nexus.Discover` | Relatório de texto da descoberta | Não |
@@ -90,7 +92,7 @@ Windows (PC novo). Os testes de integração compilam e nunca foram executados. 
 dotnet --list-sdks
 dotnet restore Nexus.slnx                       # lock files versionados; use --locked-mode para garantir reprodução
 dotnet build Nexus.slnx -c Release --no-restore # esperado: 0 erros, 0 avisos
-dotnet test  Nexus.slnx -c Release --no-build --filter Category=Unit   # esperado: 143 aprovados
+dotnet test  Nexus.slnx -c Release --no-build --filter Category=Unit   # esperado: 149 aprovados
 
 # Tudo de uma vez, com log (UTF-8) em %TEMP%\nexus-validacao-<data>.log:
 powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1
@@ -109,8 +111,8 @@ src\Nexus.Recovery.Cli\bin\Release\net10.0\nexus-recover.exe scan --journal $env
 ```
 
 Códigos de saída do `nexus-recover`: 0 ok · 1 há o que recuperar / recuperação parcial · 2 uso inválido · 3 diário não
-encontrado · 5 **recusado: execução ativa** · 6 recusado: não foi possível verificar · 7 **recusado: portão de execução**
-(fora de VM de teste liberada).
+encontrado · 4 `accept`: entrada inexistente ou não pendente · 5 **recusado: execução ativa** · 6 recusado: não foi
+possível verificar · 7 **recusado: portão de execução** (fora de VM de teste liberada).
 
 ```powershell
 # Testes de aplicação/rollback REAIS, isolados no Windows Sandbox (ver tools\vm\README.md):
@@ -136,10 +138,10 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
 
 ## 7. Pendências, em ordem
 
-1. ~~Validar a Etapa 3 no Windows~~ (feito em 31/10). Conferir na interface os valores
+1. ~~Validar a Etapa 3 no Windows~~ (feito em 31/10: 143/143). Rodar de novo `tools\etapa1-windows.ps1` com o
+   `accept` (agora 149 testes). Conferir na interface os valores
    lidos contra o Gerenciador de Tarefas e o Painel de Controle e corrigir o que divergir.
-2. **Decisões em aberto** (`docs/07-recovery-cases.md`, seção final): A1 (restaurar ou preservar), entradas
-   superadas (comando `accept`), validade de `--force` entre invocações, quem segura a trava com broker.
+2. ~~Decisões em aberto~~ (decididas em 31/10; ver `docs/07-recovery-cases.md`).
 3. **Rodar os testes de integração no Windows Sandbox** (`tools/vm`) e corrigir o que falhar. Exige ativar o recurso
    Windows Sandbox (decisão do usuário; administrador e reinício).
 4. **Broker como serviço:** instalador com ACL de `%ProgramData%\NEXUS` (R1/B1), trava com ACL (B7), HKCU pelo SID do

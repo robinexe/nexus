@@ -191,6 +191,37 @@ public sealed class CoordinationTests : IDisposable
         Assert.Equal(1, Cli("scan").Exit);                     // consulta continua funcionando
     }
 
+    [Fact]
+    public void Cli_accept_closes_a_pending_entry_without_the_gate_and_refuses_while_another_process_holds_the_lock()
+    {
+        File.WriteAllText(Cfg, "fps_max 300\n");
+        var ready = Path.Combine(_dir, "ready");
+        var child = StartHelper("apply-and-hang", Journal, _dir, ready);
+        WaitReady(child, ready);
+        Kill(child); // execução abandonada com 400 aplicado: entrada pendente em Applying
+
+        long id;
+        using (var j = SqliteJournal.OpenReadOnly(Journal)) id = j.Runs().SelectMany(r => j.Entries(r.RunId)).Single().Id;
+
+        var holderReady = Path.Combine(_dir, "ready-hold");
+        var holder = StartHelper("hold", Journal, holderReady);
+        WaitReady(holder, holderReady);
+        Assert.Equal(5, Cli("accept", id.ToString(System.Globalization.CultureInfo.InvariantCulture)).Exit); // trava ocupada
+        Assert.Equal(JournalState.Applying, StateOf(Journal));
+        Kill(holder);
+
+        _withoutEmergency = true; // accept não escreve no sistema: não passa pelo portão (não há exit 7)
+        Assert.Equal(2, Cli("accept", "abc").Exit);
+        var ok = Cli("accept", id.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        Assert.Equal(0, ok.Exit);
+        Assert.Contains("Accepted", ok.Out, StringComparison.Ordinal);
+        Assert.Equal(JournalState.Accepted, StateOf(Journal));
+        Assert.Equal("400", FpsMax());                 // estado atual mantido
+        Assert.Equal(0, Cli("scan").Exit);             // nada mais a recuperar
+        Assert.Equal(4, Cli("accept", id.ToString(System.Globalization.CultureInfo.InvariantCulture)).Exit); // já encerrada
+        Assert.Equal(4, Cli("accept", "9999").Exit);   // inexistente
+    }
+
     // ---------- processos separados ----------
 
     [Fact]

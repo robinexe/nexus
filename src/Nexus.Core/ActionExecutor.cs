@@ -295,6 +295,8 @@ public sealed class ActionExecutor
         var key = e.Action.Definition.Key;
         if (e.State is JournalState.Reverted or JournalState.Planned)
             return new(entryId, key, RevertOutcome.NothingToRevert, $"Estado {e.State}.");
+        if (e.State == JournalState.Accepted)
+            return new(entryId, key, RevertOutcome.NothingToRevert, "Estado Accepted: o usuário manteve o estado atual; o backup não é mais usado.");
         if (e.Original is null)
             return new(entryId, key, RevertOutcome.NothingToRevert, "Sem backup: nada foi escrito.");
 

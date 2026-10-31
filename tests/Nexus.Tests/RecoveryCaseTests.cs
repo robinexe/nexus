@@ -308,10 +308,15 @@ public sealed class RecoveryCaseTests
             using (var j = new SqliteJournal(path)) j.BeginRun("p", "1");
             SetUserVersion(path, 1);
             using (var ro = SqliteJournal.OpenReadOnly(path)) Assert.Single(ro.Runs()); // v1 legível
-            using (var j = new SqliteJournal(path)) Assert.Single(j.Runs());             // migra para v2
-            Assert.Equal(2L, UserVersion(path));
+            using (var j = new SqliteJournal(path)) Assert.Single(j.Runs());             // migra para a versão atual
+            Assert.Equal(3, SqliteJournal.SchemaVersion);                                 // 3 = estado Accepted
+            Assert.Equal((long)SqliteJournal.SchemaVersion, UserVersion(path));
 
-            SetUserVersion(path, 3);
+            SetUserVersion(path, 2);                                                      // v2 também migra
+            using (var j = new SqliteJournal(path)) Assert.Single(j.Runs());
+            Assert.Equal((long)SqliteJournal.SchemaVersion, UserVersion(path));
+
+            SetUserVersion(path, SqliteJournal.SchemaVersion + 1);
             Assert.Throws<InvalidOperationException>(() => new SqliteJournal(path).Dispose());
             Assert.Throws<InvalidOperationException>(() => SqliteJournal.OpenReadOnly(path).Dispose());
         }
