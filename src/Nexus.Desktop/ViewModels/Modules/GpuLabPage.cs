@@ -7,6 +7,7 @@ using Nexus.Lab.Gpu;
 using Nexus.Lab.Gpu.Windows;
 using Nexus.Monitoring;
 using Nexus.Monitoring.Windows;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -35,9 +36,13 @@ public sealed class GpuLabPage : ModulePage
     private double _chartMaxClock = 2000;
     private IReadOnlyList<GpuTelemetrySample> _samples = [];
     private IReadOnlyList<LimitBand> _bands = [];
+    private double _vramBytes = double.NaN, _vramUsedPercent = double.NaN;
+    private string _heroCaption = "";
 
     public GpuLabPage()
     {
+        Changes.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasChanges));
+        Findings.CollectionChanged += (_, _) => { OnPropertyChanged(nameof(HasFindings)); OnPropertyChanged(nameof(ShowNoFindings)); };
         RefreshCommand = new RelayCommand(() => _ = LoadAsync(), () => !Busy && !IsRecording);
         RecordCommand = new RelayCommand(() => _ = ToggleRecordingAsync(), () => _hasReport && (!Busy || IsRecording));
     }
@@ -53,7 +58,25 @@ public sealed class GpuLabPage : ModulePage
     public string HeroDetail { get => _heroDetail; private set => Set(ref _heroDetail, value); }
     public string HybridText { get => _hybridText; private set => Set(ref _hybridText, value); }
     public string VendorNote { get => _vendorNote; private set => Set(ref _vendorNote, value); }
-    public bool HasReport { get => _hasReport; private set => Set(ref _hasReport, value); }
+    public bool HasReport { get => _hasReport; private set { if (Set(ref _hasReport, value)) { OnPropertyChanged(nameof(IsLoading)); OnPropertyChanged(nameof(ShowNoFindings)); } } }
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Verdadeiro até a primeira leitura terminar (esqueleto no destaque e nos cartões).</summary>
+    public bool IsLoading => !HasReport;
+    /// <summary>Memória de vídeo da GPU principal (bytes; NaN = sem leitura).</summary>
+    public double VramBytes { get => _vramBytes; private set => Set(ref _vramBytes, value); }
+    /// <summary>% da VRAM em uso agora (NaN = o driver não informa).</summary>
+    public double VramUsedPercent { get => _vramUsedPercent; private set { if (Set(ref _vramUsedPercent, value)) OnPropertyChanged(nameof(HasVramUse)); } }
+    public bool HasVramUse => double.IsFinite(VramUsedPercent);
+    /// <summary>Uma linha: nome da placa e o papel dela.</summary>
+    public string HeroCaption { get => _heroCaption; private set => Set(ref _heroCaption, value); }
+    /// <summary>Recursos (HAGS, Resizable BAR, MPO, Modo de Jogo, energia) como selos.</summary>
+    public ObservableCollection<GpuCheckRow> Checks { get; } = [];
+    public bool HasChanges => Changes.Count > 0;
+    public bool HasFindings => Findings.Count > 0;
+    /// <summary>Leitura feita e nenhum achado: mostra o selo "Nada a apontar".</summary>
+    public bool ShowNoFindings => HasReport && Findings.Count == 0;
     public bool IsHybrid { get => _isHybrid; private set => Set(ref _isHybrid, value); }
 
     public ObservableCollection<GpuStatCard> Cards { get; } = [];
@@ -76,7 +99,8 @@ public sealed class GpuLabPage : ModulePage
     public double ChartMaxClock { get => _chartMaxClock; private set => Set(ref _chartMaxClock, value); }
     public string Verdict { get => _verdict; private set => Set(ref _verdict, value); }
     /// <summary>"good", "warn", "bad" ou "info".</summary>
-    public string VerdictTone { get => _verdictTone; private set => Set(ref _verdictTone, value); }
+    public string VerdictTone { get => _verdictTone; private set { if (Set(ref _verdictTone, value)) OnPropertyChanged(nameof(VerdictToneKind)); } }
+    public UiTone VerdictToneKind => GpuTones.Of(VerdictTone);
 
     public override Task OnShownAsync() => _report is null ? LoadAsync() : Task.CompletedTask;
 
@@ -110,6 +134,11 @@ public sealed class GpuLabPage : ModulePage
         HeroTitle = primary is null ? "Nenhuma GPU de hardware encontrada" : GpuDiagnostics.HeroLine(primary);
         HeroDetail = primary is null ? "O Windows só mostra o adaptador básico (sem driver do fabricante)." : PrimaryDetail(primary);
         HybridText = hybrid.Description;
+        HeroCaption = primary is null ? "Sem driver do fabricante" : primary.Name + (primary.IsIntegrated ? " · integrada" : " · dedicada");
+        var vram = primary is null ? 0UL : primary.Nvidia?.VramTotalBytes ?? primary.DedicatedVideoBytes;
+        VramBytes = vram > 0 ? vram : double.NaN;
+        var vramUsed = primary?.Nvidia?.VramUsedBytes ?? primary?.LocalUsageBytes;
+        VramUsedPercent = vram > 0 && vramUsed is { } vu ? Math.Clamp(vu * 100.0 / vram, 0, 100) : double.NaN;
 
         Adapters.Clear();
         foreach (var a in r.Hardware) Adapters.Add(new GpuAdapterRow(a));
@@ -120,8 +149,10 @@ public sealed class GpuLabPage : ModulePage
             Cards.Add(PcieCard(primary));
             Cards.Add(LimitsCard(primary));
             Cards.Add(MemoryCard(primary));
-            Cards.Add(FeaturesCard(r, primary));
+            Cards.Add(MonitorCard(r));
         }
+        Checks.Clear();
+        if (primary is not null) foreach (var c in FeatureChecks(r, primary)) Checks.Add(c);
 
         Readings.Clear();
         if (primary?.Nvidia is { } nv) foreach (var kv in NvidiaRows(nv)) Readings.Add(kv);
@@ -174,23 +205,23 @@ public sealed class GpuLabPage : ModulePage
 
     private static GpuStatCard PcieCard(GpuAdapter a)
     {
-        if (a.IsIntegrated) return new("Barramento", "Integrada", "Fica dentro do processador: não usa slot PCIe.", "info");
+        if (a.IsIntegrated) return new("Barramento", "Integrada", "Fica dentro do processador: não usa slot PCIe.", "info", "Icon.Hardware");
         var (level, text) = Pcie.IdleVerdict(a.Pcie, false);
-        if (!a.Pcie.HasData) return new("Barramento PCIe", "—", text, "info");
+        if (!a.Pcie.HasData) return new("Barramento PCIe", "—", text, "info", "Icon.Hardware");
         var detail = $"Placa: {a.Pcie.Describe(current: false)}" + (a.Pcie.PortMaxGen is { } pg ? $" · porta: PCIe {Pcie.GenLabel(pg)} x{a.Pcie.PortMaxWidth?.ToString(CultureInfo.InvariantCulture) ?? "?"}" : "") + ". " + text;
-        return new("Barramento PCIe (agora)", a.Pcie.Describe(), detail, level);
+        return new("Barramento PCIe (agora)", a.Pcie.Describe(), detail, level, "Icon.Hardware");
     }
 
     private static GpuStatCard LimitsCard(GpuAdapter a)
     {
-        if (a.Nvidia is not { } nv) return new("Limites", "sem leitura", "O driver desta placa não expõe limites de potência/temperatura sem SDK.", "info");
+        if (a.Nvidia is not { } nv) return new("Limites", "sem leitura", "O driver desta placa não expõe limites de potência/temperatura sem SDK.", "info", "Icon.Bolt");
         var value = nv.EnforcedPowerLimitWatts ?? nv.PowerLimitWatts;
         var parts = new List<string>();
         if (nv.DefaultPowerLimitWatts is { } d) parts.Add($"padrão {d:0} W");
         if (nv.MinPowerLimitWatts is { } lo && nv.MaxPowerLimitWatts is { } hi && hi > 0) parts.Add($"faixa {lo:0}–{hi:0} W");
         if (nv.SlowdownTemperatureC is { } t) parts.Add($"reduz clock a {t:0} °C");
         if (nv.MaxGraphicsClockMhz is { } c) parts.Add($"clock máx. {c:0} MHz");
-        return new("Limite de potência", value is { } v ? $"{v:0} W" : "—", string.Join(" · ", parts), "info");
+        return new("Limite de potência", value is { } v ? $"{v:0} W" : "—", string.Join(" · ", parts), "info", "Icon.Bolt");
     }
 
     private static GpuStatCard MemoryCard(GpuAdapter a)
@@ -200,21 +231,36 @@ public sealed class GpuLabPage : ModulePage
         if (a.LocalBudgetBytes is { } b) parts.Add($"orçamento do Windows {GpuDiagnostics.FormatGb(b)}");
         if ((a.Nvidia?.VramUsedBytes ?? a.LocalUsageBytes) is { } u) parts.Add($"em uso {GpuDiagnostics.FormatGb(u)}");
         if (a.SharedSystemBytes > 0) parts.Add($"pode emprestar até {GpuDiagnostics.FormatGb(a.SharedSystemBytes)} da RAM");
-        return new(a.IsIntegrated ? "Memória (reservada da RAM)" : "Memória de vídeo", total > 0 ? GpuDiagnostics.FormatGb(total) : "—", string.Join(" · ", parts), "info");
+        return new(a.IsIntegrated ? "Memória (reservada da RAM)" : "Memória de vídeo", total > 0 ? GpuDiagnostics.FormatGb(total) : "—", string.Join(" · ", parts), "info", "Icon.Ram");
     }
 
-    private static GpuStatCard FeaturesCard(GpuLabReport r, GpuAdapter a)
+    private static GpuStatCard MonitorCard(GpuLabReport r)
     {
-        var lines = new List<string>();
+        var m = r.Monitors.FirstOrDefault(x => x.Primary) ?? (r.Monitors.Count > 0 ? r.Monitors[0] : null);
+        if (m is null) return new("Monitor", "—", "Nenhum monitor lido.", "info", "Icon.Monitor");
+        var best = m.Advice.BelowMaxRefresh ? m.Advice.Best : null;
+        return new("Monitor principal", $"{m.Current.Hz} Hz",
+            best is not null ? $"Aceita {best.Hz} Hz nesta resolução." : "Já na maior taxa desta resolução.", best is not null ? "warn" : "good", "Icon.Monitor",
+            best is not null ? $"pode {best.Hz} Hz" : "no máximo");
+    }
+
+    /// <summary>Recursos da placa como selos (o mesmo conteúdo do antigo cartão "Recursos": HAGS, Resizable BAR, MPO, Modo de Jogo, energia).</summary>
+    private static IEnumerable<GpuCheckRow> FeatureChecks(GpuLabReport r, GpuAdapter a)
+    {
         var hags = a.HagsEnabled ?? (r.Settings.HwSchMode == 2 ? true : r.Settings.HwSchMode == 1 ? false : null);
-        lines.Add($"HAGS: {(hags is null ? "não informado" : hags.Value ? "ligado" : "desligado")}{(a.HagsEnabled is null ? "" : " (driver)")}");
+        yield return new("Agendamento por hardware (HAGS)", hags is null ? "não informado" : hags.Value ? "ligado" : "desligado",
+            hags == true ? "good" : "info", a.HagsEnabled is null ? "Lido do registro do Windows." : "Informado pelo driver.");
         if (a.Nvidia?.Bar1TotalBytes is { } bar1)
-            lines.Add($"Resizable BAR: {(bar1 > 300UL << 20 ? "ligado" : "desligado")} (BAR1 {bar1 >> 20} MB)");
-        else lines.Add("Resizable BAR: sem leitura (só NVIDIA via NVML)");
-        lines.Add($"MPO: {(r.Settings.OverlayTestMode == 5 ? "desligado no registro" : "padrão do Windows")}");
-        lines.Add($"Modo de Jogo: {(r.Settings.AutoGameModeEnabled == 0 ? "desligado" : "ligado")}");
-        if (r.Settings.OnBattery == true) lines.Add("Energia: na bateria (GPU limitada)");
-        return new("Recursos", "", string.Join(Environment.NewLine, lines), "info");
+        {
+            var on = bar1 > 300UL << 20;
+            yield return new("Resizable BAR", on ? "ligado" : "desligado", on ? "good" : "info", $"Janela BAR1 de {bar1 >> 20} MB (NVML).");
+        }
+        else yield return new("Resizable BAR", "sem leitura", "info", "Só dá para ler em placas NVIDIA (NVML).");
+        yield return new("MPO (planos de sobreposição)", r.Settings.OverlayTestMode == 5 ? "desligado no registro" : "padrão do Windows",
+            r.Settings.OverlayTestMode == 5 ? "warn" : "good", "Desligar o MPO à mão só se recomenda para tela piscando.");
+        yield return new("Modo de Jogo", r.Settings.AutoGameModeEnabled == 0 ? "desligado" : "ligado", r.Settings.AutoGameModeEnabled == 0 ? "warn" : "good",
+            "Dá prioridade ao jogo em primeiro plano.");
+        if (r.Settings.OnBattery == true) yield return new("Energia", "na bateria", "warn", "Na bateria a GPU é limitada pelo notebook.");
     }
 
     private static IEnumerable<GpuKeyValue> NvidiaRows(NvidiaReading n)
@@ -410,8 +456,37 @@ public sealed class GpuLabPage : ModulePage
     }
 }
 
-/// <summary>Cartão de número (barramento, limites, memória, recursos).</summary>
-public sealed record GpuStatCard(string Title, string Value, string Detail, string Tone);
+/// <summary>Cartão de número (barramento, limites, memória, monitor). IconKey = ícone do design system; Trend = selo curto.</summary>
+public sealed record GpuStatCard(string Title, string Value, string Detail, string Tone, string IconKey = "Icon.Gpu", string Trend = "")
+{
+    public UiTone ToneKind => GpuTones.Of(Tone);
+}
+
+/// <summary>Um recurso da placa (HAGS, Resizable BAR…) como selo.</summary>
+public sealed record GpuCheckRow(string Name, string State, string Tone, string Note)
+{
+    public UiTone ToneKind => GpuTones.Of(Tone);
+}
+
+/// <summary>"good"/"warn"/"bad"/"info" → tom e ícone do design system.</summary>
+public static class GpuTones
+{
+    public static UiTone Of(string? tone) => tone switch
+    {
+        "good" => UiTone.Good,
+        "warn" => UiTone.Warn,
+        "bad" => UiTone.Bad,
+        _ => UiTone.Info,
+    };
+
+    public static string IconOf(string? tone) => tone switch
+    {
+        "good" => "Icon.Check",
+        "warn" => "Icon.Warning",
+        "bad" => "Icon.Error",
+        _ => "Icon.Info",
+    };
+}
 
 public sealed record GpuKeyValue(string Label, string Value, string Note);
 
@@ -459,6 +534,9 @@ public sealed class GpuMonitorRow
             m.BitsPerColor is { } bpc ? $"{bpc} bits por cor" : "",
         }.Where(s => !string.IsNullOrEmpty(s)));
         Tone = m.Advice.BelowMaxRefresh ? "warn" : "good";
+        CurrentHz = m.Current.Hz;
+        MaxHz = m.Advice.Best?.Hz ?? m.Current.Hz;
+        IsBelowMax = m.Advice.BelowMaxRefresh;
         Fix = fix;
         FixLabel = fix?.FixLabel ?? "";
         FixCommand = new RelayCommand(() => { if (Fix is not null) _ = page.FixAsync(Fix); }, () => Fix is not null && !page.Busy);
@@ -469,6 +547,12 @@ public sealed class GpuMonitorRow
     public string Max { get; }
     public string Detail { get; }
     public string Tone { get; }
+    public UiTone ToneKind => GpuTones.Of(Tone);
+    /// <summary>Taxa atual e a maior anunciada na mesma resolução (o antes → depois do cartão).</summary>
+    public double CurrentHz { get; }
+    public double MaxHz { get; }
+    public bool IsBelowMax { get; }
+    public string StatusText => IsBelowMax ? "Abaixo do que o monitor aguenta" : "Na taxa máxima";
     public GpuFinding? Fix { get; }
     public bool HasFix => Fix is not null;
     public string FixLabel { get; }
@@ -492,6 +576,10 @@ public sealed class GpuFindingRow
     public string Advice => Finding.Advice;
     public string Source => "Fonte: " + Finding.Source;
     public string Tone => Finding.Level;
+    public UiTone ToneKind => GpuTones.Of(Finding.Level);
+    public string IconKey => GpuTones.IconOf(Finding.Level);
+    public string LevelText => Finding.Level switch { "bad" => "Problema", "warn" => "Atenção", "good" => "Tudo certo", _ => "Para saber" };
+    public bool HasAdvice => !string.IsNullOrWhiteSpace(Finding.Advice);
     public bool HasFix => Finding.Fix != GpuFixKind.None;
     public string FixLabel => Finding.FixLabel ?? "Corrigir";
     public RelayCommand FixCommand { get; }
@@ -518,6 +606,7 @@ public sealed class GpuGameRow
     public string Exe { get; }
     public string Preference { get; }
     public bool IsHigh { get; }
+    public UiTone ToneKind => IsHigh ? UiTone.Good : Fix is not null ? UiTone.Warn : UiTone.Info;
     public GpuFinding? Fix { get; }
     public bool HasFix => Fix is not null;
     public RelayCommand FixCommand { get; }
