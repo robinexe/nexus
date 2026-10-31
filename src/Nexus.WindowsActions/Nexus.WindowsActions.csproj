@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- net10.0 (não -windows) para que a lógica rode nos testes em qualquer SO; tipos que tocam o Windows
+         são marcados com [SupportedOSPlatform("windows")] e verificados pelo analisador CA1416. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.WindowsActions</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
+  </ItemGroup>
+</Project>

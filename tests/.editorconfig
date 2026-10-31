@@ -1,0 +1,4 @@
+# Convenções dos projetos de teste (não afeta src/).
+[*.cs]
+# Nomes de teste descritivos com sublinhado (Metodo_situacao_resultado) são a convenção deste repositório.
+dotnet_diagnostic.CA1707.severity = none

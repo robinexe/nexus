@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- O construtor de ActionExecutor sem trava é interno: só os testes o usam. Produção exige IRunLease. -->
+    <InternalsVisibleTo Include="Nexus.Tests" />
+    <InternalsVisibleTo Include="Nexus.TestHelper" />
+  </ItemGroup>
+</Project>

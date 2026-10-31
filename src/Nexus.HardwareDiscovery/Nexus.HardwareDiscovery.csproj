@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Descoberta SOMENTE LEITURA. Um teste (ReadOnlyGuaranteeTests) inspeciona os metadados deste assembly e falha se
+       aparecer qualquer API de escrita (registro, arquivos, energia, serviços, dispositivos, processos). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.HardwareDiscovery</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+  </ItemGroup>
+</Project>

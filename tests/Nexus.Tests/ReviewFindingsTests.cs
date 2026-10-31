@@ -1,0 +1,173 @@
+using Nexus.Core;
+using Nexus.GameProfiles.SourceCfg;
+using Nexus.Persistence;
+using Nexus.WindowsActions.Registry;
+using Nexus.WindowsActions.Services;
+
+namespace Nexus.Tests;
+
+/// <summary>Achados da revisão independente (docs/07-recovery-cases.md, seção "Revisão independente").</summary>
+[Trait("Category", "Unit")]
+public sealed class ReviewFindingsTests
+{
+    private const string P = @"Software\NexusTest";
+
+    /// <summary>Diário adulterado: a entrada aponta para um alvo que a política de segurança proíbe.</summary>
+    private static (InMemoryRegistryBackend Reg, InMemoryJournal Journal, long Id, HandlerRegistry Handlers) TamperedRegistryEntry(string path, RegHive hive)
+    {
+        var reg = new InMemoryRegistryBackend();
+        var handlers = new HandlerRegistry().Add(new RegistryValueHandler(reg));
+        var journal = new InMemoryJournal();
+        var run = journal.BeginRun("p", "1");
+        var forged = new ActionInstance(T.Def("x", RegistryValueHandler.Kind),
+            new Dictionary<string, string> { ["hive"] = hive.ToString(), ["path"] = path, ["name"] = "RunAsPPL", ["type"] = "DWord" },
+            StateSnapshot.Of("DWord", "1"));
+        var id = journal.AddPlanned(run, 0, forged);
+        journal.Transition(id, JournalState.BackedUp, original: StateSnapshot.Of("DWord", "0"));
+        journal.Transition(id, JournalState.Applying);
+        reg.Seed(new RegistryTarget(hive, path, "RunAsPPL", RegView.Default), "DWord", "1"); // "aplicado"
+        return (reg, journal, id, handlers);
+    }
+
+    [Fact]
+    public void Restore_refuses_a_journal_entry_whose_target_violates_the_safety_policy()
+    {
+        var (reg, journal, id, handlers) = TamperedRegistryEntry(@"SYSTEM\CurrentControlSet\Control\Lsa", RegHive.HKLM);
+
+        var r = new ActionExecutor(handlers, journal).Revert(id, force: true);
+
+        Assert.Equal(RevertOutcome.Failed, r.Outcome);
+        Assert.Contains("recusada", r.Detail, StringComparison.Ordinal);
+        Assert.Equal("1", reg.Read(new RegistryTarget(RegHive.HKLM, @"SYSTEM\CurrentControlSet\Control\Lsa", "RunAsPPL", RegView.Default)).Value);
+        Assert.Equal(JournalState.Applying, journal.Get(id).State); // continua visível para a recuperação
+    }
+
+    [Fact]
+    public void Restore_of_valid_target_still_works()
+    {
+        var (reg, journal, id, handlers) = TamperedRegistryEntry(P, RegHive.HKCU);
+        Assert.Equal(RevertOutcome.Reverted, new ActionExecutor(handlers, journal).Revert(id).Outcome);
+        Assert.Equal("0", reg.Read(new RegistryTarget(RegHive.HKCU, P, "RunAsPPL", RegView.Default)).Value);
+    }
+
+    [Theory]
+    [InlineData("WinDefend", "Manual")]
+    [InlineData("SysMain", "Boot")]
+    public void Service_restore_refuses_protected_service_or_boot_start_type(string service, string original)
+    {
+        var h = new ServiceStartTypeHandler(new NullServiceBackend());
+        var a = new ActionInstance(T.Def("s", ServiceStartTypeHandler.Kind), new Dictionary<string, string> { ["service"] = service }, StateSnapshot.Of("StartType", "Manual"));
+        Assert.NotNull(((IRestoreValidator)h).CheckRestore(a, StateSnapshot.Of("StartType", original)));
+    }
+
+    [Fact]
+    public void Cfg_restore_refuses_path_outside_root()
+    {
+        var root = Directory.CreateTempSubdirectory("nexus-rv-").FullName;
+        try
+        {
+            var h = new SourceCfgConvarHandler(() => null);
+            var a = new ActionInstance(T.Def("c", SourceCfgConvarHandler.Kind),
+                new Dictionary<string, string> { ["root"] = root, ["file"] = Path.Combine("..", "evil.cfg"), ["convar"] = "fps_max" }, StateSnapshot.Of("Convar", "1"));
+            Assert.NotNull(((IRestoreValidator)h).CheckRestore(a, StateSnapshot.Of("Convar", "0")));
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public void Older_entry_superseded_by_a_newer_nexus_run_is_not_restored()
+    {
+        var reg = new InMemoryRegistryBackend();
+        var handlers = new HandlerRegistry().Add(new RegistryValueHandler(reg));
+        var journal = new InMemoryJournal();
+        var t = T.RT(P, "V");
+        reg.Seed(t, "DWord", "0");
+
+        // Execução A: backup 0, Apply, depois a compensação não conseguiu ler: fica Failed com original 0.
+        var runA = journal.BeginRun("A", "1");
+        var a = T.RegAction("a", P, "V", 1);
+        var idA = journal.AddPlanned(runA, 0, a);
+        journal.Transition(idA, JournalState.BackedUp, original: reg.Read(t).ValueExists ? StateSnapshot.Of("DWord", "0") : StateSnapshot.Absent());
+        journal.Transition(idA, JournalState.Applying);
+        journal.Transition(idA, JournalState.Failed, note: "releitura falhou");
+        reg.Write(t, "DWord", "5"); // depois disso o valor mudou por fora
+
+        // Execução B (mais nova, do próprio NEXUS): 5 → 1, verificada e encerrada.
+        var exec = new ActionExecutor(handlers, journal);
+        var runB = journal.BeginRun("B", "1");
+        Thread.Sleep(5); // StartedAt de B posterior ao de A
+        Assert.Equal(ExecutionOutcome.Verified,
+            exec.Execute(runB, new DesiredStateResolver(handlers).Resolve([T.RegAction("b", P, "V", 1)], T.Ctx), T.Ctx).Single().Outcome);
+        journal.EndRun(runB);
+
+        var report = new RecoveryService(journal, new ActionExecutor(handlers, journal)).Recover();
+
+        var r = Assert.Single(report.Results);
+        Assert.Equal(RevertOutcome.Conflict, r.Outcome);
+        Assert.Contains("Superada", r.Detail, StringComparison.Ordinal);
+        Assert.False(report.FullyRestored);
+        Assert.Equal("1", reg.Read(t).Value); // a mudança de B foi preservada
+    }
+
+    [Fact]
+    public void Recovery_records_unexpected_errors_per_item_and_keeps_the_report()
+    {
+        var (reg, handlers, mem, exec, resolver) = T.Engine();
+        var run = mem.BeginRun("p", "1");
+        exec.FaultInjector = (w, _) => { if (w == "after-apply") throw new InvalidOperationException("crash"); };
+        Assert.Throws<InvalidOperationException>(() => exec.Execute(run, resolver.Resolve([T.RegAction("a", P, "A", 1)], T.Ctx), T.Ctx));
+        Assert.Throws<InvalidOperationException>(() => exec.Execute(run, resolver.Resolve([T.RegAction("b", P, "B", 1)], T.Ctx), T.Ctx));
+
+        // O diário falha (ex.: disco cheio) ao gravar Restoring no primeiro item recuperado.
+        var failing = new JournalThatFailsOnce(mem, JournalState.Restoring);
+        var report = new RecoveryService(failing, new ActionExecutor(handlers, failing)).Recover();
+
+        Assert.Equal(2, report.Results.Count);                                          // o relatório não se perdeu
+        Assert.Contains(report.Results, r => r.Outcome == RevertOutcome.Failed && r.Detail.Contains("Erro inesperado", StringComparison.Ordinal));
+        Assert.Contains(report.Results, r => r.Outcome == RevertOutcome.Reverted);      // e o outro item seguiu
+        Assert.False(report.FullyRestored);
+    }
+
+    private sealed class JournalThatFailsOnce(IJournal inner, JournalState failOn) : IJournal
+    {
+        private bool _failed;
+        public Guid BeginRun(string profile, string catalogVersion) => inner.BeginRun(profile, catalogVersion);
+        public void EndRun(Guid runId) => inner.EndRun(runId);
+        public long AddPlanned(Guid runId, int sequence, ActionInstance action) => inner.AddPlanned(runId, sequence, action);
+        public void Transition(long entryId, JournalState targetState, StateSnapshot? original = null, StateSnapshot? observed = null, string? note = null)
+        {
+            if (targetState == failOn && !_failed) { _failed = true; throw new IOException("disco cheio (simulado)"); }
+            inner.Transition(entryId, targetState, original, observed, note);
+        }
+        public JournalEntry Get(long entryId) => inner.Get(entryId);
+        public IReadOnlyList<JournalEntry> Entries(Guid runId) => inner.Entries(runId);
+        public IReadOnlyList<RunInfo> Runs() => inner.Runs();
+    }
+
+    [Fact]
+    public void Owner_record_that_does_not_match_a_live_process_is_not_presented_as_the_holder()
+    {
+        var dir = Directory.CreateTempSubdirectory("nexus-owner-").FullName;
+        try
+        {
+            var c = new FileRunCoordinator(dir);
+            using var lease = c.TryAcquire("real").Lease!;
+            // Registro adulterado/obsoleto: PID inexistente.
+            var fake = new LeaseHolder(Guid.NewGuid(), "fantasma", Guid.NewGuid(), int.MaxValue - 7, DateTimeOffset.UtcNow, Environment.MachineName, "x", DateTimeOffset.UtcNow);
+            File.WriteAllText(Path.Combine(dir, FileRunCoordinator.OwnerFileName), System.Text.Json.JsonSerializer.Serialize(fake));
+
+            var probe = new FileRunCoordinator(dir).Probe();
+            Assert.Equal(CoordinationState.Active, probe.State);   // a trava do SO continua mandando
+            Assert.Null(probe.Holder);
+            Assert.Contains("desatualizado", probe.Detail, StringComparison.Ordinal);
+            Assert.True(FileRunCoordinator.IsLive(lease.Holder));
+        }
+        finally { Directory.Delete(dir, true); }
+    }
+
+    private sealed class NullServiceBackend : IServiceBackend
+    {
+        public string? GetStartType(string service) => "Manual";
+        public void SetStartType(string service, string startType) => throw new InvalidOperationException("não deveria escrever");
+    }
+}

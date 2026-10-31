@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Nexus.Core/Nexus.Core.csproj" />
+    <Project Path="src/Nexus.Persistence/Nexus.Persistence.csproj" />
+    <Project Path="src/Nexus.WindowsActions/Nexus.WindowsActions.csproj" />
+    <Project Path="src/Nexus.GameProfiles/Nexus.GameProfiles.csproj" />
+    <Project Path="src/Nexus.TraceAnalysis/Nexus.TraceAnalysis.csproj" />
+    <Project Path="src/Nexus.Experimentation/Nexus.Experimentation.csproj" />
+    <Project Path="src/Nexus.Recovery.Cli/Nexus.Recovery.Cli.csproj" />
+    <Project Path="src/Nexus.HardwareDiscovery/Nexus.HardwareDiscovery.csproj" />
+    <Project Path="src/Nexus.Desktop/Nexus.Desktop.csproj" />
+    <Project Path="src/Nexus.Broker/Nexus.Broker.csproj" />
+    <Project Path="src/Nexus.Broker.Host/Nexus.Broker.Host.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Nexus.Tests/Nexus.Tests.csproj" />
+    <Project Path="tests/Nexus.TestHelper/Nexus.TestHelper.csproj" />
+  </Folder>
+</Solution>

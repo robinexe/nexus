@@ -1,0 +1,26 @@
+# Saídas de compilação
+bin/
+obj/
+TestResults/
+*.binlog
+
+# Editores
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Dados locais do NEXUS: diários, logs, relatórios de descoberta (contêm nome do PC, IPs e caminhos)
+*.db
+*.db-wal
+*.db-shm
+*.log
+nexus.lock
+nexus.lock.owner.json
+nexus-descoberta*.txt
+nexus-export*.json
+
+# Kit de VM: gerados no hospedeiro
+vm-config/
+vm-saida/

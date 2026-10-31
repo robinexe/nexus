@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Testes de integração com handlers REAIS (registro, energia, serviços). FORA da solução de propósito:
+       só rodam numa VM Windows de teste. Cada teste avalia o VmOnlyExecutionGate antes de qualquer escrita e falha
+       sem tocar no sistema se não estiver liberado; o broker confere o portão de novo. Ver tools/vm/README.md. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Nexus.Broker\Nexus.Broker.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Persistence\Nexus.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Recovery.Cli\Nexus.Recovery.Cli.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\catalog\actions.v1.json" Link="catalog\actions.v1.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

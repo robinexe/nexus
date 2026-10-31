@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Processo auxiliar dos testes de coordenação: segura a trava e para no meio de uma aplicação/restauração
+       até ser morto pelo teste. Só escreve no diretório temporário que o teste passar. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Nexus.Core\Nexus.Core.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Persistence\Nexus.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
+  </ItemGroup>
+</Project>
