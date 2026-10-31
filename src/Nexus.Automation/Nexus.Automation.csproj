@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Módulo Automático: perfil do PC, recomendações, "Otimizar agora", verificação agendada e a base da linha de comando.
+  <!-- Módulo Automático: perfil do PC, recomendações, "Otimizar agora", tarefas agendadas, iniciar com o Windows, notificação
+       (bandeja), preferências e a base da linha de comando.
        net10.0: a lógica roda nos testes em qualquer SO; o que toca o Windows usa [SupportedOSPlatform("windows")]. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -12,6 +13,8 @@
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
+    <!-- Regras de limpeza (somente leitura): seleção da limpeza segura do "Otimizar agora" e da limpeza agendada. -->
+    <ProjectReference Include="..\Nexus.Cleaning\Nexus.Cleaning.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Rules\recommendations.v1.json" LogicalName="Nexus.Automation.Rules.recommendations.v1.json" />

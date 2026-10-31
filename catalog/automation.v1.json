@@ -1,23 +1,31 @@
 {
-  "catalogVersion": "1.0.0-draft",
+  "catalogVersion": "1.1.0",
   "schema": "nexus.catalog/1",
-  "note": "Módulo Automático. Só a verificação semanal agendada (somente leitura). O NEXUS nunca agenda ações que escrevem no sistema.",
+  "note": "Módulo Automático. Tarefas agendadas do NEXUS (verificação somente leitura e limpeza segura reversível, opt-in) e iniciar com o Windows. O NEXUS só agenda escrita para a limpeza reversível de baixo risco (quarentena, diário e desfazer), e só se você ligar.",
   "actions": [
     {
       "id": "automation.scheduled-scan.weekly",
       "version": 1,
-      "title": "Verificação semanal agendada (somente leitura)",
+      "title": "Verificação semanal agendada (somente leitura, versão antiga)",
       "classification": "SupportedDocumented",
       "handlerKind": "AutomationScheduledScan",
       "target": {
         "taskName": "NEXUS-VerificacaoSemanal"
       },
       "desiredType": "ScanSchedule",
-      "allowedValues": ["SUN 19:00", "SAT 12:00", "WED 20:00", "OFF"],
+      "allowedValues": [
+        "SUN 19:00",
+        "SAT 12:00",
+        "WED 20:00",
+        "OFF"
+      ],
       "risk": "Low",
       "mechanism": "Cria (ou remove, com OFF) uma tarefa no Agendador de Tarefas do Windows, na sua conta e sem privilégios de administrador, que roda \"nexus scan --report\" uma vez por semana. O comando só lê o PC e grava um relatório (JSON e HTML) em %LocalAppData%\\NEXUS\\reports. A tarefa é registrada com schtasks /create /xml a partir de um XML gerado e validado pelo NEXUS (caminho local do nexus.exe, sem aspas nem variáveis).",
       "evidence": [
-        { "level": "VendorDocumented", "source": "Microsoft Learn: schtasks create (/xml) e Task Scheduler Schema (CalendarTrigger, ScheduleByWeek, Principal LogonType InteractiveToken, RunLevel LeastPrivilege)" }
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Learn: schtasks create (/xml) e Task Scheduler Schema (CalendarTrigger, ScheduleByWeek, Principal LogonType InteractiveToken, RunLevel LeastPrivilege)"
+        }
       ],
       "risks": "Baixo. A tarefa não altera nada; roda por até 15 minutos com prioridade baixa. Se o NEXUS for movido de pasta, a tarefa fica apontando para o caminho antigo e aparece como desatualizada. Uma tarefa de terceiros com o mesmo nome nunca é tocada.",
       "privileges": "User",
@@ -25,13 +33,120 @@
       "reboot": "None",
       "verification": "Releitura da tarefa no Agendador (schtasks /query /xml): marcador do NEXUS, caminho do nexus.exe, argumentos e horário.",
       "revert": "Remove a tarefa se ela não existia; se existia uma tarefa do NEXUS com outro horário, recria exatamente o XML anterior guardado no diário."
+    },
+    {
+      "id": "automation.schedule.scan",
+      "version": 1,
+      "title": "Verificação agendada (somente leitura)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "AutomationScheduledTask",
+      "target": {
+        "task": "scan",
+        "taskName": "NEXUS-Verificacao",
+        "schedule": "{schedule}",
+        "conditions": "{conditions}"
+      },
+      "desiredType": "TaskSchedule",
+      "allowedValues": [
+        "ON",
+        "OFF"
+      ],
+      "userParameters": {
+        "schedule": "(?:DAILY|WEEKLY (?:SUN|MON|TUE|WED|THU|FRI|SAT)|MONTHLY (?:[1-9]|1[0-9]|2[0-8])) (?:[01][0-9]|2[0-3]):[0-5][0-9]",
+        "conditions": "none|battery|game|battery-game"
+      },
+      "risk": "Low",
+      "mechanism": "Cria (ON) ou remove (OFF) a tarefa NEXUS-Verificacao no Agendador de Tarefas, na sua conta e sem administrador, que roda \"nexus scan --report\" todo dia, toda semana ou todo mês na hora escolhida. O comando só lê o PC e grava um relatório em %LocalAppData%\\NEXUS\\reports; se as notificações estiverem ligadas, avisa ao terminar. Condições opcionais: não rodar na bateria (o Agendador nem inicia) e não rodar com jogo aberto ou app em tela cheia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Learn: schtasks create (/xml) e Task Scheduler Schema (CalendarTrigger, ScheduleByDay/ScheduleByWeek/ScheduleByMonth, DisallowStartIfOnBatteries, Principal LogonType InteractiveToken, RunLevel LeastPrivilege)"
+        }
+      ],
+      "risks": "Baixo. Não altera nada; roda por até 15 minutos com prioridade baixa. Se o NEXUS mudar de pasta, a tarefa aparece como desatualizada. Tarefa de outro programa com o mesmo nome nunca é tocada.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura da tarefa (schtasks /query /xml): marcador do NEXUS, caminho do nexus.exe, argumentos fixos, horário e condição de bateria.",
+      "revert": "Remove a tarefa se ela não existia; se existia uma tarefa do NEXUS com outro horário, recria exatamente o XML anterior guardado no diário."
+    },
+    {
+      "id": "automation.schedule.clean",
+      "version": 1,
+      "title": "Limpeza segura agendada (opt-in)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "AutomationScheduledTask",
+      "target": {
+        "task": "clean",
+        "taskName": "NEXUS-LimpezaSegura",
+        "schedule": "{schedule}",
+        "conditions": "{conditions}"
+      },
+      "desiredType": "TaskSchedule",
+      "allowedValues": [
+        "ON",
+        "OFF"
+      ],
+      "userParameters": {
+        "schedule": "(?:DAILY|WEEKLY (?:SUN|MON|TUE|WED|THU|FRI|SAT)|MONTHLY (?:[1-9]|1[0-9]|2[0-8])) (?:[01][0-9]|2[0-3]):[0-5][0-9]",
+        "conditions": "none|battery|game|battery-game"
+      },
+      "risk": "Low",
+      "mechanism": "Cria (ON) ou remove (OFF) a tarefa NEXUS-LimpezaSegura no Agendador de Tarefas, na sua conta e sem administrador, que roda \"nexus clean --safe --scheduled\" na frequência e hora escolhidas. Esse comando pede ao aplicador do usuário (sem aviso do Windows) só as regras de limpeza de risco baixo da sua conta: caches e temporários marcados por padrão na página Limpeza. Nunca regras de administrador, histórico, cookies, caches de shader ou qualquer coisa irreversível. Tudo vai para a quarentena do NEXUS, com diário e desfazer, e um relatório fica em %LocalAppData%\\NEXUS\\reports. Programa aberto (ex.: navegador) faz a regra dele ser pulada. Condições: não rodar na bateria e não rodar com jogo aberto ou app em tela cheia (recomendadas).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Learn: schtasks create (/xml) e Task Scheduler Schema (CalendarTrigger, ScheduleByDay/ScheduleByWeek/ScheduleByMonth, DisallowStartIfOnBatteries, Principal LogonType InteractiveToken, RunLevel LeastPrivilege)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32"
+        }
+      ],
+      "risks": "Baixo. Só caches e temporários que os programas recriam; arquivos abertos são pulados. Nada é apagado de verdade: os arquivos vão para a quarentena (no mesmo disco, o espaço volta quando ela for esvaziada). Não acelera o PC nem aumenta FPS: libera espaço e tira arquivos velhos do caminho. Roda sem você olhar, por isso é desligada por padrão.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura da tarefa (schtasks /query /xml): marcador do NEXUS, caminho do nexus.exe, argumentos fixos (clean --safe --scheduled), horário e condição de bateria. Cada limpeza agendada fica no diário como uma execução normal.",
+      "revert": "Desligar remove a tarefa (ou recria o XML anterior). Cada limpeza feita pela tarefa é desfeita em Limpeza > Histórico ou com \"nexus quarantine restore <lote>\"."
+    },
+    {
+      "id": "automation.start-with-windows",
+      "version": 1,
+      "title": "Iniciar o NEXUS com o Windows (minimizado na bandeja)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "AutomationStartWithWindows",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+        "name": "NEXUS"
+      },
+      "desiredType": "StartWithWindows",
+      "allowedValues": [
+        "ON",
+        "OFF"
+      ],
+      "risk": "Low",
+      "mechanism": "Cria (ON) ou remove (OFF) o valor NEXUS em HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run (sua conta, sem administrador) com \"<pasta do NEXUS>\\Nexus.Desktop.exe\" --minimized. O caminho é montado pelo aplicador a partir da pasta onde o NEXUS está e validado (pasta local, sem aspas nem variáveis).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "Microsoft Learn: Run and RunOnce Registry Keys"
+        }
+      ],
+      "risks": "Baixo. O NEXUS abre minimizado na bandeja a cada logon e só lê o PC (usa um pouco de memória enquanto aberto). Pode ser desligado aqui, no Gerenciador de Tarefas (Aplicativos de inicialização) ou no módulo Inicialização. Uma entrada NEXUS de outro programa nunca é tocada.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor no Run: tipo REG_SZ e exatamente \"<pasta>\\Nexus.Desktop.exe\" --minimized.",
+      "revert": "Remove o valor se ele não existia; se existia (outra pasta do NEXUS), grava de volta o texto anterior guardado no diário."
     }
   ],
   "rejected": [
     {
       "id": "automation.scheduled-apply",
       "classification": "Rejected",
-      "reason": "Agendar ações que alteram o sistema (limpeza, serviços, registro) sem o usuário presente. Decisão de segurança do NEXUS: aplicar é sempre com o usuário vendo o plano e confirmando; o agendamento só faz verificações somente leitura.",
+      "reason": "Agendar ações que alteram o sistema além da limpeza reversível de baixo risco (serviços, registro, privacidade, limpeza de administrador, histórico/cookies). Decisão de segurança do NEXUS: o agendamento só faz verificação somente leitura e, se você ligar, a limpeza segura (quarentena, diário e desfazer). Todo o resto é sempre com você vendo o plano e confirmando.",
       "source": "docs/modules/automation.md"
     }
   ]
