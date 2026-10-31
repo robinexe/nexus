@@ -20,6 +20,9 @@ public sealed record CleaningFolders(
     /// <summary>Pastas sob as quais nada é limpo, além das fixas (ex.: a própria quarentena do NEXUS).</summary>
     public IReadOnlyList<string> ExtraForbidden { get; init; } = [];
 
+    /// <summary>Raiz do disco do sistema (ex.: C:\), derivada da pasta do Windows. Só para %SystemDrive%\NVIDIA e %SystemDrive%\AMD.</summary>
+    public string? SystemDrive { get; init; }
+
     public string? Resolve(string placeholder) => placeholder switch
     {
         "%UserTemp%" => UserTemp,
@@ -29,6 +32,8 @@ public sealed record CleaningFolders(
         "%ProgramData%" => ProgramData,
         "%WinDir%" => WinDir,
         "%SteamPath%" => SteamPath,
+        "%UserProfile%" => UserProfile,
+        "%SystemDrive%" => SystemDrive,
         _ => null,
     };
 }
@@ -59,6 +64,10 @@ public static class CleaningPaths
 
     internal static string Normalize(string path) => Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
 
+    /// <summary>Prefixo "pasta\" para testar se um caminho fica DENTRO da pasta (a raiz do disco já termina com separador).</summary>
+    internal static string ChildPrefix(string directory) =>
+        Path.EndsInDirectorySeparator(directory) ? directory : directory + Path.DirectorySeparatorChar;
+
     /// <summary>A pasta-base de um placeholder, validada (absoluta, local, existente ou não).</summary>
     public static string? BaseOf(string placeholder, CleaningFolders folders, out string? problem)
     {
@@ -74,6 +83,11 @@ public static class CleaningPaths
         var full = Normalize(b);
         // Pastas do perfil vêm de variáveis e pastas conhecidas que o próprio usuário pode redirecionar (TEMP, LOCALAPPDATA...).
         // O aplicador pode rodar como administrador/SYSTEM: elas só valem se ficarem DENTRO da pasta do perfil.
+        if (placeholder is "%UserProfile%" && full.Length <= 3)
+        {
+            problem = "Pasta do perfil inválida.";
+            return null;
+        }
         if (placeholder is "%UserTemp%" or "%LocalAppData%" or "%LocalAppDataLow%" or "%AppData%")
         {
             var profile = string.IsNullOrWhiteSpace(folders.UserProfile) || !Path.IsPathFullyQualified(folders.UserProfile) ? null : Normalize(folders.UserProfile);
@@ -161,8 +175,8 @@ public static class CleaningPaths
         {
             var (placeholder, segments) = Split(root.Template);
             var baseDir = BaseOf(placeholder, folders, out _);
-            if (baseDir is null || !full.StartsWith(baseDir + Path.DirectorySeparatorChar, Cmp)) continue;
-            var rel = full[(baseDir.Length + 1)..].Split(Path.DirectorySeparatorChar);
+            if (baseDir is null || !full.StartsWith(ChildPrefix(baseDir), Cmp)) continue;
+            var rel = full[ChildPrefix(baseDir).Length..].Split(Path.DirectorySeparatorChar);
             if (rel.Length < segments.Length + 1) continue;
             if (!root.Recursive && rel.Length != segments.Length + 1) continue;
             var ok = true;
@@ -193,7 +207,7 @@ public static class CleaningPaths
         foreach (var root in rule.Roots)
         {
             var b = BaseOf(Split(root.Template).Placeholder, folders, out _);
-            if (b is not null && full.StartsWith(b + Path.DirectorySeparatorChar, Cmp) && (baseDir is null || b.Length > baseDir.Length)) baseDir = b;
+            if (b is not null && full.StartsWith(ChildPrefix(b), Cmp) && (baseDir is null || b.Length > baseDir.Length)) baseDir = b;
         }
         if (baseDir is null) return path;
         for (var dir = Path.GetDirectoryName(full); dir is not null && dir.Length >= baseDir.Length; dir = Path.GetDirectoryName(dir))
