@@ -24,7 +24,7 @@ public static class ProgramsHandlers
         var tree = new WindowsRegistryTreeBackend(requireUserProfileForHkcu: environment.OtherAccount);
         var otherAccount = environment.OtherAccount;
         return new ProgramLeftoverHandler(tree, new WindowsLeftoverRoots(tree, otherAccount), sid => InstalledFor(sid, otherAccount),
-            environment.DataDirectory, environment.Elevated, otherAccount, AdminOwnedFile.Check);
+            environment.DataDirectory, environment.Elevated, otherAccount, AdminOwnedFile.Check, hardenMachineQuarantine: QuarantineAcl.Harden);
     }
 
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]

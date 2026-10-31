@@ -477,6 +477,24 @@ public class ProgramLeftoverHandlerTests
     }
 
     [Fact]
+    public void Quarentena_da_maquina_e_protegida_e_a_do_usuario_nao_precisa()
+    {
+        using var t = new TempTree();
+        var hardened = new List<string>();
+        var h = new ProgramLeftoverHandler(new InMemoryRegistryTreeBackend(), new Roots(t), _ => [], t.Data, true, false,
+            hardenMachineQuarantine: hardened.Add);
+        var machine = TempTree.File(Path.Combine(t.ProgramData, "Old Tool", "a.log"));
+        var user = TempTree.File(Path.Combine(t.Roaming, "Old Tool", "a.ini"));
+        h.Apply(Action("file", "HKLM", Path.GetDirectoryName(machine)!));
+        var folder = h.Quarantine.FolderOf(new LeftoverTarget(false, true, Path.GetDirectoryName(machine)!, null));
+        Assert.Contains(folder, hardened);
+        Assert.Contains(Path.Combine(folder, "manifest.json"), hardened);
+        hardened.Clear();
+        h.Apply(Action("file", "HKCU", Path.GetDirectoryName(user)!));
+        Assert.Empty(hardened);
+    }
+
+    [Fact]
     public void Arquivo_unico_e_restauracao_sem_sobrescrever()
     {
         using var t = new TempTree();

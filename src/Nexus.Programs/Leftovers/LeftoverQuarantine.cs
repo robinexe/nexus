@@ -62,6 +62,9 @@ public sealed class LeftoverQuarantine
     /// <summary>Força o caminho de "outro volume" (testes).</summary>
     public bool ForceCrossVolume { get; init; }
 
+    /// <summary>Protege pasta e manifesto de sobras da máquina (Windows: <see cref="QuarantineAcl.Harden"/>).</summary>
+    public Action<string>? Harden { get; init; }
+
     public static string IdOf(LeftoverTarget t)
     {
         ArgumentNullException.ThrowIfNull(t);
@@ -85,7 +88,10 @@ public sealed class LeftoverQuarantine
 
     public void WriteManifest(LeftoverTarget t, LeftoverManifest m)
     {
+        ArgumentNullException.ThrowIfNull(t);
+        var created = !Directory.Exists(FolderOf(t));
         Directory.CreateDirectory(FolderOf(t));
+        if (created && t.Machine) Harden?.Invoke(FolderOf(t));
         var final = ManifestPath(t);
         var tmp = final + ".tmp";
         using (var fs = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -94,6 +100,7 @@ public sealed class LeftoverQuarantine
             fs.Flush(flushToDisk: true);
         }
         File.Move(tmp, final, overwrite: true);
+        if (t.Machine) Harden?.Invoke(final);
     }
 
     public void Discard(LeftoverTarget t)

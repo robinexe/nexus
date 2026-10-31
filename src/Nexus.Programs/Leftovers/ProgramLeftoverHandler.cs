@@ -46,13 +46,14 @@ public sealed class ProgramLeftoverHandler : IActionHandler, IRestoreValidator
     /// <param name="machineManifestTrust">Windows: confere que o manifesto de uma sobra da máquina só pode ter sido escrito por
     /// administradores (<c>AdminOwnedFile.Check</c>); impede que um usuário comum troque o conteúdo que volta para Program Files.</param>
     public ProgramLeftoverHandler(IRegistryTreeBackend registry, ILeftoverRootsProvider roots, Func<string?, IReadOnlyList<InstalledProgram>> installed,
-        string dataDirectory, bool elevated, bool otherAccount, Func<string, string?>? machineManifestTrust = null, bool forceCrossVolume = false)
+        string dataDirectory, bool elevated, bool otherAccount, Func<string, string?>? machineManifestTrust = null, bool forceCrossVolume = false,
+        Action<string>? hardenMachineQuarantine = null)
     {
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
         _roots = roots ?? throw new ArgumentNullException(nameof(roots));
         _installed = installed ?? throw new ArgumentNullException(nameof(installed));
         _dataDirectory = dataDirectory ?? throw new ArgumentNullException(nameof(dataDirectory));
-        _quarantine = new LeftoverQuarantine(dataDirectory) { ForceCrossVolume = forceCrossVolume };
+        _quarantine = new LeftoverQuarantine(dataDirectory) { ForceCrossVolume = forceCrossVolume, Harden = hardenMachineQuarantine };
         _elevated = elevated;
         _otherAccount = otherAccount;
         _machineManifestTrust = machineManifestTrust;
