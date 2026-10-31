@@ -1,0 +1,425 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Serviços (módulo Nexus.Boot). Presets explicados no campo 'presets' (lido só pela página; o carregador ignora). Lista proibida aplicada no handler BootServiceStartType.",
+  "actions": [
+    {
+      "id": "boot.service.spooler.disabled",
+      "version": 1,
+      "title": "Spooler de impressão desativado",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "Spooler"
+      },
+      "desiredValue": "Disabled",
+      "desiredType": "StartType",
+      "mechanism": "Sem o spooler o Windows não imprime (nem 'Imprimir em PDF'). A Microsoft recomendou desativá-lo onde não se imprime, por causa das falhas PrintNightmare.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527 (solução alternativa: parar e desativar o Spooler)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Impressão e 'Microsoft Print to PDF' param até voltar ao original (Desfazer).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.fax.disabled",
+      "version": 1,
+      "title": "Fax desativado",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "Fax"
+      },
+      "desiredValue": "Disabled",
+      "desiredType": "StartType",
+      "mechanism": "Serviço de fax do Windows. Em Manual ele já não roda sozinho; desativado não abre nem por engano.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Fax do Windows deixa de funcionar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.xblauthmanager.disabled",
+      "version": 1,
+      "title": "Xbox Live: autenticação desativada",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "XblAuthManager"
+      },
+      "desiredValue": "Disabled",
+      "desiredType": "StartType",
+      "mechanism": "Autenticação Xbox Live usada pelo app Xbox, Game Pass e jogos da Microsoft Store. Já fica em Manual (abre sob demanda).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Game Pass, app Xbox, conquistas e jogos da Store com login Xbox deixam de funcionar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.xblgamesave.disabled",
+      "version": 1,
+      "title": "Xbox Live: salvamento na nuvem desativado",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "XblGameSave"
+      },
+      "desiredValue": "Disabled",
+      "desiredType": "StartType",
+      "mechanism": "Sincroniza saves de jogos Xbox Live com a nuvem.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Saves na nuvem de jogos Xbox/Game Pass param de sincronizar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.xboxnetapisvc.disabled",
+      "version": 1,
+      "title": "Xbox Live: rede desativada",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "XboxNetApiSvc"
+      },
+      "desiredValue": "Disabled",
+      "desiredType": "StartType",
+      "mechanism": "Serviço de rede do Xbox Live (multijogador e chat de jogos Xbox).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Multijogador e chat de jogos Xbox/Game Pass deixam de funcionar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.diagtrack.disabled",
+      "version": 1,
+      "title": "Telemetria (DiagTrack) desativada",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "DiagTrack"
+      },
+      "desiredValue": "Disabled",
+      "desiredType": "StartType",
+      "mechanism": "'Experiências do Usuário Conectado e Telemetria': envia dados de diagnóstico à Microsoft. Desativar reduz o envio; não muda desempenho de forma mensurável.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/privacy/configure-windows-diagnostic-data-in-your-organization"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Alguns relatórios de problema e recursos que dependem de diagnóstico ficam limitados. Windows Update continua funcionando.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.remoteregistry.disabled",
+      "version": 1,
+      "title": "Registro Remoto desativado",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "RemoteRegistry"
+      },
+      "desiredValue": "Disabled",
+      "desiredType": "StartType",
+      "mechanism": "Permite que outro computador leia/altere o registro deste pela rede. No Windows 10/11 doméstico já vem desativado; aqui só garantimos.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Ferramentas de administração remota que leem o registro deixam de funcionar (raro em casa).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.sysmain.manual",
+      "version": 1,
+      "title": "SysMain em Manual",
+      "classification": "Experimental",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "SysMain"
+      },
+      "desiredValue": "Manual",
+      "desiredType": "StartType",
+      "mechanism": "Pré-carrega na memória programas que você usa muito. Em SSD/NVMe o ganho dele é pequeno, e desligar também ganha pouco: espere diferença pequena ou nenhuma.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Windows Internals (Superfetch/SysMain pré-carrega páginas a partir do histórico de uso)"
+        }
+      ],
+      "risks": "Programas usados com frequência podem abrir um pouco mais devagar, principalmente em HD.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.mapsbroker.manual",
+      "version": 1,
+      "title": "Gerenciador de Mapas Baixados em Manual",
+      "classification": "Conditional",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "MapsBroker"
+      },
+      "desiredValue": "Manual",
+      "desiredType": "StartType",
+      "mechanism": "Atualiza mapas offline do app Mapas. Em Manual ele abre quando o app precisar.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Mapas offline só atualizam quando o app Mapas for aberto.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.wsearch.manual",
+      "version": 1,
+      "title": "Windows Search (indexação) em Manual",
+      "classification": "Experimental",
+      "condition": "Parte de um preset explicado na página Serviços; aplicado só com confirmação.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "WSearch"
+      },
+      "desiredValue": "Manual",
+      "desiredType": "StartType",
+      "mechanism": "Indexa arquivos e e-mails para a busca ser instantânea. Em Manual a indexação para: a busca do Iniciar, do Explorador e do Outlook fica lenta e incompleta.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/search/-search-3x-wds-overview (Windows Search)"
+        }
+      ],
+      "risks": "Busca do Iniciar/Explorador/Outlook mais lenta e incompleta. Ganho em jogos: pequeno (a indexação já recua quando você usa o PC).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    },
+    {
+      "id": "boot.service.starttype",
+      "version": 1,
+      "title": "Tipo de início de um serviço (escolhido por você)",
+      "classification": "Conditional",
+      "condition": "Serviço escolhido pelo usuário na página Serviços, fora da lista proibida do NEXUS.",
+      "handlerKind": "BootServiceStartType",
+      "target": {
+        "service": "{service}"
+      },
+      "userParameters": {
+        "service": "[A-Za-z0-9_.\\-]([A-Za-z0-9_.\\- ]{0,78}[A-Za-z0-9_.\\-])?"
+      },
+      "allowedValues": [
+        "Automatic",
+        "AutomaticDelayed",
+        "Manual",
+        "Disabled"
+      ],
+      "desiredType": "StartType",
+      "mechanism": "Muda o tipo de início pelo Gerenciador de Controle de Serviços (ChangeServiceConfig). Não para nem inicia o serviço agora: vale a partir do próximo boot (ou quando algo pedir o serviço).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/api/winsvc/nf-winsvc-changeserviceconfigw"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+        }
+      ],
+      "risks": "Desativar um serviço de que um recurso depende quebra esse recurso até desfazer. Serviços essenciais (RPC, Defender, firewall, rede, som, Windows Update desativado, anticheat) são recusados pelo NEXUS.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "QueryServiceConfig (tipo de início e início atrasado).",
+      "revert": "Desfazer devolve o tipo de início original (inclusive Automático atrasado)."
+    }
+  ],
+  "presets": [
+    {
+      "id": "sem-impressora",
+      "title": "Não uso impressora nem fax",
+      "summary": "Desliga o spooler de impressão e o fax. Também fecha a porta das falhas PrintNightmare.",
+      "forWho": "Quem nunca imprime (nem em PDF pelo 'Imprimir').",
+      "honesty": "Não deixa jogos mais rápidos de forma mensurável: o ganho é de segurança e de um processo a menos.",
+      "items": [
+        {
+          "action": "boot.service.spooler.disabled@1",
+          "service": "Spooler",
+          "startType": "Disabled",
+          "why": "Sem impressora, o spooler só ocupa memória e é uma superfície de ataque conhecida."
+        },
+        {
+          "action": "boot.service.fax.disabled@1",
+          "service": "Fax",
+          "startType": "Disabled",
+          "why": "Fax do Windows: quase ninguém usa."
+        }
+      ]
+    },
+    {
+      "id": "sem-xbox",
+      "title": "Não uso Xbox nem Game Pass",
+      "summary": "Desativa os serviços do Xbox Live. Eles já ficam em Manual e só abrem quando um jogo ou o app Xbox pede.",
+      "forWho": "Quem joga só pela Steam/Epic/Battle.net e não usa Game Pass, app Xbox nem jogos da Microsoft Store.",
+      "honesty": "Ganho de desempenho perto de zero (os serviços quase nunca estão rodando). Serve para garantir que nada do Xbox abra. O serviço de acessórios Xbox (controle) não é tocado.",
+      "items": [
+        {
+          "action": "boot.service.xblauthmanager.disabled@1",
+          "service": "XblAuthManager",
+          "startType": "Disabled",
+          "why": "Login Xbox Live."
+        },
+        {
+          "action": "boot.service.xblgamesave.disabled@1",
+          "service": "XblGameSave",
+          "startType": "Disabled",
+          "why": "Saves na nuvem do Xbox."
+        },
+        {
+          "action": "boot.service.xboxnetapisvc.disabled@1",
+          "service": "XboxNetApiSvc",
+          "startType": "Disabled",
+          "why": "Rede do Xbox Live."
+        }
+      ]
+    },
+    {
+      "id": "privacidade",
+      "title": "Privacidade e acesso remoto",
+      "summary": "Desliga o envio de telemetria (DiagTrack) e garante o Registro Remoto desligado.",
+      "forWho": "Quem quer menos dados enviados à Microsoft e nenhum acesso remoto ao registro.",
+      "honesty": "Não acelera o PC. Windows Update e Microsoft Store continuam funcionando.",
+      "items": [
+        {
+          "action": "boot.service.diagtrack.disabled@1",
+          "service": "DiagTrack",
+          "startType": "Disabled",
+          "why": "Envio de dados de diagnóstico."
+        },
+        {
+          "action": "boot.service.remoteregistry.disabled@1",
+          "service": "RemoteRegistry",
+          "startType": "Disabled",
+          "why": "Acesso ao registro pela rede."
+        }
+      ]
+    },
+    {
+      "id": "jogos-ssd",
+      "title": "Jogos em PC com SSD (ganho pequeno)",
+      "summary": "Põe em Manual serviços que trabalham em segundo plano: SysMain, mapas offline e indexação da busca.",
+      "forWho": "PC com SSD/NVMe, que não depende da busca do Iniciar/Outlook.",
+      "honesty": "Em SSD o efeito costuma ser pequeno ou nenhum: meça antes e depois na página Medir. Com indexação desligada a busca do Windows fica lenta e incompleta.",
+      "items": [
+        {
+          "action": "boot.service.sysmain.manual@1",
+          "service": "SysMain",
+          "startType": "Manual",
+          "why": "Pré-carregamento; em SSD pouco ganho de qualquer lado."
+        },
+        {
+          "action": "boot.service.mapsbroker.manual@1",
+          "service": "MapsBroker",
+          "startType": "Manual",
+          "why": "Atualiza mapas offline em segundo plano."
+        },
+        {
+          "action": "boot.service.wsearch.manual@1",
+          "service": "WSearch",
+          "startType": "Manual",
+          "why": "Indexação: atenção, a busca fica lenta e incompleta."
+        }
+      ]
+    }
+  ],
+  "rejected": [
+    {
+      "id": "boot.service.myth.disable-many",
+      "classification": "Rejected",
+      "reason": "Listas 'desative 50 serviços para ganhar FPS' quebram recursos (Wi-Fi, Bluetooth, impressão, atualizações) sem ganho medido: a maioria dos serviços já fica parada em Manual.",
+      "source": "learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server (guia da Microsoft sobre desativar serviços; escrito para servidor, então o critério num PC é se você usa o recurso)"
+    },
+    {
+      "id": "boot.service.myth.wuauserv-disabled",
+      "classification": "Rejected",
+      "reason": "Desativar o Windows Update deixa o PC sem correções de segurança; o NEXUS só permite Manual.",
+      "source": "learn.microsoft.com/windows/deployment/update/how-windows-update-works"
+    }
+  ]
+}

@@ -1,0 +1,383 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Inicialização (Nexus.Boot). Toda ação é escolhida pelo usuário na página e validada por regex (userParameters).",
+  "actions": [
+    {
+      "id": "boot.startup.user.run",
+      "version": 1,
+      "title": "Ligar/desligar item de inicialização (usuário)",
+      "classification": "Conditional",
+      "condition": "Item escolhido pelo usuário na página Inicialização.",
+      "handlerKind": "StartupApproved",
+      "target": {
+        "scope": "HKCU",
+        "kind": "Run",
+        "entryName": "{entryName}"
+      },
+      "userParameters": {
+        "entryName": "[^\\x00-\\x1f\\\\]{1,200}"
+      },
+      "allowedValues": [
+        "enabled",
+        "disabled"
+      ],
+      "mechanism": "Mesmo método do Gerenciador de Tarefas: grava 'habilitado/desabilitado' em Explorer\\StartupApproved. A entrada em ...\\CurrentVersion\\Run não é apagada; o programa só deixa de abrir com o Windows.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "support.microsoft.com: 'Configurar aplicativos de inicialização no Windows' (Gerenciador de Tarefas > Aplicativos de inicialização)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys (chaves Run/RunOnce)"
+        },
+        {
+          "level": "Observed",
+          "source": "Formato de Explorer\\StartupApproved observado no Gerenciador de Tarefas (byte 0 par = habilitado, ímpar = desabilitado); não documentado oficialmente."
+        }
+      ],
+      "risks": "O programa deixa de abrir sozinho (ex.: sincronização, atalhos de teclado, painel de periférico). Alguns programas se registram de novo ao abrir.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor binário em StartupApproved.",
+      "revert": "Desfazer grava os bytes originais de volta (ou remove o valor, se não existia)."
+    },
+    {
+      "id": "boot.startup.machine.run",
+      "version": 1,
+      "title": "Ligar/desligar item de inicialização (computador)",
+      "classification": "Conditional",
+      "condition": "Item escolhido pelo usuário na página Inicialização.",
+      "handlerKind": "StartupApproved",
+      "target": {
+        "scope": "HKLM",
+        "kind": "Run",
+        "entryName": "{entryName}"
+      },
+      "userParameters": {
+        "entryName": "[^\\x00-\\x1f\\\\]{1,200}"
+      },
+      "allowedValues": [
+        "enabled",
+        "disabled"
+      ],
+      "mechanism": "Mesmo método do Gerenciador de Tarefas: grava 'habilitado/desabilitado' em Explorer\\StartupApproved. A entrada em ...\\CurrentVersion\\Run não é apagada; o programa só deixa de abrir com o Windows.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "support.microsoft.com: 'Configurar aplicativos de inicialização no Windows' (Gerenciador de Tarefas > Aplicativos de inicialização)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys (chaves Run/RunOnce)"
+        },
+        {
+          "level": "Observed",
+          "source": "Formato de Explorer\\StartupApproved observado no Gerenciador de Tarefas (byte 0 par = habilitado, ímpar = desabilitado); não documentado oficialmente."
+        }
+      ],
+      "risks": "O programa deixa de abrir sozinho (ex.: sincronização, atalhos de teclado, painel de periférico). Alguns programas se registram de novo ao abrir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor binário em StartupApproved.",
+      "revert": "Desfazer grava os bytes originais de volta (ou remove o valor, se não existia)."
+    },
+    {
+      "id": "boot.startup.machine.run32",
+      "version": 1,
+      "title": "Ligar/desligar item de inicialização (computador, 32 bits)",
+      "classification": "Conditional",
+      "condition": "Item escolhido pelo usuário na página Inicialização.",
+      "handlerKind": "StartupApproved",
+      "target": {
+        "scope": "HKLM",
+        "kind": "Run32",
+        "entryName": "{entryName}"
+      },
+      "userParameters": {
+        "entryName": "[^\\x00-\\x1f\\\\]{1,200}"
+      },
+      "allowedValues": [
+        "enabled",
+        "disabled"
+      ],
+      "mechanism": "Mesmo método do Gerenciador de Tarefas: grava 'habilitado/desabilitado' em Explorer\\StartupApproved. A entrada em ...\\CurrentVersion\\Run não é apagada; o programa só deixa de abrir com o Windows.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "support.microsoft.com: 'Configurar aplicativos de inicialização no Windows' (Gerenciador de Tarefas > Aplicativos de inicialização)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys (chaves Run/RunOnce)"
+        },
+        {
+          "level": "Observed",
+          "source": "Formato de Explorer\\StartupApproved observado no Gerenciador de Tarefas (byte 0 par = habilitado, ímpar = desabilitado); não documentado oficialmente."
+        }
+      ],
+      "risks": "O programa deixa de abrir sozinho (ex.: sincronização, atalhos de teclado, painel de periférico). Alguns programas se registram de novo ao abrir.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor binário em StartupApproved.",
+      "revert": "Desfazer grava os bytes originais de volta (ou remove o valor, se não existia)."
+    },
+    {
+      "id": "boot.startupfolder.user",
+      "version": 1,
+      "title": "Ligar/desligar atalho da pasta Inicializar (usuário)",
+      "classification": "Conditional",
+      "condition": "Atalho escolhido pelo usuário na página Inicialização.",
+      "handlerKind": "BootStartupFolder",
+      "target": {
+        "scope": "HKCU",
+        "fileName": "{fileName}"
+      },
+      "userParameters": {
+        "fileName": "[^\\\\/:*?\"<>|\\x00-\\x1f]{1,200}"
+      },
+      "allowedValues": [
+        "enabled",
+        "disabled"
+      ],
+      "desiredType": "StartupState",
+      "mechanism": "Mesmo método do Gerenciador de Tarefas para a pasta Inicializar: valor com o nome do arquivo em Explorer\\StartupApproved\\StartupFolder. O atalho não é movido nem apagado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "support.microsoft.com: 'Configurar aplicativos de inicialização no Windows' (Gerenciador de Tarefas > Aplicativos de inicialização)"
+        },
+        {
+          "level": "Observed",
+          "source": "Formato de Explorer\\StartupApproved observado no Gerenciador de Tarefas (byte 0 par = habilitado, ímpar = desabilitado); não documentado oficialmente."
+        }
+      ],
+      "risks": "O programa do atalho deixa de abrir com o Windows.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor binário em StartupApproved\\StartupFolder.",
+      "revert": "Desfazer grava os bytes originais de volta (ou remove o valor, se não existia)."
+    },
+    {
+      "id": "boot.startupfolder.common",
+      "version": 1,
+      "title": "Ligar/desligar atalho da pasta Inicializar (todos)",
+      "classification": "Conditional",
+      "condition": "Atalho escolhido pelo usuário na página Inicialização.",
+      "handlerKind": "BootStartupFolder",
+      "target": {
+        "scope": "HKLM",
+        "fileName": "{fileName}"
+      },
+      "userParameters": {
+        "fileName": "[^\\\\/:*?\"<>|\\x00-\\x1f]{1,200}"
+      },
+      "allowedValues": [
+        "enabled",
+        "disabled"
+      ],
+      "desiredType": "StartupState",
+      "mechanism": "Mesmo método do Gerenciador de Tarefas para a pasta Inicializar: valor com o nome do arquivo em Explorer\\StartupApproved\\StartupFolder. O atalho não é movido nem apagado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "support.microsoft.com: 'Configurar aplicativos de inicialização no Windows' (Gerenciador de Tarefas > Aplicativos de inicialização)"
+        },
+        {
+          "level": "Observed",
+          "source": "Formato de Explorer\\StartupApproved observado no Gerenciador de Tarefas (byte 0 par = habilitado, ímpar = desabilitado); não documentado oficialmente."
+        }
+      ],
+      "risks": "O programa do atalho deixa de abrir com o Windows.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor binário em StartupApproved\\StartupFolder.",
+      "revert": "Desfazer grava os bytes originais de volta (ou remove o valor, se não existia)."
+    },
+    {
+      "id": "boot.task.user",
+      "version": 1,
+      "title": "Ligar/desligar tarefa de logon (sua conta)",
+      "classification": "Conditional",
+      "condition": "Tarefa com gatilho de logon ou de boot, fora de \\Microsoft\\, escolhida pelo usuário.",
+      "handlerKind": "BootScheduledTask",
+      "target": {
+        "taskPath": "{taskPath}"
+      },
+      "userParameters": {
+        "taskPath": "(?i)(?!\\\\microsoft\\\\)(\\\\[^\\\\/:*?\"<>|\\x00-\\x1f]{1,120}){1,8}"
+      },
+      "allowedValues": [
+        "enabled",
+        "disabled"
+      ],
+      "desiredType": "TaskState",
+      "mechanism": "Desabilita a tarefa como o botão 'Desabilitar' do Agendador de Tarefas (IRegisteredTask.Enabled). A tarefa continua cadastrada; só não dispara.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/taskschd/registeredtask-enabled"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/administration/windows-commands/schtasks-change (/enable, /disable)"
+        }
+      ],
+      "risks": "O que a tarefa fazia no logon/boot (atualizador, sincronização) deixa de rodar. Tarefas da Microsoft não são alteradas.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura de Enabled pela API do Agendador.",
+      "revert": "Desfazer devolve o estado anterior (habilitada ou desabilitada)."
+    },
+    {
+      "id": "boot.task.admin",
+      "version": 1,
+      "title": "Ligar/desligar tarefa de logon/boot (administrador)",
+      "classification": "Conditional",
+      "condition": "Tarefa com gatilho de logon ou de boot, fora de \\Microsoft\\, escolhida pelo usuário.",
+      "handlerKind": "BootScheduledTask",
+      "target": {
+        "taskPath": "{taskPath}"
+      },
+      "userParameters": {
+        "taskPath": "(?i)(?!\\\\microsoft\\\\)(\\\\[^\\\\/:*?\"<>|\\x00-\\x1f]{1,120}){1,8}"
+      },
+      "allowedValues": [
+        "enabled",
+        "disabled"
+      ],
+      "desiredType": "TaskState",
+      "mechanism": "Desabilita a tarefa como o botão 'Desabilitar' do Agendador de Tarefas (IRegisteredTask.Enabled). A tarefa continua cadastrada; só não dispara.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/taskschd/registeredtask-enabled"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/administration/windows-commands/schtasks-change (/enable, /disable)"
+        }
+      ],
+      "risks": "O que a tarefa fazia no logon/boot (atualizador, sincronização) deixa de rodar. Tarefas da Microsoft não são alteradas.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura de Enabled pela API do Agendador.",
+      "revert": "Desfazer devolve o estado anterior (habilitada ou desabilitada)."
+    },
+    {
+      "id": "boot.orphan.user.run",
+      "version": 1,
+      "title": "Remover entrada órfã (usuário)",
+      "classification": "SupportedDocumented",
+      "condition": "Entrada cujo programa comprovadamente não existe mais (caminho absoluto, local, sem variável desconhecida).",
+      "handlerKind": "BootOrphanEntry",
+      "target": {
+        "scope": "HKCU",
+        "kind": "Run",
+        "entryName": "{entryName}"
+      },
+      "userParameters": {
+        "entryName": "[^\\x00-\\x1f\\\\]{1,200}"
+      },
+      "desiredValue": "removed",
+      "desiredType": "OrphanEntry",
+      "mechanism": "Remove o valor de ...\\CurrentVersion\\Run que aponta para um programa apagado. Não muda desempenho: só limpa a lista (o Windows tenta abrir e falha em silêncio).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys (chaves Run/RunOnce)"
+        }
+      ],
+      "risks": "Nenhum para o sistema: o programa já não existe. Se ele estiver num disco desconectado ou na rede, a remoção é recusada (só caminhos locais).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o valor não existe mais.",
+      "revert": "Desfazer recria o valor com o tipo e os dados originais, guardados no diário antes da remoção."
+    },
+    {
+      "id": "boot.orphan.machine.run",
+      "version": 1,
+      "title": "Remover entrada órfã (computador)",
+      "classification": "SupportedDocumented",
+      "condition": "Entrada cujo programa comprovadamente não existe mais (caminho absoluto, local, sem variável desconhecida).",
+      "handlerKind": "BootOrphanEntry",
+      "target": {
+        "scope": "HKLM",
+        "kind": "Run",
+        "entryName": "{entryName}"
+      },
+      "userParameters": {
+        "entryName": "[^\\x00-\\x1f\\\\]{1,200}"
+      },
+      "desiredValue": "removed",
+      "desiredType": "OrphanEntry",
+      "mechanism": "Remove o valor de ...\\CurrentVersion\\Run que aponta para um programa apagado. Não muda desempenho: só limpa a lista (o Windows tenta abrir e falha em silêncio).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys (chaves Run/RunOnce)"
+        }
+      ],
+      "risks": "Nenhum para o sistema: o programa já não existe. Se ele estiver num disco desconectado ou na rede, a remoção é recusada (só caminhos locais).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o valor não existe mais.",
+      "revert": "Desfazer recria o valor com o tipo e os dados originais, guardados no diário antes da remoção."
+    },
+    {
+      "id": "boot.orphan.machine.run32",
+      "version": 1,
+      "title": "Remover entrada órfã (computador, 32 bits)",
+      "classification": "SupportedDocumented",
+      "condition": "Entrada cujo programa comprovadamente não existe mais (caminho absoluto, local, sem variável desconhecida).",
+      "handlerKind": "BootOrphanEntry",
+      "target": {
+        "scope": "HKLM",
+        "kind": "Run32",
+        "entryName": "{entryName}"
+      },
+      "userParameters": {
+        "entryName": "[^\\x00-\\x1f\\\\]{1,200}"
+      },
+      "desiredValue": "removed",
+      "desiredType": "OrphanEntry",
+      "mechanism": "Remove o valor de ...\\CurrentVersion\\Run que aponta para um programa apagado. Não muda desempenho: só limpa a lista (o Windows tenta abrir e falha em silêncio).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys (chaves Run/RunOnce)"
+        }
+      ],
+      "risks": "Nenhum para o sistema: o programa já não existe. Se ele estiver num disco desconectado ou na rede, a remoção é recusada (só caminhos locais).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o valor não existe mais.",
+      "revert": "Desfazer recria o valor com o tipo e os dados originais, guardados no diário antes da remoção."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "boot.myth.prefetch-clean",
+      "classification": "Ineffective",
+      "reason": "Apagar a pasta Prefetch não acelera o boot: o Windows a recria e o boot seguinte fica mais lento.",
+      "source": "Windows Internals (prefetcher/SysMain); comportamento documentado pela Microsoft"
+    },
+    {
+      "id": "boot.myth.msconfig-cores",
+      "classification": "Ineffective",
+      "reason": "msconfig > Opções avançadas > 'Número de processadores' não acelera o boot; só limita os núcleos usados (opção de diagnóstico).",
+      "source": "learn.microsoft.com/troubleshoot/windows-client/performance/how-to-perform-clean-boot"
+    }
+  ]
+}
