@@ -1,7 +1,7 @@
 {
-  "catalogVersion": "2.0.0",
+  "catalogVersion": "2.1.0",
   "schema": "nexus.catalog/1",
-  "note": "Módulo Programas. Desinstalar e atualizar NÃO são ações do catálogo: o NEXUS abre o desinstalador oficial do fornecedor ou a janela do gerenciador de pacotes, visível, depois da confirmação do usuário. Aqui ficam só as remoções de sobras, reversíveis: uma ação por escopo, repetida no mesmo pedido com alvos diferentes (lote). As antigas vagas programs.leftover.{user|machine}.NN@1 ficam em 'supersedes' só para desfazer/recuperar execuções já feitas.",
+  "note": "Módulo Programas. Desinstalar e atualizar NÃO são ações do catálogo: o NEXUS abre o desinstalador oficial do fornecedor (um, ou vários em fila, um por vez) ou a janela do gerenciador de pacotes depois da confirmação do usuário. Aqui ficam só as remoções de sobras, reversíveis: uma ação por escopo, repetida no mesmo pedido com alvos diferentes (lote). As antigas vagas programs.leftover.{user|machine}.NN@1 ficam em 'supersedes' só para desfazer/recuperar execuções já feitas.",
   "actions": [
     {
       "id": "programs.leftover.user",
@@ -124,7 +124,7 @@
     {
       "id": "programs.uninstall.silent",
       "classification": "Rejected",
-      "reason": "Desinstalar em modo silencioso (QuietUninstallString) sem o usuário ver: o NEXUS só abre o desinstalador oficial visível, e quem remove é o fornecedor.",
+      "reason": "Inventar opções silenciosas (/S, /VERYSILENT, /qn) ou desinstalar sem o usuário pedir: cada instalador entende uma coisa e /qn esconde até o aviso de administrador. Na desinstalação em massa o NEXUS só usa o comando silencioso que o próprio fornecedor declarou (QuietUninstallString, mesmo executável/pasta e mesmo validador) ou o Windows Installer com barra de progresso (/qb- /norestart), depois da confirmação que lista cada item, e mostra o progresso na página.",
       "source": "Política do NEXUS"
     },
     {
