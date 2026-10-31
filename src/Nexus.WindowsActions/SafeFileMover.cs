@@ -200,7 +200,10 @@ public static partial class SafeFileMover
         var lengthOffset = rootOffset + IntPtr.Size;
         var nameOffset = lengthOffset + sizeof(uint);
         var nameBytes = newName.Length * sizeof(char);
-        var buffer = new byte[nameOffset + nameBytes + sizeof(char)];
+        // O Windows exige BufferSize >= sizeof(FILE_RENAME_INFO) + FileNameLength, e sizeof inclui WCHAR[1] + preenchimento
+        // (24 bytes em x64). Sem isso, nomes curtos dão ERROR_INVALID_PARAMETER (87) — visto na VM do CI.
+        var structSize = (nameOffset + sizeof(char) + IntPtr.Size - 1) / IntPtr.Size * IntPtr.Size;
+        var buffer = new byte[structSize + nameBytes];
         var added = false;
         try
         {
