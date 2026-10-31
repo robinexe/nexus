@@ -179,15 +179,27 @@ Teste do pipe (`Named_pipe_round_trip_and_malformed_frames`): era instável na p
 
 Revisão independente do broker: 15 achados (B1–B15), tratados ou registrados como pendentes em `07-recovery-cases.md`.
 
+## Etapa 3 — Windows (PC novo do usuário, MATHEUSANJOS), 2026-10-31 02:25 — log `nexus-validacao-20261031-022559.log`
+
+Executado pelo assistente por meio do PC vinculado (PowerShell **não elevado**, via `tools\etapa1-windows.ps1`).
+
+| Passo | Exit | Resumo |
+|---|---|---|
+| `dotnet --list-sdks` | 0 | 10.0.403 |
+| `dotnet restore Nexus.slnx` | 0 | |
+| `dotnet build Nexus.slnx -c Release --no-restore` | 0 | **0 avisos, 0 erros** |
+| `dotnet test ... --filter Category=Unit` | 0 | **143/143 aprovados** |
+| `CoordinationTests` (processos reais) | 0 | **10/10** |
+| `Nexus.Discover --rows 400` | 0 | **0 valores indisponíveis** (processo não elevado) |
+| `nexus-recover runs / scan / show / scan inexistente` | 0 / 1 / 0 / 3 | todos os esperados |
+| SHA-256 do diário de teste antes/depois do CLI | — | igual (`610F9D5F58D2B3F3…`) |
+
+Testes de integração continuam **não executados** (só em VM). Conferência visual da interface contra o Gerenciador de
+Tarefas: pendente.
+
 ## Pendente no Windows (esta versão)
 
-1. `powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1` (não elevado): agora são 143 testes.
-   Para os testes de aplicação e rollback reais: `tools\vm\README.md` (Windows Sandbox). Agora inclui:
-   - `CoordinationTests` com processos reais;
-   - o relatório completo do `Nexus.Discover`;
-   - a versão do SQLite nativo;
-   - codificação UTF-8 corrigida (console forçado para UTF-8 durante o script e restaurado no fim; log gravado pela API
-     do .NET em UTF-8 com BOM, com linha de controle de acentuação).
-   **O script não foi executado por mim:** não há PowerShell nem Windows aqui.
+1. ~~Rodar `tools\etapa1-windows.ps1`~~ — feito em 2026-10-31 (acima).
 2. Abrir `src\Nexus.Desktop\bin\Release\net10.0-windows\Nexus.Desktop.exe` e conferir se hardware, diagnóstico,
    catálogo e simulação mostram os valores reais deste PC.
+3. Testes de aplicação e rollback reais: `tools\vm\README.md` (Windows Sandbox).

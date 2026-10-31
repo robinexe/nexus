@@ -8,11 +8,11 @@
 
 Ainda **não feitas** pelo responsável:
 
-1. [ ] **Tornar o repositório privado.** Ele foi criado público: github.com/robinexe/nexus → Settings → "Change
+1. [x] **(Feito em 31/10 02:30.)** **Tornar o repositório privado.** Ele foi criado público: github.com/robinexe/nexus → Settings → "Change
    repository visibility" → Make private. A sessão do assistente não tem permissão para mudar isso.
 2. [ ] **Revogar o token do GitHub colado na conversa de 31/10** (GitHub → Settings → Developer settings → Fine-grained
    tokens). O token nunca foi gravado no repositório. Ele nem foi usado para o envio, mas ficou no histórico da conversa.
-3. [ ] **Validar a Etapa 3 no Windows:** `powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1`. O
+3. [x] **(Feito em 31/10 02:25 no PC novo: 143/143, 0 avisos, coordenação 10/10, descoberta 0 indisponíveis; ver `docs/06-build-log.md`.)** Validar a Etapa 3 no Windows: `powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1`. O
    esperado são 143 testes aprovados e 0 avisos. Devolver o log gerado em `%TEMP%`.
 4. [ ] (Opcional) Ativar o Windows Sandbox (exige administrador e reinício) e rodar `tools\vm\Prepare-Sandbox.ps1`.
    Depois, duplo clique em `vm-config\nexus-sandbox.wsb`.
@@ -35,8 +35,8 @@ As regras da seção 2 valem também no PC novo. Se ele for de jogos, nada de al
 ## 1. Estado em uma linha
 
 Etapa 2 validada no Windows: 0 erros, 0 avisos, 99/99, inclusive coordenação entre processos reais. A interface
-**somente leitura** abriu no PC do usuário. A Etapa 3 (broker e kit de VM) passa em 143/143 em Linux, mas ainda não
-rodou no Windows. Os testes de integração compilam e nunca foram executados. A aplicação de otimizações reais continua
+**somente leitura** abriu no PC do usuário. A Etapa 3 (broker e kit de VM) passa em 143/143 em Linux e, desde 31/10, também no
+Windows (PC novo). Os testes de integração compilam e nunca foram executados. A aplicação de otimizações reais continua
 **bloqueada** no Windows hospedeiro.
 
 ## 2. Regras que continuam valendo
@@ -58,6 +58,7 @@ rodou no Windows. Os testes de integração compilam e nunca foram executados. A
 | **Windows (PC do usuário)** | Etapa 2 | restore 0; build 0 (**0 avisos**); **99/99**; coordenação 9/9; descoberta sem falhas (0 indisponíveis); CLI 0/1/0/3; SHA igual | `docs/06-build-log.md` |
 | Linux | Etapa 2 + correção de rede | 106/106 | idem |
 | Linux | **Etapa 3 (atual: broker + kit de VM)** | 143/143, 0 avisos; integração compila, **não executada** | idem |
+| **Windows (PC novo, MATHEUSANJOS)** | Etapa 3 | restore/build 0 (**0 avisos**); **143/143**; coordenação 10/10; descoberta 0 indisponíveis; CLI 0/1/0/3; SHA igual | `docs/06-build-log.md` |
 | VM Windows | qualquer | **não existe ainda** | — |
 
 ## 4. Mapa do código
@@ -135,7 +136,7 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
 
 ## 7. Pendências, em ordem
 
-1. **Validar a Etapa 3 no Windows:** rodar `tools\etapa1-windows.ps1` (143 testes). Conferir na interface os valores
+1. ~~Validar a Etapa 3 no Windows~~ (feito em 31/10). Conferir na interface os valores
    lidos contra o Gerenciador de Tarefas e o Painel de Controle e corrigir o que divergir.
 2. **Decisões em aberto** (`docs/07-recovery-cases.md`, seção final): A1 (restaurar ou preservar), entradas
    superadas (comando `accept`), validade de `--force` entre invocações, quem segura a trava com broker.
