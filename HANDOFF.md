@@ -4,6 +4,34 @@
 > nas instruções mas **não estavam na pasta recebida**. Nada aqui reproduz o conteúdo deles; este arquivo descreve o
 > estado **verificado** do projeto nesta data. Se os originais aparecerem, compare antes de confiar em qualquer um.
 
+## 0. Retomar daqui (pendências do responsável, registradas em 31/10/2026 01:59)
+
+Ainda **não feitas** pelo responsável:
+
+1. [ ] **Tornar o repositório privado.** Ele foi criado público: github.com/robinexe/nexus → Settings → "Change
+   repository visibility" → Make private. A sessão do assistente não tem permissão para mudar isso.
+2. [ ] **Revogar o token do GitHub colado na conversa de 31/10** (GitHub → Settings → Developer settings → Fine-grained
+   tokens). O token nunca foi gravado no repositório. Ele nem foi usado para o envio, mas ficou no histórico da conversa.
+3. [ ] **Validar a Etapa 3 no Windows:** `powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1`. O
+   esperado são 143 testes aprovados e 0 avisos. Devolver o log gerado em `%TEMP%`.
+4. [ ] (Opcional) Ativar o Windows Sandbox (exige administrador e reinício) e rodar `tools\vm\Prepare-Sandbox.ps1`.
+   Depois, duplo clique em `vm-config\nexus-sandbox.wsb`.
+5. [ ] Decidir: A1 (restaurar e marcar como inferido, ou tratar como conflito); comando `accept` para entradas
+   superadas; validade do `--force` entre invocações. Detalhes no fim de `docs/07-recovery-cases.md`.
+
+### Começar num PC novo
+
+```powershell
+git clone https://github.com/robinexe/nexus.git
+cd nexus
+dotnet --list-sdks          # precisa de um SDK 10.0.1xx ou superior (testado com 10.0.403); senão instale o .NET 10 SDK
+dotnet restore Nexus.slnx --locked-mode
+dotnet build Nexus.slnx -c Release --no-restore
+dotnet test  Nexus.slnx -c Release --no-build --filter Category=Unit
+```
+
+As regras da seção 2 valem também no PC novo. Se ele for de jogos, nada de alterações reais nele; só em VM.
+
 ## 1. Estado em uma linha
 
 Etapa 2 validada no Windows: 0 erros, 0 avisos, 99/99, inclusive coordenação entre processos reais. A interface
