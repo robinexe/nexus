@@ -1,0 +1,1020 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Limpeza. Gerado a partir de src/Nexus.Cleaning/Rules/cleaning-rules.json (uma ação por regra de quarentena; o teste de paridade em CleaningTests confere). O cliente só escolhe o lote ('batch', regex fechada); raízes, padrões e idade vêm das regras embutidas no aplicador.",
+  "actions": [
+    {
+      "id": "cleaning.temp-user",
+      "version": 1,
+      "title": "Limpar: Arquivos temporários da sua conta",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "temp-user",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'temp-user' com mais de 24 horas sem modificação. Pasta %TEMP% da sua conta. Programas e instaladores deixam arquivos aqui e muitas vezes esquecem de apagar. Só sai o que não foi modificado nas últimas 24 horas e não está aberto.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.temp-windows",
+      "version": 1,
+      "title": "Limpar: Arquivos temporários do Windows",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "temp-windows",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'temp-windows' com mais de 48 horas sem modificação. Pasta Windows\\Temp, usada por serviços e instaladores. Por cautela, só sai o que tem mais de 48 horas sem modificação e não está aberto.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.thumbnails",
+      "version": 1,
+      "title": "Limpar: Cache de miniaturas do Explorador",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "thumbnails",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'thumbnails'. Miniaturas de fotos e vídeos que o Explorador guarda para abrir pastas mais rápido. O Explorador costuma manter esses arquivos abertos: os que estiverem em uso são pulados. A Limpeza de Disco do Windows faz o mesmo (item 'Miniaturas').",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Limpeza de Disco do Windows, item 'Miniaturas' (cleanmgr.exe)"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.wer-user",
+      "version": 1,
+      "title": "Limpar: Relatórios de erro (sua conta)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "wer-user",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'wer-user' com mais de 24 horas sem modificação. Relatórios do Relatório de Erros do Windows (WER) sobre programas que travaram. Já enviados ou na fila. Só servem para diagnóstico.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/wer/wer-settings"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.wer-system",
+      "version": 1,
+      "title": "Limpar: Relatórios de erro do sistema",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "wer-system",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'wer-system' com mais de 24 horas sem modificação. Relatórios de erro de serviços e de todas as contas, guardados pelo Windows. Só servem para diagnóstico.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/wer/wer-settings"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.logs-cbs",
+      "version": 1,
+      "title": "Limpar: Registros antigos de manutenção do Windows (CBS)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "logs-cbs",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'logs-cbs' com mais de 720 horas sem modificação. Cópias arquivadas do registro de manutenção de componentes (CbsPersist_*), com mais de 30 dias. O registro atual (CBS.log) nunca é tocado. Útil só para investigar falhas antigas de atualização.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows-hardware/manufacture/desktop/deployment-troubleshooting-and-log-files"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.crashdumps-user",
+      "version": 1,
+      "title": "Limpar: Despejos de travamento de programas (sua conta)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "crashdumps-user",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'crashdumps-user' com mais de 24 horas sem modificação. Arquivos .dmp que o Windows grava quando um programa trava (pasta CrashDumps). Só servem para um desenvolvedor investigar o erro.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/wer/collecting-user-mode-dumps"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.crashdumps-system",
+      "version": 1,
+      "title": "Limpar: Despejos de travamento do sistema (tela azul)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "crashdumps-system",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'crashdumps-system' com mais de 24 horas sem modificação. Minidumps e MEMORY.DMP gravados depois de telas azuis, e relatórios de travamento do núcleo. Se você ainda investiga uma tela azul, não limpe.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/troubleshoot/windows-server/performance/memory-dump-file-options"
+        }
+      ],
+      "risks": "Baixo: só arquivos temporários/de diagnóstico; arquivos em uso são pulados. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.chrome-cache",
+      "version": 1,
+      "title": "Limpar: Google Chrome: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "chrome-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'chrome-cache'. Cópias de páginas, scripts e shaders que o Chrome guarda para carregar sites mais rápido, em todos os perfis. Cookies, senhas, histórico e sessões não são tocados. O Chrome precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.google.com/chrome/answer/2392709"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto chrome estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.edge-cache",
+      "version": 1,
+      "title": "Limpar: Microsoft Edge: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "edge-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'edge-cache'. Cache do Edge em todos os perfis. Cookies, senhas, histórico e sessões não são tocados. O Edge (inclusive em segundo plano) precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/microsoft-edge/view-and-delete-browser-history-in-microsoft-edge-00cf7943-a9e1-975a-a33d-ac10ce454ca4"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto msedge estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.brave-cache",
+      "version": 1,
+      "title": "Limpar: Brave: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "brave-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'brave-cache'. Cache do Brave em todos os perfis. Cookies, senhas, histórico e sessões não são tocados. O Brave precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Brave (Chromium): Configurações > Privacidade > Limpar dados de navegação > 'Imagens e arquivos em cache'"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto brave estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.opera-cache",
+      "version": 1,
+      "title": "Limpar: Opera e Opera GX: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "opera-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'opera-cache'. Cache do Opera e do Opera GX. Cookies, senhas, histórico e sessões não são tocados. O Opera precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://help.opera.com/en/latest/security-and-privacy/"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto opera estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.firefox-cache",
+      "version": 1,
+      "title": "Limpar: Firefox: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "firefox-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'firefox-cache'. Cache do Firefox em todos os perfis (pasta local; o perfil com favoritos, senhas e histórico fica em outra pasta e não é tocado). O Firefox precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.mozilla.org/kb/how-clear-firefox-cache"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto firefox estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.chrome-history",
+      "version": 1,
+      "title": "Limpar: Google Chrome: histórico de navegação",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "chrome-history",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'chrome-history'. Arquivo de histórico do Chrome. Não libera espaço relevante nem acelera nada: é uma opção de privacidade.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.google.com/chrome/answer/95589"
+        }
+      ],
+      "risks": "Apaga da vista o histórico de todos os perfis do Chrome (sites visitados e sugestões da barra de endereço). Vai para a quarentena, mas só volta inteiro se você não abrir o Chrome antes de desfazer. Bloqueado enquanto chrome estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.chrome-cookies",
+      "version": 1,
+      "title": "Limpar: Google Chrome: cookies (desconecta dos sites)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "chrome-cookies",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'chrome-cookies'. Banco de cookies do Chrome. Não acelera nada: é uma opção de privacidade.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.google.com/chrome/answer/95647"
+        }
+      ],
+      "risks": "Você sai de TODAS as contas nos sites (e-mail, redes sociais, lojas) em todos os perfis do Chrome. Vai para a quarentena, mas só volta se você não abrir o Chrome antes de desfazer. Bloqueado enquanto chrome estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.edge-history",
+      "version": 1,
+      "title": "Limpar: Microsoft Edge: histórico de navegação",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "edge-history",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'edge-history'. Arquivo de histórico do Edge. Não libera espaço relevante nem acelera nada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/microsoft-edge/view-and-delete-browser-history-in-microsoft-edge-00cf7943-a9e1-975a-a33d-ac10ce454ca4"
+        }
+      ],
+      "risks": "Apaga da vista o histórico de todos os perfis do Edge. Vai para a quarentena, mas só volta inteiro se você não abrir o Edge antes de desfazer. Bloqueado enquanto msedge estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.edge-cookies",
+      "version": 1,
+      "title": "Limpar: Microsoft Edge: cookies (desconecta dos sites)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "edge-cookies",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'edge-cookies'. Banco de cookies do Edge. Não acelera nada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09"
+        }
+      ],
+      "risks": "Você sai de TODAS as contas nos sites em todos os perfis do Edge (inclusive contas Microsoft no navegador). Só volta se você não abrir o Edge antes de desfazer. Bloqueado enquanto msedge estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.brave-history",
+      "version": 1,
+      "title": "Limpar: Brave: histórico de navegação",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "brave-history",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'brave-history'. Arquivo de histórico do Brave. Não libera espaço relevante nem acelera nada.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Brave (Chromium): Configurações > Privacidade > Limpar dados de navegação > 'Histórico de navegação'"
+        }
+      ],
+      "risks": "Apaga da vista o histórico de todos os perfis do Brave. Só volta inteiro se você não abrir o Brave antes de desfazer. Bloqueado enquanto brave estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.brave-cookies",
+      "version": 1,
+      "title": "Limpar: Brave: cookies (desconecta dos sites)",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "brave-cookies",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'brave-cookies'. Banco de cookies do Brave. Não acelera nada.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Brave (Chromium): Configurações > Privacidade > Limpar dados de navegação > 'Cookies e outros dados do site'"
+        }
+      ],
+      "risks": "Você sai de TODAS as contas nos sites em todos os perfis do Brave. Só volta se você não abrir o Brave antes de desfazer. Bloqueado enquanto brave estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.discord-cache",
+      "version": 1,
+      "title": "Limpar: Discord: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "discord-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'discord-cache'. Imagens, vídeos e scripts que o Discord guarda (inclusive PTB e Canary). Sua conta e configurações não são tocadas. O Discord precisa estar fechado (inclusive na bandeja).",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Discord (Electron/Chromium): pastas Cache, Code Cache e GPUCache são recriadas ao abrir"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto Discord, DiscordPTB, DiscordCanary estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.spotify-cache",
+      "version": 1,
+      "title": "Limpar: Spotify: cache de músicas",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "spotify-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'spotify-cache'. Trechos de músicas tocadas recentemente. Downloads para ouvir offline ficam em outra pasta (Storage) e não são tocados. O Spotify precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.spotify.com/article/storage-and-data-information/"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto Spotify estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.teams-cache",
+      "version": 1,
+      "title": "Limpar: Microsoft Teams: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "teams-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'teams-cache'. Cache do Teams (novo e clássico). Só as pastas de cache; login e configurações ficam. O Teams precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/troubleshoot/microsoftteams/teams-administration/clear-teams-cache"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto ms-teams, Teams estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.slack-cache",
+      "version": 1,
+      "title": "Limpar: Slack: cache",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "slack-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'slack-cache'. Cache do Slack (versão instalada e da Microsoft Store). Login e configurações ficam. O Slack precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Slack: Ajuda > Solução de problemas > 'Limpar cache e reiniciar'"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto slack estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.shader-nvidia",
+      "version": 1,
+      "title": "Limpar: Cache de shaders NVIDIA",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "shader-nvidia",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'shader-nvidia'. Shaders já compilados pelo driver da NVIDIA para seus jogos. É o que evita engasgos ao ver efeitos pela primeira vez. Feche os jogos antes (arquivos em uso são pulados).",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Painel de Controle NVIDIA > Configurações 3D > 'Tamanho do cache do shader' (o driver recria o cache)"
+        }
+      ],
+      "risks": "Os jogos vão recompilar os shaders: as primeiras partidas depois disso podem engasgar (stutter) por alguns minutos. Só vale para liberar espaço ou depois de trocar de driver com problemas gráficos. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.shader-amd",
+      "version": 1,
+      "title": "Limpar: Cache de shaders AMD",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "shader-amd",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'shader-amd'. Shaders compilados pelo driver da AMD. O próprio AMD Software tem a opção 'Redefinir cache de shader', que faz o mesmo de forma permanente; aqui vai para a quarentena.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "AMD Software: Adrenalin Edition > Gráficos > Avançado > 'Redefinir cache de shader'"
+        }
+      ],
+      "risks": "Os jogos vão recompilar os shaders: as primeiras partidas podem engasgar por alguns minutos. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.shader-intel",
+      "version": 1,
+      "title": "Limpar: Cache de shaders Intel",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "shader-intel",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'shader-intel'. Shaders compilados pelo driver gráfico da Intel (integrado e Arc).",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Driver gráfico Intel: cache em LocalLow\\Intel\\ShaderCache, recriado sob demanda"
+        }
+      ],
+      "risks": "Os jogos vão recompilar os shaders: as primeiras partidas podem engasgar por alguns minutos. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.shader-directx",
+      "version": 1,
+      "title": "Limpar: Cache de shaders do DirectX",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "shader-directx",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'shader-directx'. Cache de shaders do próprio DirectX. A Limpeza de Disco do Windows oferece o mesmo item ('Cache de Sombreador DirectX').",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Limpeza de Disco do Windows, item 'Cache de Sombreador DirectX' (cleanmgr.exe)"
+        }
+      ],
+      "risks": "Jogos e apps recompilam os shaders: as primeiras aberturas podem ficar mais lentas. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.steam-htmlcache",
+      "version": 1,
+      "title": "Limpar: Steam: cache do navegador da loja",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "steam-htmlcache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'steam-htmlcache'. Cache das páginas da loja e da comunidade dentro do Steam. Jogos e downloads não são tocados. O Steam precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Steam: Configurações > Navegador > 'Excluir dados do navegador' (mesmo cache)"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto steam, steamwebhelper estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.steam-logs",
+      "version": 1,
+      "title": "Limpar: Steam: registros e despejos antigos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "steam-logs",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'steam-logs' com mais de 24 horas sem modificação. Registros de diagnóstico e despejos de travamento do cliente Steam, com mais de 24 horas.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Steam: pastas logs e dumps da instalação, usadas só para diagnóstico"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto steam estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.steam-shadercache",
+      "version": 1,
+      "title": "Limpar: Steam: shaders pré-compilados dos jogos",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "steam-shadercache",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'steam-shadercache'. Shaders que o Steam baixa ou compila para cada jogo (biblioteca principal). Só vale para liberar espaço.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Steam: Configurações > Downloads > 'Pré-cache de shaders' (o Steam recria a pasta)"
+        }
+      ],
+      "risks": "O Steam vai baixar ou recompilar os shaders: as primeiras partidas podem engasgar e a primeira abertura de cada jogo demora mais. Bloqueado enquanto steam estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.epic-webcache",
+      "version": 1,
+      "title": "Limpar: Epic Games Launcher: cache web",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "epic-webcache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'epic-webcache'. Cache das páginas do Epic Games Launcher (pastas webcache*). Jogos e login ficam. O Launcher precisa estar fechado (inclusive na bandeja).",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Suporte Epic Games: limpar o webcache do Epic Games Launcher"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto EpicGamesLauncher estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.epic-logs",
+      "version": 1,
+      "title": "Limpar: Epic Games Launcher: registros antigos",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "epic-logs",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'epic-logs' com mais de 24 horas sem modificação. Registros de diagnóstico do Launcher com mais de 24 horas.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Epic Games Launcher: pasta Saved\\Logs, usada só para diagnóstico"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto EpicGamesLauncher estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.battlenet-cache",
+      "version": 1,
+      "title": "Limpar: Battle.net: cache (sua conta)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "battlenet-cache",
+        "batch": "{batch}",
+        "scope": "HKCU"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'battlenet-cache'. Cache do aplicativo Battle.net. Jogos e login ficam. O Battle.net precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://us.battle.net/support/article/27596"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto Battle.net estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    },
+    {
+      "id": "cleaning.battlenet-programdata",
+      "version": 1,
+      "title": "Limpar: Battle.net: cache compartilhado",
+      "classification": "Conditional",
+      "handlerKind": "CleaningRule",
+      "target": {
+        "rule": "battlenet-programdata",
+        "batch": "{batch}"
+      },
+      "desiredValue": "applied",
+      "desiredType": "CleaningBatch",
+      "userParameters": {
+        "batch": "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}"
+      },
+      "mechanism": "Move para a quarentena do NEXUS os arquivos elegíveis da regra 'battlenet-programdata'. Cache do Battle.net em ProgramData, que a Blizzard manda apagar quando o aplicativo apresenta erros. O Battle.net precisa estar fechado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://us.battle.net/support/article/27596"
+        }
+      ],
+      "risks": "Baixo: só caches/temporários que o programa recria. Bloqueado enquanto Battle.net, Agent estiver aberto. Não melhora FPS nem acelera o PC: libera espaço.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do manifesto do lote: os arquivos movidos estão na quarentena e saíram do lugar original.",
+      "revert": "Devolve cada arquivo da quarentena ao caminho original, sem sobrescrever (se já houver outro, volta com o sufixo ' (restaurado)')."
+    }
+  ]
+}
