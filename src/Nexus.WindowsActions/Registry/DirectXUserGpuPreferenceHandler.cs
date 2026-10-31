@@ -18,7 +18,7 @@ public sealed class DirectXUserGpuPreferenceHandler : IActionHandler, IRestoreVa
 
     public string HandlerKind => Kind;
 
-    private static RegistryTarget TargetOf(ActionInstance a) => new(RegHive.HKCU, KeyPath, a.Target["name"], RegView.Default);
+    private static RegistryTarget TargetOf(ActionInstance a) => new(RegHive.HKCU, KeyPath, a.Target["name"], RegView.Default, UserHive.Of(a));
 
     public Applicability Assess(ActionInstance action, SystemContext context)
     {
@@ -26,6 +26,7 @@ public sealed class DirectXUserGpuPreferenceHandler : IActionHandler, IRestoreVa
             return Applicability.Blocked("Executável não informado.");
         if (!action.Target.TryGetValue("token", out var token) || !AllowedTokens.Contains(token))
             return Applicability.Blocked("Token não permitido.");
+        if (UserHive.Check(action, RegHive.HKCU) is { } sidProblem) return Applicability.Blocked(sidProblem);
         var existing = _reg.Read(TargetOf(action));
         if (existing.ValueExists && !string.Equals(existing.Kind, "String", StringComparison.OrdinalIgnoreCase))
             return Applicability.Blocked($"Valor existente é {existing.Kind}, não REG_SZ; o NEXUS não altera o tipo.");
@@ -38,6 +39,7 @@ public sealed class DirectXUserGpuPreferenceHandler : IActionHandler, IRestoreVa
     {
         if (!action.Target.TryGetValue("name", out var name) || string.IsNullOrWhiteSpace(name)) return "Executável não informado.";
         if (!action.Target.TryGetValue("token", out var token) || !AllowedTokens.Contains(token)) return "Token não permitido.";
+        if (UserHive.Check(action, RegHive.HKCU) is { } sidProblem) return sidProblem;
         if (original.Exists && (original.Type != "Token" || original.Value is null || original.Value.Contains(';') || original.Value.Contains('=')))
             return "Valor original de token inválido.";
         return null;

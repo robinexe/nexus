@@ -11,6 +11,8 @@ namespace Nexus.Broker;
 /// <item>Escrita (Execute, EndSession, RevertRun, Recover): exige <see cref="IExecutionGate"/> liberado e a trava de execução.</item>
 /// <item>Execute recusa enquanto houver operações interrompidas no diário: a recuperação vem antes.</item>
 /// <item>Ajustes de sessão: o broker segura a trava até EndSession, que reverte os ajustes da sessão.</item>
+/// <item>Com <see cref="BindCallerProfile"/> (serviço como LocalSystem): toda ação de HKCU recebe no alvo o SID de quem pediu
+/// (<see cref="UserProfileScope"/>); sem SID válido do cliente, ações de HKCU são recusadas.</item>
 /// </list>
 /// </summary>
 public sealed class BrokerService : IDisposable
@@ -29,16 +31,20 @@ public sealed class BrokerService : IDisposable
     private readonly Func<SystemContext> _context;
     private readonly Func<IReadOnlyDictionary<string, string>> _parameters;
     private readonly Lock _gateLock = new();
+    private readonly bool _bindCallerProfile;
     private IRunLease? _sessionLease;
     private Guid? _sessionRun;
 
+    /// <param name="bindCallerProfile">true quando o broker roda como serviço (LocalSystem): HKCU passa a ser o perfil de quem
+    /// pediu, identificado pelo transporte (achado B10).</param>
     public BrokerService(CatalogDocument catalog, HandlerRegistry handlers, IJournal journal, IRunCoordinator coordinator,
-        IExecutionGate gate, Func<SystemContext> context, Func<IReadOnlyDictionary<string, string>> parameters)
+        IExecutionGate gate, Func<SystemContext> context, Func<IReadOnlyDictionary<string, string>> parameters, bool bindCallerProfile = false)
     {
         _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         ArgumentNullException.ThrowIfNull(handlers);
+        _bindCallerProfile = bindCallerProfile;
         // Toda restauração passa a exigir que a entrada do diário corresponda ao catálogo do broker.
-        _handlers = CatalogBoundHandler.Wrap(handlers, catalog?.Actions.Select(a => a.Definition.HandlerKind) ?? [], catalog!, parameters!);
+        _handlers = CatalogBoundHandler.Wrap(handlers, catalog?.Actions.Select(a => a.Definition.HandlerKind) ?? [], catalog!, parameters!, bindCallerProfile);
         _journal = journal ?? throw new ArgumentNullException(nameof(journal));
         _coordinator = coordinator ?? throw new ArgumentNullException(nameof(coordinator));
         _gate = gate ?? throw new ArgumentNullException(nameof(gate));
@@ -48,8 +54,11 @@ public sealed class BrokerService : IDisposable
 
     public static string Version => typeof(BrokerService).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0";
 
+    public bool BindCallerProfile => _bindCallerProfile;
+
     /// <summary>Processa um pedido. Nunca lança: erros viram resposta com código.</summary>
-    public BrokerResponse Handle(BrokerRequest request)
+    /// <param name="callerSid">SID de quem pediu, obtido pelo transporte (nunca pelo conteúdo do pedido).</param>
+    public BrokerResponse Handle(BrokerRequest request, string? callerSid = null)
     {
         if (request is null) return BrokerResponse.Fail(Guid.Empty, "invalid-request", "Pedido vazio.");
         lock (_gateLock) // um pedido por vez: o broker é um único executor
@@ -64,9 +73,9 @@ public sealed class BrokerService : IDisposable
                 {
                     BrokerOperation.Ping => new BrokerResponse(request.Id, true, Message: "pong"),
                     BrokerOperation.Status => new BrokerResponse(request.Id, true, Status: Status()),
-                    BrokerOperation.ReadState => ReadState(request),
-                    BrokerOperation.Plan => PlanOnly(request),
-                    BrokerOperation.Execute => Execute(request),
+                    BrokerOperation.ReadState => ReadState(request, callerSid),
+                    BrokerOperation.Plan => PlanOnly(request, callerSid),
+                    BrokerOperation.Execute => Execute(request, callerSid),
                     BrokerOperation.EndSession => EndSession(request),
                     BrokerOperation.RevertRun => RevertRun(request),
                     BrokerOperation.Recover => Recover(request),
@@ -98,7 +107,7 @@ public sealed class BrokerService : IDisposable
     // ------------------------------------------------------------------ validação de pedidos
 
     /// <summary>Converte pedidos em ações concretas usando SÓ o catálogo do broker. Erro = nenhuma ação.</summary>
-    private (List<ActionInstance>? Actions, BrokerResponse? Error) Resolve(BrokerRequest r)
+    private (List<ActionInstance>? Actions, BrokerResponse? Error) Resolve(BrokerRequest r, string? callerSid)
     {
         if (r.Actions is null || r.Actions.Count == 0)
             return (null, BrokerResponse.Fail(r.Id, "invalid-request", "Nenhuma ação pedida."));
@@ -139,6 +148,13 @@ public sealed class BrokerService : IDisposable
                 return (null, BrokerResponse.Fail(r.Id, "not-instantiable", $"'{a.ActionId}': {reason}"));
             if (!_handlers.Contains(instance.Definition.HandlerKind))
                 return (null, BrokerResponse.Fail(r.Id, "handler-unavailable", $"'{a.ActionId}': handler '{instance.Definition.HandlerKind}' pendente."));
+            if (_bindCallerProfile && UserProfileScope.IsUserScoped(instance))
+            {
+                // Como serviço, o HKCU do processo é o do SYSTEM: a ação vai para o perfil de quem pediu, ou não vai.
+                if (!UserProfileScope.IsValidSid(callerSid))
+                    return (null, BrokerResponse.Fail(r.Id, "caller-unknown", $"'{a.ActionId}' altera o perfil do usuário, e o cliente não foi identificado como conta de usuário."));
+                instance = UserProfileScope.Bind(instance, callerSid!);
+            }
             list.Add(instance);
         }
         return (list, null);
@@ -146,9 +162,9 @@ public sealed class BrokerService : IDisposable
 
     // ------------------------------------------------------------------ leitura
 
-    private BrokerResponse ReadState(BrokerRequest r)
+    private BrokerResponse ReadState(BrokerRequest r, string? callerSid)
     {
-        var (actions, error) = Resolve(r);
+        var (actions, error) = Resolve(r, callerSid);
         if (error is not null) return error;
         var results = actions!.Select(a =>
         {
@@ -165,9 +181,9 @@ public sealed class BrokerService : IDisposable
         return new BrokerResponse(r.Id, true, Results: results);
     }
 
-    private BrokerResponse PlanOnly(BrokerRequest r)
+    private BrokerResponse PlanOnly(BrokerRequest r, string? callerSid)
     {
-        var (actions, error) = Resolve(r);
+        var (actions, error) = Resolve(r, callerSid);
         if (error is not null) return error;
         var plan = new DesiredStateResolver(_handlers).Resolve(actions!, _context());
         return new BrokerResponse(r.Id, true, Results: plan.Items.Select(i => new ActionResultDto(i.Action.Definition.Key, i.Status.ToString(), i.Reason,
@@ -192,12 +208,12 @@ public sealed class BrokerService : IDisposable
             : BrokerResponse.Fail(r.Id, "coordination-unavailable", Clip($"{acquired.Status}: {acquired.Detail}")!));
     }
 
-    private BrokerResponse Execute(BrokerRequest r)
+    private BrokerResponse Execute(BrokerRequest r, string? callerSid)
     {
         if (GateRefusal(r) is { } blocked) return blocked; // antes de qualquer coisa: nada lido, nada travado, nada gravado
         if (_sessionLease is not null)
             return BrokerResponse.Fail(r.Id, "session-active", $"Encerre a sessão {_sessionRun} antes de outra execução.");
-        var (actions, error) = Resolve(r);
+        var (actions, error) = Resolve(r, callerSid);
         if (error is not null) return error;
 
         var (lease, leaseError) = AcquireLease(r, "broker-execute");

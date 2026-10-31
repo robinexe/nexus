@@ -117,7 +117,7 @@ public sealed class ReviewFindingsTests
         public RegistryRead Read(RegistryTarget target) { Calls++; return inner.Read(target); }
         public void Write(RegistryTarget target, string kind, string value) { Calls++; inner.Write(target, kind, value); }
         public void DeleteValue(RegistryTarget target) { Calls++; inner.DeleteValue(target); }
-        public bool DeleteKeyIfEmpty(RegHive hive, string path, RegView view) { Calls++; return inner.DeleteKeyIfEmpty(hive, path, view); }
+        public bool DeleteKeyIfEmpty(RegHive hive, string path, RegView view, string? userSid = null) { Calls++; return inner.DeleteKeyIfEmpty(hive, path, view, userSid); }
     }
 
     /// <summary>Mesmo cenário do teste acima: A (Failed, original 0) superada por B (5 → 1, verificada).</summary>

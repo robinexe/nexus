@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Host do broker (Windows). Escritas reais só passam pelo VmOnlyExecutionGate: no PC físico, nada é escrito.
-       Por enquanto é um executável de console; instalação como serviço Windows (LocalSystem) está pendente. -->
+       Console (desenvolvimento) ou serviço Windows (LocalSystem, opção service; instalado por tools\service\Install-Broker.ps1). -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
@@ -13,6 +13,9 @@
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
     <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\catalog\actions.v1.json" Link="catalog\actions.v1.json" CopyToOutputDirectory="PreserveNewest" />

@@ -8,20 +8,39 @@ namespace Nexus.WindowsActions.Registry;
 [SupportedOSPlatform("windows")]
 public sealed class WindowsRegistryBackend : IRegistryBackend
 {
-    private static RegistryKey Base(RegHive hive, RegView view)
+    private readonly bool _requireUserProfileForHkcu;
+
+    public WindowsRegistryBackend() { }
+
+    /// <param name="requireUserProfileForHkcu">Processo rodando como LocalSystem: HKCU sem SID de usuário seria o perfil do
+    /// SYSTEM, então é recusado (segunda barreira do achado B10, além do broker).</param>
+    public WindowsRegistryBackend(bool requireUserProfileForHkcu) => _requireUserProfileForHkcu = requireUserProfileForHkcu;
+
+    private RegistryKey Base(RegHive hive, RegView view, string? userSid = null)
     {
+        if (_requireUserProfileForHkcu && hive == RegHive.HKCU && userSid is null)
+            throw new InvalidOperationException("HKCU sem perfil de usuário num processo de serviço: seria o perfil do SYSTEM; nada foi lido ou escrito.");
         var v = view switch
         {
             RegView.Registry64 => RegistryView.Registry64,
             RegView.Registry32 => RegistryView.Registry32,
             _ => RegistryView.Default,
         };
-        return RegistryKey.OpenBaseKey(hive == RegHive.HKLM ? RegistryHive.LocalMachine : RegistryHive.CurrentUser, v);
+        if (userSid is null)
+            return RegistryKey.OpenBaseKey(hive == RegHive.HKLM ? RegistryHive.LocalMachine : RegistryHive.CurrentUser, v);
+
+        // HKCU de outro usuário (broker como serviço): HKU\<SID>. Só existe com o perfil carregado (usuário com sessão).
+        // Nunca cria a raiz: se o perfil não estiver carregado, falha em vez de escrever num lugar que o Windows ignora.
+        if (hive != RegHive.HKCU || !UserHive.IsValidSid(userSid))
+            throw new InvalidOperationException("Perfil de usuário inválido para este alvo.");
+        using var users = RegistryKey.OpenBaseKey(RegistryHive.Users, v);
+        return users.OpenSubKey(userSid, writable: true)
+               ?? throw new InvalidOperationException($"Perfil do usuário {userSid} não está carregado (sem sessão aberta); nada foi lido ou escrito.");
     }
 
     public RegistryRead Read(RegistryTarget target)
     {
-        using var root = Base(target.Hive, target.View);
+        using var root = Base(target.Hive, target.View, target.UserSid);
         using var key = root.OpenSubKey(target.Path, writable: false);
         if (key is null) return new(false, false, null, null);
         if (!key.GetValueNames().Contains(target.Name, StringComparer.OrdinalIgnoreCase)) return new(true, false, null, null);
@@ -34,7 +53,7 @@ public sealed class WindowsRegistryBackend : IRegistryBackend
     public void Write(RegistryTarget target, string kind, string value)
     {
         var k = Enum.Parse<RegistryValueKind>(kind, ignoreCase: true);
-        using var root = Base(target.Hive, target.View);
+        using var root = Base(target.Hive, target.View, target.UserSid);
         using var key = root.CreateSubKey(target.Path, writable: true)
                         ?? throw new InvalidOperationException($"Não foi possível abrir/criar {target.Hive}\\{target.Path}");
         key.SetValue(target.Name, FromCanonical(k, value), k);
@@ -42,14 +61,14 @@ public sealed class WindowsRegistryBackend : IRegistryBackend
 
     public void DeleteValue(RegistryTarget target)
     {
-        using var root = Base(target.Hive, target.View);
+        using var root = Base(target.Hive, target.View, target.UserSid);
         using var key = root.OpenSubKey(target.Path, writable: true);
         key?.DeleteValue(target.Name, throwOnMissingValue: false);
     }
 
-    public bool DeleteKeyIfEmpty(RegHive hive, string path, RegView view)
+    public bool DeleteKeyIfEmpty(RegHive hive, string path, RegView view, string? userSid = null)
     {
-        using var root = Base(hive, view);
+        using var root = Base(hive, view, userSid);
         using (var key = root.OpenSubKey(path, writable: false))
         {
             if (key is null || key.ValueCount > 0 || key.SubKeyCount > 0) return false;

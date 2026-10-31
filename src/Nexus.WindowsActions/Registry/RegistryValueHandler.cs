@@ -22,13 +22,15 @@ public sealed class RegistryValueHandler : IActionHandler, IRestoreValidator
         Enum.Parse<RegHive>(a.Target["hive"], ignoreCase: true),
         a.Target["path"],
         a.Target["name"],
-        a.Target.TryGetValue("view", out var v) ? Enum.Parse<RegView>(v, ignoreCase: true) : RegView.Default);
+        a.Target.TryGetValue("view", out var v) ? Enum.Parse<RegView>(v, ignoreCase: true) : RegView.Default,
+        UserHive.Of(a));
 
     public Applicability Assess(ActionInstance action, SystemContext context)
     {
         foreach (var k in new[] { "hive", "path", "name", "type" })
             if (!action.Target.ContainsKey(k)) return Applicability.Blocked($"Alvo incompleto: falta '{k}'.");
-        if (!Enum.TryParse<RegHive>(action.Target["hive"], true, out _)) return Applicability.Blocked("Hive não permitida.");
+        if (!Enum.TryParse<RegHive>(action.Target["hive"], true, out var hive)) return Applicability.Blocked("Hive não permitida.");
+        if (UserHive.Check(action, hive) is { } sidProblem) return Applicability.Blocked(sidProblem);
         if (action.Target.TryGetValue("view", out var view) && !Enum.TryParse<RegView>(view, true, out _)) return Applicability.Blocked("Visão de registro inválida.");
         if (action.Target.TryGetValue("policyHive", out var ph) && !Enum.TryParse<RegHive>(ph, true, out _)) return Applicability.Blocked("Hive de política inválida.");
         if (action.Target["type"] is not ("DWord" or "QWord" or "String" or "ExpandString" or "Binary"))
@@ -81,7 +83,7 @@ public sealed class RegistryValueHandler : IActionHandler, IRestoreValidator
 
         _reg.DeleteValue(t);
         if (original.Detail is not null && original.Detail.TryGetValue(KeyExistedDetail, out var existed) && existed == "false")
-            _reg.DeleteKeyIfEmpty(t.Hive, t.Path, t.View);
+            _reg.DeleteKeyIfEmpty(t.Hive, t.Path, t.View, t.UserSid);
     }
 
     private static readonly HashSet<string> RestorableTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -91,7 +93,8 @@ public sealed class RegistryValueHandler : IActionHandler, IRestoreValidator
     {
         foreach (var k in new[] { "hive", "path", "name", "type" })
             if (!action.Target.ContainsKey(k)) return $"Alvo incompleto: falta '{k}'.";
-        if (!Enum.TryParse<RegHive>(action.Target["hive"], true, out _)) return "Hive não permitida.";
+        if (!Enum.TryParse<RegHive>(action.Target["hive"], true, out var hive)) return "Hive não permitida.";
+        if (UserHive.Check(action, hive) is { } sidProblem) return sidProblem;
         if (action.Target.TryGetValue("view", out var view) && !Enum.TryParse<RegView>(view, true, out _)) return "Visão de registro inválida.";
         if (SafetyPolicy.CheckRegistry(action.Target["hive"], action.Target["path"], action.Target["name"]) is { } problem) return problem;
         if (original.Exists && (original.Type is null || !RestorableTypes.Contains(original.Type) || original.Value is null))

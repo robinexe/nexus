@@ -13,6 +13,9 @@ on:
     paths:
       - '.github/workflows/vm-integracao.yml'
       - 'tests/Nexus.IntegrationTests/**'
+      - 'src/Nexus.Broker/**'
+      - 'src/Nexus.Broker.Host/**'
+      - 'tools/service/**'
 
 permissions:
   contents: read
@@ -72,7 +75,35 @@ jobs:
 
       - name: Testes de integração (handlers reais, elevado)
         shell: pwsh
-        run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --logger "console;verbosity=detailed" --logger "trx;LogFileName=integracao.trx" --results-directory saida
+        run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter Category=VmIntegration --logger "console;verbosity=detailed" --logger "trx;LogFileName=integracao.trx" --results-directory saida
+
+      - name: Instalar o broker como serviço (LocalSystem)
+        shell: pwsh
+        run: |
+          # Valor inicial diferente do desejado no HKCU do usuário da VM (o cliente), para o teste exercitar escrita real.
+          reg add HKCU\Software\Microsoft\GameBar /v AutoGameModeEnabled /t REG_DWORD /d 0 /f
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/service/Install-Broker.ps1 -Start
+          Get-Service NexusBroker | Format-List Name,Status,StartType
+          icacls "$env:ProgramData\NEXUS"
+          icacls "$env:ProgramData\NEXUS\nexus.lock"
+
+      - name: Testes do serviço (cliente = usuário da VM)
+        shell: pwsh
+        env:
+          NEXUS_SERVICE_TEST: '1'
+        run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter Category=ServiceIntegration --logger "console;verbosity=detailed" --logger "trx;LogFileName=servico.trx" --results-directory saida
+
+      - name: Log do serviço e desinstalação
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path saida | Out-Null
+          $log = "$env:ProgramData\NEXUS\broker.log"
+          if (Test-Path $log) { Copy-Item $log saida/broker.log; Get-Content $log }
+          if (Get-Service NexusBroker -ErrorAction SilentlyContinue) {
+            powershell -NoProfile -ExecutionPolicy Bypass -File tools/service/Uninstall-Broker.ps1
+            if (Get-Service NexusBroker -ErrorAction SilentlyContinue) { Write-Error 'Serviço não foi removido.'; exit 1 }
+          }
 
       - name: Resultados
         if: always()

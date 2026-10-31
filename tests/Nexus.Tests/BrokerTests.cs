@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Nexus.Broker;
 using Nexus.Core;
 using Nexus.Persistence;
@@ -50,6 +50,123 @@ public sealed class BrokerTests : IDisposable
         var service = new BrokerService(Catalog(), new HandlerRegistry().Add(new RegistryValueHandler(_reg)), _journal, coordinator, gate,
             () => T.Ctx, () => new Dictionary<string, string>());
         return (service, coordinator, gate);
+    }
+
+    private BrokerService ServiceMode()
+    {
+        var coordinator = new FileRunCoordinator(_dir);
+        return new BrokerService(Catalog(), new HandlerRegistry().Add(new RegistryValueHandler(_reg)), _journal, coordinator, new FixedGate(true),
+            () => T.Ctx, () => new Dictionary<string, string>(), bindCallerProfile: true);
+    }
+
+    private const string SidA = "S-1-5-21-1111111111-2222222222-3333333333-1001";
+    private const string SidB = "S-1-5-21-1111111111-2222222222-3333333333-1002";
+    private string? UserValue(string sid, string name) => _reg.Read(T.RT(P, name) with { UserSid = sid }).Value;
+
+    // ---------------------------------------------------------------- B10: broker como serviço (perfil de quem pediu)
+
+    [Fact]
+    public void Service_mode_writes_hkcu_actions_to_the_callers_profile_and_records_the_sid()
+    {
+        using var service = ServiceMode();
+        var r = service.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1")), SidA);
+
+        Assert.True(r.Ok, r.Error?.Detail);
+        Assert.Equal("1", UserValue(SidA, "Persist"));
+        Assert.Null(Value("Persist"));               // nada no HKCU do processo (que, como serviço, seria o do SYSTEM)
+        Assert.Null(UserValue(SidB, "Persist"));
+        var entry = Assert.Single(_journal.Entries(r.RunId!.Value));
+        Assert.Equal(SidA, entry.Action.Target[UserProfileScope.TargetKey]); // o perfil fica no diário
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("S-1-5-18")]                                        // SYSTEM
+    [InlineData("S-1-5-21-1-2-3")]                                  // incompleto
+    [InlineData("S-1-5-21-1111111111-2222222222-3333333333-1001x")]
+    public void Service_mode_refuses_hkcu_actions_when_the_caller_is_not_a_user_account(string? sid)
+    {
+        using var service = ServiceMode();
+        var r = service.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1")), sid);
+
+        Assert.False(r.Ok);
+        Assert.Equal("caller-unknown", r.Error!.Code);
+        Assert.Empty(_journal.Runs());
+        Assert.Null(Value("Persist"));
+    }
+
+    [Theory]
+    [InlineData("HKLM", SidA, "só se aplica a HKCU")]
+    [InlineData("HKCU", "S-1-5-18", "SID de usuário inválido")]
+    [InlineData("HKCU", ".DEFAULT", "SID de usuário inválido")]
+    public void Registry_handler_blocks_profile_targets_outside_hkcu_or_with_non_user_sids(string hive, string sid, string expected)
+    {
+        var h = new RegistryValueHandler(_reg);
+        var a = T.RegAction("x", P, "V", 1) with
+        {
+            Target = new Dictionary<string, string> { ["hive"] = hive, ["path"] = P, ["name"] = "V", ["type"] = "DWord", [UserProfileScope.TargetKey] = sid },
+        };
+
+        var assess = h.Assess(a, T.Ctx);
+        Assert.Equal(ApplicabilityKind.Blocked, assess.Kind);
+        Assert.Contains(expected, assess.Reason, StringComparison.Ordinal);
+        Assert.Contains(expected, h.CheckRestore(a, StateSnapshot.Of("DWord", "0")), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Revert_by_another_user_still_restores_the_original_profile()
+    {
+        using var service = ServiceMode();
+        _reg.Seed(T.RT(P, "Persist") with { UserSid = SidA }, "DWord", "0");
+        var exec = service.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1")), SidA);
+        Assert.Equal("1", UserValue(SidA, "Persist"));
+
+        var revert = service.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.RevertRun, null, RunId: exec.RunId), SidB);
+
+        Assert.True(revert.FullyRestored, string.Join("; ", revert.Results?.Select(x => x.Detail) ?? []));
+        Assert.Equal("0", UserValue(SidA, "Persist")); // voltou ao perfil de quem aplicou
+        Assert.Null(UserValue(SidB, "Persist"));       // o perfil de quem pediu a reversão não foi tocado
+    }
+
+    [Fact]
+    public void Service_mode_refuses_to_restore_a_hkcu_entry_without_recorded_profile()
+    {
+        // Entrada criada pelo broker em modo console (HKCU do processo). Como serviço, restaurá-la iria para o SYSTEM.
+        using (var console = Broker(allowed: true).Service)
+            Assert.True(console.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1"))).Ok);
+        var run = _journal.Runs().Single().RunId;
+
+        using var service = ServiceMode();
+        var r = service.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.RevertRun, null, RunId: run), SidA);
+
+        var item = Assert.Single(r.Results!);
+        Assert.Equal("Failed", item.Outcome);
+        Assert.Contains("perfil do SYSTEM", item.Detail, StringComparison.Ordinal);
+        Assert.Equal("1", Value("Persist"));          // nada foi escrito
+        Assert.Null(UserValue(SidA, "Persist"));
+    }
+
+    [Fact]
+    public void Tampered_user_sid_in_the_journal_is_refused()
+    {
+        using var service = ServiceMode();
+        var exec = service.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1")), SidA);
+        var entry = _journal.Entries(exec.RunId!.Value).Single();
+        var forged = new InMemoryJournal();
+        var run = forged.BeginRun("p", "teste-1");
+        var target = new Dictionary<string, string>(entry.Action.Target) { [UserProfileScope.TargetKey] = "S-1-5-18" };
+        var id = forged.AddPlanned(run, 0, entry.Action with { Target = target });
+        forged.Transition(id, JournalState.BackedUp, original: StateSnapshot.Absent());
+        forged.Transition(id, JournalState.Applying);
+        _reg.Seed(T.RT(P, "Persist") with { UserSid = "S-1-5-18" }, "DWord", "1"); // restaurar exigiria escrever
+
+        var handlers = CatalogBoundHandler.Wrap(new HandlerRegistry().Add(new RegistryValueHandler(_reg)), [RegistryValueHandler.Kind], Catalog(),
+            () => new Dictionary<string, string>(), requireUserProfile: true);
+        var result = new ActionExecutor(handlers, forged).Revert(id, force: true);
+
+        Assert.Equal(RevertOutcome.Failed, result.Outcome);
+        Assert.Contains("Perfil de usuário inválido", result.Detail, StringComparison.Ordinal);
+        Assert.Equal("1", _reg.Read(T.RT(P, "Persist") with { UserSid = "S-1-5-18" }).Value); // nada escrito
     }
 
     private static BrokerRequest Req(BrokerOperation op, params ActionRequest[] actions) =>
@@ -224,6 +341,68 @@ public sealed class BrokerTests : IDisposable
     }
 
     // ---------------------------------------------------------------- transporte real (named pipe)
+
+    [Fact]
+    public async Task Pipe_server_passes_the_transport_identity_not_request_content_to_the_service()
+    {
+        using var service = ServiceMode();
+        var name = "nexus-test-" + Guid.NewGuid().ToString("N")[..12];
+        var identified = 0;
+        var server = new BrokerPipeServer(service, first => BrokerPipeServer.CurrentUserPipe(name, first))
+        {
+            IdentifyClient = _ => { Interlocked.Increment(ref identified); return SidA; },
+        };
+        using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        var running = server.RunAsync(cancel.Token);
+
+        using (var client = BrokerClient.Connect(name, 10_000))
+        {
+            Assert.True(client.Send(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.Ping)).Ok);
+            var exec = client.Send(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1")));
+            Assert.True(exec.Ok, exec.Error?.Detail);
+        }
+
+        cancel.Cancel();
+        await running;
+        Assert.Equal(1, identified);                  // uma vez por conexão, depois do primeiro quadro
+        Assert.Equal("1", UserValue(SidA, "Persist"));
+        Assert.Null(Value("Persist"));
+    }
+
+    [Fact]
+    public void Service_owner_check_accepts_only_system_or_administrators()
+    {
+        if (!OperatingSystem.IsWindows()) return; // ACL de pipe só existe no Windows
+        Assert.True(BrokerClient.IsServiceOwner(new System.Security.Principal.SecurityIdentifier(System.Security.Principal.WellKnownSidType.LocalSystemSid, null)));
+        Assert.True(BrokerClient.IsServiceOwner(new System.Security.Principal.SecurityIdentifier(System.Security.Principal.WellKnownSidType.BuiltinAdministratorsSid, null)));
+        Assert.False(BrokerClient.IsServiceOwner(new System.Security.Principal.SecurityIdentifier(System.Security.Principal.WellKnownSidType.BuiltinUsersSid, null)));
+        Assert.False(BrokerClient.IsServiceOwner(new System.Security.Principal.SecurityIdentifier(SidA)));
+        Assert.False(BrokerClient.IsServiceOwner(null));
+    }
+
+    [Fact]
+    public async Task Client_in_service_mode_refuses_a_pipe_owned_by_an_ordinary_user()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        using var me = System.Security.Principal.WindowsIdentity.GetCurrent();
+        // Processo elevado: o dono padrão dos objetos criados é Administradores, que o cliente aceita por definição. O cenário
+        // do impostor (usuário comum) só pode ser reproduzido sem elevação.
+        if (new System.Security.Principal.WindowsPrincipal(me).IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator)) return;
+
+        var (svc, _, _) = Broker(allowed: true);
+        var name = "nexus-test-" + Guid.NewGuid().ToString("N")[..12];
+        var server = new BrokerPipeServer(svc, first => new System.IO.Pipes.NamedPipeServerStream(name, System.IO.Pipes.PipeDirection.InOut,
+            BrokerPipeServer.MaxInstances, System.IO.Pipes.PipeTransmissionMode.Byte, System.IO.Pipes.PipeOptions.Asynchronous));
+        using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        var running = server.RunAsync(cancel.Token);
+
+        var ex = Assert.Throws<UnauthorizedAccessException>(() => BrokerClient.Connect(name, 10_000, BrokerServerKind.Service));
+        Assert.Contains("impostor", ex.Message, StringComparison.Ordinal);
+
+        cancel.Cancel();
+        await running;
+        Assert.Empty(_journal.Runs());
+    }
 
     [Fact]
     public async Task Named_pipe_round_trip_and_malformed_frames()

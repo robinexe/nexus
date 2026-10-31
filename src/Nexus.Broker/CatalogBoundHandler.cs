@@ -13,20 +13,25 @@ public sealed class CatalogBoundHandler : IActionHandler, IRestoreValidator
     private readonly IActionHandler _inner;
     private readonly CatalogDocument _catalog;
     private readonly Func<IReadOnlyDictionary<string, string>> _parameters;
+    private readonly bool _requireUserProfile;
 
-    public CatalogBoundHandler(IActionHandler inner, CatalogDocument catalog, Func<IReadOnlyDictionary<string, string>> parameters)
+    /// <param name="requireUserProfile">Broker como serviço: entradas de HKCU sem SID de usuário no alvo são recusadas
+    /// (restaurá-las escreveria no perfil do SYSTEM).</param>
+    public CatalogBoundHandler(IActionHandler inner, CatalogDocument catalog, Func<IReadOnlyDictionary<string, string>> parameters, bool requireUserProfile = false)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
         _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         _parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
+        _requireUserProfile = requireUserProfile;
     }
 
-    public static HandlerRegistry Wrap(HandlerRegistry inner, IEnumerable<string> kinds, CatalogDocument catalog, Func<IReadOnlyDictionary<string, string>> parameters)
+    public static HandlerRegistry Wrap(HandlerRegistry inner, IEnumerable<string> kinds, CatalogDocument catalog, Func<IReadOnlyDictionary<string, string>> parameters,
+        bool requireUserProfile = false)
     {
         ArgumentNullException.ThrowIfNull(inner);
         var reg = new HandlerRegistry();
         foreach (var k in kinds.Distinct(StringComparer.Ordinal))
-            if (inner.Contains(k)) reg.Add(new CatalogBoundHandler(inner.Get(k), catalog, parameters));
+            if (inner.Contains(k)) reg.Add(new CatalogBoundHandler(inner.Get(k), catalog, parameters, requireUserProfile));
         return reg;
     }
 
@@ -52,7 +57,19 @@ public sealed class CatalogBoundHandler : IActionHandler, IRestoreValidator
         if (probe is null)
             return $"Não foi possível reconstruir o alvo pelo catálogo: {reason}";
         var expected = probe.Target;
-        if (expected.Count != action.Target.Count || expected.Any(kv => !action.Target.TryGetValue(kv.Key, out var v) || !string.Equals(v, kv.Value, StringComparison.Ordinal)))
+        // O perfil do usuário (userSid) é o único campo que o catálogo não define: é acrescentado pelo broker como serviço.
+        var recorded = action.Target;
+        if (recorded.TryGetValue(UserProfileScope.TargetKey, out var sid))
+        {
+            if (!UserProfileScope.IsUserScoped(action) || !UserProfileScope.IsValidSid(sid))
+                return "Perfil de usuário inválido no diário; restauração recusada.";
+            recorded = recorded.Where(kv => kv.Key != UserProfileScope.TargetKey).ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+        }
+        else if (_requireUserProfile && UserProfileScope.IsUserScoped(action))
+        {
+            return "Entrada de HKCU sem perfil de usuário registrado: como serviço, restaurá-la escreveria no perfil do SYSTEM. Restaure pelo nexus-recover na sessão do usuário.";
+        }
+        if (expected.Count != recorded.Count || expected.Any(kv => !recorded.TryGetValue(kv.Key, out var v) || !string.Equals(v, kv.Value, StringComparison.Ordinal)))
             return "O alvo registrado no diário difere do alvo definido pelo catálogo; restauração recusada.";
 
         return _inner is IRestoreValidator v ? v.CheckRestore(action, original) : null;

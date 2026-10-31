@@ -26,12 +26,12 @@ public sealed class StartupApprovedHandler : IActionHandler, IRestoreValidator
     private static RegHive HiveOf(ActionInstance a) => Enum.Parse<RegHive>(a.Target["scope"], true);
 
     private static RegistryTarget ApprovedTarget(ActionInstance a) =>
-        new(HiveOf(a), $@"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\{a.Target["kind"]}", a.Target["entryName"], RegView.Default);
+        new(HiveOf(a), $@"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\{a.Target["kind"]}", a.Target["entryName"], RegView.Default, UserHive.Of(a));
 
     private static RegistryTarget RunTarget(ActionInstance a) => a.Target["kind"] switch
     {
-        "Run" => new(HiveOf(a), @"Software\Microsoft\Windows\CurrentVersion\Run", a.Target["entryName"], RegView.Registry64),
-        "Run32" => new(HiveOf(a), @"Software\Microsoft\Windows\CurrentVersion\Run", a.Target["entryName"], RegView.Registry32),
+        "Run" => new(HiveOf(a), @"Software\Microsoft\Windows\CurrentVersion\Run", a.Target["entryName"], RegView.Registry64, UserHive.Of(a)),
+        "Run32" => new(HiveOf(a), @"Software\Microsoft\Windows\CurrentVersion\Run", a.Target["entryName"], RegView.Registry32, UserHive.Of(a)),
         _ => throw new NotSupportedException(),
     };
 
@@ -39,7 +39,8 @@ public sealed class StartupApprovedHandler : IActionHandler, IRestoreValidator
     {
         foreach (var k in new[] { "scope", "kind", "entryName" })
             if (!action.Target.ContainsKey(k)) return Applicability.Blocked($"Alvo incompleto: falta '{k}'.");
-        if (!Enum.TryParse<RegHive>(action.Target["scope"], true, out _)) return Applicability.Blocked("Escopo inválido.");
+        if (!Enum.TryParse<RegHive>(action.Target["scope"], true, out var scope)) return Applicability.Blocked("Escopo inválido.");
+        if (UserHive.Check(action, scope) is { } sidProblem) return Applicability.Blocked(sidProblem);
         if (action.Target["kind"] is not ("Run" or "Run32")) return Applicability.Blocked("v1 suporta somente Run e Run32.");
         if (action.Desired.Type != "StartupState" || action.Desired.Value is not ("enabled" or "disabled"))
             return Applicability.Blocked("Estado desejado deve ser enabled/disabled.");
@@ -71,7 +72,8 @@ public sealed class StartupApprovedHandler : IActionHandler, IRestoreValidator
     {
         foreach (var k in new[] { "scope", "kind", "entryName" })
             if (!action.Target.TryGetValue(k, out var v) || string.IsNullOrWhiteSpace(v)) return $"Alvo incompleto: falta '{k}'.";
-        if (!Enum.TryParse<RegHive>(action.Target["scope"], true, out _)) return "Escopo inválido.";
+        if (!Enum.TryParse<RegHive>(action.Target["scope"], true, out var scope)) return "Escopo inválido.";
+        if (UserHive.Check(action, scope) is { } sidProblem) return sidProblem;
         if (action.Target["kind"] is not ("Run" or "Run32")) return "v1 suporta somente Run e Run32.";
         if (original.Exists && (original.Type != "StartupState" || original.Value is not ("enabled" or "disabled"))) return "Estado original inválido.";
         return null;
