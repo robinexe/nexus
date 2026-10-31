@@ -387,7 +387,7 @@ public static unsafe class MemoryBenchmark
 
     private static nint _sinkPointer;
 
-    internal static double Median(IReadOnlyList<double> values)
+    public static double Median(IReadOnlyList<double> values)
     {
         if (values.Count == 0) return 0;
         var s = values.OrderBy(v => v).ToArray();

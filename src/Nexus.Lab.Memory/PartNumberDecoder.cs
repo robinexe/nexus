@@ -141,7 +141,7 @@ public static partial class PartNumberDecoder
 
     // ---------------------------------------------------------------- Kingston
 
-    [GeneratedRegex(@"\AKF(?<gen>[345])(?<spd>\d{2})C(?<cl>\d{2})(?<fam>[A-Z])(?<rest>[A-Z]*?)(?:K(?<kit>\d))?[/-](?<size>\d+)", RegexOptions.None, 200)]
+    [GeneratedRegex(@"\AKF(?<gen>[345])(?<spd>\d{2})(?<ff>[CS])(?<cl>\d{2})(?<fam>[A-Z])(?<rest>[A-Z]*?)(?:K(?<kit>\d))?[/-](?<size>\d+)", RegexOptions.None, 200)]
     private static partial Regex KfRx();
 
     private static PartNumberInfo? KingstonFury(string pn)
@@ -160,7 +160,7 @@ public static partial class PartNumberDecoder
         {
             PartNumber = pn, Vendor = "Kingston", Family = family, Generation = Gen(m.Groups["gen"].Value[0]),
             SpeedMts = Speed2(I(m, "spd")), CasLatency = I(m, "cl"), ModuleBytes = module, KitModules = kit, KitTotalBytes = total,
-            FormFactor = fam == 'I' ? MemoryFormFactor.SoDimm : MemoryFormFactor.Dimm, Profile = profile,
+            FormFactor = fam == 'I' || m.Groups["ff"].Value == "S" ? MemoryFormFactor.SoDimm : MemoryFormFactor.Dimm, Profile = profile,
             Confidence = DecodeConfidence.High, Rule = "kingston-fury", Notes = notes,
         };
     }
@@ -620,7 +620,7 @@ public static partial class PartNumberDecoder
 
     // ---------------------------------------------------------------- TeamGroup
 
-    [GeneratedRegex(@"\A(?<pre>TF\d|FF\d|TED|TPD|TLZ[A-Z]?|TDZ[A-Z]?|TT[A-Z]?)(?<gen>D[345])(?<size>\d{1,3})G(?<spd>\d{4})H?C(?<cl>\d{2})(?<tail>[A-Z0-9-]*)\z", RegexOptions.None, 200)]
+    [GeneratedRegex(@"\A(?<pre>TF\d|FF\d|TE|TP|TLZ[A-Z]?|TDZ[A-Z]?|TT[A-Z]?)(?<gen>D[345])(?<size>\d{1,3})G(?<spd>\d{4})H?C(?<cl>\d{2})(?<tail>[A-Z0-9-]*)\z", RegexOptions.None, 200)]
     private static partial Regex TeamRx();
 
     private static PartNumberInfo? TeamGroup(string pn)
@@ -632,7 +632,7 @@ public static partial class PartNumberDecoder
         var kit = tail.Contains("DC", StringComparison.Ordinal) ? 2 : tail.Contains("QC", StringComparison.Ordinal) ? 4 : 1;
         var total = I(m, "size");
         var (module, kitN, kitTotal) = Kit(total, kit);
-        var elite = pre is "TED" or "TPD";
+        var elite = pre is "TE" or "TP";
         return new PartNumberInfo
         {
             PartNumber = pn, Vendor = "TeamGroup", Family = elite ? "Elite" : "T-Force", Generation = "DDR" + m.Groups["gen"].Value[1],

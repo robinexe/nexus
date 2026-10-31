@@ -1,0 +1,29 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Laboratório da memória RAM. Uma única ação, oferecida só quando o arquivo de paginação está desligado ou fixo e pequeno com pouca RAM. Handler em src/Nexus.Lab.Memory (PageFileHandler): alvo fixo no código. Ver docs/modules/memorylab.md.",
+  "actions": [
+    {
+      "id": "memorylab.pagefile.automatic",
+      "version": 1,
+      "title": "Voltar o arquivo de paginação para automático",
+      "classification": "Conditional",
+      "condition": "Somente quando o arquivo de paginação está desligado, ou fixo com máximo menor que metade da RAM em PCs com até 16 GB.",
+      "handlerKind": "MemoryLabPageFile",
+      "target": { "setting": "PagingFiles" },
+      "desiredType": "MultiString",
+      "desiredValue": "?:\\pagefile.sys",
+      "mechanism": "Grava PagingFiles = \"?:\\pagefile.sys\" em HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management, que é o que a opção \"Gerenciar automaticamente o tamanho do arquivo de paginação de todas as unidades\" faz. O Windows passa a criar e dimensionar o arquivo conforme a necessidade. Isso não deixa o PC mais rápido: evita que jogos e programas fechem por falta de memória quando a RAM enche, e permite gravar despejo de erro.",
+      "evidence": [
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/troubleshoot/windows-client/performance/how-to-determine-the-appropriate-page-file-size-for-64-bit-versions-of-windows" },
+        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/troubleshoot/windows-client/performance/introduction-to-the-page-file" }
+      ],
+      "risks": "Baixo. Ocupa espaço no disco do sistema (o Windows decide o tamanho; costuma ser alguns GB). Só vale depois de reiniciar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura do valor PagingFiles; depois de reiniciar, o pagefile.sys aparece na raiz da unidade.",
+      "revert": "Desfazer regrava o valor anterior exatamente como estava (tipo e conteúdo) ou o remove se não existia. Vale depois de reiniciar."
+    }
+  ]
+}
