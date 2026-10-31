@@ -29,7 +29,7 @@ public sealed partial class BootStartupFolderHandler : IActionHandler, IRestoreV
 
     public string HandlerKind => Kind;
 
-    [GeneratedRegex(@"^[^\\/:*?""<>|\x00-\x1f]{1,200}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[^\\/:*?""<>|\x00-\x1f]{1,200}\z", RegexOptions.CultureInvariant)]
     private static partial Regex FilePattern();
 
     public static bool IsValidFileName(string? name) => name is not null && FilePattern().IsMatch(name) && name is not ("." or "..") && !name.EndsWith(' ');

@@ -11,7 +11,7 @@ public static partial class CleaningBatchId
     /// <summary>Regra fechada usada também em <c>userParameters</c> do catálogo.</summary>
     public const string Pattern = "[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}";
 
-    [GeneratedRegex("^" + Pattern + "$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex("^" + Pattern + @"\z", RegexOptions.CultureInvariant)]
     private static partial Regex Regex();
 
     public static bool IsValid(string? id) => id is not null && Regex().IsMatch(id);

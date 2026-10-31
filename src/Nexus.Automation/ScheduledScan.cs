@@ -13,7 +13,7 @@ public sealed partial record ScanSchedule(DayOfWeek Day, int Hour, int Minute)
     private static readonly string[] Codes = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
     private static readonly string[] Names = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 
-    [GeneratedRegex(@"^(SUN|MON|TUE|WED|THU|FRI|SAT) ([01][0-9]|2[0-3]):([0-5][0-9])$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^(SUN|MON|TUE|WED|THU|FRI|SAT) ([01][0-9]|2[0-3]):([0-5][0-9])\z", RegexOptions.CultureInvariant)]
     private static partial Regex Pattern();
 
     public static ScanSchedule? TryParse(string? text)
@@ -54,7 +54,7 @@ public static partial class ScheduledScanTask
     public const int MaxXmlChars = 32 * 1024;
     private const string Ns = "http://schemas.microsoft.com/windows/2004/02/mit/task";
 
-    [GeneratedRegex(@"^[A-Za-z]:\\(?:[^\\/:*?""<>|\x00-\x1F%]+\\)*[^\\/:*?""<>|\x00-\x1F%]+$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[A-Za-z]:\\(?:[^\\/:*?""<>|\x00-\x1F%]+\\)*[^\\/:*?""<>|\x00-\x1F%]+\z", RegexOptions.CultureInvariant)]
     private static partial Regex LocalPath();
 
     /// <summary>

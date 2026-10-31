@@ -523,6 +523,7 @@ public sealed class CleaningHandlerTests
         Assert.Equal(new DateTime(2026, 10, 31, 12, 0, 0, DateTimeKind.Utc), CleaningBatchId.TimeOf(id));
         Assert.False(CleaningBatchId.IsValid("20261031T120000Z-1234567"));
         Assert.False(CleaningBatchId.IsValid("../../Windows"));
+        Assert.False(CleaningBatchId.IsValid("20261031T120000Z-1a2b3c4d\n")); // "$" do .NET aceitava um "\n" final
         Assert.Throws<ArgumentException>(() => QuarantineStore.RuleDirectory("/x", "..", "temp-user"));
     }
 }

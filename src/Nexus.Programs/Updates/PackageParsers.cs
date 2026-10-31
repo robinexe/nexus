@@ -27,19 +27,19 @@ public sealed record PackageUpdate(
 /// <summary>Formato dos IDs aceitos para montar a linha de atualização (nada fora disso chega ao gerenciador).</summary>
 public static partial class PackageIdRules
 {
-    [GeneratedRegex(@"^[A-Za-z0-9][A-Za-z0-9.+_\-]{0,127}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[A-Za-z0-9][A-Za-z0-9.+_\-]{0,127}\z", RegexOptions.CultureInvariant)]
     private static partial Regex WingetId();
 
-    [GeneratedRegex(@"^[A-Za-z0-9][A-Za-z0-9._\-]{0,99}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[A-Za-z0-9][A-Za-z0-9._\-]{0,99}\z", RegexOptions.CultureInvariant)]
     private static partial Regex ChocoId();
 
-    [GeneratedRegex(@"^(?:[A-Za-z0-9][A-Za-z0-9._\-]{0,63}/)?[A-Za-z0-9][A-Za-z0-9._\-]{0,99}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^(?:[A-Za-z0-9][A-Za-z0-9._\-]{0,63}/)?[A-Za-z0-9][A-Za-z0-9._\-]{0,99}\z", RegexOptions.CultureInvariant)]
     private static partial Regex ScoopName();
 
-    [GeneratedRegex(@"^(?:@[a-z0-9][a-z0-9._~\-]{0,100}/)?[a-z0-9][a-z0-9._~\-]{0,100}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^(?:@[a-z0-9][a-z0-9._~\-]{0,100}/)?[a-z0-9][a-z0-9._~\-]{0,100}\z", RegexOptions.CultureInvariant)]
     private static partial Regex NpmName();
 
-    [GeneratedRegex(@"^[A-Za-z0-9][A-Za-z0-9._\-]{0,31}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[A-Za-z0-9][A-Za-z0-9._\-]{0,31}\z", RegexOptions.CultureInvariant)]
     private static partial Regex WingetSource();
 
     public static bool IsValid(PackageManagerKind kind, string? id) => id is not null && kind switch

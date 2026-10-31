@@ -73,7 +73,8 @@ public sealed partial record CatalogEntry(
 
     internal static bool MatchesWhole(string pattern, string value)
     {
-        try { return Regex.IsMatch(value, "^(?:" + pattern + ")$", RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(200)); }
+        // \z, não $: em .NET "$" também casa antes de um "\n" final, e o valor passaria com uma quebra de linha a mais.
+        try { return Regex.IsMatch(value, @"\A(?:" + pattern + @")\z", RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(200)); }
         catch (RegexMatchTimeoutException) { return false; }
     }
 

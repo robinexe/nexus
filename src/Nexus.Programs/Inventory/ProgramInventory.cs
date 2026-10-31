@@ -53,7 +53,7 @@ public enum ProgramSort { Name, SizeDescending, DateDescending, Publisher }
 /// </summary>
 public static partial class ProgramInventory
 {
-    [GeneratedRegex(@"^\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}\z", RegexOptions.CultureInvariant)]
     private static partial Regex GuidKey();
 
     [GeneratedRegex(@"^KB\d{6,8}$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)]

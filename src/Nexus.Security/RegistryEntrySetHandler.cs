@@ -28,7 +28,7 @@ public abstract partial class RegistryEntrySetHandler : IActionHandler, IRestore
     public const string Absent = "absent";
     private const string Extension = ".json";
 
-    [GeneratedRegex(@"^[0-9a-f]{8}(,[0-9a-f]{8}){0,27}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[0-9a-f]{8}(,[0-9a-f]{8}){0,27}\z", RegexOptions.CultureInvariant)]
     private static partial Regex SelectionPattern();
 
     protected ISecurityRegistry Registry { get; }

@@ -80,6 +80,7 @@ public sealed class BrokerTests : IDisposable
     [InlineData("entry", "Entrada7x")]          // fora da regra (casamento inteiro)
     [InlineData("entry", "..\\Lsa")]
     [InlineData("entry", "Entrada1234")]
+    [InlineData("entry", "Entrada7\n")]          // revisão de segurança: "$" do .NET aceitava um "\n" final
     [InlineData("outro", "Entrada7")]            // não declarado
     public void User_argument_outside_the_rule_or_undeclared_is_refused(string name, string value)
     {

@@ -11,7 +11,7 @@ public static partial class UserProfileScope
 {
     public const string TargetKey = "userSid";
 
-    [GeneratedRegex(@"^S-1-5-21(-[0-9]{1,10}){4}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^S-1-5-21(-[0-9]{1,10}){4}\z", RegexOptions.CultureInvariant)]
     private static partial Regex SidPattern();
 
     /// <summary>Só contas locais/de domínio (<c>S-1-5-21-…</c>); nunca SYSTEM, .DEFAULT ou contas de serviço.</summary>

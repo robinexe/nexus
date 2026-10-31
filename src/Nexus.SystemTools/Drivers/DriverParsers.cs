@@ -25,7 +25,7 @@ public static partial class DriverParsers
     [GeneratedRegex(@"^oem[0-9]{1,5}\.inf\z", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex OemInf();
 
-    [GeneratedRegex(@"^\{[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}$")]
+    [GeneratedRegex(@"^\{[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}\z")]
     private static partial Regex GuidValue();
 
     [GeneratedRegex(@"^(?<a>\d{1,2})[/.\-](?<b>\d{1,2})[/.\-](?<y>\d{4})\s+(?<v>\d+(\.\d+){1,3})\s*$")]

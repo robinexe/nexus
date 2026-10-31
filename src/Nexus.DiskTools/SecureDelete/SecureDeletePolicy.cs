@@ -16,7 +16,7 @@ public sealed partial class SecureDeletePolicy
     public const string PathPattern =
         @"(?!.*\\\.{1,2}(?:\\|$))(?!.*[ .](?:\\|$))(?!.*~[0-9])[A-Za-z]:(?:\\[^\\/:*?""<>|\x00-\x1F]+)+";
 
-    [GeneratedRegex("^(?:" + PathPattern + ")$", RegexOptions.CultureInvariant, 200)]
+    [GeneratedRegex("^(?:" + PathPattern + @")\z", RegexOptions.CultureInvariant, 200)]
     private static partial Regex PathRegex();
 
     [GeneratedRegex(@"^(?:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|COM[0-9¹²³]|LPT[0-9¹²³])(?:\..*)?$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, 200)]

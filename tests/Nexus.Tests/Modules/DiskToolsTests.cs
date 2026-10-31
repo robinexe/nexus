@@ -325,6 +325,7 @@ public sealed class SecureDeleteTargetTests : IDisposable
     [InlineData(@"C:")]
     [InlineData(@"C:\")]
     [InlineData(@"C:/Users/ana/Documents/x.txt")]
+    [InlineData("C:\\Users\\ana\\Documents\\x.txt\n")] // "$" do .NET aceitava um "\n" final
     [InlineData("")]
     public void Forbidden_targets_are_refused(string path) => Assert.NotNull(Policy.Check(path));
 

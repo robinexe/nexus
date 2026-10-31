@@ -27,7 +27,7 @@ public sealed partial class BootScheduledTaskHandler : IActionHandler, IRestoreV
     public string HandlerKind => Kind;
 
     // \pasta\...\nome: até 8 níveis; sem caracteres proibidos em nomes de tarefa nem ".." como nível.
-    [GeneratedRegex(@"^(\\[^\\/:*?""<>|\x00-\x1f]{1,120}){1,8}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^(\\[^\\/:*?""<>|\x00-\x1f]{1,120}){1,8}\z", RegexOptions.CultureInvariant)]
     private static partial Regex PathPattern();
 
     public static bool IsValidPath(string? path) =>

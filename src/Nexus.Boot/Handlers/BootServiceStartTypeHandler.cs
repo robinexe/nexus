@@ -28,7 +28,7 @@ public sealed partial class BootServiceStartTypeHandler : IActionHandler, IResto
 
     public string HandlerKind => Kind;
 
-    [GeneratedRegex(@"^[A-Za-z0-9_.\-]([A-Za-z0-9_.\- ]{0,78}[A-Za-z0-9_.\-])?$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[A-Za-z0-9_.\-]([A-Za-z0-9_.\- ]{0,78}[A-Za-z0-9_.\-])?\z", RegexOptions.CultureInvariant)]
     private static partial Regex NamePattern();
 
     public static bool IsValidName(string? name) => name is not null && NamePattern().IsMatch(name);
