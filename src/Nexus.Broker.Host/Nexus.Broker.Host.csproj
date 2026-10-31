@@ -11,6 +11,9 @@
     <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
     <ProjectReference Include="..\Nexus.Persistence\Nexus.Persistence.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Cpu\Nexus.Lab.Cpu.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
+    <ProjectReference Include="..\Nexus.Lab.Memory\Nexus.Lab.Memory.csproj" />
     <ProjectReference Include="..\Nexus.Cleaning\Nexus.Cleaning.csproj" />
     <ProjectReference Include="..\Nexus.DiskTools\Nexus.DiskTools.csproj" />
     <ProjectReference Include="..\Nexus.Programs\Nexus.Programs.csproj" />

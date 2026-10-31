@@ -38,8 +38,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public MainViewModel()
     {
         Compare = new ComparePage(Measure);
-        Pages = [Overview, Hardware, Diagnostics, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
-            Privacy, Security, SystemTools, Measure, Compare, Monitor, History, Capabilities];
+        Pages = [Overview, Hardware, Diagnostics, CpuLab, GpuLab, MemoryLab, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
+            Privacy, Security, SystemTools, Measure, Compare, Monitor, History, Settings, Capabilities];
         Broker.Candidates = Plan.Candidates;
         Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
         Broker.PlanCommand = new RelayCommand(() => _ = BrokerPlanAsync(), () => !Broker.Busy && Broker.Connected && Chosen().Count > 0);
@@ -121,6 +121,10 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public SecurityPage Security { get; } = new();
     public SystemToolsPage SystemTools { get; } = new();
     public MonitorPage Monitor { get; } = new();
+    public CpuLabPage CpuLab { get; } = new();
+    public GpuLabPage GpuLab { get; } = new();
+    public MemoryLabPage MemoryLab { get; } = new();
+    public SettingsPage Settings { get; } = new();
 
     public PageViewModel SelectedPage
     {

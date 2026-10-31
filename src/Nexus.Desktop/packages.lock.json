@@ -88,6 +88,30 @@
       "nexus.hardwarediscovery": {
         "type": "Project"
       },
+      "nexus.lab.cpu": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.HardwareDiscovery": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
+      "nexus.lab.gpu": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.HardwareDiscovery": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
+      "nexus.lab.memory": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.HardwareDiscovery": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.measurement": {
         "type": "Project",
         "dependencies": {

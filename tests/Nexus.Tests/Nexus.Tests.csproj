@@ -17,6 +17,9 @@
     <ProjectReference Include="..\..\src\Nexus.Experimentation\Nexus.Experimentation.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Measurement\Nexus.Measurement.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Cleaning\Nexus.Cleaning.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Lab.Cpu\Nexus.Lab.Cpu.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Lab.Memory\Nexus.Lab.Memory.csproj" />
     <ProjectReference Include="..\..\src\Nexus.DiskTools\Nexus.DiskTools.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Programs\Nexus.Programs.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Boot\Nexus.Boot.csproj" />

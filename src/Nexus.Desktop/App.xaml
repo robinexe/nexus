@@ -26,6 +26,10 @@
         <ResourceDictionary Source="Views/Pages/Monitor.xaml"/>
         <ResourceDictionary Source="Views/Pages/SystemTools.xaml"/>
         <ResourceDictionary Source="Views/Pages/Automation.xaml"/>
+        <ResourceDictionary Source="Views/Pages/CpuLab.xaml"/>
+        <ResourceDictionary Source="Views/Pages/GpuLab.xaml"/>
+        <ResourceDictionary Source="Views/Pages/MemoryLab.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Settings.xaml"/>
         <ResourceDictionary Source="Views/Pages/History.xaml"/>
         <ResourceDictionary Source="Views/Pages/Capabilities.xaml"/>
       </ResourceDictionary.MergedDictionaries>

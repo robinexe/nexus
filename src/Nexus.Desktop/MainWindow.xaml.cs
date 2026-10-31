@@ -10,7 +10,7 @@ namespace Nexus.Desktop;
 public partial class MainWindow : Window
 {
     /// <summary>Ordem dos grupos da navegação lateral (por tarefa do jogador).</summary>
-    private static readonly string[] GroupOrder = ["Meu PC", "Automático", "Otimizar", "Limpar", "Proteger", "Sistema", "Medir", "Registro"];
+    private static readonly string[] GroupOrder = ["Meu PC", "Laboratório", "Automático", "Otimizar", "Limpar", "Proteger", "Sistema", "Medir", "Registro"];
 
     private readonly MainViewModel _vm;
 

@@ -1,0 +1,10 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels">
+  <DataTemplate DataType="{x:Type vm:SettingsPage}">
+    <StackPanel Margin="28,24,28,28">
+      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}"/>
+      <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"/>
+    </StackPanel>
+  </DataTemplate>
+</ResourceDictionary>

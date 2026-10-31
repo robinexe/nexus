@@ -19,6 +19,9 @@
     <Project Path="src/Nexus.SystemTools/Nexus.SystemTools.csproj" />
     <Project Path="src/Nexus.Automation/Nexus.Automation.csproj" />
     <Project Path="src/Nexus.Cli/Nexus.Cli.csproj" />
+    <Project Path="src/Nexus.Lab.Cpu/Nexus.Lab.Cpu.csproj" />
+    <Project Path="src/Nexus.Lab.Gpu/Nexus.Lab.Gpu.csproj" />
+    <Project Path="src/Nexus.Lab.Memory/Nexus.Lab.Memory.csproj" />
     <Project Path="src/Nexus.Desktop/Nexus.Desktop.csproj" />
     <Project Path="src/Nexus.Broker/Nexus.Broker.csproj" />
     <Project Path="src/Nexus.Broker.Host/Nexus.Broker.Host.csproj" />
