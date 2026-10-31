@@ -11,14 +11,27 @@ using Nexus.Broker;
 using Nexus.HardwareDiscovery;
 using Nexus.Lab.Memory;
 using Nexus.Lab.Memory.Problems;
+using UiTone = Nexus.Desktop.Views.Controls.Tone;
 
 namespace Nexus.Desktop.ViewModels;
 
 /// <summary>Barra do quadro "Memória agora".</summary>
 public sealed record DoctorBar(string Label, string Value, double Fraction, string Tone, string Detail);
 
-/// <summary>Uma linha da lista "Maiores consumidores".</summary>
-public sealed record DoctorConsumerRow(string Name, string Private, string WorkingSet, string Processes, string Trend, string TrendTone, string Kind);
+/// <summary>Uma linha da lista "Maiores consumidores". <paramref name="History"/> = memória privada nas leituras (sparkline).</summary>
+public sealed record DoctorConsumerRow(string Name, string Private, string WorkingSet, string Processes, string Trend, string TrendTone, string Kind,
+    IReadOnlyList<double>? History = null)
+{
+    public UiTone TrendToneKind => TrendTone switch { "bad" => UiTone.Bad, "good" => UiTone.Good, _ => UiTone.Info };
+    public string IconKey => Kind switch
+    {
+        "navegador" => "Icon.Browser",
+        "serviço" => "Icon.Services",
+        "máquina virtual" => "Icon.Pc",
+        "Windows" => "Icon.Windows",
+        _ => "Icon.Apps",
+    };
+}
 
 /// <summary>Evento da linha do tempo.</summary>
 public sealed record DoctorEvent(string When, string Text, string Tone);
@@ -49,6 +62,8 @@ public sealed class DoctorFixRow : ObservableObject
     public Guid? RunId { get => _runId; set { if (Set(ref _runId, value)) OnPropertyChanged(nameof(CanRevert)); } }
     public bool CanRevert => RunId is not null;
     public bool Admin => Fix.Admin;
+    /// <summary>Selo: vermelho quando não há desfazer (risco à vista), ciano nos demais.</summary>
+    public UiTone BadgeTone => Fix.Kind != FixKind.Info && !Fix.Reversible && Fix.Kind is not (FixKind.DisableStartup or FixKind.Navigate) ? UiTone.Bad : UiTone.Info;
 }
 
 /// <summary>Cartão de suspeito.</summary>
@@ -66,6 +81,12 @@ public sealed class DoctorSuspectRow
     public bool HasTemporary => Temporary.Count > 0;
     public bool HasPermanent => Permanent.Count > 0;
     public bool HasSources => Sources.Count > 0;
+    public UiTone ToneKind => Suspect.Severity switch { "bad" => UiTone.Bad, "warn" => UiTone.Warn, _ => UiTone.Info };
+    public string IconKey => Suspect.Severity switch { "bad" => "Icon.Error", "warn" => "Icon.Warning", _ => "Icon.Info" };
+    /// <summary>Tendência do suspeito (memória privada do app, ou memória comprometida do PC) nas leituras desta sessão.</summary>
+    public IReadOnlyList<double> Trend { get; init; } = [];
+    public string TrendLabel { get; init; } = "";
+    public bool HasTrend => Trend.Count > 1;
 }
 
 /// <summary>
@@ -89,6 +110,10 @@ public sealed class MemoryDoctorPage : ModulePage
     private string _guardText = "", _poolNote = "", _lastSample = "";
     private Geometry? _usedGeometry, _commitGeometry, _poolGeometry;
     private bool _guardSuggest;
+    private double _inUseBytes = double.NaN, _totalBytes = double.NaN, _commitPercent = double.NaN, _usedPercent = double.NaN;
+    private System.Windows.GridLength _stackInUse = new(1, System.Windows.GridUnitType.Star), _stackModified = new(0, System.Windows.GridUnitType.Star);
+    private System.Windows.GridLength _stackStandby = new(0, System.Windows.GridUnitType.Star), _stackFree = new(0, System.Windows.GridUnitType.Star);
+    private string _inUseText = "", _modifiedText = "", _standbyText = "", _freeText = "", _commitText = "";
 
     public MemoryDoctorPage()
     {
@@ -129,6 +154,29 @@ public sealed class MemoryDoctorPage : ModulePage
     public bool HasSuspects => Suspects.Count > 0;
     public bool NoSuspects => Suspects.Count == 0 && _history.Count > 0;
     public bool HasTimeline => Timeline.Count > 0;
+
+    // ------------------------------------------------------------------ números para a apresentação (design system v2)
+
+    /// <summary>Ainda sem nenhuma leitura (esqueleto no destaque e nas listas).</summary>
+    public bool IsLoading => _history.Count == 0;
+    public bool HasSample => _history.Count > 0;
+    public double InUseBytes { get => _inUseBytes; private set => Set(ref _inUseBytes, value); }
+    public double TotalBytes { get => _totalBytes; private set => Set(ref _totalBytes, value); }
+    /// <summary>Pressão de memória: % do limite de memória comprometida (RAM + arquivo de paginação).</summary>
+    public double CommitPercent { get => _commitPercent; private set => Set(ref _commitPercent, value); }
+    public double UsedPercent { get => _usedPercent; private set => Set(ref _usedPercent, value); }
+    /// <summary>Barra empilhada da RAM: em uso | modificada | cache | livre (larguras proporcionais).</summary>
+    public System.Windows.GridLength StackInUse { get => _stackInUse; private set => Set(ref _stackInUse, value); }
+    public System.Windows.GridLength StackModified { get => _stackModified; private set => Set(ref _stackModified, value); }
+    public System.Windows.GridLength StackStandby { get => _stackStandby; private set => Set(ref _stackStandby, value); }
+    public System.Windows.GridLength StackFree { get => _stackFree; private set => Set(ref _stackFree, value); }
+    public string InUseText { get => _inUseText; private set => Set(ref _inUseText, value); }
+    public string ModifiedText { get => _modifiedText; private set => Set(ref _modifiedText, value); }
+    public string StandbyText { get => _standbyText; private set => Set(ref _standbyText, value); }
+    public string FreeText { get => _freeText; private set => Set(ref _freeText, value); }
+    /// <summary>"6,1 GB de 13,2 GB".</summary>
+    public string CommitText { get => _commitText; private set => Set(ref _commitText, value); }
+    public bool HasChart => _history.Count > 1;
 
     public int IntervalMinutes
     {
@@ -264,6 +312,26 @@ public sealed class MemoryDoctorPage : ModulePage
         Subline = s.CommitRatio >= 0.9
             ? "Perto do limite: programas podem fechar sozinhos por falta de memória."
             : "Cache e memória livre são memória disponível. O número que importa é a comprometida chegando no limite.";
+        InUseBytes = s.InUse;
+        TotalBytes = s.Total;
+        UsedPercent = used * 100;
+        CommitPercent = s.CommitRatio * 100;
+        CommitText = $"{Gb(s.CommitTotal)} de {Gb(s.CommitLimit)}";
+        var modified = Math.Max(0, s.Modified ?? 0);
+        var standby = Math.Max(0, s.Standby ?? 0);
+        var free = Math.Max(0, s.Total - s.InUse - modified - standby);
+        static System.Windows.GridLength Star(long v) => new(Math.Max(0, v), System.Windows.GridUnitType.Star);
+        StackInUse = Star(s.InUse);
+        StackModified = Star(modified);
+        StackStandby = Star(standby);
+        StackFree = Star(free);
+        InUseText = Gb(s.InUse);
+        ModifiedText = Gb(modified);
+        StandbyText = Gb(standby);
+        FreeText = Gb(free);
+        OnPropertyChanged(nameof(IsLoading));
+        OnPropertyChanged(nameof(HasSample));
+        OnPropertyChanged(nameof(HasChart));
         Bars.Clear();
         Bars.Add(new DoctorBar("Em uso", Gb(s.InUse), used, used >= 0.92 ? "bad" : used >= 0.85 ? "warn" : "good", "Total − disponível − modificada (como o Gerenciador de Tarefas)."));
         if (s.Modified is { } mod) Bars.Add(new DoctorBar("Modificada", Gb(mod), (double)mod / s.Total, "info", "Esperando ser gravada no disco antes de virar disponível."));
@@ -294,7 +362,8 @@ public sealed class MemoryDoctorPage : ModulePage
                 AppKind.Browser => "navegador", AppKind.ServiceHost or AppKind.Service => "serviço", AppKind.VirtualMachine => "máquina virtual",
                 AppKind.System => "Windows", _ => "programa",
             };
-            Consumers.Add(new DoctorConsumerRow(g.DisplayName, Gb(g.PrivateBytes), Gb(g.WorkingSet), g.ProcessCount == 1 ? "1 processo" : $"{g.ProcessCount} processos", trend, tone, kind));
+            var history = _history.Group(g.Key, x => x.PrivateBytes).Select(t => t.Value).ToList();
+            Consumers.Add(new DoctorConsumerRow(g.DisplayName, Gb(g.PrivateBytes), Gb(g.WorkingSet), g.ProcessCount == 1 ? "1 processo" : $"{g.ProcessCount} processos", trend, tone, kind, history));
         }
         var snaps = _history.Snapshots;
         var first = snaps.Count == 0 ? null : snaps[0];
@@ -359,9 +428,13 @@ public sealed class MemoryDoctorPage : ModulePage
         foreach (var s in suspects)
         {
             if (_seenSuspects.Add(s.Id)) AddEvent(s.Title, s.Severity);
+            var appTrend = s.GroupKey is { } key ? _history.Group(key, x => x.PrivateBytes).Select(t => t.Value).ToList() : [];
+            var trend = appTrend.Count > 1 ? appTrend : _history.System(x => x.CommitTotal).Select(t => t.Value).ToList();
             Suspects.Add(new DoctorSuspectRow
             {
                 Suspect = s,
+                Trend = trend,
+                TrendLabel = appTrend.Count > 1 ? "Memória do app nas últimas leituras" : "Memória comprometida do PC nas últimas leituras",
                 Temporary = s.Temporary.Select(f => FixRow(s, f)).ToList(),
                 Permanent = s.Permanent.Select(f => FixRow(s, f)).ToList(),
                 Sources = s.Sources.Select(Source).ToList(),
