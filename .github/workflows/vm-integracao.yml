@@ -61,7 +61,7 @@ jobs:
 
       - name: Testes de integração (handlers reais, elevado)
         shell: pwsh
-        run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=integracao.trx" --results-directory saida
+        run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --logger "console;verbosity=detailed" --logger "trx;LogFileName=integracao.trx" --results-directory saida
 
       - name: Resultados
         if: always()

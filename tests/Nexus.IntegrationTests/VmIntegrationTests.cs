@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.Win32;
 using Nexus.Broker;
 using Nexus.Core;
@@ -40,8 +40,11 @@ public sealed class VmIntegrationTests : IDisposable
     private string JournalPath => Path.Combine(_dir, "journal.db");
     private readonly WindowsRegistryBackend _reg = new();
 
-    public VmIntegrationTests()
+    private readonly Xunit.Abstractions.ITestOutputHelper _out;
+
+    public VmIntegrationTests(Xunit.Abstractions.ITestOutputHelper output)
     {
+        _out = output;
         Vm.Require(); // PRIMEIRO passo: nada (nem pasta temporária) é criado antes do portão
         _dir = Directory.CreateTempSubdirectory("nexus-vm-").FullName;
     }
@@ -152,8 +155,10 @@ public sealed class VmIntegrationTests : IDisposable
             var exec = broker.Handle(Req(BrokerOperation.Execute, "power.active-scheme.high-performance.session@1"));
             Assert.True(exec.Ok, exec.Error?.Detail);
             var r = Assert.Single(exec.Results!);
+            _out.WriteLine($"[energia/sessão] esquema antes={before}; resultado={r.Outcome}");
             if (r.Outcome is "NotApplicable" or "Blocked" or "AlreadyConfigured")
             {
+                _out.WriteLine("[energia/sessão] RAMO: não aplicável (nada foi alterado)");
                 Assert.Equal(before, power.GetActiveScheme()); // nada mudou
                 return;
             }
@@ -164,6 +169,7 @@ public sealed class VmIntegrationTests : IDisposable
             var end = broker.Handle(Req(BrokerOperation.EndSession, run: exec.RunId));
             Assert.True(end.Ok && end.FullyRestored == true, end.Error?.Detail);
             Assert.Equal(before, power.GetActiveScheme());
+            _out.WriteLine("[energia/sessão] RAMO: aplicado (Alto desempenho) e revertido por EndSession");
         }
     }
 
@@ -180,8 +186,10 @@ public sealed class VmIntegrationTests : IDisposable
             var exec = broker.Handle(Req(BrokerOperation.Execute, "svc.sysmain.manual.lab@1"));
             Assert.True(exec.Ok, exec.Error?.Detail);
             var r = Assert.Single(exec.Results!);
+            _out.WriteLine($"[SysMain] elevado={Vm.Elevated}; inicialização antes={before ?? "(serviço ausente)"}; resultado={r.Outcome}");
             if (!Vm.Elevated || before is null)
             {
+                _out.WriteLine("[SysMain] RAMO: recusado (sem elevação ou serviço ausente)");
                 Assert.Contains(r.Outcome, RefusedOutcomes);
                 Assert.Equal(before, svc.GetStartType("SysMain"));
                 return;
@@ -191,6 +199,7 @@ public sealed class VmIntegrationTests : IDisposable
             var revert = broker.Handle(Req(BrokerOperation.RevertRun, run: exec.RunId));
             Assert.True(revert.FullyRestored, string.Join("; ", revert.Results?.Select(x => x.Detail) ?? []));
             Assert.Equal(before, svc.GetStartType("SysMain"));
+            _out.WriteLine("[SysMain] RAMO: Manual aplicado e revertido");
         }
     }
 
@@ -208,8 +217,10 @@ public sealed class VmIntegrationTests : IDisposable
             var exec = broker.Handle(Req(BrokerOperation.Execute, "power.processor.min-cores-parking@1"));
             Assert.True(exec.Ok, exec.Error?.Detail);
             var r = Assert.Single(exec.Results!);
+            _out.WriteLine($"[core parking AC] elevado={Vm.Elevated}; valor antes={before}; resultado={r.Outcome}");
             if (!Vm.Elevated)
             {
+                _out.WriteLine("[core parking AC] RAMO: bloqueado sem elevação");
                 Assert.Equal("Blocked", r.Outcome);
                 Assert.Equal(before, power.ReadAcValue(scheme, sub, setting));
                 return;
@@ -218,6 +229,7 @@ public sealed class VmIntegrationTests : IDisposable
             var revert = broker.Handle(Req(BrokerOperation.RevertRun, run: exec.RunId));
             Assert.True(revert.FullyRestored, string.Join("; ", revert.Results?.Select(x => x.Detail) ?? []));
             Assert.Equal(before, power.ReadAcValue(scheme, sub, setting));
+            _out.WriteLine("[core parking AC] RAMO: aplicado e revertido");
         }
     }
 
