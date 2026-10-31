@@ -2,30 +2,216 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:v="clr-namespace:Nexus.Desktop.Views">
+  <!--
+    "Meu PC": a porta de entrada. Destaque com o PC do jogador em tipografia de instrumento, resumo do diagnóstico e convites
+    para os próximos passos (medir; ver o que dá para ajustar). Navegação pelos comandos Show*Command do MainViewModel.
+  -->
   <DataTemplate DataType="{x:Type vm:OverviewPage}">
-      <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="24">
-          <TextBlock Text="{Binding Title}" Style="{StaticResource H1}"/>
-          <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Sub}"/>
-          <ItemsControl ItemsSource="{Binding Cards}">
-            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Border Style="{StaticResource Card}" Width="290" MinHeight="110">
-                  <StackPanel>
-                    <DockPanel>
-                      <ContentPresenter DockPanel.Dock="Right" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}"/>
-                      <TextBlock Text="{Binding Title}" Style="{StaticResource Small}"/>
-                    </DockPanel>
-                    <TextBlock Text="{Binding Value}" FontSize="16" FontWeight="SemiBold" Margin="0,6,0,4"/>
-                    <TextBlock Text="{Binding Detail}" Style="{StaticResource Small}"/>
-                  </StackPanel>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          <TextBlock Text="{Binding Footer}" Style="{StaticResource Small}" Margin="0,8,0,0"/>
-        </StackPanel>
-      </ScrollViewer>
-    </DataTemplate>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
+
+        <!-- Título -->
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Display}"/>
+        <TextBlock Text="Tudo o que o NEXUS leu do seu PC. Ler não muda nada." Style="{StaticResource Text.Body}"
+                   Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,22"/>
+
+        <!-- ===== Destaque: o PC do jogador ===== -->
+        <Border Style="{StaticResource Panel.Hero}" Padding="0" ClipToBounds="True">
+          <Grid>
+            <!-- Retícula de instrumento, bem apagada -->
+            <Rectangle Fill="{StaticResource Brush.Graticule}" Opacity="0.35" IsHitTestVisible="False" RadiusX="10" RadiusY="10"/>
+            <StackPanel Margin="28,22,28,26">
+              <DockPanel Margin="0,0,0,18">
+                <TextBlock DockPanel.Dock="Right" Style="{StaticResource Text.Small}" VerticalAlignment="Center"
+                           Text="{Binding Reading.Detail}" Visibility="{Binding Reading, Converter={StaticResource NullToCollapsed}}"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                  <Border Width="8" Height="8" CornerRadius="4" Background="{StaticResource Brush.Trace}" VerticalAlignment="Center" Margin="0,1,10,0"/>
+                  <TextBlock Text="Seu equipamento" Style="{StaticResource Text.H2}"/>
+                </StackPanel>
+              </DockPanel>
+
+              <!-- Enquanto a primeira leitura não termina -->
+              <StackPanel Visibility="{Binding HasData, Converter={StaticResource FalseToVisible}}" Margin="0,8,0,8">
+                <TextBlock Text="Lendo seu PC…" Style="{StaticResource Text.Readout}" Foreground="{StaticResource Brush.TextMuted}"/>
+                <TextBlock Text="Processador, placa de vídeo, memória e Windows aparecem aqui em alguns segundos." Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
+              </StackPanel>
+
+              <!-- Quatro canais: CPU, GPU, memória, Windows -->
+              <ItemsControl ItemsSource="{Binding HeroCards}" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="2"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Grid Margin="0,0,24,22">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                      </Grid.ColumnDefinitions>
+                      <!-- Marca de canal (ciano = valor lido) -->
+                      <Border Width="2" Margin="0,3,14,3" Background="{StaticResource Brush.Signal}" Opacity="0.8"/>
+                      <StackPanel Grid.Column="1">
+                        <DockPanel>
+                          <ContentPresenter DockPanel.Dock="Right" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}" Margin="8,0,0,0"/>
+                          <TextBlock Text="{Binding Title}" Style="{StaticResource Text.MetricLabel}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding Value}" Style="{StaticResource Text.Readout}" Margin="0,6,0,4"/>
+                        <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}"/>
+                      </StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <!-- ===== Diagnóstico + o resto do que foi lido ===== -->
+        <Grid Margin="0,16,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="16"/>
+            <ColumnDefinition Width="2*"/>
+          </Grid.ColumnDefinitions>
+
+          <!-- Diagnóstico (dados da página Diagnóstico) -->
+          <Border Style="{StaticResource Panel.Card}"
+                  DataContext="{Binding DataContext.Diagnostics, RelativeSource={RelativeSource AncestorType=Window}}">
+            <StackPanel>
+              <TextBlock Text="Diagnóstico" Style="{StaticResource Text.H2}"/>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,2,0,12" Text="Pistas lidas da configuração. Nenhuma promete FPS a mais."/>
+
+              <StackPanel Orientation="Horizontal" Visibility="{Binding HasFindings, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding AttentionCount}" FontSize="{StaticResource Size.Metric}" VerticalAlignment="Bottom">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Metric}">
+                      <Setter Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding AttentionCount}" Value="0">
+                          <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+                <StackPanel Margin="12,0,0,9" VerticalAlignment="Bottom">
+                  <TextBlock Text="{Binding AttentionLabel}" Style="{StaticResource Text.Body}"/>
+                  <TextBlock Style="{StaticResource Text.Small}">
+                    <Run Text="em"/> <Run Text="{Binding Total, Mode=OneWay}"/> <Run Text="itens avaliados"/>
+                  </TextBlock>
+                </StackPanel>
+              </StackPanel>
+              <TextBlock Text="Esperando a leitura terminar." Style="{StaticResource Text.Small}"
+                         Visibility="{Binding HasFindings, Converter={StaticResource FalseToVisible}}"/>
+              <TextBlock Text="Nada pede atenção agora." Style="{StaticResource Text.Body}" Margin="0,4,0,0"
+                         Visibility="{Binding NoAttention, Converter={StaticResource BoolToVis}}"/>
+
+              <!-- Até três pontos de atenção -->
+              <ItemsControl ItemsSource="{Binding Highlights}" Margin="0,12,0,0" Focusable="False">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,9">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="Auto"/>
+                          <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Ellipse Width="6" Height="6" Margin="0,7,10,0" VerticalAlignment="Top" Fill="{StaticResource Brush.Trace}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Title}" Style="{StaticResource Text.Body}"/>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,6,0,0"
+                      Content="Ver o diagnóstico completo"
+                      Command="{Binding DataContext.ShowDiagnosticsCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+            </StackPanel>
+          </Border>
+
+          <!-- Também lido -->
+          <Border Grid.Column="2" Style="{StaticResource Panel.Card}">
+            <StackPanel>
+              <TextBlock Text="Também lido" Style="{StaticResource Text.H2}" Margin="0,0,0,10"/>
+              <ItemsControl ItemsSource="{Binding OtherCards}" Focusable="False">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1" Padding="0,8,0,10">
+                      <StackPanel>
+                        <DockPanel>
+                          <ContentPresenter DockPanel.Dock="Right" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}" Margin="8,0,0,0"/>
+                          <TextBlock Text="{Binding Title}" Style="{StaticResource Text.MetricLabel}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding Value}" Style="{StaticResource Text.Body}" FontFamily="{StaticResource Font.Numbers}" FontSize="16" Margin="0,4,0,2"/>
+                        <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}"/>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,8,0,0"
+                      Content="Ver todo o hardware"
+                      Command="{Binding DataContext.ShowHardwareCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <!-- ===== Próximos passos ===== -->
+        <TextBlock Text="Próximo passo" Style="{StaticResource Text.H2}" Margin="0,30,0,12"/>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="16"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+
+          <!-- Medir: a ação principal (âmbar) -->
+          <Border Style="{StaticResource Panel.Card}" BorderBrush="{StaticResource Brush.TraceLine}">
+            <DockPanel>
+              <Button DockPanel.Dock="Bottom" Style="{StaticResource Button.Primary}" HorizontalAlignment="Left" Margin="0,16,0,0"
+                      Content="Medir uma partida"
+                      Command="{Binding DataContext.ShowMeasureCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+              <StackPanel>
+                <!-- Mini traço de frametime -->
+                <Canvas Width="72" Height="22" HorizontalAlignment="Left" Margin="0,0,0,12">
+                  <Path Data="M0,15.5 L72,15.5" Stroke="{StaticResource Brush.Signal}" StrokeThickness="1" StrokeDashArray="2 2" Opacity="0.6"/>
+                  <Path Data="M0,15.5 L10,15.5 L12,13 L14,15.5 L26,15.5 L29,3 L32,15.5 L46,15.5 L48,12 L50,15.5 L72,15.5"
+                        Stroke="{StaticResource Brush.Trace}" StrokeThickness="1.8" StrokeLineJoin="Round"/>
+                </Canvas>
+                <TextBlock Text="Meça seu desempenho" Style="{StaticResource Text.H2}"/>
+                <TextBlock Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                           Text="Grave uma partida e veja o FPS, as quedas e cada engasgo, quadro a quadro. Medir não muda nada no PC."/>
+              </StackPanel>
+            </DockPanel>
+          </Border>
+
+          <!-- Ajustes -->
+          <Border Grid.Column="2" Style="{StaticResource Panel.Card}">
+            <DockPanel>
+              <Button DockPanel.Dock="Bottom" Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,16,0,0"
+                      Content="Ver o que dá pra ajustar"
+                      Command="{Binding DataContext.ShowCatalogCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+              <StackPanel>
+                <!-- Mini controle deslizante -->
+                <Canvas Width="72" Height="22" HorizontalAlignment="Left" Margin="0,0,0,12">
+                  <Path Data="M0,11 L72,11" Stroke="{StaticResource Brush.Line}" StrokeThickness="2"/>
+                  <Path Data="M0,11 L44,11" Stroke="{StaticResource Brush.Signal}" StrokeThickness="2"/>
+                  <Ellipse Canvas.Left="39" Canvas.Top="6" Width="10" Height="10" Fill="{StaticResource Brush.Bg}" Stroke="{StaticResource Brush.Signal}" StrokeThickness="2"/>
+                </Canvas>
+                <TextBlock Text="Veja o que dá pra ajustar" Style="{StaticResource Text.H2}"/>
+                <TextBlock Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,0"
+                           Text="Cada ajuste mostra como está hoje no seu PC, o risco e como desfazer. Nada é aplicado sem você pedir."/>
+              </StackPanel>
+            </DockPanel>
+          </Border>
+        </Grid>
+
+        <TextBlock Text="{Binding Footer}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,22,0,0"
+                   Visibility="{Binding Footer, Converter={StaticResource NullToCollapsed}}"/>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
 </ResourceDictionary>

@@ -47,7 +47,26 @@ public sealed class HardwarePage : PageViewModel
     public override string Title => "Hardware";
     public override string Group => "Meu PC";
     public override string Subtitle => "Leitura do sistema: cada valor mostra se foi detectado, inferido ou está indisponível, e a fonte.";
-    public IReadOnlyList<SectionViewModel> Sections { get => _sections; set => Set(ref _sections, value); }
+    public IReadOnlyList<SectionViewModel> Sections
+    {
+        get => _sections;
+        set
+        {
+            if (!Set(ref _sections, value)) return;
+            OnPropertyChanged(nameof(DetectedCount));
+            OnPropertyChanged(nameof(InferredCount));
+            OnPropertyChanged(nameof(UnavailableCount));
+            OnPropertyChanged(nameof(HasData));
+        }
+    }
+
+    // Derivados para a legenda do topo da página.
+    public int DetectedCount => CountFacts(FactStatus.Detected);
+    public int InferredCount => CountFacts(FactStatus.Inferred);
+    public int UnavailableCount => CountFacts(FactStatus.Unavailable);
+    public bool HasData => Sections.Count > 0;
+
+    private int CountFacts(FactStatus status) => Sections.SelectMany(s => s.Facts).Count(f => f.Status == status);
 }
 
 // ------------------------------------------------------------------ Diagnóstico
@@ -61,8 +80,37 @@ public sealed class DiagnosticsPage : PageViewModel
     public IReadOnlyList<DiagnosticFinding> Findings
     {
         get => _findings;
-        set { Set(ref _findings, value); OnPropertyChanged(nameof(Summary)); }
+        set
+        {
+            if (!Set(ref _findings, value)) return;
+            foreach (var name in Derived) OnPropertyChanged(name);
+        }
     }
+
+    private static readonly string[] Derived =
+    [
+        nameof(Summary), nameof(Ordered), nameof(Highlights), nameof(AttentionCount), nameof(InfoCount), nameof(OkCount),
+        nameof(UnavailableCount), nameof(Total), nameof(AttentionLabel), nameof(HasFindings), nameof(NoAttention),
+    ];
+
+    // Derivados para a apresentação: atenção primeiro, depois informativo, depois ok.
+    public IReadOnlyList<DiagnosticFinding> Ordered => Findings.OrderBy(f => Rank(f.Severity)).ToList();
+    public IReadOnlyList<DiagnosticFinding> Highlights => Ordered.Where(f => f.Severity == DiagnosticSeverity.Attention).Take(3).ToList();
+    public int AttentionCount => Findings.Count(f => f.Severity == DiagnosticSeverity.Attention);
+    public int InfoCount => Findings.Count(f => f.Severity == DiagnosticSeverity.Info);
+    public int OkCount => Findings.Count(f => f.Severity == DiagnosticSeverity.Ok);
+    public int UnavailableCount => Findings.Count(f => f.Basis == FactStatus.Unavailable);
+    public int Total => Findings.Count;
+    public string AttentionLabel => AttentionCount == 1 ? "ponto para conferir" : "pontos para conferir";
+    public bool HasFindings => Findings.Count > 0;
+    public bool NoAttention => HasFindings && AttentionCount == 0;
+
+    private static int Rank(DiagnosticSeverity s) => s switch
+    {
+        DiagnosticSeverity.Attention => 0,
+        DiagnosticSeverity.Info => 1,
+        _ => 2,
+    };
     public string Summary => $"{Findings.Count(f => f.Severity == DiagnosticSeverity.Attention)} ponto(s) de atenção · " +
                              $"{Findings.Count(f => f.Basis == FactStatus.Unavailable)} não avaliável(is) · {Findings.Count} no total";
 }
@@ -197,8 +245,30 @@ public sealed class OverviewPage : PageViewModel
     public override string Title => "Meu PC";
     public override string Group => "Meu PC";
     public override string Subtitle => "Resumo do que foi lido deste PC. Modo somente leitura: nada é alterado.";
-    public IReadOnlyList<OverviewCard> Cards { get => _cards; set => Set(ref _cards, value); }
+    private static readonly string[] HeroOrder = ["Processador", "GPU", "Memória", "Windows"];
+
+    public IReadOnlyList<OverviewCard> Cards
+    {
+        get => _cards;
+        set
+        {
+            if (!Set(ref _cards, value)) return;
+            OnPropertyChanged(nameof(HeroCards));
+            OnPropertyChanged(nameof(OtherCards));
+            OnPropertyChanged(nameof(Reading));
+            OnPropertyChanged(nameof(HasData));
+        }
+    }
+
     public string Footer { get => _footer; set => Set(ref _footer, value); }
+
+    // Derivados para a apresentação: o destaque (CPU, GPU, memória, Windows), o resto do que foi lido e a leitura em si.
+    public IReadOnlyList<OverviewCard> HeroCards =>
+        HeroOrder.Select(t => Cards.FirstOrDefault(c => c.Title == t)).OfType<OverviewCard>().ToList();
+    public IReadOnlyList<OverviewCard> OtherCards =>
+        Cards.Where(c => !HeroOrder.Contains(c.Title) && c.Title is not ("Diagnóstico" or "Leitura")).ToList();
+    public OverviewCard? Reading => Cards.FirstOrDefault(c => c.Title == "Leitura");
+    public bool HasData => Cards.Count > 0;
 
     public static IReadOnlyList<OverviewCard> Build(SystemSnapshot s, IReadOnlyList<DiagnosticFinding> findings)
     {

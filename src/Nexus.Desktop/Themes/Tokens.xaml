@@ -3,15 +3,20 @@
   ser refinados. Ideia: fundo azul-grafite profundo, traço âmbar de fósforo (o que é medido/agora/depois), ciano de sinal
   (referência/antes), verde e vermelho só para melhora/piora. Tipos nativos do Windows: Bahnschrift (instrumento, DIN) para
   títulos e números; Segoe UI Variable para texto corrido.
+  Chaves novas (acréscimos, podem ser usadas por qualquer página): C.SurfaceLow, C.LineSoft, Brush.SurfaceLow, Brush.LineSoft,
+  Brush.Hover, Brush.TraceSoft, Brush.SignalSoft, Brush.GoodSoft, Brush.BadSoft, Brush.TraceLine, Brush.Graticule, Size.Readout,
+  Radius.Chip, Space.Page.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <!-- Cores -->
   <Color x:Key="C.Bg">#0E1320</Color>
+  <Color x:Key="C.SurfaceLow">#111726</Color>
   <Color x:Key="C.Surface">#161D2E</Color>
   <Color x:Key="C.SurfaceHi">#1F2840</Color>
   <Color x:Key="C.Line">#2A3550</Color>
+  <Color x:Key="C.LineSoft">#1E2638</Color>
   <Color x:Key="C.Text">#E8ECF5</Color>
   <Color x:Key="C.TextMuted">#8A96B3</Color>
   <Color x:Key="C.TextDim">#5C6785</Color>
@@ -19,12 +24,14 @@
   <Color x:Key="C.Signal">#4FD1E8</Color>
   <Color x:Key="C.Good">#5EE6A0</Color>
   <Color x:Key="C.Bad">#FF6B7A</Color>
-  <Color x:Key="C.WarnBg">#2B2412</Color>
+  <Color x:Key="C.WarnBg">#251F12</Color>
 
   <SolidColorBrush x:Key="Brush.Bg" Color="{StaticResource C.Bg}"/>
+  <SolidColorBrush x:Key="Brush.SurfaceLow" Color="{StaticResource C.SurfaceLow}"/>
   <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource C.Surface}"/>
   <SolidColorBrush x:Key="Brush.SurfaceHi" Color="{StaticResource C.SurfaceHi}"/>
   <SolidColorBrush x:Key="Brush.Line" Color="{StaticResource C.Line}"/>
+  <SolidColorBrush x:Key="Brush.LineSoft" Color="{StaticResource C.LineSoft}"/>
   <SolidColorBrush x:Key="Brush.Text" Color="{StaticResource C.Text}"/>
   <SolidColorBrush x:Key="Brush.TextMuted" Color="{StaticResource C.TextMuted}"/>
   <SolidColorBrush x:Key="Brush.TextDim" Color="{StaticResource C.TextDim}"/>
@@ -36,25 +43,51 @@
   <SolidColorBrush x:Key="Brush.Bad" Color="{StaticResource C.Bad}"/>
   <SolidColorBrush x:Key="Brush.WarnBg" Color="{StaticResource C.WarnBg}"/>
 
+  <!-- Tons translúcidos: hover, seleção e fundos de selo (sempre sobre as superfícies escuras) -->
+  <SolidColorBrush x:Key="Brush.Hover" Color="#0FE8ECF5"/>
+  <SolidColorBrush x:Key="Brush.TraceSoft" Color="#1FFFB547"/>
+  <SolidColorBrush x:Key="Brush.TraceLine" Color="#40FFB547"/>
+  <SolidColorBrush x:Key="Brush.SignalSoft" Color="#1A4FD1E8"/>
+  <SolidColorBrush x:Key="Brush.GoodSoft" Color="#1A5EE6A0"/>
+  <SolidColorBrush x:Key="Brush.BadSoft" Color="#1FFF6B7A"/>
+
+  <!-- Retícula de osciloscópio: grade fina para áreas de instrumento (use com Opacity baixa) -->
+  <DrawingBrush x:Key="Brush.Graticule" TileMode="Tile" Stretch="None"
+                Viewport="0,0,32,32" ViewportUnits="Absolute" Viewbox="0,0,32,32" ViewboxUnits="Absolute">
+    <DrawingBrush.Drawing>
+      <GeometryDrawing Geometry="M0,0.5 L32,0.5 M0.5,0 L0.5,32">
+        <GeometryDrawing.Pen>
+          <Pen Brush="{StaticResource Brush.Line}" Thickness="1"/>
+        </GeometryDrawing.Pen>
+      </GeometryDrawing>
+    </DrawingBrush.Drawing>
+  </DrawingBrush>
+
   <!-- Tipos -->
   <FontFamily x:Key="Font.Display">Bahnschrift SemiBold</FontFamily>
   <FontFamily x:Key="Font.Numbers">Bahnschrift SemiCondensed</FontFamily>
   <FontFamily x:Key="Font.Body">Segoe UI Variable Text, Segoe UI</FontFamily>
 
-  <!-- Escala (px): 12 · 13.5 · 17 · 24 · 32 · 44 (números grandes) -->
+  <!-- Escala (px): 12 · 13.5 · 17 · 24 · 32 · 44 (números grandes); 28 para leituras de instrumento -->
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Small">12</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Body">13.5</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.H2">17</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.H1">24</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Display">32</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Metric">44</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Readout">28</system:Double>
 
-  <!-- Raios por hierarquia: painel grande 10, cartão 8, controle 6, selo 999 -->
+  <!-- Raios por hierarquia: painel grande 10, cartão 8, controle 6, selo 10 -->
   <CornerRadius x:Key="Radius.Panel">10</CornerRadius>
   <CornerRadius x:Key="Radius.Card">8</CornerRadius>
   <CornerRadius x:Key="Radius.Control">6</CornerRadius>
+  <CornerRadius x:Key="Radius.Chip">10</CornerRadius>
 
-  <!-- Durações de movimento (respeitar SystemParameters.ClientAreaAnimation: sem animação quando desligada) -->
+  <!-- Margem padrão de página -->
+  <Thickness x:Key="Space.Page">32,28,32,32</Thickness>
+
+  <!-- Durações de movimento (respeitar SystemParameters.ClientAreaAnimation: sem animação quando desligada).
+       Os modelos de controle usam Views/Shell/ShellMotion (x:Static), que já zera as durações quando o Windows desliga animações. -->
   <Duration x:Key="Motion.Fast">0:0:0.12</Duration>
   <Duration x:Key="Motion.Normal">0:0:0.22</Duration>
   <Duration x:Key="Motion.Slow">0:0:0.6</Duration>

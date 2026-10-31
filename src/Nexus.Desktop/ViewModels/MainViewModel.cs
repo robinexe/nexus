@@ -43,6 +43,10 @@ public sealed class MainViewModel : ObservableObject
         ExportCommand = new RelayCommand(Export, () => !Busy && _snapshot is not null);
         Plan.SimulateCommand = new RelayCommand(() => _ = SimulateAsync(), () => !Busy && !Plan.Busy && _snapshot is not null);
         History.OnSelected = LoadHistoryEntries;
+        ShowMeasureCommand = new RelayCommand(() => SelectedPage = Measure);
+        ShowCatalogCommand = new RelayCommand(() => SelectedPage = Catalog);
+        ShowDiagnosticsCommand = new RelayCommand(() => SelectedPage = Diagnostics);
+        ShowHardwareCommand = new RelayCommand(() => SelectedPage = Hardware);
     }
 
     public OverviewPage Overview { get; } = new();
@@ -63,8 +67,14 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand RefreshCommand { get; }
     public RelayCommand ExportCommand { get; }
 
+    // Navegação (usada pelos convites da página "Meu PC").
+    public RelayCommand ShowMeasureCommand { get; }
+    public RelayCommand ShowCatalogCommand { get; }
+    public RelayCommand ShowDiagnosticsCommand { get; }
+    public RelayCommand ShowHardwareCommand { get; }
+
     public string ModeBanner { get; } =
-        "A interface não altera nada por conta própria. Aplicar só pelo serviço do broker (página Broker), que recusa escrita fora de VM de teste liberada.";
+        "A interface não muda nada no seu PC por conta própria. Aplicar só acontece pelo serviço NexusBroker (página Aplicar), que recusa qualquer escrita fora de uma VM de teste liberada.";
 
     public async Task LoadAsync()
     {

@@ -2,63 +2,94 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:v="clr-namespace:Nexus.Desktop.Views">
+  <!-- Hardware: seções legíveis; cada valor com seu selo (detectado/inferido/indisponível), a observação e a fonte numa linha discreta. -->
   <DataTemplate DataType="{x:Type vm:HardwarePage}">
-      <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="24">
-          <TextBlock Text="{Binding Title}" Style="{StaticResource H1}"/>
-          <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Sub}"/>
-          <ItemsControl ItemsSource="{Binding Sections}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
-                  <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <ItemsControl ItemsSource="{Binding Facts}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Grid Margin="0,3">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Display}"/>
+        <TextBlock Text="Tudo o que foi lido do seu PC. Cada valor diz de onde veio e se foi lido direto, deduzido ou se não deu para ler."
+                   Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,6,0,16"/>
+
+        <!-- Legenda com contagem -->
+        <WrapPanel Margin="0,0,0,20" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+          <StackPanel Orientation="Horizontal" Margin="0,0,22,6">
+            <TextBlock Text="{Binding DetectedCount}" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.Signal}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock Text="lidos direto da fonte" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Margin="0,0,22,6">
+            <TextBlock Text="{Binding InferredCount}" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.TextMuted}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock Text="deduzidos de outros valores" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Margin="0,0,22,6">
+            <TextBlock Text="{Binding UnavailableCount}" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock Text="sem leitura (com o motivo)" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </WrapPanel>
+        <TextBlock Text="Lendo seu PC…" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,0,20"
+                   Visibility="{Binding HasData, Converter={StaticResource FalseToVisible}}"/>
+
+        <ItemsControl ItemsSource="{Binding Sections}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,14" Padding="22,18,22,14">
+                <StackPanel>
+                  <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H2}" Margin="0,0,0,8"/>
+
+                  <!-- Valores -->
+                  <ItemsControl ItemsSource="{Binding Facts}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,9">
+                          <Grid>
                             <Grid.ColumnDefinitions>
-                              <ColumnDefinition Width="250"/>
-                              <ColumnDefinition Width="*"/>
-                              <ColumnDefinition Width="110"/>
+                              <ColumnDefinition Width="2*" MinWidth="150" MaxWidth="280"/>
+                              <ColumnDefinition Width="5*"/>
+                              <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Grid.ToolTip>
-                              <TextBlock>
-                                <Run Text="Fonte: "/><Run Text="{Binding Source, Mode=OneWay}"/>
+                            <TextBlock Text="{Binding Label}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                              <TextBlock Text="{Binding Value, TargetNullValue=—}" Style="{StaticResource Text.Body}"/>
+                              <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Margin="0,2,0,0"
+                                         Visibility="{Binding Note, Converter={StaticResource NullToCollapsed}}"/>
+                              <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" FontSize="11.5" Margin="0,2,0,0">
+                                <Run Text="Fonte:"/> <Run Text="{Binding Source, Mode=OneWay}"/>
                               </TextBlock>
-                            </Grid.ToolTip>
-                            <TextBlock Text="{Binding Label}" Foreground="{StaticResource Muted}"/>
-                            <StackPanel Grid.Column="1">
-                              <TextBlock Text="{Binding Value, TargetNullValue=—}"/>
-                              <TextBlock Text="{Binding Note}" Style="{StaticResource Small}" Visibility="{Binding Note, Converter={StaticResource NullToCollapsed}}"/>
                             </StackPanel>
-                            <ContentPresenter Grid.Column="2" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}"/>
+                            <ContentPresenter Grid.Column="2" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}" Margin="0,1,0,0"/>
                           </Grid>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <ItemsControl ItemsSource="{Binding Tables}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Expander Header="{Binding Header}" Margin="0,10,0,0">
-                            <StackPanel Margin="0,6,0,0">
-                              <DockPanel Margin="0,0,0,4">
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <!-- Tabelas (módulos de memória, discos, monitores…) -->
+                  <ItemsControl ItemsSource="{Binding Tables}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,6,0,0">
+                          <Expander Header="{Binding Header}" Margin="-6,0,0,4">
+                            <StackPanel Margin="6,4,0,6">
+                              <DockPanel Margin="0,0,0,6">
                                 <ContentPresenter DockPanel.Dock="Right" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}"/>
-                                <TextBlock Style="{StaticResource Small}"><Run Text="Fonte: "/><Run Text="{Binding Source, Mode=OneWay}"/></TextBlock>
+                                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center">
+                                  <Run Text="Fonte:"/> <Run Text="{Binding Source, Mode=OneWay}"/>
+                                </TextBlock>
                               </DockPanel>
-                              <TextBlock Text="{Binding Note}" Style="{StaticResource Small}" Margin="0,0,0,4" Visibility="{Binding Note, Converter={StaticResource NullToCollapsed}}"/>
+                              <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Margin="0,0,0,6"
+                                         Visibility="{Binding Note, Converter={StaticResource NullToCollapsed}}"/>
                               <ListView ItemsSource="{Binding Rows}" v:TableColumns.Source="{Binding Columns}" MaxHeight="380"/>
                             </StackPanel>
                           </Expander>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                  </StackPanel>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-      </ScrollViewer>
-    </DataTemplate>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
 </ResourceDictionary>
