@@ -71,7 +71,19 @@ public static class CleaningPaths
             problem = $"Pasta {placeholder} não é um caminho local absoluto.";
             return null;
         }
-        return Normalize(b);
+        var full = Normalize(b);
+        // Pastas do perfil vêm de variáveis e pastas conhecidas que o próprio usuário pode redirecionar (TEMP, LOCALAPPDATA...).
+        // O aplicador pode rodar como administrador/SYSTEM: elas só valem se ficarem DENTRO da pasta do perfil.
+        if (placeholder is "%UserTemp%" or "%LocalAppData%" or "%LocalAppDataLow%" or "%AppData%")
+        {
+            var profile = string.IsNullOrWhiteSpace(folders.UserProfile) || !Path.IsPathFullyQualified(folders.UserProfile) ? null : Normalize(folders.UserProfile);
+            if (profile is null || profile.Length <= 3 || !full.StartsWith(profile + Path.DirectorySeparatorChar, Cmp))
+            {
+                problem = $"Pasta {placeholder} ({full}) fica fora da pasta do perfil; por segurança, as regras dela ficam indisponíveis.";
+                return null;
+            }
+        }
+        return full;
     }
 
     /// <summary>Raízes concretas e existentes de uma regra. Curingas só casam pastas de verdade (nunca links/junções).</summary>

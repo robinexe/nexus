@@ -400,6 +400,28 @@ public sealed class CleaningHandlerTests
         Assert.Equal(QuarantineEntryState.RestoreFailed, QuarantineStore.ReadManifest(ruleDir)!.Entries[0].State);
     }
 
+    [Fact]
+    public void Profile_folders_redirected_outside_the_profile_are_not_cleaned()
+    {
+        // Revisão de segurança: como serviço, %UserTemp% vinha de HKU\<SID>\Environment\TEMP, que o próprio usuário escreve.
+        // TEMP=C:\Windows\Installer fazia o aplicador (SYSTEM) levar o cache de instaladores para a quarentena.
+        using var s = new CleaningSandbox();
+        var installer = s.File(Path.Combine(s.Folders.WinDir!, "Installer", "1a2b3c.msi"));
+        var otherUser = s.File(Path.Combine(s.Root, "Users", "bia", "AppData", "Local", "Temp", "dela.tmp"));
+        foreach (var redirected in new[] { Path.GetDirectoryName(installer)!, Path.GetDirectoryName(otherUser)! })
+        {
+            var folders = s.Folders with { UserTemp = redirected };
+            var (h, _, _) = Handler(s, folders: folders);
+            var act = Action("temp-user", NewBatch());
+            h.Apply(act);
+            Assert.False(CleaningPaths.IsWithinRule(Set.Find("temp-user")!, folders, Path.Combine(redirected, "x.tmp")));
+        }
+        Assert.True(File.Exists(installer));
+        Assert.True(File.Exists(otherUser));
+        Assert.Null(CleaningPaths.BaseOf("%UserTemp%", s.Folders with { UserTemp = Path.GetDirectoryName(installer) }, out var problem));
+        Assert.Contains("fora da pasta do perfil", problem, StringComparison.Ordinal);
+    }
+
     /// <summary>Simula a troca de uma pasta por link entre a varredura e o movimento (janela de corrida).</summary>
     private sealed class SwapBeforeMoveOps(Action swap) : IQuarantineFileOps
     {

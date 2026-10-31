@@ -7,7 +7,7 @@ namespace Nexus.Cleaning;
 
 /// <summary>
 /// Pastas reais no Windows. Para um SID (aplicador como serviço), tudo vem do registro do perfil daquele usuário
-/// (HKU\&lt;SID&gt;\Volatile Environment, ProfileList) e nunca do processo do aplicador. Só leitura.
+/// (só ProfileList, em HKLM) e nunca do processo do aplicador. Só leitura.
 /// </summary>
 [SupportedOSPlatform("windows")]
 public static class WindowsCleaningFolders
@@ -27,28 +27,29 @@ public static class WindowsCleaningFolders
         };
     }
 
-    /// <summary>Pastas do perfil de um SID, lidas do registro. Null se o perfil não puder ser identificado com segurança.</summary>
+    /// <summary>
+    /// Pastas do perfil de um SID. Null se o perfil não puder ser identificado com segurança.
+    /// <para>Só a pasta do perfil vem do registro, e de <c>HKLM\...\ProfileList</c> (que o usuário não altera). As demais são
+    /// derivadas dela (<c>AppData\Local</c>, <c>AppData\Roaming</c>, <c>AppData\Local\Temp</c>). Antes vinham de
+    /// <c>HKU\&lt;SID&gt;\Volatile Environment</c> e <c>HKU\&lt;SID&gt;\Environment\TEMP</c>, que o próprio usuário escreve: um usuário
+    /// comum punha <c>TEMP=C:\Windows\Installer</c> (ou a pasta de outro programa ou de outra conta) e o aplicador, como
+    /// SYSTEM, levava esses arquivos para a quarentena.</para>
+    /// </summary>
     public static CleaningFolders? ForSid(IRegistryBackend registry, string sid)
     {
         ArgumentNullException.ThrowIfNull(registry);
         if (!UserProfileScope.IsValidSid(sid)) return null;
-        string? User(string path, string name)
-        {
-            try
-            {
-                var r = registry.Read(new RegistryTarget(RegHive.HKCU, path, name, RegView.Default, sid));
-                return r.ValueExists ? r.Value : null;
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Security.SecurityException) { return null; }
-        }
-        var profile = User("Volatile Environment", "USERPROFILE") ?? ProfileImagePath(registry, sid);
-        if (profile is null || !Path.IsPathFullyQualified(profile)) return null;
-        var local = User("Volatile Environment", "LOCALAPPDATA") ?? Path.Combine(profile, "AppData", "Local");
-        var roaming = User("Volatile Environment", "APPDATA") ?? Path.Combine(profile, "AppData", "Roaming");
-        var temp = ExpandUser(User("Environment", "TEMP"), profile, local) ?? Path.Combine(local, "Temp");
+        var profile = ProfileImagePath(registry, sid);
+        if (profile is null || !Path.IsPathFullyQualified(profile) || profile.StartsWith(@"\\", StringComparison.Ordinal)) return null;
+        profile = Path.TrimEndingDirectorySeparator(profile);
+        var local = Path.Combine(profile, "AppData", "Local");
         return ForMachine(registry) with
         {
-            UserProfile = profile, LocalAppData = local, AppData = roaming, LocalAppDataLow = Path.Combine(profile, "AppData", "LocalLow"), UserTemp = temp,
+            UserProfile = profile,
+            LocalAppData = local,
+            AppData = Path.Combine(profile, "AppData", "Roaming"),
+            LocalAppDataLow = Path.Combine(profile, "AppData", "LocalLow"),
+            UserTemp = Path.Combine(local, "Temp"),
         };
     }
 
@@ -70,14 +71,6 @@ public static class WindowsCleaningFolders
             return v.Contains('%', StringComparison.Ordinal) ? null : v;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Security.SecurityException) { return null; }
-    }
-
-    /// <summary>Expande só %USERPROFILE% e %LOCALAPPDATA% (do perfil certo). Qualquer outra variável = não confiável (null).</summary>
-    internal static string? ExpandUser(string? value, string profile, string local)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        var v = value.Replace("%USERPROFILE%", profile, StringComparison.OrdinalIgnoreCase).Replace("%LOCALAPPDATA%", local, StringComparison.OrdinalIgnoreCase);
-        return v.Contains('%', StringComparison.Ordinal) || !Path.IsPathFullyQualified(v) ? null : v;
     }
 
     /// <summary>Pasta do Steam pela instalação registrada (HKLM, visão 32 bits); senão o local padrão, se existir.</summary>
