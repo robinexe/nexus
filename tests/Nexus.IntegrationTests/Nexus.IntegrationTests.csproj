@@ -32,7 +32,11 @@
     <ProjectReference Include="..\..\src\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
     <ProjectReference Include="..\..\src\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Recovery.Cli\Nexus.Recovery.Cli.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Assistant\Nexus.Assistant.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Broker.Host\Nexus.Broker.Host.csproj" ReferenceOutputAssembly="false" />
+    <!-- nexus.exe ao lado do aplicador (como no produto instalado): a etapa "Manter em dia" do assistente agenda a verificação
+         semanal apontando para ele. Só a ordem de compilação; os arquivos são copiados em CopyCli. -->
+    <ProjectReference Include="..\..\src\Nexus.Cli\Nexus.Cli.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
@@ -45,5 +49,12 @@
       <BrokerHostFiles Include="$(MSBuildThisFileDirectory)..\..\src\Nexus.Broker.Host\bin\$(Configuration)\net10.0-windows\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(BrokerHostFiles)" DestinationFiles="@(BrokerHostFiles->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CopyCli" AfterTargets="Build">
+    <ItemGroup>
+      <CliCandidates Include="$(MSBuildThisFileDirectory)..\..\src\Nexus.Cli\bin\$(Configuration)\net10.0\nexus.exe;$(MSBuildThisFileDirectory)..\..\src\Nexus.Cli\bin\$(Configuration)\net10.0\nexus.dll;$(MSBuildThisFileDirectory)..\..\src\Nexus.Cli\bin\$(Configuration)\net10.0\nexus.runtimeconfig.json" />
+      <CliFiles Include="@(CliCandidates)" Condition="Exists('%(CliCandidates.FullPath)')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CliFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>
