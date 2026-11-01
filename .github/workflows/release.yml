@@ -226,8 +226,9 @@ jobs:
           Start-Sleep -Seconds 8
           foreach ($proc in 'Nexus.Desktop.exe', 'dwm.exe') {
             $csv = Join-Path (Resolve-Path saida).Path "presentmon-$proc.csv"
-            $pmArgs = @('--process_name', $proc, '--output_file', $csv, '--timed', '5', '--terminate_after_timed', '--no_console_stats', '--stop_existing_session', '--session_name', 'NEXUS_CI')
+            $pmArgs = @('--process_name', $proc, '--output_file', "`"$csv`"", '--timed', '5', '--terminate_after_timed', '--no_console_stats', '--stop_existing_session', '--session_name', 'NEXUS_CI')
             $run = Start-Process $pm -ArgumentList $pmArgs -PassThru -NoNewWindow -RedirectStandardOutput "saida\presentmon-$proc.out.txt" -RedirectStandardError "saida\presentmon-$proc.err.txt"
+            $null = $run.Handle # sem isso o ExitCode pode vir vazio depois de WaitForExit(ms) com saída redirecionada
             if (-not $run.WaitForExit(60000)) { $run.Kill(); Write-Error "PresentMon ($proc) não terminou em 60 s"; exit 1 }
             $lines = if (Test-Path $csv) { @(Get-Content $csv | Where-Object { $_ }).Count } else { 0 }
             $frames = [Math]::Max(0, $lines - 1)
