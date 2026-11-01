@@ -467,8 +467,7 @@ public static class ProcessTimeModel
         ArgumentNullException.ThrowIfNull(batch);
         var n = batch.Changes.Count;
         var what = n == 1 ? "1 mudança" : string.Create(CultureInfo.GetCultureInfo("pt-BR"), $"{n} mudanças");
-        var part = batch.Parts > 1 ? string.Create(CultureInfo.GetCultureInfo("pt-BR"), $" (parte {batch.Part} de {batch.Parts})") : "";
-        return batch.Level == BrokerLevel.Admin ? $"Mudanças de sistema: {what}{part}" : $"Na sua conta: {what}{part}";
+        return batch.Level == BrokerLevel.Admin ? $"Mudanças de sistema: {what}" : $"Na sua conta: {what}";
     }
 
     public static string BatchKey(ApplyBatch batch)

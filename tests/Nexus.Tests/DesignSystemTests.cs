@@ -258,6 +258,53 @@ public sealed partial class DesignSystemTests
             Assert.Contains(k, seen);
     }
 
+    // ------------------------------------------------------------------ tela de progresso (Assistente)
+
+    /// <summary>
+    /// Componentes da tela de progresso: existem no Desktop com as propriedades usadas no XAML, estão no manual do design
+    /// system e todo laço infinito de animação nos controles respeita "Mostrar animações no Windows" (ShellMotion.Enabled).
+    /// </summary>
+    [Fact]
+    public void Progress_view_components_exist_are_documented_and_respect_reduced_motion()
+    {
+        var root = Root();
+        var config = AppContext.BaseDirectory.Contains($"{Path.DirectorySeparatorChar}Debug{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ? "Debug" : "Release";
+        var dll = Path.Combine(root, "src", "Nexus.Desktop", "bin", config, "net10.0-windows", "Nexus.Desktop.dll");
+        using var pe = new PEReader(File.OpenRead(dll));
+        var md = pe.GetMetadataReader();
+        var fields = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        foreach (var h in md.TypeDefinitions)
+        {
+            var t = md.GetTypeDefinition(h);
+            if (md.GetString(t.Namespace) != "Nexus.Desktop.Views.Controls") continue;
+            fields[md.GetString(t.Name)] = t.GetFields().Select(f => md.GetString(md.GetFieldDefinition(f).Name)).ToHashSet(StringComparer.Ordinal);
+        }
+        foreach (var (type, dps) in new[]
+                 {
+                     ("ProcessRing", new[] { "ValueProperty", "IsActiveProperty", "ToneProperty", "ThicknessProperty" }),
+                     ("ScanlineOverlay", new[] { "IsActiveProperty" }),
+                     ("Pulse", new[] { "IsOnProperty" }),
+                 })
+        {
+            Assert.True(fields.ContainsKey(type), $"{type} não existe em Views/Controls");
+            foreach (var dp in dps) Assert.Contains(dp, fields[type]);
+        }
+
+        var manual = File.ReadAllText(Path.Combine(root, "docs", "10-design-system.md"));
+        foreach (var name in new[] { "ProcessRing", "ScanlineOverlay", "Pulse.IsOn" }) Assert.Contains(name, manual, StringComparison.Ordinal);
+
+        foreach (var file in Directory.EnumerateFiles(Path.Combine(root, "src", "Nexus.Desktop", "Views", "Controls"), "*.cs"))
+        {
+            var text = File.ReadAllText(file);
+            var loops = Regex.Count(text, @"RepeatBehavior\.Forever");
+            if (loops == 0) continue;
+            Assert.True(Regex.Count(text, @"ShellMotion\.Enabled") >= 1, $"{Path.GetFileName(file)}: animação em laço sem conferir ShellMotion.Enabled");
+        }
+        var visuals = File.ReadAllText(Path.Combine(root, "src", "Nexus.Desktop", "Views", "Controls", "ProcessVisuals.cs"));
+        // Cada controle com laço decide "quero animar" olhando as animações do Windows.
+        Assert.True(Regex.Count(visuals, @"ShellMotion\.Enabled") >= 3, "ProcessRing, ScanlineOverlay e Pulse devem conferir ShellMotion.Enabled antes de animar");
+    }
+
     // ------------------------------------------------------------------ apoio
 
     [GeneratedRegex(@"\{StaticResource\s+(?:ResourceKey=)?([^\s,}]+)\s*\}|<StaticResource\s+ResourceKey=""([^""]+)""")]
