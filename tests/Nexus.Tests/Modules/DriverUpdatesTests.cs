@@ -402,10 +402,12 @@ public sealed class DriverUpdatesHandlerTests : IDisposable
     public void Catalog_loads_and_the_kind_is_registered()
     {
         var mine = Catalog.Actions.Where(a => a.Definition.Id.StartsWith("driverupdates.", StringComparison.Ordinal)).ToList();
-        var a = Assert.Single(mine);
+        Assert.Equal(["driverupdates.gpu.install", "driverupdates.install"], mine.Select(x => x.Definition.Id).Order(StringComparer.Ordinal));
+        var a = mine.Single(x => x.Definition.Id == "driverupdates.install");
         Assert.Equal(Catalog.Actions.Count, Catalog.Actions.Select(x => x.Definition.Key).Distinct().Count());
         var kinds = DriverUpdatesHandlers.Create(new HandlerEnvironment(new InMemoryRegistryBackend(), _dir, false, true)).Select(h => h.HandlerKind).ToList();
-        Assert.Equal([DriverUpdateInstallHandler.Kind], kinds);
+        Assert.Equal([DriverUpdateInstallHandler.Kind, Nexus.DriverUpdates.Vendor.VendorDriverInstallHandler.Kind], kinds);
+        Assert.All(mine, m => Assert.Contains(m.Definition.HandlerKind, kinds));
         Assert.Equal(DriverUpdateInstallHandler.Kind, a.Definition.HandlerKind);
         Assert.Equal(PrivilegeLevel.Admin, a.Definition.Privileges);
         Assert.Equal(PersistenceKind.Persistent, a.Definition.Persistence);
