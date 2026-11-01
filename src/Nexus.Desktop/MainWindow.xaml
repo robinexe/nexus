@@ -165,6 +165,14 @@
           </StackPanel>
 
           <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button Style="{StaticResource Header.Button}" Command="{Binding RelaunchAsAdminCommand}"
+                    Visibility="{Binding CanRelaunchAsAdmin, Converter={StaticResource BoolToVis}}"
+                    ToolTip="Algumas leituras só aparecem como administrador (tempo de boot, cache DNS, pontos de restauração, drivers em uso). Abre o NEXUS de novo com a permissão do Windows; ler continua não mudando nada.">
+              <StackPanel Orientation="Horizontal">
+                <c:Icon Data="{StaticResource Icon.Security}" Size="15" Foreground="{StaticResource Brush.Trace}" Margin="0,0,7,0"/>
+                <TextBlock Text="Ver tudo (administrador)" TextWrapping="NoWrap"/>
+              </StackPanel>
+            </Button>
             <Button Style="{StaticResource Header.Button}" Command="{Binding RefreshCommand}"
                     ToolTip="Lê o hardware e o Windows de novo. Não muda nada.">
               <StackPanel Orientation="Horizontal">

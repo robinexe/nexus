@@ -48,6 +48,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         Broker.RecoverCommand = new RelayCommand(() => _ = BrokerRecoverAsync(), () => !Broker.Busy && Broker.Connected && Broker.WriteAllowed);
         _selectedPage = Overview;
         RefreshCommand = new RelayCommand(() => _ = LoadAsync(), () => !Busy);
+        RelaunchAsAdminCommand = new RelayCommand(RelaunchAsAdmin);
         ExportCommand = new RelayCommand(Export, () => !Busy && _snapshot is not null);
         Plan.SimulateCommand = new RelayCommand(() => _ = SimulateAsync(), () => !Busy && !Plan.Busy && _snapshot is not null);
         History.OnSelected = LoadHistoryEntries;
@@ -166,6 +167,32 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public string Status { get => _status; set => Set(ref _status, value); }
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public RelayCommand RefreshCommand { get; }
+    public RelayCommand RelaunchAsAdminCommand { get; }
+
+    /// <summary>Não elevado e fora do autoteste: oferece reabrir como administrador (só para ler mais; escrever continua pelo aplicador).</summary>
+    public bool CanRelaunchAsAdmin { get; } = !IsProcessElevated() && !Environment.GetCommandLineArgs().Any(a => a.StartsWith("--selftest", StringComparison.Ordinal));
+
+    private static bool IsProcessElevated()
+    {
+        try
+        {
+            using var id = System.Security.Principal.WindowsIdentity.GetCurrent();
+            return new System.Security.Principal.WindowsPrincipal(id).IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+        }
+        catch (System.Security.SecurityException) { return false; }
+    }
+
+    private void RelaunchAsAdmin()
+    {
+        var exe = Environment.ProcessPath;
+        if (exe is null) return;
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe, "--admin-relaunch") { UseShellExecute = true, Verb = "runas" });
+            System.Windows.Application.Current.Shutdown();
+        }
+        catch (System.ComponentModel.Win32Exception) { Status = "Você recusou o aviso do Windows. O NEXUS continua aberto sem administrador."; }
+    }
     public RelayCommand ExportCommand { get; }
 
     // Navegação (usada pelos convites da página "Meu PC").

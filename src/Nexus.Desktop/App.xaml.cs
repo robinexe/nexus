@@ -35,6 +35,12 @@ public partial class App : Application
         }
 
         _instance = new Mutex(initiallyOwned: true, InstanceName, out var first);
+        if (!first && e.Args.Contains("--admin-relaunch"))
+        {
+            // Reaberto como administrador pelo próprio NEXUS: a cópia anterior está fechando; espera ela soltar a trava.
+            try { first = _instance.WaitOne(TimeSpan.FromSeconds(15)); }
+            catch (AbandonedMutexException) { first = true; }
+        }
         if (!first)
         {
             try { using var signal = EventWaitHandle.OpenExisting(ShowEventName); signal.Set(); }

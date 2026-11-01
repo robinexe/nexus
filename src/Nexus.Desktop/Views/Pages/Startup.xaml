@@ -269,7 +269,7 @@
             <c:Icon Data="{StaticResource Icon.Startup}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
             <TextBlock Text="O que abre com o Windows" Style="{StaticResource Text.H2}" FontSize="15.5" TextWrapping="NoWrap"/>
           </StackPanel>
-          <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" MaxWidth="320" HorizontalAlignment="Left"
+          <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="280" HorizontalAlignment="Left" Margin="16,0,0,0" Tag="Buscar…"
                    ToolTip="Buscar por nome, editor ou caminho" AutomationProperties.Name="Buscar na inicialização"/>
           <CheckBox Grid.Column="2" Content="Mostrar itens do Windows" IsChecked="{Binding ShowWindowsItems}" VerticalAlignment="Center" Margin="14,0,8,0"/>
           <Button Grid.Column="3" Command="{Binding RefreshCommand}" Style="{StaticResource Button.Ghost}">

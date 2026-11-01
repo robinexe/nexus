@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Nexus.Core;
@@ -773,7 +773,18 @@ public sealed class OverviewPage : PageViewModel
         OverviewCard Card(string title, string? value, string detail, FactStatus ok = FactStatus.Detected) =>
             new(title, value ?? "indisponível", value is null ? FactStatus.Unavailable : ok, detail);
 
-        var gpu = f.Gpus.FirstOrDefault(g => g.Vendor is not "Microsoft") ?? (f.Gpus.Count > 0 ? f.Gpus[0] : null);
+        // Notebook híbrido: mostrar a placa dedicada (a que roda os jogos), não a integrada que desenha a tela.
+        static int GpuRank(GpuInfo g)
+        {
+            var n = g.Name ?? "";
+            if (string.Equals(g.Vendor, "Microsoft", StringComparison.OrdinalIgnoreCase) || n.Contains("Basic", StringComparison.OrdinalIgnoreCase)) return 0;
+            if (n.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase) || n.Contains("GeForce", StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Quadro", StringComparison.OrdinalIgnoreCase) || n.Contains("RTX", StringComparison.OrdinalIgnoreCase)) return 3;
+            if (n.Contains(" RX ", StringComparison.OrdinalIgnoreCase) || n.Contains("Radeon Pro", StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Arc", StringComparison.OrdinalIgnoreCase)) return 2;
+            return 1; // integrada (Radeon(TM) Graphics, UHD, Iris...)
+        }
+        var gpu = f.Gpus.OrderByDescending(GpuRank).ThenByDescending(g => g.MemoryBytes ?? 0).FirstOrDefault();
         var sized = f.MemoryModules.Where(m => m.SizeBytes is not null).ToList();
         var installed = sized.Aggregate(0UL, (a, m) => a + m.SizeBytes!.Value);
         var attention = findings.Count(x => x.Severity == DiagnosticSeverity.Attention);

@@ -129,9 +129,9 @@ public sealed class AutomationPage : ModulePage
     /// <summary>"prévia" (antes de perguntar ao aplicador) ou "confirmado pelo aplicador".</summary>
     public string PlanState { get => _planState; private set => Set(ref _planState, value); }
     public int PlanCount => _plan.Count;
-    public string PlanCountText => (_planVerified ? _plan.Count + _cleaning.Requests.Count : _candidates.Count).ToString(CultureInfo.InvariantCulture);
+    public string PlanCountText => PlanNumberRaw.ToString(CultureInfo.InvariantCulture);
     /// <summary>"Limpeza segura: 9 regras, 1,2 GB recuperáveis (vão para a quarentena)".</summary>
-    public string CleaningText { get => _cleaningText; private set { if (Set(ref _cleaningText, value)) Raise(nameof(HasCleaning)); } }
+    public string CleaningText { get => _cleaningText; private set { if (Set(ref _cleaningText, value)) { Raise(nameof(HasCleaning), nameof(PlanNumber)); OnPropertyChanged(nameof(PlanCountText)); } } }
     public string Result { get => _result; private set => Set(ref _result, value); }
     public bool CanUndo => _runs.Count > 0;
     public bool HasAvoid => _avoid.Count > 0;
@@ -143,7 +143,9 @@ public sealed class AutomationPage : ModulePage
 
     public bool IsLoading => _set is null;
     /// <summary>Ações no plano (o mesmo número de <see cref="PlanCountText"/>); NaN antes da leitura.</summary>
-    public double PlanNumber => _set is null ? double.NaN : _planVerified ? _plan.Count + _cleaning.Requests.Count : _candidates.Count;
+    public double PlanNumber => _set is null ? double.NaN : PlanNumberRaw;
+    // Antes de o aplicador conferir, a limpeza segura conta como 1 item (o número de regras só se sabe depois).
+    private int PlanNumberRaw => _planVerified ? _plan.Count + _cleaning.Requests.Count : _candidates.Count + (_cleaningText.Length > 0 ? 1 : 0);
     public bool HasPlanRows => _planRows.Count > 0;
     public bool HasSkipped => _planSkipped.Count > 0;
     public bool HasGains => _planGains.Length > 0;
