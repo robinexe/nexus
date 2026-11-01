@@ -213,7 +213,14 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     vídeo NVIDIA/AMD baixados, conferidos (assinatura) e instalados dentro do app; correção grave: interface aberta como
     administrador fazia o aplicador de usuário nascer elevado e recusar %LocalAppData% (tudo "bloqueado") — agora usa o
     aplicador de administrador. Ponto de restauração do limite de 24 h não é mais erro. 1900 testes.
-15. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+15. **01/11 madrugada (PC real):** Aplicar consulta o aplicador sozinho; pedidos >64 viram lotes (desfazer todos); RequestsFor só
+    envia valor com allowedValues (o plano de energia derrubava o pedido); ação recusada na validação é pulada sem derrubar o
+    resto; broker aplica/desfaz ajustes normais com sessão aberta (trava emprestada; só outro ajuste de sessão espera);
+    teste do catálogo inteiro (94 ações) aplicando e desfazendo na VM 2022/2025; drivers AMD sem compressão HTTP;
+    Inicialização com desligar em massa. Cópia de desenvolvimento (bin\Release gravável) não roda ações de administrador:
+    usar o instalador. Atualização automática: script _claude\Configurar-Atualizacoes.cmd (usuário roda; a sessão foi
+    bloqueada de criar repositório público e gravar segredos).
+16. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
