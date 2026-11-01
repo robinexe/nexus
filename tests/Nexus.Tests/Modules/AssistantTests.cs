@@ -564,6 +564,28 @@ public sealed class AssistantReportTests
 public sealed class AssistantPlannerTests
 {
     [Fact]
+    public void Performance_lists_the_rest_of_the_catalog_as_advanced_unchecked_and_never_session_or_with_bad_values()
+    {
+        // O usuário perguntou por que os ajustes da página Aplicar não estavam no assistente: entram como "avançado", desmarcados.
+        var c = AssistantFakes.Real();
+        var traits = new PcTraits(ChassisType: 10, HasSystemBattery: true, OnAcPower: true, BatteryPercent: 90);
+        var set = AutoFakes.Recommend(AutoFakes.Facts(), traits, c.Document);
+        var p = new Dictionary<string, string> { ["activeScheme"] = "381b4222-f694-41f0-9685-ff5bb260df2e" };
+        var scan = StepPlanners.Performance(c, set, p);
+        var advanced = scan.Changes.Where(x => x.Title.StartsWith("Avançado: ", StringComparison.Ordinal)).ToList();
+        Assert.NotEmpty(advanced);
+        foreach (var x in advanced)
+        {
+            var e = c.Entry(x.Request.ActionId);
+            Assert.NotNull(e);
+            Assert.True(x.OptIn && !x.SelectedByDefault, x.Request.ActionId);
+            Assert.NotEqual(PersistenceKind.Session, e!.Definition.Persistence);
+            Assert.Null(x.Request.Value); // valor fixo no catálogo
+        }
+        Assert.Equal(scan.Changes.Count, scan.Changes.Select(x => x.Request.ActionId).Distinct().Count());
+    }
+
+    [Fact]
     public void Welcome_proposes_the_restore_point_unless_a_recovery_is_pending()
     {
         var c = AssistantFakes.Real();

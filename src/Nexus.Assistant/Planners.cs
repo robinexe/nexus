@@ -468,7 +468,14 @@ public static class StepPlanners
 
     // ------------------------------------------------------------------ 10. desempenho
 
-    public static StepScan Performance(AssistantCatalog catalog, RecommendationSet set)
+    /// <summary>Catálogos de ajustes de jogo/sistema que só aparecem na página Aplicar; o assistente os mostra como "avançado".</summary>
+    private static readonly string[] AdvancedPrefixes = ["win.", "power.", "sched.", "gpu.", "svc.", "boot.service."];
+
+    public static StepScan Performance(AssistantCatalog catalog, RecommendationSet set) => Performance(catalog, set, null);
+
+    /// <param name="parameters">Parâmetros deste PC (ex.: activeScheme). Com eles, o resto dos ajustes do catálogo entra como
+    /// "avançado", desmarcado: o mesmo que a página Aplicar lista, sem precisar sair do assistente.</param>
+    public static StepScan Performance(AssistantCatalog catalog, RecommendationSet set, IReadOnlyDictionary<string, string>? parameters)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(set);
@@ -478,13 +485,30 @@ public static class StepPlanners
         foreach (var r in set.Actionable.Where(r => !r.OneClick && r.Kind is RecommendationKind.Recommend or RecommendationKind.Consider && r.ActionKey is not null))
         {
             if (catalog.Entry(r.ActionKey!) is not { } e || e.UserParameters.Count > 0) continue;
-            Add(changes, catalog.Change(AssistantStepId.Performance, new ActionRequest(e.Definition.Key, e.DesiredValue is null ? r.Value : null), r.Title,
+            // Mesma regra do aplicador: valor só quando o catálogo oferece escolha (allowedValues).
+            var value = e.DesiredValue is null && e.Definition.AllowedValues is { Count: > 0 } allowed && r.Value is not null && allowed.Contains(r.Value, StringComparer.Ordinal) ? r.Value : null;
+            Add(changes, catalog.Change(AssistantStepId.Performance, new ActionRequest(e.Definition.Key, value), r.Title,
                 r.Reason + (r.Kind == RecommendationKind.Consider ? " Vale medir antes e depois." : "")));
+        }
+        var recommended = changes.Count;
+        if (parameters is not null)
+        {
+            var proposed = changes.Select(c => c.Request.ActionId).ToHashSet(StringComparer.Ordinal);
+            var avoid = set.Avoid.Where(a => a.ActionKey is not null).Select(a => a.ActionKey!).ToHashSet(StringComparer.Ordinal);
+            foreach (var e in catalog.Document.Actions)
+            {
+                var d = e.Definition;
+                if (!AdvancedPrefixes.Any(p => d.Id.StartsWith(p, StringComparison.Ordinal)) || e.UserParameters.Count > 0 ||
+                    proposed.Contains(d.Key) || avoid.Contains(d.Key) || e.TryInstantiate(parameters, out _) is null) continue;
+                Add(changes, catalog.Change(AssistantStepId.Performance, new ActionRequest(d.Key), "Avançado: " + d.Title,
+                    d.Mechanism + (d.Classification == Nexus.Core.Classification.Experimental ? " Experimental: meça antes e depois." : ""), optIn: true));
+            }
         }
         var facts = new List<StepFact>
         {
             new("Perfil", set.Profile.Headline, "info"),
-            new("Recomendações", changes.Count.ToString(Pt), "info"),
+            new("Recomendações", recommended.ToString(Pt), "info"),
+            new("Avançados (desmarcados)", (changes.Count - recommended).ToString(Pt), "info"),
             new("Não fazer neste PC", set.Avoid.Count().ToString(Pt), "info"),
         };
         var notes = set.Avoid.Take(5).Select(a => $"Não fazer: {a.Title}. {a.Reason}").ToList();

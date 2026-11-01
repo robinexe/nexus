@@ -276,7 +276,7 @@ public static class AssistantReaders
             var traits = PcTraitsProbe.Read(facts.SystemDrive);
             var profile = PcProfiler.Classify(facts, traits, DiagnosticRules.Evaluate(facts));
             var set = RecommendationEngine.Default().Evaluate(profile, catalog.Document, catalog.DeclaredRisk, parameters);
-            return StepPlanners.Performance(catalog, set);
+            return StepPlanners.Performance(catalog, set, parameters);
         }
         catch (Exception ex) when (Expected(ex)) { return StepScan.Unavailable("Desempenho", ex.Message); }
     }

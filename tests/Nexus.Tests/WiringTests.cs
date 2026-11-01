@@ -74,6 +74,10 @@ public sealed partial class WiringTests
     /// dizendo qual teste cobre a origem dela.
     /// </summary>
     [Fact]
+    public void Assistant_advanced_keys_come_from_the_catalog() =>
+        new Modules.AssistantPlannerTests().Performance_lists_the_rest_of_the_catalog_as_advanced_unchecked_and_never_session_or_with_bad_values();
+
+    [Fact]
     public void Every_action_request_in_the_code_reaches_a_valid_catalog_action()
     {
         var sites = ActionSites.All();
@@ -167,6 +171,7 @@ public sealed partial class WiringTests
         ["Planners.cs|item.ActionKey"] = nameof(Service_presets_send_valid_admin_actions),
         ["ServicesPage.cs|i.Item.ActionKey"] = nameof(Service_presets_send_valid_admin_actions),
         ["Planners.cs|a.Key"] = nameof(Privacy_planner_keys_are_valid_catalog_actions),
+        ["Planners.cs|d.Key"] = nameof(Assistant_advanced_keys_come_from_the_catalog), // chaves lidas do próprio catálogo
         ["PrivacyPage.cs|k"] = nameof(Privacy_planner_keys_are_valid_catalog_actions),
         ["Planners.cs|f.ActionKey!"] = nameof(Key_and_level_written_together_match_the_catalog),
         ["MemoryDoctorPage.cs|f.ActionKey"] = nameof(Key_and_level_written_together_match_the_catalog),
