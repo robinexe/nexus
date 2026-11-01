@@ -118,7 +118,7 @@ public static class DriverUpdatesReader
         try { devices = new SetupApiDeviceInventory().List(); }
         catch (Exception ex) when (ex is not OutOfMemoryException) { inventoryNote = "Inventário de dispositivos indisponível: " + ex.Message; }
 
-        var (gpus, gpuNote) = ReadGpus();
+        var (gpus, gpuNote) = ReadGpus(devices);
         bool? reboot = null;
         try { reboot = WindowsRebootState.Pending(agent); }
         catch (Exception ex) when (ex is not OutOfMemoryException) { reboot = null; }
@@ -134,13 +134,13 @@ public static class DriverUpdatesReader
     }
 
     [SupportedOSPlatform("windows")]
-    private static (IReadOnlyList<GpuDriverStatus>, string?) ReadGpus()
+    private static (IReadOnlyList<GpuDriverStatus>, string?) ReadGpus(IReadOnlyList<DeviceDriver> devices)
     {
         try
         {
             var report = Nexus.Lab.Gpu.Windows.GpuLabScanner.Scan(null, "não usado", includeGames: false);
             string[] roots = [Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)];
-            var gpus = GpuDrivers.From(report.Adapters, DateOnly.FromDateTime(DateTime.Today), v => GpuDrivers.FindApp(v, roots, File.Exists));
+            var gpus = GpuDrivers.From(report.Adapters, DateOnly.FromDateTime(DateTime.Today), v => GpuDrivers.FindApp(v, roots, File.Exists), devices, report.IsLaptop);
             return (gpus, gpus.Count == 0 ? "Nenhuma placa NVIDIA, AMD ou Intel encontrada." : null);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException) { return ([], "Leitura da placa de vídeo indisponível: " + ex.Message); }
