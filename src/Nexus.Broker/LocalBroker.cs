@@ -54,6 +54,10 @@ public static class LocalBroker
     /// </summary>
     public static BrokerClient Connect(BrokerLevel level, string brokerDirectory, string userSid, Action<string>? progress = null)
     {
+        // Interface aberta como administrador: um aplicador "de usuário" nasceria elevado (herda o token) e, com razão, recusaria
+        // gravar o diário em %LocalAppData% (pasta que qualquer programa da conta altera). Nesse caso tudo vai para o aplicador
+        // de administrador, com diário em %ProgramData%\NEXUS protegido. Não pede aviso do Windows: o processo já é elevado.
+        level = EffectiveLevel(level, CurrentProcessIsElevated());
         if (level == BrokerLevel.Admin && TryConnect(BrokerPipeServer.DefaultPipeName, BrokerServerKind.Service, 200) is { } service)
             return service; // serviço instalado
         var kind = level == BrokerLevel.User ? BrokerServerKind.SameUser : BrokerServerKind.Service;
@@ -71,6 +75,17 @@ public static class LocalBroker
         throw new TimeoutException("O aplicador do NEXUS não respondeu a tempo.");
     }
 
+    /// <summary>Nível que de fato atende o pedido: processo elevado sempre usa o aplicador de administrador.</summary>
+    public static BrokerLevel EffectiveLevel(BrokerLevel requested, bool processElevated) =>
+        processElevated ? BrokerLevel.Admin : requested;
+
+    private static bool CurrentProcessIsElevated()
+    {
+        if (!OperatingSystem.IsWindows()) return false;
+        using var id = System.Security.Principal.WindowsIdentity.GetCurrent();
+        return new System.Security.Principal.WindowsPrincipal(id).IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+    }
+
     private static BrokerClient? TryConnect(string pipe, BrokerServerKind kind, int timeoutMs)
     {
         try { return BrokerClient.Connect(pipe, timeoutMs, kind); }
@@ -85,7 +100,9 @@ public static class LocalBroker
         // fica AQUI, no cliente, antes de pedir a elevação: depois de elevado, um binário trocado não se denunciaria.
         // O serviço instalado (tentado antes, em Connect) não passa por aqui. Desenvolvimento/CI (pasta bin gravável):
         // NEXUS_ALLOW_WRITABLE_BROKER_DIR=1.
-        if (level == BrokerLevel.Admin && OperatingSystem.IsWindows() &&
+        // Já elevado (interface aberta como administrador): não há fronteira nova sendo cruzada; os arquivos desta pasta já
+        // rodam como administrador, então a checagem não protegeria nada e só impediria o uso.
+        if (level == BrokerLevel.Admin && OperatingSystem.IsWindows() && !CurrentProcessIsElevated() &&
             Environment.GetEnvironmentVariable("NEXUS_ALLOW_WRITABLE_BROKER_DIR") != "1" &&
             UnsafeBrokerFolder(brokerDirectory) is { } why)
             throw new OperationCanceledException(
