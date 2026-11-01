@@ -76,7 +76,8 @@ public sealed class MemFindingRow : ObservableObject
     public IReadOnlyList<string> Steps { get; init; } = [];
     public IReadOnlyList<MemSourceRow> Sources { get; init; } = [];
     public string? ActionId { get; init; }
-    public bool HasAction => ActionId is not null;
+    /// <summary>Só o arquivo de paginação tem botão aqui (o texto da confirmação é dele).</summary>
+    public bool HasAction => ActionId == MemoryDiagnosis.PageFileActionId;
     public bool HasSteps => Steps.Count > 0;
     public string SeverityText => Severity switch { "bad" => "Problema", "warn" => "Atenção", "good" => "Tudo certo", _ => "Informação" };
     public UiTone ToneKind => Severity switch { "bad" => UiTone.Bad, "warn" => UiTone.Warn, "good" => UiTone.Good, _ => UiTone.Info };
@@ -534,11 +535,12 @@ public sealed class MemoryLabPage : ModulePage
 
     private async Task ApplyAsync(MemFindingRow row)
     {
-        if (Host is null || row.ActionId is null) return;
+        // O texto e o nível abaixo são do arquivo de paginação, a única ação desta página; outra ação precisaria do próprio texto.
+        if (Host is null || row.ActionId != MemoryDiagnosis.PageFileActionId) return;
         var r = await Host.ApplyAsync("Arquivo de paginação automático",
             "O Windows volta a gerenciar o arquivo de paginação sozinho (padrão do sistema).\n\nRisco: baixo; ocupa alguns GB no disco.\n" +
             "Exige administrador e vale depois de reiniciar.\nDesfazer: volta exatamente a configuração anterior.",
-            [new ActionRequest(row.ActionId == MemoryDiagnosis.PageFileActionId ? MemoryDiagnosis.PageFileActionKey : row.ActionId)], BrokerLevel.Admin);
+            [new ActionRequest(MemoryDiagnosis.PageFileActionKey)], BrokerLevel.Admin);
         if (r is null) return;
         var outcome = r.Response?.Results is { Count: > 0 } items ? items[0].Outcome : "";
         if (outcome is "Verified" or "AlreadyConfigured")
