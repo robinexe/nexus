@@ -101,10 +101,7 @@
                      Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Right"/>
           <Grid Grid.Row="1" Grid.ColumnSpan="2" Height="6" Margin="0,5,0,0">
             <Border Background="{StaticResource Brush.Bg}" CornerRadius="3"/>
-            <Rectangle Fill="{StaticResource Brush.Signal}" RadiusX="3" RadiusY="3" RenderTransformOrigin="0,0.5">
-              <Rectangle.RenderTransform>
-                <ScaleTransform ScaleX="{Binding Fraction}"/>
-              </Rectangle.RenderTransform>
+            <Rectangle Fill="{StaticResource Brush.Signal}" RadiusX="3" RadiusY="3" RenderTransformOrigin="0,0.5" RenderTransform="{Binding Fraction, Converter={StaticResource FractionScale}}">
             </Rectangle>
           </Grid>
         </Grid>
@@ -122,10 +119,7 @@
       <DataTemplate x:Key="Mon.Core" DataType="{x:Type vm:CoreBar}">
         <Grid Width="14" Height="72" Margin="0,0,5,5" ToolTip="{Binding Tip}">
           <Border Background="{StaticResource Brush.Bg}" CornerRadius="3"/>
-          <Border x:Name="bar" Background="{StaticResource Brush.Signal}" CornerRadius="3" RenderTransformOrigin="0.5,1">
-            <Border.RenderTransform>
-              <ScaleTransform ScaleY="{Binding Fraction}"/>
-            </Border.RenderTransform>
+          <Border x:Name="bar" Background="{StaticResource Brush.Signal}" CornerRadius="3" RenderTransformOrigin="0.5,1" RenderTransform="{Binding Fraction, Converter={StaticResource FractionScale}, ConverterParameter=Y}">
           </Border>
         </Grid>
         <DataTemplate.Triggers>
@@ -304,10 +298,7 @@
                       <TextBlock Grid.Column="3" Text="{Binding Gpu}" Style="{StaticResource Mon.Num}"/>
                       <Grid Grid.Row="1" Grid.ColumnSpan="2" Height="3" Margin="0,4,0,0">
                         <Border Background="{StaticResource Brush.Bg}" CornerRadius="1.5"/>
-                        <Rectangle Fill="{StaticResource Brush.Trace}" RadiusX="1.5" RadiusY="1.5" RenderTransformOrigin="0,0.5">
-                          <Rectangle.RenderTransform>
-                            <ScaleTransform ScaleX="{Binding CpuFraction}"/>
-                          </Rectangle.RenderTransform>
+                        <Rectangle Fill="{StaticResource Brush.Trace}" RadiusX="1.5" RadiusY="1.5" RenderTransformOrigin="0,0.5" RenderTransform="{Binding CpuFraction, Converter={StaticResource FractionScale}}">
                         </Rectangle>
                       </Grid>
                     </Grid>

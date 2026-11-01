@@ -40,6 +40,7 @@
   <shell:SeverityHintConverter x:Key="SeverityHint"/>
   <shell:ZeroToVisibleConverter x:Key="ZeroToVisible"/>
   <shell:FalseToVisibleConverter x:Key="FalseToVisible"/>
+  <shell:FractionScaleConverter x:Key="FractionScale"/>
 
   <!-- O canto entre as duas barras de rolagem e alguns modelos padrão usam esta cor de sistema: escurecida para o tema. -->
   <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#161D2E"/>

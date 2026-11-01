@@ -303,6 +303,11 @@ internal sealed class UiSelfTestRunner
         var dpi = VisualTreeHelper.GetDpi(_window);
         var bmp = new RenderTargetBitmap((int)Math.Ceiling(root.ActualWidth * dpi.DpiScaleX), (int)Math.Ceiling(root.ActualHeight * dpi.DpiScaleY),
             dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+        // O conteúdo é transparente sobre o fundo da janela; Render(root) não inclui Window.Background → pintamos o fundo antes.
+        var backdrop = new DrawingVisual();
+        using (var dc = backdrop.RenderOpen())
+            dc.DrawRectangle(_window.Background ?? Brushes.Black, null, new Rect(0, 0, root.ActualWidth, root.ActualHeight));
+        bmp.Render(backdrop);
         bmp.Render(root);
         var folder = Path.Combine(Path.GetDirectoryName(_jsonPath)!, "telas");
         Directory.CreateDirectory(folder);

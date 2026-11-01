@@ -98,10 +98,7 @@
                   </BeginStoryboard>
                 </EventTrigger>
               </Grid.Triggers>
-              <Rectangle x:Name="bar" Fill="{StaticResource Brush.TextDim}" RadiusX="3" RadiusY="3" RenderTransformOrigin="0,0.5">
-                <Rectangle.RenderTransform>
-                  <ScaleTransform ScaleX="{Binding Fraction}"/>
-                </Rectangle.RenderTransform>
+              <Rectangle x:Name="bar" Fill="{StaticResource Brush.TextDim}" RadiusX="3" RadiusY="3" RenderTransformOrigin="0,0.5" RenderTransform="{Binding Fraction, Converter={StaticResource FractionScale}}">
               </Rectangle>
             </Grid>
           </Grid>
