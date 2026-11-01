@@ -55,6 +55,91 @@ public sealed partial class XamlBindingTests
         Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
     }
 
+    /// <summary>
+    /// Tela de progresso do Assistente: todo {Binding X} dentro do painel (DataContext = ProcessView), das linhas do feed e dos
+    /// segmentos da barra existe no ViewModel certo; caminhos "ProcessView.X" existem em AssistantProcess. Nome errado aqui só
+    /// apareceria no Windows, como um número parado ou uma linha vazia.
+    /// </summary>
+    [Fact]
+    public void Assistant_progress_view_bindings_exist_on_their_view_models()
+    {
+        var root = Root();
+        var all = AllProperties(DesktopDll(root));
+        var file = Path.Combine(root, "src", "Nexus.Desktop", "Views", "Pages", "Assistant.xaml");
+        var doc = XDocument.Load(file, LoadOptions.SetLineInfo);
+        XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
+        var problems = new List<string>();
+        var checkedCount = 0;
+
+        void Check(XElement scope, string type)
+        {
+            foreach (var e in scope.DescendantsAndSelf())
+            {
+                // Modelo interno com outro DataType: conferido na sua própria vez.
+                if (!ReferenceEquals(e, scope) && e.Name.LocalName == "DataTemplate" && e.Attribute("DataType") is not null) continue;
+                if (e.Ancestors().TakeWhile(a => !ReferenceEquals(a, scope)).Any(a => a.Name.LocalName == "DataTemplate" && a.Attribute("DataType") is not null)) continue;
+                foreach (var a in e.Attributes())
+                {
+                    var m = AnyBindingRegex().Match(a.Value);
+                    if (!m.Success || a.Value.Contains("RelativeSource", StringComparison.Ordinal) || a.Value.Contains("ElementName", StringComparison.Ordinal)) continue;
+                    if (a.Name.LocalName == "DataContext" && ReferenceEquals(e, scope)) continue;
+                    checkedCount++;
+                    var path = m.Groups[1].Value;
+                    if (!all.TryGetValue(type, out var props) || !props.Contains(path))
+                        problems.Add($"{((System.Xml.IXmlLineInfo)e).LineNumber} {e.Name.LocalName}.{a.Name.LocalName} → {type}.{path}");
+                }
+            }
+        }
+
+        var panel = doc.Descendants().Single(e => e.Attribute("DataContext")?.Value == "{Binding ProcessView}");
+        Check(panel, "AssistantProcess");
+        foreach (var t in doc.Descendants().Where(e => e.Name.LocalName == "DataTemplate" && e.Attribute("DataType")?.Value is "{x:Type vm:ProcessFeedRow}" or "{x:Type vm:ProcessSegment}"))
+            Check(t, TypeRegex().Match(t.Attribute("DataType")!.Value).Groups[1].Value);
+        foreach (var a in doc.Descendants().SelectMany(e => e.Attributes()))
+        {
+            var m = ProcessViewPathRegex().Match(a.Value);
+            if (!m.Success) continue;
+            checkedCount++;
+            if (!all["AssistantProcess"].Contains(m.Groups[1].Value)) problems.Add($"ProcessView.{m.Groups[1].Value}");
+        }
+        Assert.True(all["AssistantPage"].Contains("ProcessView"), "AssistantPage.ProcessView sumiu");
+        Assert.True(checkedCount > 30, $"só {checkedCount} ligações conferidas: a tela de progresso mudou de forma?");
+        Assert.True(problems.Count == 0, "Ligações sem propriedade:" + Environment.NewLine + string.Join(Environment.NewLine, problems));
+        Assert.Contains(doc.Descendants(), e => e.Name.LocalName == "DataTemplate" && e.Attribute(x + "Key")?.Value == "As.FeedRow");
+    }
+
+    [GeneratedRegex(@"^\{Binding\s+(?:Path=)?([A-Za-z_]\w*)\s*(?:,|\})")]
+    private static partial Regex AnyBindingRegex();
+
+    [GeneratedRegex(@"^\{Binding\s+(?:Path=)?ProcessView\.([A-Za-z_]\w*)\s*(?:,|\})")]
+    private static partial Regex ProcessViewPathRegex();
+
+    /// <summary>Tipo do ViewModel → todas as propriedades (inclui as herdadas de classes do próprio Desktop e as estáticas).</summary>
+    private static Dictionary<string, HashSet<string>> AllProperties(string dll)
+    {
+        using var pe = new PEReader(File.OpenRead(dll));
+        var md = pe.GetMetadataReader();
+        var own = new Dictionary<string, (HashSet<string> Props, string? Base)>(StringComparer.Ordinal);
+        foreach (var h in md.TypeDefinitions)
+        {
+            var t = md.GetTypeDefinition(h);
+            if (md.GetString(t.Namespace) != "Nexus.Desktop.ViewModels") continue;
+            var props = t.GetProperties().Select(ph => md.GetString(md.GetPropertyDefinition(ph).Name)).ToHashSet(StringComparer.Ordinal);
+            string? baseName = null;
+            if (!t.BaseType.IsNil && t.BaseType.Kind == HandleKind.TypeDefinition)
+                baseName = md.GetString(md.GetTypeDefinition((TypeDefinitionHandle)t.BaseType).Name);
+            own[md.GetString(t.Name)] = (props, baseName);
+        }
+        var result = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        foreach (var (name, info) in own)
+        {
+            var props = new HashSet<string>(info.Props, StringComparer.Ordinal);
+            for (var b = info.Base; b is not null && own.TryGetValue(b, out var bi); b = bi.Base) props.UnionWith(bi.Props);
+            result[name] = props;
+        }
+        return result;
+    }
+
     [GeneratedRegex(@"^\{Binding\s+(?:Path=)?([A-Za-z_]\w*)\s*(?:,|\})")]
     private static partial Regex BindingRegex();
 

@@ -25,6 +25,13 @@ public interface IModuleHost
     /// </summary>
     Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level);
 
+    /// <summary>
+    /// Igual a <see cref="ApplyAsync(string, string, IReadOnlyList{ActionRequest}, BrokerLevel)"/>, avisando os marcos reais
+    /// (confirmado, aplicador iniciando/aviso do Windows, aplicando, relendo) na thread da interface — para a tela de progresso.
+    /// </summary>
+    Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages) =>
+        ApplyAsync(title, confirmation, requests, level);
+
     /// <summary>Reverte uma execução (com confirmação).</summary>
     Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level);
 

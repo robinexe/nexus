@@ -213,6 +213,26 @@ Distintivo redondo padrão (cartões, categorias):
 </Grid>
 ```
 
+### Tela de progresso — `ProcessRing`, `ScanlineOverlay`, `Pulse.IsOn`
+Para uma etapa que trabalha (ler o PC, aplicar). Modelo: a tela de progresso do Assistente (`Views/Pages/Assistant.xaml`,
+`ViewModels/Modules/AssistantProcess.cs`). O andamento vem de `Nexus.Assistant.ProcessTracker` (marcos reais + tempo típico
+dentro de cada parte, mostrado como "estimativa"); o tempo restante, de `EtaEstimator` (suavizado, nunca negativo,
+"calculando…" até ter dados). Os três laços (giro do anel, varredura e pulso) **só rodam com as animações do Windows ligadas**
+e enquanto a etapa trabalha — é um indicador de carregamento, não decoração.
+
+```xml
+<Grid Width="236" Height="236">
+  <c:ProcessRing Value="{Binding Percent}" IsActive="{Binding IsRunning}" Tone="{Binding RingTone}" Thickness="13"/>
+  <c:AnimatedNumber Value="{Binding Percent}" Kind="Percent" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="58"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
+</Grid>
+<c:ScanlineOverlay IsActive="{Binding IsRunning}"/>   <!-- por cima de um painel, não recebe clique -->
+<Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Trace}" c:Pulse.IsOn="{Binding IsRunning}"/>   <!-- "ao vivo" -->
+```
+
+`ProcessRing`: 72 marcas que acendem com o %, arco com brilho, ponto na ponta e um arco ciano girando por dentro; `Tone`
+Warn (aplicando), Info (lendo), Good (concluído), Bad (falhou). Leitor de tela: "Andamento: 45%".
+
 ### Abas — `Tab.Underline`
 `RadioButton` com sublinhado âmbar; ícone + nome com um `ContentTemplate` local (veja `C.TabHeader` em Cleaning.xaml):
 

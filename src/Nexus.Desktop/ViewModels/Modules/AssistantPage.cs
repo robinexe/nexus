@@ -288,6 +288,13 @@ public sealed class AssistantPage : ModulePage
 
     private bool CanAct => _inFlow && !Busy && !_scanning;
 
+    /// <summary>Tela de progresso (lendo, aplicando, montando o relatório): fica na frente da página enquanto a etapa trabalha.</summary>
+    public AssistantProcess ProcessView { get; } = new();
+
+    /// <summary>A barra das 13 etapas para a tela de progresso.</summary>
+    private List<ProcessSegment> Segments() => AssistantSteps.All.Select(s => new ProcessSegment(s.Number, s.ShortName,
+        s.Id == _state.Current ? "current" : _state.StatusOf(s.Id) switch { StepStatus.Done => "done", StepStatus.Skipped => "skipped", _ => "pending" })).ToList();
+
     // ---- apresentação v2 (somente leitura)
 
     /// <summary>Ícone e ilustração da etapa atual (chaves de recurso, para ResourceByKey).</summary>
@@ -402,6 +409,7 @@ public sealed class AssistantPage : ModulePage
     private void Stop()
     {
         _cancel?.Cancel();
+        ProcessView.Close();
         Save();
         InFlow = false;
         RefreshStart();
@@ -449,7 +457,8 @@ public sealed class AssistantPage : ModulePage
         RefreshHeader();
     }
 
-    private async Task ScanAsync(AssistantStepId step, Func<CancellationToken, Task<StepScan>>? custom = null)
+    /// <param name="deep">Variante demorada (procurar no Windows Update/winget): a tela de progresso usa o tempo típico dela.</param>
+    private async Task ScanAsync(AssistantStepId step, Func<CancellationToken, Task<StepScan>>? custom = null, bool deep = false)
     {
         var host = Host;
         var facts = host?.Facts;
@@ -459,30 +468,44 @@ public sealed class AssistantPage : ModulePage
         _cancel = cts;
         Scanning = true;
         ScanStatus = $"Verificando: {AssistantSteps.Info(step).Checks}";
+        var tracker = ProcessView.Begin(step, "Verificando", apply: false, Segments(), canCancel: true);
+        var read = tracker.Add("read", deep ? "Procurando atualizações (pode levar até 1 min)" : "Lendo o PC (só leitura)", ProcessTimeModel.ScanSeconds(step, deep));
+        var plan = tracker.Add("plan", "Conferindo com o aplicador o que mudaria (nada é alterado)", ProcessTimeModel.Planning);
+        tracker.Start(read, ScanStatus);
+        using var closeOnCancel = cts.Token.Register(() => { if (ReferenceEquals(ProcessView.Tracker, tracker)) ProcessView.Close(); });
+        ProcessSummary? summary = null;
         try
         {
             var scan = custom is not null ? await custom(cts.Token) : await ReadAsync(step, facts, cts.Token);
             if (cts.IsCancellationRequested) return;
+            tracker.Finish(read, ProcessTaskStatus.Done, scan.Facts.Count == 1 ? "1 item lido" : $"{scan.Facts.Count} itens lidos");
             var notes = scan.Notes.ToList();
             var changes = scan.Changes.Where(ChangeSelection.IsAllowed).ToList();
             if (changes.Count > 0)
             {
                 ScanStatus = "Conferindo com o aplicador o que de fato mudaria (nada é alterado)…";
+                tracker.Start(plan, ScanStatus);
+                var asked = changes.Count;
                 var (keep, dropped, problem) = await StepPlanners.PlanAsync(changes, q => host.PlanAsync(q, BrokerLevel.User));
                 changes = [.. keep];
                 if (dropped.Count > 0) notes.Insert(0, $"{dropped.Count} item(ns) já estão como recomendado ou não se aplicam a este PC.");
                 if (problem is not null) notes.Insert(0, $"Aplicador indisponível para conferir agora ({problem}); ele confere de novo antes de escrever.");
+                tracker.Finish(plan, problem is null ? ProcessTaskStatus.Done : ProcessTaskStatus.Skipped,
+                    problem is null ? $"{changes.Count} de {asked} mudariam algo" : "aplicador indisponível agora; ele confere antes de escrever");
             }
+            else tracker.Finish(plan, ProcessTaskStatus.Skipped, "nada a conferir");
             _scan = scan with { Changes = changes, Notes = notes };
             foreach (var (key, m) in scan.Metrics)
                 if (!_state.Metrics.TryGetValue(key, out var old) || old.Before is null) _state.SetMetric(key, m.Label, before: m.Value);
             foreach (var u in scan.UserActions) _state.AddUserAction(u);
             ShowScan(_scan, step);
             Save();
+            summary = ProcessSummary.ForScan(scan.Facts.Count, changes.Count, tracker.Elapsed);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException and not OperationCanceledException)
         {
             ShowScan(StepScan.Unavailable(AssistantSteps.Info(step).Title, ex.Message), step);
+            summary = new ProcessSummary("Não consegui ler esta parte agora", ProcessTaskStatus.Failed);
         }
         catch (OperationCanceledException) { ScanStatus = "Verificação cancelada."; }
         finally
@@ -490,6 +513,9 @@ public sealed class AssistantPage : ModulePage
             if (ReferenceEquals(_cancel, cts)) _cancel = null;
             Scanning = false;
         }
+        if (!ReferenceEquals(ProcessView.Tracker, tracker)) return; // outra leitura já tomou a tela
+        if (summary is not null && !cts.IsCancellationRequested) await ProcessView.FinishAsync(summary);
+        else ProcessView.Close();
     }
 
     private Task<StepScan> ReadAsync(AssistantStepId step, SystemFacts facts, CancellationToken ct)
@@ -570,7 +596,7 @@ public sealed class AssistantPage : ModulePage
                 list.Add(new ExtraAction("Abrir Limpeza (todas as regras)", Open(typeof(CleaningPage))));
                 break;
             case AssistantStepId.Programs:
-                list.Add(new ExtraAction("Procurar atualizações", new RelayCommand(() => _ = RunAsync(() => ScanAsync(step, ct => Task.Run(() => AssistantReaders.ProgramsAsync(true, ct), ct))), () => CanAct)));
+                list.Add(new ExtraAction("Procurar atualizações", new RelayCommand(() => _ = RunAsync(() => ScanAsync(step, ct => Task.Run(() => AssistantReaders.ProgramsAsync(true, ct), ct), deep: true)), () => CanAct)));
                 list.Add(new ExtraAction("Revisar na página Programas", new RelayCommand(OpenProgramsWithSelection, () => CanAct), true));
                 break;
             case AssistantStepId.Startup:
@@ -585,7 +611,7 @@ public sealed class AssistantPage : ModulePage
                 list.Add(new ExtraAction("Revisar na página Segurança", Open(typeof(SecurityPage))));
                 break;
             case AssistantStepId.Drivers:
-                list.Add(new ExtraAction("Procurar no Windows Update", new RelayCommand(() => _ = RunAsync(() => ScanAsync(step, ct => Task.Run(() => AssistantReaders.Drivers(_catalog!, true, ct), ct))), () => CanAct), true));
+                list.Add(new ExtraAction("Procurar no Windows Update", new RelayCommand(() => _ = RunAsync(() => ScanAsync(step, ct => Task.Run(() => AssistantReaders.Drivers(_catalog!, true, ct), ct), deep: true)), () => CanAct), true));
                 list.Add(new ExtraAction("Abrir Atualizar drivers", Open(typeof(DriverUpdatesPage))));
                 break;
             case AssistantStepId.Memory:
@@ -609,10 +635,19 @@ public sealed class AssistantPage : ModulePage
     {
         ScanStatus = "Medindo o processador e a memória (≈15 s). Feche jogos e programas pesados para um número justo…";
         Scanning = true;
+        var tracker = ProcessView.Begin(AssistantStepId.MyPc, "Medindo", apply: false, Segments());
+        var task = tracker.Add("measure", "Medindo o processador e a memória", 15);
+        tracker.Start(task, ScanStatus);
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
             _measured = await Task.Run(() => AssistantReaders.Measure(cts.Token));
+            tracker.Finish(task, ProcessTaskStatus.Done, "medido");
+        }
+        catch
+        {
+            ProcessView.Close();
+            throw;
         }
         finally { Scanning = false; }
         await ScanAsync(AssistantStepId.MyPc);
@@ -650,15 +685,24 @@ public sealed class AssistantPage : ModulePage
             return;
         Scanning = true;
         ScanStatus = "Verificação rápida do Defender em andamento…";
+        // O Defender não informa %: a barra anda pelo tempo típico de uma verificação rápida (estimativa) e o texto é a última
+        // linha que o próprio MpCmdRun escreveu.
+        var tracker = ProcessView.Begin(AssistantStepId.Security, "Verificando com o Defender", apply: false, Segments(), canCancel: true);
+        var task = tracker.Add("defender", "Verificação rápida do Microsoft Defender", 180);
+        tracker.Start(task, ScanStatus);
+        var lines = new Progress<string>(line => { if (ReferenceEquals(ProcessView.Tracker, tracker) && !task.IsFinished) tracker.SetText(task, $"Defender: {line}"); });
+        IProgress<string> report = lines;
         try
         {
             using var cts = new CancellationTokenSource();
             _cancel = cts;
-            var result = await Task.Run(() => DefenderScanner.ScanAsync(ScanKind.Quick, null, (line, elapsed) => { }, cts.Token));
+            using var closeOnCancel = cts.Token.Register(() => { if (ReferenceEquals(ProcessView.Tracker, tracker)) ProcessView.Close(); });
+            var result = await Task.Run(() => DefenderScanner.ScanAsync(ScanKind.Quick, null, (line, _) => report.Report(line), cts.Token));
             _state.SetMetric("defender", "Verificação rápida do Defender", after: result.Summary);
             StepResult = $"Defender: {result.Summary}";
+            tracker.Finish(task, ProcessTaskStatus.Done, result.Summary);
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { StepResult = $"Defender: não foi possível concluir ({ex.Message})."; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { StepResult = $"Defender: não foi possível concluir ({ex.Message})."; ProcessView.Close(); }
         finally { Scanning = false; _cancel = null; }
         await ScanAsync(AssistantStepId.Security);
     }
@@ -690,19 +734,69 @@ public sealed class AssistantPage : ModulePage
         var unselected = Changes.Where(c => !c.IsSelected).Select(c => c.Change).ToList();
         if (chosen.Count == 0) { Message = "Nada marcado."; return; }
         var step = _state.Current;
-        var result = await AssistantRunner.ApplyAsync(_state, step, chosen, new HostWriter(Host));
+        var tracker = ProcessView.Begin(step, "Aplicando", apply: true, Segments());
+        StepApplyResult result;
+        ProcessSummary summary;
+        try
+        {
+            var prep = tracker.Add("prep", "Preparando as mudanças escolhidas", 0.5);
+            tracker.Start(prep);
+            var lookup = chosen.Any(c => c.Request.ActionId == StepPlanners.RestorePointAction)
+                ? tracker.Add("restore-lookup", "Procurando um ponto de restauração recente", ProcessTimeModel.RestorePointLookup) : null;
+            ProcessView.Observer!.Planned(ApplyGrouping.Group(step, chosen)); // o feed mostra os lotes desde o começo
+            tracker.Finish(prep, ProcessTaskStatus.Done, chosen.Count == 1 ? "1 escolhida" : $"{chosen.Count} escolhidas");
+            var recent = lookup is null ? null : await RecentRestorePointAsync(tracker, lookup);
+            result = await AssistantRunner.ApplyAsync(_state, step, chosen, new HostWriter(Host), ProcessView.Observer, recent);
+            summary = ProcessSummary.ForApply(result, ProcessView.Observer.MovedBytes, tracker.Elapsed);
+        }
+        catch
+        {
+            ProcessView.Close();
+            throw;
+        }
         AssistantRunner.RecordUnselected(_state, unselected);
         Save();
-        if (result.Applied + result.Already + result.Refused == 0 && result.Canceled > 0)
+        if (result.Applied + result.Already + result.Refused + result.NotNeeded == 0 && result.Canceled > 0)
         {
+            ProcessView.Close();
             StepResult = "Cancelado. Nada foi alterado nesta etapa; dá para escolher de novo ou pular.";
             return;
         }
+        await ProcessView.FinishAsync(summary);
         StepResult = result.Summary;
         _flow.Advance(result.Summary, _scan.Facts);
         Save();
         await EnterStepAsync();
-        StepResult = $"Etapa anterior: {result.Summary}";
+        StepResult = $"Etapa anterior: {summary.Text}" + (result.Refused > 0 ? " (o motivo de cada recusa está no relatório)" : "");
+    }
+
+    /// <summary>
+    /// O ponto de restauração mais novo que dá para ler daqui (só leitura). O Windows cria no máximo um a cada 24 h: se já houver
+    /// um recente, o assistente não pede outro (vale como proteção). Listar costuma exigir administrador; sem lista, quem confere
+    /// é o aplicador (e a recusa "já existe um recente" também conta como protegido).
+    /// </summary>
+    private static async Task<DateTime?> RecentRestorePointAsync(ProcessTracker tracker, ProcessTask lookup)
+    {
+        tracker.Start(lookup, "Lendo os pontos de restauração do Windows (só leitura)…");
+        try
+        {
+            var reading = await Task.Run(Nexus.SystemTools.SystemToolsReader.RestorePoints);
+            if (reading.Points.Items is not { } items)
+            {
+                tracker.Finish(lookup, ProcessTaskStatus.Skipped, "não deu para ler daqui; o aplicador confere");
+                return null;
+            }
+            var newest = items.Where(p => p.Created is not null).MaxBy(p => p.Created)?.Created;
+            tracker.Finish(lookup, ProcessTaskStatus.Done, newest is { } n
+                ? (RestorePointRule.IsRecent(n, DateTime.Now) ? $"achei um de {n:dd/MM HH:mm}" : $"o mais novo é de {n:dd/MM HH:mm} (mais de 24 h)")
+                : "nenhum ponto no Windows");
+            return newest;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            tracker.Finish(lookup, ProcessTaskStatus.Skipped, "não deu para ler daqui; o aplicador confere");
+            return null;
+        }
     }
 
     private async Task ContinueAsync()
@@ -737,6 +831,24 @@ public sealed class AssistantPage : ModulePage
         if (facts is null || _catalog is null) return;
         Scanning = true;
         ScanStatus = "Lendo de novo os números para o \"depois\" e montando o relatório…";
+        var tracker = ProcessView.Begin(AssistantStepId.Report, "Montando o relatório", apply: false, Segments());
+        var parts = new[]
+        {
+            tracker.Add("space", "Espaço livre no disco", 2),
+            tracker.Add("cleaning", "O que ainda dá para limpar", ProcessTimeModel.ScanSeconds(AssistantStepId.Cleaning)),
+            tracker.Add("startup", "Inicialização", ProcessTimeModel.ScanSeconds(AssistantStepId.Startup)),
+            tracker.Add("privacy", "Privacidade", ProcessTimeModel.ScanSeconds(AssistantStepId.Privacy)),
+            tracker.Add("security", "Segurança", ProcessTimeModel.ScanSeconds(AssistantStepId.Security)),
+        };
+        var save = tracker.Add("save", "Gravando o relatório", 1.5);
+        // Cada leitura termina de verdade antes da próxima: o feed acompanha (Progress volta para a thread da interface).
+        var readProgress = new Progress<int>(i =>
+        {
+            if (i > 0) tracker.Finish(parts[i - 1], ProcessTaskStatus.Done, "lido de novo");
+            if (i < parts.Length) tracker.Start(parts[i], $"Lendo de novo: {parts[i].Title.ToLowerInvariant()}…");
+        });
+        IProgress<int> reread = readProgress;
+        tracker.Start(parts[0], "Lendo de novo os números para o \"depois\"…");
         try
         {
             var catalog = _catalog;
@@ -744,16 +856,20 @@ public sealed class AssistantPage : ModulePage
             var build = facts.WindowsBuild ?? 0;
             var after = await Task.Run(async () =>
             {
-                var scans = new List<StepScan>
-                {
-                    AssistantReaders.Welcome(catalog, facts.SystemDrive, 0),
-                    (await AssistantReaders.CleaningAsync(catalog, CancellationToken.None)).Scan,
-                    AssistantReaders.Startup(catalog, StartupToggle, dir),
-                    AssistantReaders.Privacy(catalog, dir, build),
-                    AssistantReaders.Security(),
-                };
+                var scans = new List<StepScan> { AssistantReaders.Welcome(catalog, facts.SystemDrive, 0) };
+                reread.Report(1);
+                scans.Add((await AssistantReaders.CleaningAsync(catalog, CancellationToken.None)).Scan);
+                reread.Report(2);
+                scans.Add(AssistantReaders.Startup(catalog, StartupToggle, dir));
+                reread.Report(3);
+                scans.Add(AssistantReaders.Privacy(catalog, dir, build));
+                reread.Report(4);
+                scans.Add(AssistantReaders.Security());
+                reread.Report(5);
                 return scans.SelectMany(s => s.Metrics).ToList();
             });
+            await Task.Yield(); // deixa os avisos de andamento chegarem antes de seguir
+            tracker.Start(save, "Gravando o relatório (HTML) na sua pasta…");
             foreach (var (key, m) in after)
                 if (_state.Metrics.ContainsKey(key)) _state.SetMetric(key, m.Label, after: m.Value);
             if (_state.Metrics.TryGetValue("boot", out var boot)) _state.Metrics["boot"] = boot with { After = null, Note = "O \"depois\" aparece no próximo boot (página Inicialização)." };
@@ -763,9 +879,14 @@ public sealed class AssistantPage : ModulePage
             _state.ReportPath = path;
             _report = report;
             Save();
+            tracker.Finish(save, ProcessTaskStatus.Done, "pronto");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) { Message = $"Não consegui gravar o relatório: {ex.Message}"; }
         finally { Scanning = false; }
+        if (ReferenceEquals(ProcessView.Tracker, tracker))
+            await ProcessView.FinishAsync(_report is null
+                ? new ProcessSummary("Não consegui gravar o relatório", ProcessTaskStatus.Failed)
+                : new ProcessSummary($"{_report.AppliedCount} {(_report.AppliedCount == 1 ? "mudança aplicada" : "mudanças aplicadas")} • {ProcessText.Duration(tracker.Elapsed)}", ProcessTaskStatus.Done));
         Facts = [];
         Changes.Clear();
         Review = [];
@@ -835,6 +956,37 @@ public sealed class AssistantPage : ModulePage
         RefreshHeader();
     }
 
+    // ------------------------------------------------------------------ demonstração para o autoteste da interface
+
+    /// <summary>
+    /// Autoteste da interface (--selftest-ui): mostra a tela de progresso com dados de DEMONSTRAÇÃO (rotulados assim) para
+    /// fotografar. Nada é lido, planejado nem aplicado; nenhum pedido vai ao aplicador.
+    /// </summary>
+    internal void ShowProcessDemo()
+    {
+        var segments = AssistantSteps.All.Select(s => new ProcessSegment(s.Number, s.ShortName, s.Number < 3 ? "done" : s.Number == 3 ? "current" : "pending")).ToList();
+        var t = ProcessView.Begin(AssistantStepId.Cleaning, "Aplicando (demonstração do autoteste)", apply: true, segments);
+        var prep = t.Add("prep", "Preparando as mudanças escolhidas", 0.5);
+        var user = t.Add("batch:User:1", "Na sua conta: 4 mudanças", 12);
+        var admin = t.Add("batch:Admin:2", "Mudanças de sistema: 2 mudanças", 40);
+        t.SetItems(user, [new("Cache do Chrome", ProcessTaskStatus.Pending), new("Cache do Edge", ProcessTaskStatus.Pending),
+            new("Temporários do Windows", ProcessTaskStatus.Pending), new("Miniaturas do Explorador", ProcessTaskStatus.Pending)]);
+        t.SetItems(admin, [new("Logs antigos do Windows Update", ProcessTaskStatus.Pending), new("Cache da Otimização de Entrega", ProcessTaskStatus.Pending)]);
+        t.Start(prep);
+        ProcessView.AdvanceClock(TimeSpan.FromSeconds(0.6));
+        t.Finish(prep, ProcessTaskStatus.Done, "6 escolhidas");
+        t.Start(user, "Movendo para a quarentena: Cache do Chrome…", estimate: true);
+        ProcessView.AdvanceClock(TimeSpan.FromSeconds(9));
+        t.SetItems(user, [new("Cache do Chrome", ProcessTaskStatus.Done, "na quarentena"), new("Cache do Edge", ProcessTaskStatus.Done, "na quarentena"),
+            new("Temporários do Windows", ProcessTaskStatus.Done, "na quarentena"), new("Miniaturas do Explorador", ProcessTaskStatus.Skipped, "já estava assim")]);
+        t.Finish(user, ProcessTaskStatus.Done, "3 feitas · 1 não precisou · 9 s");
+        t.Start(admin, ProcessTimeModel.BatchText(new ApplyBatch(AssistantStepId.Cleaning, BrokerLevel.Admin, 2, 2, "", "", []), 0), estimate: true);
+        ProcessView.AdvanceClock(TimeSpan.FromSeconds(12));
+        ProcessView.Tick();
+    }
+
+    internal void HideProcessDemo() => ProcessView.Close();
+
     // ------------------------------------------------------------------ leitura do diário (somente leitura)
 
     /// <summary>Alterações que ficaram pela metade nos dois diários (mesma leitura da janela principal, sem travar nem escrever).</summary>
@@ -858,6 +1010,9 @@ public sealed class AssistantPage : ModulePage
     {
         public async Task<WriteOutcome?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level) =>
             await host.ApplyAsync(title, confirmation, requests, level) is { } r ? WriteOutcome.From(r) : null;
+
+        public async Task<WriteOutcome?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages) =>
+            await host.ApplyAsync(title, confirmation, requests, level, stages) is { } r ? WriteOutcome.From(r) : null;
 
         public async Task<WriteOutcome?> RevertAsync(Guid runId, BrokerLevel level) =>
             await host.RevertAsync(runId, level) is { } r ? WriteOutcome.From(r) : null;

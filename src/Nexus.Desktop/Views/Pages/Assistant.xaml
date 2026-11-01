@@ -108,6 +108,47 @@
           </DockPanel>
         </Border>
       </DataTemplate>
+
+      <!-- Linha do feed da tela de progresso: ícone de estado (pulsa quando roda), título e o detalhe (estimativa em itálico). -->
+      <DataTemplate x:Key="As.FeedRow" DataType="{x:Type vm:ProcessFeedRow}">
+        <Grid x:Name="Row" Margin="0,5" AutomationProperties.Name="{Binding Title}" AutomationProperties.HelpText="{Binding StatusText}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <Grid x:Name="Badge" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Top" c:Pulse.IsOn="{Binding IsRunning}">
+            <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}" Stroke="{Binding Tone, Converter={StaticResource ToneBrush}}" StrokeThickness="1"/>
+            <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="13" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
+          </Grid>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <TextBlock x:Name="Title" Text="{Binding Title}" Style="{StaticResource Text.Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Title}"/>
+            <TextBlock x:Name="Detail" Text="{Binding Detail}" Style="{StaticResource Text.Small}" TextTrimming="CharacterEllipsis" MaxHeight="34" ToolTip="{Binding Detail}"
+                       Visibility="{Binding HasDetail, Converter={StaticResource BoolToVis}}"/>
+          </StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding StatusText}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Margin="12,2,0,0"
+                     VerticalAlignment="Top" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"/>
+        </Grid>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding IsChild}" Value="True">
+            <Setter TargetName="Row" Property="Margin" Value="36,2,0,2"/>
+            <Setter TargetName="Badge" Property="Width" Value="18"/>
+            <Setter TargetName="Badge" Property="Height" Value="18"/>
+            <Setter TargetName="Title" Property="FontSize" Value="13"/>
+            <Setter TargetName="Title" Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding IsRunning}" Value="True">
+            <Setter TargetName="Title" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding IsPending}" Value="True">
+            <Setter TargetName="Title" Property="Foreground" Value="{StaticResource Brush.TextDim}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding IsEstimate}" Value="True">
+            <Setter TargetName="Detail" Property="FontStyle" Value="Italic"/>
+            <Setter TargetName="Detail" Property="Foreground" Value="{StaticResource Brush.Signal}"/>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
     </DataTemplate.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
@@ -121,6 +162,178 @@
             <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
           </DockPanel>
         </Border>
+
+        <!-- ================================================================ TELA DE PROGRESSO (enquanto a etapa trabalha)
+             Painel de telemetria: anel com %, tempo restante suavizado, decorrido, o que acontece agora (com selo "estimativa"
+             quando é pelo tempo típico), barra das 13 etapas e o feed de tarefas com estado. Laços (varredura, giro, pulso) só
+             com as animações do Windows ligadas. -->
+        <Border Background="{StaticResource Brush.Bg}" BorderBrush="{StaticResource Brush.TraceLine}" BorderThickness="1"
+                CornerRadius="{StaticResource Radius.Panel}" ClipToBounds="True" Margin="0,0,0,18" SnapsToDevicePixels="True"
+                Visibility="{Binding ProcessView.IsVisible, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding ProcessView.IsVisible}"
+                AutomationProperties.Name="Andamento da etapa">
+          <Grid>
+            <Rectangle Fill="{StaticResource Brush.Graticule}" Opacity="0.35"/>
+            <Rectangle>
+              <Rectangle.Fill>
+                <RadialGradientBrush Center="0.22,0.38" GradientOrigin="0.22,0.38" RadiusX="0.55" RadiusY="0.9">
+                  <GradientStop Color="#22FFB547" Offset="0"/>
+                  <GradientStop Color="#00FFB547" Offset="1"/>
+                </RadialGradientBrush>
+              </Rectangle.Fill>
+            </Rectangle>
+            <c:ScanlineOverlay IsActive="{Binding ProcessView.IsRunning}"/>
+            <!-- Cantoneiras de mira (HUD) -->
+            <Path Data="M0,16 L0,0 L16,0" Stroke="{StaticResource Brush.Trace}" StrokeThickness="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+            <Path Data="M0,0 L16,0 L16,16" Stroke="{StaticResource Brush.Trace}" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"/>
+            <Path Data="M0,0 L0,16 L16,16" Stroke="{StaticResource Brush.Signal}" StrokeThickness="2" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10" Opacity="0.7"/>
+            <Path Data="M16,0 L16,16 L0,16" Stroke="{StaticResource Brush.Signal}" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Opacity="0.7"/>
+
+            <StackPanel Margin="30,24,30,22" DataContext="{Binding ProcessView}">
+              <!-- Cabeçalho: modo · etapa, título e o selo "ao vivo" -->
+              <DockPanel Margin="0,0,0,18">
+                <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="{StaticResource Radius.Chip}" Padding="10,4"
+                        Background="{Binding RingTone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}">
+                  <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="8" Height="8" Fill="{Binding RingTone, Converter={StaticResource ToneBrush}}" VerticalAlignment="Center" Margin="0,0,7,0"
+                             c:Pulse.IsOn="{Binding IsRunning}"/>
+                    <TextBlock Text="ao vivo" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
+                               Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="concluído" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
+                               Visibility="{Binding IsFinished, Converter={StaticResource BoolToVis}}"/>
+                  </StackPanel>
+                </Border>
+                <Grid Width="44" Height="44" Margin="0,0,14,0" VerticalAlignment="Top">
+                  <Ellipse Fill="{StaticResource Brush.TraceSoft}" Stroke="{StaticResource Brush.TraceLine}" StrokeThickness="1"/>
+                  <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+                </Grid>
+                <StackPanel>
+                  <TextBlock Style="{StaticResource Text.MetricLabel}" Foreground="{StaticResource Brush.Signal}" FontFamily="{StaticResource Font.Numbers}" FontSize="14">
+                    <Run Text="{Binding Mode, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Position, Mode=OneWay}"/>
+                  </TextBlock>
+                  <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                </StackPanel>
+              </DockPanel>
+
+              <!-- Anel + telemetria -->
+              <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Width="236" Height="236" VerticalAlignment="Top">
+                  <c:ProcessRing Value="{Binding Percent}" IsActive="{Binding IsRunning}" Tone="{Binding RingTone}" Thickness="13"/>
+                  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <c:AnimatedNumber Value="{Binding Percent}" Kind="Percent" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="58"
+                                      Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center" AutomationProperties.LiveSetting="Off"/>
+                    <TextBlock Text="concluído" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" Margin="0,-6,0,0"/>
+                  </StackPanel>
+                </Grid>
+
+                <StackPanel Grid.Column="1" Margin="34,6,0,0">
+                  <UniformGrid Columns="2" Margin="0,0,0,16">
+                    <StackPanel>
+                      <TextBlock Text="Tempo restante" Style="{StaticResource Text.MetricLabel}"/>
+                      <TextBlock Text="{Binding RemainingText}" FontFamily="{StaticResource Font.Numbers}" FontSize="30" Foreground="{StaticResource Brush.Trace}"
+                                 TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" AutomationProperties.Name="Tempo restante"/>
+                    </StackPanel>
+                    <StackPanel>
+                      <TextBlock Text="Decorrido" Style="{StaticResource Text.MetricLabel}"/>
+                      <TextBlock Text="{Binding ElapsedText}" FontFamily="{StaticResource Font.Numbers}" FontSize="30" Foreground="{StaticResource Brush.Signal}"
+                                 TextWrapping="NoWrap" Margin="0,2,0,0" AutomationProperties.Name="Tempo decorrido"/>
+                    </StackPanel>
+                  </UniformGrid>
+
+                  <Border Background="{StaticResource Brush.SurfaceLow}" BorderThickness="3,1,1,1"
+                          CornerRadius="{StaticResource Radius.Control}" Padding="14,10">
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="{StaticResource Brush.Trace}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsFinished}" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource Brush.Good}"/>
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding IsWaiting}" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource Brush.Signal}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                    <StackPanel>
+                      <DockPanel>
+                        <Border DockPanel.Dock="Right" Background="{StaticResource Brush.SignalSoft}" CornerRadius="{StaticResource Radius.Chip}" Padding="8,2" Margin="10,0,0,0"
+                                VerticalAlignment="Top" Visibility="{Binding CurrentIsEstimate, Converter={StaticResource BoolToVis}}"
+                                ToolTip="O aplicador responde no fim de cada grupo; o item de agora é estimado pelo tempo típico de cada parte.">
+                          <TextBlock Text="estimativa" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" FontSize="11.5"/>
+                        </Border>
+                        <TextBlock Text="Agora" Style="{StaticResource Text.MetricLabel}"/>
+                      </DockPanel>
+                      <TextBlock Text="{Binding CurrentText}" Style="{StaticResource Text.Body}" FontSize="15" Margin="0,4,0,0" MaxHeight="42" TextTrimming="CharacterEllipsis"
+                                 ToolTip="{Binding CurrentText}" AutomationProperties.LiveSetting="Polite"/>
+                      <TextBlock Text="{Binding SummaryText}" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.Good}" Margin="0,6,0,0"
+                                 TextWrapping="Wrap" Visibility="{Binding IsFinished, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding IsFinished}"
+                                 AutomationProperties.LiveSetting="Assertive"/>
+                      <TextBlock Text="Responda à janela de confirmação para continuar. O tempo restante volta a contar depois." Style="{StaticResource Text.Small}"
+                                 Foreground="{StaticResource Brush.Signal}" Margin="0,6,0,0" Visibility="{Binding IsWaiting, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                  </Border>
+
+                  <!-- Barra das 13 etapas -->
+                  <DockPanel Margin="0,18,0,6">
+                    <TextBlock DockPanel.Dock="Right" Text="{Binding Position}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}"/>
+                    <TextBlock Text="As 13 etapas" Style="{StaticResource Text.MetricLabel}"/>
+                  </DockPanel>
+                  <ItemsControl ItemsSource="{Binding Segments}" Focusable="False" Margin="-2,0">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <UniformGrid Rows="1"/>
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="{x:Type vm:ProcessSegment}">
+                        <Border x:Name="Seg" Height="9" CornerRadius="2" Margin="2,0" Background="{StaticResource Brush.SurfaceHi}" ToolTip="{Binding Tip}"
+                                AutomationProperties.Name="{Binding Tip}" c:Pulse.IsOn="{Binding IsCurrent}"/>
+                        <DataTemplate.Triggers>
+                          <DataTrigger Binding="{Binding IsDone}" Value="True">
+                            <Setter TargetName="Seg" Property="Background" Value="{StaticResource Brush.Good}"/>
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding IsSkipped}" Value="True">
+                            <Setter TargetName="Seg" Property="Background" Value="{StaticResource Brush.Line}"/>
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                            <Setter TargetName="Seg" Property="Background" Value="{StaticResource Brush.Trace}"/>
+                          </DataTrigger>
+                        </DataTemplate.Triggers>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Grid>
+
+              <!-- Feed: cada tarefa com estado; resultados do aplicador recuados embaixo do lote -->
+              <DockPanel Margin="0,0,0,8">
+                <TextBlock DockPanel.Dock="Right" Text="atualiza sozinho" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
+                <TextBlock Text="O que está acontecendo" Style="{StaticResource Text.H2}"/>
+              </DockPanel>
+              <Border Style="{StaticResource Panel.Inset}" Padding="14,8">
+                <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource As.FeedRow}" Focusable="False"/>
+              </Border>
+
+              <!-- Cancelar só onde é de verdade (leitura); aplicando, diz por que não. -->
+              <DockPanel Margin="0,14,0,0">
+                <Button DockPanel.Dock="Right" Content="Cancelar leitura" Style="{StaticResource Button.Ghost}"
+                        Command="{Binding DataContext.CancelScanCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                        Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}"/>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding IsApply, Converter={StaticResource BoolToVis}}">
+                  <c:Icon Data="{StaticResource Icon.Lock}" Size="14" Foreground="{StaticResource Brush.TextDim}" Margin="0,1,8,0" VerticalAlignment="Top"/>
+                  <TextBlock Text="{x:Static vm:AssistantProcess.CancelNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" MaxWidth="760"/>
+                </StackPanel>
+              </DockPanel>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <!-- Conteúdo normal da página (some enquanto a tela de progresso está na frente e volta com uma revelação curta) -->
+        <StackPanel Visibility="{Binding ProcessView.IsHidden, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding ProcessView.IsHidden}">
 
         <!-- ================================================================ TELA INICIAL -->
         <StackPanel Visibility="{Binding ShowStart, Converter={StaticResource BoolToVis}}">
@@ -399,6 +612,7 @@
                       Visibility="{Binding CanUndoAll, Converter={StaticResource BoolToVis}}"/>
             </WrapPanel>
           </Border>
+        </StackPanel>
         </StackPanel>
       </StackPanel>
     </ScrollViewer>
