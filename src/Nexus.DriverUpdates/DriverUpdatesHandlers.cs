@@ -56,7 +56,7 @@ public static class DriverUpdatesHandlers
 /// <summary>
 /// Exceção controlada (brief, regra 2): abrir o que o usuário VÊ e controla. Só destinos fixos: páginas oficiais dos fabricantes,
 /// links de detalhes da Microsoft (https e domínio conferido), as Configurações do Windows Update e os apps oficiais da
-/// placa de vídeo em caminhos fixos. A página pede confirmação (Host.Confirm) antes. Nada é baixado.
+/// placa de vídeo em caminhos fixos. A página pede confirmação (Host.Confirm) antes. Estes destinos só são abertos (o driver de vídeo baixado pelo NEXUS fica em Vendor/).
 /// </summary>
 [SupportedOSPlatform("windows")]
 public static class DriverVendorTools

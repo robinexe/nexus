@@ -161,7 +161,7 @@ public sealed class GpuDriverCard : ObservableObject
 /// <summary>
 /// Atualizar drivers: procura no Windows Update (leitura, direto da biblioteca, com tempo limite e cancelamento), mostra o que
 /// cada oferta troca e instala as escolhidas SÓ pelo aplicador (Host.ApplyAsync, administrador, ponto de restauração automático).
-/// Placa de vídeo: versão e idade do driver, com a página oficial do fabricante (só abre, depois de confirmar).
+/// Placa de vídeo: versão e idade do driver; NVIDIA/AMD: procura, baixa e instala o driver do fabricante (instalação só pelo aplicador).
 /// </summary>
 public sealed class DriverUpdatesPage : ModulePage
 {
