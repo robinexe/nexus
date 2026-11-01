@@ -1,7 +1,7 @@
 {
   "catalogVersion": "1.0.0",
   "schema": "nexus.catalog/1",
-  "note": "Módulo Atualizar drivers (Nexus.DriverUpdates). Só fontes oficiais: Windows Update (Windows Update Agent) e páginas/apps oficiais dos fabricantes de vídeo (só abertos, nunca baixados pelo NEXUS). Lote: a mesma ação várias vezes no pedido, uma por atualização (UpdateID + revisão validados por regex). Ver docs/modules/driverupdates.md.",
+  "note": "Módulo Atualizar drivers (Nexus.DriverUpdates). Só fontes oficiais: Windows Update (Windows Update Agent) e os servidores oficiais da NVIDIA e da AMD (driver de vídeo baixado pelo NEXUS, com assinatura digital do fabricante conferida antes de executar). Lote: a mesma ação várias vezes no pedido, uma por atualização (UpdateID + revisão validados por regex). Ver docs/modules/driverupdates.md.",
   "actions": [
     {
       "id": "driverupdates.install",
@@ -9,20 +9,37 @@
       "title": "Instalar atualização de driver do Windows Update (com backup do driver atual)",
       "classification": "SupportedDocumented",
       "handlerKind": "DriverUpdateInstall",
-      "target": { "updateId": "{updateId}", "revision": "{updateRevision}" },
+      "target": {
+        "updateId": "{updateId}",
+        "revision": "{updateRevision}"
+      },
       "userParameters": {
         "updateId": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
         "updateRevision": "[0-9]{1,6}"
       },
       "desiredType": "DriverUpdate",
       "desiredValue": "instalada",
-      "compatibility": { "minBuild": 17763 },
+      "compatibility": {
+        "minBuild": 17763
+      },
       "mechanism": "Baixa e instala, pelo próprio Windows Update (API oficial do Windows Update Agent: UpdateDownloader e UpdateInstaller), uma atualização de driver que o Windows oferece para este PC — a mesma que aparece em Configurações > Windows Update (inclusive em 'Atualizações opcionais'). Antes, o NEXUS busca de novo e confere que o ID é de um driver e ainda está disponível, e exporta o driver atual do dispositivo ('pnputil /export-driver') para a pasta de dados do aplicador. Corrige falhas e compatibilidade; em geral não muda o desempenho (exceção: drivers de vídeo para jogos novos).",
       "evidence": [
-        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/wua_sdk/searching--downloading--and-installing-updates" },
-        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/wuapi/nn-wuapi-iwindowsdriverupdate" },
-        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows-hardware/drivers/devtest/pnputil-command-syntax" },
-        { "level": "VendorDocumented", "source": "https://learn.microsoft.com/windows/win32/api/newdev/nf-newdev-updatedriverforplugandplaydevicesw" }
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/wua_sdk/searching--downloading--and-installing-updates"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/wuapi/nn-wuapi-iwindowsdriverupdate"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows-hardware/drivers/devtest/pnputil-command-syntax"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/newdev/nf-newdev-updatedriverforplugandplaydevicesw"
+        }
       ],
       "risks": "Baixo a moderado: um driver novo pode trazer um defeito que o antigo não tinha (principalmente vídeo, áudio e rede). O NEXUS cria um ponto de restauração antes e guarda o driver atual para Desfazer. Quando o dispositivo estava sem driver, não há driver anterior para voltar (a confirmação avisa). Alguns drivers só valem depois de reiniciar.",
       "privileges": "Admin",
@@ -30,6 +47,58 @@
       "reboot": "Recommended",
       "verification": "Releitura da versão do driver do dispositivo (SetupAPI / chave do driver): precisa ser a versão oferecida, ou o Windows Update ter pedido um reinício que ainda não aconteceu.",
       "revert": "Reinstala o driver anterior a partir do backup ('pnputil /add-driver' e instalação forçada no mesmo ID de hardware, a API do 'Atualizar driver' do Gerenciador de Dispositivos) ou do INF do próprio Windows. Sem backup possível, o Desfazer diz isso e indica a Restauração do Sistema."
+    },
+    {
+      "id": "driverupdates.gpu.install",
+      "version": 1,
+      "title": "Instalar o driver de vídeo baixado do site oficial (NVIDIA ou AMD), com backup do driver atual",
+      "classification": "SupportedDocumented",
+      "handlerKind": "DriverUpdatesVendorInstall",
+      "target": {
+        "vendor": "{gpuVendor}",
+        "version": "{gpuVersion}",
+        "sha256": "{installerSha256}",
+        "scope": "User"
+      },
+      "userParameters": {
+        "gpuVendor": "nvidia|amd",
+        "gpuVersion": "[0-9]{2,3}\\.[0-9]{1,2}(?:\\.[0-9]{1,2})?",
+        "installerSha256": "[0-9a-f]{64}"
+      },
+      "desiredType": "GpuDriver",
+      "desiredValue": "instalada",
+      "compatibility": {
+        "minBuild": 17763
+      },
+      "mechanism": "Instala o driver de vídeo que o NEXUS baixou do servidor oficial do fabricante (NVIDIA: us.download.nvidia.com, versão achada pela consulta oficial de drivers da NVIDIA; AMD: drivers.amd.com, versão da página oficial de drivers da AMD). O pedido leva só o fabricante, a versão e o SHA-256 do arquivo conferido — nunca um caminho. No aplicador elevado: copia o instalador da pasta de downloads do NEXUS (%LocalAppData%\\NEXUS\\drivers) para a pasta de dados do aplicador (só administradores alteram), confere que o SHA-256 da cópia é o mesmo, confere a assinatura digital da cópia (WinVerifyTrust: cadeia válida e assinante 'NVIDIA Corporation' ou 'Advanced Micro Devices'), exporta o driver atual ('pnputil /export-driver') e só então roda o instalador do fabricante em modo silencioso (NVIDIA: -s -noreboot -noeula; AMD: -INSTALL), esperando até 15 min (NVIDIA) ou 20 min (AMD). Corrige falhas e traz perfis para jogos novos; não aumenta FPS por si só.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/windows.html (instalação silenciosa: setup.exe -s; código 0 = sucesso, 1 = sucesso com reinício)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://drivers.amd.com/relnotes/command-line-installation.pdf (Setup.exe -INSTALL: instalação sem janelas; ResultCode 0 = sucesso)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/wintrust/nf-wintrust-winverifytrust"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows-hardware/drivers/devtest/pnputil-command-syntax"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/newdev/nf-newdev-updatedriverforplugandplaydevicesw"
+        }
+      ],
+      "risks": "Moderado: a tela pisca e pode ficar preta por alguns segundos durante a troca; um driver novo pode trazer um defeito que o antigo não tinha. Em notebook, o fabricante (ex.: Acer) às vezes personaliza o driver; o driver genérico da NVIDIA é suportado em notebooks com Optimus, e o Adrenalin suporta os Ryzen móveis, mas a AMD recomenda o driver do fabricante do notebook se algo falhar. O NEXUS cria um ponto de restauração antes e guarda o driver atual para Desfazer. Pode pedir reinício.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura da versão do driver da placa (SetupAPI / chave do driver): NVIDIA pela numeração do Windows (30.0.15.1274 = 512.74); AMD pela versão do Adrenalin gravada pelo driver ou pela troca do driver depois da instalação; ou o instalador ter pedido um reinício que ainda não aconteceu.",
+      "revert": "Reinstala o driver anterior a partir do backup ('pnputil /add-driver' e instalação forçada no mesmo ID de hardware, a API do 'Atualizar driver' do Gerenciador de Dispositivos). Os programas que vêm com o driver (Painel de Controle da NVIDIA, AMD Software) podem ficar na versão nova; o driver da placa volta. Sem backup possível, o Desfazer diz isso e indica a Restauração do Sistema."
     }
   ],
   "rejected": [
@@ -40,10 +109,10 @@
       "source": "https://learn.microsoft.com/windows-hardware/drivers/install/driver-signing"
     },
     {
-      "id": "driverupdates.auto-gpu-download",
+      "id": "driverupdates.gpu-unsigned-or-unofficial",
       "classification": "Rejected",
-      "reason": "Baixar e instalar sozinho o driver de vídeo do site do fabricante: o NEXUS só abre a página oficial (ou o app oficial já instalado). O usuário escolhe a versão.",
-      "source": "https://www.nvidia.com/pt-br/drivers/"
+      "reason": "Instalar driver de vídeo de qualquer outro lugar, ou sem a assinatura digital do fabricante conferida no aplicador elevado: o NEXUS só baixa dos servidores oficiais (lista fixa de hosts, inclusive nos redirecionamentos) e só executa o instalador com assinatura válida da NVIDIA ou da AMD e o mesmo SHA-256 que você confirmou.",
+      "source": "https://learn.microsoft.com/windows-hardware/drivers/install/driver-signing"
     }
   ]
 }

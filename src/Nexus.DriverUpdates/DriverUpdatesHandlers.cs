@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using Nexus.Core;
+using Nexus.DriverUpdates.Vendor;
 using Nexus.DriverUpdates.Windows;
 using Nexus.Lab.Gpu;
 using Nexus.WindowsActions;
@@ -14,21 +15,30 @@ public static class DriverUpdatesHandlers
     {
         ArgumentNullException.ThrowIfNull(environment);
         if (OperatingSystem.IsWindows())
-            return Build(environment, new WuaAgent(), new SetupApiDeviceInventory(), new WindowsDriverPackageTool(), new WindowsBootClock());
+            return Build(environment, new WuaAgent(), new SetupApiDeviceInventory(), new WindowsDriverPackageTool(), new WindowsBootClock(),
+                new WindowsAuthenticodeVerifier(), new WindowsInstallerRunner(), new WindowsUserProfileLocator(environment.OtherAccount));
         var none = new Unsupported();
-        return Build(environment, none, none, none, none);
+        return Build(environment, none, none, none, none, none, none, none);
     }
 
     /// <summary>Monta os handlers com backends injetados (testes usam backends falsos).</summary>
-    public static IEnumerable<IActionHandler> Build(HandlerEnvironment environment, IWindowsUpdateAgent wua, IDeviceInventory devices, IDriverPackageTool tool, IBootClock clock)
+    public static IEnumerable<IActionHandler> Build(HandlerEnvironment environment, IWindowsUpdateAgent wua, IDeviceInventory devices, IDriverPackageTool tool, IBootClock clock,
+        ISignatureVerifier verifier, IInstallerRunner runner, IUserProfileLocator profiles)
     {
         ArgumentNullException.ThrowIfNull(environment);
-        return [new DriverUpdateInstallHandler(wua, devices, tool, clock, environment.DataDirectory)];
+        return
+        [
+            new DriverUpdateInstallHandler(wua, devices, tool, clock, environment.DataDirectory),
+            new VendorDriverInstallHandler(devices, tool, clock, verifier, runner, profiles, environment.DataDirectory),
+        ];
     }
 
     /// <summary>Fora do Windows: o handler existe (o catálogo é validado), mas qualquer leitura/escrita recusa.</summary>
-    private sealed class Unsupported : IWindowsUpdateAgent, IDeviceInventory, IDriverPackageTool, IBootClock
+    private sealed class Unsupported : IWindowsUpdateAgent, IDeviceInventory, IDriverPackageTool, IBootClock, ISignatureVerifier, IInstallerRunner, IUserProfileLocator
     {
+        public SignatureCheck Verify(string path) => new(false, null, "só no Windows");
+        public InstallerRunResult Run(string executable, IReadOnlyList<string> arguments, TimeSpan timeout) => throw No();
+        public string? UserProfile(string? userSid) => null;
         private static PlatformNotSupportedException No() => new("Atualização de drivers só funciona no Windows.");
         public WuSearchOutcome SearchDrivers(TimeSpan timeout, CancellationToken cancel) => WuSearchOutcome.Fail(WuErrorKind.Unsupported, "Windows Update só no Windows.");
         public WuInstallResult DownloadAndInstall(string updateId, int revision, TimeSpan timeout) => throw No();
@@ -46,7 +56,7 @@ public static class DriverUpdatesHandlers
 /// <summary>
 /// Exceção controlada (brief, regra 2): abrir o que o usuário VÊ e controla. Só destinos fixos: páginas oficiais dos fabricantes,
 /// links de detalhes da Microsoft (https e domínio conferido), as Configurações do Windows Update e os apps oficiais da
-/// placa de vídeo em caminhos fixos. A página pede confirmação (Host.Confirm) antes. Nada é baixado.
+/// placa de vídeo em caminhos fixos. A página pede confirmação (Host.Confirm) antes. Estes destinos só são abertos (o driver de vídeo baixado pelo NEXUS fica em Vendor/).
 /// </summary>
 [SupportedOSPlatform("windows")]
 public static class DriverVendorTools

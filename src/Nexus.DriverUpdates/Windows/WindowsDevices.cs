@@ -85,7 +85,7 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
                 var instance = new string(idBuf);
                 var pData = &data;
                 var driver = First(set, pData, buf, SpdrpDriver);
-                string? version = null, inf = null, provider = null, matching = null;
+                string? version = null, inf = null, provider = null, matching = null, package = null;
                 DateOnly? date = null;
                 if (driver is not null && DriverKey().IsMatch(driver))
                 {
@@ -97,11 +97,13 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
                         inf = key.GetValue("InfPath") as string;
                         provider = key.GetValue("ProviderName") as string;
                         matching = key.GetValue("MatchingDeviceId") as string;
+                        package = key.GetValue("RadeonSoftwareVersion") as string; // AMD (quando o driver grava)
                     }
                 }
                 list.Add(new DeviceDriver(instance, First(set, pData, buf, SpdrpFriendlyName) ?? First(set, pData, buf, SpdrpDeviceDesc) ?? instance,
                     Strings(set, pData, SpdrpHardwareId, buf), Strings(set, pData, SpdrpCompatibleIds, buf),
-                    First(set, pData, buf, SpdrpClass), First(set, pData, buf, SpdrpClassGuid)?.ToLowerInvariant(), First(set, pData, buf, SpdrpMfg), version, date, provider, inf, matching, ProblemCode(data.DevInst)));
+                    First(set, pData, buf, SpdrpClass), First(set, pData, buf, SpdrpClassGuid)?.ToLowerInvariant(), First(set, pData, buf, SpdrpMfg), version, date, provider, inf, matching, ProblemCode(data.DevInst),
+                    package is { Length: > 0 and < 32 } ? package.Trim() : null));
             }
         }
         finally { SetupDiDestroyDeviceInfoList(set); }

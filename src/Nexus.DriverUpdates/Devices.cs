@@ -11,6 +11,8 @@ namespace Nexus.DriverUpdates;
 /// <param name="MatchingDeviceId">Hardware/compatible ID que o INF atual casou (é o que um reinstalar forçado precisa usar).</param>
 /// <param name="ProblemCode">Código de problema do Gerenciador de Dispositivos (CM_PROB_*, lido por CM_Get_DevNode_Status): 0 = funcionando,
 /// 28 = sem driver etc. Null quando não deu para ler.</param>
+/// <param name="VendorPackageVersion">Versão do pacote do fabricante gravada pelo driver na chave dele, quando existe (AMD:
+/// valor "RadeonSoftwareVersion", ex.: "26.5.2"). Null quando o driver não grava.</param>
 public sealed record DeviceDriver(
     string InstanceId,
     string Description,
@@ -24,7 +26,20 @@ public sealed record DeviceDriver(
     string? DriverProvider,
     string? InfName,
     string? MatchingDeviceId,
-    int? ProblemCode = null);
+    int? ProblemCode = null,
+    string? VendorPackageVersion = null)
+{
+    /// <summary>Classe "Display" (adaptador de vídeo).</summary>
+    public const string DisplayClassGuid = "{4d36e968-e325-11ce-bfc1-08002be10318}";
+
+    /// <summary>Adaptador de vídeo PCI do fabricante (VEN_xxxx no hardware ID e classe Display).</summary>
+    public bool IsDisplayOf(uint pciVendorId)
+    {
+        var tag = $@"PCI\VEN_{pciVendorId:X4}&";
+        var display = string.Equals(ClassGuid, DisplayClassGuid, StringComparison.OrdinalIgnoreCase) || string.Equals(ClassName, "Display", StringComparison.OrdinalIgnoreCase);
+        return display && HardwareIds.Any(h => h.StartsWith(tag, StringComparison.OrdinalIgnoreCase));
+    }
+}
 
 /// <summary>Dispositivos presentes com o driver atual (leitura; não precisa de administrador).</summary>
 public interface IDeviceInventory

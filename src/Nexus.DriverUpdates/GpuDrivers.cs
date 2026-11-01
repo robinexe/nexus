@@ -17,7 +17,23 @@ public sealed record GpuDriverStatus(
     string Level,
     string Verdict,
     string? OfficialPage,
-    VendorApp? App);
+    VendorApp? App)
+{
+    /// <summary>PCI Device ID (escolha da série NVIDIA / ramo AMD).</summary>
+    public uint DeviceId { get; init; }
+
+    /// <summary>Instância do dispositivo (SetupAPI), para cruzar com o inventário.</summary>
+    public string? InstanceId { get; init; }
+
+    /// <summary>Versão do pacote do fabricante quando o driver grava (AMD: "RadeonSoftwareVersion", ex.: "26.5.2").</summary>
+    public string? PackageVersion { get; init; }
+
+    /// <summary>O PC é notebook (bateria ou tela interna, leitura do Laboratório de GPU).</summary>
+    public bool Laptop { get; init; }
+
+    /// <summary>Versão do fabricante comparável com a do site: NVIDIA "512.74"; AMD só quando o driver grava a do Adrenalin.</summary>
+    public string? ComparableVersion => Vendor == GpuVendor.Amd ? PackageVersion : VendorVersion;
+}
 
 public static class GpuDrivers
 {
@@ -51,7 +67,8 @@ public static class GpuDrivers
     }
 
     /// <summary>Monta o estado de cada placa física (ignora o renderizador por software da Microsoft).</summary>
-    public static IReadOnlyList<GpuDriverStatus> From(IEnumerable<GpuAdapter> adapters, DateOnly today, Func<GpuVendor, VendorApp?> app)
+    public static IReadOnlyList<GpuDriverStatus> From(IEnumerable<GpuAdapter> adapters, DateOnly today, Func<GpuVendor, VendorApp?> app,
+        IReadOnlyList<DeviceDriver>? devices = null, bool laptop = false)
     {
         ArgumentNullException.ThrowIfNull(adapters);
         ArgumentNullException.ThrowIfNull(app);
@@ -61,8 +78,15 @@ public static class GpuDrivers
             var decoded = a.DriverInfoDecoded;
             int? age = a.DriverDate is { } d ? DriverInfo.AgeDays(d, today) : null;
             var (level, verdict) = age is { } days ? DriverInfo.AgeVerdict(days, a.IsIntegrated) : ("info", "Data do driver não informada pelo Windows.");
+            var device = devices?.FirstOrDefault(d => a.InstanceId is not null && string.Equals(d.InstanceId, a.InstanceId, StringComparison.OrdinalIgnoreCase));
             list.Add(new GpuDriverStatus(a.Name, a.Vendor, a.IsIntegrated, decoded.WindowsVersion, decoded.VendorVersion, a.DriverDate, age, level, verdict,
-                DriverInfo.OfficialDownloadPage(a.Vendor), app(a.Vendor)));
+                DriverInfo.OfficialDownloadPage(a.Vendor), app(a.Vendor))
+            {
+                DeviceId = a.DeviceId,
+                InstanceId = a.InstanceId,
+                PackageVersion = device?.VendorPackageVersion,
+                Laptop = laptop,
+            });
         }
         return list;
     }

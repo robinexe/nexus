@@ -6,9 +6,11 @@ página de atualização de drivers". Duas seções:
 1. **Windows Update**: procura atualizações de driver oferecidas pela Microsoft para este PC (inclusive as "atualizações
    opcionais de driver"), mostra o que cada uma troca e instala as escolhidas pelo aplicador, com backup do driver atual e
    Desfazer.
-2. **Placa de vídeo**: versão e idade do driver de cada GPU NVIDIA/AMD/Intel (leitura do Laboratório de GPU), com o botão
-   para a página oficial de drivers do fabricante e, se instalado, o app oficial (NVIDIA App / GeForce Experience / AMD
-   Software). Explica quando vale atualizar e quando não mexer.
+2. **Placa de vídeo**: versão e idade do driver de cada GPU NVIDIA/AMD/Intel (leitura do Laboratório de GPU). Para NVIDIA e
+   AMD o NEXUS **procura a versão mais nova no serviço oficial do fabricante, baixa e instala no próprio app** (pedido do
+   responsável em 01/11: "baixado e instalado direto no nosso app, sem precisar ir para página externa"), com progresso no
+   cartão, assinatura digital conferida, backup do driver atual e Desfazer. A página oficial e o app oficial ficam como links
+   pequenos. Intel: só o link do assistente oficial. Explica quando vale atualizar e quando não mexer.
 
 Só fontes oficiais. Nada de "driver booster", nada de baixar de site agregador (está em `rejected` no catálogo).
 
@@ -16,16 +18,23 @@ Só fontes oficiais. Nada de "driver booster", nada de baixar de site agregador 
   leitura (`DriverUpdatesReader.Scan`), em `Task.Run`, com tempo limite (3 min) e botão Cancelar.
 - Escrita: só pelo aplicador, ação `driverupdates.install` do catálogo `catalog/driverupdates.v1.json` (`Host.ApplyAsync` /
   `Host.RevertAsync`). Administrador: UAC + ponto de restauração automático do aplicador.
+- Escrita do driver de vídeo: só pelo aplicador, ação `driverupdates.gpu.install` (seção "Driver de vídeo pelo NEXUS" abaixo).
+  A interface só consulta (rede, leitura) e grava o instalador na pasta de downloads do usuário.
 - Exceção controlada (abrir o que o usuário vê e controla, depois de `Host.Confirm`): página oficial do fabricante da GPU
   (`DriverInfo.OfficialDownloadPage` do Lab.Gpu), app oficial em caminho fixo de Program Files, "mais informações" da
-  atualização (só https em domínios da Microsoft) e Configurações > Windows Update > Atualizações opcionais
-  (`DriverVendorTools`). Nada é baixado pelo NEXUS fora do Windows Update.
+  atualização (só https em domínios da Microsoft), Configurações > Windows Update > Atualizações opcionais
+  (`DriverVendorTools`) e o "Auto-Detect and Install" da AMD (só quando o ramo da placa AMD não é identificado; baixado de
+  drivers.amd.com, assinatura da AMD conferida, aberto com a janela do próprio instalador da AMD — `AmdAutoDetectTool`).
 
 ## Ação do catálogo
 
 | Id | Handler | Privilégio | O que faz | Desfazer |
 |---|---|---|---|---|
 | `driverupdates.install` | `DriverUpdateInstall` | Admin | Re-busca e confere a oferta → `pnputil /export-driver` do driver atual → manifesto → `UpdateDownloader.Download` + `UpdateInstaller.Install` (WUA) | `pnputil /add-driver <inf>` + `UpdateDriverForPlugAndPlayDevicesW(INSTALLFLAG_FORCE)` no ID que o driver anterior casava; ou o INF do próprio Windows |
+| `driverupdates.gpu.install` | `DriverUpdatesVendorInstall` | Admin | Copia o instalador baixado para a pasta protegida → SHA-256 da cópia = o confirmado → Authenticode da cópia (NVIDIA Corporation / Advanced Micro Devices) → `pnputil /export-driver` do driver atual da placa → manifesto → instalador do fabricante em modo silencioso (tempo limite) | O mesmo do Windows Update: pacote anterior do backup com instalação forçada |
+
+Página: "Instalar todas (N)" no grupo das recomendadas (uma confirmação, um aviso do Windows, um Desfazer), "Instalar" em cada
+oferta e "Instalar selecionadas". O progresso do aplicador aparece na tela de progresso (ApplyAsync).
 
 `userParameters`: `updateId` = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` (UpdateID do WUA, minúsculo) e
 `updateRevision` = `[0-9]{1,6}`. O alvo é `{ updateId, revision }`. Lote: a mesma ação várias vezes no pedido, uma por
@@ -107,7 +116,114 @@ O WUA não tem cancelamento síncrono. A busca roda numa thread própria; no tem
 esperar e avisa — a busca do Windows termina sozinha em segundo plano (é só leitura). Instalação: até 45 min; passou disso,
 o aplicador relata a falha dizendo que o Windows Update pode continuar em segundo plano.
 
-## Placa de vídeo
+## Driver de vídeo pelo NEXUS (NVIDIA e AMD)
+
+Ao abrir a página, o NEXUS consulta (só leitura) a versão mais nova para cada placa NVIDIA/AMD; o botão **Procurar versão nova**
+repete. Resultado no cartão:
+
+- **Em dia**: "Em dia: 621.01 é a mais nova." (verde).
+- **Há versão nova**: botão principal **Baixar e instalar 621.01 (989,1 MB)**, com a linha "Driver GeForce Game Ready · de 21/10/2026 ·
+  servidor oficial us.download.nvidia.com" e a nota de notebook quando é o caso.
+- Ao clicar: download no próprio cartão (barra, "Baixando 42% (412 MB de 989 MB) · 31,5 MB/s · faltam 1 min", **Pausar download**
+  — continua de onde parou), depois **"Conferindo assinatura…"**, depois a confirmação (lista versão atual → nova, tamanho, assinante,
+  início do SHA-256, ponto de restauração, reinício, Desfazer) e o aplicador (UAC + tela de progresso). Sucesso: "Driver 621.01
+  instalado. Driver anterior guardado para Desfazer." + botão **Desfazer (voltar ao driver anterior)**; o cartão relê a versão.
+- Erros em português: sem internet ("Sem internet ou gfwsl.geforce.com fora do ar…"), espaço insuficiente (antes de baixar: precisa do
+  instalador + 3 GB para a extração), download parado 2 min, tamanho diferente do anunciado, assinatura inválida ("o arquivo foi
+  apagado e NUNCA foi executado"), assinante diferente, instalador alterado depois de conferido (SHA-256), código de saída de falha.
+
+### NVIDIA: de onde vem a versão (pesquisado e conferido em 01/11/2026)
+
+1. Lista oficial de séries e produtos: `https://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2` (séries; `ParentID=1` =
+   GeForce) e `TypeID=3` (produtos; `ParentID` = série). `TypeID=4` = sistemas: **Windows 11 = 135**, Windows 10 64-bit = 57.
+   Séries de notebook têm "(Notebooks)" no nome. Ex.: "GeForce GTX 16 Series (Notebooks)" = psid **115**, "GeForce GTX 1650" nela =
+   pfid **898** (desktop: 112/897).
+2. A placa é casada pelo **nome normalizado** (sem "NVIDIA", "Laptop GPU", "Max-Q") na lista, preferindo a série de notebook quando o PC
+   é notebook (bateria ou tela interna, `GpuReport.IsLaptop`) ou o nome diz "Laptop GPU"/"Max-Q"/"xxxM". O Windows chama a GTX 1650
+   do Acer Nitro só de "NVIDIA GeForce GTX 1650": por isso o "é notebook" vem do PC, não do nome.
+3. Sem casar (ou sem a lista), **plano B puro** `NvidiaDriverLookup.FromDeviceId`: faixa do PCI Device ID → arquitetura → série
+   (Blackwell 131/133, Ada 127/129, Ampere 120/123, Turing 112/115, Pascal 101/102, Maxwell 98/99, Kepler 95/92). O driver é o
+   mesmo para toda a série; a série só importa para linhas que pararam num ramo antigo (Pascal/Maxwell: 582.xx; Kepler: 475.14).
+4. Versão mais nova: `https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=115&pfid=898&osID=135&languageCode=1046&isWHQL=1&dch=1&sort1=0&numberOfResults=1`
+   (JSON; campos em URL-encoding). Exigido: `Success=1`, `IsWHQL=1`, `IsBeta=0`, `Version` "xxx.yy", `DownloadURL` https num host da
+   lista, `DownloadURLFileSize` ("1.04 GB") dentro do limite. Em 01/11/2026 para o PC do responsável: **621.01**,
+   `https://us.download.nvidia.com/Windows/621.01/621.01-notebook-win10-win11-64bit-international-dch-whql.exe`, 1 037 190 000 bytes.
+5. Tamanho exato por HEAD (seguindo e conferindo redirecionamentos); precisa bater com o anunciado (±5%).
+
+Comparação de versões: o Windows guarda a NVIDIA como `30.0.15.1274`; os **5 últimos dígitos** de "15"+"1274" = 51274 = "512.74"
+(`VendorVersions.NvidiaKeyFromWindows`), comparado com "621.01" → 62101.
+
+### AMD: de onde vem a versão
+
+A AMD não tem API pública em JSON. Opções avaliadas: (a) o "Auto-Detect and Install"
+(`amd-software-adrenalin-edition-*-minimalsetup-*_web.exe`, ~46 MB, em drivers.amd.com/drivers/installer/…) — instala com a janela
+da AMD, sem modo silencioso documentado; (b) **a página oficial de drivers de um produto** (HTML do amd.com), que traz versão,
+tamanho, data e o link do **instalador completo**. O NEXUS usa (b) e cai para (a) só quando não identifica a placa.
+
+- Ramo pelo Device ID (`AmdDriverLookup.Classify`, faixas do Laboratório de GPU). Conferido em 01/11/2026 nas páginas reais:
+  RDNA 3/3.5/4 (RX 7600, RX 9070 XT, Ryzen 7 7840HS) → `…-26.10.2-win11-b.exe`; RDNA 1/2 (RX 6600, RX 5700 XT, Ryzen 7 6800H) →
+  `…-win11-a.exe`; **Polaris/Vega e integradas Vega (Ryzen 5 5600H, 5800H, 4600H) → `whql-amd-software-adrenalin-edition-26.5.2-win11-may-vega-polaris.exe`**
+  (ramo de manutenção: a Radeon integrada do PC do responsável não recebe mais as versões 26.10.x); GCN 1–3 → sem driver novo.
+- Página de referência por ramo (o pacote é o mesmo no ramo): RX 6600, RX 7600 e Ryzen 5 5600H. Lida a seção "Windows 11 - 64-Bit
+  Edition" (ou Windows 10), artigo "AMD Software: Adrenalin Edition": "Revision Number" (`Adrenalin 26.5.2 (WHQL Recommended)`) tem
+  que ter a MESMA versão do link `https://drivers.amd.com/drivers/whql-amd-software-adrenalin-edition-<versão>-….exe`; "File Size"
+  (623 MB) e "Release Date". Escolhe a versão mais alta (na RX 7600 há 26.10.1 Recommended e 26.10.2 Optional: fica a 26.10.2).
+- drivers.amd.com **exige `Referer: https://www.amd.com/`**; sem ele redireciona para uma página de erro em www.amd.com, que o NEXUS
+  recusa (não é host de download).
+- Versão instalada: o driver da AMD não segue a numeração do Adrenalin (27.20.14032.15001 não diz "21.x"). O NEXUS lê
+  `RadeonSoftwareVersion` na chave do driver quando existe; sem ela, a tela diz que a versão do Adrenalin não é informada e o
+  Detect usa a troca do driver depois da instalação (versão do Windows mais nova que a gravada no manifesto). **A existência desse
+  valor não foi conferida num PC real** (ver "Como validar").
+- Notebook: a própria página da AMD diz "AMD recommends OEM-provided drivers… If you experience issues… install the OEM-provided
+  drivers". O NEXUS mostra isso no cartão e na confirmação (a Acer pode ter versão própria; o Adrenalin suporta os Ryzen 5000 móveis).
+
+### Assinatura (conferida nos instaladores reais, pelo certificado embutido, em 01/11/2026)
+
+| Fabricante | Assinante (CN) | Emissor |
+|---|---|---|
+| NVIDIA | `NVIDIA Corporation` (O=NVIDIA Corporation, Santa Clara) | DigiCert Trusted G4 Code Signing RSA4096 SHA384 2021 CA1 |
+| AMD | `Advanced Micro Devices` (O=Advanced Micro Devices) | Sectigo Public Code Signing CA R36 |
+
+`WinVerifyTrust` (WINTRUST_ACTION_GENERIC_VERIFY_V2, sem interface, revogação só do cache) + nome simples do certificado do assinante
+principal (`WindowsAuthenticodeVerifier`, mesmo padrão do PresentMon). Aceitos: só esses nomes ("Advanced Micro Devices, Inc." também,
+nome de certificados anteriores). Conferido duas vezes: na interface depois do download e no aplicador elevado na cópia que vai rodar.
+
+### Ação `driverupdates.gpu.install` (handler `DriverUpdatesVendorInstall`)
+
+`userParameters` (validados pelo broker; o handler confere de novo o formato de cada fabricante): `gpuVendor` = `nvidia|amd`,
+`gpuVersion` = `[0-9]{2,3}\.[0-9]{1,2}(?:\.[0-9]{1,2})?` (NVIDIA `xxx.yy`, AMD `aa.b.c`), `installerSha256` = `[0-9a-f]{64}` — o "token"
+do arquivo. **Nunca um caminho**: o arquivo é `<perfil>\AppData\Local\NEXUS\drivers\<nvidia|amd>\<versão>\<nvidia-621.01.exe |
+amd-adrenalin-26.5.2.exe>` (nome fixo). O alvo tem `"scope": "User"`: como serviço, o aplicador recebe o SID de quem pediu e acha o
+perfil em `HKLM\...\ProfileList` (`WindowsUserProfileLocator`); sob demanda, usa o perfil do próprio processo (mesma conta). Elevado com
+OUTRA conta de administrador (usuário comum digitando a senha de outro): o arquivo não é achado e nada roda (mensagem clara).
+
+Apply, em ordem (qualquer falha para tudo; o executor só desfaz se o driver mudou):
+1. Copia o instalador da pasta do usuário para `DataDirectory\drivers\<fab>\<versão>\` (pasta do aplicador, só administradores
+   alteram), calculando o SHA-256 **da cópia**; diferente do confirmado = apaga, "NÃO foi executado" (contra troca entre a conferência
+   e a execução, TOCTOU). Link/junção ou tamanho fora do limite (1,5 GB) = recusa.
+2. Authenticode **da cópia**: cadeia válida e assinante do fabricante; senão apaga e recusa.
+3. Backup do driver atual da placa (`RollbackRules.Plan` + `pnputil /export-driver oemNN.inf` em
+   `DataDirectory\backup\drivers\gpu-<fab>-<versão>\`, o mesmo mecanismo das atualizações do Windows Update) e manifesto.
+4. Executa a cópia (sem shell, argumentos fixos) e espera: **NVIDIA `-s -noreboot -noeula`**, até 15 min; **AMD `-INSTALL`**, até 20 min.
+   Estourou o tempo: NÃO mata o instalador (driver pela metade é pior); relata e pede para esperar/reiniciar.
+5. Código de saída: NVIDIA 0 = ok, 1 = ok com reinício (documentação da NVIDIA); AMD 0 = ok, 3010/1641 = ok com reinício. Outro código: se o
+   driver da placa mudou mesmo assim, vale o driver; senão falha ("terminou com o código N e o driver não mudou").
+6. Apaga a cópia (~1 GB). A interface apaga o download depois de instalado; se cancelar, fica para a próxima vez.
+
+Opções silenciosas — fontes: NVIDIA, guia de instalação para Windows (`setup.exe -s` "suppresses the installer UI"; `-n`; 0 = sucesso,
+1 = sucesso com reinício); o pacote baixado é um 7-Zip SFX ("NVIDIA Display Driver v621.01 - International Package", `RunProgram=setup.exe`)
+que repassa as opções ao setup.exe — `<pacote>.exe -s` em uso por terceiros (ex.: buildbot do Skia); `-noreboot`/`-noeula` são
+usadas pelos pacotes Chocolatey/Scoop e citadas no fórum de desenvolvedores da NVIDIA. Sem `-clean` ("instalação limpa" zera as
+configurações do Painel de Controle da NVIDIA). Instalação só de "Display.Driver" (`-s -n Display.Driver`, documentada) **não** foi usada: tiraria
+PhysX e áudio HDMI; fica como opção futura. AMD: "Command Line Installation" (`Setup.exe -INSTALL`, ResultCode 0/1/2); o SFX do pacote
+Adrenalin tem as opções `-INSTALL`, `-SILENT` e `-factoryresetInstall` (lidas no binário real).
+
+Detect: versão do fabricante em uso em alguma placa do fabricante (classe Display, `PCI\VEN_10DE&`/`PCI\VEN_1002&`) ≥ a pedida =
+`instalada`; ou manifesto com instalação e reinício pendente (último boot antes da instalação); ou (AMD sem `RadeonSoftwareVersion`)
+driver trocado pela instalação. Senão `pendente`. Restore: pacote anterior do backup (ou INF do Windows) com instalação forçada; o
+Painel de Controle da NVIDIA/AMD Software instalados junto podem ficar na versão nova (o driver da placa volta).
+
+## Placa de vídeo (leitura)
 
 Reaproveita `Nexus.Lab.Gpu` por API pública (sem editar): `GpuLabScanner.Scan(null, …, includeGames: false)`,
 `DriverInfo.Decode` (NVIDIA 32.0.15.6636 → 566.36; Intel 101.5590; AMD sem tabela pública, dito na tela),
@@ -121,6 +237,15 @@ vídeo" com o aviso de conferir se não são MAIS ANTIGAS que a instalada (a lis
   critérios de busca: <https://learn.microsoft.com/windows/win32/api/wuapi/nf-wuapi-iupdatesearcher-search>,
   códigos de erro: <https://learn.microsoft.com/windows/deployment/update/windows-update-error-reference>
 - pnputil: <https://learn.microsoft.com/windows-hardware/drivers/devtest/pnputil-command-syntax>
+- NVIDIA, listas e consulta: <https://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2> (e TypeID=3/4),
+  `https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&…`
+- NVIDIA, instalação silenciosa: <https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/windows.html>;
+  <https://forums.developer.nvidia.com/t/nvidia-geforce-gameready-studio-driver-silent-deployment-parameters-that-exclude-nvidia-app/372634>;
+  <https://skia.googlesource.com/buildbot/+/9e907cc17f5d/skolo/win/ansible/nvidia-graphics-driver.yml>;
+  <https://community.chocolatey.org/packages/nvidia-display-driver>
+- AMD, páginas de drivers: <https://www.amd.com/en/support/download/drivers.html> e as páginas de produto citadas acima;
+  instalação por linha de comando: <https://drivers.amd.com/relnotes/command-line-installation.pdf>
+- WinVerifyTrust: <https://learn.microsoft.com/windows/win32/api/wintrust/nf-wintrust-winverifytrust>
 - UpdateDriverForPlugAndPlayDevicesW: <https://learn.microsoft.com/windows/win32/api/newdev/nf-newdev-updatedriverforplugandplaydevicesw>
 - SetupAPI (SetupDiGetClassDevs, SPDRP_*), chave do driver (DriverVersion/InfPath/MatchingDeviceId): documentação do WDK.
 
@@ -134,7 +259,10 @@ vídeo" com o aviso de conferir se não são MAIS ANTIGAS que a instalada (a lis
 ## O que NÃO faz (e por quê)
 
 - Não baixa drivers de sites de terceiros nem de "agregadores" (sem garantia de origem; vetor de malware).
-- Não baixa nem instala o driver de vídeo do site do fabricante: só abre a página/app oficial; você escolhe a versão.
+- Driver de vídeo: só dos servidores oficiais da NVIDIA/AMD (lista fixa de hosts, conferida em cada redirecionamento), só WHQL estável,
+  e só executa com a assinatura do fabricante conferida no aplicador. Não instala beta, Studio, versões antigas escolhidas a dedo nem
+  Intel (só o link do assistente da Intel).
+- Não usa `-clean` da NVIDIA (apagaria as configurações do Painel de Controle) nem a "redefinição de fábrica" da AMD.
 - Não aceita termos de licença por você; não liga o serviço Windows Update; não contorna política da empresa.
 - Não oculta atualizações (o Windows tem o próprio solucionador "Mostrar ou ocultar atualizações").
 - Não promete desempenho: driver novo corrige falhas e compatibilidade; FPS só muda em casos específicos (jogos novos).
@@ -143,9 +271,33 @@ vídeo" com o aviso de conferir se não são MAIS ANTIGAS que a instalada (a lis
 
 | Kudu | NEXUS |
 |---|---|
-| "Drivers": inventário e atualização | Busca oficial no Windows Update (recomendadas + opcionais), versão oferecida × instalada, data, tamanho, KB, link oficial; instalação em lote com ponto de restauração, backup por dispositivo e Desfazer real (instalação forçada do pacote anterior); honestidade quando não há volta; reinício pendente; GPU com idade, veredito e página/app oficial |
+| "Drivers": inventário e atualização | Driver de vídeo NVIDIA/AMD baixado do servidor oficial e instalado no app (progresso, assinatura conferida duas vezes, backup e Desfazer); busca oficial no Windows Update (recomendadas + opcionais), versão oferecida × instalada, data, tamanho, KB, link oficial; instalação em lote com ponto de restauração, backup por dispositivo e Desfazer real (instalação forçada do pacote anterior); honestidade quando não há volta; reinício pendente; GPU com idade, veredito e página/app oficial |
 
 ## Como validar no Windows
+
+### Driver de vídeo pelo NEXUS (o que só um PC real prova)
+
+Os testes no Linux cobrem a consulta (respostas REAIS da NVIDIA e páginas REAIS da AMD como amostras), a escolha da série, hosts,
+redirecionamentos, retomada, tamanho, regex, códigos de saída e o handler inteiro com falsos. **Não foram exercitados de verdade:** o
+download de 1 GB, `WinVerifyTrust` nos instaladores, o instalador da NVIDIA/AMD em modo silencioso, a troca real do driver, o Desfazer
+de um driver de vídeo, a leitura de `RadeonSoftwareVersion`. Passos no PC do responsável (Acer Nitro AN515-45):
+
+1. Abrir NEXUS → Sistema → **Atualizar drivers**. Esperado no cartão da GTX 1650: "Versão 512.74 (30.0.15.1274)" e, em segundos,
+   "Há versão nova: 621.01 (você tem 512.74)" + **Baixar e instalar 621.01 (989,1 MB)** + nota de Optimus. Sem internet: mensagem
+   "Sem internet…" em vermelho. Na Radeon integrada: "Versão mais nova do fabricante: 26.5.2" (ramo Vega/Polaris) + nota da Acer + "o
+   Windows não informa a versão do Adrenalin" (se aparecer "Em dia"/"Adrenalin x" no cartão, `RadeonSoftwareVersion` existe — anotar).
+2. **Baixar e instalar** na NVIDIA: barra com %, MB/s e tempo restante; testar **Pausar download** e clicar de novo (deve continuar de
+   onde parou: `%LocalAppData%\NEXUS\drivers\nvidia\621.01\nvidia-621.01.exe.partial` cresce a partir do tamanho anterior).
+3. "Conferindo assinatura…" → confirmação lista 512.74 → 621.01, "Assinatura digital conferida: NVIDIA Corporation" → UAC → tela de
+   progresso. A tela pisca. Esperado: "Driver 621.01 instalado…"; o cartão relê "621.01 (32.0.16.2101)" e "Em dia: 621.01 é a mais nova".
+   Conferir `%ProgramData%\NEXUS\backup\drivers\gpu-nvidia-621.01\` (nv_dispi.inf exportado + `nexus-manifest.json` com
+   `ExitCode` 0 ou 1) e que `%ProgramData%\NEXUS\drivers\nvidia\621.01\` ficou vazio. Gerenciador de Dispositivos: 32.0.16.2101.
+4. **Desfazer (voltar ao driver anterior)** → UAC → o Gerenciador de Dispositivos volta a 30.0.15.1274 (pode pedir reinício).
+5. Teste de assinatura (opcional, seguro): com o download pronto e antes de confirmar, trocar o `.exe` por outro arquivo e confirmar:
+   esperado "O instalador mudou depois de conferido (SHA-256 diferente): NÃO foi executado".
+6. AMD (só se quiser trocar a integrada): igual ao passo 2–4 com 26.5.2 (~623 MB). Anotar se o Detect confirmou pela versão do
+   Adrenalin ou "driver trocado pela instalação"; se o instalador da AMD mostrar janela mesmo com `-INSTALL`, anotar.
+7. "Instalar todas (N)" nas recomendadas do Windows Update e "Instalar" numa oferta: uma confirmação, tela de progresso.
 
 1. `dotnet build Nexus.slnx -c Release` e abrir o NEXUS → Sistema → **Atualizar drivers**.
 2. Ao abrir: cartão da placa de vídeo (no PC do responsável: "NVIDIA GeForce RTX 3050 Laptop GPU · dedicada", versão

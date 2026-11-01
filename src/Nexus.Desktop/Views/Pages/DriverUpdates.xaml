@@ -5,7 +5,9 @@
     1b. Dispositivos sem driver (código de problema 28, 1, 18… lido ao abrir): nome, código, significado e hardware ID, com
        "Procurar no Windows Update" (o WU oferece drivers para aparelhos sem driver). Sem nenhum: uma linha verde.
     2. Placa de vídeo em destaque: ilustração, nome, selos (dedicada/integrada, fabricante), versão, idade do driver em dias na
-       cor do veredito, e os botões oficiais (página e app do fabricante).
+       cor do veredito; "Procurar versão nova" (consulta oficial da NVIDIA/AMD) e o botão principal "Baixar e instalar <versão>
+       (<tamanho>)" com progresso no próprio cartão (%, MB/s, tempo restante → "Conferindo assinatura…" → aplicador). Em dia:
+       "Em dia: x é a mais nova". Página/app oficiais ficam como links pequenos.
     3. Como funciona: Procura → Escolhe → Instala → Desfaz.
     4. Atualizações agrupadas (recomendadas, opcionais, vídeo) em cartões com selos (tipo, tem/sem desfazer); detalhes recolhidos.
        Estados vazios antes de procurar e quando está tudo em dia.
@@ -72,6 +74,9 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
               <Button Content="Detalhes" Style="{StaticResource DU.Link}" Command="{Binding DetailsCommand}"
                       AutomationProperties.Name="{Binding Title, StringFormat='Detalhes: {0}'}"/>
+              <Button Content="Instalar" Style="{StaticResource DU.Small}" Command="{Binding InstallCommand}"
+                      Visibility="{Binding CanApply, Converter={StaticResource BoolToVis}}"
+                      AutomationProperties.Name="{Binding Title, StringFormat='Instalar: {0}'}"/>
               <Button Style="{StaticResource DU.Small}" Command="{Binding RevertCommand}"
                       Visibility="{Binding CanRevert, Converter={StaticResource BoolToVis}}">
                 <StackPanel Orientation="Horizontal">
@@ -105,15 +110,71 @@
               </TextBlock>
               <TextBlock Text="{Binding Verdict}" Style="{StaticResource Text.Small}" Margin="0,8,0,0"
                          Foreground="{Binding LevelTone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"/>
-              <WrapPanel Margin="0,12,0,0">
-                <Button Style="{StaticResource Button.Secondary}" Command="{Binding OpenPageCommand}" Margin="0,0,8,0"
+
+              <!-- Versão nova do fabricante: procurar, baixar e instalar no NEXUS -->
+              <StackPanel Margin="0,12,0,0" Visibility="{Binding CanUpdateInApp, Converter={StaticResource BoolToVis}}">
+                <DockPanel Visibility="{Binding CheckMessage, Converter={StaticResource NullToCollapsed}}">
+                  <c:Icon DockPanel.Dock="Left" Data="{StaticResource Icon.Check}" Size="14" Margin="0,1,6,0" VerticalAlignment="Top"
+                          Foreground="{StaticResource Brush.Good}" Visibility="{Binding IsUpToDate, Converter={StaticResource BoolToVis}}"/>
+                  <TextBlock Text="{Binding CheckMessage}" Style="{StaticResource Text.Body}" AutomationProperties.LiveSetting="Polite"
+                             Foreground="{Binding CheckTone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"/>
+                </DockPanel>
+                <TextBlock Text="{Binding ReleaseLine}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,0,0"
+                           Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"
+                           Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Progresso no próprio cartão -->
+                <StackPanel Margin="0,10,0,0" Visibility="{Binding Working, Converter={StaticResource BoolToVis}}">
+                  <TextBlock Text="{Binding Phase}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+                  <ProgressBar Value="{Binding Progress, Mode=OneWay}" Minimum="0" Maximum="1" Height="6" Margin="0,6,0,4" MaxWidth="460" HorizontalAlignment="Stretch"
+                               Visibility="{Binding Downloading, Converter={StaticResource BoolToVis}}"/>
+                  <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}"
+                             Visibility="{Binding ProgressText, Converter={StaticResource NullToCollapsed}}"/>
+                </StackPanel>
+                <TextBlock Text="{Binding Error}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Bad}" Margin="0,6,0,0"
+                           Visibility="{Binding Error, Converter={StaticResource NullToCollapsed}}" AutomationProperties.LiveSetting="Assertive"/>
+                <TextBlock Text="{Binding Result}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Good}" Margin="0,6,0,0"
+                           Visibility="{Binding Result, Converter={StaticResource NullToCollapsed}}" AutomationProperties.LiveSetting="Polite"/>
+
+                <WrapPanel Margin="0,10,0,0">
+                  <Button Style="{StaticResource Button.Primary}" Command="{Binding InstallCommand}" Margin="0,0,8,6"
+                          Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                      <c:Icon Data="{StaticResource Icon.Drivers}" Size="14" Margin="0,0,6,0"/>
+                      <TextBlock Text="{Binding InstallLabel}" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                  </Button>
+                  <Button Content="Pausar download" Style="{StaticResource Button.Secondary}" Command="{Binding CancelCommand}" Margin="0,0,8,6"
+                          Visibility="{Binding Downloading, Converter={StaticResource BoolToVis}}"/>
+                  <Button Content="Baixar e abrir o assistente oficial da AMD" Style="{StaticResource Button.Secondary}" Command="{Binding AutoDetectCommand}" Margin="0,0,8,6"
+                          Visibility="{Binding HasAutoDetect, Converter={StaticResource BoolToVis}}"/>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding CheckCommand}" Margin="0,0,8,6">
+                    <StackPanel Orientation="Horizontal">
+                      <c:Icon Data="{StaticResource Icon.Refresh}" Size="14" Margin="0,0,6,0"/>
+                      <TextBlock Text="Procurar versão nova" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                  </Button>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding RevertCommand}" Margin="0,0,8,6"
+                          Visibility="{Binding CanRevert, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                      <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
+                      <TextBlock Text="Desfazer (voltar ao driver anterior)" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                  </Button>
+                </WrapPanel>
+              </StackPanel>
+
+              <!-- Links oficiais (secundários) -->
+              <WrapPanel Margin="-10,4,0,0">
+                <Button Style="{StaticResource DU.Link}" Command="{Binding OpenPageCommand}"
                         Visibility="{Binding HasPage, Converter={StaticResource BoolToVis}}">
                   <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding PageLabel}" TextWrapping="NoWrap"/>
-                    <c:Icon Data="{StaticResource Icon.ChevronRight}" Size="14" Margin="6,0,0,0"/>
+                    <c:Icon Data="{StaticResource Icon.ChevronRight}" Size="12" Margin="4,0,0,0"/>
                   </StackPanel>
                 </Button>
-                <Button Content="{Binding AppLabel}" Style="{StaticResource Button.Ghost}" Command="{Binding OpenAppCommand}"
+                <Button Content="{Binding AppLabel}" Style="{StaticResource DU.Link}" Command="{Binding OpenAppCommand}"
                         Visibility="{Binding HasApp, Converter={StaticResource BoolToVis}}"/>
               </WrapPanel>
             </StackPanel>
@@ -265,8 +326,8 @@
         <ItemsControl ItemsSource="{Binding Gpus}" ItemTemplate="{StaticResource DU.Gpu}" Focusable="False"/>
         <TextBlock Text="{Binding GpuNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,0,0,6"
                    Visibility="{Binding GpuNote, Converter={StaticResource NullToCollapsed}}"/>
-        <c:ExplainToggle Header="Quem instala o driver de vídeo?" Margin="0,0,0,20"
-                         Content="O NEXUS só abre a página ou o app oficial; o download e a instalação são feitos por você, no instalador do fabricante (que também tem a opção de voltar à versão anterior). Prefira a versão estável mais recente."/>
+        <c:ExplainToggle Header="Como o NEXUS baixa e instala o driver de vídeo?" Margin="0,0,0,20"
+                         Content="A versão mais nova vem da consulta oficial da NVIDIA (a mesma do site nvidia.com/drivers) ou da página oficial de drivers da AMD. O download sai só dos servidores do fabricante (us.download.nvidia.com, drivers.amd.com), com progresso aqui. Antes de executar, o NEXUS confere a assinatura digital (tem que ser da NVIDIA ou da AMD) e, no aplicador com administrador, confere de novo numa cópia protegida. Assinatura inválida: o arquivo é apagado e nunca roda. O driver atual é guardado e há Desfazer; o Windows cria um ponto de restauração. Em notebook com placa NVIDIA + integrada (Optimus), o driver da NVIDIA é suportado; na integrada AMD, a AMD recomenda o driver do fabricante do notebook se algo falhar."/>
 
         <!-- ===== 3. Como funciona ===== -->
         <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,20">
@@ -278,7 +339,7 @@
               <c:StepItem Icon="{StaticResource Icon.Undo}" Title="Desfaz" Text="Algo estranho? Volte ao driver anterior." Tone="Good"/>
             </c:HowItWorks>
             <c:ExplainToggle Margin="0,12,0,0"
-                             Content="Só fontes oficiais: o próprio Windows Update e os sites dos fabricantes. Nada de 'driver booster'. Atualizar driver corrige falhas e compatibilidade; não deixa o PC mais rápido por si só. Se está tudo funcionando, não é obrigatório."/>
+                             Content="Só fontes oficiais: o próprio Windows Update e os servidores da NVIDIA e da AMD (com a assinatura digital conferida). Nada de 'driver booster'. Atualizar driver corrige falhas e compatibilidade; não deixa o PC mais rápido por si só. Se está tudo funcionando, não é obrigatório."/>
           </StackPanel>
         </Border>
 
@@ -323,7 +384,15 @@
                 <TextBlock Text="Recomendadas pelo Windows" Style="{StaticResource Text.H2}"/>
                 <TextBlock Text="Testadas pela Microsoft para o seu hardware." Style="{StaticResource Text.Small}"/>
               </StackPanel>
-              <Button Grid.Column="2" Content="Marcar todas" Style="{StaticResource DU.Link}" Command="{Binding SelectRecommendedCommand}"/>
+              <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Marcar todas" Style="{StaticResource DU.Link}" Command="{Binding SelectRecommendedCommand}"/>
+                <Button Style="{StaticResource Button.Primary}" Command="{Binding InstallRecommendedCommand}" Margin="8,0,0,0" Padding="12,6">
+                  <StackPanel Orientation="Horizontal">
+                    <c:Icon Data="{StaticResource Icon.Drivers}" Size="14" Margin="0,0,6,0"/>
+                    <TextBlock Text="{Binding InstallRecommendedLabel}" TextWrapping="NoWrap"/>
+                  </StackPanel>
+                </Button>
+              </StackPanel>
               <TextBlock Grid.Column="3" Text="{Binding RecommendedCount}" Style="{StaticResource DU.GroupCount}" Foreground="{StaticResource Brush.Good}"/>
             </Grid>
             <ItemsControl ItemsSource="{Binding Recommended}" ItemTemplate="{StaticResource DU.Row}" Focusable="False"/>
