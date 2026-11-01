@@ -16,6 +16,22 @@ Versões centralizadas em `Directory.Packages.props`; resolução travada pelos 
 | System.ServiceProcess.ServiceController | 10.0.14 | MIT (Microsoft, dotnet/runtime) | PackageReference em `Nexus.Broker.Host` (serviço do Windows); traz `System.Diagnostics.EventLog` 10.0.14 (MIT) | Sim: DLLs no output do broker | Incluir aviso de copyright e texto da licença MIT na distribuição. Adicionado em 31/10/2026, avisado ao responsável na conversa |
 | xunit.runner.visualstudio | 3.1.4 | Apache-2.0 | Só no projeto de testes | Não | Nenhuma para a distribuição |
 
+## Binários de terceiros embutidos (fora do NuGet)
+
+| Componente | Versão | Licença | Origem | Integração | Redistribuído? | Obrigação concreta |
+|---|---|---|---|---|---|---|
+| PresentMon (Intel) | 2.6.0 (x64) | MIT, Copyright (C) 2017-2024 Intel Corporation | <https://github.com/GameTechDev/PresentMon> release v2.6.0, arquivo `PresentMon-2.6.0-x64.exe` sem alteração; assinatura Authenticode de **Intel Corporation** (cadeia Sectigo Public Code Signing CA R36); SHA-256 `b2a706bc6ad475749e3b7e3409263aa1e6906d45bdcf993f6dbc0f660188f1af` | `tools/presentmon/` no repositório; o build da interface e da CLI copia para `<saída>\tools\PresentMon\PresentMon.exe` + `LICENSE.txt`; `publish.py` confere o hash; o instalador põe em `%ProgramFiles%\NEXUS\tools\PresentMon`. O Medir executa só depois de conferir hash conhecido ou assinatura válida da Intel (`PresentMonTrust`) | Sim | Aviso de copyright e texto MIT: `tools\PresentMon\LICENSE.txt` e `THIRD-PARTY-NOTICES.txt` (raiz, copiado para a saída e para o instalador) |
+
+Por que embutido (e não "o usuário baixa"): o pedido do responsável foi deixar o Medir pronto automaticamente; o NEXUS não pode
+baixar nada sozinho (regra 8); e um PresentMon baixado pelo usuário numa pasta do perfil é um executável que se eleva
+(`--restart_as_admin`) numa pasta gravável por qualquer programa da conta. Embutido na pasta protegida do instalador e conferido
+antes de cada uso, o risco é o mesmo dos executáveis do próprio NEXUS. Atualizar: trocar o arquivo em `tools/presentmon`, o hash em
+`PresentMonTrust.BundledSha256`/`publish.py`/`release.yml`/`THIRD-PARTY-NOTICES.txt` e esta tabela.
+
+`THIRD-PARTY-NOTICES.txt` (raiz) reúne os avisos de tudo o que é redistribuído: PresentMon (MIT), Microsoft.Data.Sqlite,
+ServiceController/EventLog, .NET e WPF (MIT), SQLitePCLRaw (Apache-2.0, texto completo) e SQLite (domínio público). O build da
+interface e da CLI copia para a saída; vai no ZIP e no instalador (com atalho "NEXUS - avisos de terceiros" no Menu Iniciar).
+
 ## Transitivas relevantes para a distribuição
 
 | Pacote | Versão resolvida | Licença | Trazido por | Redistribuído? | Obrigação concreta |
@@ -29,6 +45,7 @@ Versões centralizadas em `Directory.Packages.props`; resolução travada pelos 
 |---|---|---|
 | 2026-10-30 | Microsoft.Data.Sqlite 10.0.0 → **10.0.14** | NU1903 / GHSA-2m69-gcr7-jv3q / CVE-2025-6965 (SQLite < 3.50.2, CVSS 7.2) em SQLitePCLRaw.lib.e_sqlite3 ≤ 2.1.11. A 10.0.14 é o patch mais recente da mesma linha e puxa a 2.1.13. Não é dependência nova: mesmo pacote, mesma licença. |
 | 2026-10-30 | Evidência do NU1903 sem supressão | Ver `06-build-log.md` (restore com 10.0.0 vs 10.0.14; SQLite nativo carregado 3.53.3). |
+| 2026-11-01 | **PresentMon 2.6.0** (Intel, MIT) embutido em `tools/presentmon` | Pedido do responsável: Medir pronto para usar sem baixar nada. SHA-256 `b2a706bc6ad4…`, assinado por Intel Corporation. Avisado ao responsável na conversa. Sem pacote NuGet novo. |
 | 2026-10-30 | Demais versões confirmadas | As versões fixadas originalmente restauraram sem NU1102; nenhuma troca foi necessária. |
 
 ## Frameworks do .NET (não são pacotes NuGet)
