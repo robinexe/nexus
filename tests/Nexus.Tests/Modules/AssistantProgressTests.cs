@@ -442,3 +442,123 @@ public sealed class ApplySummaryTests
         Assert.False(ApplySummary.IsRecentRestorePointRefusal("A Restauração do Sistema está desligada."));
     }
 }
+
+[Trait("Category", "Unit")]
+public sealed class HostApplyProgressTests
+{
+    private static readonly (string Key, string Name)[] Actions = [("a@1", "Modo de Jogo"), ("b@1", "Telemetria opcional"), ("c@1", "Anúncios")];
+
+    private static BrokerCallResult Ok(string? message, params (string Key, string Outcome, string? Detail)[] results) =>
+        new(true, new BrokerResponse(Guid.NewGuid(), true, Results: results.Select(r => new ActionResultDto(r.Key, r.Outcome, r.Detail)).ToList(),
+            RunId: Guid.NewGuid(), Message: message), "técnico");
+
+    [Fact]
+    public void Admin_apply_walks_confirmation_windows_restore_point_actions_and_check()
+    {
+        var clock = new ManualClock();
+        var t = new ProcessTracker("Aplicar", () => clock.Now);
+        var p = new HostApplyProgress(t, Actions, BrokerLevel.Admin);
+        Assert.Equal(["Sua confirmação", "Aviso do Windows (administrador)", "Ponto de restauração do Windows", "Aplicando 3 ações", "Conferindo e relendo o PC"],
+            t.Tasks.Select(x => x.Title));
+        Assert.Equal(["Modo de Jogo", "Telemetria opcional", "Anúncios"], t.Find("work")!.Items.Select(i => i.Title));
+
+        p.Stage(ApplyStage.WaitingConfirmation);
+        Assert.Equal("Aguardando a sua confirmação…", t.CurrentText);
+        clock.Advance(20);
+        p.Stage(ApplyStage.Confirmed);
+        p.Stage(ApplyStage.WaitingWindows);
+        Assert.True(t.IsWaiting);
+        Assert.Contains("aviso do Windows", t.CurrentText, StringComparison.Ordinal);
+        clock.Advance(5);
+        p.Stage(ApplyStage.Running);
+        Assert.Equal(ProcessTaskStatus.Done, t.Find("windows")!.Status);
+        Assert.Contains("ponto de restauração", t.CurrentText, StringComparison.Ordinal);
+        Assert.True(t.Current!.TextIsEstimate);
+        clock.Advance(ProcessTimeModel.AdminRestorePoint + 0.8);
+        p.Tick();
+        Assert.Equal("Aplicando: Telemetria opcional…", t.CurrentText);
+
+        p.Finished(Ok("Execução encerrada. Ponto de restauração do Windows criado antes de aplicar.",
+            ("a@1", "Verified", null), ("b@1", "AlreadyConfigured", null), ("c@1", "Failed", "acesso negado")));
+        Assert.Equal(ProcessTaskStatus.Done, t.Find("restore")!.Status);
+        var work = t.Find("work")!;
+        Assert.Equal([ProcessTaskStatus.Done, ProcessTaskStatus.Skipped, ProcessTaskStatus.Failed], work.Items.Select(i => i.Status));
+        Assert.Equal("Não aplicada: acesso negado", work.Items[2].Detail);
+        p.Stage(ApplyStage.Refreshing);
+        Assert.Equal(ProcessTaskStatus.Running, t.Find("check")!.Status);
+        clock.Advance(2);
+        p.Done();
+        Assert.True(t.IsComplete);
+        var s = p.Summary();
+        Assert.Equal("1 feita • 1 já estava assim • 1 não aplicada • 58 s", s.Text);
+        Assert.Equal(ProcessTaskStatus.Done, s.Status);
+    }
+
+    [Fact]
+    public void Already_running_applier_skips_the_windows_prompt_and_restore_point_reason_is_shown()
+    {
+        var t = new ProcessTracker("x", () => TimeSpan.Zero);
+        var p = new HostApplyProgress(t, Actions, BrokerLevel.Admin);
+        p.Stage(ApplyStage.WaitingConfirmation);
+        p.Stage(ApplyStage.Confirmed);
+        p.Stage(ApplyStage.Running);
+        Assert.Equal(ProcessTaskStatus.Skipped, t.Find("windows")!.Status);
+        p.Finished(Ok("Execução encerrada.", ("a@1", "Verified", null)));
+        Assert.Equal(ProcessTaskStatus.Skipped, t.Find("restore")!.Status);
+        Assert.Contains("já criado", t.Find("restore")!.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void User_level_has_no_windows_or_restore_point_rows_and_cancel_sends_nothing()
+    {
+        var t = new ProcessTracker("x", () => TimeSpan.Zero);
+        var p = new HostApplyProgress(t, Actions, BrokerLevel.User);
+        Assert.Null(t.Find("windows"));
+        Assert.Null(t.Find("restore"));
+        p.Stage(ApplyStage.WaitingConfirmation);
+        p.Canceled();
+        Assert.True(t.IsComplete);
+        Assert.Equal(ProcessTaskStatus.Skipped, t.Find("confirm")!.Status);
+        Assert.StartsWith("Nada foi enviado", p.Summary().Text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Refused_request_and_revert_are_described_for_people()
+    {
+        var t = new ProcessTracker("x", () => TimeSpan.Zero);
+        var p = new HostApplyProgress(t, Actions, BrokerLevel.User);
+        p.Stage(ApplyStage.Confirmed);
+        p.Finished(new BrokerCallResult(true, BrokerResponse.Fail(Guid.NewGuid(), "session-active", "há uma sessão aberta"), "Execute recusado"));
+        Assert.Equal(ProcessTaskStatus.Failed, t.Find("work")!.Status);
+        Assert.Equal(ProcessTaskStatus.Failed, p.Summary().Status);
+        Assert.Contains("há uma sessão aberta", p.Summary().Text, StringComparison.Ordinal);
+
+        var t2 = new ProcessTracker("x", () => TimeSpan.Zero);
+        var names = new Dictionary<string, string> { ["a@1"] = "Modo de Jogo" };
+        var r = new HostApplyProgress(t2, [], BrokerLevel.User, revert: true, name: k => names.GetValueOrDefault(k, k));
+        Assert.Equal("Desfazendo a execução", t2.Find("work")!.Title);
+        r.Stage(ApplyStage.Confirmed);
+        r.Stage(ApplyStage.Running);
+        Assert.StartsWith("Desfazendo pelo diário", t2.CurrentText, StringComparison.Ordinal);
+        r.Finished(new BrokerCallResult(true, new BrokerResponse(Guid.NewGuid(), true, Results: [new ActionResultDto("a@1", "Reverted"), new ActionResultDto("z@1", "Conflict", "mudou")],
+            FullyRestored: false), ""));
+        Assert.Equal(["Modo de Jogo", "z@1"], t2.Find("work")!.Items.Select(i => i.Title));
+        Assert.Equal("Não voltou: mudou por fora depois: mudou", t2.Find("work")!.Items[1].Detail);
+        r.Done();
+        Assert.StartsWith("1 desfeita • 1 não voltou", r.Summary().Text, StringComparison.Ordinal);
+        Assert.Equal(ProcessTaskStatus.Failed, r.Summary().Status);
+    }
+
+    [Fact]
+    public void Broker_status_line_is_human_for_every_kind_of_answer()
+    {
+        var status = new BrokerCallResult(true, new BrokerResponse(Guid.NewGuid(), true,
+            Status: new BrokerStatus("0.9.0-ci.7+abc", "2026.11", true, "Execução neste PC autorizada pelo usuário.", "livre")), "Broker 0.9.0 · escrita LIBERADA");
+        Assert.Equal("Aplicador pronto · escrita liberada neste PC", ApplySummary.Human(status));
+        var blocked = new BrokerCallResult(true, new BrokerResponse(Guid.NewGuid(), true, Status: new BrokerStatus("1", "1", false, "desativada", "livre")), "");
+        Assert.Equal("Aplicador respondeu · escrita não liberada: desativada", ApplySummary.Human(blocked));
+        var plan = new BrokerCallResult(true, new BrokerResponse(Guid.NewGuid(), true, Results: [new ActionResultDto("a@1", "Pending")]), "");
+        Assert.Equal("Simulação pronta: 1 ação conferida. Nada foi aplicado.", ApplySummary.Human(plan));
+        Assert.DoesNotContain("LIBERADA", ApplySummary.Human(status), StringComparison.Ordinal);
+    }
+}

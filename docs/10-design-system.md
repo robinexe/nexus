@@ -230,6 +230,10 @@ e enquanto a etapa trabalha — é um indicador de carregamento, não decoraçã
 <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Trace}" c:Pulse.IsOn="{Binding IsRunning}"/>   <!-- "ao vivo" -->
 ```
 
+**Qualquer aplicar/desfazer de uma página** (`IModuleHost.ApplyAsync/RevertAsync`, página Aplicar) já ganha a tela de progresso
+da janela (`ViewModels/ApplyOverlay.cs` + `MainWindow.xaml`, lógica em `Nexus.Assistant.HostApplyProgress`): não precisa fazer
+nada na página. Uma página com tela própria (o Assistente) passa `IProgress<ApplyStage>` ao `ApplyAsync` e a da janela não aparece.
+
 `ProcessRing`: 72 marcas que acendem com o %, arco com brilho, ponto na ponta e um arco ciano girando por dentro; `Tone`
 Warn (aplicando), Info (lendo), Good (concluído), Bad (falhou). Leitor de tela: "Andamento: 45%".
 

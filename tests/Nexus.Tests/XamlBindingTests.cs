@@ -108,6 +108,46 @@ public sealed partial class XamlBindingTests
         Assert.Contains(doc.Descendants(), e => e.Name.LocalName == "DataTemplate" && e.Attribute(x + "Key")?.Value == "As.FeedRow");
     }
 
+    /// <summary>
+    /// Tela de progresso da janela (MainWindow, DataContext = ApplyView) e a linha do feed: toda ligação existe em ApplyOverlay /
+    /// ProcessFeedRow; a página Aplicar mostra a frase para pessoas (LastSummary) e o texto técnico recolhido.
+    /// </summary>
+    [Fact]
+    public void Window_progress_overlay_bindings_exist_on_their_view_models()
+    {
+        var root = Root();
+        var all = AllProperties(DesktopDll(root));
+        var doc = XDocument.Load(Path.Combine(root, "src", "Nexus.Desktop", "MainWindow.xaml"), LoadOptions.SetLineInfo);
+        var problems = new List<string>();
+        var count = 0;
+        void Check(XElement scope, string type)
+        {
+            foreach (var e in scope.DescendantsAndSelf())
+            {
+                if (e.Ancestors().TakeWhile(a => !ReferenceEquals(a, scope)).Any(a => a.Name.LocalName == "DataTemplate")) continue;
+                foreach (var a in e.Attributes())
+                {
+                    var m = AnyBindingRegex().Match(a.Value);
+                    if (!m.Success || a.Value.Contains("RelativeSource", StringComparison.Ordinal)) continue;
+                    if (a.Name.LocalName == "DataContext" && ReferenceEquals(e, scope)) continue;
+                    count++;
+                    if (!all[type].Contains(m.Groups[1].Value)) problems.Add($"{((System.Xml.IXmlLineInfo)e).LineNumber} {e.Name.LocalName}.{a.Name.LocalName} → {type}.{m.Groups[1].Value}");
+                }
+            }
+        }
+        Assert.Contains("ApplyView", all["MainViewModel"]);
+        Check(doc.Descendants().Single(e => e.Attribute("DataContext")?.Value == "{Binding ApplyView}"), "ApplyOverlay");
+        Check(doc.Descendants().Single(e => e.Name.LocalName == "DataTemplate" && e.Attribute("DataType")?.Value == "{x:Type vm:ProcessFeedRow}"), "ProcessFeedRow");
+        Assert.True(count > 30, $"só {count} ligações conferidas");
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+
+        var broker = File.ReadAllText(Path.Combine(root, "src", "Nexus.Desktop", "Views", "Pages", "Broker.xaml"));
+        Assert.Contains("{Binding LastSummary}", broker, StringComparison.Ordinal);
+        Assert.Contains("Detalhes técnicos", broker, StringComparison.Ordinal);
+        Assert.Contains("LastSummary", all["BrokerPage"]);
+        Assert.Contains("HasLastMessage", all["BrokerPage"]);
+    }
+
     [GeneratedRegex(@"^\{Binding\s+(?:Path=)?([A-Za-z_]\w*)\s*(?:,|\})")]
     private static partial Regex AnyBindingRegex();
 
