@@ -64,6 +64,8 @@ public sealed class LocalBrokerIntegrationTests
         {
             var revert = session.RevertRun(run);
             _out.WriteLine($"[desfazer {run}] " + revert.Message);
+            foreach (var x in revert.Response?.Results ?? []) if (x.Outcome is not ("Restored" or "AlreadyOriginal" or "NothingToRestore"))
+                _out.WriteLine($"   {x.ActionKey}: {x.Outcome} · {x.Detail}");
             Assert.True(revert.Ok, revert.Message);
         }
     }
