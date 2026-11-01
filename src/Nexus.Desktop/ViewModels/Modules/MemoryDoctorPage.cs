@@ -62,6 +62,11 @@ public sealed class DoctorFixRow : ObservableObject
     public Guid? RunId { get => _runId; set { if (Set(ref _runId, value)) OnPropertyChanged(nameof(CanRevert)); } }
     public bool CanRevert => RunId is not null;
     public bool Admin => Fix.Admin;
+    /// <summary>
+    /// Nível em que a execução <see cref="RunId"/> foi feita: Desfazer precisa ir ao MESMO aplicador (cada nível tem o seu diário).
+    /// "Desligar da inicialização" usa o nível da entrada (máquina = administrador), que não é o <see cref="Admin"/> da solução.
+    /// </summary>
+    public BrokerLevel RunLevel { get; set; }
     /// <summary>Selo: vermelho quando não há desfazer (risco à vista), ciano nos demais.</summary>
     public UiTone BadgeTone => Fix.Kind != FixKind.Info && !Fix.Reversible && Fix.Kind is not (FixKind.DisableStartup or FixKind.Navigate) ? UiTone.Bad : UiTone.Info;
 }
@@ -448,7 +453,7 @@ public sealed class MemoryDoctorPage : ModulePage
     {
         var key = s.Id + "|" + f.Id;
         var row = new DoctorFixRow { Fix = f };
-        if (_applied.TryGetValue(key, out var previous)) { row.RunId = previous.RunId; row.Status = previous.Status; }
+        if (_applied.TryGetValue(key, out var previous)) { row.RunId = previous.RunId; row.RunLevel = previous.RunLevel; row.Status = previous.Status; }
         row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => ApplyFixAsync(key, s, row)), () => !Busy && !row.CanRevert);
         row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertFixAsync(key, row)), () => !Busy && row.CanRevert);
         return row;
@@ -494,6 +499,7 @@ public sealed class MemoryDoctorPage : ModulePage
         if (outcome is "Verified" or "AlreadyConfigured")
         {
             row.RunId = outcome == "Verified" && f.Reversible ? r.Response?.RunId : null;
+            row.RunLevel = f.Admin ? BrokerLevel.Admin : BrokerLevel.User;
             row.Status = outcome == "AlreadyConfigured" ? "Já estava assim." : f.Term == FixTerm.Temporary ? $"Feito às {DateTime.Now:HH:mm}. Lembre: isso volta a acontecer." : "Feito.";
             _applied[key] = row;
             if (f.ActionKey == DoctorActions.StandbyPurge) _lastPurge = DateTimeOffset.Now;
@@ -507,7 +513,7 @@ public sealed class MemoryDoctorPage : ModulePage
     private async Task RevertFixAsync(string key, DoctorFixRow row)
     {
         if (Host is null || row.RunId is not { } run) return;
-        var r = await Host.RevertAsync(run, row.Admin ? BrokerLevel.Admin : BrokerLevel.User);
+        var r = await Host.RevertAsync(run, row.RunLevel);
         if (r is null) return;
         if (r.Response?.FullyRestored == true)
         {
@@ -541,6 +547,7 @@ public sealed class MemoryDoctorPage : ModulePage
         if (outcome is "Verified" or "AlreadyConfigured")
         {
             row.RunId = outcome == "Verified" ? r.Response?.RunId : null;
+            row.RunLevel = req.Level;
             row.Status = outcome == "Verified" ? "Desligado da inicialização. Vale no próximo login." : "Já estava desligado.";
             _applied[key] = row;
             AddEvent($"{match.Name}: {row.Status}", "good");
