@@ -42,4 +42,21 @@ public sealed class BrokerSessionBatchTests
         Assert.Contains("não foram enviados", r.Message, StringComparison.Ordinal);
         Assert.Single(r.AllRunIds);
     }
+
+    [Fact]
+    public void One_invalid_action_is_skipped_and_the_rest_is_applied()
+    {
+        var sent = new List<int>();
+        var r = BrokerSession.Batched(Many(5), c =>
+        {
+            sent.Add(c.Count);
+            return c.Any(a => a.ActionId == "a2@1")
+                ? new BrokerCallResult(true, BrokerResponse.Fail(Guid.NewGuid(), "invalid-value", "'a2@1' não aceita valor."), "recusado")
+                : Ok(c);
+        });
+        Assert.Equal([5, 4], sent);
+        Assert.True(r.Ok);
+        Assert.Equal(5, r.Response!.Results!.Count);
+        Assert.Contains(r.Response.Results, x => x.ActionKey == "a2@1" && x.Outcome == "Refused");
+    }
 }

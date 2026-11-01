@@ -1,6 +1,8 @@
 using System.Security.Principal;
 using Microsoft.Win32;
 using Nexus.Broker;
+using Nexus.Core;
+using Nexus.WindowsActions.Power;
 using Nexus.WindowsActions.Services;
 
 namespace Nexus.IntegrationTests;
@@ -26,6 +28,44 @@ public sealed class LocalBrokerIntegrationTests
     {
         using var k = Registry.CurrentUser.OpenSubKey(path);
         return k?.GetValue(name)?.ToString();
+    }
+
+    [Fact]
+    public void Whole_catalog_like_the_apply_page_validates_applies_and_reverts()
+    {
+        // Mesmo caminho da página Aplicar com "tudo marcado": RequestsFor + lotes de 64 + aplicador de administrador.
+        // Visto no PC real: uma ação com valor indevido derrubava o pedido inteiro ("não aceita valor").
+        var catalog = CatalogLoader.LoadDirectory(Path.Combine(AppContext.BaseDirectory, "catalog"));
+        var p = new Dictionary<string, string>(StringComparer.Ordinal);
+        try { p["activeScheme"] = new WindowsPowerBackend().GetActiveScheme().ToString("D"); } catch (Exception ex) when (ex is not OutOfMemoryException) { }
+        var chosen = catalog.Actions
+            .Where(e => e.UserParameters.Count == 0 && !e.Definition.Irreversible)
+            .Select(e => (Entry: e, Instance: e.TryInstantiate(p, out _)))
+            .Where(x => x.Instance is not null)
+            .Select(x => (x.Entry, x.Instance!))
+            .ToList();
+        _out.WriteLine($"{chosen.Count} ações instanciáveis");
+        var requests = BrokerSession.RequestsFor(chosen);
+        var session = BrokerSession.ForThisPc(BrokerLevel.Admin, AppContext.BaseDirectory, Sid, m => _out.WriteLine("[sob demanda] " + m));
+
+        var plan = session.Plan(requests);
+        _out.WriteLine("[plano] " + plan.Message);
+        var refusedInPlan = plan.Response?.Results?.Where(r => r.Outcome == "Refused").ToList() ?? [];
+        Assert.True(refusedInPlan.Count == 0, "recusadas na validação: " + string.Join("; ", refusedInPlan.Select(r => r.ActionKey + ": " + r.Detail)));
+
+        var exec = session.Execute(requests);
+        _out.WriteLine("[aplicar] " + exec.Message);
+        foreach (var g in (exec.Response?.Results ?? []).GroupBy(r => r.Outcome)) _out.WriteLine($"  {g.Key}: {g.Count()} ({string.Join(", ", g.Take(6).Select(r => r.ActionKey))})");
+        Assert.True(exec.Ok, exec.Message);
+        Assert.DoesNotContain(exec.Response!.Results!, r => r.Outcome == "Refused");
+        Assert.True(exec.AllRunIds.Count >= 2, "mais de 64 ações = vários lotes");
+
+        foreach (var run in exec.AllRunIds.Reverse())
+        {
+            var revert = session.RevertRun(run);
+            _out.WriteLine($"[desfazer {run}] " + revert.Message);
+            Assert.True(revert.Ok, revert.Message);
+        }
     }
 
     [Fact]

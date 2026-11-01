@@ -562,6 +562,24 @@ public sealed class BrokerTests : IDisposable
     }
 
     [Fact]
+    public void Every_real_catalog_action_the_apply_page_sends_passes_the_broker_value_rule()
+    {
+        // Visto no PC real: a página Aplicar mandava o GUID desejado do plano de energia como valor e o aplicador recusava
+        // o pedido inteiro ("não aceita valor"). Regra: só envia valor quando o catálogo oferece allowedValues.
+        var catalog = CatalogLoader.LoadDirectory(Path.Combine(AppContext.BaseDirectory, "catalog"));
+        var noParams = new Dictionary<string, string>();
+        foreach (var e in catalog.Actions.Where(e => e.UserParameters.Count == 0))
+        {
+            if (e.TryInstantiate(noParams, out _) is not { } inst) continue;
+            var req = Assert.Single(BrokerSession.RequestsFor([(e, inst)]));
+            if (e.DesiredValue is not null || e.Definition.AllowedValues is not { Count: > 0 })
+                Assert.True(req.Value is null, $"{e.Definition.Key} não aceita valor, mas a página enviaria '{req.Value}'.");
+            else
+                Assert.Contains(req.Value, e.Definition.AllowedValues);
+        }
+    }
+
+    [Fact]
     public void Confirmation_lists_each_change_and_its_conditions()
     {
         var catalog = Catalog();

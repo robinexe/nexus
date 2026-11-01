@@ -47,6 +47,37 @@ public sealed class BrokerSession
     public BrokerCallResult Execute(IReadOnlyList<ActionRequest> actions, string profile = "interface") =>
         Batched(actions, chunk => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Execute, chunk, Profile: profile)));
 
+    private static readonly HashSet<string> PerActionRefusals = new(StringComparer.Ordinal)
+        { "invalid-value", "invalid-arguments", "not-instantiable", "handler-unavailable", "unknown-action", "caller-unknown" };
+
+    /// <summary>
+    /// O aplicador recusa o pedido INTEIRO quando uma ação não passa na validação. Para uma lista grande (página Aplicar,
+    /// Otimizar agora), uma ação inválida não deve impedir as outras: tira só a ação citada, registra o motivo como
+    /// "Refused" e reenvia (no máximo 16 vezes). Nada foi escrito nas tentativas recusadas (validação vem antes de tudo).
+    /// </summary>
+    private static Func<IReadOnlyList<ActionRequest>, BrokerCallResult> Resilient(Func<IReadOnlyList<ActionRequest>, BrokerCallResult> send) => actions =>
+    {
+        var pending = actions.ToList();
+        var refused = new List<ActionResultDto>();
+        for (var attempt = 0; ; attempt++)
+        {
+            var r = send(pending);
+            var error = r.Response is { Ok: false, Error: { } e } ? e : null;
+            var culprit = error is not null && PerActionRefusals.Contains(error.Code) && pending.Count > 1 && attempt < 16
+                ? pending.FirstOrDefault(p => error.Detail?.Contains("'" + p.ActionId + "'", StringComparison.Ordinal) == true)
+                : null;
+            if (culprit is null)
+            {
+                if (refused.Count == 0) return r;
+                var results = refused.Concat(r.Response?.Results ?? []).ToList();
+                var note = $" {refused.Count} ação(ões) recusada(s) pelo aplicador e puladas: {string.Join("; ", refused.Select(x => x.ActionKey + " (" + x.Detail + ")"))}.";
+                return r with { Response = r.Response is null ? null : r.Response with { Results = results }, Message = r.Message + note };
+            }
+            refused.Add(new ActionResultDto(culprit.ActionId, "Refused", error!.Detail));
+            pending.Remove(culprit);
+        }
+    };
+
     /// <summary>
     /// O aplicador aceita até <see cref="BrokerService.MaxActionsPerRequest"/> ações por pedido. Mais que isso vira lotes em
     /// sequência (mesma ordem); para no primeiro lote que falhar. Os resultados e as execuções (para desfazer) são somados.
@@ -55,6 +86,7 @@ public sealed class BrokerSession
     {
         ArgumentNullException.ThrowIfNull(actions);
         ArgumentNullException.ThrowIfNull(send);
+        send = Resilient(send);
         if (actions.Count <= BrokerService.MaxActionsPerRequest) return send(actions);
         var results = new List<ActionResultDto>();
         var runs = new List<Guid>();
@@ -147,7 +179,11 @@ public sealed class BrokerSession
     public static IReadOnlyList<ActionRequest> RequestsFor(IEnumerable<(CatalogEntry Entry, ActionInstance Instance)> chosen)
     {
         ArgumentNullException.ThrowIfNull(chosen);
-        return chosen.Select(c => new ActionRequest(c.Entry.Definition.Key, c.Entry.DesiredValue is null ? c.Instance.Desired.Value : null)).ToList();
+        // Mesma regra do aplicador (BrokerService.Validate): só manda valor quando o catálogo oferece uma escolha
+        // (allowedValues). Valor fixo no catálogo ou alvo que já define o desejado (ex.: plano de energia pelo GUID): sem valor.
+        return chosen.Select(c => new ActionRequest(c.Entry.Definition.Key,
+            c.Entry.DesiredValue is null && c.Entry.Definition.AllowedValues is { Count: > 0 } allowed && allowed.Contains(c.Instance.Desired.Value, StringComparer.Ordinal)
+                ? c.Instance.Desired.Value : null)).ToList();
     }
 
     /// <summary>Texto da confirmação antes de aplicar: o que muda, onde e o que exige.</summary>
