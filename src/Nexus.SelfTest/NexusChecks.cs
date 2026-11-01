@@ -85,6 +85,7 @@ public static class NexusChecks
         new("Memória: diagnóstico", "Uma amostra (processos, pool, compromisso)", MemoryDoctorSample) { Timeout = TimeSpan.FromSeconds(90) },
         new("Medir", "Bibliotecas de jogos", GameLibraries),
         new("Medir", "PresentMon encontrado?", PresentMon) { WindowsOnly = false },
+        new("Medir", "PresentMon executa (captura de 5 s do dwm.exe)", PresentMonRunsAsync) { Timeout = TimeSpan.FromSeconds(60) },
         new("Automático", "Perfil do PC e recomendações", Recommendations) { WindowsOnly = false },
         new("Automático", "Tarefas agendadas do NEXUS", ScheduledTasks),
         new("Ajustes", "settings.json", Settings) { WindowsOnly = false },
@@ -626,12 +627,48 @@ public static class NexusChecks
         foreach (var n in notes.Take(3)) c.Warn(n);
     }
 
+    /// <summary>
+    /// Embutido primeiro (tools\PresentMon\PresentMon.exe), depois o caminho e as pastas conhecidas; o escolhido precisa passar na
+    /// conferência (SHA-256 conhecido ou assinatura Authenticode da Intel). Só leitura: hash e assinatura do arquivo.
+    /// </summary>
     private static void PresentMon(CheckContext c)
     {
-        var path = PresentMonCli.Locate(null, AppContext.BaseDirectory);
-        c.Flag("encontrado", path is not null);
-        if (path is null) c.Warn("PresentMon não encontrado: Medir precisa dele (baixe em github.com/GameTechDev/PresentMon e salve em %LocalAppData%\\NEXUS\\PresentMon)");
-        else c.Info("versão", PresentMonCli.GenerationOf(path).ToString());
+        var found = PresentMonLocator.Locate(null, AppContext.BaseDirectory, PresentMonLocator.SystemProbe());
+        c.Flag("encontrado", found is not null);
+        if (found is null)
+        {
+            c.Warn($"PresentMon não encontrado: a cópia embutida ({PresentMonTrust.BundledPath(AppContext.BaseDirectory)}) falta nesta pasta e nenhum outro foi achado");
+            return;
+        }
+        c.Info("origem", found.Source switch { PresentMonSource.Bundled => "embutido", PresentMonSource.Configured => "configurado", _ => "achado" });
+        c.Flag("conferido", found.Usable);
+        c.Info("assinante", found.Verdict.Signer);
+        c.Info("versão", PresentMonCli.GenerationOf(found.Path).ToString());
+        if (!found.Usable) c.Warn(found.Verdict.Reason);
+        else if (found.Source != PresentMonSource.Bundled) c.Warn($"a cópia embutida falta; usando {found.Path}");
+    }
+
+    /// <summary>
+    /// Prova de que o PresentMon executa neste PC (captura de 5 s do dwm.exe, sem pedir elevação). Fica atrás de
+    /// --with-benchmarks porque inicia um processo e grava um CSV temporário (apagado em seguida) — o resto do autoteste não
+    /// inicia processos nem grava arquivos. Sem permissão de rastreamento (nem administrador nem o grupo "Usuários do log de
+    /// desempenho") a verificação é ignorada: o autoteste nunca pede o aviso do Windows.
+    /// </summary>
+    [SupportedOSPlatform("windows")]
+    private static async Task PresentMonRunsAsync(CheckContext c)
+    {
+        if (!c.Options.WithBenchmarks) CheckContext.Skip("use --with-benchmarks (inicia o PresentMon por 5 s e grava um CSV temporário, apagado em seguida)");
+        if (!WindowsProcessProbe.CanTraceWithoutElevation())
+            CheckContext.Skip("sem permissão de rastreamento (administrador ou grupo \"Usuários do log de desempenho\"); o autoteste não pede o aviso do Windows");
+        var probe = PresentMonLocator.SystemProbe();
+        var found = PresentMonLocator.Locate(null, AppContext.BaseDirectory, probe);
+        if (found is not { Usable: true }) CheckContext.Skip(found?.Verdict.Reason ?? "PresentMon não encontrado");
+        var r = await PresentMonSmokeTest.RunAsync(found!.Path, probe, "dwm.exe", 5, c.Cancel).ConfigureAwait(false);
+        c.Flag("executou", r.Ran);
+        c.Flag("cabeçalho gravado", r.HeaderWritten);
+        c.Count("quadros do dwm.exe", r.Frames);
+        if (!r.Ran) throw new InvalidOperationException(r.Message + (r.Log.Length > 0 ? " · " + r.Log.Trim() : ""));
+        if (r.Frames == 0) c.Warn(r.Message);
     }
 
     // ------------------------------------------------------------------ automático e ajustes

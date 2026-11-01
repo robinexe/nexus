@@ -63,12 +63,16 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private string _libraryText = "Lendo as bibliotecas de jogos…";
     private string _inviteText = "";
     private SessionComparisonResult? _manual;
+    private readonly IPresentMonTrustProbe _trust = PresentMonLocator.SystemProbe();
+    private PresentMonLocation? _pm;
+    private bool? _perfLogMember;
+    private Guid? _perfLogRun;
 
     public MeasurePage()
     {
         _prefs = MeasurePreferences.Load(_prefsPath);
         if (_prefs.PresentMonPath is null && LegacyPresentMonPath() is { } legacy) _prefs = _prefs with { PresentMonPath = legacy };
-        _prefs = _prefs with { PresentMonPath = PresentMonCli.Locate(_prefs.PresentMonPath, AppContext.BaseDirectory) };
+        RelocatePresentMon(_prefs.PresentMonPath);
         _hotkeyText = _prefs.OverlayHotkey;
         _overlay.SetCorner(_prefs.OverlayCorner);
         _overlay.ShowSystem = _prefs.OverlayShowSystem;
@@ -103,6 +107,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
         ExportCsvCommand = new RelayCommand(ExportCsv, () => _all.Count > 0);
         CleanupCommand = new RelayCommand(Cleanup, () => KeepDays > 0 && _all.Count > 0);
         OpenFolderCommand = new RelayCommand(OpenFolder);
+        JoinPerfLogCommand = new RelayCommand(() => _ = JoinPerfLogAsync(), () => ShowPerfLogOffer && !Busy);
+        UndoPerfLogCommand = new RelayCommand(() => _ = UndoPerfLogAsync(), () => _perfLogRun is not null && !Busy);
         Reload();
     }
 
@@ -255,19 +261,35 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public string LibraryText { get => _libraryText; private set => Set(ref _libraryText, value); }
 
     public string? PresentMonPath => _prefs.PresentMonPath;
-    public bool HasPresentMon => PresentMonPath is not null && File.Exists(PresentMonPath);
-    public string PresentMonText => HasPresentMon ? $"{Path.GetFileName(PresentMonPath!)} ({PresentMonCli.GenerationOf(PresentMonPath) switch { PresentMonGeneration.V1 => "versão 1.x", _ => "versão 2.x" }})" : "PresentMon não encontrado";
+    /// <summary>Há um PresentMon aprovado na conferência (hash conhecido ou assinatura da Intel).</summary>
+    public bool HasPresentMon => _pm is { Usable: true } pm && File.Exists(pm.Path);
+    public string PresentMonText => HasPresentMon
+        ? _pm!.Source == PresentMonSource.Bundled
+            ? $"PresentMon {PresentMonTrust.BundledVersion} (acompanha o NEXUS)"
+            : $"{Path.GetFileName(_pm.Path)} ({PresentMonCli.GenerationOf(_pm.Path) switch { PresentMonGeneration.V1 => "versão 1.x", _ => "versão 2.x" }}, {_pm.SourceText})"
+        : _pm is not null ? "PresentMon recusado" : "PresentMon não encontrado";
+    /// <summary>Resultado da conferência (por que foi aceito ou recusado).</summary>
+    public string PresentMonTrustText => _pm?.Verdict.Reason ?? "";
     public string PresentMonHelp { get; } =
-        "O NEXUS usa o PresentMon, ferramenta gratuita e oficial da Intel, para ler o tempo de cada quadro (rastreamento de eventos do Windows, " +
-        "sem entrar no jogo). O NEXUS não baixa nada sozinho: baixe o arquivo PresentMon-2.x-x64.exe em github.com/GameTechDev/PresentMon " +
-        "(seção Releases) e salve em %LocalAppData%\\NEXUS\\PresentMon ou indique onde salvou. Se você já usa o CapFrameX ou o app PresentMon da " +
-        "Intel, o NEXUS procura lá também.";
+        "O NEXUS usa o PresentMon, ferramenta gratuita e oficial da Intel (licença MIT), para ler o tempo de cada quadro (rastreamento de eventos " +
+        "do Windows, sem entrar no jogo). A versão " + PresentMonTrust.BundledVersion + " já vem com o NEXUS, na pasta tools\\PresentMon. Antes de cada uso " +
+        "o NEXUS confere que o arquivo é o oficial (impressão digital SHA-256 conhecida ou assinatura digital da Intel Corporation); se não for, " +
+        "ele não é executado. Se a cópia embutida faltar, o NEXUS procura o app PresentMon da Intel, o CapFrameX, Downloads, ou o arquivo que você indicar.";
     public bool CanTraceSilently { get; } = SafeCanTrace();
     public string RightsText => CanTraceSilently
         ? "Sua conta pode medir sem aviso do Windows."
-        : "Cada medição vai pedir permissão ao Windows (o PresentMon precisa disso). Para medir sem aviso, um administrador pode adicionar " +
-          "sua conta ao grupo \"Usuários de log de desempenho\" (PowerShell como administrador: Add-LocalGroupMember -SID S-1-5-32-559 -Member $env:USERNAME) " +
-          "e você sai e entra de novo no Windows. O NEXUS não faz isso sozinho.";
+        : "Sem permissão especial, cada medição pede permissão ao Windows (o PresentMon precisa de administrador para rastrear os quadros). " +
+          "Com \"Medir sem pedir permissão toda vez\", o NEXUS coloca a sua conta no grupo do Windows \"Usuários do log de desempenho\" " +
+          "(pede o aviso do Windows uma vez). Vale depois de sair e entrar de novo na conta; dá para desfazer. Esse grupo deixa programas da sua " +
+          "conta iniciarem rastreamentos de eventos do Windows; não dá privilégio de administrador.";
+
+    /// <summary>A conta já está no grupo, mas o acesso atual ainda não tem o grupo (falta sair e entrar de novo).</summary>
+    public bool PerfLogPendingLogon => !CanTraceSilently && _perfLogMember == true;
+    public bool ShowPerfLogOffer => OperatingSystem.IsWindows() && !CanTraceSilently && _perfLogMember != true;
+    public bool CanUndoPerfLog => _perfLogRun is not null;
+    public string PerfLogText => CanTraceSilently ? ""
+        : _perfLogMember == true ? "Sua conta já está no grupo \"Usuários do log de desempenho\". Saia e entre de novo no Windows para medir sem aviso; até lá o PresentMon continua pedindo permissão."
+        : "Um aviso do Windows agora, e depois nunca mais a cada partida (vale depois de sair e entrar de novo na conta).";
 
     public string OverlayHelp { get; } =
         "O mostrador é uma janela do próprio NEXUS por cima do jogo: não entra no jogo, não usa ganchos nem injeção, por isso é seguro com " +
@@ -301,6 +323,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public RelayCommand ExportCsvCommand { get; }
     public RelayCommand CleanupCommand { get; }
     public RelayCommand OpenFolderCommand { get; }
+    public RelayCommand JoinPerfLogCommand { get; }
+    public RelayCommand UndoPerfLogCommand { get; }
 
     // ------------------------------------------------------------------ ciclo de vida
 
@@ -327,7 +351,9 @@ public sealed class MeasurePage : ModulePage, IDisposable
         try
         {
             _probe = new WindowsProcessProbe();
-            _engine = new AutoMeasureEngine(_probe, new PresentMonLiveStarter(() => _prefs.PresentMonPath, () => _prefs.RequestElevation && !CanTraceSilently));
+            _engine = new AutoMeasureEngine(_probe, new PresentMonLiveStarter(() => _prefs.PresentMonPath, () => _prefs.RequestElevation && !CanTraceSilently,
+                verify: p => PresentMonTrust.Verify(p, _trust)));
+            _ = RefreshPerfLogAsync();
             _pollTimer.Start();
             RegisterHotkey();
             CleanOldTempFiles();
@@ -781,7 +807,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         else if (message is not null) Status = message;
         foreach (var p in new[] { nameof(AutoMeasure), nameof(OverlayOnGameStart), nameof(OverlayShowSystem), nameof(OverlayCornerValue), nameof(HotkeyEnabled),
                      nameof(DetectFullscreen), nameof(RequestElevation), nameof(MinSessionSeconds), nameof(KeepDays), nameof(UserGames), nameof(ExcludedGames),
-                     nameof(PresentMonPath), nameof(HasPresentMon), nameof(PresentMonText) })
+                     nameof(PresentMonPath), nameof(HasPresentMon), nameof(PresentMonText), nameof(PresentMonTrustText) })
             OnPropertyChanged(p);
                         Notify();
     }
@@ -798,13 +824,88 @@ public sealed class MeasurePage : ModulePage, IDisposable
     {
         var dialog = new Microsoft.Win32.OpenFileDialog { Title = "Onde está o PresentMon?", Filter = "PresentMon (PresentMon*.exe)|PresentMon*.exe|Executável (*.exe)|*.exe" };
         if (dialog.ShowDialog() != true) return;
-        SetPrefs(_prefs with { PresentMonPath = dialog.FileName }, "PresentMon indicado.");
+        RelocatePresentMon(dialog.FileName);
+        SetPrefs(_prefs, _pm is { Usable: true, Source: PresentMonSource.Bundled } bundled && !string.Equals(bundled.Path, dialog.FileName, StringComparison.OrdinalIgnoreCase)
+            ? "O NEXUS continua usando o PresentMon que o acompanha (conferido); o arquivo indicado fica como alternativa."
+            : PresentMonStatus());
     }
 
     private void RescanPresentMon()
     {
-        var found = PresentMonCli.Locate(null, AppContext.BaseDirectory);
-        SetPrefs(_prefs with { PresentMonPath = found ?? _prefs.PresentMonPath }, found is null ? "PresentMon não encontrado nas pastas conhecidas." : $"PresentMon encontrado: {found}");
+        RelocatePresentMon(_prefs.PresentMonPath);
+        SetPrefs(_prefs, PresentMonStatus());
+    }
+
+    /// <summary>Procura (embutido primeiro) e confere o PresentMon. Só leitura: hash e assinatura do arquivo.</summary>
+    private void RelocatePresentMon(string? configured)
+    {
+        try { _pm = PresentMonLocator.Locate(configured, AppContext.BaseDirectory, _trust); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { _pm = null; _status = "Não deu para conferir o PresentMon: " + ex.Message; }
+        _prefs = _prefs with { PresentMonPath = _pm?.Path ?? configured };
+    }
+
+    private string PresentMonStatus() => _pm switch
+    {
+        null => "PresentMon não encontrado nas pastas conhecidas.",
+        { Usable: true } pm => $"PresentMon pronto ({pm.SourceText}). {pm.Verdict.Reason}",
+        var pm => pm.Verdict.Reason,
+    };
+
+    // ------------------------------------------------------------------ grupo "Usuários do log de desempenho" (ação de catálogo)
+
+    private const string PerfLogActionId = "measure.perflog-group.join";
+
+    private async Task RefreshPerfLogAsync()
+    {
+        if (!OperatingSystem.IsWindows() || CanTraceSilently) return;
+        var sid = Host?.UserSid ?? WindowsLocalGroupBackend.CurrentUserSid();
+        _perfLogMember = sid is null ? null : await Task.Run(() => WindowsLocalGroupBackend.IsMemberOfPerfLogUsers(sid));
+        foreach (var p in new[] { nameof(PerfLogPendingLogon), nameof(ShowPerfLogOffer), nameof(PerfLogText), nameof(CanUndoPerfLog) }) OnPropertyChanged(p);
+    }
+
+    private async Task JoinPerfLogAsync()
+    {
+        if (Host is null) return;
+        try
+        {
+            Busy = true;
+            var r = await Host.ApplyAsync("Medir sem pedir permissão toda vez",
+                "O NEXUS vai colocar a sua conta no grupo do Windows \"Usuários do log de desempenho\" (o Windows pede permissão uma vez).\n\n" +
+                "Depois disso o PresentMon mede sem o aviso do Windows a cada partida. Vale depois que você sair e entrar de novo na conta.\n\n" +
+                "O que muda: programas da sua conta passam a poder iniciar rastreamentos de eventos do Windows (é o que o PresentMon usa). " +
+                "Não dá privilégio de administrador. Desfazer tira a conta do grupo (só se ela não estava lá antes).",
+                [new ActionRequest(PerfLogActionId)], BrokerLevel.Admin);
+            if (r is null) { Status = "Cancelado. Nada foi alterado."; return; }
+            if (r.Response is { Ok: true, RunId: { } run })
+            {
+                _perfLogRun = run;
+                Status = "Pronto: sua conta está no grupo \"Usuários do log de desempenho\". Saia e entre de novo no Windows para medir sem aviso.";
+            }
+            else Status = r.Message;
+        }
+        finally
+        {
+            Busy = false;
+            await RefreshPerfLogAsync();
+        }
+    }
+
+    private async Task UndoPerfLogAsync()
+    {
+        if (Host is null || _perfLogRun is not { } run) return;
+        try
+        {
+            Busy = true;
+            var r = await Host.RevertAsync(run, BrokerLevel.Admin);
+            if (r is null) return;
+            if (r.Ok) { _perfLogRun = null; Status = "Desfeito: sua conta saiu do grupo (vale depois de sair e entrar de novo)."; }
+            else Status = r.Message;
+        }
+        finally
+        {
+            Busy = false;
+            await RefreshPerfLogAsync();
+        }
     }
 
     /// <summary>Caminho do PresentMon da versão anterior da página (desktop-settings.json), para não pedir de novo.</summary>
