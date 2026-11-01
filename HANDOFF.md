@@ -197,7 +197,11 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     permanentes), Medir v2 (jogo detectado → captura automática PresentMon, antes x depois automático, ao vivo, mostrador
     de FPS sem injeção; página Comparar absorvida). Defeito real achado no PC: ProgressBar ligada a propriedade só leitura
     (pilha de janelas de erro) → corrigido + teste `XamlBindingTests`. CI: 1504 unitários e 51/51 integração no Windows.
-12. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+12. **31/10 noite (2):** Assistente completo (13 etapas, relatório HTML, desfazer tudo), autoteste no PC real
+    (`tools\selftest\Rodar-Autoteste.cmd` → `%LocalAppData%\NEXUS\autoteste\<data>\`, 37 verificações + todas as páginas
+    fotografadas; roda também na VM do CI), design system v2 (ilustrações vetoriais, ícones, componentes animados) aplicado
+    às 27 páginas. VM do CI: 37 verificações sem FALHA e 27 páginas abertas sem exceção.
+13. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
