@@ -37,10 +37,13 @@ public sealed class VendorDriverClient : IDisposable
     private readonly HttpClient _http;
     private readonly Func<long> _clockMs;
 
+    // Sem compressão: o Akamai da AMD responde "Content-Encoding: gzip" até ao HEAD de um .exe quando o cliente aceita gzip
+    // (visto no PC real: tamanho sumia e o NEXUS dizia "tamanho desconhecido"); no GET o binário viria comprimido e o hash
+    // não bateria. Binário é pedido sempre como identidade.
     public VendorDriverClient(HttpMessageHandler? handler = null, Func<long>? clockMs = null)
     {
         _http = handler is null
-            ? new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false, AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate }, disposeHandler: true)
+            ? new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false, AutomaticDecompression = DecompressionMethods.None }, disposeHandler: true)
             : new HttpClient(handler, disposeHandler: false);
         _http.Timeout = Timeout.InfiniteTimeSpan;
         _http.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);

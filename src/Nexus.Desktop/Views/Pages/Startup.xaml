@@ -69,8 +69,11 @@
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Interruptor (ou cadeado quando é só leitura) -->
+            <!-- Interruptor (ou cadeado quando é só leitura); caixa para desligar em massa -->
             <StackPanel Width="60" VerticalAlignment="Center">
+              <CheckBox IsChecked="{Binding Selected}" Margin="0,0,0,6" HorizontalAlignment="Left"
+                        Visibility="{Binding CanSelect, Converter={StaticResource BoolToVis}}"
+                        ToolTip="Selecionar para desligar junto com outros" AutomationProperties.Name="Selecionar para desligar em massa"/>
               <Button Style="{StaticResource B.Switch}" Command="{Binding ToggleCommand}" HorizontalAlignment="Left"
                       Visibility="{Binding CanToggle, Converter={StaticResource BoolToVis}}"
                       ToolTip="{Binding StateText}" AutomationProperties.Name="{Binding SwitchName}"/>
@@ -287,6 +290,27 @@
                       Detail="Nenhum item de terceiros (ou da busca) abre com o Windows. Os do Windows ficam ocultos."
                       ActionText="Ler de novo" Command="{Binding RefreshCommand}"
                       Visibility="{Binding ShowEmpty, Converter={StaticResource BoolToVis}}"/>
+
+        <!-- Desligar em massa: marque os itens e desligue todos de uma vez (uma confirmação, um Desfazer). -->
+        <Border Style="{StaticResource Panel.Inset}" Padding="14,10" Margin="0,0,0,10">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <c:Icon Data="{StaticResource Icon.Startup}" Size="16" Foreground="{StaticResource Brush.Trace}" Margin="0,0,8,0"/>
+              <TextBlock Style="{StaticResource Text.Body}" VerticalAlignment="Center" TextWrapping="Wrap"
+                         Text="Marque os programas e desligue todos de uma vez."/>
+            </StackPanel>
+            <Button Grid.Column="1" Command="{Binding SelectAllOnCommand}" Style="{StaticResource Button.Ghost}" Margin="8,0,0,0" Content="Marcar todos ligados"/>
+            <Button Grid.Column="2" Command="{Binding ClearSelectionCommand}" Style="{StaticResource Button.Ghost}" Margin="8,0,0,0" Content="Limpar"/>
+            <Button Grid.Column="3" Command="{Binding DisableSelectedCommand}" Style="{StaticResource Button.Primary}" Margin="8,0,0,0"
+                    Content="{Binding DisableSelectedText}" AutomationProperties.Name="Desligar selecionados"/>
+          </Grid>
+        </Border>
 
         <ItemsControl ItemsSource="{Binding Visible}" ItemTemplate="{StaticResource B.ItemCard}" Focusable="False"/>
 

@@ -174,6 +174,7 @@ public sealed partial class WiringTests
         ["CleaningPage.cs|rule.ActionKey"] = nameof(Cleaning_rules_point_to_batch_actions),
         ["AssistantPage.cs|t.Key"] = nameof(Key_and_level_written_together_match_the_catalog),
         ["StartupPage.cs|req.Key"] = nameof(Key_and_level_written_together_match_the_catalog),
+        ["StartupPage.cs|r.Key"] = nameof(Key_and_level_written_together_match_the_catalog), // desligar em massa: mesmo ToggleRequest
         ["MemoryDoctorPage.cs|req.Key"] = nameof(Key_and_level_written_together_match_the_catalog),
         ["ProgramsPage.cs|actionId"] = nameof(Key_and_level_written_together_match_the_catalog),
         ["SystemToolsPage.cs|actionId"] = nameof(Key_and_level_written_together_match_the_catalog),

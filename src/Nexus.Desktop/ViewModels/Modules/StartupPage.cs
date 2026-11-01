@@ -34,6 +34,62 @@ public sealed class StartupPage : ModulePage
     {
         RefreshCommand = new RelayCommand(() => _ = RunAsync(LoadAsync), () => !Busy);
         UndoCommand = new RelayCommand(() => _ = RunAsync(UndoAsync), () => !Busy && _lastRun is not null);
+        DisableSelectedCommand = new RelayCommand(() => _ = RunAsync(DisableSelectedAsync), () => !Busy && SelectedCount > 0);
+        SelectAllOnCommand = new RelayCommand(() => SetSelection(r => r.CanSelect), () => !Busy && Visible.Any(r => r.CanSelect));
+        ClearSelectionCommand = new RelayCommand(() => SetSelection(_ => false), () => SelectedCount > 0);
+    }
+
+    // ------------------------------------------------------------------ desligar em massa
+
+    public RelayCommand DisableSelectedCommand { get; }
+    public RelayCommand SelectAllOnCommand { get; }
+    public RelayCommand ClearSelectionCommand { get; }
+    public int SelectedCount => _all.Count(r => r.Selected);
+    public bool HasSelection => SelectedCount > 0;
+    public string DisableSelectedText => SelectedCount == 1 ? "Desligar 1 selecionado" : $"Desligar {SelectedCount} selecionados";
+
+    internal void SelectionChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+        OnPropertyChanged(nameof(DisableSelectedText));
+    }
+
+    private void SetSelection(Func<StartupRow, bool> pick)
+    {
+        foreach (var r in Visible) r.Selected = pick(r);
+        SelectionChanged();
+    }
+
+    /// <summary>Um pedido só: nível administrador se algum item for do computador inteiro (como na página Aplicar).</summary>
+    internal static (BrokerLevel Level, IReadOnlyList<ActionRequest> Requests) BulkRequests(IEnumerable<StartupItem> items)
+    {
+        var reqs = items.Select(ToggleRequest).Where(r => r is not null).Select(r => r!.Value).ToList();
+        var level = reqs.Any(r => r.Level == BrokerLevel.Admin) ? BrokerLevel.Admin : BrokerLevel.User;
+        return (level, reqs.Select(r => new ActionRequest(r.Key, "disabled", r.Args)).ToList());
+    }
+
+    private readonly List<(Guid Run, BrokerLevel Level)> _bulkRuns = [];
+
+    private async Task DisableSelectedAsync()
+    {
+        if (Host is null) return;
+        var chosen = _all.Where(r => r.Selected && r.CanSelect).ToList();
+        if (chosen.Count == 0) return;
+        var (level, requests) = BulkRequests(chosen.Select(r => r.Item));
+        var names = string.Join("\n", chosen.Take(15).Select(r => "• " + r.Name)) + (chosen.Count > 15 ? $"\n• e mais {chosen.Count - 15}" : "");
+        var text = $"Deixar de abrir {chosen.Count} programa(s) junto com o Windows?\n\n{names}\n\nOs programas continuam instalados e abrem " +
+                   "normalmente quando você quiser. É o mesmo método do Gerenciador de Tarefas; Desfazer liga todos de novo." +
+                   (level == BrokerLevel.Admin ? "\n\nAlguns são do computador inteiro: o Windows vai pedir permissão de administrador." : "");
+        var r = await Host.ApplyAsync($"Desligar {chosen.Count} na inicialização", text, requests, level);
+        if (r is null) return; // cancelado
+        _bulkRuns.Clear();
+        foreach (var run in r.AllRunIds) _bulkRuns.Add((run, level));
+        if (_bulkRuns.Count > 0) { _lastRun = _bulkRuns[^1].Run; _lastLevel = level; }
+        var done = r.Response?.Results?.Count(x => x.Outcome is "Verified" or "AlreadyDesired" or "Applied") ?? 0;
+        LastChange = $"Desligados {done} de {chosen.Count}: o efeito aparece no próximo logon/boot.";
+        Message = r.Ok ? LastChange : LastChange + " " + ApplySummary.Human(r);
+        await LoadAsync();
     }
 
     public override string Title => "Inicialização";
@@ -252,9 +308,16 @@ public sealed class StartupPage : ModulePage
     private async Task UndoAsync()
     {
         if (Host is null || _lastRun is not { } run) return;
-        var r = await Host.RevertAsync(run, _lastLevel);
+        // Desligar em massa gera até dois lotes (usuário e computador): desfaz todos, do último para o primeiro.
+        var runs = _bulkRuns.Count > 0 && _bulkRuns[^1].Run == run ? Enumerable.Reverse(_bulkRuns).ToList() : [(run, _lastLevel)];
+        BrokerCallResult? r = null;
+        foreach (var (id, level) in runs)
+        {
+            r = await Host.RevertAsync(id, level);
+            if (r is null || r.Response?.FullyRestored != true) break;
+        }
         if (r is null) return;
-        if (r.Response?.FullyRestored == true) { _lastRun = null; LastChange = ""; }
+        if (r.Response?.FullyRestored == true) { _lastRun = null; _bulkRuns.Clear(); LastChange = ""; }
         Message = r.Message;
         await LoadAsync();
     }
@@ -280,11 +343,13 @@ public sealed class StartupRow : ObservableObject
     public StartupRow(StartupItem item, StartupPage page)
     {
         Item = item;
+        _page = page;
         ToggleCommand = new RelayCommand(() => _ = page.ToggleAsync(this), () => CanToggle && !page.Busy);
         RemoveCommand = new RelayCommand(() => _ = page.RemoveOrphanAsync(this), () => CanRemove && !page.Busy);
         ManualCommand = new RelayCommand(() => _ = page.ServiceManualAsync(this), () => IsService && !page.Busy);
     }
 
+    private readonly StartupPage _page;
     public StartupItem Item { get; }
     public string Name => Item.Name;
     public string Publisher => Item.Publisher.Describe();
@@ -295,6 +360,14 @@ public sealed class StartupRow : ObservableObject
     public bool CanToggle => Item.CanToggle && StartupPage.ToggleRequest(Item) is not null;
     public bool CanRemove => Item.CanRemoveOrphan;
     public bool IsService => Item.Source == StartupSource.Service;
+    /// <summary>Entra na seleção em massa: só o que dá para desligar e está ligado.</summary>
+    public bool CanSelect => CanToggle && Item.Enabled;
+    private bool _selected;
+    public bool Selected
+    {
+        get => _selected;
+        set { if (Set(ref _selected, value && CanSelect)) _page.SelectionChanged(); }
+    }
     public bool IsOrphan => Item.IsOrphan;
     public bool ReadOnly => !CanToggle && !IsService;
     public string ReadOnlyReason => Item.Source switch
