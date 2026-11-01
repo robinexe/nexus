@@ -178,7 +178,7 @@ public sealed class VendorDriverClient : IDisposable
             else if (response.StatusCode == HttpStatusCode.RequestedRangeNotSatisfiable)
             {
                 TryDelete(partial);
-                throw new VendorDriverException("O download parcial não confere com o servidor; recomeçando.");
+                throw new VendorDriverException("O download parcial não conferia com o servidor e foi descartado. Clique de novo para baixar do início.");
             }
             else throw new VendorDriverException($"Download recusado pelo servidor ({(int)response.StatusCode}).");
 
