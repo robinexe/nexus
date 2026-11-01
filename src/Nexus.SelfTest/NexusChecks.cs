@@ -510,6 +510,13 @@ public static class NexusChecks
         var r = DriverUpdatesReader.Scan(TimeSpan.Zero, c.Cancel, searchUpdates: false);
         c.Count("placas de vídeo", r.Gpus.Count);
         c.Flag("reinício pendente", r.RebootPending);
+        // "Ver se falta algum driver": a mesma leitura do cartão "Dispositivos sem driver" (código de problema de cada dispositivo).
+        c.Count("dispositivos", r.DeviceCount);
+        c.Flag("código de problema lido", r.ProblemCodesRead);
+        c.Count("dispositivos sem driver", r.Problems.Count(p => p.Kind == DeviceProblemKind.MissingDriver));
+        c.Count("dispositivos com driver que não carrega", r.Problems.Count(p => p.Kind == DeviceProblemKind.DriverFailed));
+        c.Count("dispositivos desativados", r.Problems.Count(p => p.Kind == DeviceProblemKind.Disabled));
+        if (r.DeviceCount == 0) c.Warn("nenhum dispositivo lido pela SetupAPI");
         if (r.InventoryNote is not null) c.Warn(r.InventoryNote);
         if (r.GpuNote is not null) c.Warn(r.GpuNote);
     }

@@ -399,6 +399,16 @@ public static class StepPlanners
                 users.Add(new UserAction($"Atualizar o driver da {g.Name} pelo site oficial", g.Verdict, g.OfficialPage));
         }
         if (reading.RebootPending == true) facts.Add(new StepFact("Reinício pendente", "sim", "warn", "O Windows Update espera um reinício para terminar."));
+        var needing = reading.NeedingDriver;
+        if (reading.ProblemCodesRead || needing.Count > 0)
+            facts.Add(new StepFact("Dispositivos sem driver", needing.Count.ToString(Pt), needing.Count > 0 ? "bad" : "good",
+                needing.Count > 0 ? string.Join(" · ", needing.Take(3).Select(p => $"{p.Name} ({p.CodeText})")) + (needing.Count > 3 ? $" e mais {needing.Count - 3}" : "")
+                    : $"{reading.DeviceCount} dispositivos conferidos."));
+        if (needing.Count > 0 && (!searched || reading.Offers.All(o => o.InstalledVersion is not null)))
+            users.Add(new UserAction(
+                needing.Count == 1 ? $"Instalar o driver de \"{needing[0].Name}\"" : $"Instalar o driver de {needing.Count} dispositivos sem driver",
+                (searched ? "O Windows Update não ofereceu driver para eles. " : "Procure primeiro no Windows Update (botão desta etapa). ") + DeviceProblems.Advice,
+                DeviceProblems.Source));
         var changes = new List<ProposedChange>();
         if (searched)
         {

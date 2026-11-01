@@ -131,6 +131,15 @@ public sealed class DriverUpdatesPage : ModulePage
     public ObservableCollection<DriverUpdateRow> Graphics { get; } = [];
     public ObservableCollection<GpuDriverCard> Gpus { get; } = [];
 
+    /// <summary>Dispositivos sem driver ou com driver que não carrega (código de problema do Gerenciador de Dispositivos).</summary>
+    public ObservableCollection<DeviceProblem> MissingDevices { get; } = [];
+    public int MissingCount => MissingDevices.Count;
+    public bool HasMissing => MissingDevices.Count > 0;
+    public string MissingSummary { get => _missingSummary; private set => Set(ref _missingSummary, value); }
+    private string _missingSummary = "";
+    public string MissingAdvice => _missingAdvice;
+    private readonly string _missingAdvice = DeviceProblems.Advice;
+
     public bool Searching { get => _searching; private set { if (Set(ref _searching, value)) NotifyOffers(); } }
     public bool Searched { get => _searched; private set { if (Set(ref _searched, value)) NotifyOffers(); } }
     public string SearchStatus { get => _searchStatus; private set => Set(ref _searchStatus, value); }
@@ -195,7 +204,24 @@ public sealed class DriverUpdatesPage : ModulePage
         finally { LoadingGpus = false; }
         FillGpus(r);
         FillReboot(r.RebootPending);
+        FillProblems(r);
         Message = "";
+    }
+
+    /// <summary>"Ver se falta algum driver": aparelhos sem driver ou com driver que não carrega (lidos ao abrir e a cada busca).</summary>
+    private void FillProblems(DriverUpdatesReading r)
+    {
+        MissingDevices.Clear();
+        foreach (var p in r.NeedingDriver) MissingDevices.Add(p);
+        var disabled = r.Problems.Count(p => p.Kind == DeviceProblemKind.Disabled);
+        var missing = r.NeedingDriver.Count(p => p.Kind == DeviceProblemKind.MissingDriver);
+        var failed = r.NeedingDriver.Count - missing;
+        MissingSummary = MissingDevices.Count == 0
+            ? (r.ProblemCodesRead ? $"Nenhum dispositivo sem driver ({r.DeviceCount} conferidos)." : "")
+            : $"{missing} sem driver, {failed} com driver que não carrega." +
+              (disabled > 0 ? $" {disabled} desativado(s) por você ou pelo BIOS não entra(m) na conta." : "");
+        OnPropertyChanged(nameof(MissingCount));
+        OnPropertyChanged(nameof(HasMissing));
     }
 
     private async Task SearchAsync()
@@ -215,6 +241,7 @@ public sealed class DriverUpdatesPage : ModulePage
             var r = await Task.Run(() => DriverUpdatesReader.Scan(DriverUpdatesReader.DefaultTimeout, token), CancellationToken.None);
             FillGpus(r);
             FillReboot(r.RebootPending);
+            FillProblems(r);
             if (r.Error != WuErrorKind.None)
             {
                 ErrorText = r.ErrorMessage ?? "Não foi possível consultar o Windows Update.";
@@ -228,6 +255,8 @@ public sealed class DriverUpdatesPage : ModulePage
                 ? "O Windows Update não tem atualização de driver para este PC agora. Isso é normal: o Windows só oferece versões testadas para o seu hardware."
                 : $"{total} atualização(ões) de driver: {Recommended.Count} recomendada(s), {Optional.Count} opcional(is), {Graphics.Count} de vídeo.";
             if (r.InventoryNote is not null) Summary += " " + r.InventoryNote;
+            if (MissingDevices.Count > 0 && !r.Offers.Any(o => o.InstalledVersion is null))
+                Summary += $" O Windows Update não ofereceu driver para {MissingDevices.Count} dispositivo(s) sem driver: veja o site do fabricante (cartão \"Dispositivos sem driver\").";
             SearchStatus = $"Busca concluída em {(DateTime.Now - started).TotalSeconds:0} s, às {DateTime.Now:HH:mm}.";
         }
         finally

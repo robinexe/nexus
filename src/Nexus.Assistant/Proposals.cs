@@ -132,6 +132,9 @@ public sealed class AssistantCatalog
         ArgumentNullException.ThrowIfNull(request);
         if (Entry(request.ActionId) is not { } e) return null;
         var d = e.Definition;
+        // Ajuste "de sessão" segura a trava do aplicador até alguém encerrar a sessão: as etapas seguintes seriam recusadas
+        // ("session-active") e o assistente não tem onde encerrar. Fica para as páginas que controlam a sessão.
+        if (d.Persistence == PersistenceKind.Session) return null;
         var risk = RiskModel.Of(e, _declared.TryGetValue(d.Key, out var r) ? r : null);
         var experimental = d.Classification is Classification.Experimental or Classification.Rejected or Classification.Obsolete
             or Classification.Incompatible or Classification.Ineffective;

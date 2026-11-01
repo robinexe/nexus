@@ -46,6 +46,20 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SetupDiGetDeviceRegistryProperty(IntPtr set, SpDevInfoData* data, uint property, uint* regType, byte* buffer, uint size, uint* required);
 
+    /// <summary>Estado do nó do dispositivo e código de problema (o mesmo do Gerenciador de Dispositivos). CR_SUCCESS = 0.</summary>
+    [LibraryImport("cfgmgr32.dll")]
+    private static partial uint CM_Get_DevNode_Status(uint* status, uint* problemNumber, uint devInst, uint flags);
+
+    private const uint DnHasProblem = 0x400;
+
+    /// <summary>0 = sem problema, &gt; 0 = código CM_PROB_*, null = não deu para ler.</summary>
+    private static int? ProblemCode(uint devInst)
+    {
+        uint status = 0, problem = 0;
+        if (CM_Get_DevNode_Status(&status, &problem, devInst, 0) != 0) return null;
+        return (status & DnHasProblem) != 0 ? (int)problem : 0;
+    }
+
     private const uint DigcfPresent = 0x2, DigcfAllClasses = 0x4;
     private const uint SpdrpDeviceDesc = 0x0, SpdrpHardwareId = 0x1, SpdrpCompatibleIds = 0x2, SpdrpClass = 0x7, SpdrpClassGuid = 0x8,
         SpdrpDriver = 0x9, SpdrpMfg = 0xB, SpdrpFriendlyName = 0xC;
@@ -87,7 +101,7 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
                 }
                 list.Add(new DeviceDriver(instance, First(set, pData, buf, SpdrpFriendlyName) ?? First(set, pData, buf, SpdrpDeviceDesc) ?? instance,
                     Strings(set, pData, SpdrpHardwareId, buf), Strings(set, pData, SpdrpCompatibleIds, buf),
-                    First(set, pData, buf, SpdrpClass), First(set, pData, buf, SpdrpClassGuid)?.ToLowerInvariant(), First(set, pData, buf, SpdrpMfg), version, date, provider, inf, matching));
+                    First(set, pData, buf, SpdrpClass), First(set, pData, buf, SpdrpClassGuid)?.ToLowerInvariant(), First(set, pData, buf, SpdrpMfg), version, date, provider, inf, matching, ProblemCode(data.DevInst)));
             }
         }
         finally { SetupDiDestroyDeviceInfoList(set); }
