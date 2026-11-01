@@ -40,7 +40,20 @@ public sealed record DriverUpdatesReading(
     bool? RebootPending,
     IReadOnlyList<GpuDriverStatus> Gpus,
     string? GpuNote,
-    string? InventoryNote);
+    string? InventoryNote)
+{
+    /// <summary>Dispositivos presentes lidos (SetupAPI).</summary>
+    public int DeviceCount { get; init; }
+
+    /// <summary>O código de problema de algum dispositivo foi lido (CM_Get_DevNode_Status respondeu).</summary>
+    public bool ProblemCodesRead { get; init; }
+
+    /// <summary>Dispositivos com problema (sem driver primeiro). Lido mesmo sem buscar no Windows Update.</summary>
+    public IReadOnlyList<DeviceProblem> Problems { get; init; } = [];
+
+    /// <summary>Sem driver ou com driver que não carrega: o cartão "Dispositivos sem driver".</summary>
+    public IReadOnlyList<DeviceProblem> NeedingDriver => DeviceProblems.NeedingDriver(Problems);
+}
 
 public static class DriverUpdatesReader
 {
@@ -110,10 +123,14 @@ public static class DriverUpdatesReader
         try { reboot = WindowsRebootState.Pending(agent); }
         catch (Exception ex) when (ex is not OutOfMemoryException) { reboot = null; }
 
-        if (!searchUpdates) return new([], WuErrorKind.None, null, reboot, gpus, gpuNote, inventoryNote);
+        var problems = DeviceProblems.From(devices);
+        var codesRead = devices.Any(d => d.ProblemCode is not null);
+        if (devices.Count > 0 && !codesRead) inventoryNote ??= "Não foi possível ler o estado dos dispositivos (códigos de problema).";
+        if (!searchUpdates)
+            return new([], WuErrorKind.None, null, reboot, gpus, gpuNote, inventoryNote) { DeviceCount = devices.Count, ProblemCodesRead = codesRead, Problems = problems };
         var outcome = agent.SearchDrivers(timeout, cancel);
         var offers = outcome.Ok ? Combine(outcome.Updates, devices) : [];
-        return new(offers, outcome.Error, outcome.Message, reboot, gpus, gpuNote, inventoryNote);
+        return new(offers, outcome.Error, outcome.Message, reboot, gpus, gpuNote, inventoryNote) { DeviceCount = devices.Count, ProblemCodesRead = codesRead, Problems = problems };
     }
 
     [SupportedOSPlatform("windows")]

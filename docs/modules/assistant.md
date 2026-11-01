@@ -97,7 +97,41 @@ desmarcados, irreversível e ação desconhecida recusados, inclusive todas as i
 próximo lote, cancelar para a etapa, execução só efêmera fora do desfazer, desfazer tudo em ordem inversa e parando ao cancelar),
 relatório sintético (XHTML válido, seções, escape, sem nome/computador/perfil/e-mail/IP, link só https), planejadores (ponto de
 restauração, agendas, candidatos de programas, filtro do `PlanAsync` com e sem aplicador) e presença no catálogo real de toda
-ação usada.
+ação usada. `tests/Nexus.Tests/Modules/DeviceProblemsTests.cs`: a etapa Drivers mostra "Dispositivos sem driver" e o assistente
+nunca propõe ação de **sessão** (ver abaixo).
+
+### Ponta a ponta num Windows real (`tests/Nexus.IntegrationTests/E2E/AssistantEndToEndTests.cs`, `Category=E2E`)
+
+Roda na VM descartável do CI (`vm-integracao.yml`, passo "Ponta a ponta", em **windows-2022 e windows-2025**), elevado, com as
+**mesmas classes da página** (`AssistantReaders`, `StepPlanners` + `PlanAsync`, `AssistantRunner`, `ApplyGrouping`,
+`AssistantStateStore`/`AssistantFlow`, `AssistantReport`, `UndoAllAsync`). No lugar da janela, `BrokerTestHost` implementa
+`IAssistantWriter` chamando o **aplicador real sob demanda** (`BrokerSession.ForThisPc`, usuário e administrador, perfil
+"modulo") e aprova as confirmações (o texto de cada uma vai para o log).
+
+1. Semeia estado conhecido: 3 arquivos com 3 dias numa pasta do `%TEMP%` (hash guardado) e uma entrada `Run` de terceiros.
+2. Etapas 1–6; **para no meio** (estado salvo), descarta tudo da memória, **recarrega o arquivo** e confere etapa, execuções e
+   mudanças; etapas 7–12. Em cada etapa: lê, confere com o aplicador do usuário, aplica as de risco baixo não experimentais
+   (marcadas por padrão + opcionais de risco baixo; na Inicialização também desliga a entrada semeada) e exige `Verified` ou
+   recusa com motivo de VM (lista abaixo). Leitura "indisponível" é defeito.
+3. Relê o "depois" como a página (espaço, limpeza, inicialização, privacidade, segurança), gera o **relatório HTML** (sem o nome
+   do usuário) e confere: privacidade sobe quando algo da etapa 6 foi aplicado; os arquivos semeados saíram do lugar.
+4. **Desfazer tudo** e conferência ação por ação: o estado que o próprio aplicador leu antes de aplicar (Plan → Observed, isto é,
+   o `Detect` de cada handler) tem de ser o lido depois; arquivos semeados de volta com o mesmo hash; entrada de inicialização
+   ligada de novo; tarefas agendadas do NEXUS como antes; mesma contagem de itens de inicialização ligados.
+
+Recusas aceitas numa VM (Windows Server, sem Wi‑Fi, bateria, GPU física ou Restauração do Sistema): motivo com Wi‑Fi/sem fio,
+bateria, Windows Server/"esta edição do Windows", máquina virtual, Restauração/Proteção do Sistema/ponto de restauração,
+GPU/monitor/HAGS. Qualquer outra recusa ou falha reprova. Saída em `saida/e2e/` (artifact `vm-integracao-<so>`):
+`assistente-e2e.log` (cada fato, mudança proposta [x]/[ ], confirmação, resultado e conferência), `assistente-e2e.json`,
+`assistente-estado.json` e `relatorio-assistente/*.html`. Fora do Windows os testes E2E são pulados com o motivo.
+
+Correção feita a partir do E2E: **ação de sessão nunca é proposta** (`AssistantCatalog.Change` devolve null para
+`persistence: Session`): ela segura a trava do aplicador até alguém encerrar a sessão, e todas as etapas seguintes seriam
+recusadas com "session-active" (o assistente não tem onde encerrar). Hoje só `power.active-scheme.high-performance.session`
+(experimental) e `proc.game.ecoqos-optout.session` estão nesse caso.
+
+O que só o PC real prova: medição de FPS (etapa 11, depende de jogo e PresentMon), drivers instalados pelo Windows Update
+(VM raramente tem oferta; ver `docs/modules/driverupdates.md`), Wi‑Fi, bateria, GPU física e o ponto de restauração.
 
 ## Como validar no Windows
 

@@ -9,6 +9,8 @@ namespace Nexus.DriverUpdates;
 /// <param name="InfName">INF do driver atual como o Windows registra: "oemNN.inf" (terceiros, no repositório) ou o nome de um INF
 /// do próprio Windows (ex.: "display.inf").</param>
 /// <param name="MatchingDeviceId">Hardware/compatible ID que o INF atual casou (é o que um reinstalar forçado precisa usar).</param>
+/// <param name="ProblemCode">Código de problema do Gerenciador de Dispositivos (CM_PROB_*, lido por CM_Get_DevNode_Status): 0 = funcionando,
+/// 28 = sem driver etc. Null quando não deu para ler.</param>
 public sealed record DeviceDriver(
     string InstanceId,
     string Description,
@@ -21,7 +23,8 @@ public sealed record DeviceDriver(
     DateOnly? DriverDate,
     string? DriverProvider,
     string? InfName,
-    string? MatchingDeviceId);
+    string? MatchingDeviceId,
+    int? ProblemCode = null);
 
 /// <summary>Dispositivos presentes com o driver atual (leitura; não precisa de administrador).</summary>
 public interface IDeviceInventory

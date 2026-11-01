@@ -46,6 +46,20 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SetupDiGetDeviceRegistryProperty(IntPtr set, SpDevInfoData* data, uint property, uint* regType, byte* buffer, uint size, uint* required);
 
+    /// <summary>Estado do nó do dispositivo e código de problema (o mesmo do Gerenciador de Dispositivos). CR_SUCCESS = 0.</summary>
+    [LibraryImport("cfgmgr32.dll")]
+    private static partial uint CM_Get_DevNode_Status(uint* status, uint* problemNumber, uint devInst, uint flags);
+
+    private const uint DnHasProblem = 0x400;
+
+    /// <summary>0 = sem problema, &gt; 0 = código CM_PROB_*, null = não deu para ler.</summary>
+    private static int? ProblemCode(uint devInst)
+    {
+        uint status = 0, problem = 0;
+        if (CM_Get_DevNode_Status(&status, &problem, devInst, 0) != 0) return null;
+        return (status & DnHasProblem) != 0 ? (int)problem : 0;
+    }
+
     private const uint DigcfPresent = 0x2, DigcfAllClasses = 0x4;
     private const uint SpdrpDeviceDesc = 0x0, SpdrpHardwareId = 0x1, SpdrpCompatibleIds = 0x2, SpdrpClass = 0x7, SpdrpClassGuid = 0x8,
         SpdrpDriver = 0x9, SpdrpMfg = 0xB, SpdrpFriendlyName = 0xC;
@@ -87,7 +101,7 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
                 }
                 list.Add(new DeviceDriver(instance, First(set, pData, buf, SpdrpFriendlyName) ?? First(set, pData, buf, SpdrpDeviceDesc) ?? instance,
                     Strings(set, pData, SpdrpHardwareId, buf), Strings(set, pData, SpdrpCompatibleIds, buf),
-                    First(set, pData, buf, SpdrpClass), First(set, pData, buf, SpdrpClassGuid)?.ToLowerInvariant(), First(set, pData, buf, SpdrpMfg), version, date, provider, inf, matching));
+                    First(set, pData, buf, SpdrpClass), First(set, pData, buf, SpdrpClassGuid)?.ToLowerInvariant(), First(set, pData, buf, SpdrpMfg), version, date, provider, inf, matching, ProblemCode(data.DevInst)));
             }
         }
         finally { SetupDiDestroyDeviceInfoList(set); }
@@ -118,7 +132,10 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
 [SupportedOSPlatform("windows")]
 public sealed partial class WindowsDriverPackageTool : IDriverPackageTool
 {
-    private readonly PnpUtilDriverStore _store = new(new WindowsProcessRunner());
+    private readonly WindowsProcessRunner _runner = new();
+    private readonly PnpUtilDriverStore _store;
+
+    public WindowsDriverPackageTool() => _store = new PnpUtilDriverStore(_runner);
 
     [LibraryImport("newdev.dll", EntryPoint = "UpdateDriverForPlugAndPlayDevicesW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -132,7 +149,22 @@ public sealed partial class WindowsDriverPackageTool : IDriverPackageTool
 
     public void Export(string publishedName, string directory) => _store.Export(publishedName, directory);
 
-    public void Add(string infPath) => _store.Add(infPath);
+    /// <summary>
+    /// <c>pnputil /add-driver arquivo.inf</c> SEM <c>/install</c>: só coloca o pacote no repositório de drivers. Quem troca o driver do
+    /// dispositivo no Desfazer é <see cref="ForceInstall"/> (a única forma de voltar a uma versão MAIS ANTIGA). Com <c>/install</c>, o
+    /// pnputil tenta atualizar os dispositivos e, quando o driver instalado é mais novo ou igual (exatamente o caso do Desfazer), não
+    /// atualiza nenhum e pode sair com código diferente de 0 (ex.: 259), o que fazia o Desfazer falhar antes de chegar ao ForceInstall.
+    /// 0 = adicionado ou já existia; 3010 = adicionado, reinício recomendado.
+    /// </summary>
+    public void Add(string infPath)
+    {
+        var r = _runner.Run(SystemPaths.Tool("pnputil.exe"), ["/add-driver", infPath], TimeSpan.FromMinutes(10));
+        if (r.ExitCode is not (0 or 3010))
+        {
+            var last = string.Join(" ", r.Combined.Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).TakeLast(3));
+            throw new InvalidOperationException($"pnputil não conseguiu guardar o driver anterior no repositório (código {r.ExitCode}): {last}");
+        }
+    }
 
     public bool ForceInstall(string hardwareId, string infPath)
     {

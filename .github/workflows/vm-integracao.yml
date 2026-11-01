@@ -22,8 +22,14 @@ permissions:
 
 jobs:
   integracao:
-    runs-on: windows-latest
-    timeout-minutes: 30
+    # "Qualquer PC": o mesmo roteiro em duas versões do Windows, em paralelo (cada uma numa VM descartável própria).
+    # windows-2022 = base do Windows 10 21H2/Server 2022; windows-2025 = base do Windows 11 24H2/Server 2025.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: '1'
@@ -95,6 +101,22 @@ jobs:
           dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter Category=LocalBrokerIntegration --logger "console;verbosity=detailed" --logger "trx;LogFileName=sob-demanda.trx" --results-directory saida
           Start-Sleep -Seconds 10   # o aplicador sob demanda encerra quando o processo de teste termina
 
+      - name: Ponta a ponta (assistente completo + atualizar drivers, aplicador real)
+        if: ${{ !cancelled() }}   # roda mesmo se um teste de integração anterior falhar (o portão já foi liberado ou recusa sozinho)
+        shell: pwsh
+        timeout-minutes: 30
+        env:
+          NEXUS_ALLOW_WRITABLE_BROKER_DIR: '1'
+          NEXUS_E2E_OUT: ${{ github.workspace }}\saida\e2e
+        run: |
+          # ANTES de instalar o serviço: com o serviço instalado, o nível administrador iria para ele e não para o aplicador
+          # sob demanda que a interface usa num PC comum. Gera saida/e2e: logs, JSON por teste, estado salvo e o relatório HTML.
+          New-Item -ItemType Directory -Force -Path saida/e2e | Out-Null
+          dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter Category=E2E --logger "console;verbosity=detailed" --logger "trx;LogFileName=e2e.trx" --results-directory saida
+          "$LASTEXITCODE" | Out-File saida/e2e.exitcode -Encoding ascii
+          "ponta a ponta: código $LASTEXITCODE (0 = tudo aprovado); o veredito fica para o fim, para não pular os testes do serviço"
+          Start-Sleep -Seconds 10   # o aplicador sob demanda encerra quando o processo de teste termina
+
       - name: Instalar o broker como serviço (LocalSystem)
         shell: pwsh
         run: |
@@ -158,8 +180,10 @@ jobs:
         run: |
           $cli = if (Test-Path saida/selftest.exitcode) { (Get-Content saida/selftest.exitcode).Trim() } else { 'ausente' }
           $ui = if (Test-Path saida/ui/ui.exitcode) { (Get-Content saida/ui/ui.exitcode).Trim() } else { 'ausente' }
-          "nexus selftest: $cli · interface: $ui"
+          $e2e = if (Test-Path saida/e2e.exitcode) { (Get-Content saida/e2e.exitcode).Trim() } else { 'ausente' }
+          "nexus selftest: $cli · interface: $ui · ponta a ponta: $e2e"
           $bad = @()
+          if ($e2e -ne '0') { $bad += "testes de ponta a ponta com FALHA ou sem resultado ($e2e); veja saida/e2e/*.log e saida/e2e.trx" }
           if ($cli -ne '0') { $bad += "nexus selftest com FALHA ou sem resultado ($cli); veja saida/selftest.html" }
           if ($ui -notin @('0', 'sem sessao grafica')) { $bad += "autoteste da interface com FALHA ou sem resultado ($ui); veja saida/ui/relatorio.html" }
           if ($bad.Count -gt 0) { $bad | ForEach-Object { Write-Error $_ }; exit 1 }
@@ -168,5 +192,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: vm-integracao
+          name: vm-integracao-${{ matrix.os }}
           path: saida/

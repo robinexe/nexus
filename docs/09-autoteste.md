@@ -114,8 +114,16 @@ As imagens mostram o que a janela mostra (nomes de programas, redes etc.): ficam
 - **Autoteste da interface**: os runners `windows-latest` do GitHub rodam numa sessão interativa (com área de trabalho),
   então a janela WPF abre de verdade. Se o processo estiver na sessão 0 (sem área de trabalho), o passo registra o motivo
   e não conta como falha. Resultado em `saida/ui/` (JSON, telas e `relatorio.html`).
-- **Veredito dos autotestes** (no fim, `if: always()`): falha o job se `nexus selftest` ou a interface tiverem FALHA. Fica
-  no fim para uma falha do autoteste não esconder os testes de integração.
+- **Ponta a ponta** (`Category=E2E`, antes de instalar o serviço): assistente completo com o aplicador real, retomada,
+  relatório e "Desfazer tudo" conferido; atualizar drivers (Windows Update real, backup/desfazer com driver real, dispositivos
+  sem driver). Ver `docs/modules/assistant.md` e `docs/modules/driverupdates.md`. Saída em `saida/e2e/`.
+- **Matriz**: o job inteiro roda em `windows-2022` e `windows-2025`, em paralelo; artifacts `vm-integracao-windows-2022` e
+  `vm-integracao-windows-2025`.
+- **Veredito dos autotestes** (no fim, `if: always()`): falha o job se `nexus selftest`, a interface ou os testes de ponta a
+  ponta tiverem FALHA. Fica no fim para uma falha não esconder os testes de integração e do serviço.
+
+Atualizar drivers no autoteste agora também conta **dispositivos**, se o **código de problema foi lido**, **sem driver**,
+**com driver que não carrega** e **desativados** (mesma leitura do cartão "Dispositivos sem driver").
 
 ## 4. Ler o resultado
 

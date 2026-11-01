@@ -2,6 +2,8 @@
   Atualizar drivers (design system v2, docs/10-design-system.md):
     1. Destaque: chip com seta, "N atualizações" contando depois da busca (esqueleto durante), contagens por grupo à direita;
        ação principal "Procurar atualizações".
+    1b. Dispositivos sem driver (código de problema 28, 1, 18… lido ao abrir): nome, código, significado e hardware ID, com
+       "Procurar no Windows Update" (o WU oferece drivers para aparelhos sem driver). Sem nenhum: uma linha verde.
     2. Placa de vídeo em destaque: ilustração, nome, selos (dedicada/integrada, fabricante), versão, idade do driver em dias na
        cor do veredito, e os botões oficiais (página e app do fabricante).
     3. Como funciona: Procura → Escolhe → Instala → Desfaz.
@@ -198,6 +200,61 @@
             </Button>
           </Grid>
         </Border>
+
+        <!-- ===== Dispositivos sem driver (código de problema do Gerenciador de Dispositivos) ===== -->
+        <Border Style="{StaticResource Panel.Card}" Padding="18,14" Margin="0,0,0,14"
+                Visibility="{Binding HasMissing, Converter={StaticResource BoolToVis}}">
+          <StackPanel>
+            <Grid Margin="0,0,0,8">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <Grid Width="38" Height="38" Margin="0,0,12,0">
+                <Ellipse Fill="{StaticResource Brush.BadSoft}"/>
+                <c:Icon Data="{StaticResource Icon.Warning}" Size="19" Foreground="{StaticResource Brush.Bad}" HorizontalAlignment="Center"/>
+              </Grid>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Dispositivos sem driver" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="{Binding MissingSummary}" Style="{StaticResource Text.Small}"/>
+              </StackPanel>
+              <TextBlock Grid.Column="2" Text="{Binding MissingCount}" Style="{StaticResource DU.GroupCount}" Foreground="{StaticResource Brush.Bad}"/>
+            </Grid>
+            <ItemsControl ItemsSource="{Binding MissingDevices}" Focusable="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,8,0,7">
+                    <StackPanel>
+                      <DockPanel>
+                        <c:StatusChip DockPanel.Dock="Right" Tone="Bad" Text="{Binding CodeText}" Margin="8,0,0,0"/>
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"
+                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}"/>
+                      </DockPanel>
+                      <TextBlock Text="{Binding Meaning}" Style="{StaticResource Text.Small}" Margin="0,2,0,0"/>
+                      <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,0,0"
+                                 Visibility="{Binding HardwareId, Converter={StaticResource NullToCollapsed}}">
+                        <Run Text="Hardware ID "/><Run Text="{Binding HardwareId, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}"/>
+                      </TextBlock>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="{Binding MissingAdvice}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,8,0,0"/>
+            <WrapPanel Margin="0,10,0,0">
+              <Button Style="{StaticResource Button.Secondary}" Command="{Binding SearchCommand}" Margin="0,0,8,0">
+                <StackPanel Orientation="Horizontal">
+                  <c:Icon Data="{StaticResource Icon.Search}" Size="14" Margin="0,0,6,0"/>
+                  <TextBlock Text="Procurar no Windows Update" TextWrapping="NoWrap"/>
+                </StackPanel>
+              </Button>
+              <Button Content="Abrir atualizações opcionais" Style="{StaticResource Button.Ghost}" Command="{Binding OpenWindowsUpdateCommand}"/>
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+        <TextBlock Text="{Binding MissingSummary}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Good}" Margin="0,0,0,14"
+                   Visibility="{Binding MissingCount, Converter={StaticResource ZeroToVisible}}"/>
 
         <!-- ===== 2. Placa de vídeo em destaque ===== -->
         <DockPanel Margin="0,4,0,12">
