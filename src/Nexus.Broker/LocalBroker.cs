@@ -79,7 +79,7 @@ public static class LocalBroker
     public static BrokerLevel EffectiveLevel(BrokerLevel requested, bool processElevated) =>
         processElevated ? BrokerLevel.Admin : requested;
 
-    private static bool CurrentProcessIsElevated()
+    public static bool CurrentProcessIsElevated()
     {
         if (!OperatingSystem.IsWindows()) return false;
         using var id = System.Security.Principal.WindowsIdentity.GetCurrent();

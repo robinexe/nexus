@@ -44,7 +44,10 @@ public sealed class LocalBrokerIntegrationTests
         _out.WriteLine("[usuário] " + exec.Message);
         Assert.True(exec.Ok, exec.Message);
         Assert.Equal("1", ReadHkcu(path, name));
-        Assert.True(File.Exists(LocalBroker.JournalPath(BrokerLevel.User)), "diário do usuário em %LocalAppData%\\NEXUS");
+        // Processo elevado (o runner do CI é administrador): o pedido "de usuário" vai para o aplicador de administrador,
+        // com diário protegido em %ProgramData%; nunca um aplicador elevado gravando em %LocalAppData%.
+        var level = LocalBroker.EffectiveLevel(BrokerLevel.User, LocalBroker.CurrentProcessIsElevated());
+        Assert.True(File.Exists(LocalBroker.JournalPath(level)), "diário em " + LocalBroker.JournalPath(level));
 
         var revert = session.RevertRun(exec.Response!.RunId!.Value);
         Assert.True(revert.Ok && revert.Response!.FullyRestored == true, revert.Message);
