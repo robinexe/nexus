@@ -4,8 +4,11 @@ using Nexus.Core;
 namespace Nexus.Broker;
 
 /// <summary>Resultado de uma chamada ao broker: se houve conexão, a resposta e uma mensagem pronta para mostrar.</summary>
-public sealed record BrokerCallResult(bool Connected, BrokerResponse? Response, string Message)
+public sealed record BrokerCallResult(bool Connected, BrokerResponse? Response, string Message, IReadOnlyList<Guid>? RunIds = null)
 {
+    /// <summary>Todas as execuções gravadas (um pedido grande vira vários lotes de até 64 ações; desfazer volta todas).</summary>
+    public IReadOnlyList<Guid> AllRunIds => RunIds ?? (Response?.RunId is { } r ? [r] : []);
+
     public bool Ok => Connected && Response is { Ok: true };
 }
 
@@ -39,9 +42,40 @@ public sealed class BrokerSession
         });
 
     public BrokerCallResult Status() => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Status));
-    public BrokerCallResult Plan(IReadOnlyList<ActionRequest> actions) => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Plan, actions));
+    public BrokerCallResult Plan(IReadOnlyList<ActionRequest> actions) =>
+        Batched(actions, chunk => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Plan, chunk)));
     public BrokerCallResult Execute(IReadOnlyList<ActionRequest> actions, string profile = "interface") =>
-        Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Execute, actions, Profile: profile));
+        Batched(actions, chunk => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Execute, chunk, Profile: profile)));
+
+    /// <summary>
+    /// O aplicador aceita até <see cref="BrokerService.MaxActionsPerRequest"/> ações por pedido. Mais que isso vira lotes em
+    /// sequência (mesma ordem); para no primeiro lote que falhar. Os resultados e as execuções (para desfazer) são somados.
+    /// </summary>
+    public static BrokerCallResult Batched(IReadOnlyList<ActionRequest> actions, Func<IReadOnlyList<ActionRequest>, BrokerCallResult> send)
+    {
+        ArgumentNullException.ThrowIfNull(actions);
+        ArgumentNullException.ThrowIfNull(send);
+        if (actions.Count <= BrokerService.MaxActionsPerRequest) return send(actions);
+        var results = new List<ActionResultDto>();
+        var runs = new List<Guid>();
+        var messages = new List<string>();
+        BrokerCallResult last = null!;
+        var batches = actions.Chunk(BrokerService.MaxActionsPerRequest).ToList();
+        for (var i = 0; i < batches.Count; i++)
+        {
+            last = send(batches[i]);
+            messages.Add($"Lote {i + 1}/{batches.Count}: {last.Message}");
+            if (last.Response?.Results is { } rs) results.AddRange(rs);
+            if (last.Response?.RunId is { } run) runs.Add(run);
+            if (!last.Ok)
+            {
+                if (i + 1 < batches.Count) messages.Add($"Lotes {i + 2} a {batches.Count} não foram enviados.");
+                break;
+            }
+        }
+        var response = last.Response is null ? null : last.Response with { Results = results };
+        return new BrokerCallResult(last.Connected, response, string.Join(" ", messages), runs);
+    }
     public BrokerCallResult RevertRun(Guid runId) => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.RevertRun, RunId: runId));
     public BrokerCallResult EndSession(Guid runId) => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.EndSession, RunId: runId));
     public BrokerCallResult Recover() => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Recover));

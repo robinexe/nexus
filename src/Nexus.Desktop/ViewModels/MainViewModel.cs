@@ -138,7 +138,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
                 : new UiStages(new StageRelay(s => { stages?.Report(s); own?.Stage(s); }), dispatcher);
             ui?.Report(ApplyStage.Confirmed);
             var r = await CallBrokerAsync(level, call, ui);
-            if (!revert && r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
+            if (!revert && r.Response is { RunId: { } run } resp && r.AllRunIds.Count > 0) { Broker.LastRun = run; _lastRuns = r.AllRunIds; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
             own?.Finished(r);
             Notify(revert ? ApplySummary.DescribeRevert(r) : ApplySummary.Describe(r));
             ui?.Report(ApplyStage.Refreshing);
@@ -518,14 +518,24 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         if (r is null) Broker.LastMessage = Broker.LastSummary = "Aplicação cancelada. Nada foi enviado.";
     }
 
+    private IReadOnlyList<Guid> _lastRuns = [];
+
     private async Task BrokerRevertAsync()
     {
         if (Broker.LastRun is not { } run) return;
-        var answer = System.Windows.MessageBox.Show($"Reverter a execução {run}? O broker restaura os valores originais registrados no diário.",
+        var answer = System.Windows.MessageBox.Show("Desfazer a última aplicação? O NEXUS volta os valores originais guardados no diário.",
             "Confirmar reversão", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
         if (answer != System.Windows.MessageBoxResult.Yes) return;
         var own = ApplyView.Begin("Reverter a última execução", [], _lastLevel, revert: true, name: ActionName);
-        var r = await ExecuteWithProgressAsync(() => true, _lastLevel, b => b.RevertRun(run), null, own, revert: true);
+        // Aplicação grande = vários lotes: desfaz todos, do último para o primeiro.
+        var runs = _lastRuns.Contains(run) ? _lastRuns.Reverse().ToList() : [run];
+        var r = await ExecuteWithProgressAsync(() => true, _lastLevel, b =>
+        {
+            BrokerCallResult res = null!;
+            foreach (var id in runs) { res = b.RevertRun(id); if (!res.Ok) break; }
+            return res;
+        }, null, own, revert: true);
+        if (r?.Response?.FullyRestored == true) _lastRuns = [];
         if (r?.Response?.FullyRestored == true) Broker.SessionOpen = false;
     }
 
