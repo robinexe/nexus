@@ -186,7 +186,8 @@ def publish(rid: str, args: argparse.Namespace, version: str, suffix: str, commi
                    "-p:PublishTrimmed=false", "-p:PublishSingleFile=false",
                    "-p:SatelliteResourceLanguages=pt-BR",
                    "-p:DebugType=none", "-p:GenerateDocumentationFile=false",
-                   f"-p:SourceRevisionId={commit}", f"-p:VersionPrefix={version}"]
+                   f"-p:SourceRevisionId={commit}", f"-p:VersionPrefix={version}",
+                   "-p:NexusPackaged=true"]  # marca de cópia publicada: liga a atualização automática (docs/11-atualizacao.md)
             if suffix:
                 cmd.append(f"-p:VersionSuffix={suffix}")
             run(cmd)

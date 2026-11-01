@@ -337,6 +337,9 @@
       "nexus.traceanalysis": {
         "type": "Project"
       },
+      "nexus.updates": {
+        "type": "Project"
+      },
       "nexus.windowsactions": {
         "type": "Project",
         "dependencies": {
