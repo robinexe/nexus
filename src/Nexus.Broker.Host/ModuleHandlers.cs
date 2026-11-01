@@ -22,5 +22,6 @@ internal static class ModuleHandlers
         .. Nexus.Lab.Cpu.CpuLabHandlers.Create(environment),
         .. Nexus.Lab.Gpu.GpuLabHandlers.Create(environment),
         .. Nexus.Lab.Memory.MemoryLabHandlers.Create(environment),
+        .. Nexus.Measurement.MeasureHandlers.Create(environment),
     ];
 }

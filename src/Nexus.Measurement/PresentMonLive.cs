@@ -206,9 +206,15 @@ public static partial class PresentMonCli
         return $"{P(1)}.{P(2)}.{P(3)}";
     }
 
-    /// <summary>Procura o PresentMon: o caminho configurado (se existir) e depois as pastas conhecidas. Nada é baixado.</summary>
+    /// <summary>
+    /// Procura o PresentMon (só o caminho, sem conferir): primeiro a cópia que acompanha o NEXUS
+    /// (<c>tools\PresentMon\PresentMon.exe</c>), depois o caminho configurado e as pastas conhecidas. Nada é baixado.
+    /// Antes de executar, use <see cref="PresentMonLocator.Locate"/> (confere hash/assinatura).
+    /// </summary>
     public static string? Locate(string? configured, string appBaseDirectory)
     {
+        var bundled = PresentMonTrust.BundledPath(appBaseDirectory);
+        if (File.Exists(bundled)) return bundled;
         if (!string.IsNullOrWhiteSpace(configured) && File.Exists(configured)) return configured;
         foreach (var dir in CandidateFolders(appBaseDirectory))
         {

@@ -11,8 +11,8 @@ public sealed record PresentMonCaptureRequest(string PresentMonExe, string Proce
 public sealed record PresentMonRunResult(bool Ok, string Message, string? OutputCsv, int? ExitCode, string Log);
 
 /// <summary>
-/// Executa o PresentMon (Intel, MIT; não é distribuído com o NEXUS) só para LER: o rastreamento ETW de apresentação de
-/// quadros não altera nada no sistema. O NEXUS não baixa o PresentMon sozinho: o usuário indica o executável.
+/// Executa o PresentMon (Intel, MIT; a versão 2.6.0 acompanha o NEXUS em tools\PresentMon) só para LER: o rastreamento ETW de
+/// apresentação de quadros não altera nada no sistema. O NEXUS não baixa nada sozinho.
 /// </summary>
 public static class PresentMonRunner
 {
@@ -42,28 +42,20 @@ public static class PresentMonRunner
         return args;
     }
 
-    /// <summary>Onde procurar o PresentMon: o caminho configurado; senão, pasta "PresentMon" ao lado do NEXUS ou em %LocalAppData%\NEXUS.</summary>
-    public static string? Locate(string? configured, string appBaseDirectory)
-    {
-        if (!string.IsNullOrWhiteSpace(configured) && File.Exists(configured)) return configured;
-        foreach (var dir in new[] { Path.Combine(appBaseDirectory, "PresentMon"),
-                                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NEXUS", "PresentMon") })
-        {
-            if (!Directory.Exists(dir)) continue;
-            var exe = Directory.EnumerateFiles(dir, "PresentMon*.exe").OrderDescending(StringComparer.OrdinalIgnoreCase).FirstOrDefault();
-            if (exe is not null) return exe;
-        }
-        return null;
-    }
+    /// <summary>Onde procurar o PresentMon: a cópia embutida, o caminho configurado e as pastas conhecidas (<see cref="PresentMonCli.Locate"/>).</summary>
+    public static string? Locate(string? configured, string appBaseDirectory) => PresentMonCli.Locate(configured, appBaseDirectory);
 
     /// <param name="customize">Só para testes: troca o executável (ex.: um PresentMon falso).</param>
+    /// <param name="verify">Conferência antes de executar (<see cref="PresentMonTrust.Verify"/>); recusado = não executa.</param>
     public static async Task<PresentMonRunResult> RunAsync(PresentMonCaptureRequest r, CancellationToken cancel, IProgress<string>? progress = null,
-        Func<ProcessStartInfo, ProcessStartInfo>? customize = null)
+        Func<ProcessStartInfo, ProcessStartInfo>? customize = null, Func<string, PresentMonVerdict>? verify = null)
     {
         ArgumentNullException.ThrowIfNull(r);
         var args = Arguments(r);
         if (customize is null && !File.Exists(r.PresentMonExe))
             return new(false, $"PresentMon não encontrado em {r.PresentMonExe}.", null, null, "");
+        if (customize is null && verify?.Invoke(r.PresentMonExe) is { Trusted: false } refused)
+            return new(false, refused.Reason, null, null, "");
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(r.OutputCsv))!);
         if (File.Exists(r.OutputCsv)) File.Delete(r.OutputCsv);
 

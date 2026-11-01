@@ -8,10 +8,15 @@ namespace Nexus.Measurement;
 /// elevação (<c>--restart_as_admin</c>, o Windows pergunta e o usuário aceita): o PresentMon elevado grava num arquivo
 /// temporário e o NEXUS lê o arquivo enquanto ele cresce. O PresentMon termina sozinho quando o jogo fecha.
 /// </summary>
+/// <param name="verify">Conferência do executável (<see cref="PresentMonTrust.Verify"/>) feita a cada início, imediatamente antes
+/// de executar: um PresentMon recusado não roda (a captura volta encerrada, com o motivo em <see cref="ILiveCapture"/>.Log).</param>
 public sealed class PresentMonLiveStarter(Func<string?> presentMonPath, Func<bool> requestElevation,
-    Func<ProcessStartInfo, ProcessStartInfo>? customize = null) : ILiveCaptureStarter
+    Func<ProcessStartInfo, ProcessStartInfo>? customize = null, Func<string, PresentMonVerdict>? verify = null) : ILiveCaptureStarter
 {
-    public bool Available => presentMonPath() is { } p && (customize is not null || File.Exists(p));
+    public bool Available => presentMonPath() is { } p && (customize is not null || (File.Exists(p) && (verify is null || verify(p).Trusted)));
+
+    /// <summary>Motivo da última recusa (PresentMon que não passou na conferência), ou null.</summary>
+    public string? LastRefusal { get; private set; }
 
     public ILiveCapture Start(string processName, Action<LiveFrame> onFrame)
     {
@@ -20,7 +25,9 @@ public sealed class PresentMonLiveStarter(Func<string?> presentMonPath, Func<boo
         var file = elevate ? Path.Combine(Path.GetTempPath(), $"nexus-ao-vivo-{Guid.NewGuid():N}.csv") : null;
         var req = new LiveCaptureRequest(exe, processName, elevate, file);
         var capture = new PresentMonLiveCapture(req, PresentMonCli.LiveArguments(req, PresentMonCli.GenerationOf(exe)), onFrame, customize);
-        capture.Begin();
+        LastRefusal = customize is null && verify?.Invoke(exe) is { Trusted: false } refused ? refused.Reason : null;
+        if (LastRefusal is { } reason) capture.Refuse(reason);
+        else capture.Begin();
         return capture;
     }
 }
@@ -50,6 +57,13 @@ public sealed class PresentMonLiveCapture : ILiveCapture
     public string Log { get { lock (_log) return _log.ToString(); } }
     public bool Ended => _ended;
     public int SkippedLines => _parser.Skipped;
+
+    /// <summary>Não executa: a captura já nasce encerrada, com o motivo no log.</summary>
+    internal void Refuse(string reason)
+    {
+        AppendLog(reason);
+        _ended = true;
+    }
 
     internal void Begin()
     {
