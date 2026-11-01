@@ -181,7 +181,8 @@ public sealed class BrokerSession
         ArgumentNullException.ThrowIfNull(chosen);
         // Mesma regra do aplicador (BrokerService.Validate): só manda valor quando o catálogo oferece uma escolha
         // (allowedValues). Valor fixo no catálogo ou alvo que já define o desejado (ex.: plano de energia pelo GUID): sem valor.
-        return chosen.Select(c => new ActionRequest(c.Entry.Definition.Key,
+        // Ajustes de sessão por último: em lotes, só o último abre a sessão (os outros não esperam por ela).
+        return chosen.OrderBy(c => c.Entry.Definition.Persistence == PersistenceKind.Session ? 1 : 0).Select(c => new ActionRequest(c.Entry.Definition.Key,
             c.Entry.DesiredValue is null && c.Entry.Definition.AllowedValues is { Count: > 0 } allowed && allowed.Contains(c.Instance.Desired.Value, StringComparer.Ordinal)
                 ? c.Instance.Desired.Value : null)).ToList();
     }

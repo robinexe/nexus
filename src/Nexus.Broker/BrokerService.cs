@@ -247,10 +247,14 @@ public sealed class BrokerService : IDisposable
     private BrokerResponse Execute(BrokerRequest r, string? callerSid)
     {
         if (GateRefusal(r) is { } blocked) return blocked; // antes de qualquer coisa: nada lido, nada travado, nada gravado
-        if (_sessionLease is not null)
-            return BrokerResponse.Fail(r.Id, "session-active", $"Encerre a sessão {_sessionRun} antes de outra execução.");
         var (actions, error) = Resolve(r, callerSid);
         if (error is not null) return error;
+        // Com ajustes de sessão ativos, o broker continua aplicando ajustes NORMAIS (é um único executor, pedidos em fila, e a
+        // trava da sessão é dele). Só outro ajuste de sessão espera: a sessão é uma por vez (EndSession desfaz as dela).
+        // Visto na VM: "Aplicar" com o plano de energia de sessão no 1º lote travava o 2º lote e todas as outras páginas.
+        var sharedSession = _sessionLease is not null;
+        if (sharedSession && actions!.Any(a => a.Definition.Persistence == PersistenceKind.Session))
+            return BrokerResponse.Fail(r.Id, "session-active", $"Já há ajustes de sessão ativos ({_sessionRun}). Encerre a sessão antes de aplicar outros ajustes de sessão.");
         // Ações irreversíveis: só com confirmação explícita, ação por ação. Recusa o pedido inteiro antes de travar ou gravar.
         var confirmedIrreversible = new HashSet<string>(StringComparer.Ordinal);
         foreach (var (instance, request) in actions!.Zip(r.Actions!))
@@ -262,14 +266,20 @@ public sealed class BrokerService : IDisposable
             confirmedIrreversible.Add(instance.Definition.Key);
         }
 
-        var (lease, leaseError) = AcquireLease(r, "broker-execute");
-        if (leaseError is not null) return leaseError;
-        var keepLease = false;
+        IRunLease? lease = sharedSession ? new BorrowedLease(_sessionLease!) : null;
+        if (!sharedSession)
+        {
+            var (acquired, leaseError) = AcquireLease(r, "broker-execute");
+            if (leaseError is not null) return leaseError;
+            lease = acquired;
+        }
+        var keepLease = sharedSession; // trava da sessão: continua com a sessão
         try
         {
             // Só operações realmente interrompidas (estado do sistema incerto) bloqueiam. Conflitos e entradas superadas são
             // decisões pendentes do usuário: não impedem novas execuções (a recuperação trata entradas superadas).
             var interrupted = RecoveryService.FindInterrupted(_journal)
+                .Where(f => f.Entry.RunId != _sessionRun) // a sessão aberta é deste broker: não está "interrompida"
                 .Where(f => f.Entry.State is JournalState.BackedUp or JournalState.Applying or JournalState.Applied or JournalState.Restoring or JournalState.Verified)
                 .ToList();
             if (interrupted.Count > 0)
@@ -315,6 +325,21 @@ public sealed class BrokerService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Trava emprestada da sessão aberta para outra execução do mesmo broker (pedidos em fila): confere a trava real antes de
+    /// cada escrita, mas não a amarra a esta execução nem a solta no fim (ela continua sendo da sessão).
+    /// </summary>
+    private sealed class BorrowedLease(IRunLease session) : IRunLease
+    {
+        public LeaseHolder Holder => session.Holder;
+        public bool IsHeld => session.IsHeld;
+        public Guid? ActiveRunId { get; private set; }
+        public void BindRun(Guid runId) { session.EnsureHeld(); ActiveRunId = runId; }
+        public void UnbindRun(Guid runId) { if (ActiveRunId == runId) ActiveRunId = null; }
+        public void EnsureHeld() => session.EnsureHeld();
+        public void Dispose() { }
+    }
+
     private BrokerResponse EndSession(BrokerRequest r)
     {
         if (_sessionLease is null || r.RunId is null || r.RunId != _sessionRun)
@@ -345,12 +370,11 @@ public sealed class BrokerService : IDisposable
     {
         if (r.RunId is null) return BrokerResponse.Fail(r.Id, "invalid-request", "runId obrigatório.");
         if (GateRefusal(r) is { } blocked) return blocked;
-        if (_sessionLease is not null && r.RunId != _sessionRun)
-            return BrokerResponse.Fail(r.Id, "session-active", $"Encerre a sessão {_sessionRun} antes.");
-
-        var ownSession = _sessionLease is not null;
-        var lease = _sessionLease;
-        if (!ownSession)
+        // Outra execução com a sessão aberta: desfaz usando a trava da sessão (mesmo executor), sem encerrar a sessão.
+        var ownSession = _sessionLease is not null && r.RunId == _sessionRun;
+        var borrowed = _sessionLease is not null && !ownSession;
+        var lease = borrowed ? new BorrowedLease(_sessionLease!) : _sessionLease;
+        if (_sessionLease is null)
         {
             var (l, err) = AcquireLease(r, "broker-revert");
             if (err is not null) return err;
@@ -373,7 +397,7 @@ public sealed class BrokerService : IDisposable
         }
         finally
         {
-            if (!ownSession) lease?.Dispose();
+            if (!ownSession && !borrowed) lease?.Dispose();
         }
     }
 

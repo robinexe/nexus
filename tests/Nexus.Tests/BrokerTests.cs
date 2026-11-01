@@ -376,9 +376,17 @@ public sealed class BrokerTests : IDisposable
         Assert.True(r.SessionActive);
         Assert.Equal("1", Value("Session"));
 
-        // Durante a sessão: outro executor (ex.: nexus-recover) não consegue a trava; o broker recusa nova execução.
+        // Durante a sessão: outro executor (ex.: nexus-recover) não consegue a trava. O próprio broker continua aplicando
+        // ajustes normais (mesma trava, pedidos em fila) e desfaz essa execução sem encerrar a sessão; só outro ajuste de
+        // sessão espera.
         Assert.Equal(LeaseAcquireStatus.HeldByOther, new FileRunCoordinator(_dir).TryAcquire("cli", TimeSpan.FromMilliseconds(200)).Status);
-        Assert.Equal("session-active", svc.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1"))).Error!.Code);
+        var normal = svc.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.persist@1")));
+        Assert.True(normal.Ok, normal.Error?.Detail);
+        Assert.False(normal.SessionActive);
+        var undoNormal = svc.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.RevertRun, RunId: normal.RunId));
+        Assert.True(undoNormal.FullyRestored, undoNormal.Error?.Detail);
+        Assert.Equal("1", Value("Session")); // a sessão continua
+        Assert.Equal("session-active", svc.Handle(Req(BrokerOperation.Execute, new ActionRequest("t.session@1"))).Error!.Code);
         Assert.Equal("session-active", svc.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.Recover)).Error!.Code);
         Assert.Equal(r.RunId, svc.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.Status)).Status!.ActiveSessionRunId);
         Assert.Equal("no-such-session", svc.Handle(new BrokerRequest(1, Guid.NewGuid(), BrokerOperation.EndSession, RunId: Guid.NewGuid())).Error!.Code);
@@ -388,7 +396,7 @@ public sealed class BrokerTests : IDisposable
         Assert.True(end.FullyRestored);
         Assert.Null(Value("Session"));
         Assert.Equal(CoordinationState.Idle, coordinator.Probe().State);
-        Assert.NotNull(Assert.Single(_journal.Runs()).EndedAt);
+        Assert.All(_journal.Runs(), run => Assert.NotNull(run.EndedAt));
     }
 
     [Fact]
