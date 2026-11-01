@@ -29,8 +29,14 @@ public sealed class BrokerSession
     /// Aplicar neste PC: broker sob demanda do nível pedido (usuário sem aviso; administrador com o aviso do Windows ou pelo
     /// serviço instalado). Ver <see cref="LocalBroker"/>.
     /// </summary>
-    public static BrokerSession ForThisPc(BrokerLevel level, string brokerDirectory, string userSid, Action<string>? progress = null) =>
-        new(() => LocalBroker.Connect(level, brokerDirectory, userSid, progress));
+    /// <param name="connected">Chamado depois de conectar (antes de enviar o pedido): a tela de progresso marca "aplicando".</param>
+    public static BrokerSession ForThisPc(BrokerLevel level, string brokerDirectory, string userSid, Action<string>? progress = null, Action? connected = null) =>
+        new(() =>
+        {
+            var client = LocalBroker.Connect(level, brokerDirectory, userSid, progress);
+            connected?.Invoke();
+            return client;
+        });
 
     public BrokerCallResult Status() => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Status));
     public BrokerCallResult Plan(IReadOnlyList<ActionRequest> actions) => Call(new BrokerRequest(BrokerWire.ProtocolVersion, Guid.NewGuid(), BrokerOperation.Plan, actions));
@@ -98,13 +104,7 @@ public sealed class BrokerSession
     }
 
     /// <summary>O que o aplicador acrescentou além das frases padrão (ex.: ponto de restauração criado ou o motivo de não ter sido).</summary>
-    private static string Extra(string? message)
-    {
-        if (string.IsNullOrWhiteSpace(message)) return "";
-        var rest = message.Replace("Execução encerrada.", "", StringComparison.Ordinal)
-                          .Replace("Ajustes de sessão aplicados; o broker mantém a trava até EndSession.", "", StringComparison.Ordinal).Trim();
-        return rest.Length == 0 ? "" : " " + rest;
-    }
+    private static string Extra(string? message) => ApplySummary.Extra(message) is { Length: > 0 } rest ? " " + rest : "";
 
     private static string Count(BrokerResponse r) =>
         r.Results is null ? "sem itens" : string.Join(", ", r.Results.GroupBy(x => x.Outcome).Select(g => $"{g.Count()} {g.Key}"));

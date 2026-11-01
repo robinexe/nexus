@@ -24,8 +24,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     private BrokerLevel _lastLevel = BrokerLevel.User;
 
     /// <summary>Aplicar neste PC: broker sob demanda do nível pedido (usuário sem aviso; administrador com o aviso do Windows).</summary>
-    private BrokerSession Session(BrokerLevel level) =>
-        BrokerSession.ForThisPc(level, AppContext.BaseDirectory, CurrentUserSid, m => System.Windows.Application.Current?.Dispatcher.Invoke(() => Broker.LastMessage = m));
+    private BrokerSession Session(BrokerLevel level, IProgress<ApplyStage>? stages = null) =>
+        BrokerSession.ForThisPc(level, AppContext.BaseDirectory, CurrentUserSid, m =>
+        {
+            System.Windows.Application.Current?.Dispatcher.Invoke(() => Broker.LastMessage = m);
+            stages?.Report(level == BrokerLevel.Admin ? ApplyStage.WaitingWindows : ApplyStage.StartingApplier);
+        }, stages is null ? null : () => stages.Report(ApplyStage.Running));
 
     private static BrokerLevel LevelFor(IEnumerable<(CatalogEntry Entry, ActionInstance Instance)> chosen) =>
         chosen.Any(c => c.Entry.Definition.Privileges == PrivilegeLevel.Admin) ? BrokerLevel.Admin : BrokerLevel.User;
@@ -91,15 +95,33 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         RefuseInSelfTest() ? Task.FromResult(new BrokerCallResult(false, null, "Autoteste: o aplicador não é iniciado."))
             : CallBrokerAsync(level, b => b.Plan(requests));
 
-    public async Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level)
+    public Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level) =>
+        ApplyAsync(title, confirmation, requests, level, null);
+
+    public async Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages)
     {
         if (requests.Count == 0 || RefuseInSelfTest()) return null;
         if (!Confirm(title, confirmation)) { Notify("Cancelado. Nada foi alterado."); return null; }
-        var r = await CallBrokerAsync(level, b => b.Execute(requests, "modulo"));
+        // Marcos vindos da thread do aplicador voltam para a interface na ordem em que aconteceram.
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        var ui = stages is null ? null : new UiStages(stages, dispatcher);
+        ui?.Report(ApplyStage.Confirmed);
+        var r = await CallBrokerAsync(level, b => b.Execute(requests, "modulo"), ui);
         if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
-        Notify(r.Message);
+        Notify(ApplySummary.Describe(r));
+        ui?.Report(ApplyStage.Refreshing);
         await LoadAfterWriteAsync();
         return r;
+    }
+
+    /// <summary>Repassa o marco na thread da interface (direto quando já está nela; senão, na fila, preservando a ordem).</summary>
+    private sealed class UiStages(IProgress<ApplyStage> target, System.Windows.Threading.Dispatcher? dispatcher) : IProgress<ApplyStage>
+    {
+        public void Report(ApplyStage value)
+        {
+            if (dispatcher is null || dispatcher.CheckAccess()) target.Report(value);
+            else dispatcher.BeginInvoke(() => target.Report(value));
+        }
     }
 
     public async Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level)
@@ -108,7 +130,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         if (!Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança.")) return null;
         var r = await CallBrokerAsync(level, b => b.RevertRun(runId));
         if (r.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
-        Notify(r.Message);
+        Notify(ApplySummary.DescribeRevert(r));
         await LoadAfterWriteAsync();
         return r;
     }
@@ -359,12 +381,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     private Task<BrokerCallResult> CallBrokerAsync(Func<BrokerSession, BrokerCallResult> call) => CallBrokerAsync(BrokerLevel.User, call);
 
-    private async Task<BrokerCallResult> CallBrokerAsync(BrokerLevel level, Func<BrokerSession, BrokerCallResult> call)
+    private async Task<BrokerCallResult> CallBrokerAsync(BrokerLevel level, Func<BrokerSession, BrokerCallResult> call, IProgress<ApplyStage>? stages = null)
     {
         Broker.Busy = true;
         try
         {
-            var session = Session(level);
+            var session = Session(level, stages);
             var result = await Task.Run(() => call(session));
             Broker.LastMessage = $"{DateTime.Now:HH:mm:ss} {result.Message}";
             if (result.Response?.Results is { } items)

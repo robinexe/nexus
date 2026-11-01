@@ -20,18 +20,55 @@ public interface IAssistantWriter
 {
     Task<WriteOutcome?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level);
     Task<WriteOutcome?> RevertAsync(Guid runId, BrokerLevel level);
+
+    /// <summary>Igual a ApplyAsync, avisando os marcos reais do pedido (confirmação, aplicador, releitura) para a tela de progresso.</summary>
+    Task<WriteOutcome?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages) =>
+        ApplyAsync(title, confirmation, requests, level);
+}
+
+/// <summary>Quem acompanha a aplicação de uma etapa (a tela de progresso). Tudo é chamado na thread de quem aplica.</summary>
+public interface IApplyObserver
+{
+    /// <summary>Uma mudança não precisou ir ao aplicador (ex.: já há ponto de restauração recente).</summary>
+    void NotNeeded(ProposedChange change, string why);
+
+    /// <summary>Os lotes que serão pedidos, na ordem.</summary>
+    void Planned(IReadOnlyList<ApplyBatch> batches);
+
+    /// <summary>Marco real de um lote (esperando confirmação, aplicador, aplicando, relendo).</summary>
+    void Stage(ApplyBatch batch, ApplyStage stage);
+
+    /// <summary>O aplicador respondeu ao lote (ou ele foi cancelado): o que aconteceu com cada mudança, na ordem do lote.</summary>
+    void Finished(ApplyBatch batch, IReadOnlyList<ChangeRecord> records);
+}
+
+/// <summary>Ponto de restauração recente vale como proteção (o Windows cria no máximo um a cada 24 h).</summary>
+public static class RestorePointRule
+{
+    public static readonly TimeSpan Window = TimeSpan.FromHours(24);
+
+    public static bool IsRecent(DateTime? created, DateTime now) => created is { } c && c <= now.AddMinutes(5) && now - c < Window;
+
+    public static string AlreadyProtected(DateTime created) =>
+        string.Create(System.Globalization.CultureInfo.GetCultureInfo("pt-BR"),
+            $"Já existe um ponto de restauração recente ({created:dd/MM HH:mm}): vale como proteção.");
+
+    public const string AlreadyProtectedByWindows =
+        "Já protegido: o Windows já tem um ponto de restauração recente (ele cria no máximo um a cada 24 h) e ele vale como proteção.";
 }
 
 /// <summary>O que aconteceu ao aplicar uma etapa.</summary>
-public sealed record StepApplyResult(int Applied, int Already, int Refused, int Canceled, IReadOnlyList<string> Lines)
+/// <param name="NotNeeded">Neutras que não foram ao aplicador ou que ele não precisou fazer (ex.: ponto de restauração recente).</param>
+public sealed record StepApplyResult(int Applied, int Already, int Refused, int Canceled, IReadOnlyList<string> Lines, int NotNeeded = 0)
 {
     public bool AnyWritten => Applied > 0;
     public string Summary =>
-        Applied + Already + Refused + Canceled == 0 ? "Nada a aplicar." :
+        Applied + Already + Refused + Canceled + NotNeeded == 0 ? "Nada a aplicar." :
         string.Join(" · ", new[]
         {
             Applied > 0 ? $"{Applied} {(Applied == 1 ? "aplicada" : "aplicadas")}" : null,
             Already > 0 ? $"{Already} já {(Already == 1 ? "estava" : "estavam")} assim" : null,
+            NotNeeded > 0 ? $"{NotNeeded} não {(NotNeeded == 1 ? "precisou" : "precisaram")}" : null,
             Refused > 0 ? $"{Refused} {(Refused == 1 ? "recusada" : "recusadas")} (motivo no relatório)" : null,
             Canceled > 0 ? $"{Canceled} {(Canceled == 1 ? "cancelada" : "canceladas")} por você" : null,
         }.Where(s => s is not null));
@@ -46,24 +83,47 @@ public static class AssistantRunner
     /// não interrompe: é registrada com o motivo e o resto continua. Cancelar uma confirmação encerra a etapa (o que já foi
     /// aplicado fica, e pode ser desfeito).
     /// </summary>
-    public static async Task<StepApplyResult> ApplyAsync(AssistantState state, AssistantStepId step, IEnumerable<ProposedChange> chosen, IAssistantWriter writer)
+    /// <param name="observer">Tela de progresso (opcional).</param>
+    /// <param name="recentRestorePoint">Ponto de restauração mais novo que a interface conseguiu ler (null = nenhum ou não deu
+    /// para ler). Se tiver menos de 24 h, o pedido de criar outro não vai ao aplicador: é registrado como "não precisou".</param>
+    /// <param name="now">Relógio (testes).</param>
+    public static async Task<StepApplyResult> ApplyAsync(AssistantState state, AssistantStepId step, IEnumerable<ProposedChange> chosen, IAssistantWriter writer,
+        IApplyObserver? observer = null, DateTime? recentRestorePoint = null, DateTime? now = null)
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(writer);
-        var batches = ApplyGrouping.Group(step, chosen);
-        int applied = 0, already = 0, refused = 0, canceled = 0;
+        ArgumentNullException.ThrowIfNull(chosen);
+        int applied = 0, already = 0, refused = 0, canceled = 0, notNeeded = 0;
+        var list = chosen.ToList();
+        if (recentRestorePoint is { } point && RestorePointRule.IsRecent(point, now ?? DateTime.Now))
+        {
+            var why = RestorePointRule.AlreadyProtected(point);
+            foreach (var c in list.Where(c => c.Request.ActionId == StepPlanners.RestorePointAction).ToList())
+            {
+                Record(state, c, ChangeOutcome.AlreadyConfigured, why, null);
+                observer?.NotNeeded(c, why);
+                list.Remove(c);
+                notNeeded++;
+            }
+        }
+        var batches = ApplyGrouping.Group(step, list);
+        observer?.Planned(batches);
         var lines = new List<string>();
         var stop = false;
         foreach (var batch in batches)
         {
+            var mark = state.Changes.Count;
             if (stop)
             {
                 foreach (var c in batch.Changes) Record(state, c, ChangeOutcome.Canceled, "Você cancelou uma confirmação anterior desta etapa.", null);
                 canceled += batch.Changes.Count;
+                observer?.Finished(batch, state.Changes.Skip(mark).ToList());
                 continue;
             }
             WriteOutcome? r;
-            try { r = await writer.ApplyAsync(batch.Title, batch.Confirmation, batch.Requests, batch.Level).ConfigureAwait(true); }
+            observer?.Stage(batch, ApplyStage.WaitingConfirmation);
+            var stages = observer is null ? null : new Relay(s => observer.Stage(batch, s));
+            try { r = await writer.ApplyAsync(batch.Title, batch.Confirmation, batch.Requests, batch.Level, stages).ConfigureAwait(true); }
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {
                 r = new WriteOutcome(false, null, $"O aplicador não respondeu: {ex.Message}", []);
@@ -74,6 +134,7 @@ public static class AssistantRunner
                 canceled += batch.Changes.Count;
                 lines.Add(batch.Level == BrokerLevel.Admin ? "Mudanças de sistema canceladas." : "Cancelado.");
                 stop = true;
+                observer?.Finished(batch, state.Changes.Skip(mark).ToList());
                 continue;
             }
             lines.Add(r.Message);
@@ -105,14 +166,40 @@ public static class AssistantRunner
                     Record(state, c, ChangeOutcome.Applied, res.Detail, r.RunId, res.Observed, res.Desired);
                     applied++;
                 }
+                else if (c.Request.ActionId == StepPlanners.RestorePointAction && ApplySummary.IsRecentRestorePointRefusal(res.Detail))
+                {
+                    // O Windows recusou por já haver um ponto nas últimas 24 h: o PC já está protegido. Neutro, não é falha.
+                    Record(state, c, ChangeOutcome.AlreadyConfigured, RestorePointRule.AlreadyProtectedByWindows, r.RunId);
+                    notNeeded++;
+                }
                 else
                 {
-                    Record(state, c, ChangeOutcome.Refused, $"{res.Outcome}{(res.Detail is null ? "" : ": " + res.Detail)}", r.RunId);
+                    Record(state, c, ChangeOutcome.Refused, $"{OutcomeText(res.Outcome)}{(res.Detail is null ? "" : ": " + res.Detail)}", r.RunId);
                     refused++;
                 }
             }
+            observer?.Finished(batch, state.Changes.Skip(mark).ToList());
         }
-        return new StepApplyResult(applied, already, refused, canceled, lines);
+        return new StepApplyResult(applied, already, refused, canceled, lines, notNeeded);
+    }
+
+    /// <summary>Resultado do aplicador em palavras (nunca o nome do enum para o usuário).</summary>
+    public static string OutcomeText(string outcome) => outcome switch
+    {
+        "Verified" => "Aplicada e conferida",
+        "AlreadyConfigured" => "Já estava assim",
+        "NotApplicable" => "Não se aplica a este PC",
+        "SkippedExternalChange" => "Pulada: mudou por fora desde a leitura",
+        "Blocked" => "Bloqueada",
+        "FailedAndCompensated" => "Não aplicada (voltou ao que era)",
+        "Interrupted" => "Interrompida",
+        _ => "Não aplicada",
+    };
+
+    /// <summary>IProgress que chama na hora, na mesma thread (o host já entrega os marcos na thread da interface).</summary>
+    private sealed class Relay(Action<ApplyStage> action) : IProgress<ApplyStage>
+    {
+        public void Report(ApplyStage value) => action(value);
     }
 
     /// <summary>Casa cada mudança com o resultado: pelo índice do pedido quando o aplicador informa, senão pela chave (na ordem).</summary>
