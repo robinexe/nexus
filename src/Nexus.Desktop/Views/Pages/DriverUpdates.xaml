@@ -157,7 +157,7 @@
 
         <!-- ===== 1. Destaque ===== -->
         <c:HeroPanel Illustration="{StaticResource Illo.Drivers}" Title="Atualizações de driver"
-                     Number="{Binding UpdatesNumber}" ValueText="{Binding HeroValueText}" IsLoading="{Binding Searching}"
+                     Number="{Binding UpdatesNumber}" ValueText="{Binding HeroValueText}"
                      Caption="{Binding HeroCaption}"
                      ActionText="Procurar atualizações" Command="{Binding SearchCommand}"
                      SecondaryText="Abrir Windows Update" SecondaryCommand="{Binding OpenWindowsUpdateCommand}">

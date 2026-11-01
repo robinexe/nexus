@@ -53,7 +53,7 @@ public sealed record OneClickPlan(IReadOnlyList<OneClickItem> User, IReadOnlyLis
 public static class OneClickPlanner
 {
     /// <summary>Motivo que o aplicador do usuário dá para ações de administrador (CommonAssessment): não é recusa, é nível.</summary>
-    public const string NeedsElevation = "Requer o broker elevado.";
+    public const string NeedsElevation = CommonAssessment.NeedsElevation;
 
     /// <summary>Pedidos candidatos (antes de perguntar ao aplicador): as recomendações marcadas para um clique.</summary>
     public static IReadOnlyList<(Recommendation Recommendation, ActionRequest Request)> Candidates(RecommendationSet set, CatalogDocument catalog)

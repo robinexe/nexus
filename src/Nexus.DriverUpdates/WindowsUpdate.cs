@@ -98,7 +98,8 @@ public static partial class WindowsUpdateQueries
     [GeneratedRegex(@"\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z", RegexOptions.CultureInvariant)]
     private static partial Regex UpdateIdPattern();
 
-    [GeneratedRegex(@"(?<v>\d{1,5}(?:\.\d{1,6}){1,3})\s*\z", RegexOptions.CultureInvariant)]
+    // Títulos reais: "Intel - System - 10.1.1.45" e também "Apple, Inc. USBDevice Driver Update (552.0.0.0)" (visto no PC real).
+    [GeneratedRegex(@"(?<v>\d{1,5}(?:\.\d{1,6}){1,3})\)?\s*\z", RegexOptions.CultureInvariant)]
     private static partial Regex TrailingVersion();
 
     /// <summary>Mesmas regras do catálogo (userParameters): GUID minúsculo e revisão de 1 a 6 dígitos.</summary>

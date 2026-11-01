@@ -142,7 +142,7 @@ public sealed class DriverUpdatesPage : ModulePage
 
     public bool Searching { get => _searching; private set { if (Set(ref _searching, value)) NotifyOffers(); } }
     public bool Searched { get => _searched; private set { if (Set(ref _searched, value)) NotifyOffers(); } }
-    public string SearchStatus { get => _searchStatus; private set => Set(ref _searchStatus, value); }
+    public string SearchStatus { get => _searchStatus; private set { if (Set(ref _searchStatus, value)) OnPropertyChanged(nameof(HeroCaption)); } }
     public string Summary { get => _summary; private set => Set(ref _summary, value); }
     public string ErrorText { get => _error; private set => Set(ref _error, value); }
     public string RebootNotice { get => _reboot; private set => Set(ref _reboot, value); }
@@ -162,10 +162,12 @@ public sealed class DriverUpdatesPage : ModulePage
     public double OptionalNumber => Optional.Count;
     public double GraphicsNumber => Graphics.Count;
     /// <summary>Texto no lugar do número antes da primeira busca.</summary>
-    public string HeroValueText => Searched || Searching ? "" : "Não procurado";
-    public string HeroCaption => Searched
-        ? "Achadas pelo Windows Update agora. Instalar guarda o driver atual para Desfazer."
-        : "A busca usa o próprio Windows Update e pode levar alguns minutos.";
+    public string HeroValueText => Searching ? "Procurando…" : Searched ? "" : "Não procurado";
+    public string HeroCaption => Searching
+        ? SearchStatus + " Pode mudar de página: a busca continua."
+        : Searched
+            ? "Achadas pelo Windows Update agora. Instalar guarda o driver atual para Desfazer."
+            : "A busca usa o próprio Windows Update e leva de 30 s a alguns minutos.";
     public bool HasOffers => Recommended.Count + Optional.Count + Graphics.Count > 0;
     /// <summary>Procurou e não há nada: estado vazio "tudo em dia".</summary>
     public bool ShowNoUpdates => Searched && !Searching && !HasOffers;

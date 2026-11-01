@@ -118,6 +118,7 @@ public sealed class DriverUpdatesParsingTests
 {
     [Theory]
     [InlineData("NVIDIA - Display - 32.0.15.6636", "32.0.15.6636")]
+    [InlineData("Apple, Inc. USBDevice Driver Update (552.0.0.0)", "552.0.0.0")] // título real do PC do responsável
     [InlineData("Realtek Semiconductor Corp. - Extension - 10.0.22621.31274", "10.0.22621.31274")]
     [InlineData("Intel - System - 10.1.1.42 ", "10.1.1.42")]
     [InlineData("Advanced Micro Devices, Inc. - System - 2.0", "2.0")]

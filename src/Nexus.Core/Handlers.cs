@@ -42,6 +42,8 @@ public sealed class HandlerRegistry
 /// <summary>Validação comum a todos os handlers: compatibilidade de build e lista de valores permitidos.</summary>
 public static class CommonAssessment
 {
+    public const string NeedsElevation = "Precisa de administrador: o NEXUS pede a permissão do Windows na hora de aplicar.";
+
     public static Applicability Check(ActionInstance action, SystemContext context)
     {
         var d = action.Definition;
@@ -52,7 +54,7 @@ public static class CommonAssessment
         if (d.MaxBuild is { } max && context.WindowsBuild > max)
             return Applicability.NotApplicable($"Validado só até build {max}; detectado {context.WindowsBuild}.");
         if (d.Privileges == PrivilegeLevel.Admin && !context.IsElevated)
-            return Applicability.Blocked("Requer o broker elevado.");
+            return Applicability.Blocked(CommonAssessment.NeedsElevation);
         if (d.AllowedValues is { Count: > 0 } allowed && action.Desired.Exists &&
             !allowed.Contains(action.Desired.Value ?? string.Empty, StringComparer.Ordinal))
             return Applicability.Blocked($"Valor '{action.Desired.Value}' fora da lista permitida pelo catálogo.");

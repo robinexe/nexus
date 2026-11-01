@@ -853,7 +853,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
 
     // ------------------------------------------------------------------ grupo "Usuários do log de desempenho" (ação de catálogo)
 
-    private const string PerfLogActionId = "measure.perflog-group.join";
+    private const string PerfLogActionId = "measure.perflog-group.join@1";
 
     private async Task RefreshPerfLogAsync()
     {

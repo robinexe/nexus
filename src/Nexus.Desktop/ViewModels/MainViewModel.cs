@@ -313,7 +313,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
                 Plan.Summary = "Nenhuma ação selecionada.";
                 return;
             }
-            var context = NexusServices.ContextFrom(_snapshot.Facts);
+            // Simulação: a interface não roda elevada, mas aplicar eleva sozinho (aviso do Windows). Então simula como administrador
+            // e marca o que vai pedir permissão, em vez de dizer "bloqueada" para tudo que é de sistema.
+            var context = NexusServices.ContextFrom(_snapshot.Facts) with { IsElevated = true };
             var plan = await Task.Run(() => new DesiredStateResolver(_services.Handlers).Resolve(chosen, context));
             Plan.Rows = plan.Items.Select(i => new PlanRow(
                 $"{i.Action.Definition.Title} ({i.Action.Definition.Key})",
@@ -327,7 +329,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
                 i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured ? i.ObservedAtPlan.Describe() : "—",
                 i.Action.Desired.Describe(),
                 i.Status == PlanStatus.Pending ? (i.Batch == 0 ? "1 (normal)" : "2 (após reinício)") : "—",
-                i.Reason ?? "",
+                (i.Action.Definition.Privileges == PrivilegeLevel.Admin && i.Status == PlanStatus.Pending ? "Pede a permissão do Windows ao aplicar. " : "") + (i.Reason ?? ""),
                 i.Status)).ToList();
             var pending = plan.Items.Count(i => i.Status == PlanStatus.Pending);
             Plan.Summary = $"{pending} seriam aplicadas · {plan.Items.Count(i => i.Status == PlanStatus.AlreadyConfigured)} já configuradas · " +
