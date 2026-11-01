@@ -635,10 +635,19 @@ public sealed class AssistantPage : ModulePage
     {
         ScanStatus = "Medindo o processador e a memória (≈15 s). Feche jogos e programas pesados para um número justo…";
         Scanning = true;
+        var tracker = ProcessView.Begin(AssistantStepId.MyPc, "Medindo", apply: false, Segments());
+        var task = tracker.Add("measure", "Medindo o processador e a memória", 15);
+        tracker.Start(task, ScanStatus);
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
             _measured = await Task.Run(() => AssistantReaders.Measure(cts.Token));
+            tracker.Finish(task, ProcessTaskStatus.Done, "medido");
+        }
+        catch
+        {
+            ProcessView.Close();
+            throw;
         }
         finally { Scanning = false; }
         await ScanAsync(AssistantStepId.MyPc);
@@ -676,15 +685,24 @@ public sealed class AssistantPage : ModulePage
             return;
         Scanning = true;
         ScanStatus = "Verificação rápida do Defender em andamento…";
+        // O Defender não informa %: a barra anda pelo tempo típico de uma verificação rápida (estimativa) e o texto é a última
+        // linha que o próprio MpCmdRun escreveu.
+        var tracker = ProcessView.Begin(AssistantStepId.Security, "Verificando com o Defender", apply: false, Segments(), canCancel: true);
+        var task = tracker.Add("defender", "Verificação rápida do Microsoft Defender", 180);
+        tracker.Start(task, ScanStatus);
+        var lines = new Progress<string>(line => { if (ReferenceEquals(ProcessView.Tracker, tracker) && !task.IsFinished) tracker.SetText(task, $"Defender: {line}"); });
+        IProgress<string> report = lines;
         try
         {
             using var cts = new CancellationTokenSource();
             _cancel = cts;
-            var result = await Task.Run(() => DefenderScanner.ScanAsync(ScanKind.Quick, null, (line, elapsed) => { }, cts.Token));
+            using var closeOnCancel = cts.Token.Register(() => { if (ReferenceEquals(ProcessView.Tracker, tracker)) ProcessView.Close(); });
+            var result = await Task.Run(() => DefenderScanner.ScanAsync(ScanKind.Quick, null, (line, _) => report.Report(line), cts.Token));
             _state.SetMetric("defender", "Verificação rápida do Defender", after: result.Summary);
             StepResult = $"Defender: {result.Summary}";
+            tracker.Finish(task, ProcessTaskStatus.Done, result.Summary);
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { StepResult = $"Defender: não foi possível concluir ({ex.Message})."; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { StepResult = $"Defender: não foi possível concluir ({ex.Message})."; ProcessView.Close(); }
         finally { Scanning = false; _cancel = null; }
         await ScanAsync(AssistantStepId.Security);
     }

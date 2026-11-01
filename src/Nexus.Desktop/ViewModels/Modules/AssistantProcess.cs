@@ -200,7 +200,9 @@ public sealed class AssistantProcess : ObservableObject
             _ => IsApply ? "Etapa aplicada" : "Leitura concluída",
         };
         CurrentIsEstimate = false;
+        var mine = _tracker;
         await Task.Delay(IsApply ? HoldApply : HoldScan);
+        if (!ReferenceEquals(mine, _tracker)) return; // outra etapa já tomou a tela durante a pausa
         IsFinished = false;
         IsVisible = false;
     }

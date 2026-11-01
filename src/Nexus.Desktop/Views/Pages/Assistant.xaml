@@ -243,7 +243,7 @@
                     </StackPanel>
                   </UniformGrid>
 
-                  <Border Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="3,1,1,1"
+                  <Border Background="{StaticResource Brush.SurfaceLow}" BorderThickness="3,1,1,1"
                           CornerRadius="{StaticResource Radius.Control}" Padding="14,10">
                     <Border.Style>
                       <Style TargetType="Border">
