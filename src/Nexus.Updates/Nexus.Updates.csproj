@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Atualização do NEXUS (docs/11-atualizacao.md): manifesto assinado (ECDSA P-256) num GitHub Release público, download com
+       conferência de host, tamanho e SHA-256, e o instalador Inno em modo silencioso. Sem pacotes NuGet.
+       net10.0: a lógica (versões, manifesto, assinatura, download) roda nos testes em qualquer SO; o que toca o Windows
+       (registro, iniciar o instalador) usa [SupportedOSPlatform("windows")]. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.Updates</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+  </ItemGroup>
+</Project>

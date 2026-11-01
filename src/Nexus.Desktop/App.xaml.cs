@@ -31,6 +31,7 @@ public partial class App : Application
             var testWindow = new MainWindow();
             testWindow.Show();
             SelfTest.UiSelfTestRunner.Start(testWindow, selfTest.Path, selfTest.Screenshots);
+            ViewModels.AppUpdates.Instance.Start(e.Args, selfTest: true); // autoteste: atualização desligada
             return;
         }
 
@@ -62,10 +63,14 @@ public partial class App : Application
             window.ShowActivated = false;
         }
         window.Show();
+        // Atualização do programa: procura 30 s depois de abrir e a cada 6 h (se ligada em Ajustes); docs/11-atualizacao.md.
+        ViewModels.AppUpdates.Instance.Start(e.Args, selfTest: false);
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        // Versão nova já baixada e conferida, e o usuário não clicou "Reiniciar e atualizar": instala agora, ao fechar.
+        if (_instance is not null) ViewModels.AppUpdates.Instance.OnAppExit();
         _showWait?.Unregister(null);
         _showSignal?.Dispose();
         if (_instance is not null)

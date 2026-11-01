@@ -21,4 +21,9 @@
     <Description>NEXUS: utilitário de desempenho e manutenção para Windows, com diário, confirmação e desfazer.</Description>
     <Copyright>Copyright (c) 2026 robinexe</Copyright>
   </PropertyGroup>
+  <!-- Marca de cópia publicada (publish.py passa -p:NexusPackaged=true): sem ela o NEXUS é "versão de desenvolvimento" e não
+       procura nem instala atualizações (src/Nexus.Updates, docs/11-atualizacao.md). -->
+  <ItemGroup Condition="'$(NexusPackaged)' == 'true'">
+    <AssemblyMetadata Include="NexusPackaged" Value="true" />
+  </ItemGroup>
 </Project>

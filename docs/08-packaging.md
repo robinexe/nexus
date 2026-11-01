@@ -148,6 +148,12 @@ Dispara em tag `v*` (ex.: `git tag v0.9.0 && git push origin v0.9.0`) e manualme
    instalador) ou continuou (se já era membro antes). Extrai o ZIP e roda o `nexus` de lá.
 6. `SHA256SUMS.txt` de todos os `.zip`/`.exe`; upload como artifact; em tag, **GitHub Release em rascunho** (o responsável
    revisa e publica; sufixo `-rc` vira pré-lançamento).
+7. **Atualização automática** (docs/11-atualizacao.md): com o segredo `NEXUS_UPDATE_SIGNING_KEY`, gera e assina
+   `nexus-update.json` e confere com `nexus update --verify-manifest` (chave embutida); com `NEXUS_RELEASES_TOKEN` e (tag ou
+   publish=true), publica instalador, ZIP, manifesto e assinatura em `robinexe/nexus-releases` (público, *latest*). A VM
+   também roda `nexus update --check` da pasta instalada (espera `Installed`) e do ZIP (espera `Portable`), tolerante.
+   A publicação (`publish.py`) passa `-p:NexusPackaged=true`: sem essa marca o NEXUS é "versão de desenvolvimento" e não
+   se atualiza.
 
 Validado localmente com `actionlint` 1.7.7 (sem erros). O instalador só é compilado e testado no runner Windows.
 
