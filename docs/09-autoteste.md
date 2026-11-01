@@ -123,3 +123,24 @@ As imagens mostram o que a janela mostra (nomes de programas, redes etc.): ficam
 2. Para um defeito da interface, veja a tela correspondente em "Telas" e os erros de binding da página.
 3. Para enviar a quem corrige: `relatorio.json` + `ui.json` bastam (sem imagens, sem dados pessoais). As imagens só se
    precisar e depois de olhar o que aparece nelas.
+
+## 5. Fiação (testes estáticos, em Linux, a cada `dotnet test`)
+
+O autoteste no PC só lê; ele não aperta os botões que escrevem. Quem garante que cada botão chega a uma ação que o
+aplicador aceita é `tests/Nexus.Tests/WiringTests.cs` (+ `WiringSites.cs`, `WiringSupport.cs`, `WiringXamlTests.cs`):
+
+- toda string `id@N` dos binários existe no catálogo; todo id com prefixo de módulo também (pega `+ "@1"` com id errado);
+- todo `new ActionRequest(...)` do código-fonte: a chave resolve (literal, constante, concatenação, variável local) para
+  uma ação viva; o valor é aceito; os argumentos são exatamente os `userParameters`; ação irreversível leva
+  `ConfirmIrreversible`; o `BrokerLevel` literal é o do catálogo (Admin mandado como User sempre falha); a ação é
+  instanciável. Chave vinda de dados fica em `DynamicSites` com o nome do teste que confere a origem (presets de serviço,
+  regras de limpeza, achados da CPU, vagas da quarentena, correções da Segurança, tarefas agendadas…);
+- chave e nível escritos juntos (tuplas da Inicialização, `EphemeralAsync(..., chave, BrokerLevel.X)`,
+  `Apply(..., admin: true)` do diagnóstico de memória) batem com o catálogo;
+- toda ação do catálogo tem handler no aplicador (`ModuleHandlers.All` + embutidos de `Program.cs`), e a lista de
+  módulos é a mesma no aplicador, no autoteste e na pré-visualização da interface — é o "sem handler" do autoteste,
+  agora pego antes;
+- todo `*Command="{Binding X}"` dos XAML aponta para um comando que existe no ViewModel do contexto (DataType,
+  ItemsSource do dono do modelo, RelativeSource) e que recebe valor em algum lugar (lido do IL);
+- todo destino de navegação (`CommandParameter` de `ShellCommands.Navigate`, `Target = "XPage"`, `typeof(XPage)`) é uma
+  página da janela; toda chave `Icon.*`/`Illo.*` escrita em C# existe nos dicionários.
