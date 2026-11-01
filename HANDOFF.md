@@ -207,7 +207,13 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     limpeza que vinha desmarcada; drivers: backup/restauração real, dispositivos sem driver, busca no WU (no PC real achou
     oferta Apple com versão entre parênteses — corrigido). Auditoria de fiação: 5 defeitos reais corrigidos + WiringTests.
     Simulação deixou de marcar "bloqueada" ações de administrador. 1669 testes unitários.
-14. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+14. **01/11 manhã:** tela de progresso (anel, % real, tempo restante suavizado, etapas) no Assistente e em toda aplicação
+    (sobreposição na janela); atualização automática assinada (Nexus.Updates, ECDSA P-256; falta criar o repositório público
+    robinexe/nexus-releases e os segredos NEXUS_UPDATE_SIGNING_KEY/NEXUS_RELEASES_TOKEN — docs/11-atualizacao.md); drivers de
+    vídeo NVIDIA/AMD baixados, conferidos (assinatura) e instalados dentro do app; correção grave: interface aberta como
+    administrador fazia o aplicador de usuário nascer elevado e recusar %LocalAppData% (tudo "bloqueado") — agora usa o
+    aplicador de administrador. Ponto de restauração do limite de 24 h não é mais erro. 1900 testes.
+15. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
