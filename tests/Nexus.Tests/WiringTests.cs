@@ -346,6 +346,32 @@ public sealed partial class WiringTests
         Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
     }
 
+    /// <summary>
+    /// Regras de recomendação (Automático, Assistente, "Otimizar agora"): uma regra que cita ação inexistente some em silêncio
+    /// (o motor pula), então toda ação/prefixo citado existe e todo valor fixo é aceito pela ação.
+    /// </summary>
+    [Fact]
+    public void Recommendation_rules_point_to_existing_actions_and_values()
+    {
+        var problems = new List<string>();
+        var rules = Nexus.Automation.RecommendationEngine.Default().Rules;
+        Assert.NotEmpty(rules);
+        foreach (var rule in rules)
+        {
+            if (rule.Action is { } id)
+            {
+                var entry = Wiring.Catalog.Actions.Where(a => a.Definition.Id == id).MaxBy(a => a.Definition.Version);
+                if (entry is null) { problems.Add($"regra {rule.Id}: ação '{id}' não existe no catálogo"); continue; }
+                if (rule.Kind is Nexus.Automation.RecommendationKind.Recommend or Nexus.Automation.RecommendationKind.Consider && entry.UserParameters.Count == 0)
+                    problems.AddRange(CheckRequest($"regra {rule.Id}", entry, [entry.DesiredValue is null ? rule.Value : null], null, false, false, null));
+            }
+            foreach (var prefix in new[] { rule.ActionPrefix, rule.Module }.OfType<string>())
+                if (!Wiring.Catalog.Actions.Any(a => a.Definition.Id.StartsWith(prefix, StringComparison.Ordinal)))
+                    problems.Add($"regra {rule.Id}: nenhuma ação começa com '{prefix}'");
+        }
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+    }
+
     [GeneratedRegex(@"LevelOf\(string actionId\)\s*=>\s*actionId is (.+?)\?\s*BrokerLevel\.User", RegexOptions.Singleline)]
     private static partial Regex LevelOfRegex();
 

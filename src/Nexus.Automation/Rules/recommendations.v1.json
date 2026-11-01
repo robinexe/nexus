@@ -198,6 +198,7 @@
       "id": "consider.hags.gamer",
       "kind": "Consider",
       "action": "gpu.hags.lab",
+      "value": "2",
       "when": ["gamer", "win11"],
       "priority": 3,
       "reason": "Com placa dedicada ({gpu}) e Windows 11, o agendamento de GPU acelerado por hardware pode reduzir um pouco a latência, ou não; depende do driver. Exige reiniciar e medir antes e depois.",
