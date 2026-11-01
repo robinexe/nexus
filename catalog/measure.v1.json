@@ -1,0 +1,42 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Módulo Medir. Medir em si é somente leitura (PresentMon, rastreamento de eventos do Windows). A única ação é opcional: colocar a sua conta no grupo do Windows que permite rastrear sem pedir permissão a cada partida.",
+  "actions": [
+    {
+      "id": "measure.perflog-group.join",
+      "version": 1,
+      "title": "Medir sem pedir permissão toda vez (grupo \"Usuários do log de desempenho\")",
+      "classification": "SupportedDocumented",
+      "handlerKind": "MeasureLocalGroupMember",
+      "target": {
+        "group": "S-1-5-32-559",
+        "scope": "User"
+      },
+      "desiredValue": "Member",
+      "desiredType": "Membership",
+      "risk": "Low",
+      "mechanism": "Adiciona a SUA conta (a que pediu, identificada pelo Windows) ao grupo local \"Usuários do log de desempenho\" (Performance Log Users, SID S-1-5-32-559) com NetLocalGroupAddMembers. Membros desse grupo podem iniciar sessões de rastreamento de eventos do Windows (ETW), que é o que o PresentMon usa para ler o tempo de cada quadro. Sem isso, o PresentMon precisa pedir permissão de administrador (aviso do Windows) a cada medição. Não acelera o PC: só tira o aviso. Vale depois que você sair e entrar de novo na conta do Windows (o grupo entra no seu acesso no logon).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/GameTechDev/PresentMon (README da linha de comando: requer privilégio elevado ou a conta no grupo Performance Log Users)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows-server/identity/ad-ds/manage/understand-security-groups#performance-log-users (o grupo pode agendar contadores e habilitar provedores de rastreamento)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "learn.microsoft.com/windows/win32/api/lmaccess/nf-lmaccess-netlocalgroupaddmembers"
+        }
+      ],
+      "risks": "Baixo. Programas que rodam na sua conta passam a poder iniciar rastreamentos de eventos do Windows (ETW) e coletar contadores de desempenho sem pedir permissão; alguns provedores de eventos revelam atividade de outros programas do PC (nomes de processos, acesso a arquivos e rede). Não dá privilégio de administrador nem permite alterar o sistema. Se outras pessoas usam programas desconhecidos na sua conta, prefira deixar o PresentMon pedir permissão a cada vez.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "NetLocalGroupGetMembers: a sua conta aparece como membro direto do grupo S-1-5-32-559.",
+      "revert": "Desfazer tira a sua conta do grupo, mas só se ela não estava lá antes do NEXUS (se já era membro, nada muda). A marca de que foi o NEXUS que adicionou fica em HKLM\\SOFTWARE\\NEXUS\\PerfLogGroup; o desinstalador usa essa marca para desfazer também."
+    }
+  ]
+}

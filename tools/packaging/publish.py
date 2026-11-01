@@ -13,7 +13,8 @@ O que faz, por RID:
   3. Confere a estrutura: os quatro executáveis lado a lado (a interface e o nexus iniciam o nexus-broker.exe da própria pasta;
      a tarefa semanal roda o nexus.exe da pasta), o catálogo completo em catalog\\, nenhum executável dependente de .NET
      instalado, arquitetura PE certa.
-  4. Copia tools\\service (serviço opcional do aplicador) e os scripts de tools\\packaging usados pelo instalador.
+  4. Copia tools\\service (serviço opcional do aplicador) e os scripts de tools\\packaging usados pelo instalador; confere o
+     PresentMon embutido (tools\\PresentMon\\PresentMon.exe, SHA-256 conhecido), a licença dele e THIRD-PARTY-NOTICES.txt.
   5. Grava VERSAO.txt e LEIA-ME-PORTATIL.txt e cria artifacts/NEXUS-<versão>-<rid>-portatil.zip (entradas ordenadas e com
      data fixa: o mesmo conteúdo gera o mesmo ZIP).
 
@@ -53,7 +54,12 @@ EXTRA_FILES = [  # (origem relativa à raiz, destino relativo à pasta publicada
     ("tools/service/README.md", "tools/service/README.md"),
     ("tools/packaging/Remove-NexusTasks.ps1", "tools/Remove-NexusTasks.ps1"),
     ("tools/packaging/Test-NexusFolderSafety.ps1", "tools/Test-NexusFolderSafety.ps1"),
+    ("tools/packaging/Set-NexusPerfLogGroup.ps1", "tools/Set-NexusPerfLogGroup.ps1"),
 ]
+# PresentMon 2.6.0 oficial (Intel, MIT) embutido: o build da interface e da CLI já copia para tools\PresentMon; aqui só se
+# confere que chegou intacto (mesmo SHA-256 de src/Nexus.Measurement/PresentMonTrust.cs e de docs/05-dependencies.md).
+PRESENTMON = ("tools/PresentMon/PresentMon.exe", "b2a706bc6ad475749e3b7e3409263aa1e6906d45bdcf993f6dbc0f660188f1af")
+PRESENTMON_FILES = ["tools/PresentMon/LICENSE.txt", "THIRD-PARTY-NOTICES.txt"]
 ZIP_DATE = (2020, 1, 1, 0, 0, 0)
 SRC_COPY = ROOT / "artifacts" / "src"
 
@@ -289,6 +295,16 @@ def verify(target: Path, rid: str) -> list[str]:
         if not (target / must).is_file():
             fail(f"falta {must} na pasta publicada")
     report.append("runtime, WPF, SQLite nativo e ServiceController presentes")
+
+    pm, pm_hash = PRESENTMON
+    if not (target / pm).is_file():
+        fail(f"falta {pm} (PresentMon embutido) na pasta publicada")
+    if sha256(target / pm) != pm_hash:
+        fail(f"{pm} com SHA-256 diferente do PresentMon 2.6.0 oficial")
+    for f in PRESENTMON_FILES:
+        if not (target / f).is_file():
+            fail(f"falta {f} na pasta publicada")
+    report.append("PresentMon 2.6.0 embutido (SHA-256 conferido), licença e avisos de terceiros presentes")
     return report
 
 
@@ -312,7 +328,11 @@ def write_texts(target: Path, rid: str, full_version: str, commit: str) -> None:
         "Segurança no modo administrador: ações de administrador iniciam nexus-broker.exe elevado (aviso do Windows). Numa pasta\r\n"
         "do seu usuário (Downloads, Área de Trabalho) qualquer programa rodando com a sua conta pode trocar esses arquivos antes\r\n"
         "do aviso. Para usar ações de administrador com frequência, prefira o instalador (pasta em Arquivos de Programas, que só\r\n"
-        "administradores alteram). Para conferir esta pasta: powershell -ExecutionPolicy Bypass -File tools\\Test-NexusFolderSafety.ps1\r\n",
+        "administradores alteram). Para conferir esta pasta: powershell -ExecutionPolicy Bypass -File tools\\Test-NexusFolderSafety.ps1\r\n"
+        "\r\n"
+        "Medir: o PresentMon 2.6.0 oficial da Intel (licença MIT) acompanha o NEXUS em tools\\PresentMon. Antes de cada uso o NEXUS\r\n"
+        "confere a impressão digital (SHA-256) ou a assinatura digital da Intel; um arquivo trocado não é executado. Avisos de\r\n"
+        "terceiros: THIRD-PARTY-NOTICES.txt.\r\n",
         encoding="utf-8")
 
 

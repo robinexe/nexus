@@ -387,7 +387,7 @@
               <TextBlock Text="Para medir, falta uma peça gratuita" Style="{StaticResource Text.H2}" VerticalAlignment="Center"/>
             </DockPanel>
             <c:HowItWorks>
-              <c:StepItem Icon="{StaticResource Icon.Export}" Title="Baixe" Text="PresentMon-2.x-x64.exe, da Intel (GitHub, seção Releases)." Tone="Warn"/>
+              <c:StepItem Icon="{StaticResource Icon.Export}" Title="Baixe" Text="O PresentMon acompanha o NEXUS; se faltou ou foi recusado, baixe o PresentMon-2.x-x64.exe oficial da Intel (GitHub, seção Releases)." Tone="Warn"/>
               <c:StepItem Icon="{StaticResource Icon.Disk}" Title="Salve" Text="Em %LocalAppData%\NEXUS\PresentMon, ou indique onde salvou."/>
               <c:StepItem Icon="{StaticResource Icon.Measure}" Title="Meça" Text="Abra um jogo: o NEXUS mede sozinho." Tone="Good"/>
             </c:HowItWorks>
@@ -405,6 +405,7 @@
                 </StackPanel>
               </Button>
             </WrapPanel>
+            <TextBlock Text="{Binding PresentMonTrustText}" Style="{StaticResource Text.Small}" TextWrapping="Wrap" Margin="0,8,14,0"/>
             <c:ExplainToggle Margin="0,8,0,0" Content="{Binding PresentMonHelp}"/>
           </StackPanel>
         </Border>
@@ -772,6 +773,16 @@
                     <TextBlock Text="Deixar o PresentMon pedir permissão ao Windows" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
                   </CheckBox>
                   <c:ExplainToggle Header="Permissão do Windows" Content="{Binding RightsText}" Margin="24,0,0,8"/>
+                  <StackPanel Margin="24,0,0,10">
+                    <WrapPanel>
+                      <Button Style="{StaticResource Button.Secondary}" Command="{Binding JoinPerfLogCommand}" Content="Medir sem pedir permissão toda vez" Margin="0,0,8,4"
+                              Visibility="{Binding ShowPerfLogOffer, Converter={StaticResource M.Vis}}"
+                              ToolTip="Coloca a sua conta no grupo do Windows &quot;Usuários do log de desempenho&quot; (um aviso do Windows agora). Dá para desfazer."/>
+                      <Button Style="{StaticResource Button.Ghost}" Command="{Binding UndoPerfLogCommand}" Content="Desfazer" Margin="0,0,8,4"
+                              Visibility="{Binding CanUndoPerfLog, Converter={StaticResource M.Vis}}"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding PerfLogText}" Style="{StaticResource Text.Small}" TextWrapping="Wrap"/>
+                  </StackPanel>
                   <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                     <TextBlock Text="Guardar partidas com pelo menos" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
                     <TextBox Text="{Binding MinSessionSeconds, UpdateSourceTrigger=LostFocus}" Width="60" Margin="8,0" Padding="6,3" HorizontalContentAlignment="Right"
@@ -834,6 +845,7 @@
                     <c:StatusChip Tone="Good" Text="{Binding PresentMonText}" Visibility="{Binding HasPresentMon, Converter={StaticResource M.Vis}}"/>
                     <c:StatusChip Tone="Bad" Text="{Binding PresentMonText}" Visibility="{Binding HasPresentMon, Converter={StaticResource M.VisNot}}"/>
                   </StackPanel>
+                  <TextBlock Text="{Binding PresentMonTrustText}" Style="{StaticResource Text.Small}" TextWrapping="Wrap" Margin="0,0,0,6"/>
                   <WrapPanel Margin="0,0,0,6">
                     <Button Style="{StaticResource Button.Secondary}" Command="{Binding BrowseCommand}" Content="Localizar PresentMon" Margin="0,0,8,4"/>
                     <Button Style="{StaticResource Button.Ghost}" Command="{Binding RescanPresentMonCommand}" Content="Procurar de novo" Margin="0,0,8,4"/>

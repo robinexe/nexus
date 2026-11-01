@@ -1,8 +1,9 @@
 # Medir (v2)
 
 Página **Medir** (grupo Medir). Substitui a página antiga de captura por tempo fixo e absorve a página **Comparar**.
-Tudo aqui é **somente leitura**: nenhuma ação de catálogo, nenhuma escrita no sistema. As únicas gravações são arquivos
-do próprio NEXUS no perfil do usuário (`%LocalAppData%\NEXUS\medir.json` e `%LocalAppData%\NEXUS\sessoes\`).
+Medir em si é **somente leitura**: as únicas gravações são arquivos do próprio NEXUS no perfil do usuário
+(`%LocalAppData%\NEXUS\medir.json` e `%LocalAppData%\NEXUS\sessoes\`). A única ação de catálogo é **opcional**:
+`measure.perflog-group.join` ("Medir sem pedir permissão toda vez", abaixo), pelo aplicador, com diário e desfazer.
 
 ## O que faz
 
@@ -19,9 +20,29 @@ do próprio NEXUS no perfil do usuário (`%LocalAppData%\NEXUS\medir.json` e `%L
 
 ## PresentMon
 
-Ferramenta oficial e gratuita da Intel (MIT), <https://github.com/GameTechDev/PresentMon>. **O NEXUS não baixa nada sozinho.**
-Procura um executável já existente no caminho configurado, em `PresentMon\` ao lado do NEXUS, em `%LocalAppData%\NEXUS\PresentMon`,
-nas pastas do app PresentMon da Intel (`Program Files\Intel\PresentMon\PresentMonCli`), do CapFrameX e em Downloads; ou o usuário indica.
+Ferramenta oficial e gratuita da Intel (MIT), <https://github.com/GameTechDev/PresentMon>. **A versão 2.6.0 acompanha o NEXUS**
+(`tools/presentmon/PresentMon-2.6.0-x64.exe` no repositório, sem alteração, assinada por Intel Corporation, SHA-256
+`b2a706bc6ad475749e3b7e3409263aa1e6906d45bdcf993f6dbc0f660188f1af`). O build da interface e da CLI copia para `<saída>\tools\PresentMon\PresentMon.exe` (+ `LICENSE.txt`); o
+`publish.py`, o ZIP e o instalador levam junto (no instalador fica em `%ProgramFiles%\NEXUS\tools\PresentMon`, que só
+administradores alteram). Nada é baixado em tempo de execução.
+
+**Onde procura** (`PresentMonLocator`, `src/Nexus.Measurement/PresentMonTrust.cs`), nesta ordem: (1) a cópia embutida
+`tools\PresentMon\PresentMon.exe` ao lado do NEXUS; (2) o caminho que o usuário indicou; (3) `PresentMon\` ao lado do NEXUS,
+`%LocalAppData%\NEXUS\PresentMon`, o app PresentMon da Intel (`Program Files\Intel\PresentMon\PresentMonCli`), CapFrameX e
+Downloads. Links/junções no lugar do arquivo contam como "não existe".
+
+**Conferência antes de executar** (`PresentMonTrust.Verify`): o PresentMon pode se elevar (`--restart_as_admin`), então é tratado
+como código que roda com privilégio. Só é executado se (a) o SHA-256 é o de uma versão oficial conhecida (hoje a 2.6.0) **ou**
+(b) tem assinatura Authenticode válida (`WinVerifyTrust`, WINTRUST_ACTION_GENERIC_VERIFY_V2, sem baixar lista de revogação: só
+cache local) cujo assinante principal é exatamente `Intel Corporation` (CN do certificado, lido de
+`WTHelperGetProvSignerFromChain`/`WTHelperGetProvCertFromChain`). Vale o primeiro candidato aprovado. Recusado: não roda, e a
+página/autoteste dizem o porquê ("não é a versão oficial conhecida e a assinatura digital não é válida…"). A conferência é
+refeita a cada início de captura (imediatamente antes de iniciar o processo), não só ao abrir a página.
+Com a cópia embutida presente e aprovada, a página **não mostra mais "Falta o PresentMon"**.
+
+Por que embutido: o pedido do responsável foi "pronto para ser usado automaticamente"; baixar sozinho é proibido (regra 8), e
+pedir para o usuário baixar e salvar numa pasta do perfil deixava o executável que se eleva numa pasta gravável por qualquer
+programa da conta. Embutido na pasta protegida do instalador e conferido por hash/assinatura, isso some.
 
 Linha de comando (2.x; a 1.x usa um traço só e `-dont_restart_as_admin` quando não deve se elevar):
 
@@ -32,8 +53,26 @@ Linha de comando (2.x; a 1.x usa um traço só e `-dont_restart_as_admin` quando
 
 * Sem permissão de rastreamento, o PresentMon precisa se elevar (`--restart_as_admin`: o Windows pergunta, o usuário aceita).
   A saída padrão de um processo elevado não chega ao NEXUS, então nesse caso o PresentMon grava num CSV temporário que o
-  NEXUS lê enquanto cresce (só linhas completas). Contas no grupo **Usuários de log de desempenho** (S-1-5-32-559) ou um
-  NEXUS elevado medem sem aviso, pela saída padrão. A página explica como entrar no grupo; o NEXUS não faz isso sozinho.
+  NEXUS lê enquanto cresce (só linhas completas). Contas no grupo **Usuários do log de desempenho** (S-1-5-32-559) ou um
+  NEXUS elevado medem sem aviso, pela saída padrão.
+
+### Medir sem pedir permissão toda vez (`measure.perflog-group.join`)
+
+Ação de catálogo (`catalog/measure.v1.json`), administrador, uma vez. Handler `MeasureLocalGroupMember`
+(`src/Nexus.Measurement/PerfLogGroup.cs`, backend `Windows/WindowsLocalGroupBackend.cs`):
+
+| | |
+|---|---|
+| Quem entra | A conta de quem pede: `userSid` acrescentado pelo aplicador quando ele roda como serviço ou com outra conta (B10; alvo com `"scope": "User"`); com o aplicador elevado da própria conta, a conta do processo. Sem conta válida (`S-1-5-21-…`), recusa. Só o grupo S-1-5-32-559 é aceito (nunca Administradores). |
+| Detect | `NetLocalGroupGetMembers` nível 0: a conta é membro **direto**? `Membership:Member` ou ausente. |
+| Apply | Se ainda não é membro: `NetLocalGroupAddMembers` (grupo traduzido do SID, funciona em qualquer idioma) e grava a marca `HKLM\SOFTWARE\NEXUS\PerfLogGroup\<SID> = "app"`. Já membro: nada muda, sem marca. |
+| Restore | Estado anterior "membro": garante que continua. Estado anterior "ausente" (foi o NEXUS que adicionou): `NetLocalGroupDelMembers` e apaga a marca. Desfazer pedido por outra conta: recusa. |
+| Quando vale | Depois de sair e entrar de novo na conta (o grupo entra no token no logon). Até lá a página diz "já está no grupo; saia e entre de novo" e o PresentMon continua usando `--restart_as_admin`. |
+| Risco (dito na tela) | Programas da conta passam a poder iniciar rastreamentos ETW e coletar contadores sem aviso; alguns provedores revelam atividade de outros programas. Não dá privilégio de administrador. |
+
+A página oferece o botão "Medir sem pedir permissão toda vez" (uma confirmação + o aviso do Windows uma vez) e "Desfazer"
+depois de aplicar. O instalador oferece a mesma coisa (opção **marcada**, ver `docs/08-packaging.md`), com a mesma marca, e o
+desinstalador tira do grupo só as contas com a marca.
 * Colunas reconhecidas por nome: `FrameTime`/`CPUBusy`/`GPUBusy` (2.1+), `MsBetweenAppStart`/`MsCPUBusy`/`MsGPUBusy` (2.0),
   `MsBetweenPresents` (1.x e `--v1_metrics`). O relógio ao vivo é a soma dos frametimes (a unidade da coluna de tempo muda com
   as opções). A partida é guardada num CSV normalizado (formato 2.x) lido pelo mesmo analisador das importações.
@@ -75,29 +114,44 @@ Linha de comando (2.x; a 1.x usa um traço só e `-dont_restart_as_admin` quando
 
 ## O que NÃO faz (e por quê)
 
-* Não baixa o PresentMon (regra: sem downloads automáticos).
+* Não baixa o PresentMon (regra: sem downloads automáticos): a 2.6.0 oficial vem junto; versões mais novas entram por commit
+  (novo arquivo em `tools/presentmon` + hash em `PresentMonTrust.KnownSha256`) ou por um PresentMon assinado pela Intel que o
+  usuário já tenha.
+* Não executa PresentMon que não passe na conferência (hash conhecido ou assinatura da Intel), nem se o usuário indicar.
 * Não injeta overlay no jogo (RTSS/Steam overlay fazem isso; é o que anticheats bloqueiam ou banem).
-* Não adiciona a conta ao grupo "Usuários de log de desempenho" (mudança de segurança do sistema; seria uma ação de catálogo
-  Admin com Detect/Apply/Restore — fica como proposta).
+* Não adiciona a conta ao grupo "Usuários do log de desempenho" sem o usuário pedir (botão ou opção do instalador).
 * Não detecta mapa/cena/configuração gráfica do jogo (não há fonte confiável sem ler o jogo); a página avisa.
 * Não usa ETW direto sem o PresentMon: exigiria reimplementar o rastreamento de apresentação (DxgKrnl/DWM/Present) e os
   mesmos privilégios; o PresentMon é a implementação de referência da Intel.
 
 ## Arquivos
 
-* `src/Nexus.Measurement/`: `GameLibrary.cs` (bibliotecas), `GameDetection.cs` (regras e máquina de estados), `PresentMonLive.cs`
+* `src/Nexus.Measurement/`: `PresentMonTrust.cs` (localizador com o embutido primeiro, conferência hash/assinatura),
+  `PresentMonSmokeTest.cs` (captura curta do autoteste), `PerfLogGroup.cs` (ação do grupo), `Windows/WindowsPresentMonTrustProbe.cs`
+  (WinVerifyTrust + assinante), `Windows/WindowsLocalGroupBackend.cs` (NetLocalGroup* + marca), `GameLibrary.cs` (bibliotecas), `GameDetection.cs` (regras e máquina de estados), `PresentMonLive.cs`
   (parser em tempo real, linha de comando, localização), `PresentMonLiveCapture.cs` (processo + leitura do arquivo),
   `LiveStats.cs`, `AutoCompare.cs` (diário → mudanças, referência, avisos, trechos, veredito, biblioteca/CSV/relatório),
   `AutoMeasure.cs` (motor), `MeasurePreferences.cs` (preferências, atalho), `Overlay.cs` (estado do mostrador),
   `Windows/WindowsProcessProbe.cs`, `Windows/OverlayNative.cs`.
 * `src/Nexus.Desktop/ViewModels/Modules/MeasurePage.cs`, `MeasureRows.cs`, `Views/Pages/Measure.xaml`,
   `Views/Modules/Measure/OverlayWindow.cs` (mostrador + atalho), `Sparkline.cs`.
-* Testes: `tests/Nexus.Tests/Modules/MeasureTests.cs` (+ `MeasurementTests.cs` antigos continuam valendo).
+* Testes: `tests/Nexus.Tests/Modules/MeasureTests.cs`, `MeasurePresentMonTests.cs` (localização, conferência com falsos, recusa
+  antes de executar, handler do grupo com backend falso, catálogo, interface sem escrita direta) e `MeasurementTests.cs`.
+* Autoteste: "Medir · PresentMon encontrado?" mostra origem (embutido/configurado/achado), conferido e assinante; "Medir ·
+  PresentMon executa" (captura de 5 s do dwm.exe, CSV temporário apagado em seguida) só com `--with-benchmarks`, porque é a única
+  verificação do Medir que inicia processo e grava arquivo (o teste de proibição de escrita do autoteste olha só a dll do
+  autoteste; a execução fica na biblioteca do Medir, por isso a regra é a opção explícita). Sem permissão de rastreamento, é
+  ignorada (o autoteste nunca pede o aviso do Windows).
 
 ## Como validar no Windows
 
-1. Baixe `PresentMon-2.x-x64.exe` (Releases do repositório da Intel) para `%LocalAppData%\NEXUS\PresentMon\`. Abra Medir:
-   o ponto do PresentMon fica verde; "N jogos nas bibliotecas" lista as lojas instaladas.
+1. Instale pelo instalador (ou rode da pasta do build). Abra Medir: o PresentMon aparece verde, "PresentMon 2.6.0 (acompanha o
+   NEXUS)", com "PresentMon 2.6.0 oficial da Intel (SHA-256 conferido)"; "N jogos nas bibliotecas" lista as lojas instaladas.
+   `nexus selftest --only Medir --with-benchmarks` mostra a origem "embutido", conferido, e a captura de 5 s.
+   Para ver a recusa: copie qualquer outro .exe por cima de `tools\PresentMon\PresentMon.exe` numa pasta portátil e clique em
+   "Procurar de novo": "PresentMon recusado" com o motivo.
+1b. Se a conta não está no grupo: "Medir sem pedir permissão toda vez" → confirme → aviso do Windows → saia e entre de novo; o
+   próximo jogo é medido sem aviso. "Desfazer" (ou desinstalar, se foi o NEXUS que adicionou) tira do grupo.
 2. Ligue "Medir automaticamente" e abra um jogo (ex.: CS2). Em ~8 s o título vira o nome do jogo; aceite o aviso do Windows
    do PresentMon (se sua conta não estiver no grupo). Os números ao vivo e o traço aparecem.
 3. Ligue o mostrador; com o jogo em janela sem bordas, o mostrador aparece no canto escolhido e cliques passam por ele.

@@ -100,6 +100,9 @@
           "Nexus.WindowsActions": "[0.9.0, )"
         }
       },
+      "nexus.experimentation": {
+        "type": "Project"
+      },
       "nexus.gameprofiles": {
         "type": "Project",
         "dependencies": {
@@ -131,6 +134,14 @@
           "Nexus.Core": "[0.9.0, )",
           "Nexus.HardwareDiscovery": "[0.9.0, )",
           "Nexus.WindowsActions": "[0.9.0, )"
+        }
+      },
+      "nexus.measurement": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Experimentation": "[0.9.0, )",
+          "Nexus.Lab.Gpu": "[0.9.0, )",
+          "Nexus.TraceAnalysis": "[0.9.0, )"
         }
       },
       "nexus.monitoring": {
@@ -182,6 +193,9 @@
           "Nexus.Core": "[0.9.0, )",
           "Nexus.WindowsActions": "[0.9.0, )"
         }
+      },
+      "nexus.traceanalysis": {
+        "type": "Project"
       },
       "nexus.windowsactions": {
         "type": "Project",

@@ -12,6 +12,10 @@
 ;    Em desinstalação silenciosa nada é apagado. A exclusão nunca segue links/junções.
 ;  - Remove as tarefas agendadas com a marca do NEXUS e o serviço do aplicador (tools\service\Uninstall-Broker.ps1).
 ;  - Serviço do aplicador: opcional e desmarcado.
+;  - PresentMon 2.6.0 oficial (Intel, MIT) vai em {app}\tools\PresentMon (pasta protegida); o Medir confere SHA-256/assinatura
+;    antes de executar. Opção MARCADA: "Medir FPS sem pedir permissão toda vez" põe a conta de quem abriu o instalador no grupo
+;    "Usuários do log de desempenho" (S-1-5-32-559) com marca em HKLM\SOFTWARE\NEXUS\PerfLogGroup; o desinstalador tira do grupo
+;    só quem tem essa marca (adicionado pelo instalador ou pela ação measure.perflog-group.join do aplicativo).
 ;  - Assinatura Authenticode: preparada e desligada (defina SignToolName; ver docs/08-packaging.md).
 
 #ifndef AppVersion
@@ -76,6 +80,9 @@ Name: "ptbr"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 [CustomMessages]
 ptbr.TaskDesktop=Criar atalho na Área de Trabalho
 ptbr.TaskService=Instalar o serviço do aplicador (avançado; para ações de administrador sem o aviso do Windows a cada vez)
+ptbr.TaskPerfLog=Medir FPS sem pedir permissão toda vez: coloca a sua conta no grupo do Windows "Usuários do log de desempenho" (vale depois de sair e entrar de novo na conta; o desinstalador desfaz)
+ptbr.StatusPerfLog=Configurando a medição de FPS sem aviso...
+ptbr.StatusPerfLogRemove=Desfazendo o grupo "Usuários do log de desempenho"...
 ptbr.GroupExtras=Opcional:
 ptbr.LaunchNexus=Abrir o NEXUS
 ptbr.StatusService=Instalando o serviço do aplicador...
@@ -85,6 +92,7 @@ ptbr.StatusServiceRemove=Removendo o serviço do aplicador...
 [Tasks]
 Name: "desktopicon"; Description: "{cm:TaskDesktop}"; GroupDescription: "{cm:GroupExtras}"; Flags: unchecked
 Name: "service"; Description: "{cm:TaskService}"; GroupDescription: "{cm:GroupExtras}"; Flags: unchecked
+Name: "perflog"; Description: "{cm:TaskPerfLog}"; GroupDescription: "{cm:GroupExtras}"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -96,6 +104,7 @@ Source: "{#SourceDir}\*"; DestDir: "{tmp}\nexus-servico"; Flags: ignoreversion r
 [Icons]
 Name: "{autoprograms}\NEXUS"; Filename: "{app}\Nexus.Desktop.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\NEXUS"; Filename: "{app}\Nexus.Desktop.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autoprograms}\NEXUS - avisos de terceiros"; Filename: "{app}\THIRD-PARTY-NOTICES.txt"
 
 [Run]
 Filename: "{app}\Nexus.Desktop.exe"; Description: "{cm:LaunchNexus}"; Flags: postinstall nowait skipifsilent runasoriginaluser
@@ -103,6 +112,9 @@ Filename: "{app}\Nexus.Desktop.exe"; Description: "{cm:LaunchNexus}"; Flags: pos
 [UninstallRun]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\tools\service\Uninstall-Broker.ps1"""; StatusMsg: "{cm:StatusServiceRemove}"; Flags: runhidden waituntilterminated; RunOnceId: "NexusRemoveService"
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\tools\Remove-NexusTasks.ps1"""; StatusMsg: "{cm:StatusTasks}"; Flags: runhidden waituntilterminated; RunOnceId: "NexusRemoveTasks"
+; Tira do grupo "Usuários do log de desempenho" SÓ as contas com a marca do NEXUS (HKLM\SOFTWARE\NEXUS\PerfLogGroup); quem já era
+; membro antes do NEXUS não tem marca e fica como estava.
+Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\tools\Set-NexusPerfLogGroup.ps1"" -Leave"; StatusMsg: "{cm:StatusPerfLogRemove}"; Flags: runhidden waituntilterminated; RunOnceId: "NexusLeavePerfLog"
 
 [Code]
 const
@@ -113,6 +125,8 @@ var
   RemoveData: Boolean;
   RemoveQuarantine: Boolean;
   ServiceWanted: Boolean;  { decidido uma vez em ssInstall (Check pode ser chamado várias vezes) }
+  CachedSid: String;
+  SidLooked: Boolean;
 
 function PowerShell(): String;
 begin
@@ -170,12 +184,23 @@ begin
     Result := S;
 end;
 
+{ Descoberto uma vez (serviço e grupo usam o mesmo SID de quem abriu o instalador). }
+function UserSidOnce(): String;
+begin
+  if not SidLooked then
+  begin
+    CachedSid := OriginalUserSid();
+    SidLooked := True;
+  end;
+  Result := CachedSid;
+end;
+
 procedure InstallService();
 var
   Sid, Params: String;
   Code: Integer;
 begin
-  Sid := OriginalUserSid();
+  Sid := UserSidOnce();
   if Sid = '' then
   begin
     SuppressibleMsgBox('Não foi possível identificar a sua conta de usuário, então o serviço do aplicador NÃO foi instalado.' + #13#10#13#10 +
@@ -192,6 +217,34 @@ begin
       'Detalhes no log do instalador (opção /LOG) e em tools\service\README.md.', mbError, MB_OK, IDOK)
   else
     Log('Serviço do aplicador instalado para ' + Sid);
+end;
+
+{ Medir sem aviso: põe a conta ORIGINAL (não a de administrador que o instalador usa) no grupo "Usuários do log de desempenho".
+  Set-NexusPerfLogGroup.ps1 -Join: 0 = adicionada (marca do NEXUS gravada), 2 = já era membro (sem marca), outro = erro. }
+procedure JoinPerfLogGroup();
+var
+  Sid: String;
+  Code: Integer;
+begin
+  Sid := UserSidOnce();
+  if Sid = '' then
+  begin
+    SuppressibleMsgBox('Não foi possível identificar a sua conta de usuário, então ela NÃO foi colocada no grupo "Usuários do log de desempenho".' + #13#10#13#10 +
+      'O Medir funciona do mesmo jeito (o Windows pede permissão a cada medição). Para medir sem aviso, use o botão "Medir sem pedir permissão toda vez" na página Medir.',
+      mbInformation, MB_OK, IDOK);
+    Exit;
+  end;
+  WizardForm.StatusLabel.Caption := CustomMessage('StatusPerfLog');
+  if not Exec(PowerShell(), '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\tools\Set-NexusPerfLogGroup.ps1') + '" -Join -Sid ' + Sid + ' -By installer',
+              '', SW_HIDE, ewWaitUntilTerminated, Code) then
+    Code := -1;
+  Log('Set-NexusPerfLogGroup -Join ' + Sid + ': ' + IntToStr(Code));
+  if Code = 0 then
+    SuppressibleMsgBox('Sua conta entrou no grupo "Usuários do log de desempenho". Saia e entre de novo no Windows para o Medir funcionar sem o aviso do Windows a cada partida.',
+      mbInformation, MB_OK, IDOK)
+  else if Code <> 2 then
+    SuppressibleMsgBox('Não deu para colocar a sua conta no grupo "Usuários do log de desempenho" (código ' + IntToStr(Code) + '). O Medir funciona do mesmo jeito, pedindo permissão ao Windows a cada medição.',
+      mbError, MB_OK, IDOK);
 end;
 
 { Pasta escolhida protegida? (Test-NexusFolderSafety.ps1: 0 = só administradores alteram.) }
@@ -219,6 +272,8 @@ begin
     CheckFolderSafety();
     if ShouldInstallService() then
       InstallService();
+    if WizardIsTaskSelected('perflog') then
+      JoinPerfLogGroup();
   end;
 end;
 

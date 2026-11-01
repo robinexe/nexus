@@ -19,7 +19,10 @@ não sai por padrão.
 - **Self-contained** (não precisa do .NET instalado), **ReadyToRun** (menos compilação na hora de abrir: a interface WPF
   abre mais rápido), **sem trimming** (WPF e reflexão não suportam; `PublishTrimmed=false` explícito no csproj da interface).
 - Publica `nexus-broker` (aplicador), `nexus` (linha de comando), `nexus-recover` e `Nexus.Desktop` e junta tudo em
-  `artifacts/<rid>/NEXUS/`, com `catalog\`, `tools\service\` (serviço opcional) e os scripts do instalador.
+  `artifacts/<rid>/NEXUS/`, com `catalog\`, `tools\service\` (serviço opcional), os scripts do instalador,
+  `tools\PresentMon\PresentMon.exe` + `LICENSE.txt` (PresentMon 2.6.0 oficial da Intel, copiado pelo build da interface e da CLI;
+  a publicação confere o SHA-256) e `THIRD-PARTY-NOTICES.txt`. O PresentMon é x64; no win-arm64 roda pela emulação do Windows
+  (não testado num PC ARM).
 - **Junção conferida:** arquivo com o mesmo nome precisa ser idêntico. A única exceção é assembly gerenciado listado nos
   `deps.json` dos dois lados, e aí vale a regra do host do .NET (maior `assemblyVersion`, depois maior `fileVersion`).
   Casos reais hoje: `WindowsBase.dll` (fachada 4.0 do runtime base × WindowsBase 10.0 do WPF: fica a do WPF),
@@ -83,7 +86,16 @@ Mitigações:
 
 - Instala em `%ProgramFiles%\NEXUS` (`PrivilegesRequired=admin`) **com a ACL herdada de Arquivos de Programas**: só
   administradores, SYSTEM e TrustedInstaller alteram. Nenhuma permissão extra é dada a usuários.
-- Atalho no Menu Iniciar (todos os usuários); Área de Trabalho opcional (desmarcado).
+- Atalho no Menu Iniciar (todos os usuários) e "NEXUS - avisos de terceiros" (abre `THIRD-PARTY-NOTICES.txt`); Área de
+  Trabalho opcional (desmarcado).
+- **PresentMon embutido** em `%ProgramFiles%\NEXUS\tools\PresentMon` (pasta protegida). O Medir confere hash/assinatura antes de
+  executar (`docs/modules/measure.md`).
+- **"Medir FPS sem pedir permissão toda vez"**: opção **marcada por padrão** (também vale em `/VERYSILENT`; para não aplicar,
+  `/MERGETASKS="!perflog"`). Coloca a conta de quem abriu o instalador (o mesmo SID descoberto para o serviço, com `whoami /user`
+  rodado como o usuário original) no grupo "Usuários do log de desempenho" (S-1-5-32-559) por
+  `tools\Set-NexusPerfLogGroup.ps1 -Join` (Add-LocalGroupMember pelo SID; ADSI se o módulo faltar) e grava a marca
+  `HKLM\SOFTWARE\NEXUS\PerfLogGroup\<SID> = "installer"`. Se a conta já era membro, nada muda e não há marca. Avisa que vale
+  depois de sair e entrar de novo. Sem SID descoberto, não faz e explica (o botão da página Medir faz depois).
 - **Serviço do aplicador**: opção desmarcada. Marcada, roda `tools\service\Install-Broker.ps1 -AllowSid <SID de quem abriu o
   instalador> -AllowHost` (a conta é descoberta com `whoami /user` rodado como o usuário original; se não der para saber,
   por exemplo elevação com a senha de outra conta, o serviço não é instalado e o instalador mostra o comando manual).
@@ -94,6 +106,9 @@ Mitigações:
   - pede para fechar o NEXUS se estiver aberto;
   - remove o serviço do aplicador (`Uninstall-Broker.ps1`, que preserva `%ProgramData%\NEXUS`) e as tarefas agendadas com a
     marca do NEXUS (`Remove-NexusTasks.ps1`; tarefa com o mesmo nome criada por outro programa não é tocada);
+  - tira do grupo "Usuários do log de desempenho" **só as contas com a marca do NEXUS** (`Set-NexusPerfLogGroup.ps1 -Leave`):
+    as que o instalador ou a ação `measure.perflog-group.join` do aplicativo adicionaram. Quem já era membro antes não tem marca
+    e fica como estava;
   - **pergunta, com padrão "Não"**, se remove os dados (`%LocalAppData%\NEXUS` da conta que desinstala e
     `%ProgramData%\NEXUS`), explicando que sem o histórico o NEXUS não consegue mais desfazer o que alterou;
   - se `nexus-recover scan` indicar operações interrompidas, **não oferece** remover: avisa e mantém tudo;
@@ -123,8 +138,14 @@ Dispara em tag `v*` (ex.: `git tag v0.9.0 && git push origin v0.9.0`) e manualme
 4. Inno Setup: usa o do runner se existir; senão `choco install innosetup` (o passo registra qual caminho usou e a versão).
 5. **Teste na VM descartável:** instala em silêncio, confere arquivos, atalho, ACL (`Test-NexusFolderSafety.ps1` = 0),
    `nexus version`, `nexus-recover scan`, `nexus plan win.gamemode.enable` (inicia o aplicador da pasta instalada e só
-   simula), abre a interface por 20 s, desinstala e confere que os dados ficaram e que não sobrou tarefa do NEXUS. Extrai o
-   ZIP e roda o `nexus` de lá.
+   simula); **PresentMon**: SHA-256 e `Get-AuthenticodeSignature` (Valid, CN=Intel Corporation) do arquivo instalado,
+   `nexus selftest --only Medir --with-benchmarks --json` rodado **da pasta instalada** ("Medir · PresentMon encontrado?" = OK
+   com origem `embutido` e `conferido`; "PresentMon executa" não pode ser FALHA) e uma **captura real** de 5 s com o PresentMon
+   instalado contra `Nexus.Desktop.exe` (aberto na hora) e `dwm.exe` (código 0 obrigatório; zero quadros vira aviso
+   `::warning::`, documentado: VM sem GPU usa o adaptador básico e pode não apresentar quadros; os CSV ficam em `saida/`);
+   **grupo**: a conta do runner virou membro (opção marcada) e a marca `installer` existe; abre a interface por 20 s,
+   desinstala e confere que os dados ficaram, que não sobrou tarefa do NEXUS e que a conta saiu do grupo (se a marca era do
+   instalador) ou continuou (se já era membro antes). Extrai o ZIP e roda o `nexus` de lá.
 6. `SHA256SUMS.txt` de todos os `.zip`/`.exe`; upload como artifact; em tag, **GitHub Release em rascunho** (o responsável
    revisa e publica; sufixo `-rc` vira pré-lançamento).
 

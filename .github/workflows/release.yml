@@ -9,7 +9,9 @@
 # O que confere antes de entregar (numa VM descartável do GitHub; nada roda no PC de ninguém):
 #   build Release e testes unitários; estrutura da pasta publicada (tools/packaging/publish.py); instala o instalador em
 #   modo silencioso, confere a pasta e a ACL, roda nexus/nexus-recover, simula uma ação pelo aplicador da pasta instalada,
-#   abre a interface por 20 s e desinstala (dados preservados); extrai o ZIP portátil e roda o nexus de lá.
+#   confere o PresentMon embutido (hash, assinatura da Intel, "nexus selftest" da pasta instalada, captura real curta) e o
+#   grupo "Usuários do log de desempenho", abre a interface por 20 s e desinstala (dados preservados, grupo desfeito só se
+#   foi o instalador que adicionou); extrai o ZIP portátil e roda o nexus de lá.
 #
 # Assinatura Authenticode: preparada e DESLIGADA. Para ligar: variável de repositório NEXUS_SIGN=true e segredos
 # NEXUS_SIGN_PFX_BASE64 / NEXUS_SIGN_PFX_PASSWORD (certificado de assinatura de código). Ver docs/08-packaging.md.
@@ -178,9 +180,68 @@ jobs:
           "nexus plan: $LASTEXITCODE"
           if ($LASTEXITCODE -notin 0, 1) { Write-Error 'O nexus não conseguiu simular pelo aplicador da pasta instalada.'; exit 1 }
 
-          # A interface abre e continua aberta (falta de dll ou conflito de versão derrubaria logo no início).
+          # ---- PresentMon embutido: presente, intacto, assinado pela Intel, avisos de terceiros junto.
+          $pm = Join-Path $app 'tools\PresentMon\PresentMon.exe'
+          foreach ($f in $pm, (Join-Path $app 'tools\PresentMon\LICENSE.txt'), (Join-Path $app 'THIRD-PARTY-NOTICES.txt'), (Join-Path $app 'tools\Set-NexusPerfLogGroup.ps1')) {
+            if (-not (Test-Path $f)) { Write-Error "Falta $f"; exit 1 }
+          }
+          $hash = (Get-FileHash $pm -Algorithm SHA256).Hash.ToLowerInvariant()
+          "PresentMon SHA-256: $hash"
+          if ($hash -ne 'b2a706bc6ad475749e3b7e3409263aa1e6906d45bdcf993f6dbc0f660188f1af') { Write-Error 'PresentMon embutido difere do 2.6.0 oficial.'; exit 1 }
+          $sig = Get-AuthenticodeSignature $pm
+          "Assinatura: $($sig.Status) · $($sig.SignerCertificate.Subject)"
+          if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'CN=Intel Corporation') { Write-Error 'Assinatura do PresentMon não é válida da Intel Corporation.'; exit 1 }
+
+          # ---- "nexus selftest" A PARTIR DA PASTA INSTALADA: "Medir · PresentMon encontrado?" precisa dar OK, embutido e conferido
+          # (SHA-256 conhecido / WinVerifyTrust + assinante). --with-benchmarks inclui "PresentMon executa" (captura de 5 s do dwm.exe).
+          $stJson = Join-Path (Resolve-Path saida).Path 'selftest-medir-instalado.json'
+          Push-Location $env:TEMP
+          & "$app\nexus.exe" selftest --only Medir --with-benchmarks --json $stJson
+          $stCode = $LASTEXITCODE
+          Pop-Location
+          "nexus selftest (Medir): $stCode"
+          $st = Get-Content $stJson -Raw -Encoding UTF8 | ConvertFrom-Json
+          $st.results | ForEach-Object { "  [$($_.statusText)] $($_.module) · $($_.name) — $($_.summary) $($_.reason)" }
+          $found = $st.results | Where-Object { $_.module -eq 'Medir' -and $_.name -eq 'PresentMon encontrado?' }
+          if (-not $found -or $found.statusText -ne 'OK') { Write-Error "Medir · PresentMon encontrado? deveria ser OK; deu $($found.statusText) $($found.warnings)"; exit 1 }
+          if ($found.data.origem -ne 'embutido' -or $found.data.conferido -ne $true) { Write-Error "PresentMon deveria ser o embutido e conferido (origem=$($found.data.origem), conferido=$($found.data.conferido))"; exit 1 }
+          $runs = $st.results | Where-Object { $_.module -eq 'Medir' -and $_.name -like 'PresentMon executa*' }
+          if ($runs.statusText -eq 'FALHA') { Write-Error "PresentMon não executou pelo autoteste: $($runs.error)"; exit 1 }
+          if ($stCode -ne 0) { Write-Error "nexus selftest --only Medir saiu com $stCode"; exit 1 }
+
+          # ---- Grupo "Usuários do log de desempenho": a opção do instalador vem marcada (também em /VERYSILENT).
+          $me = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+          $markerKey = 'HKLM:\SOFTWARE\NEXUS\PerfLogGroup'
+          powershell -NoProfile -ExecutionPolicy Bypass -File "$app\tools\Set-NexusPerfLogGroup.ps1" -Status -Sid $me
+          $memberCode = $LASTEXITCODE
+          $markedByInstaller = (Get-ItemProperty -Path $markerKey -Name $me -ErrorAction SilentlyContinue).$me -eq 'installer'
+          "Grupo: status $memberCode (0 = membro); marca do instalador: $markedByInstaller"
+          if ($memberCode -ne 0) { Get-Content saida\instalacao.log | Select-String 'PerfLogGroup' ; Write-Error 'O instalador deveria ter colocado a conta no grupo Usuários do log de desempenho.'; exit 1 }
+
+          # ---- Captura REAL curta com o PresentMon da pasta instalada (prova de que funciona fora do repositório). A conta do
+          # runner é administradora, então roda sem --restart_as_admin. A interface do NEXUS (WPF/Direct3D) fica aberta durante
+          # a captura para haver quadros; o dwm.exe também é medido. VM sem GPU: o Windows usa o adaptador básico (WARP) e
+          # costuma apresentar quadros; se vier 0, fica registrado como aviso (o PresentMon executou com permissão).
           $ui = Start-Process "$app\Nexus.Desktop.exe" -PassThru
-          Start-Sleep -Seconds 20
+          Start-Sleep -Seconds 8
+          foreach ($proc in 'Nexus.Desktop.exe', 'dwm.exe') {
+            $csv = Join-Path (Resolve-Path saida).Path "presentmon-$proc.csv"
+            $pmArgs = @('--process_name', $proc, '--output_file', "`"$csv`"", '--timed', '5', '--terminate_after_timed', '--no_console_stats', '--stop_existing_session', '--session_name', 'NEXUS_CI')
+            $run = Start-Process $pm -ArgumentList $pmArgs -PassThru -NoNewWindow -RedirectStandardOutput "saida\presentmon-$proc.out.txt" -RedirectStandardError "saida\presentmon-$proc.err.txt"
+            $null = $run.Handle # sem isso o ExitCode pode vir vazio depois de WaitForExit(ms) com saída redirecionada
+            if (-not $run.WaitForExit(60000)) { $run.Kill(); Write-Error "PresentMon ($proc) não terminou em 60 s"; exit 1 }
+            $lines = if (Test-Path $csv) { @(Get-Content $csv | Where-Object { $_ }).Count } else { 0 }
+            $frames = [Math]::Max(0, $lines - 1)
+            "PresentMon --process_name $($proc): código $($run.ExitCode), $frames quadro(s) em 5 s"
+            Get-Content "saida\presentmon-$proc.err.txt" -ErrorAction SilentlyContinue | Select-Object -First 10
+            if ($run.ExitCode -ne 0) { Write-Error "PresentMon ($proc) saiu com $($run.ExitCode)"; exit 1 }
+            if ($frames -eq 0) { "::warning::PresentMon executou, mas $proc não apresentou quadros em 5 s nesta VM (sem GPU/sem mudança na tela)." }
+            else { Get-Content $csv -TotalCount 3 }
+          }
+
+          # A interface abre e continua aberta (falta de dll ou conflito de versão derrubaria logo no início). Já foi aberta acima,
+          # para a captura do PresentMon; completa os 20 s.
+          Start-Sleep -Seconds 7
           if ($ui.HasExited) {
             Get-ChildItem "$env:LOCALAPPDATA\NEXUS" -Filter *.log -ErrorAction SilentlyContinue | ForEach-Object { Get-Content $_.FullName -Tail 60 }
             Write-Error "A interface fechou sozinha (código $($ui.ExitCode))."; exit 1
@@ -200,6 +261,14 @@ jobs:
           if (Test-Path "$app\Nexus.Desktop.exe") { if (Test-Path $log) { Get-Content $log -Tail 40 }; Write-Error 'Desinstalação não removeu o programa.'; exit 1 }
           if (-not (Test-Path "$env:LOCALAPPDATA\NEXUS\teste-desinstalacao.txt")) { Write-Error 'Desinstalação silenciosa apagou os dados do usuário (não deveria).'; exit 1 }
           if (Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.Description -match '\[nexus\.' }) { Write-Error 'Sobrou tarefa agendada do NEXUS.'; exit 1 }
+          # Grupo: o desinstalador tira só quem tem a marca do NEXUS; sem marca (já era membro antes), continua membro.
+          $me = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+          $g = [ADSI]("WinNT://$env:COMPUTERNAME/" + (New-Object Security.Principal.SecurityIdentifier 'S-1-5-32-559').Translate([Security.Principal.NTAccount]).Value.Split('\')[-1] + ',group')
+          $stillMember = @($g.Invoke('Members') | ForEach-Object { (New-Object Security.Principal.SecurityIdentifier($_.GetType().InvokeMember('objectSid', 'GetProperty', $null, $_, $null), 0)).Value }) -contains $me
+          $marker = Get-ItemProperty -Path 'HKLM:\SOFTWARE\NEXUS\PerfLogGroup' -Name $me -ErrorAction SilentlyContinue
+          "Depois de desinstalar: membro = $stillMember; marca = $([bool]$marker); marca do instalador antes = $markedByInstaller"
+          if ($markedByInstaller -and ($stillMember -or $marker)) { Write-Error 'O desinstalador deveria ter tirado a conta do grupo e apagado a marca.'; exit 1 }
+          if (-not $markedByInstaller -and -not $stillMember) { Write-Error 'O desinstalador tirou do grupo uma conta que já era membro antes do NEXUS.'; exit 1 }
           "Desinstalado; dados preservados em $env:LOCALAPPDATA\NEXUS (padrão)."
 
       - name: Teste do ZIP portátil nesta VM

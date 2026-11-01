@@ -27,6 +27,8 @@
     <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
     <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
+    <!-- Medir: ação measure.perflog-group.join (grupo "Usuários do log de desempenho"). -->
+    <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.ServiceProcess.ServiceController" />

@@ -45,6 +45,13 @@
     <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
+    <!-- PresentMon 2.6.0 oficial (Intel, MIT; tools/presentmon) embutido em <saída>\tools\PresentMon: Medir procura primeiro aqui
+         e confere o SHA-256 ou a assinatura da Intel antes de executar. Avisos de terceiros vão junto. -->
+    <None Include="..\..\tools\presentmon\PresentMon-2.6.0-x64.exe" Link="tools\PresentMon\PresentMon.exe" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\tools\presentmon\LICENSE.txt" Link="tools\PresentMon\LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.txt" Link="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- nexus.exe (linha de comando) ao lado da interface: a verificação semanal agendada chama este executável. -->
     <ProjectReference Include="..\Nexus.Cli\Nexus.Cli.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>

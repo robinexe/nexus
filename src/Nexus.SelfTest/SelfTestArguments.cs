@@ -23,7 +23,8 @@ public sealed record SelfTestArguments
           --html ARQUIVO          grava o relatório em HTML (para abrir no navegador)
           --ui ARQUIVO            inclui no HTML o resultado de "Nexus.Desktop.exe --selftest-ui ARQUIVO"
           --with-windows-update   também procura drivers no Windows Update (lento; só leitura)
-          --with-benchmarks       também mede CPU e memória por alguns segundos (o PC trabalha nesse tempo)
+          --with-benchmarks       também mede CPU e memória por alguns segundos (o PC trabalha nesse tempo) e roda o
+                                  PresentMon por 5 s (CSV temporário, apagado em seguida)
           --timeout SEGUNDOS      tempo limite padrão de cada verificação (padrão 60; 5 a 900)
           --max-files N           limite da verificação rápida de arquivos (padrão 300; 10 a 100000)
           --only MÓDULO[,MÓDULO]  só estes módulos (ex.: --only Programas,Segurança)
