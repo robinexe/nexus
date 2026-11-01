@@ -245,6 +245,32 @@
     <!-- ============ Conteúdo: a página escolhida (com a transição de entrada) ============ -->
     <ContentControl x:Name="PageHost" Grid.Row="1" Grid.Column="1" Content="{Binding SelectedPage}" Focusable="False" IsTabStop="False"/>
 
+    <!-- ============ Atualização: faixa não bloqueante sobre o conteúdo (ViewModels/AppUpdates.cs) ============ -->
+    <Border Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="24,0,24,18" MaxWidth="760"
+            Background="{StaticResource Brush.SurfaceHi}" BorderBrush="{StaticResource Brush.Trace}" BorderThickness="1"
+            CornerRadius="{StaticResource Radius.Card}" Padding="16,12"
+            Visibility="{Binding Updates.BannerVisible, Converter={StaticResource BoolToVis}}"
+            AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Atualização do NEXUS">
+      <Border.Effect>
+        <DropShadowEffect BlurRadius="18" ShadowDepth="4" Opacity="0.45" Color="#000000"/>
+      </Border.Effect>
+      <DockPanel>
+        <c:Icon DockPanel.Dock="Left" Data="{StaticResource Icon.Sparkle}" Size="20" Foreground="{StaticResource Brush.Trace}" Margin="0,0,12,0" VerticalAlignment="Center"/>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+          <Button Content="Reiniciar e atualizar" Style="{StaticResource Button.Primary}" Command="{Binding Updates.InstallNowCommand}" Margin="0,0,8,0"
+                  Visibility="{Binding Updates.BannerIsReady, Converter={StaticResource BoolToVis}}"/>
+          <Button Content="Abrir downloads" Style="{StaticResource Button.Secondary}" Command="{Binding Updates.OpenDownloadsCommand}" Margin="0,0,8,0"
+                  Visibility="{Binding Updates.BannerIsNotify, Converter={StaticResource BoolToVis}}"/>
+          <Button Content="{Binding Updates.DismissText}" Style="{StaticResource Button.Ghost}" Command="{Binding Updates.LaterCommand}"/>
+        </StackPanel>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="{Binding Updates.BannerText}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" FontWeight="SemiBold"/>
+          <TextBlock Text="{Binding Updates.BannerNote}" Style="{StaticResource Text.Small}" Margin="0,2,0,0"
+                     Visibility="{Binding Updates.BannerNote, Converter={StaticResource NullToCollapsed}}"/>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
     <!-- ============ Rodapé: status, legenda das cores e ocupado ============ -->
     <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.Line}"
             BorderThickness="0,1,0,0" Padding="22,6,20,7">

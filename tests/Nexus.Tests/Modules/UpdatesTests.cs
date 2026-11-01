@@ -145,6 +145,30 @@ public sealed class UpdatesTests : IDisposable
         Assert.False(UpdatePolicy.VerifySignature(manifest, p1363, pub));
     }
 
+    /// <summary>
+    /// Gerado por tools/packaging/sign-update.py com o openssl (chave de teste descartável): o formato do CI é o que o NEXUS confere.
+    /// </summary>
+    [Fact]
+    public void Signature_from_openssl_via_sign_update_script_verifies()
+    {
+        const string pub = """
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAELqOWjnXa5BAWjpdLWe1UBbtT14UR
+            WxIQzkZWzZYVGU1LIYzVUhu21EkkSagFviuynlBei8r8aLcnuT+GWqTpsg==
+            -----END PUBLIC KEY-----
+            """;
+        var manifest = Convert.FromBase64String(
+            "ewogICJzY2hlbWEiOiAibmV4dXMudXBkYXRlLzEiLAogICJ2ZXJzaW9uIjogIjAuOS4xIiwKICAiY2hhbm5lbCI6ICJzdGFibGUiLAogICJwdWJsaXNoZWRBdCI6ICIyMDI2LTExLTAxVDA1OjM4OjUzWiIsCiAgIm5vdGVzIjogIkNvcnJlw6fDtWVzIGUgbWVsaG9yaWFzLiIsCiAgImluc3RhbGxlciI6IHsKICAgICJ1cmwiOiAiaHR0cHM6Ly9naXRodWIuY29tL3JvYmluZXhlL25leHVzLXJlbGVhc2VzL3JlbGVhc2VzL2Rvd25sb2FkL3YwLjkuMS9ORVhVUy0wLjkuMS13aW4teDY0LWluc3RhbGFkb3IuZXhlIiwKICAgICJzaGEyNTYiOiAiOWQ1YjViMGNlMDY2YWJjZGUzYmI1NzRlZjk4NzhkMTI5NGVhNWJkODBkNDNiYzc5MzAzYjc5ZDA5OWIyMWIwMCIsCiAgICAic2l6ZSI6IDMwMDAKICB9Cn0K");
+        var sig = "MEQCIBzVfNVjhh+lQs2Ftxd3FKybmjy+QRA2u8ksLAVrp5ZfAiB2zRWSHaLxkF+4H+dyAkjcgRd2fHtgr7ZKz30Yrcbctw==\n"u8.ToArray();
+        using var key = UpdatePolicy.ImportPublicKey(pub);
+        Assert.True(UpdatePolicy.VerifySignature(manifest, sig, key));
+        using var client = new UpdateClient(SemVersion.Parse("0.9.0"), key, Feed, new FakeHttp());
+        var r = client.Evaluate(manifest, sig);
+        Assert.Equal(UpdateCheckStatus.Available, r.Status);
+        Assert.Equal("Correções e melhorias.", r.Manifest!.Notes);
+        Assert.Equal(3000, r.Manifest.Installer.Size);
+    }
+
     [Fact]
     public void Signature_rejects_changed_bytes_other_key_and_garbage()
     {

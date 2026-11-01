@@ -131,7 +131,7 @@ public sealed class SettingsPage : ModulePage
 {
     public override string Title => "Ajustes";
     public override string Group => "Registro";
-    public override string Subtitle => "Agendamentos, notificações, bandeja, iniciar com o Windows e informações do NEXUS.";
+    public override string Subtitle => "Agendamentos, atualizações, notificações, bandeja, iniciar com o Windows e informações do NEXUS.";
 
     private CatalogDocument? _catalog;
     private string _legacyText = "";
@@ -221,7 +221,10 @@ public sealed class SettingsPage : ModulePage
     public static string DataDirectory => Path.GetDirectoryName(LocalBroker.JournalPath(BrokerLevel.User))!;
     public static string ReportsDirectory => ScanReport.DefaultDirectory;
     public static string SettingsFile => UiSettings.Path;
-    public static string Version => $"NEXUS {typeof(SettingsPage).Assembly.GetName().Version} · aplicador {BrokerService.Version} · .NET {Environment.Version}";
+    public static string Version => $"NEXUS {AppUpdates.Instance.CurrentVersion} · aplicador {BrokerService.Version} · .NET {Environment.Version}";
+
+    /// <summary>Atualização do programa (versão, procurar agora, automático, progresso).</summary>
+    public AppUpdates Updates { get; } = AppUpdates.Instance;
     public string CatalogText { get => _catalogText; private set => Set(ref _catalogText, value); }
 
     public IReadOnlyList<DependencyLicense> Licenses { get; } =

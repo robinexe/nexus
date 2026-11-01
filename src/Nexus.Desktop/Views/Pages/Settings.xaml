@@ -3,7 +3,8 @@
     1. Destaque: controles deslizantes, quantos agendamentos estão ligados (conta, de 2); à direita o estado de cada coisa em selos.
     2. Agendamentos: cartão por tarefa (ícone, selo ligada/desligada, horário, condições, Ligar/Salvar e Desligar). A limpeza
        segura mostra o que entra e o que nunca entra recolhidos; avisos visíveis (desligada por padrão, vai para a quarentena).
-    3. Notificações e bandeja, Iniciar com o Windows, Dados e relatórios e Sobre como cartões com ícone; explicações longas em
+    3. Atualizações (versão, automático, procurar agora, progresso, instalar).
+    4. Notificações e bandeja, Iniciar com o Windows, Dados e relatórios e Sobre como cartões com ícone; explicações longas em
        "Por que isso?".
   A lógica é a do SettingsPage (o que muda o sistema vai pelo aplicador, com diário e desfazer).
 -->
@@ -65,6 +66,47 @@
         <Button Content="Desligar" Style="{StaticResource Button.Secondary}" Command="{Binding TurnOffCommand}"
                 Visibility="{Binding IsOn, Converter={StaticResource BoolToVis}}"/>
       </WrapPanel>
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Atualizações: versão, automático, procurar agora, progresso do download e instalar (ViewModels/AppUpdates.cs). -->
+  <DataTemplate DataType="{x:Type vm:AppUpdates}">
+    <StackPanel>
+      <DockPanel Margin="0,0,0,12">
+        <c:StatusChip DockPanel.Dock="Right" Tone="{Binding AutoTone}" Text="{Binding AutoChip}" VerticalAlignment="Top"/>
+        <Grid Width="38" Height="38" Margin="0,0,12,0">
+          <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+          <c:Icon Data="{StaticResource Icon.Refresh}" Size="19" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+        </Grid>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="Atualizações" Style="{StaticResource Text.H2}"/>
+          <TextBlock Text="{Binding CurrentVersionText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
+        </StackPanel>
+      </DockPanel>
+      <CheckBox Content="Atualizar automaticamente" IsChecked="{Binding AutoUpdate}" IsEnabled="{Binding IsEnabled}"/>
+      <TextBlock Text="{Binding KindNote}" Style="{StaticResource Text.Small}" Margin="24,4,0,0"/>
+
+      <Border Style="{StaticResource Panel.Inset}" Padding="14,10" Margin="0,12,0,0">
+        <StackPanel>
+          <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"
+                     Visibility="{Binding Status, Converter={StaticResource NullToCollapsed}}" AutomationProperties.LiveSetting="Polite"/>
+          <ProgressBar Height="4" Maximum="100" Value="{Binding Progress, Mode=OneWay}" Margin="0,8,0,0"
+                       Visibility="{Binding ShowProgress, Converter={StaticResource BoolToVis}}" AutomationProperties.Name="Progresso do download"/>
+          <TextBlock Text="{Binding ReadyNotes}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"
+                     Visibility="{Binding ReadyNotes, Converter={StaticResource NullToCollapsed}}"/>
+          <TextBlock Text="{Binding LastCheckText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,6,0,0"/>
+        </StackPanel>
+      </Border>
+
+      <WrapPanel Margin="0,12,0,0">
+        <Button Content="Reiniciar e atualizar" Style="{StaticResource Button.Primary}" Command="{Binding InstallNowCommand}" Margin="0,0,10,0"
+                Visibility="{Binding HasReady, Converter={StaticResource BoolToVis}}"/>
+        <Button Content="Procurar atualização agora" Style="{StaticResource Button.Secondary}" Command="{Binding CheckNowCommand}" Margin="0,0,10,0"/>
+        <Button Content="Abrir downloads" Style="{StaticResource Button.Ghost}" Command="{Binding OpenDownloadsCommand}"
+                Visibility="{Binding HasNotify, Converter={StaticResource BoolToVis}}"/>
+      </WrapPanel>
+      <c:ExplainToggle Header="Como é conferido" Margin="0,8,0,0"
+                       Content="Só instala o que foi assinado pela chave do NEXUS e baixado do GitHub, com tamanho e SHA-256 iguais aos do manifesto assinado. Qualquer diferença: o arquivo é descartado e nada roda. Sem conta e sem telemetria: a cada 6 h o NEXUS só lê dois arquivos pequenos do GitHub. A instalação pede permissão ao Windows uma vez e não roda no meio de uma aplicação ou do Assistente."/>
     </StackPanel>
   </DataTemplate>
 
@@ -164,6 +206,11 @@
           </DockPanel>
         </Border>
 
+        <!-- ===== Atualizações ===== -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,14,0,0" BorderBrush="{StaticResource Brush.TraceLine}">
+          <ContentControl Content="{Binding Updates}" Focusable="False"/>
+        </Border>
+
         <UniformGrid Columns="2" Margin="-7,14,-7,0">
           <!-- ===== Notificações e bandeja ===== -->
           <Border Style="{StaticResource Panel.Card}" Margin="7,0,7,14">
@@ -256,7 +303,7 @@
               <WrapPanel Margin="0,10,0,0">
                 <c:StatusChip Tone="Good" Text="Sem telemetria" Margin="0,0,6,6"/>
                 <c:StatusChip Tone="Good" Text="Sem contas" Margin="0,0,6,6"/>
-                <c:StatusChip Tone="Good" Text="Sem downloads automáticos" Margin="0,0,6,6"/>
+                <c:StatusChip Tone="Good" Text="Atualização assinada" Margin="0,0,6,6"/>
               </WrapPanel>
               <c:ExplainToggle Header="Dependências redistribuídas" Margin="0,4,0,0">
                 <StackPanel>

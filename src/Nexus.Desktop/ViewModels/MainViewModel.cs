@@ -153,6 +153,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public MemoryLabPage MemoryLab { get; } = new();
     public MemoryDoctorPage MemoryDoctor { get; } = new();
     public SettingsPage Settings { get; } = new();
+    /// <summary>Atualização do programa (faixa "pronto — Reiniciar e atualizar" na janela; ver AppUpdates).</summary>
+    public AppUpdates Updates { get; } = AppUpdates.Instance;
 
     public PageViewModel SelectedPage
     {

@@ -24,6 +24,12 @@ public sealed record NexusSettings
     public bool MinimizeToTray { get; init; }
     /// <summary>Fechar (X) esconde na bandeja em vez de sair. "Sair" no menu da bandeja sai de verdade.</summary>
     public bool CloseToTray { get; init; }
+    /// <summary>Atualizar automaticamente (procura, baixa e confere sozinho; instala com um clique ou ao fechar). Padrão: ligado.</summary>
+    public bool AutoUpdate { get; init; } = true;
+    /// <summary>Última vez que procurou atualização (com resposta do servidor).</summary>
+    public DateTimeOffset? LastUpdateCheck { get; init; }
+    /// <summary>Versão que já tentou instalar ao fechar (se o aviso do Windows foi recusado, não insiste a cada saída).</summary>
+    public string? UpdateExitAttempted { get; init; }
 
     public static NexusSettings Defaults { get; } = new();
 
