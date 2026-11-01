@@ -47,7 +47,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         Broker.Candidates = Plan.Candidates;
         Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
         Broker.PlanCommand = new RelayCommand(() => _ = BrokerPlanAsync(), () => !Broker.Busy && Broker.Connected && Chosen().Count > 0);
-        Broker.ApplyCommand = new RelayCommand(() => _ = BrokerApplyAsync(), () => !Broker.Busy && Broker.Connected && Broker.WriteAllowed && Chosen().Count > 0);
+        Broker.ApplyCommand = new RelayCommand(() => _ = BrokerApplyAsync(), () => !Broker.Busy && !(Broker.Connected && !Broker.WriteAllowed) && Chosen().Count > 0); // consulta sozinho ao clicar
         Broker.RevertCommand = new RelayCommand(() => _ = BrokerRevertAsync(), () => !Broker.Busy && Broker.WriteAllowed && Broker.LastRun is not null);
         Broker.EndSessionCommand = new RelayCommand(() => _ = BrokerEndSessionAsync(), () => !Broker.Busy && Broker.SessionOpen && Broker.LastRun is not null);
         Broker.RecoverCommand = new RelayCommand(() => _ = BrokerRecoverAsync(), () => !Broker.Busy && Broker.Connected && Broker.WriteAllowed);
@@ -499,6 +499,16 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     {
         var chosen = Chosen();
         if (chosen.Count == 0) return;
+        if (!Broker.Connected)
+        {
+            // "O aplicador inicia sozinho quando você aplica": consulta primeiro (inicia o aplicador), sem exigir outro clique.
+            await BrokerStatusAsync();
+            if (!Broker.Connected || !Broker.WriteAllowed)
+            {
+                Broker.LastSummary = $"{DateTime.Now:HH:mm} · Não deu para aplicar: {(Broker.Connected ? Broker.Gate : Broker.ServiceStatus)}";
+                return;
+            }
+        }
         var level = LevelFor(chosen);
         var requests = BrokerSession.RequestsFor(chosen);
         var own = ApplyView.Begin("Aplicar os ajustes marcados", chosen.Select(c => (c.Entry.Definition.Key, c.Entry.Definition.Title)).ToList(), level, name: ActionName);
