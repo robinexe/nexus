@@ -201,7 +201,13 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     (`tools\selftest\Rodar-Autoteste.cmd` → `%LocalAppData%\NEXUS\autoteste\<data>\`, 37 verificações + todas as páginas
     fotografadas; roda também na VM do CI), design system v2 (ilustrações vetoriais, ícones, componentes animados) aplicado
     às 27 páginas. VM do CI: 37 verificações sem FALHA e 27 páginas abertas sem exceção.
-13. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+13. **01/11 madrugada:** PresentMon 2.6.0 oficial embutido (conferido por SHA-256/assinatura Intel), ação "medir sem pedir
+    permissão" (grupo Usuários do log de desempenho), instalador Inno validado no CI (instala, confere, captura, desinstala).
+    Teste ponta a ponta do Assistente com aplicador real em Windows Server 2022 e 2025: 0 defeitos depois de corrigir a
+    limpeza que vinha desmarcada; drivers: backup/restauração real, dispositivos sem driver, busca no WU (no PC real achou
+    oferta Apple com versão entre parênteses — corrigido). Auditoria de fiação: 5 defeitos reais corrigidos + WiringTests.
+    Simulação deixou de marcar "bloqueada" ações de administrador. 1669 testes unitários.
+14. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
