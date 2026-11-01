@@ -58,7 +58,10 @@ Senão `DriverUpdate:pendente`. Detalhes: versão oferecida e versão atual de c
 | Sem driver / sem `MatchingDeviceId` / nome estranho | **Nenhum** | A confirmação diz "SEM DESFAZER AUTOMÁTICO" e indica a Restauração do Sistema; o Desfazer é recusado com esse motivo |
 
 Por que forçar no Desfazer: `pnputil /add-driver /install` sozinho **não** volta a uma versão mais antiga (o Windows
-prefere a mais nova). `UpdateDriverForPlugAndPlayDevicesW` com `INSTALLFLAG_FORCE | INSTALLFLAG_NONINTERACTIVE` é a API
+prefere a mais nova). Por isso o Desfazer usa `pnputil /add-driver <inf>` **sem** `/install` (só guarda o pacote no
+repositório; 0 ou 3010) e depois a instalação forçada. Antes (correção desta rodada) usava `/install`, que não atualiza
+nenhum dispositivo quando o driver instalado é mais novo/igual e pode sair com código ≠ 0 (ex.: 259), derrubando o Desfazer
+antes de chegar à instalação forçada. `UpdateDriverForPlugAndPlayDevicesW` com `INSTALLFLAG_FORCE | INSTALLFLAG_NONINTERACTIVE` é a API
 oficial do "Atualizar driver" do Gerenciador de Dispositivos, aplicada ao `MatchingDeviceId` que o driver anterior casava.
 
 Backup anterior com o mesmo UpdateID nunca é sobrescrito (renomeado com sufixo de data). O manifesto
@@ -70,6 +73,27 @@ Backup anterior com o mesmo UpdateID nunca é sobrescrito (renomeado com sufixo 
 Detectado pelo `Microsoft.Update.SystemInfo.RebootRequired` e pelas chaves `WindowsUpdate\Auto Update\RebootRequired` e
 `Component Based Servicing\RebootPending`. A página avisa ao abrir, depois de procurar e depois de instalar. Driver que
 pediu reinício conta como instalado até o próximo boot; se depois do boot a versão não mudou, volta a "pendente".
+
+## Dispositivos sem driver ("ver se falta algum")
+
+Ao abrir a página (sem internet, sem administrador) o NEXUS lê o **código de problema** de cada dispositivo presente — o mesmo
+número do ponto de exclamação amarelo do Gerenciador de Dispositivos — com `CM_Get_DevNode_Status` (cfgmgr32) sobre o `DevInst`
+da SetupAPI (`DeviceDriver.ProblemCode`; 0 = funcionando, null = não lido). `DeviceProblems` traduz pela tabela oficial
+"Device Manager error messages" (<https://learn.microsoft.com/windows-hardware/drivers/install/device-manager-error-messages>):
+
+| Grupo | Códigos | O cartão mostra? |
+|---|---|---|
+| Sem driver | 1, 18, 28 (`CM_PROB_FAILED_INSTALL`) | Sim |
+| Driver que não carrega | 3, 10, 19, 31, 32, 37, 38, 39, 40, 41, 43, 48, 52, 54 | Sim |
+| Outro (recursos, reinício, dependência) | 12, 14, 21, 24, 33, 34, 35, 42, 44, 49, 50, 51… | Não (conta só) |
+| Desativado (você, BIOS, remoção segura) | 22, 29, 47 | Não (não é defeito) |
+
+Cartão **"Dispositivos sem driver"**: nome, "Código N", significado em português e hardware ID; botões **Procurar no Windows
+Update** (a busca normal da página: o WU oferece drivers também para aparelhos sem driver, às vezes como opcional; essas ofertas
+aparecem com "instalada: nenhum driver" e "sem desfazer automático", porque não há driver anterior) e **Abrir atualizações
+opcionais**. Sem nenhum: uma linha verde "Nenhum dispositivo sem driver (N conferidos)". Se a busca não trouxer oferta para
+eles, o resumo diz para procurar no site do fabricante (o hardware ID ajuda). O NEXUS não baixa driver de outro lugar.
+O assistente (etapa Drivers) mostra o mesmo número e, se houver, uma ação para o usuário. O autoteste conta os quatro grupos.
 
 ## Erros do Windows Update (mensagens claras)
 
@@ -135,3 +159,21 @@ vídeo" com o aviso de conferir se não são MAIS ANTIGAS que a instalada (a lis
 5. **Desfazer** → a versão anterior volta no Gerenciador de Dispositivos (pode pedir reinício).
 6. VM: `tests/Nexus.IntegrationTests/Modules/DriverUpdatesIntegrationTests.cs` (inventário, busca real, recusa de ID não
    oferecido sem escrever).
+7. Ao abrir a página, o cartão "Dispositivos sem driver" (ou a linha verde). Para ver o cartão num PC sem problema: desinstale
+   um dispositivo inofensivo no Gerenciador de Dispositivos marcando "excluir o driver" e abra a página (código 28).
+
+## Ponta a ponta na VM (`tests/Nexus.IntegrationTests/E2E/DriverUpdatesEndToEndTests.cs`, `Category=E2E`)
+
+Roda em windows-2022 e windows-2025 (passo "Ponta a ponta" do `vm-integracao.yml`). Saída em `saida/e2e/drivers-*.log|json`.
+
+| Teste | O que prova | Peça falsa |
+|---|---|---|
+| Busca no Windows Update + 1 instalação | Busca REAL (`Type='Driver'`); lista tudo o que achou. Se houver oferta instalável de classe segura (sem rede/disco/barramento), instala UMA (opcional de preferência) pelo **aplicador elevado real**, confere a versão nova no dispositivo, desfaz e confere a versão antiga | nenhuma |
+| Backup e Desfazer com driver real | `pnputil /export-driver` de um pacote de terceiros real + INF achado no backup + `pnputil /add-driver` aceito; ciclo do handler (Assess → Detect → Apply com backup e manifesto → CheckRestore → **Restore real**: `pnputil /add-driver` + `UpdateDriverForPlugAndPlayDevices(FORCE)`) num dispositivo de classe inofensiva (fila de impressão, monitor…), conferindo mesmo driver e código de problema 0 | só o Windows Update (oferece uma versão "nova" e "instala" sem mudar nada) |
+| Dispositivos sem driver | `CM_Get_DevNode_Status` responde em todos os dispositivos; lista os com problema | nenhuma |
+
+**O que a VM NÃO prova e só um PC real com oferta prova**: o download e a instalação pelo WUA (`UpdateDownloader`/
+`UpdateInstaller`) quando a VM não tem oferta (o comum no Azure: o log diz "sem oferta instalável; instalação real NÃO provada
+nesta VM"), a troca para uma versão realmente diferente e a volta forçada a uma versão MAIS ANTIGA (na VM o Desfazer reinstala a
+mesma versão), drivers de vídeo/áudio/rede e o reinício pedido pelo driver. Para provar no PC do responsável: passo 4 e 5 acima
+com uma opcional pequena.
