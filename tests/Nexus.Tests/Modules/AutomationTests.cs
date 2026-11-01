@@ -285,6 +285,18 @@ public sealed class AutomationRecommendationTests
         var param = doc.Actions.Single(a => a.Definition.Id == "cleaning.app.cache");
         Assert.Equal(ActionRisk.Medium, RiskModel.Of(param));
     }
+
+    [Fact]
+    public void Batch_number_generated_by_nexus_is_not_a_user_choice()
+    {
+        // Achado no teste ponta a ponta (VM): a limpeza segura do Assistente vinha toda "risco médio" e desmarcada.
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Nexus.slnx"))) dir = dir.Parent;
+        var catalog = CatalogLoader.LoadDirectory(Path.Combine(dir!.FullName, "catalog"));
+        var temp = catalog.Actions.Single(a => a.Definition.Key == "cleaning.temp-user@1");
+        Assert.Equal(["batch"], temp.UserParameters.Keys.ToArray());
+        Assert.Equal(ActionRisk.Low, RiskModel.Of(temp));
+    }
 }
 
 [Trait("Category", "Unit")]

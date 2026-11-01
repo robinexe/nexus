@@ -21,7 +21,10 @@ public static class RiskModel
             return ActionRisk.High;
         if (declared is { } r) return r;
         if (d.Classification == Classification.Conditional) return ActionRisk.Medium;
-        if (entry.UserParameters.Count > 0 || d.Reboot is RebootRequirement.Required or RebootRequirement.Recommended) return ActionRisk.Medium;
+        // "batch" é o número do lote que o próprio NEXUS gera (limpeza, quarentena): não é escolha do usuário. Sem isso, toda limpeza
+        // segura virava "risco médio" e o Assistente não marcava nada na etapa Limpeza (achado pelo teste ponta a ponta na VM).
+        if (entry.UserParameters.Keys.Any(k => !string.Equals(k, "batch", StringComparison.Ordinal)) ||
+            d.Reboot is RebootRequirement.Required or RebootRequirement.Recommended) return ActionRisk.Medium;
         return ActionRisk.Low;
     }
 
