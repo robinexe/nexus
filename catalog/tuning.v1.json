@@ -1,0 +1,905 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Ajustes de desempenho, latência e responsividade pesquisados em 01/11/2026 (docs Microsoft, guias do GitHub, medições publicadas). Cada item diz o ganho honesto; mitos ficam em 'rejected'. Ver docs/modules/tuning.md.",
+  "actions": [
+    {
+      "id": "fps.dwm.mpo.disable",
+      "version": 1,
+      "title": "Desligar o Multiplane Overlay (corrige tremedeira e tela preta)",
+      "classification": "Conditional",
+      "condition": "Só para quem tem tremedeira, tela preta ou stutter em janelas.",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\Dwm",
+        "name": "OverlayTestMode",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 5,
+      "mechanism": "Desliga o MPO, o recurso que deixa a placa compor camadas sem o DWM. Com alguns drivers, o MPO causa tremedeira, stutter na área de trabalho e telas pretas. Não aumenta FPS: é correção de defeito.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://www.neowin.net/amp/microsoft-amd-nvidia-are-all-sleeping-on-windows-11-mpo-display-issues/"
+        },
+        {
+          "level": "Community",
+          "source": "https://wiki.special-k.info/en/Presentation_Model"
+        }
+      ],
+      "risks": "Sem MPO, jogo em janela sem borda com resolução diferente da nativa (ou com overlay por cima) volta a passar pelo DWM e pode ter mais atraso. Use só se tiver o sintoma.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.dwm.overlay-minfps.zero",
+      "version": 1,
+      "title": "Corrigir apps congelando no 24H2 (Discord, Chrome)",
+      "classification": "Experimental",
+      "condition": "Só se apps congelarem em partes da janela.",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\Dwm",
+        "name": "OverlayMinFPS",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "compatibility": {
+        "minBuild": 26100
+      },
+      "mechanism": "Valor não documentado do DWM que, segundo muitos relatos, acaba com áreas congeladas em Discord/Chrome/VS Code no Windows 11 24H2, mantendo o MPO ligado.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://redlib.ssps.io/r/Windows11/comments/1kgp7ar/cause_and_solution_to_windows_24h2_related"
+        }
+      ],
+      "risks": "Não documentado; alguns relatam que não resolve.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.mouse.acceleration.off.speed",
+      "version": 1,
+      "title": "Mouse sem aceleração (1/3: precisão do ponteiro)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Mouse",
+        "name": "MouseSpeed",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "0",
+      "mechanism": "Desliga 'Aumentar precisão do ponteiro': o cursor anda 1:1 com o mouse. Não muda FPS; deixa a mira consistente em jogos e menus que não usam raw input.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://www.elevenforum.com/t/turn-on-or-off-enhance-pointer-precision-in-windows-11.7327/"
+        },
+        {
+          "level": "Community",
+          "source": "https://github.com/valleyofdoom/PC-Tuning"
+        }
+      ],
+      "risks": "O cursor parece mais lento para quem está acostumado; no touchpad pode piorar. Aplique as 3 partes juntas.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.mouse.acceleration.off.threshold1",
+      "version": 1,
+      "title": "Mouse sem aceleração (2/3: limite 1)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Mouse",
+        "name": "MouseThreshold1",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "0",
+      "mechanism": "Parte do mesmo ajuste 'Aumentar precisão do ponteiro' desligado.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://www.elevenforum.com/t/turn-on-or-off-enhance-pointer-precision-in-windows-11.7327/"
+        }
+      ],
+      "risks": "Igual à parte 1.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.mouse.acceleration.off.threshold2",
+      "version": 1,
+      "title": "Mouse sem aceleração (3/3: limite 2)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Mouse",
+        "name": "MouseThreshold2",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "0",
+      "mechanism": "Parte do mesmo ajuste 'Aumentar precisão do ponteiro' desligado.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://www.elevenforum.com/t/turn-on-or-off-enhance-pointer-precision-in-windows-11.7327/"
+        }
+      ],
+      "risks": "Igual à parte 1.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.power.throttling.off",
+      "version": 1,
+      "title": "Desligar o Power Throttling (modo eficiência automático)",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+        "name": "PowerThrottlingOff",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 1,
+      "compatibility": {
+        "minBuild": 16299
+      },
+      "mechanism": "O Windows rebaixa (EcoQoS) processos em segundo plano. O jogo em foco já recebe prioridade alta; isto ajuda o que roda junto: gravação, streaming, launcher, Discord.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/procthread/quality-of-service"
+        },
+        {
+          "level": "Community",
+          "source": "https://winaero.com/disable-power-throttling"
+        }
+      ],
+      "risks": "Mais consumo e calor em notebook. Ganho de FPS do jogo em si é quase nulo.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.power.user-presence-qos.off",
+      "version": 1,
+      "title": "Não rebaixar o app em foco quando você fica sem mexer (bateria)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+        "name": "DisableUserPresenceQos",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 1,
+      "compatibility": {
+        "minBuild": 22000
+      },
+      "mechanism": "Na bateria, o Windows 11 rebaixa o app em foco se não há teclado/mouse por um tempo (cutscene, jogo de controle, benchmark). A Microsoft recomenda desligar para benchmarks na bateria.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/procthread/quality-of-service"
+        }
+      ],
+      "risks": "Menos bateria em notebook.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.power.min-processor-state.100.ac",
+      "version": 1,
+      "title": "Estado mínimo do processador em 100% (na tomada)",
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "893dee8e-2bef-41e0-89c6-b55d0929964c",
+        "acdc": "AC"
+      },
+      "desiredValue": 100,
+      "mechanism": "O processador não desce abaixo da frequência base na tomada: menos tempo para subir o clock em cargas intermitentes. Em CPUs que se gerenciam sozinhas (CPPC2/HWP) o efeito é pequeno.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows-hardware/customize/power-settings/options-for-perf-state-engine-minperformance"
+        },
+        {
+          "level": "Community",
+          "source": "https://www.gamersnexus.net/news-pc/2870-ryzen-power-plan-update-min-frequency-90-pct"
+        }
+      ],
+      "risks": "Mais calor e consumo parado; pode reduzir a margem térmica do turbo em notebook.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.epp.performance.ac",
+      "version": 1,
+      "title": "Preferência de energia do processador: desempenho (na tomada)",
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "36687f9e-e3a5-4dbf-b1dc-15eb381c6863",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Energy Performance Preference = 0 diz ao processador (Intel HWP / Ryzen CPPC2) para priorizar desempenho: sobe o clock mais rápido. Ajuda latência e frametime em cargas que variam.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perfenergypreference"
+        }
+      ],
+      "risks": "Mais consumo parado e calor em notebook. Sem efeito em CPUs sem CPPC2/HWP.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.usb-selective-suspend.off.ac",
+      "version": 1,
+      "title": "Não suspender portas USB (na tomada)",
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "2a737441-1930-4402-8d77-b2bebba308a3",
+        "setting": "48e6b7a6-50f5-4782-a5d4-53bb8f07e226",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Evita que headset, controle ou DAC USB 'durmam' e demorem a acordar ou desconectem. Mouse em uso não suspende, então não muda a mira.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://elevenforum.com/t/enable-or-disable-usb-selective-suspend-in-windows-11.10251/"
+        }
+      ],
+      "risks": "Consumo um pouco maior (irrelevante em desktop).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.pcie-aspm.off.ac",
+      "version": 1,
+      "title": "PCIe sem economia de energia no link (na tomada)",
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "501a4d13-42af-4429-9fd1-a8218c268e20",
+        "setting": "ee12f906-d277-404b-b6da-e5fa1a576df5",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Desliga o ASPM: a placa de vídeo, o NVMe e a rede não entram em L1 e não pagam o atraso de saída. No plano Alto desempenho já vem desligado; no Equilibrado vem ligado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/pci-express-settings-link-state-power-management"
+        },
+        {
+          "level": "Community",
+          "source": "https://github.com/valleyofdoom/PC-Tuning"
+        }
+      ],
+      "risks": "Mais consumo parado. Ganho de FPS médio raramente aparece; ajuda estabilidade de latência.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.latency-tolerance.ac",
+      "version": 1,
+      "title": "NVMe sem estados de energia profundos (na tomada)",
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "fc95af4d-40e7-4b6d-835a-56d131dbc80e",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tolerância de latência 0 ms faz o driver da Microsoft (StorNVMe) não colocar o SSD em estados profundos: a primeira leitura depois de ocioso fica mais rápida.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais calor no SSD. Drivers do fabricante podem ignorar. Não espere FPS a mais.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.gamedvr.policy.off",
+      "version": 1,
+      "title": "Política: sem gravação de jogos em segundo plano",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+        "name": "AllowGameDVR",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "Impede gravação e transmissão de jogos pelo Game Bar, inclusive se algum app religar. O custo real é a gravação em segundo plano.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.stigviewer.com/stigs/microsoft_windows_11_v2r8/2026-05-19/finding/V-253399"
+        }
+      ],
+      "risks": "Bloqueia clipes Win+Alt+G.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura da política.",
+      "revert": "Remover a política (volta ao padrão do Windows) ou restaurar o valor anterior."
+    },
+    {
+      "id": "sys.do.download-mode.http-only",
+      "version": 1,
+      "title": "Atualizações sem enviar para outros PCs (Otimização de Entrega)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+        "name": "DODownloadMode",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "mechanism": "O Windows Update baixa só dos servidores da Microsoft e não usa sua internet para enviar pedaços a outros PCs.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/deployment/do/waas-delivery-optimization-reference"
+        }
+      ],
+      "risks": "Nenhum relevante. Ganho pequeno: só faz diferença se o envio para a internet estava ligado.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura da política.",
+      "revert": "Remover a política (volta ao padrão do Windows) ou restaurar o valor anterior."
+    },
+    {
+      "id": "sys.do.background-bandwidth.cap50",
+      "version": 1,
+      "title": "Updates em segundo plano usando no máximo 50% da internet",
+      "classification": "Conditional",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+        "name": "DOPercentageMaxBackgroundBandwidth",
+        "type": "DWord"
+      },
+      "desiredValue": 50,
+      "desiredType": "DWord",
+      "mechanism": "Evita que um download de atualização em segundo plano encha a conexão durante o jogo (útil em internet lenta).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/deployment/do/waas-delivery-optimization-reference"
+        }
+      ],
+      "risks": "Atualizações baixam mais devagar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura da política.",
+      "revert": "Remover a política (volta ao padrão do Windows) ou restaurar o valor anterior."
+    },
+    {
+      "id": "sys.ai.recall-enablement.off",
+      "version": 1,
+      "title": "Recall indisponível",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+        "name": "AllowRecallEnablement",
+        "type": "DWord"
+      },
+      "desiredValue": 0,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 26100
+      },
+      "mechanism": "Impede o Recall de capturar e indexar a tela continuamente (só PCs Copilot+).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai"
+        }
+      ],
+      "risks": "Nenhum.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura da política.",
+      "revert": "Remover a política (volta ao padrão do Windows) ou restaurar o valor anterior."
+    },
+    {
+      "id": "sys.ai.clicktodo.off",
+      "version": 1,
+      "title": "Desligar o Click to Do",
+      "classification": "SupportedDocumented",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+        "name": "DisableClickToDo",
+        "type": "DWord"
+      },
+      "desiredValue": 1,
+      "desiredType": "DWord",
+      "compatibility": {
+        "minBuild": 26100
+      },
+      "mechanism": "Desliga a análise de tela do Click to Do.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai"
+        }
+      ],
+      "risks": "Nenhum.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura da política.",
+      "revert": "Remover a política (volta ao padrão do Windows) ou restaurar o valor anterior."
+    },
+    {
+      "id": "sys.explorer.startup-delay.off",
+      "version": 1,
+      "title": "Programas da inicialização abrem sem atraso",
+      "classification": "Experimental",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize",
+        "name": "StartupDelayInMSec",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "O Windows espera alguns segundos antes de abrir os programas da inicialização. Com 0, eles abrem logo após o logon.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/answers/a/7617892"
+        },
+        {
+          "level": "Community",
+          "source": "https://github.com/Atlas-OS/Atlas/tree/main/src/playbook/Configuration/tweaks"
+        }
+      ],
+      "risks": "O atraso existe para a área de trabalho ficar pronta primeiro; os primeiros segundos podem ficar mais pesados.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.ui.transparency.off",
+      "version": 1,
+      "title": "Desligar transparência das janelas",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "name": "EnableTransparency",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "A Microsoft diz que o efeito acrílico usa GPU e energia. Sem FPS a mais em placa dedicada; ajuda vídeo integrado e bateria.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/apps/design/style/acrylic"
+        }
+      ],
+      "risks": "Só visual.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.ui.minimize-animation.off",
+      "version": 1,
+      "title": "Sem animação ao minimizar e maximizar",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Desktop\\WindowMetrics",
+        "name": "MinAnimate",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "0",
+      "mechanism": "Alt+Tab, minimizar e maximizar ficam instantâneos.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/rds-vdi-recommendations-2004"
+        }
+      ],
+      "risks": "Só visual.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.ui.taskbar-animations.off",
+      "version": 1,
+      "title": "Sem animações da barra de tarefas",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "TaskbarAnimations",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "A barra de tarefas responde sem animação.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/rds-vdi-recommendations-2004"
+        }
+      ],
+      "risks": "Só visual.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.ui.menu-show-delay.200",
+      "version": 1,
+      "title": "Submenus abrem mais rápido (400→200 ms)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Desktop",
+        "name": "MenuShowDelay",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "200",
+      "mechanism": "Atraso de submenus cai do padrão de 400 ms para 200 ms. Zero seria rápido demais (abre ao passar o mouse sem querer).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-systemparametersinfoa"
+        }
+      ],
+      "risks": "Nenhum.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.ntfs.last-access.disable",
+      "version": 1,
+      "title": "NTFS sem gravar 'último acesso' a cada leitura",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+        "name": "NtfsDisableLastAccessUpdate",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 2147483649,
+      "mechanism": "Mesmo efeito de 'fsutil behavior set disablelastaccess 1': menos escritas de metadados ao abrir e listar arquivos. Em muitos PCs o Windows já deixa desligado (aparece como 'já estava assim').",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-behavior"
+        }
+      ],
+      "risks": "Backup e o Sensor de Armazenamento ('arquivos não usados') dependem do último acesso. Ganho pequeno.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.power.fast-startup.off",
+      "version": 1,
+      "title": "Desligar a Inicialização Rápida (desligar = desligar de verdade)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power",
+        "name": "HiberbootEnabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Com a Inicialização Rápida, 'Desligar' hiberna o kernel: drivers ficam em estado velho e o PC 'nunca reinicia'. Sem ela, cada desligamento é completo. Melhora estabilidade, não FPS.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/setup-upgrade-and-drivers/fast-startup-causes-system-hibernation-shutdown-fail"
+        }
+      ],
+      "risks": "Ligar a frio fica alguns segundos mais lento.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.explorer.show-extensions",
+      "version": 1,
+      "title": "Mostrar extensões de arquivo (.exe, .pdf…)",
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "HideFileExt",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Não é desempenho: segurança. Mostra quando um 'documento.pdf' é na verdade um '.exe'.",
+      "evidence": [
+        {
+          "level": "Community",
+          "source": "https://github.com/valleyofdoom/PC-Tuning"
+        }
+      ],
+      "risks": "Nenhum.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.notifications.toasts.off",
+      "version": 1,
+      "title": "Desligar todas as notificações pop-up",
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications",
+        "name": "ToastEnabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 0,
+      "mechanism": "Nenhuma notificação aparece por cima do jogo. Prefira o 'Não incomodar ao jogar' do Windows se quiser manter as outras.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/windows/8942c744-6198-fe56-4639-34320cf9444e"
+        }
+      ],
+      "risks": "Você perde todas as notificações pop-up (inclusive de mensagens).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "net.ipv6.prefer-ipv4",
+      "version": 1,
+      "title": "Preferir IPv4 sem desligar o IPv6",
+      "classification": "Conditional",
+      "condition": "Só se sites/jogos demorarem a conectar por IPv6.",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
+        "name": "DisabledComponents",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": 32,
+      "mechanism": "Faz o Windows preferir IPv4 quando os dois existem. Só ajuda quem tem IPv6 ruim no provedor; não reduz ping em rota normal. Nunca desliga o IPv6 (a Microsoft não recomenda).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/configure-ipv6-in-windows"
+        }
+      ],
+      "risks": "Nenhum relevante.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Required",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.svc.pcasvc.disabled",
+      "version": 1,
+      "title": "Desativar o Assistente de Compatibilidade de Programas",
+      "classification": "Conditional",
+      "handlerKind": "ServiceStartType",
+      "target": {
+        "service": "PcaSvc"
+      },
+      "desiredValue": "Disabled",
+      "mechanism": "A Microsoft classifica como 'OK to disable'. Menos monitoramento de programas abertos e pop-ups de compatibilidade.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/iot/iot-enterprise/optimize/services"
+        }
+      ],
+      "risks": "Some o assistente que sugere modo de compatibilidade para jogos antigos.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "QueryServiceConfig.",
+      "revert": "Restaurar o tipo de inicialização original."
+    },
+    {
+      "id": "sys.svc.trkwks.disabled",
+      "version": 1,
+      "title": "Desativar o Cliente de Rastreamento de Link Distribuído",
+      "classification": "SupportedDocumented",
+      "handlerKind": "ServiceStartType",
+      "target": {
+        "service": "TrkWks"
+      },
+      "desiredValue": "Disabled",
+      "mechanism": "A Microsoft classifica como 'OK to disable'. Serve para atalhos de arquivos movidos em rede se consertarem sozinhos.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/iot/iot-enterprise/optimize/services"
+        }
+      ],
+      "risks": "Atalhos para arquivos movidos na rede não se corrigem sozinhos.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "QueryServiceConfig.",
+      "revert": "Restaurar o tipo de inicialização original."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "myth.tuning.network-throttling-index",
+      "classification": "Ineffective",
+      "reason": "NetworkThrottlingIndex limita só tráfego acima de ~10.000 pacotes/s enquanto há mídia tocando; jogo manda dezenas a centenas. Medição mostrou DPC do ndis.sys pior sem o limite. Não reduz ping.",
+      "source": "https://learn.microsoft.com/en-us/archive/blogs/markrussinovich/vista-multimedia-playback-and-network-throughput"
+    },
+    {
+      "id": "myth.tuning.tcpackfrequency-nagle",
+      "classification": "Ineffective",
+      "reason": "TcpAckFrequency/TCPNoDelay valem só para TCP; jogos de ação usam UDP, e quando usam TCP já desligam o Nagle no próprio socket. A Microsoft não recomenda mudar.",
+      "source": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/registry-entry-control-tcp-acknowledgment-behavior"
+    },
+    {
+      "id": "myth.tuning.mmcss-games-priority",
+      "classification": "Ineffective",
+      "reason": "Na tarefa MMCSS 'Games', GPU Priority e SFIO Priority não são usados (documentação da Microsoft) e nenhum jogo observado registra threads nela.",
+      "source": "https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service"
+    },
+    {
+      "id": "myth.tuning.disable-paging-executive",
+      "classification": "Ineffective",
+      "reason": "DisablePagingExecutive/DisablePageCombining só restringem o gerenciador de memória; sem ganho medido.",
+      "source": "https://learn.microsoft.com/en-us/archive/blogs/markrussinovich/pushing-the-limits-of-windows-virtual-memory"
+    },
+    {
+      "id": "myth.tuning.disable-pagefile",
+      "classification": "Ineffective",
+      "reason": "Ter arquivo de paginação libera RAM útil e é necessário para despejo de falha. Desligar não dá desempenho.",
+      "source": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/how-to-determine-the-appropriate-page-file-size-for-64-bit-versions-of-windows"
+    },
+    {
+      "id": "myth.tuning.dns-lowers-ping",
+      "classification": "Ineffective",
+      "reason": "DNS só resolve o nome antes de conectar; depois de conectado não afeta o ping do jogo.",
+      "source": "https://adguard-dns.io/en/blog/best-dns-servers-for-gaming.html"
+    },
+    {
+      "id": "myth.tuning.qos-reserves-20-percent",
+      "classification": "Ineffective",
+      "reason": "A Microsoft desmente que o Agendador de Pacotes QoS reserve 20% da banda.",
+      "source": "https://ftp.zx.net.nz/pub/archive/ftp.microsoft.com/MISC/KB/en-us/316/666.HTM"
+    },
+    {
+      "id": "myth.tuning.disable-maintenance",
+      "classification": "Rejected",
+      "reason": "A manutenção automática só roda com o PC ocioso e é ela que faz TRIM/otimização de disco. Desligar prejudica.",
+      "source": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-maintenence"
+    },
+    {
+      "id": "myth.tuning.debloat-iso-fps",
+      "classification": "Ineffective",
+      "reason": "Comparações Windows 11 normal vs 'debloated' (Nano11) ficaram dentro da margem de erro em FPS; só a interface fica mais ágil.",
+      "source": "https://www.pcgameshardware.de/Windows-Software-277633/News/Standard-gegen-Nano-Debloat-Gaming-Performance-1472429/"
+    },
+    {
+      "id": "myth.tuning.hvci-off-silently",
+      "classification": "Rejected",
+      "reason": "Desligar Integridade de Memória (HVCI) dá 2-10% em alguns jogos, mas reduz a proteção e anticheats como Vanguard/FACEIT podem exigir HVCI. O NEXUS protege DeviceGuard por política: só a página de Segurança do Windows deve mudar isso, com o usuário ciente.",
+      "source": "https://support.microsoft.com/en-us/windows/options-to-optimize-gaming-performance-in-windows-11-a255f612-2949-4373-a566-ff6f3f474613"
+    }
+  ]
+}

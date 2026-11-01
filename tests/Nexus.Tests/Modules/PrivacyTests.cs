@@ -137,7 +137,8 @@ public sealed class PrivacyTests
         Assert.NotNull(PrivacyPolicyAllowlist.Check(RegHive.HKLM, @"SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\DataCollection", "AllowTelemetry"));
         Assert.Null(PrivacyPolicyAllowlist.Check(RegHive.HKLM, @"software\policies\microsoft\windows\datacollection", "allowtelemetry"));
         // Toda entrada da lista é usada pelo catálogo (nada sobrando aberto sem motivo).
-        var used = Catalog().Document.Actions.Where(a => a.Definition.HandlerKind == PrivacyPolicyValueHandler.Kind)
+        // Todos os catálogos (privacy.v1 e tuning.v1 usam este handler).
+        var used = CatalogLoader.LoadDirectory(CatalogDir).Actions.Where(a => a.Definition.HandlerKind == PrivacyPolicyValueHandler.Kind)
             .Select(a => $"{a.TargetTemplate["hive"]}\\{a.TargetTemplate["path"]}|{a.TargetTemplate["name"]}").ToHashSet(StringComparer.OrdinalIgnoreCase);
         Assert.All(PrivacyPolicyAllowlist.All, e => Assert.Contains($"{e.Hive}\\{e.Path}|{e.Name}", used));
     }

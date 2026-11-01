@@ -469,7 +469,7 @@ public static class StepPlanners
     // ------------------------------------------------------------------ 10. desempenho
 
     /// <summary>Catálogos de ajustes de jogo/sistema que só aparecem na página Aplicar; o assistente os mostra como "avançado".</summary>
-    private static readonly string[] AdvancedPrefixes = ["win.", "power.", "sched.", "gpu.", "svc.", "boot.service."];
+    private static readonly string[] AdvancedPrefixes = ["win.", "power.", "sched.", "gpu.", "svc.", "boot.service.", "fps.", "sys.", "net.", "hw."];
 
     public static StepScan Performance(AssistantCatalog catalog, RecommendationSet set) => Performance(catalog, set, null);
 

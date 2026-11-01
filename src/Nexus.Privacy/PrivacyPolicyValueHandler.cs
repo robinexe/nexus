@@ -53,6 +53,12 @@ public static class PrivacyPolicyAllowlist
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowCortana"),
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowSearchToUseLocation"),
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "EnableDynamicContentInWSB"),
+        // catalog/tuning.v1.json (desempenho e Windows Update): mesmas regras, políticas documentadas pela Microsoft.
+        (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR"),
+        (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization", "DODownloadMode"),
+        (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization", "DOPercentageMaxBackgroundBandwidth"),
+        (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "AllowRecallEnablement"),
+        (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "DisableClickToDo"),
     ];
 
     private static readonly HashSet<string> Keys = new(Entries.Select(e => Key(e.Hive, e.Path, e.Name)), StringComparer.OrdinalIgnoreCase);
