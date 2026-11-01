@@ -16,6 +16,8 @@
 ;    antes de executar. Opção MARCADA: "Medir FPS sem pedir permissão toda vez" põe a conta de quem abriu o instalador no grupo
 ;    "Usuários do log de desempenho" (S-1-5-32-559) com marca em HKLM\SOFTWARE\NEXUS\PerfLogGroup; o desinstalador tira do grupo
 ;    só quem tem essa marca (adicionado pelo instalador ou pela ação measure.perflog-group.join do aplicativo).
+;  - Atualização automática: o NEXUS baixa o instalador novo (manifesto assinado, SHA-256) e o roda com
+;    /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS [/RELAUNCH=1]; ver docs/11-atualizacao.md.
 ;  - Assinatura Authenticode: preparada e desligada (defina SignToolName; ver docs/08-packaging.md).
 
 #ifndef AppVersion
@@ -108,6 +110,9 @@ Name: "{autoprograms}\NEXUS - avisos de terceiros"; Filename: "{app}\THIRD-PARTY
 
 [Run]
 Filename: "{app}\Nexus.Desktop.exe"; Description: "{cm:LaunchNexus}"; Flags: postinstall nowait skipifsilent runasoriginaluser
+; Atualização automática (docs/11-atualizacao.md): o NEXUS inicia este instalador com /VERYSILENT ... /RELAUNCH=1 e fecha; no fim,
+; o NEXUS novo é reaberto como o usuário ORIGINAL (não como administrador). Sem /RELAUNCH=1 (instalar ao fechar), não reabre.
+Filename: "{app}\Nexus.Desktop.exe"; Parameters: "--updated"; WorkingDir: "{app}"; Flags: nowait runasoriginaluser; Check: RelaunchRequested
 
 [UninstallRun]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\tools\service\Uninstall-Broker.ps1"""; StatusMsg: "{cm:StatusServiceRemove}"; Flags: runhidden waituntilterminated; RunOnceId: "NexusRemoveService"
@@ -138,6 +143,12 @@ var
   Code: Integer;
 begin
   Result := Exec(ExpandConstant('{sys}\sc.exe'), 'query ' + SERVICE_NAME, '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0);
+end;
+
+{ /RELAUNCH=1 na linha de comando: pedido pela atualização automática do NEXUS ("Reiniciar e atualizar"). }
+function RelaunchRequested(): Boolean;
+begin
+  Result := ExpandConstant('{param:RELAUNCH|0}') = '1';
 end;
 
 { Instala/atualiza o serviço se a opção foi marcada ou se ele já existe (atualização: o serviço precisa da mesma versão). }

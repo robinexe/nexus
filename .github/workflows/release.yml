@@ -13,6 +13,12 @@
 #   grupo "Usuários do log de desempenho", abre a interface por 20 s e desinstala (dados preservados, grupo desfeito só se
 #   foi o instalador que adicionou); extrai o ZIP portátil e roda o nexus de lá.
 #
+# Atualização automática (docs/11-atualizacao.md): com o segredo NEXUS_UPDATE_SIGNING_KEY (chave EC P-256, PKCS#8 PEM), gera e
+# assina nexus-update.json (tools/packaging/sign-update.py) e confere a assinatura com o código do próprio aplicativo
+# (nexus update --verify-manifest, chave embutida). Com o segredo NEXUS_RELEASES_TOKEN e (tag ou Run workflow com publish=true),
+# publica instalador + ZIP + manifesto + assinatura como Release do repositório PÚBLICO robinexe/nexus-releases, de onde os
+# NEXUS instalados se atualizam sozinhos. Sem os segredos: pula com um aviso.
+#
 # Assinatura Authenticode: preparada e DESLIGADA. Para ligar: variável de repositório NEXUS_SIGN=true e segredos
 # NEXUS_SIGN_PFX_BASE64 / NEXUS_SIGN_PFX_PASSWORD (certificado de assinatura de código). Ver docs/08-packaging.md.
 name: release
@@ -26,6 +32,14 @@ on:
         description: 'Também gerar win-arm64 (experimental: compila, mas não foi testado num PC ARM)'
         type: boolean
         default: false
+      publish:
+        description: 'Publicar em robinexe/nexus-releases (os NEXUS instalados se atualizam sozinhos)'
+        type: boolean
+        default: false
+      notas:
+        description: 'Novidades (português, curto) para o aviso de atualização'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -172,6 +186,11 @@ jobs:
 
           & "$app\nexus.exe" version
           if ($LASTEXITCODE -ne 0) { exit 1 }
+          # Atualização: procura a partir da pasta instalada (tolerante: sem Release publicado ainda, só informa).
+          $upd = & "$app\nexus.exe" update --check --json | ConvertFrom-Json
+          "nexus update --check: código $LASTEXITCODE; $($upd.current) ($($upd.kind)): $($upd.message)"
+          if ($upd.kind -ne 'Installed') { "::warning::nexus update --check na pasta instalada deveria dizer Installed; deu $($upd.kind)" }
+          if ($upd.current -ne '${{ steps.versao.outputs.full }}') { "::warning::Versão lida pelo nexus ($($upd.current)) difere de ${{ steps.versao.outputs.full }}" }
           & "$app\nexus-recover.exe" scan
           "nexus-recover scan: $LASTEXITCODE (0 ou 3 esperados: nada a recuperar / diário não existe)"
           if ($LASTEXITCODE -notin 0, 3) { exit 1 }
@@ -279,6 +298,9 @@ jobs:
           Expand-Archive $zip.FullName -DestinationPath $dest -Force
           & "$dest\NEXUS\nexus.exe" version
           if ($LASTEXITCODE -ne 0) { exit 1 }
+          $upd = & "$dest\NEXUS\nexus.exe" update --check --json | ConvertFrom-Json
+          "nexus update --check (portátil): $($upd.kind): $($upd.message)"
+          if ($upd.kind -ne 'Portable') { "::warning::nexus update --check no ZIP portátil deveria dizer Portable; deu $($upd.kind)" }
           # Numa pasta do usuário o verificador precisa avisar (código 1): é o motivo de preferir o instalador para modo administrador.
           powershell -NoProfile -ExecutionPolicy Bypass -File "$dest\NEXUS\tools\Test-NexusFolderSafety.ps1" -Path "$dest\NEXUS"
           $safety = $LASTEXITCODE
@@ -292,6 +314,28 @@ jobs:
           python tools/packaging/publish.py --checksums artifacts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Manifesto de atualização (assinado; sem o segredo, pula)
+        id: manifesto
+        shell: pwsh
+        env:
+          NEXUS_UPDATE_SIGNING_KEY: ${{ secrets.NEXUS_UPDATE_SIGNING_KEY }}
+          NOTAS: ${{ inputs.notas }}
+        run: |
+          if (-not $env:NEXUS_UPDATE_SIGNING_KEY) {
+            "::notice::Segredo NEXUS_UPDATE_SIGNING_KEY ausente: manifesto de atualização não gerado (ver docs/11-atualizacao.md)."
+            "signed=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+          $v = "${{ steps.versao.outputs.full }}"
+          $setup = Get-ChildItem artifacts -Filter 'NEXUS-*-win-x64-instalador.exe' | Select-Object -First 1
+          $notes = if ($env:NOTAS) { $env:NOTAS } else { "NEXUS ${v}: correções e melhorias." }
+          python tools/packaging/sign-update.py --installer $setup.FullName --version $v --out artifacts/update --notes $notes
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # Confere com o código e a chave pública EMBUTIDOS no aplicativo publicado: prova que o segredo é a chave certa.
+          & artifacts\win-x64\NEXUS\nexus.exe update --verify-manifest artifacts\update\nexus-update.json
+          if ($LASTEXITCODE -ne 0) { Write-Error 'A assinatura não confere com a chave embutida no NEXUS: segredo NEXUS_UPDATE_SIGNING_KEY errado?'; exit 1 }
+          "signed=true" >> $env:GITHUB_OUTPUT
+
       - name: Artifacts
         if: always()
         uses: actions/upload-artifact@v5
@@ -302,6 +346,7 @@ jobs:
             artifacts/*.exe
             artifacts/SHA256SUMS.txt
             artifacts/version.txt
+            artifacts/update/
             saida/
           if-no-files-found: warn
 
@@ -328,3 +373,29 @@ jobs:
           if ("${{ steps.versao.outputs.suffix }}") { $ghArgs += '--prerelease' }
           gh @ghArgs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Publicar em robinexe/nexus-releases (atualização automática; sem o segredo, pula)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.NEXUS_RELEASES_TOKEN }}
+          WANT: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
+        run: |
+          if ($env:WANT -ne 'true') { "Publicação não pedida (Run workflow com publish=true, ou tag v*)."; exit 0 }
+          if (-not $env:GH_TOKEN) { "::notice::Segredo NEXUS_RELEASES_TOKEN ausente: nada publicado em robinexe/nexus-releases."; exit 0 }
+          if ("${{ steps.manifesto.outputs.signed }}" -ne 'true') { "::notice::Sem manifesto assinado (segredo NEXUS_UPDATE_SIGNING_KEY): nada publicado."; exit 0 }
+          $v = "${{ steps.versao.outputs.full }}"
+          $files = @(Get-ChildItem artifacts -File | Where-Object { $_.Name -like 'NEXUS-*-win-x64-instalador.exe' -or $_.Name -like 'NEXUS-*-win-x64-portatil.zip' -or $_.Name -eq 'SHA256SUMS.txt' } | ForEach-Object FullName)
+          $files += (Resolve-Path artifacts\update\nexus-update.json).Path, (Resolve-Path artifacts\update\nexus-update.json.sig).Path
+          @(
+            "NEXUS $v",
+            '',
+            '- NEXUS-*-instalador.exe: instala em Arquivos de Programas. Quem já tem o NEXUS instalado recebe esta versão sozinho.',
+            '- NEXUS-*-portatil.zip: extraia e abra Nexus.Desktop.exe.',
+            '- nexus-update.json(.sig): manifesto assinado lido pela atualização automática.',
+            '',
+            'SHA-256:', '```', (Get-Content artifacts\SHA256SUMS.txt -Raw).Trim(), '```'
+          ) -join "`n" | Out-File notas-publicas.md -Encoding utf8
+          # Não é pré-lançamento: "latest" precisa apontar para cá (é o endereço que os NEXUS instalados leem).
+          gh release create "v$v" @files --repo robinexe/nexus-releases --title "NEXUS $v" --notes-file notas-publicas.md --latest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "Publicado: https://github.com/robinexe/nexus-releases/releases/tag/v$v"
