@@ -111,19 +111,6 @@
       "verification": "Releitura após reinício + D3DKMTQueryAdapterInfo (estado efetivo).", "revert": "Restaurar valor original ou remover."
     },
     {
-      "id": "proc.game.ecoqos-optout.session", "version": 1,
-      "title": "Excluir o processo do jogo do EcoQoS (sessão)",
-      "classification": "Conditional",
-      "condition": "Apenas quando o diagnóstico observar o processo do jogo classificado como EcoQoS/throttled.",
-      "handlerKind": "ProcessPowerThrottling",
-      "target": { "process": "{gameProcess}", "flag": "PROCESS_POWER_THROTTLING_EXECUTION_SPEED" },
-      "mechanism": "SetProcessInformation(ProcessPowerThrottling) com ControlMask=flag e StateMask=0 desativa o EcoQoS para o processo.",
-      "evidence": [ { "level": "VendorDocumented", "source": "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setprocessinformation" } ],
-      "risks": "Nenhum persistente; Vanguard/VAC podem negar abertura do processo com PROCESS_SET_INFORMATION — nesse caso, Bloqueado.",
-      "privileges": "Admin", "persistence": "Session", "reboot": "None",
-      "verification": "GetProcessInformation(ProcessPowerThrottling).", "revert": "ControlMask=0, StateMask=0 (gerenciado pelo sistema)."
-    },
-    {
       "id": "startup.run-entry.disable", "version": 1,
       "title": "Desativar item de inicialização",
       "classification": "Conditional",
@@ -146,18 +133,6 @@
       "evidence": [ { "level": "Hypothesis", "source": "Exige I/O concorrente observado do SysMain durante stutters." } ],
       "risks": "Inicialização de aplicativos pode ficar mais lenta.", "privileges": "Admin", "persistence": "Persistent", "reboot": "None",
       "verification": "QueryServiceConfig.", "revert": "Restaurar StartType e DelayedAutoStart originais."
-    },
-    {
-      "id": "nvidia.drs.frame-rate-limit.per-app", "version": 1,
-      "title": "Limite de FPS do driver por executável",
-      "classification": "Conditional",
-      "condition": "Quando o limitador do jogo não estiver disponível ou o laboratório mostrar cadência melhor com o limite do driver.",
-      "handlerKind": "NvidiaDrsSetting",
-      "target": { "profile": "{gameExe}", "settingId": "0x10835002" },
-      "mechanism": "FRL_FPS_ID (NvApiDriverSettings.h).",
-      "evidence": [ { "level": "VendorDocumented", "source": "https://github.com/NVIDIA/nvapi/blob/main/NvApiDriverSettings.h" } ],
-      "risks": "Interage com Reflex e com fps_max do jogo; não empilhar limitadores sem teste.", "privileges": "Admin", "persistence": "Persistent", "reboot": "GameRestart",
-      "verification": "NvAPI_DRS_GetSetting: valor explícito vs herdado.", "revert": "Restaurar valor explícito ou NvAPI_DRS_DeleteProfileSetting se era herdado."
     },
     {
       "id": "cs2.cfg.fps_max", "version": 1,
@@ -185,6 +160,8 @@
     { "id": "myth.registry-cleaner", "classification": "Rejected", "reason": "Sem mecanismo de ganho; risco de remover dados de terceiros." },
     { "id": "myth.clear-shader-cache", "classification": "Rejected", "reason": "Força recompilação e causa stutter; caches são preservados por padrão." },
     { "id": "myth.winutil-presumed-original", "classification": "Rejected", "reason": "Reverter para um valor 'original' fixo no catálogo não restaura o estado real da máquina." },
+    { "id": "proc.game.ecoqos-optout.session", "classification": "Deferred", "reason": "Adiado: o handler ProcessPowerThrottling nunca foi implementado e nenhuma tela informa o processo do jogo ({gameProcess}). Ficava no catálogo como ação sem handler (o autoteste contava \"sem handler\"). Volta quando houver handler de sessão com teste e um diagnóstico que observe o jogo em EcoQoS.", "source": "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setprocessinformation" },
+    { "id": "nvidia.drs.frame-rate-limit.per-app", "classification": "Deferred", "reason": "Adiado: o handler NvidiaDrsSetting (NvAPI DRS) nunca foi implementado e nenhuma tela informa o executável do jogo ({gameExe}). Ficava no catálogo como ação sem handler. Use o limitador do próprio jogo ou o Painel de Controle da NVIDIA.", "source": "https://github.com/NVIDIA/nvapi/blob/main/NvApiDriverSettings.h" },
     { "id": "myth.disable-security-features", "classification": "Rejected", "reason": "VBS/HVCI/Defender/anticheat estão fora do escopo do perfil de otimização." }
   ]
 }

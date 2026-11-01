@@ -53,7 +53,7 @@ public static class CapabilityCatalog
             new("Execução", "Aplicar ações reais neste PC (hospedeiro físico)", CapabilityLabel.ImplementedNotValidated,
                 "Liberado em 31/10/2026 por decisão do responsável, com confirmação, diário, desfazer e ponto de restauração. Validado em VM; no PC físico, depende de você aplicar."),
             new("Execução", "Assinatura Authenticode do cliente do broker", CapabilityLabel.Pending, "Exige certificado de assinatura de código."),
-            new("Ações", "EcoQoS do processo (ProcessPowerThrottling)", CapabilityLabel.Pending, "Catalogado; handler não implementado."),
+            new("Ações", "EcoQoS do processo (ProcessPowerThrottling)", CapabilityLabel.Pending, "Adiado: fora do catálogo ativo até existir handler (listado em rejeitadas)."),
             new("Ações", "NVIDIA DRS", CapabilityLabel.Pending, "Catalogado; handler não implementado."),
             new("Ações", "Tarefas agendadas", CapabilityLabel.Pending, "Nem descoberta nem handler."),
             new("Medição", "Importar CSV, ver o traço e comparar antes/depois", CapabilityLabel.ImplementedNotValidated,

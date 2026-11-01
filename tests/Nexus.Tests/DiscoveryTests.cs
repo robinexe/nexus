@@ -314,8 +314,8 @@ public sealed class CatalogTests
     {
         var c = Real();
         Assert.Equal("1.0.0-draft", c.CatalogVersion);
-        Assert.Equal(13, c.Actions.Count);
-        Assert.Equal(14, c.Rejected.Count);
+        Assert.Equal(11, c.Actions.Count); // EcoQoS e NVIDIA DRS foram para "rejected" (adiadas: sem handler)
+        Assert.Equal(16, c.Rejected.Count);
         Assert.Equal(c.Actions.Count, c.Actions.Select(a => a.Definition.Id).Distinct().Count());
     }
 
