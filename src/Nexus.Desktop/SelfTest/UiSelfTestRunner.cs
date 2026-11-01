@@ -184,6 +184,11 @@ internal sealed class UiSelfTestRunner
                 index++;
                 pages.Add(await VisitAsync(vm, page, index));
             }
+
+            // 3) Telas que só aparecem durante uma ação: a tela de progresso do Assistente, com dados de demonstração.
+            if (!watchdog.IsCancellationRequested)
+                pages.Add(await VisitAsync(vm, vm.Assistant, ++index, "Assistente completo (progresso, demonstração)",
+                    vm.Assistant.ShowProcessDemo, vm.Assistant.HideProcessDemo));
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
@@ -209,7 +214,10 @@ internal sealed class UiSelfTestRunner
         Finish(report);
     }
 
-    private async Task<UiPageResult> VisitAsync(MainViewModel vm, PageViewModel page, int index)
+    /// <param name="label">Nome da tela no relatório (padrão: o título da página).</param>
+    /// <param name="stage">Monta um estado especial da página depois de ela ficar ociosa (ex.: a tela de progresso de demonstração).</param>
+    /// <param name="cleanup">Desfaz o estado especial depois da imagem.</param>
+    private async Task<UiPageResult> VisitAsync(MainViewModel vm, PageViewModel page, int index, string? label = null, Action? stage = null, Action? cleanup = null)
     {
         Swap();
         var notes = new List<string>();
@@ -238,6 +246,13 @@ internal sealed class UiSelfTestRunner
             await Task.Delay(200);
         }
         if (!idle) notes.Add($"Continuava ocupada depois de {PageTimeout.TotalSeconds:0} s.");
+        if (stage is not null)
+        {
+            try { stage(); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { RecordException(ex, "estado de demonstração"); }
+            await IdleAsync();
+            await Task.Delay(1200); // anel, números e revelação chegam ao valor
+        }
         await IdleAsync();
         _window.UpdateLayout();
         await Task.Delay(450); // fim da animação de entrada da página
@@ -248,15 +263,20 @@ internal sealed class UiSelfTestRunner
         string? shot = null;
         if (_screenshots)
         {
-            try { shot = Capture(index, page.Title); }
+            try { shot = Capture(index, label ?? page.Title); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException or NotSupportedException)
             { notes.Add("Imagem da tela não gravada: " + Sanitizer.Clean(ex.Message)); }
+        }
+        if (cleanup is not null)
+        {
+            try { cleanup(); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { RecordException(ex, "estado de demonstração"); }
         }
         var b = Swap();
         return new UiPageResult
         {
             Index = index,
-            Title = page.Title,
+            Title = label ?? page.Title,
             Group = page.Group,
             Type = page.GetType().Name,
             LoadSeconds = Math.Round(load, 2),

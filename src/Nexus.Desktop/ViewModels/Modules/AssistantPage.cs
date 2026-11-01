@@ -938,6 +938,37 @@ public sealed class AssistantPage : ModulePage
         RefreshHeader();
     }
 
+    // ------------------------------------------------------------------ demonstração para o autoteste da interface
+
+    /// <summary>
+    /// Autoteste da interface (--selftest-ui): mostra a tela de progresso com dados de DEMONSTRAÇÃO (rotulados assim) para
+    /// fotografar. Nada é lido, planejado nem aplicado; nenhum pedido vai ao aplicador.
+    /// </summary>
+    internal void ShowProcessDemo()
+    {
+        var segments = AssistantSteps.All.Select(s => new ProcessSegment(s.Number, s.ShortName, s.Number < 3 ? "done" : s.Number == 3 ? "current" : "pending")).ToList();
+        var t = ProcessView.Begin(AssistantStepId.Cleaning, "Aplicando (demonstração do autoteste)", apply: true, segments);
+        var prep = t.Add("prep", "Preparando as mudanças escolhidas", 0.5);
+        var user = t.Add("batch:User:1", "Na sua conta: 4 mudanças", 12);
+        var admin = t.Add("batch:Admin:2", "Mudanças de sistema: 2 mudanças", 40);
+        t.SetItems(user, [new("Cache do Chrome", ProcessTaskStatus.Pending), new("Cache do Edge", ProcessTaskStatus.Pending),
+            new("Temporários do Windows", ProcessTaskStatus.Pending), new("Miniaturas do Explorador", ProcessTaskStatus.Pending)]);
+        t.SetItems(admin, [new("Logs antigos do Windows Update", ProcessTaskStatus.Pending), new("Cache da Otimização de Entrega", ProcessTaskStatus.Pending)]);
+        t.Start(prep);
+        ProcessView.AdvanceClock(TimeSpan.FromSeconds(0.6));
+        t.Finish(prep, ProcessTaskStatus.Done, "6 escolhidas");
+        t.Start(user, "Movendo para a quarentena: Cache do Chrome…", estimate: true);
+        ProcessView.AdvanceClock(TimeSpan.FromSeconds(9));
+        t.SetItems(user, [new("Cache do Chrome", ProcessTaskStatus.Done, "na quarentena"), new("Cache do Edge", ProcessTaskStatus.Done, "na quarentena"),
+            new("Temporários do Windows", ProcessTaskStatus.Done, "na quarentena"), new("Miniaturas do Explorador", ProcessTaskStatus.Skipped, "já estava assim")]);
+        t.Finish(user, ProcessTaskStatus.Done, "3 feitas · 1 não precisou · 9 s");
+        t.Start(admin, ProcessTimeModel.BatchText(new ApplyBatch(AssistantStepId.Cleaning, BrokerLevel.Admin, 2, 2, "", "", []), 0), estimate: true);
+        ProcessView.AdvanceClock(TimeSpan.FromSeconds(12));
+        ProcessView.Tick();
+    }
+
+    internal void HideProcessDemo() => ProcessView.Close();
+
     // ------------------------------------------------------------------ leitura do diário (somente leitura)
 
     /// <summary>Alterações que ficaram pela metade nos dois diários (mesma leitura da janela principal, sem travar nem escrever).</summary>

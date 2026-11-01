@@ -176,6 +176,9 @@ public sealed class AssistantProcess : ObservableObject
 
     private TimeSpan Now() => _clock.Elapsed + _offset;
 
+    /// <summary>Só para a demonstração do autoteste: adianta o relógio desta tela (simula tempo passado).</summary>
+    internal void AdvanceClock(TimeSpan by) => _offset += by;
+
     /// <summary>Termina: anel cheio, resumo; depois de um instante a tela some e a página mostra o resultado.</summary>
     public async Task FinishAsync(ProcessSummary summary)
     {
