@@ -82,7 +82,7 @@ public sealed class UpdateClient : IDisposable
         }
         catch (HttpRequestException ex)
         {
-            return new(UpdateCheckStatus.Failed, $"Sem conexão com o GitHub ({ex.Message}).");
+            return new(UpdateCheckStatus.Failed, $"Sem conexão com {Feed.Host} ({ex.Message}).");
         }
         catch (UpdateException ex)
         {
