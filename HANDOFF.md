@@ -220,7 +220,12 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     Inicialização com desligar em massa. Cópia de desenvolvimento (bin\Release gravável) não roda ações de administrador:
     usar o instalador. Atualização automática: script _claude\Configurar-Atualizacoes.cmd (usuário roda; a sessão foi
     bloqueada de criar repositório público e gravar segredos).
-16. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+16. **01/11 manhã:** pesquisa (3 agentes, web/GitHub/fóruns) → catalog/tuning.v1.json: 29 ajustes (MPO, mouse 1:1, Power
+    Throttling, EPP/estado mínimo/ASPM/USB/NVMe na tomada, Otimização de Entrega, Recall/Click to Do, animações, NTFS,
+    Inicialização Rápida, PcaSvc/TrkWks, IPv4 preferido) + 10 mitos com fonte (docs/modules/tuning.md); aplicados e desfeitos
+    na VM 2022/2025. Assistente mostra o resto do catálogo como "Avançado" desmarcado. Conferência no PC real (script só
+    leitura): 79 de 89 ajustes no valor aplicado; limpeza real (23 mil arquivos na quarentena).
+17. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
