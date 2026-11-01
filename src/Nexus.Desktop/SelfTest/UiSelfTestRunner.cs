@@ -189,6 +189,9 @@ internal sealed class UiSelfTestRunner
             if (!watchdog.IsCancellationRequested)
                 pages.Add(await VisitAsync(vm, vm.Assistant, ++index, "Assistente completo (progresso, demonstração)",
                     vm.Assistant.ShowProcessDemo, vm.Assistant.HideProcessDemo));
+            // 4) A tela de progresso da janela (qualquer aplicar/desfazer fora do Assistente), sobre a página Aplicar.
+            if (!watchdog.IsCancellationRequested)
+                pages.Add(await VisitAsync(vm, vm.Broker, ++index, "Aplicar (progresso, demonstração)", vm.ShowApplyDemo, vm.HideApplyDemo));
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {

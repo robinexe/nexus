@@ -193,6 +193,8 @@ public static class AssistantRunner
         "Blocked" => "Bloqueada",
         "FailedAndCompensated" => "Não aplicada (voltou ao que era)",
         "Interrupted" => "Interrompida",
+        "Conflict" => "Não voltou: mudou por fora depois",
+        "Irreversible" => "Não tem desfazer",
         _ => "Não aplicada",
     };
 

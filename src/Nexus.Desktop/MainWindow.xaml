@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell"
         xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
+        xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
+        xmlns:opt="clr-namespace:Nexus.Desktop.Views.Optimize"
         Title="NEXUS Performance Lab" Width="1280" Height="820" MinWidth="980" MinHeight="600"
         Background="{StaticResource Brush.Bg}" Foreground="{StaticResource Brush.Text}"
         FontFamily="{StaticResource Font.Body}" FontSize="{StaticResource Size.Body}"
@@ -19,6 +21,47 @@
 
   <Window.Resources>
     <!-- Páginas: Views/Pages/*.xaml (mescladas em App.xaml). Aqui só o que é da casca. -->
+
+    <!-- Linha do feed da tela de progresso (a mesma do Assistente, Views/Pages/Assistant.xaml "As.FeedRow"). -->
+      <DataTemplate x:Key="Shell.FeedRow" DataType="{x:Type vm:ProcessFeedRow}">
+        <Grid x:Name="Row" Margin="0,5" AutomationProperties.Name="{Binding Title}" AutomationProperties.HelpText="{Binding StatusText}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <Grid x:Name="Badge" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Top" c:Pulse.IsOn="{Binding IsRunning}">
+            <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}" Stroke="{Binding Tone, Converter={StaticResource ToneBrush}}" StrokeThickness="1"/>
+            <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="13" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
+          </Grid>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <TextBlock x:Name="Title" Text="{Binding Title}" Style="{StaticResource Text.Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Title}"/>
+            <TextBlock x:Name="Detail" Text="{Binding Detail}" Style="{StaticResource Text.Small}" TextTrimming="CharacterEllipsis" MaxHeight="34" ToolTip="{Binding Detail}"
+                       Visibility="{Binding HasDetail, Converter={StaticResource BoolToVis}}"/>
+          </StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding StatusText}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Margin="12,2,0,0"
+                     VerticalAlignment="Top" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"/>
+        </Grid>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding IsChild}" Value="True">
+            <Setter TargetName="Row" Property="Margin" Value="36,2,0,2"/>
+            <Setter TargetName="Badge" Property="Width" Value="18"/>
+            <Setter TargetName="Badge" Property="Height" Value="18"/>
+            <Setter TargetName="Title" Property="FontSize" Value="13"/>
+            <Setter TargetName="Title" Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding IsRunning}" Value="True">
+            <Setter TargetName="Title" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding IsPending}" Value="True">
+            <Setter TargetName="Title" Property="Foreground" Value="{StaticResource Brush.TextDim}"/>
+          </DataTrigger>
+          <DataTrigger Binding="{Binding IsEstimate}" Value="True">
+            <Setter TargetName="Detail" Property="FontStyle" Value="Italic"/>
+            <Setter TargetName="Detail" Property="Foreground" Value="{StaticResource Brush.Signal}"/>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
 
     <!-- Item da navegação lateral: ícone + nome; marca âmbar que cresce no ativo, lavagem leve no hover. -->
     <Style x:Key="Nav.Item" TargetType="ListBoxItem">
@@ -270,6 +313,147 @@
         </StackPanel>
       </DockPanel>
     </Border>
+
+    <!-- ============ Tela de progresso de qualquer aplicar/desfazer (ViewModels/ApplyOverlay.cs) ============
+         Mesmo painel de telemetria do Assistente (que tem a sua própria, embutida, e não usa esta). Fica por cima do conteúdo
+         enquanto o aplicador trabalha e, no fim, mostra o resumo com "Ver resultado" e "Fechar". -->
+    <Grid Grid.Row="1" Grid.Column="1" Panel.ZIndex="20" DataContext="{Binding ApplyView}"
+          Visibility="{Binding IsVisible, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding IsVisible}">
+      <Rectangle Fill="#D90E1320"/>
+      <Border MaxWidth="900" Margin="32,24" VerticalAlignment="Center" Background="{StaticResource Brush.Bg}" BorderBrush="{StaticResource Brush.TraceLine}"
+              BorderThickness="1" CornerRadius="{StaticResource Radius.Panel}" ClipToBounds="True" SnapsToDevicePixels="True"
+              AutomationProperties.Name="Andamento da aplicação">
+        <Border.Effect>
+          <DropShadowEffect BlurRadius="28" ShadowDepth="6" Opacity="0.5" Color="#000000"/>
+        </Border.Effect>
+        <Grid>
+          <Rectangle Fill="{StaticResource Brush.Graticule}" Opacity="0.35"/>
+          <Rectangle>
+            <Rectangle.Fill>
+              <RadialGradientBrush Center="0.22,0.38" GradientOrigin="0.22,0.38" RadiusX="0.55" RadiusY="0.9">
+                <GradientStop Color="#22FFB547" Offset="0"/>
+                <GradientStop Color="#00FFB547" Offset="1"/>
+              </RadialGradientBrush>
+            </Rectangle.Fill>
+          </Rectangle>
+          <c:ScanlineOverlay IsActive="{Binding IsRunning}"/>
+          <Path Data="M0,16 L0,0 L16,0" Stroke="{StaticResource Brush.Trace}" StrokeThickness="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+          <Path Data="M0,0 L16,0 L16,16" Stroke="{StaticResource Brush.Trace}" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"/>
+          <Path Data="M0,0 L0,16 L16,16" Stroke="{StaticResource Brush.Signal}" StrokeThickness="2" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10" Opacity="0.7"/>
+          <Path Data="M16,0 L16,16 L0,16" Stroke="{StaticResource Brush.Signal}" StrokeThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Opacity="0.7"/>
+
+          <StackPanel Margin="30,24,30,22">
+            <DockPanel Margin="0,0,0,18">
+              <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="{StaticResource Radius.Chip}" Padding="10,4"
+                      Background="{Binding RingTone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}">
+                <StackPanel Orientation="Horizontal">
+                  <Ellipse Width="8" Height="8" Fill="{Binding RingTone, Converter={StaticResource ToneBrush}}" VerticalAlignment="Center" Margin="0,0,7,0"
+                           c:Pulse.IsOn="{Binding IsRunning}"/>
+                  <TextBlock Text="ao vivo" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
+                             Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
+                  <TextBlock Text="concluído" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
+                             Visibility="{Binding IsFinished, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+              </Border>
+              <Grid Width="44" Height="44" Margin="0,0,14,0" VerticalAlignment="Top">
+                <Ellipse Fill="{StaticResource Brush.TraceSoft}" Stroke="{StaticResource Brush.TraceLine}" StrokeThickness="1"/>
+                <c:Icon Data="{StaticResource Icon.Apply}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+              </Grid>
+              <StackPanel>
+                <TextBlock Style="{StaticResource Text.MetricLabel}" Foreground="{StaticResource Brush.Signal}" FontFamily="{StaticResource Font.Numbers}" FontSize="14">
+                  <Run Text="{Binding Mode, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding LevelText, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H1}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Title}"/>
+              </StackPanel>
+            </DockPanel>
+
+            <Grid Margin="0,0,0,18">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Grid Width="200" Height="200" VerticalAlignment="Top">
+                <c:ProcessRing Value="{Binding Percent}" IsActive="{Binding IsRunning}" Tone="{Binding RingTone}" Thickness="12"/>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <c:AnimatedNumber Value="{Binding Percent}" Kind="Percent" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="50"
+                                    Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center"/>
+                  <TextBlock Text="concluído" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" Margin="0,-6,0,0"/>
+                </StackPanel>
+              </Grid>
+              <StackPanel Grid.Column="1" Margin="30,4,0,0">
+                <UniformGrid Columns="2" Margin="0,0,0,14">
+                  <StackPanel>
+                    <TextBlock Text="Tempo restante" Style="{StaticResource Text.MetricLabel}"/>
+                    <TextBlock Text="{Binding RemainingText}" FontFamily="{StaticResource Font.Numbers}" FontSize="28" Foreground="{StaticResource Brush.Trace}"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" AutomationProperties.Name="Tempo restante"/>
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Text="Decorrido" Style="{StaticResource Text.MetricLabel}"/>
+                    <TextBlock Text="{Binding ElapsedText}" FontFamily="{StaticResource Font.Numbers}" FontSize="28" Foreground="{StaticResource Brush.Signal}"
+                               TextWrapping="NoWrap" Margin="0,2,0,0" AutomationProperties.Name="Tempo decorrido"/>
+                  </StackPanel>
+                </UniformGrid>
+                <Border Background="{StaticResource Brush.SurfaceLow}" BorderThickness="3,1,1,1" CornerRadius="{StaticResource Radius.Control}" Padding="14,10">
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="BorderBrush" Value="{StaticResource Brush.Trace}"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFinished}" Value="True">
+                          <Setter Property="BorderBrush" Value="{StaticResource Brush.Good}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsWaiting}" Value="True">
+                          <Setter Property="BorderBrush" Value="{StaticResource Brush.Signal}"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <StackPanel>
+                    <DockPanel>
+                      <Border DockPanel.Dock="Right" Background="{StaticResource Brush.SignalSoft}" CornerRadius="{StaticResource Radius.Chip}" Padding="8,2" Margin="10,0,0,0"
+                              VerticalAlignment="Top" Visibility="{Binding CurrentIsEstimate, Converter={StaticResource BoolToVis}}"
+                              ToolTip="O aplicador responde no fim; o item de agora é estimado pela ordem do pedido e pelo tempo típico de cada parte.">
+                        <TextBlock Text="estimativa" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" FontSize="11.5"/>
+                      </Border>
+                      <TextBlock Text="Agora" Style="{StaticResource Text.MetricLabel}"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding CurrentText}" Style="{StaticResource Text.Body}" FontSize="15" Margin="0,4,0,0" MaxHeight="42" TextTrimming="CharacterEllipsis"
+                               ToolTip="{Binding CurrentText}" AutomationProperties.LiveSetting="Polite"/>
+                    <TextBlock Text="{Binding SummaryText}" FontFamily="{StaticResource Font.Numbers}" FontSize="21" Foreground="{StaticResource Brush.Good}" Margin="0,6,0,0"
+                               TextWrapping="Wrap" Visibility="{Binding IsFinished, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding IsFinished}"
+                               AutomationProperties.LiveSetting="Assertive"/>
+                    <TextBlock Text="Responda à janela de confirmação (ou ao aviso do Windows) para continuar. O tempo restante volta a contar depois."
+                               Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,6,0,0"
+                               Visibility="{Binding IsWaiting, Converter={StaticResource BoolToVis}}"/>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Grid>
+
+            <DockPanel Margin="0,0,0,8">
+              <TextBlock DockPanel.Dock="Right" Text="atualiza sozinho" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
+              <TextBlock Text="O que está acontecendo" Style="{StaticResource Text.H2}"/>
+            </DockPanel>
+            <Border Style="{StaticResource Panel.Inset}" Padding="14,8">
+              <ScrollViewer MaxHeight="230" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource Shell.FeedRow}" Focusable="False"/>
+              </ScrollViewer>
+            </Border>
+
+            <DockPanel Margin="0,14,0,0">
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Visibility="{Binding IsFinished, Converter={StaticResource BoolToVis}}">
+                <Button Content="Ver resultado" Style="{StaticResource Button.Primary}" Command="{Binding ShowResultCommand}" Margin="0,0,10,0"/>
+                <Button Content="Fechar" Style="{StaticResource Button.Secondary}" Command="{Binding CloseCommand}"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}">
+                <c:Icon Data="{StaticResource Icon.Lock}" Size="14" Foreground="{StaticResource Brush.TextDim}" Margin="0,1,8,0" VerticalAlignment="Top"/>
+                <TextBlock Text="Não dá para interromper no meio: o aplicador termina, confere cada item e grava tudo no diário (dá para desfazer depois)."
+                           Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" MaxWidth="700"/>
+              </StackPanel>
+            </DockPanel>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
 
     <!-- ============ Rodapé: status, legenda das cores e ocupado ============ -->
     <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.Line}"

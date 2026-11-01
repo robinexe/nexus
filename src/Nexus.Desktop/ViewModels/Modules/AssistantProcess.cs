@@ -235,13 +235,19 @@ public sealed class AssistantProcess : ObservableObject
         if (t.Version != _seenVersion)
         {
             _seenVersion = t.Version;
-            SyncRows(t);
+            ProcessFeed.Sync(Rows, t);
         }
     }
+}
 
+/// <summary>Feed da tela de progresso a partir do tracker (usado pelo Assistente e pela tela de progresso da janela).</summary>
+public static class ProcessFeed
+{
     /// <summary>Atualiza as linhas no lugar (sem recriar a lista: nada pisca nem reanima).</summary>
-    private void SyncRows(ProcessTracker t)
+    public static void Sync(ObservableCollection<ProcessFeedRow> rows, ProcessTracker t)
     {
+        ArgumentNullException.ThrowIfNull(rows);
+        ArgumentNullException.ThrowIfNull(t);
         var wanted = new List<(string Key, string Title, ProcessTaskStatus Status, string? Detail, bool Child, bool Estimate)>();
         foreach (var task in t.Tasks)
         {
@@ -256,19 +262,19 @@ public sealed class AssistantProcess : ObservableObject
         for (var i = 0; i < wanted.Count; i++)
         {
             var w = wanted[i];
-            var existing = i < Rows.Count && Rows[i].Key == w.Key ? Rows[i] : Rows.FirstOrDefault(r => r.Key == w.Key);
+            var existing = i < rows.Count && rows[i].Key == w.Key ? rows[i] : rows.FirstOrDefault(r => r.Key == w.Key);
             if (existing is null)
             {
                 existing = new ProcessFeedRow(w.Key);
-                Rows.Insert(Math.Min(i, Rows.Count), existing);
+                rows.Insert(Math.Min(i, rows.Count), existing);
             }
-            else if (Rows.IndexOf(existing) != i) Rows.Move(Rows.IndexOf(existing), i);
+            else if (rows.IndexOf(existing) != i) rows.Move(rows.IndexOf(existing), i);
             existing.Title = w.Title;
             existing.Status = w.Status;
             existing.Detail = w.Detail;
             existing.IsChild = w.Child;
             existing.IsEstimate = w.Estimate;
         }
-        while (Rows.Count > wanted.Count) Rows.RemoveAt(Rows.Count - 1);
+        while (rows.Count > wanted.Count) rows.RemoveAt(rows.Count - 1);
     }
 }

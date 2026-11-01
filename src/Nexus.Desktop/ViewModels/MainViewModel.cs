@@ -2,6 +2,7 @@ using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Nexus.Assistant;
 using Nexus.Broker;
 using Nexus.Core;
 using Nexus.Desktop.Services;
@@ -27,7 +28,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     private BrokerSession Session(BrokerLevel level, IProgress<ApplyStage>? stages = null) =>
         BrokerSession.ForThisPc(level, AppContext.BaseDirectory, CurrentUserSid, m =>
         {
-            System.Windows.Application.Current?.Dispatcher.Invoke(() => Broker.LastMessage = m);
+            System.Windows.Application.Current?.Dispatcher.Invoke(() => { Broker.LastMessage = m; Broker.LastSummary = m; });
             stages?.Report(level == BrokerLevel.Admin ? ApplyStage.WaitingWindows : ApplyStage.StartingApplier);
         }, stages is null ? null : () => stages.Report(ApplyStage.Running));
 
@@ -51,6 +52,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         Broker.EndSessionCommand = new RelayCommand(() => _ = BrokerEndSessionAsync(), () => !Broker.Busy && Broker.SessionOpen && Broker.LastRun is not null);
         Broker.RecoverCommand = new RelayCommand(() => _ = BrokerRecoverAsync(), () => !Broker.Busy && Broker.Connected && Broker.WriteAllowed);
         _selectedPage = Overview;
+        ApplyView = new ApplyOverlay(() => SelectedPage = Broker);
         RefreshCommand = new RelayCommand(() => _ = LoadAsync(), () => !Busy);
         RelaunchAsAdminCommand = new RelayCommand(RelaunchAsAdmin);
         ExportCommand = new RelayCommand(Export, () => !Busy && _snapshot is not null);
@@ -101,17 +103,83 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public async Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages)
     {
         if (requests.Count == 0 || RefuseInSelfTest()) return null;
-        if (!Confirm(title, confirmation)) { Notify("Cancelado. Nada foi alterado."); return null; }
-        // Marcos vindos da thread do aplicador voltam para a interface na ordem em que aconteceram.
-        var dispatcher = System.Windows.Application.Current?.Dispatcher;
-        var ui = stages is null ? null : new UiStages(stages, dispatcher);
-        ui?.Report(ApplyStage.Confirmed);
-        var r = await CallBrokerAsync(level, b => b.Execute(requests, "modulo"), ui);
-        if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
-        Notify(ApplySummary.Describe(r));
-        ui?.Report(ApplyStage.Refreshing);
-        await LoadAfterWriteAsync();
-        return r;
+        // Quem passa marcos (o Assistente) tem a própria tela de progresso: a da janela não aparece por cima.
+        var own = stages is null ? ApplyView.Begin(title, requests.Select(r => (r.ActionId, ActionName(r.ActionId))).ToList(), level, name: ActionName) : null;
+        return await ExecuteWithProgressAsync(() => Confirm(title, confirmation), level, b => b.Execute(requests, "modulo"), stages, own, revert: false);
+    }
+
+    /// <summary>Tela de progresso da janela (qualquer aplicar/desfazer vindo de uma página que não tenha a sua própria).</summary>
+    public ApplyOverlay ApplyView { get; }
+
+    private Dictionary<string, string> _actionTitles = new(StringComparer.Ordinal);
+
+    /// <summary>Nome para pessoas de uma ação do catálogo (id@versão → título); a própria chave se o catálogo não carregou.</summary>
+    private string ActionName(string key) => _actionTitles.TryGetValue(key, out var t) && !string.IsNullOrWhiteSpace(t) ? t : key;
+
+    /// <summary>
+    /// Confirma, chama o aplicador e relê o PC, avisando os marcos reais a quem acompanha (a página, com <paramref name="stages"/>,
+    /// e/ou a tela de progresso da janela, com <paramref name="own"/>). Null = o usuário cancelou.
+    /// </summary>
+    private async Task<BrokerCallResult?> ExecuteWithProgressAsync(Func<bool> confirm, BrokerLevel level, Func<BrokerSession, BrokerCallResult> call,
+        IProgress<ApplyStage>? stages, HostApplyProgress? own, bool revert)
+    {
+        own?.Stage(ApplyStage.WaitingConfirmation);
+        if (!confirm())
+        {
+            if (own is not null) { own.Canceled(); ApplyView.Close(); }
+            Notify("Cancelado. Nada foi alterado.");
+            return null;
+        }
+        try
+        {
+            // Marcos vindos da thread do aplicador voltam para a interface na ordem em que aconteceram.
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            IProgress<ApplyStage>? ui = stages is null && own is null ? null
+                : new UiStages(new StageRelay(s => { stages?.Report(s); own?.Stage(s); }), dispatcher);
+            ui?.Report(ApplyStage.Confirmed);
+            var r = await CallBrokerAsync(level, call, ui);
+            if (!revert && r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
+            own?.Finished(r);
+            Notify(revert ? ApplySummary.DescribeRevert(r) : ApplySummary.Describe(r));
+            ui?.Report(ApplyStage.Refreshing);
+            await LoadAfterWriteAsync();
+            if (own is not null && ReferenceEquals(ApplyView.Progress, own)) ApplyView.Finish();
+            return r;
+        }
+        catch
+        {
+            if (own is not null) ApplyView.Close();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Autoteste da interface: mostra a tela de progresso da janela com dados de DEMONSTRAÇÃO (rotulados assim) para fotografar.
+    /// Nada é enviado ao aplicador.
+    /// </summary>
+    internal void ShowApplyDemo()
+    {
+        (string, string)[] actions =
+        [
+            ("demonstracao-1", "Desligar a telemetria opcional"), ("demonstracao-2", "Desligar anúncios personalizados"), ("demonstracao-3", "Plano de energia: alto desempenho"),
+            ("demonstracao-4", "Modo de Jogo ligado"), ("demonstracao-5", "Agendamento de GPU acelerado por hardware"), ("demonstracao-6", "Desligar a Xbox Game Bar em segundo plano"),
+        ];
+        var p = ApplyView.Begin("Aplicar os ajustes marcados (demonstração do autoteste)", actions, BrokerLevel.Admin);
+        p.Stage(ApplyStage.WaitingConfirmation);
+        ApplyView.AdvanceClock(TimeSpan.FromSeconds(3));
+        p.Stage(ApplyStage.Confirmed);
+        p.Stage(ApplyStage.WaitingWindows);
+        ApplyView.AdvanceClock(TimeSpan.FromSeconds(4));
+        p.Stage(ApplyStage.Running);
+        ApplyView.AdvanceClock(TimeSpan.FromSeconds(ProcessTimeModel.AdminRestorePoint + 2.5));
+        ApplyView.Tick();
+    }
+
+    internal void HideApplyDemo() => ApplyView.Close();
+
+    private sealed class StageRelay(Action<ApplyStage> action) : IProgress<ApplyStage>
+    {
+        public void Report(ApplyStage value) => action(value);
     }
 
     /// <summary>Repassa o marco na thread da interface (direto quando já está nela; senão, na fila, preservando a ordem).</summary>
@@ -127,11 +195,10 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public async Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level)
     {
         if (RefuseInSelfTest()) return null;
-        if (!Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança.")) return null;
-        var r = await CallBrokerAsync(level, b => b.RevertRun(runId));
-        if (r.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
-        Notify(ApplySummary.DescribeRevert(r));
-        await LoadAfterWriteAsync();
+        var own = ApplyView.Begin("Desfazer alteração", [], level, revert: true, name: ActionName);
+        var r = await ExecuteWithProgressAsync(() => Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança."),
+            level, b => b.RevertRun(runId), null, own, revert: true);
+        if (r?.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
         return r;
     }
 
@@ -276,6 +343,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         try
         {
             doc = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
+            var titles = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var e in doc.Actions) titles[e.Definition.Key] = e.Definition.Title;
+            _actionTitles = titles;
         }
         catch (Exception ex) when (ex is IOException or JsonException or InvalidDataException or ArgumentException or UnauthorizedAccessException)
         {
@@ -391,6 +461,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             var session = Session(level, stages);
             var result = await Task.Run(() => call(session));
             Broker.LastMessage = $"{DateTime.Now:HH:mm:ss} {result.Message}";
+            Broker.LastSummary = $"{DateTime.Now:HH:mm} · {ApplySummary.Human(result)}";
             if (result.Response?.Results is { } items)
                 Broker.Results = items.Select(i => new BrokerResultRow(i.ActionKey, i.Outcome + (i.Inferred ? " [inferido]" : ""), i.Detail ?? "", i.Observed ?? "—", i.Desired ?? "—")).ToList();
             if (!result.Connected) { Broker.Connected = false; Broker.WriteAllowed = false; }
@@ -428,13 +499,13 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     {
         var chosen = Chosen();
         if (chosen.Count == 0) return;
-        var answer = System.Windows.MessageBox.Show(BrokerSession.ConfirmationText(chosen), "Confirmar aplicação pelo broker",
-            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning, System.Windows.MessageBoxResult.No);
-        if (answer != System.Windows.MessageBoxResult.Yes) { Broker.LastMessage = "Aplicação cancelada. Nada foi enviado."; return; }
         var level = LevelFor(chosen);
-        var r = await CallBrokerAsync(level, b => b.Execute(BrokerSession.RequestsFor(chosen)));
-        if (r.Response is { Ok: true, RunId: { } run } resp) { Broker.LastRun = run; Broker.SessionOpen = resp.SessionActive == true; _lastLevel = level; }
-        await LoadAfterWriteAsync();
+        var requests = BrokerSession.RequestsFor(chosen);
+        var own = ApplyView.Begin("Aplicar os ajustes marcados", chosen.Select(c => (c.Entry.Definition.Key, c.Entry.Definition.Title)).ToList(), level, name: ActionName);
+        var r = await ExecuteWithProgressAsync(() => System.Windows.MessageBox.Show(BrokerSession.ConfirmationText(chosen), "Confirmar aplicação",
+                System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning, System.Windows.MessageBoxResult.No) == System.Windows.MessageBoxResult.Yes,
+            level, b => b.Execute(requests), null, own, revert: false);
+        if (r is null) Broker.LastMessage = Broker.LastSummary = "Aplicação cancelada. Nada foi enviado.";
     }
 
     private async Task BrokerRevertAsync()
@@ -443,9 +514,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         var answer = System.Windows.MessageBox.Show($"Reverter a execução {run}? O broker restaura os valores originais registrados no diário.",
             "Confirmar reversão", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
         if (answer != System.Windows.MessageBoxResult.Yes) return;
-        var r = await CallBrokerAsync(_lastLevel, b => b.RevertRun(run));
-        if (r.Response?.FullyRestored == true) Broker.SessionOpen = false;
-        await LoadAfterWriteAsync();
+        var own = ApplyView.Begin("Reverter a última execução", [], _lastLevel, revert: true, name: ActionName);
+        var r = await ExecuteWithProgressAsync(() => true, _lastLevel, b => b.RevertRun(run), null, own, revert: true);
+        if (r?.Response?.FullyRestored == true) Broker.SessionOpen = false;
     }
 
     private async Task BrokerEndSessionAsync()

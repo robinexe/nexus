@@ -1039,7 +1039,12 @@ public sealed class BrokerPage : PageViewModel
     public string ServiceStatus { get => _serviceStatus; set => Set(ref _serviceStatus, value); }
     public string Gate { get => _gate; set => Set(ref _gate, value); }
     public string Coordination { get => _coordination; set => Set(ref _coordination, value); }
-    public string LastMessage { get => _lastMessage; set => Set(ref _lastMessage, value); }
+    /// <summary>Texto técnico da última resposta (fica em "Detalhes técnicos").</summary>
+    public string LastMessage { get => _lastMessage; set { if (Set(ref _lastMessage, value)) OnPropertyChanged(nameof(HasLastMessage)); } }
+    /// <summary>A mesma resposta em uma frase para pessoas ("Aplicador pronto · escrita liberada neste PC").</summary>
+    public string LastSummary { get => _lastSummary; set => Set(ref _lastSummary, value); }
+    public bool HasLastMessage => !string.IsNullOrWhiteSpace(_lastMessage);
+    private string _lastSummary = "";
     public Guid? LastRun
     {
         get => _lastRun;

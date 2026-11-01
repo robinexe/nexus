@@ -95,6 +95,27 @@ public static class ApplySummary
         return r.FullyRestored == true ? "Desfeito: tudo voltou ao que era." : "Desfeito em parte: alguns itens não voltaram (detalhes na página Histórico).";
     }
 
+    /// <summary>
+    /// Linha curta para pessoas de QUALQUER resposta do aplicador (consulta, simulação, aplicar, desfazer), para a página Aplicar.
+    /// O texto técnico continua disponível em "Detalhes técnicos".
+    /// </summary>
+    public static string Human(BrokerCallResult result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        if (result.Response is not { } r) return result.Message;
+        if (!r.Ok) return string.IsNullOrWhiteSpace(r.Error?.Detail) ? "O aplicador recusou o pedido. Nada foi alterado." : $"O aplicador recusou o pedido: {r.Error!.Detail}";
+        if (r.Status is { } s)
+            return s.ExecutionAllowed ? "Aplicador pronto · escrita liberada neste PC" : $"Aplicador respondeu · escrita não liberada: {s.ExecutionGateReason}";
+        if (r.FullyRestored is not null) return DescribeRevert(result);
+        if (r.RunId is not null) return Describe(result);
+        if (r.Results is { } items)
+        {
+            return items.Count == 0 ? "Simulação pronta: nada a conferir. Nada foi aplicado."
+                : string.Create(Pt, $"Simulação pronta: {items.Count} {(items.Count == 1 ? "ação conferida" : "ações conferidas")}. Nada foi aplicado.");
+        }
+        return string.IsNullOrWhiteSpace(r.Message) ? "Pronto." : r.Message!;
+    }
+
     private static string Plural(int n, string one, string many) => n == 1 ? $"1 {one}" : string.Create(Pt, $"{n} {many}");
 
     /// <summary>O que o aplicador acrescentou além das frases padrão (ex.: ponto de restauração criado).</summary>

@@ -112,10 +112,16 @@
 
         <!-- Resultado da última ação -->
         <Border Background="{StaticResource Brush.SignalSoft}" CornerRadius="{StaticResource Radius.Control}" Padding="12,8" Margin="0,0,0,14"
-                Visibility="{Binding LastMessage, Converter={StaticResource Bro.Shown}}" opt:Reveal.Trigger="{Binding LastMessage}">
+                Visibility="{Binding LastSummary, Converter={StaticResource Bro.Shown}}" opt:Reveal.Trigger="{Binding LastSummary}">
           <DockPanel>
             <c:Icon Data="{StaticResource Icon.Info}" Size="16" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0" VerticalAlignment="Top"/>
-            <TextBlock Text="{Binding LastMessage}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+            <StackPanel>
+              <TextBlock Text="{Binding LastSummary}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+              <!-- O texto técnico do aplicador (versão, catálogo, identificador da execução) fica recolhido. -->
+              <c:ExplainToggle Header="Detalhes técnicos" Margin="0,2,0,0" Visibility="{Binding HasLastMessage, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding LastMessage}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" TextWrapping="Wrap"/>
+              </c:ExplainToggle>
+            </StackPanel>
           </DockPanel>
         </Border>
 
