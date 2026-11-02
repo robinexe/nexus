@@ -749,8 +749,118 @@ Pide permiso de administrador (aviso de Windows) y crea antes un punto de restau
   <data name="Conv.Informativo" xml:space="preserve"><value>informativo</value></data>
   <data name="Cpu.NavSubtitle" xml:space="preserve"><value>Ingeniería inversa de tu procesador: qué es, cómo se comporta y qué lo frena.</value></data>
   <data name="Cpu.NavTitle" xml:space="preserve"><value>Procesador</value></data>
+  <data name="Disk.AbraExplorerOuUse" xml:space="preserve"><value>Abre en el Explorador o usa Limpieza. Nada desaparece solo.</value></data>
+  <data name="Disk.AindaSemMapaDesta" xml:space="preserve"><value>Todavía no hay mapa de esta unidad.</value></data>
+  <data name="Disk.Analisado" xml:space="preserve"><value>Analizado</value></data>
+  <data name="Disk.AnalisarEstaUnidade" xml:space="preserve"><value>Analizar esta unidad</value></data>
+  <data name="Disk.AnaliseCanceladaNadaFoi" xml:space="preserve"><value>Análisis cancelado. No se cambió nada.</value></data>
+  <data name="Disk.AnaliseLePastasMostra" xml:space="preserve"><value>El análisis lee las carpetas y muestra lo que ocupa espacio. Tarda de segundos a unos minutos.</value></data>
+  <data name="Disk.Apaga" xml:space="preserve"><value>Borra</value></data>
+  <data name="Disk.ApagaArquivoNinguemRecuperar" xml:space="preserve"><value>Borra un archivo para que nadie lo recupere. No pasa por la Papelera.</value></data>
+  <data name="Disk.ApagarSempre" xml:space="preserve"><value>Borrar para siempre</value></data>
+  <data name="Disk.ApagarSempreNN" xml:space="preserve"><value>¿Borrar PARA SIEMPRE "{0}" ({1})?
+
+{2}
+
+No hay forma de deshacer.</value></data>
+  <data name="Disk.ArquivoComumForaWindows" xml:space="preserve"><value>Un archivo común, fuera de Windows y de los programas.</value></data>
+  <data name="Disk.ArquivoCorTipo" xml:space="preserve"><value>archivo (color = tipo)</value></data>
+  <data name="Disk.ArquivoNaoExisteMais" xml:space="preserve"><value>El archivo ya no existe.</value></data>
+  <data name="Disk.AtualizarUnidades" xml:space="preserve"><value>Actualizar unidades</value></data>
+  <data name="Disk.BotaoDesfazerNaoFunciona" xml:space="preserve"><value>• El botón Deshacer NO funciona para esto: no existe copia.
+</value></data>
+  <data name="Disk.CadaBlocoMapaTem" xml:space="preserve"><value>Cada bloque del mapa tiene el tamaño de lo que ocupa.</value></data>
+  <data name="Disk.ComandoOficialCopiar" xml:space="preserve"><value>Comando oficial para copiar</value></data>
+  <data name="Disk.ComandoOficialCopieRode" xml:space="preserve"><value>Comando oficial: cópialo y ejecútalo tú mismo (NEXUS no lo ejecuta).</value></data>
+  <data name="Disk.Comecando" xml:space="preserve"><value>Empezando…</value></data>
+  <data name="Disk.Contados" xml:space="preserve"><value>Contados uno por uno.</value></data>
+  <data name="Disk.CopiasBackupNuvemHistorico" xml:space="preserve"><value>• Las copias en backup, nube, Historial de archivos o puntos de restauración siguen existiendo.
+
+</value></data>
+  <data name="Disk.DadosAleatoriosCimaConteudo" xml:space="preserve"><value>Datos aleatorios encima del contenido (una pasada).</value></data>
+  <data name="Disk.Desenha" xml:space="preserve"><value>Dibuja</value></data>
+  <data name="Disk.DiscoNAtencaoSsd" xml:space="preserve"><value>Disco: {0}. ATENCIÓN: en SSD/NVMe la sobrescritura NO está garantizada. El controlador graba en otras celdas</value></data>
+  <data name="Disk.DiscoNHdPassada" xml:space="preserve"><value>Disco: {0}. En un HD, una pasada de datos aleatorios sobrescribe el contenido en su lugar.</value></data>
+  <data name="Disk.DizCadaPastaGrande" xml:space="preserve"><value>Dice qué es cada carpeta grande y qué hacer con ella.</value></data>
+  <data name="Disk.EscolhaPastaAnalisar" xml:space="preserve"><value>Elige la carpeta para analizar</value></data>
+  <data name="Disk.EscolherArquivo" xml:space="preserve"><value>Elegir archivo…</value></data>
+  <data name="Disk.EscolherPasta" xml:space="preserve"><value>Elegir una carpeta…</value></data>
+  <data name="Disk.EspacoLivre" xml:space="preserve"><value>Espacio libre</value></data>
+  <data name="Disk.EstaPastaSoTem" xml:space="preserve"><value>Esta carpeta solo tiene archivos pequeños.</value></data>
+  <data name="Disk.ExclusaoSegura" xml:space="preserve"><value>Borrado seguro</value></data>
+  <data name="Disk.ExclusaoSeguraArquivoIrreversivel" xml:space="preserve"><value>Borrado seguro de un archivo (irreversible)</value></data>
+  <data name="Disk.ExclusaoSeguraEscolhaArquivo" xml:space="preserve"><value>Borrado seguro: elige UN archivo para borrar para siempre</value></data>
+  <data name="Disk.ExclusaoSeguraIrreversivel" xml:space="preserve"><value>Borrado seguro (irreversible)</value></data>
+  <data name="Disk.ExclusaoSeguraIrreversivel2" xml:space="preserve"><value>Borrado seguro: IRREVERSIBLE</value></data>
+  <data name="Disk.ExclusaoSeguraSobrescreveConteudo" xml:space="preserve"><value>El borrado seguro sobrescribe el contenido con datos aleatorios y borra el archivo.
+
+</value></data>
+  <data name="Disk.Explorer" xml:space="preserve"><value>Explorador</value></data>
+  <data name="Disk.ItemNaoExisteMais" xml:space="preserve"><value>El elemento ya no existe.</value></data>
+  <data name="Disk.LidoAteAgora" xml:space="preserve"><value>Leído hasta ahora</value></data>
+  <data name="Disk.LidoNS" xml:space="preserve"><value>Leído en {0} s</value></data>
+  <data name="Disk.LidosNS" xml:space="preserve"><value>leídos en {0} s.</value></data>
+  <data name="Disk.LinksJuncoesNaoSao" xml:space="preserve"><value>Los enlaces y uniones no se siguen.</value></data>
+  <data name="Disk.LivreN" xml:space="preserve"><value>Libre en {0}</value></data>
+  <data name="Disk.MaioresArquivos" xml:space="preserve"><value>Los archivos más grandes</value></data>
+  <data name="Disk.MaisNItensPequenos" xml:space="preserve"><value>{0} elementos pequeños más</value></data>
+  <data name="Disk.MapaDisco" xml:space="preserve"><value>Mapa del disco</value></data>
+  <data name="Disk.MapaDiscoCliqueNuma" xml:space="preserve"><value>Mapa del disco: haz clic en una carpeta para entrar</value></data>
+  <data name="Disk.MedePastasArquivosSo" xml:space="preserve"><value>Mide carpetas y archivos. Solo lee: nada cambia de lugar.</value></data>
+  <data name="Disk.MinimoParteSemAcesso" xml:space="preserve"><value> (mínimo: parte sin acceso)</value></data>
+  <data name="Disk.MostrarExplorer" xml:space="preserve"><value>Mostrar en el Explorador</value></data>
+  <data name="Disk.MostrarExplorerN" xml:space="preserve"><value>Mostrar en el Explorador: {0}</value></data>
+  <data name="Disk.MostrarExplorerSoAbre" xml:space="preserve"><value>Mostrar en el Explorador (solo abre la carpeta)</value></data>
+  <data name="Disk.NAlteradoN" xml:space="preserve"><value>{0} · modificado el {1:dd/MM/yyyy}</value></data>
+  <data name="Disk.NaoApagadoNN" xml:space="preserve"><value>No borrado ({0}): {1}</value></data>
+  <data name="Disk.NaoFoiPossivelAbrir" xml:space="preserve"><value>No se pudo abrir el Explorador: {0}</value></data>
+  <data name="Disk.NaoFoiPossivelAnalisar" xml:space="preserve"><value>No se pudo analizar: {0}</value></data>
+  <data name="Disk.NaoFoiPossivelListar" xml:space="preserve"><value>No se pudieron listar las unidades: {0}</value></data>
+  <data name="Disk.NaoVaiLixeiraNem" xml:space="preserve"><value>• NO va a la Papelera ni a la cuarentena de NEXUS.
+</value></data>
+  <data name="Disk.NArquivos" xml:space="preserve"><value>{0} archivos</value></data>
+  <data name="Disk.NArquivosNN" xml:space="preserve"><value>{0} archivos · {1} · {2} carpetas</value></data>
   <data name="Disk.NavSubtitle" xml:space="preserve"><value>Mira qué ocupa tu disco, carpeta por carpeta. Solo lee: este análisis no borra nada.</value></data>
   <data name="Disk.NavTitle" xml:space="preserve"><value>Espacio en disco</value></data>
+  <data name="Disk.NenhumaPastaConhecidaNesta" xml:space="preserve"><value>Ninguna carpeta conocida en este análisis.</value></data>
+  <data name="Disk.NenhumArquivoGrandeAqui" xml:space="preserve"><value>Ningún archivo grande aquí.</value></data>
+  <data name="Disk.NestaPasta" xml:space="preserve"><value>En esta carpeta</value></data>
+  <data name="Disk.NexusGravaDadosAleatorios" xml:space="preserve"><value>NEXUS graba datos aleatorios encima del contenido (una pasada basta en discos actuales: varias pasadas son un mito), renombra y borra. No pasa por la Papelera ni por la cuarentena, y Deshacer no funciona: no existe copia.</value></data>
+  <data name="Disk.NFoiSobrescritoApagado" xml:space="preserve"><value>"{0}" se sobrescribió y se borró. {1}</value></data>
+  <data name="Disk.NivelamentoDesgasteTrimPode" xml:space="preserve"><value>(nivelación de desgaste) y el TRIM puede haber liberado ya las antiguas; pueden quedar copias físicas en el chip. El archivo desaparece de</value></data>
+  <data name="Disk.NLinkSJuncao" xml:space="preserve"><value> {0} enlace(s)/unión(es) no seguidos (el contenido se cuenta donde realmente está).</value></data>
+  <data name="Disk.NLivres" xml:space="preserve"><value>{0} libres</value></data>
+  <data name="Disk.NLivresN" xml:space="preserve"><value>{0} libres de {1}</value></data>
+  <data name="Disk.NNArquivosN" xml:space="preserve"><value>{0} en {1} archivos y {2} carpetas,</value></data>
+  <data name="Disk.NNCliqueAbrir" xml:space="preserve"><value>{0}
+{1} · clic para abrir la carpeta</value></data>
+  <data name="Disk.NNN" xml:space="preserve"><value>{0}: {1} en {2}.</value></data>
+  <data name="Disk.NPastaSSem" xml:space="preserve"><value> {0} carpeta(s) sin permiso de lectura se omitieron (su tamaño no se cuenta).</value></data>
+  <data name="Disk.NSemAcesso" xml:space="preserve"><value> · {0} sin acceso</value></data>
+  <data name="Disk.NSoNuvemNao" xml:space="preserve"><value>{0} solo en la nube no ocupan el disco.</value></data>
+  <data name="Disk.NSoNuvemOnedrive" xml:space="preserve"><value> {0} solo en la nube (OneDrive) no ocupan este disco.</value></data>
+  <data name="Disk.PastaCliqueEntrar" xml:space="preserve"><value>carpeta (clic para entrar)</value></data>
+  <data name="Disk.Pastas" xml:space="preserve"><value>Carpetas</value></data>
+  <data name="Disk.PastasPuladas" xml:space="preserve"><value>Carpetas omitidas</value></data>
+  <data name="Disk.Recusado" xml:space="preserve"><value>Rechazado:</value></data>
+  <data name="Disk.RecusadoItemLinkOu" xml:space="preserve"><value>Rechazado: el elemento es un enlace o un archivo de la nube; sobrescribirlo no borraría el contenido real.</value></data>
+  <data name="Disk.RecusadoPeloAplicadorN" xml:space="preserve"><value>Rechazado por el aplicador ({0}): {1}</value></data>
+  <data name="Disk.SaoCoisasGrandes" xml:space="preserve"><value>Qué son las cosas grandes</value></data>
+  <data name="Disk.SemDesfazer" xml:space="preserve"><value>Sin deshacer</value></data>
+  <data name="Disk.SemLixeiraSemQuarentena" xml:space="preserve"><value>Sin Papelera, sin cuarentena, sin Deshacer.</value></data>
+  <data name="Disk.SemPermissaoLeituraTamanho" xml:space="preserve"><value>Sin permiso de lectura: su tamaño no se cuenta.</value></data>
+  <data name="Disk.Sobrescreve" xml:space="preserve"><value>Sobrescribe</value></data>
+  <data name="Disk.SoLeitura" xml:space="preserve"><value>Solo lectura</value></data>
+  <data name="Disk.SsdNvmeSobrescritaNao" xml:space="preserve"><value>En SSD/NVMe la sobrescritura no está garantizada (el disco graba en otras celdas y el TRIM puede haber liberado ya las antiguas). Para protección real: BitLocker en el disco y cipher /w en el espacio libre. Solo archivos comunes fuera de las carpetas de Windows y de programas; nunca carpetas, enlaces, archivos en uso o de la nube.</value></data>
+  <data name="Disk.Subir" xml:space="preserve"><value>Subir</value></data>
+  <data name="Disk.Tipo" xml:space="preserve"><value>Por tipo</value></data>
+  <data name="Disk.TipoDiscoDesconhecidoFor" xml:space="preserve"><value>Tipo de disco desconocido. Si es SSD/NVMe, la sobrescritura no está garantizada (nivelación de desgaste y TRIM); usa BitLocker y "{0}" para protección real.</value></data>
+  <data name="Disk.Unidades" xml:space="preserve"><value>Unidades</value></data>
+  <data name="Disk.Usado" xml:space="preserve"><value>usado</value></data>
+  <data name="Disk.VejaOcupaDiscoPasta" xml:space="preserve"><value>Mira qué ocupa el disco, carpeta por carpeta. Solo lee: no se borra nada.</value></data>
+  <data name="Disk.VerOutrosNMaiores" xml:space="preserve"><value>Ver los otros {0} más grandes</value></data>
+  <data name="Disk.VoceDecide" xml:space="preserve"><value>Tú decides</value></data>
+  <data name="Disk.WindowsMasProtecaoReal" xml:space="preserve"><value>Windows, pero para protección real usa BitLocker en el disco (los restos quedan ilegibles) y, después, "{0}" (Símbolo del sistema) para sobrescribir el espacio libre.</value></data>
   <data name="Drv.AbrirAtualizacoesOpcionais" xml:space="preserve"><value>Abrir actualizaciones opcionales</value></data>
   <data name="Drv.AbrirN" xml:space="preserve"><value>Abrir {0}</value></data>
   <data name="Drv.AbrirNAppOficial" xml:space="preserve"><value>¿Abrir {0}? Es la app oficial del fabricante, ya instalada en el PC; en ella ves e instalas drivers de la tarjeta gráfica.</value></data>
@@ -1460,8 +1570,85 @@ Es el mismo cambio de Configuración &gt; Pantalla &gt; Frecuencia de actualizac
   <data name="Mem.NavTitle" xml:space="preserve"><value>Memoria RAM</value></data>
   <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Quién se está comiendo la memoria, si algo tiene fugas y cómo resolverlo ahora y para siempre.</value></data>
   <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memoria: diagnóstico</value></data>
+  <data name="Mon.AbrindoContadoresWindows" xml:space="preserve"><value>Abriendo los contadores de Windows…</value></data>
+  <data name="Mon.AlgunsDiscosNaoInformam" xml:space="preserve"><value>Algunos discos no informan temperatura/desgaste a Windows (común en USB y controladoras RAID).</value></data>
+  <data name="Mon.AtivoMaisOcupadoLeitura" xml:space="preserve"><value>activo (el más ocupado) · lectura {0} · escritura {1}</value></data>
+  <data name="Mon.BarraRedeUsoRelacao" xml:space="preserve"><value>La barra de la red es el uso en relación con la velocidad del enlace.</value></data>
+  <data name="Mon.BaseN" xml:space="preserve"><value> · base {0}</value></data>
+  <data name="Mon.Coletando" xml:space="preserve"><value>Recolectando</value></data>
+  <data name="Mon.ComoMonitorFunciona" xml:space="preserve"><value>Cómo funciona el monitor</value></data>
+  <data name="Mon.ComprometidaNN" xml:space="preserve"><value>comprometida {0}/{1}</value></data>
+  <data name="Mon.Confirme" xml:space="preserve"><value>Confirma</value></data>
+  <data name="Mon.ContadoresWindows1Vez" xml:space="preserve"><value>Contadores de Windows, una vez por segundo. Leer no cambia nada.</value></data>
+  <data name="Mon.Cpu" xml:space="preserve"><value>Por CPU</value></data>
+  <data name="Mon.Cpu2" xml:space="preserve"><value>CPU</value></data>
+  <data name="Mon.CpuMaquinaInteiraTodos" xml:space="preserve"><value>CPU = % de toda la máquina (todos los núcleos), actualizada cada 2 s. Memoria = conjunto de trabajo. Los procesos protegidos de Windows aparecen sin CPU. Pasa el mouse por el nombre para ver el PID.</value></data>
+  <data name="Mon.CpuWindowsNaoTem" xml:space="preserve"><value>CPU: Windows no tiene una lectura pública y fiable de la temperatura del procesador sin un driver de terceros, y NEXUS no instala drivers para eso.</value></data>
+  <data name="Mon.CriteriosCriticoWindowsDiz" xml:space="preserve"><value>Criterios: Crítico = Windows dice "con defectos", desgaste ≥ 90%, error no corregido o calor por encima de lo seguro. Atención = aviso de Windows, desgaste ≥ 70%, disco caliente o HD con más de 40 mil horas.</value></data>
+  <data name="Mon.CriteriosWindowsInforma" xml:space="preserve"><value>Criterios y lo que informa Windows</value></data>
+  <data name="Mon.DesgasteN" xml:space="preserve"><value>desgaste {0:0}%</value></data>
+  <data name="Mon.Discos" xml:space="preserve"><value>Discos</value></data>
+  <data name="Mon.EstePcNaoExpoe" xml:space="preserve"><value>Este PC no expone ningún sensor de temperatura a Windows.</value></data>
+  <data name="Mon.FalhaNumaLeituraN" xml:space="preserve"><value>Falló una lectura: {0}</value></data>
+  <data name="Mon.Gpu" xml:space="preserve"><value>GPU</value></data>
+  <data name="Mon.GpuLidaPeloNvidia" xml:space="preserve"><value>GPU: leída por nvidia-smi, la herramienta del propio driver NVIDIA (cada 5 s).</value></data>
+  <data name="Mon.GpuNvidiaNN" xml:space="preserve"><value>GPU NVIDIA {0}: {1} (nvidia-smi, del driver)</value></data>
+  <data name="Mon.GpuTemperaturaSoAparece" xml:space="preserve"><value>GPU: la temperatura solo aparece en tarjetas NVIDIA (nvidia-smi). AMD e Intel no la exponen a Windows sin el software del fabricante.</value></data>
+  <data name="Mon.Indisponivel" xml:space="preserve"><value>No disponible</value></data>
+  <data name="Mon.LeiturasIndisponiveisNestePc" xml:space="preserve"><value>Lecturas no disponibles en este PC</value></data>
+  <data name="Mon.LendoSaudeDiscos" xml:space="preserve"><value>Leyendo la salud de los discos…</value></data>
+  <data name="Mon.LendoSaudeDiscosPode" xml:space="preserve"><value>Leyendo la salud de los discos (puede tardar unos segundos)…</value></data>
+  <data name="Mon.LimitaAgora" xml:space="preserve"><value>Lo que limita ahora</value></data>
+  <data name="Mon.LinkN" xml:space="preserve"><value> · enlace {0}</value></data>
+  <data name="Mon.MaxRegistradaNC" xml:space="preserve"><value> (máx. registrada {0:0} °C)</value></data>
+  <data name="Mon.MecaPartidaMedirVer" xml:space="preserve"><value>Mide una partida en Medir para ver el efecto en el juego.</value></data>
+  <data name="Mon.MediaUltimos10S" xml:space="preserve"><value>Media de los últimos 10 s, con los mismos contadores del Administrador de tareas. Es una lectura desde fuera del juego: confírmalo midiendo el frametime en Medir. La recolección se detiene sola cuando sales de esta página.</value></data>
+  <data name="Mon.MedirPartidaConfirmar" xml:space="preserve"><value>Medir una partida para confirmar</value></data>
+  <data name="Mon.Memoria" xml:space="preserve"><value>Por memoria</value></data>
+  <data name="Mon.MostraEstaLimiteProcessador" xml:space="preserve"><value>Muestra lo que está al límite: procesador, tarjeta o memoria.</value></data>
+  <data name="Mon.N90OuMais" xml:space="preserve"><value>90% o más</value></data>
+  <data name="Mon.NaoFoiPossivelAbrir" xml:space="preserve"><value>No se pudieron abrir los contadores de Windows: {0}</value></data>
+  <data name="Mon.NAtivoLerN" xml:space="preserve"><value>{0}% activo · lectura {1} · escritura {2} · cola {3}</value></data>
   <data name="Mon.NavSubtitle" xml:space="preserve"><value>CPU, GPU, memoria, disco y red en vivo, y la salud de los discos.</value></data>
   <data name="Mon.NavTitle" xml:space="preserve"><value>Monitor</value></data>
+  <data name="Mon.NEfetivoNN" xml:space="preserve"><value>{0} efectivo{1} · {2} lógicos</value></data>
+  <data name="Mon.NErrosLeituraCorrigidos" xml:space="preserve"><value>{0} errores de lectura corregidos/total</value></data>
+  <data name="Mon.NHLigado" xml:space="preserve"><value>{0} h encendido</value></data>
+  <data name="Mon.NNaoCorrigidos" xml:space="preserve"><value>{0} no corregidos</value></data>
+  <data name="Mon.NNDisponivelN" xml:space="preserve"><value>{0} de {1} · disponible {2} · caché {3} ·</value></data>
+  <data name="Mon.NNMaisOcupado" xml:space="preserve"><value>{0} · {1} más ocupado</value></data>
+  <data name="Mon.NProcessadoresLogicos" xml:space="preserve"><value>{0} procesadores lógicos</value></data>
+  <data name="Mon.NucleoLogicoNN" xml:space="preserve"><value>Núcleo lógico {0}: {1}%{2}</value></data>
+  <data name="Mon.NUso" xml:space="preserve"><value>{0} en uso</value></data>
+  <data name="Mon.Parado" xml:space="preserve"><value>Detenido</value></data>
+  <data name="Mon.ParadoColetaSoRoda" xml:space="preserve"><value>Detenido: la recolección solo se ejecuta con la página abierta</value></data>
+  <data name="Mon.PasseMouseNumNucleo" xml:space="preserve"><value>Pasa el mouse por un núcleo para ver la frecuencia efectiva. Windows mueve las tareas entre núcleos, así que un juego limitado por una sola tarea no siempre aparece como un núcleo clavado al 100%.</value></data>
+  <data name="Mon.PausadoVoce" xml:space="preserve"><value>Pausado por ti</value></data>
+  <data name="Mon.Pausar" xml:space="preserve"><value>Pausar</value></data>
+  <data name="Mon.PidN" xml:space="preserve"><value>PID {0}</value></data>
+  <data name="Mon.PlacaVideoMotor" xml:space="preserve"><value>Tarjeta gráfica, por motor</value></data>
+  <data name="Mon.ProcessadorNucleoNucleo" xml:space="preserve"><value>Procesador, núcleo por núcleo</value></data>
+  <data name="Mon.Programa" xml:space="preserve"><value>Programa</value></data>
+  <data name="Mon.ProgramasMaisPesados" xml:space="preserve"><value>Programas más pesados</value></data>
+  <data name="Mon.Rede" xml:space="preserve"><value>Red</value></data>
+  <data name="Mon.Retomar" xml:space="preserve"><value>Reanudar</value></data>
+  <data name="Mon.SaudeDiscos" xml:space="preserve"><value>Salud de los discos</value></data>
+  <data name="Mon.SemContadoresConfiabilidade" xml:space="preserve"><value>sin contadores de fiabilidad</value></data>
+  <data name="Mon.SemContadoresDisco" xml:space="preserve"><value>Sin contadores de disco</value></data>
+  <data name="Mon.SemContadoresGpuNeste" xml:space="preserve"><value>Sin contadores de GPU en este PC.</value></data>
+  <data name="Mon.TemperaturaDesgasteErrosVem" xml:space="preserve"><value>La temperatura, el desgaste y los errores vienen de contadores que Windows solo entrega a administradores. Abre NEXUS como administrador para verlos; sin eso, vale el estado de salud que informa Windows.</value></data>
+  <data name="Mon.Temperaturas" xml:space="preserve"><value>Temperaturas</value></data>
+  <data name="Mon.Ultimos5Minutos" xml:space="preserve"><value>Últimos 5 minutos</value></data>
+  <data name="Mon.Uso" xml:space="preserve"><value>en uso</value></data>
+  <data name="Mon.UsoGpuMotorMais" xml:space="preserve"><value>El uso de la GPU es el del motor más ocupado, la misma regla del Administrador de tareas.</value></data>
+  <data name="Mon.UsoN" xml:space="preserve"><value>uso {0}%</value></data>
+  <data name="Mon.Vivo1LeituraSegundo" xml:space="preserve"><value>En vivo · 1 lectura por segundo</value></data>
+  <data name="Mon.VramNN" xml:space="preserve"><value>VRAM {0} de {1}</value></data>
+  <data name="Mon.VramSemLeitura" xml:space="preserve"><value>VRAM sin lectura</value></data>
+  <data name="Mon.VramUsoN" xml:space="preserve"><value>VRAM en uso {0}</value></data>
+  <data name="Mon.WindowsNaoExposContadores" xml:space="preserve"><value>Windows no expuso los contadores de GPU (requiere driver WDDM 2.x).</value></data>
+  <data name="Mon.ZonasAcpiSaoSensores" xml:space="preserve"><value>Las zonas ACPI son sensores de la placa base definidos por el fabricante: no son la temperatura del núcleo y muchas veces se quedan fijas en un valor.</value></data>
+  <data name="Mon.ZonaTermicaAcpiN" xml:space="preserve"><value>Zona térmica ACPI {0}: {1} °C</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Asistente</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratorio</value></data>

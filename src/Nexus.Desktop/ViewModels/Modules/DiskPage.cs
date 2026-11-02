@@ -57,7 +57,7 @@ public sealed class DiskPage : ModulePage, IDisposable
             switch (p)
             {
                 case DiskTile { Folder: { } f }: Show(f); break;
-                case DiskTile { File: { } file }: Message = $"{file.Name}: {Format.Bytes(file.Size)} em {file.Folder}."; break;
+                case DiskTile { File: { } file }: Message = Loc.F("Disk.NNN", file.Name, Format.Bytes(file.Size), file.Folder); break;
                 case DiskFolderRow row: Show(row.Node); break;
                 case DiskCrumb crumb: Show(crumb.Node); break;
             }
@@ -100,7 +100,7 @@ public sealed class DiskPage : ModulePage, IDisposable
     public double FreeBytes => SelectedVolume is { } v ? v.Volume.FreeBytes : double.NaN;
     /// <summary>% usado da unidade escolhida (0..100; NaN = sem unidade).</summary>
     public double UsedPercentValue => SelectedVolume is { } v ? Math.Round(v.UsedFraction * 100, 1) : double.NaN;
-    public string HeroTitle => SelectedVolume is { } v ? $"Livre em {v.Volume.RootPath.TrimEnd('\\')}" : "Espaço livre";
+    public string HeroTitle => SelectedVolume is { } v ? Loc.F("Disk.LivreN", v.Volume.RootPath.TrimEnd('\\')) : Loc.T("Disk.EspacoLivre");
     /// <summary>Lendo a lista de unidades (esqueleto no destaque).</summary>
     public bool VolumesLoading { get => _volumesLoading; private set => Set(ref _volumesLoading, value); }
     /// <summary>Bytes e arquivos lidos até agora na varredura (contam ao vivo).</summary>
@@ -111,16 +111,16 @@ public sealed class DiskPage : ModulePage, IDisposable
     public double ResultFolders => _result is { } r ? r.Directories : double.NaN;
     public double ResultSkipped => _result is { } r ? r.AccessDenied : double.NaN;
     public string ResultSkippedDetail => _result is { } r && r.CloudOnlyFiles > 0
-        ? $"{Format.Bytes(r.CloudOnlyBytes)} só na nuvem não ocupam o disco."
-        : "Sem permissão de leitura: o tamanho delas não entra.";
-    public string ResultTimeText => _result is { } r ? $"Lido em {r.Elapsed.TotalSeconds.ToString("N1", Pt)} s" : "";
+        ? Loc.F("Disk.NSoNuvemNao", Format.Bytes(r.CloudOnlyBytes))
+        : Loc.T("Disk.SemPermissaoLeituraTamanho");
+    public string ResultTimeText => _result is { } r ? Loc.F("Disk.LidoNS", r.Elapsed.TotalSeconds.ToString("N1", Pt)) : "";
     /// <summary>Sem resultado e sem varredura em andamento: mostra o estado vazio.</summary>
     public bool ShowEmpty => _result is null && !Scanning;
     /// <summary>Os maiores arquivos que viram cartões (os primeiros); o resto fica na lista recolhida.</summary>
     public IReadOnlyList<DiskFileRow> TopCards { get => _topCards; private set => Set(ref _topCards, value); }
     public IReadOnlyList<DiskFileRow> MoreFiles { get => _moreFiles; private set { if (Set(ref _moreFiles, value)) OnPropertyChanged(nameof(HasMoreFiles)); } }
     public bool HasMoreFiles => MoreFiles.Count > 0;
-    public string MoreFilesHeader => $"Ver os outros {MoreFiles.Count} maiores";
+    public string MoreFilesHeader => Loc.F("Disk.VerOutrosNMaiores", MoreFiles.Count);
     public bool HasTopFiles => TopFiles.Count > 0;
 
     public bool Scanning
@@ -172,7 +172,7 @@ public sealed class DiskPage : ModulePage, IDisposable
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            Message = $"Não foi possível listar as unidades: {ex.Message}";
+            Message = Loc.F("Disk.NaoFoiPossivelListar", ex.Message);
         }
         finally
         {
@@ -182,7 +182,7 @@ public sealed class DiskPage : ModulePage, IDisposable
 
     private Task PickFolderAsync()
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Escolha a pasta para analisar", Multiselect = false };
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Loc.T("Disk.EscolhaPastaAnalisar"), Multiselect = false };
         return dialog.ShowDialog() == true ? AnalyzeAsync(dialog.FolderName) : Task.CompletedTask;
     }
 
@@ -193,15 +193,15 @@ public sealed class DiskPage : ModulePage, IDisposable
         _scan = new CancellationTokenSource();
         Scanning = true;
         Message = "";
-        ProgressText = "Começando…";
+        ProgressText = Loc.T("Disk.Comecando");
         ScannedBytes = 0;
         ScannedFiles = 0;
         var progress = new Progress<ScanProgress>(p =>
         {
             ScannedBytes = p.Bytes;
             ScannedFiles = p.Files;
-            ProgressText = $"{p.Files.ToString("N0", Pt)} arquivos · {Format.Bytes(p.Bytes)} · {p.Directories.ToString("N0", Pt)} pastas" +
-                           (p.AccessDenied > 0 ? $" · {p.AccessDenied} sem acesso" : "") + $"\n{p.CurrentPath}";
+            ProgressText = Loc.F("Disk.NArquivosNN", p.Files.ToString("N0", Pt), Format.Bytes(p.Bytes), p.Directories.ToString("N0", Pt)) +
+                           (p.AccessDenied > 0 ? Loc.F("Disk.NSemAcesso", p.AccessDenied) : "") + $"\n{p.CurrentPath}";
         });
         try
         {
@@ -217,11 +217,11 @@ public sealed class DiskPage : ModulePage, IDisposable
             OnPropertyChanged(nameof(ResultSkipped));
             OnPropertyChanged(nameof(ResultSkippedDetail));
             OnPropertyChanged(nameof(ResultTimeText));
-            Summary = $"{Format.Bytes(result.Root.Size)} em {result.Files.ToString("N0", Pt)} arquivos e {result.Directories.ToString("N0", Pt)} pastas, " +
-                      $"lidos em {result.Elapsed.TotalSeconds.ToString("N1", Pt)} s." +
-                      (result.AccessDenied > 0 ? $" {result.AccessDenied} pasta(s) sem permissão de leitura foram puladas (o tamanho delas não entra)." : "") +
-                      (result.ReparsePointsSkipped > 0 ? $" {result.ReparsePointsSkipped} link(s)/junção(ões) não seguidos (o conteúdo é contado onde realmente está)." : "") +
-                      (result.CloudOnlyFiles > 0 ? $" {Format.Bytes(result.CloudOnlyBytes)} só na nuvem (OneDrive) não ocupam este disco." : "");
+            Summary = Loc.F("Disk.NNArquivosN", Format.Bytes(result.Root.Size), result.Files.ToString("N0", Pt), result.Directories.ToString("N0", Pt)) +
+                      Loc.F("Disk.LidosNS", result.Elapsed.TotalSeconds.ToString("N1", Pt)) +
+                      (result.AccessDenied > 0 ? Loc.F("Disk.NPastaSSem", result.AccessDenied) : "") +
+                      (result.ReparsePointsSkipped > 0 ? Loc.F("Disk.NLinkSJuncao", result.ReparsePointsSkipped) : "") +
+                      (result.CloudOnlyFiles > 0 ? Loc.F("Disk.NSoNuvemOnedrive", Format.Bytes(result.CloudOnlyBytes)) : "");
             var biggest = Math.Max(1, result.TopFiles.Count > 0 ? result.TopFiles[0].Size : 1);
             TopFiles = result.TopFiles.Select(f => new DiskFileRow(f, (double)f.Size / biggest)).ToList();
             TopCards = TopFiles.Take(TopCardCount).ToList();
@@ -238,12 +238,12 @@ public sealed class DiskPage : ModulePage, IDisposable
         catch (OperationCanceledException)
         {
             ProgressText = "";
-            Message = "Análise cancelada. Nada foi alterado.";
+            Message = Loc.T("Disk.AnaliseCanceladaNadaFoi");
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             ProgressText = "";
-            Message = $"Não foi possível analisar: {ex.Message}";
+            Message = Loc.F("Disk.NaoFoiPossivelAnalisar", ex.Message);
         }
         finally
         {
@@ -256,12 +256,12 @@ public sealed class DiskPage : ModulePage, IDisposable
     private void Show(DirNode folder)
     {
         _folder = folder;
-        FolderTitle = $"{folder.FullPath} · {Format.Bytes(folder.Size)}" + (folder.Incomplete ? " (mínimo: parte sem acesso)" : "");
+        FolderTitle = $"{folder.FullPath} · {Format.Bytes(folder.Size)}" + (folder.Incomplete ? Loc.T("Disk.MinimoParteSemAcesso") : "");
         var tiles = folder.Tiles();
         if (tiles.Count > MaxTiles)
         {
             var rest = tiles.Skip(MaxTiles - 1).ToList();
-            tiles = [.. tiles.Take(MaxTiles - 1), new DiskTile($"Mais {rest.Count} itens pequenos", rest.Sum(t => t.Size), DiskTileKind.OtherFiles, null, null)];
+            tiles = [.. tiles.Take(MaxTiles - 1), new DiskTile(Loc.F("Disk.MaisNItensPequenos", rest.Count), rest.Sum(t => t.Size), DiskTileKind.OtherFiles, null, null)];
         }
         Tiles = tiles;
         Crumbs = folder.Lineage().Select(n => new DiskCrumb(n)).ToList();
@@ -275,7 +275,7 @@ public sealed class DiskPage : ModulePage, IDisposable
     {
         if (string.IsNullOrEmpty(path) || path.Contains('"', StringComparison.Ordinal) || (!File.Exists(path) && !Directory.Exists(path)))
         {
-            Message = "O item não existe mais.";
+            Message = Loc.T("Disk.ItemNaoExisteMais");
             return;
         }
         try
@@ -284,7 +284,7 @@ public sealed class DiskPage : ModulePage, IDisposable
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
         {
-            Message = $"Não foi possível abrir o Explorer: {ex.Message}";
+            Message = Loc.F("Disk.NaoFoiPossivelAbrir", ex.Message);
         }
     }
 
@@ -307,11 +307,11 @@ public sealed class DiskPage : ModulePage, IDisposable
         var cipher = $"cipher /w:{char.ToUpperInvariant(drive)}:\\";
         return media.Kind switch
         {
-            MediaKind.Hdd => $"Disco: {media.Describe()}. Em HD, uma passada de dados aleatórios sobrescreve o conteúdo no lugar.",
-            MediaKind.Ssd => $"Disco: {media.Describe()}. ATENÇÃO: em SSD/NVMe a sobrescrita NÃO é garantida. O controlador grava em outras células " +
-                             "(nivelamento de desgaste) e o TRIM pode já ter liberado as antigas; cópias físicas podem continuar no chip. O arquivo some do " +
-                             $"Windows, mas para proteção real use BitLocker no disco (os restos ficam ilegíveis) e, depois, \"{cipher}\" (Prompt) para sobrescrever o espaço livre.",
-            _ => $"Tipo de disco desconhecido. Se for SSD/NVMe, a sobrescrita não é garantida (nivelamento de desgaste e TRIM); use BitLocker e \"{cipher}\" para proteção real.",
+            MediaKind.Hdd => Loc.F("Disk.DiscoNHdPassada", media.Describe()),
+            MediaKind.Ssd => Loc.F("Disk.DiscoNAtencaoSsd", media.Describe()) +
+                             Loc.T("Disk.NivelamentoDesgasteTrimPode") +
+                             Loc.F("Disk.WindowsMasProtecaoReal", cipher),
+            _ => Loc.F("Disk.TipoDiscoDesconhecidoFor", cipher),
         };
     }
 
@@ -320,7 +320,7 @@ public sealed class DiskPage : ModulePage, IDisposable
         if (Host is null) return;
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Exclusão segura: escolha UM arquivo para apagar para sempre",
+            Title = Loc.T("Disk.ExclusaoSeguraEscolhaArquivo"),
             CheckFileExists = true,
             Multiselect = false,
             DereferenceLinks = false, // um atalho .lnk é o próprio arquivo escolhido, nunca o destino dele
@@ -334,7 +334,7 @@ public sealed class DiskPage : ModulePage, IDisposable
             // Pré-verificação somente leitura, com a MESMA política do aplicador, para explicar a recusa antes de pedir confirmação.
             if (Policy().Check(path) is { } refused)
             {
-                SecureDeleteNote = "Recusado: " + refused;
+                SecureDeleteNote = Loc.T("Disk.Recusado") + refused;
                 return;
             }
             var (info, media) = await Task.Run(() =>
@@ -343,39 +343,39 @@ public sealed class DiskPage : ModulePage, IDisposable
                 var m = OperatingSystem.IsWindows() ? StorageMedia.Query(path[0]) : StorageMediaInfo.Unknown;
                 return (fi, m);
             });
-            if (!info.Exists) { SecureDeleteNote = "O arquivo não existe mais."; return; }
+            if (!info.Exists) { SecureDeleteNote = Loc.T("Disk.ArquivoNaoExisteMais"); return; }
             if ((info.Attributes & FileAttributes.ReparsePoint) != 0)
             {
-                SecureDeleteNote = "Recusado: o item é um link ou arquivo de nuvem; sobrescrevê-lo não apagaria o conteúdo real.";
+                SecureDeleteNote = Loc.T("Disk.RecusadoItemLinkOu");
                 return;
             }
             var warning = MediaWarning(media, path[0]);
             SecureDeleteNote = warning;
 
             // Confirmação 1: o que é e por que é diferente de apagar.
-            if (!Host.Confirm("Exclusão segura: IRREVERSÍVEL",
-                    "A exclusão segura sobrescreve o conteúdo com dados aleatórios e apaga o arquivo.\n\n" +
-                    "• NÃO vai para a Lixeira nem para a quarentena do NEXUS.\n" +
-                    "• O botão Desfazer NÃO funciona para isto: não existe cópia.\n" +
-                    "• Cópias em backup, nuvem, Histórico de Arquivos ou pontos de restauração continuam existindo.\n\n" +
-                    warning + "\n\nContinuar?"))
+            if (!Host.Confirm(Loc.T("Disk.ExclusaoSeguraIrreversivel2"),
+                    Loc.T("Disk.ExclusaoSeguraSobrescreveConteudo") +
+                    Loc.T("Disk.NaoVaiLixeiraNem") +
+                    Loc.T("Disk.BotaoDesfazerNaoFunciona") +
+                    Loc.T("Disk.CopiasBackupNuvemHistorico") +
+                    warning + Loc.T("Clean.Continuar")))
             {
-                Host.Notify("Cancelado. Nada foi alterado.");
+                Host.Notify(Loc.T("Shell.CanceladoNadaFoiAlterado"));
                 return;
             }
 
             // Confirmação 2 (pelo aplicador), com o nome do arquivo. O pedido leva a confirmação explícita da ação irreversível.
             var request = new ActionRequest(SecureDeleteActionId, null, new Dictionary<string, string>(StringComparer.Ordinal) { ["filePath"] = path },
                 ConfirmIrreversible: true);
-            var r = await Host.ApplyAsync("Apagar para sempre",
-                $"Apagar PARA SEMPRE \"{info.Name}\" ({Format.Bytes(info.Length)})?\n\n{path}\n\nNão há como desfazer.", [request], BrokerLevel.User);
+            var r = await Host.ApplyAsync(Loc.T("Disk.ApagarSempre"),
+                Loc.F("Disk.ApagarSempreNN", info.Name, Format.Bytes(info.Length), path), [request], BrokerLevel.User);
             if (r is null) return; // cancelado na segunda confirmação
             var item = r.Response?.Results is { Count: > 0 } results ? results[0] : null;
             SecureDeleteNote = (r.Response, item) switch
             {
-                ({ Ok: true }, { Outcome: "Verified" }) => $"\"{info.Name}\" foi sobrescrito e apagado. {warning}",
-                ({ Ok: true }, { } x) => $"Não apagado ({x.Outcome}): {x.Detail}",
-                ({ Ok: false, Error: { } e }, _) => $"Recusado pelo aplicador ({e.Code}): {e.Detail}",
+                ({ Ok: true }, { Outcome: "Verified" }) => Loc.F("Disk.NFoiSobrescritoApagado", info.Name, warning),
+                ({ Ok: true }, { } x) => Loc.F("Disk.NaoApagadoNN", x.Outcome, x.Detail),
+                ({ Ok: false, Error: { } e }, _) => Loc.F("Disk.RecusadoPeloAplicadorN", e.Code, e.Detail),
                 _ => r.Message,
             };
         });
@@ -399,10 +399,10 @@ public sealed class DiskVolumeRow(VolumeInfo volume)
     public string UsedPercent => Volume.UsedFraction.ToString("P0", CultureInfo.GetCultureInfo("pt-BR"));
     public string UsedText => Format.Bytes(Volume.UsedBytes);
     public string TotalText => Format.Bytes(Volume.TotalBytes);
-    public string FreeText => $"{Format.Bytes(Volume.FreeBytes)} livres de {Format.Bytes(Volume.TotalBytes)}";
+    public string FreeText => Loc.F("Disk.NLivresN", Format.Bytes(Volume.FreeBytes), Format.Bytes(Volume.TotalBytes));
     public bool AlmostFull => Volume.TotalBytes > 0 && Volume.FreeBytes < Volume.TotalBytes / 10;
     public double UsedPercentValue => Math.Round(Volume.UsedFraction * 100, 1);
-    public string FreeShort => $"{Format.Bytes(Volume.FreeBytes)} livres";
+    public string FreeShort => Loc.F("Disk.NLivres", Format.Bytes(Volume.FreeBytes));
 }
 
 public sealed class DiskCrumb(DirNode node)
@@ -427,7 +427,7 @@ public sealed class DiskFileRow(FileItem file, double fraction)
     public string SizeText => Format.Bytes(File.Size);
     public string Folder => File.Folder;
     public string Path => File.FullPath;
-    public string Detail => $"{FileCategories.Label(File.Category)} · alterado em {File.LastWriteUtc.ToLocalTime():dd/MM/yyyy}";
+    public string Detail => Loc.F("Disk.NAlteradoN", FileCategories.Label(File.Category), File.LastWriteUtc.ToLocalTime());
     public double Fraction { get; } = fraction;
     public double SizeBytes => File.Size;
     public string KindText => FileCategories.Label(File.Category);
@@ -443,7 +443,7 @@ public sealed class DiskCategoryRow(CategoryTotal total, double fraction)
     public string ColorHex => DiskPalette.Hex(total.Category);
     public string PercentText => Fraction.ToString("P0", CultureInfo.GetCultureInfo("pt-BR"));
     public string SizeText => Format.Bytes(total.Bytes);
-    public string FilesText => $"{total.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"))} arquivos";
+    public string FilesText => Loc.F("Disk.NArquivos", total.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR")));
     public double Fraction { get; } = fraction;
 }
 

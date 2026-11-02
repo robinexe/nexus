@@ -749,8 +749,118 @@ Asks for administrator permission (Windows prompt) and creates a restore point f
   <data name="Conv.Informativo" xml:space="preserve"><value>informational</value></data>
   <data name="Cpu.NavSubtitle" xml:space="preserve"><value>Reverse engineering of your processor: what it is, how it behaves and what holds it back.</value></data>
   <data name="Cpu.NavTitle" xml:space="preserve"><value>Processor</value></data>
+  <data name="Disk.AbraExplorerOuUse" xml:space="preserve"><value>Open in Explorer or use Cleanup. Nothing disappears by itself.</value></data>
+  <data name="Disk.AindaSemMapaDesta" xml:space="preserve"><value>No map of this drive yet.</value></data>
+  <data name="Disk.Analisado" xml:space="preserve"><value>Analyzed</value></data>
+  <data name="Disk.AnalisarEstaUnidade" xml:space="preserve"><value>Analyze this drive</value></data>
+  <data name="Disk.AnaliseCanceladaNadaFoi" xml:space="preserve"><value>Analysis canceled. Nothing was changed.</value></data>
+  <data name="Disk.AnaliseLePastasMostra" xml:space="preserve"><value>The analysis reads the folders and shows what takes up space. Takes from seconds to a few minutes.</value></data>
+  <data name="Disk.Apaga" xml:space="preserve"><value>Deletes</value></data>
+  <data name="Disk.ApagaArquivoNinguemRecuperar" xml:space="preserve"><value>Deletes a file so no one can recover it. Doesn't go through the Recycle Bin.</value></data>
+  <data name="Disk.ApagarSempre" xml:space="preserve"><value>Delete forever</value></data>
+  <data name="Disk.ApagarSempreNN" xml:space="preserve"><value>Delete "{0}" ({1}) FOREVER?
+
+{2}
+
+There's no way to undo.</value></data>
+  <data name="Disk.ArquivoComumForaWindows" xml:space="preserve"><value>A regular file, outside Windows and programs.</value></data>
+  <data name="Disk.ArquivoCorTipo" xml:space="preserve"><value>file (color = type)</value></data>
+  <data name="Disk.ArquivoNaoExisteMais" xml:space="preserve"><value>The file no longer exists.</value></data>
+  <data name="Disk.AtualizarUnidades" xml:space="preserve"><value>Refresh drives</value></data>
+  <data name="Disk.BotaoDesfazerNaoFunciona" xml:space="preserve"><value>• The Undo button does NOT work for this: there is no copy.
+</value></data>
+  <data name="Disk.CadaBlocoMapaTem" xml:space="preserve"><value>Each block on the map is as big as what it takes up.</value></data>
+  <data name="Disk.ComandoOficialCopiar" xml:space="preserve"><value>Official command to copy</value></data>
+  <data name="Disk.ComandoOficialCopieRode" xml:space="preserve"><value>Official command: copy it and run it yourself (NEXUS doesn't run it).</value></data>
+  <data name="Disk.Comecando" xml:space="preserve"><value>Starting…</value></data>
+  <data name="Disk.Contados" xml:space="preserve"><value>Counted one by one.</value></data>
+  <data name="Disk.CopiasBackupNuvemHistorico" xml:space="preserve"><value>• Copies in backups, the cloud, File History or restore points still exist.
+
+</value></data>
+  <data name="Disk.DadosAleatoriosCimaConteudo" xml:space="preserve"><value>Random data over the content (one pass).</value></data>
+  <data name="Disk.Desenha" xml:space="preserve"><value>Draws</value></data>
+  <data name="Disk.DiscoNAtencaoSsd" xml:space="preserve"><value>Disk: {0}. WARNING: on SSD/NVMe overwriting is NOT guaranteed. The controller writes to other cells </value></data>
+  <data name="Disk.DiscoNHdPassada" xml:space="preserve"><value>Disk: {0}. On an HDD, one pass of random data overwrites the content in place.</value></data>
+  <data name="Disk.DizCadaPastaGrande" xml:space="preserve"><value>Tells what each big folder is and what to do with it.</value></data>
+  <data name="Disk.EscolhaPastaAnalisar" xml:space="preserve"><value>Choose the folder to analyze</value></data>
+  <data name="Disk.EscolherArquivo" xml:space="preserve"><value>Choose file…</value></data>
+  <data name="Disk.EscolherPasta" xml:space="preserve"><value>Choose a folder…</value></data>
+  <data name="Disk.EspacoLivre" xml:space="preserve"><value>Free space</value></data>
+  <data name="Disk.EstaPastaSoTem" xml:space="preserve"><value>This folder only has small files.</value></data>
+  <data name="Disk.ExclusaoSegura" xml:space="preserve"><value>Secure delete</value></data>
+  <data name="Disk.ExclusaoSeguraArquivoIrreversivel" xml:space="preserve"><value>Secure delete of a file (irreversible)</value></data>
+  <data name="Disk.ExclusaoSeguraEscolhaArquivo" xml:space="preserve"><value>Secure delete: choose ONE file to delete forever</value></data>
+  <data name="Disk.ExclusaoSeguraIrreversivel" xml:space="preserve"><value>Secure delete (irreversible)</value></data>
+  <data name="Disk.ExclusaoSeguraIrreversivel2" xml:space="preserve"><value>Secure delete: IRREVERSIBLE</value></data>
+  <data name="Disk.ExclusaoSeguraSobrescreveConteudo" xml:space="preserve"><value>Secure delete overwrites the content with random data and deletes the file.
+
+</value></data>
+  <data name="Disk.Explorer" xml:space="preserve"><value>Explorer</value></data>
+  <data name="Disk.ItemNaoExisteMais" xml:space="preserve"><value>The item no longer exists.</value></data>
+  <data name="Disk.LidoAteAgora" xml:space="preserve"><value>Read so far</value></data>
+  <data name="Disk.LidoNS" xml:space="preserve"><value>Read in {0} s</value></data>
+  <data name="Disk.LidosNS" xml:space="preserve"><value>read in {0} s.</value></data>
+  <data name="Disk.LinksJuncoesNaoSao" xml:space="preserve"><value>Links and junctions aren't followed.</value></data>
+  <data name="Disk.LivreN" xml:space="preserve"><value>Free on {0}</value></data>
+  <data name="Disk.MaioresArquivos" xml:space="preserve"><value>The biggest files</value></data>
+  <data name="Disk.MaisNItensPequenos" xml:space="preserve"><value>{0} more small items</value></data>
+  <data name="Disk.MapaDisco" xml:space="preserve"><value>Disk map</value></data>
+  <data name="Disk.MapaDiscoCliqueNuma" xml:space="preserve"><value>Disk map: click a folder to enter</value></data>
+  <data name="Disk.MedePastasArquivosSo" xml:space="preserve"><value>Measures folders and files. Read-only: nothing moves.</value></data>
+  <data name="Disk.MinimoParteSemAcesso" xml:space="preserve"><value> (minimum: part without access)</value></data>
+  <data name="Disk.MostrarExplorer" xml:space="preserve"><value>Show in Explorer</value></data>
+  <data name="Disk.MostrarExplorerN" xml:space="preserve"><value>Show in Explorer: {0}</value></data>
+  <data name="Disk.MostrarExplorerSoAbre" xml:space="preserve"><value>Show in Explorer (only opens the folder)</value></data>
+  <data name="Disk.NAlteradoN" xml:space="preserve"><value>{0} · modified {1:dd/MM/yyyy}</value></data>
+  <data name="Disk.NaoApagadoNN" xml:space="preserve"><value>Not deleted ({0}): {1}</value></data>
+  <data name="Disk.NaoFoiPossivelAbrir" xml:space="preserve"><value>Could not open Explorer: {0}</value></data>
+  <data name="Disk.NaoFoiPossivelAnalisar" xml:space="preserve"><value>Could not analyze: {0}</value></data>
+  <data name="Disk.NaoFoiPossivelListar" xml:space="preserve"><value>Could not list the drives: {0}</value></data>
+  <data name="Disk.NaoVaiLixeiraNem" xml:space="preserve"><value>• It does NOT go to the Recycle Bin or the NEXUS quarantine.
+</value></data>
+  <data name="Disk.NArquivos" xml:space="preserve"><value>{0} files</value></data>
+  <data name="Disk.NArquivosNN" xml:space="preserve"><value>{0} files · {1} · {2} folders</value></data>
   <data name="Disk.NavSubtitle" xml:space="preserve"><value>See what takes up your disk, folder by folder. Read-only: this analysis deletes nothing.</value></data>
   <data name="Disk.NavTitle" xml:space="preserve"><value>Disk space</value></data>
+  <data name="Disk.NenhumaPastaConhecidaNesta" xml:space="preserve"><value>No known folder in this analysis.</value></data>
+  <data name="Disk.NenhumArquivoGrandeAqui" xml:space="preserve"><value>No big file here.</value></data>
+  <data name="Disk.NestaPasta" xml:space="preserve"><value>In this folder</value></data>
+  <data name="Disk.NexusGravaDadosAleatorios" xml:space="preserve"><value>NEXUS writes random data over the content (one pass is enough on modern disks: multiple passes are a myth), renames and deletes. It doesn't go through the Recycle Bin or the quarantine, and Undo doesn't work: there is no copy.</value></data>
+  <data name="Disk.NFoiSobrescritoApagado" xml:space="preserve"><value>"{0}" was overwritten and deleted. {1}</value></data>
+  <data name="Disk.NivelamentoDesgasteTrimPode" xml:space="preserve"><value>(wear leveling) and TRIM may have already freed the old ones; physical copies may remain on the chip. The file disappears from </value></data>
+  <data name="Disk.NLinkSJuncao" xml:space="preserve"><value> {0} link(s)/junction(s) not followed (the content is counted where it really is).</value></data>
+  <data name="Disk.NLivres" xml:space="preserve"><value>{0} free</value></data>
+  <data name="Disk.NLivresN" xml:space="preserve"><value>{0} free of {1}</value></data>
+  <data name="Disk.NNArquivosN" xml:space="preserve"><value>{0} in {1} files and {2} folders, </value></data>
+  <data name="Disk.NNCliqueAbrir" xml:space="preserve"><value>{0}
+{1} · click to open the folder</value></data>
+  <data name="Disk.NNN" xml:space="preserve"><value>{0}: {1} in {2}.</value></data>
+  <data name="Disk.NPastaSSem" xml:space="preserve"><value> {0} folder(s) without read permission were skipped (their size isn't counted).</value></data>
+  <data name="Disk.NSemAcesso" xml:space="preserve"><value> · {0} without access</value></data>
+  <data name="Disk.NSoNuvemNao" xml:space="preserve"><value>{0} cloud-only don't take up the disk.</value></data>
+  <data name="Disk.NSoNuvemOnedrive" xml:space="preserve"><value> {0} cloud-only (OneDrive) don't take up this disk.</value></data>
+  <data name="Disk.PastaCliqueEntrar" xml:space="preserve"><value>folder (click to enter)</value></data>
+  <data name="Disk.Pastas" xml:space="preserve"><value>Folders</value></data>
+  <data name="Disk.PastasPuladas" xml:space="preserve"><value>Skipped folders</value></data>
+  <data name="Disk.Recusado" xml:space="preserve"><value>Refused: </value></data>
+  <data name="Disk.RecusadoItemLinkOu" xml:space="preserve"><value>Refused: the item is a link or a cloud file; overwriting it wouldn't erase the real content.</value></data>
+  <data name="Disk.RecusadoPeloAplicadorN" xml:space="preserve"><value>Refused by the applier ({0}): {1}</value></data>
+  <data name="Disk.SaoCoisasGrandes" xml:space="preserve"><value>What the big things are</value></data>
+  <data name="Disk.SemDesfazer" xml:space="preserve"><value>No undo</value></data>
+  <data name="Disk.SemLixeiraSemQuarentena" xml:space="preserve"><value>No Recycle Bin, no quarantine, no Undo.</value></data>
+  <data name="Disk.SemPermissaoLeituraTamanho" xml:space="preserve"><value>No read permission: their size isn't counted.</value></data>
+  <data name="Disk.Sobrescreve" xml:space="preserve"><value>Overwrites</value></data>
+  <data name="Disk.SoLeitura" xml:space="preserve"><value>Read-only</value></data>
+  <data name="Disk.SsdNvmeSobrescritaNao" xml:space="preserve"><value>On SSD/NVMe overwriting isn't guaranteed (the disk writes to other cells and TRIM may have already freed the old ones). For real protection: BitLocker on the disk and cipher /w on free space. Only regular files outside Windows and program folders; never folders, links, files in use or cloud files.</value></data>
+  <data name="Disk.Subir" xml:space="preserve"><value>Up</value></data>
+  <data name="Disk.Tipo" xml:space="preserve"><value>By type</value></data>
+  <data name="Disk.TipoDiscoDesconhecidoFor" xml:space="preserve"><value>Unknown disk type. If it's SSD/NVMe, overwriting isn't guaranteed (wear leveling and TRIM); use BitLocker and "{0}" for real protection.</value></data>
+  <data name="Disk.Unidades" xml:space="preserve"><value>Drives</value></data>
+  <data name="Disk.Usado" xml:space="preserve"><value>used</value></data>
+  <data name="Disk.VejaOcupaDiscoPasta" xml:space="preserve"><value>See what takes up the disk, folder by folder. Read-only: nothing is deleted.</value></data>
+  <data name="Disk.VerOutrosNMaiores" xml:space="preserve"><value>See the other {0} biggest</value></data>
+  <data name="Disk.VoceDecide" xml:space="preserve"><value>You decide</value></data>
+  <data name="Disk.WindowsMasProtecaoReal" xml:space="preserve"><value>Windows, but for real protection use BitLocker on the disk (leftovers become unreadable) and then "{0}" (Command Prompt) to overwrite free space.</value></data>
   <data name="Drv.AbrirAtualizacoesOpcionais" xml:space="preserve"><value>Open optional updates</value></data>
   <data name="Drv.AbrirN" xml:space="preserve"><value>Open {0}</value></data>
   <data name="Drv.AbrirNAppOficial" xml:space="preserve"><value>Open {0}? It's the manufacturer's official app, already installed on the PC; in it you see and install graphics card drivers.</value></data>
@@ -1460,8 +1570,85 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Mem.NavTitle" xml:space="preserve"><value>RAM</value></data>
   <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Who is eating memory, whether something is leaking, and how to fix it now and for good.</value></data>
   <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memory: diagnosis</value></data>
+  <data name="Mon.AbrindoContadoresWindows" xml:space="preserve"><value>Opening Windows counters…</value></data>
+  <data name="Mon.AlgunsDiscosNaoInformam" xml:space="preserve"><value>Some disks don't report temperature/wear to Windows (common with USB and RAID controllers).</value></data>
+  <data name="Mon.AtivoMaisOcupadoLeitura" xml:space="preserve"><value>active (the busiest) · read {0} · write {1}</value></data>
+  <data name="Mon.BarraRedeUsoRelacao" xml:space="preserve"><value>The network bar is usage relative to the link speed.</value></data>
+  <data name="Mon.BaseN" xml:space="preserve"><value> · base {0}</value></data>
+  <data name="Mon.Coletando" xml:space="preserve"><value>Collecting</value></data>
+  <data name="Mon.ComoMonitorFunciona" xml:space="preserve"><value>How the monitor works</value></data>
+  <data name="Mon.ComprometidaNN" xml:space="preserve"><value>committed {0}/{1}</value></data>
+  <data name="Mon.Confirme" xml:space="preserve"><value>Confirm</value></data>
+  <data name="Mon.ContadoresWindows1Vez" xml:space="preserve"><value>Windows counters, once per second. Reading changes nothing.</value></data>
+  <data name="Mon.Cpu" xml:space="preserve"><value>By CPU</value></data>
+  <data name="Mon.Cpu2" xml:space="preserve"><value>CPU</value></data>
+  <data name="Mon.CpuMaquinaInteiraTodos" xml:space="preserve"><value>CPU = % of the whole machine (all cores), updated every 2 s. Memory = working set. Protected Windows processes show without CPU. Hover over the name to see the PID.</value></data>
+  <data name="Mon.CpuWindowsNaoTem" xml:space="preserve"><value>CPU: Windows has no public, reliable reading of the processor temperature without a third-party driver, and NEXUS doesn't install a driver for that. </value></data>
+  <data name="Mon.CriteriosCriticoWindowsDiz" xml:space="preserve"><value>Criteria: Critical = Windows says "unhealthy", wear ≥ 90%, uncorrected error, or heat above safe. Attention = Windows warning, wear ≥ 70%, hot disk or HDD with more than 40,000 hours.</value></data>
+  <data name="Mon.CriteriosWindowsInforma" xml:space="preserve"><value>Criteria and what Windows reports</value></data>
+  <data name="Mon.DesgasteN" xml:space="preserve"><value>wear {0:0}%</value></data>
+  <data name="Mon.Discos" xml:space="preserve"><value>Disks</value></data>
+  <data name="Mon.EstePcNaoExpoe" xml:space="preserve"><value>This PC doesn't expose any temperature sensor to Windows.</value></data>
+  <data name="Mon.FalhaNumaLeituraN" xml:space="preserve"><value>A reading failed: {0}</value></data>
+  <data name="Mon.Gpu" xml:space="preserve"><value>GPU</value></data>
+  <data name="Mon.GpuLidaPeloNvidia" xml:space="preserve"><value>GPU: read by nvidia-smi, the NVIDIA driver's own tool (every 5 s). </value></data>
+  <data name="Mon.GpuNvidiaNN" xml:space="preserve"><value>NVIDIA GPU {0}: {1} (nvidia-smi, from the driver)</value></data>
+  <data name="Mon.GpuTemperaturaSoAparece" xml:space="preserve"><value>GPU: temperature only shows on NVIDIA cards (nvidia-smi). AMD and Intel don't expose it to Windows without the vendor's software. </value></data>
+  <data name="Mon.Indisponivel" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="Mon.LeiturasIndisponiveisNestePc" xml:space="preserve"><value>Readings unavailable on this PC</value></data>
+  <data name="Mon.LendoSaudeDiscos" xml:space="preserve"><value>Reading disk health…</value></data>
+  <data name="Mon.LendoSaudeDiscosPode" xml:space="preserve"><value>Reading disk health (may take a few seconds)…</value></data>
+  <data name="Mon.LimitaAgora" xml:space="preserve"><value>What limits now</value></data>
+  <data name="Mon.LinkN" xml:space="preserve"><value> · link {0}</value></data>
+  <data name="Mon.MaxRegistradaNC" xml:space="preserve"><value> (max recorded {0:0} °C)</value></data>
+  <data name="Mon.MecaPartidaMedirVer" xml:space="preserve"><value>Measure a match in Measure to see the effect in the game.</value></data>
+  <data name="Mon.MediaUltimos10S" xml:space="preserve"><value>Average of the last 10 s, with the same counters as Task Manager. It's a reading from outside the game: confirm by measuring frametime in Measure. Collection stops by itself when you leave this page.</value></data>
+  <data name="Mon.MedirPartidaConfirmar" xml:space="preserve"><value>Measure a match to confirm</value></data>
+  <data name="Mon.Memoria" xml:space="preserve"><value>By memory</value></data>
+  <data name="Mon.MostraEstaLimiteProcessador" xml:space="preserve"><value>Shows what's at its limit: processor, card or memory.</value></data>
+  <data name="Mon.N90OuMais" xml:space="preserve"><value>90% or more</value></data>
+  <data name="Mon.NaoFoiPossivelAbrir" xml:space="preserve"><value>Could not open Windows counters: {0}</value></data>
+  <data name="Mon.NAtivoLerN" xml:space="preserve"><value>{0}% active · read {1} · write {2} · queue {3}</value></data>
   <data name="Mon.NavSubtitle" xml:space="preserve"><value>CPU, GPU, memory, disk and network live, plus disk health.</value></data>
   <data name="Mon.NavTitle" xml:space="preserve"><value>Monitor</value></data>
+  <data name="Mon.NEfetivoNN" xml:space="preserve"><value>{0} effective{1} · {2} logical</value></data>
+  <data name="Mon.NErrosLeituraCorrigidos" xml:space="preserve"><value>{0} read errors corrected/total</value></data>
+  <data name="Mon.NHLigado" xml:space="preserve"><value>{0} h powered on</value></data>
+  <data name="Mon.NNaoCorrigidos" xml:space="preserve"><value>{0} uncorrected</value></data>
+  <data name="Mon.NNDisponivelN" xml:space="preserve"><value>{0} of {1} · available {2} · cache {3} · </value></data>
+  <data name="Mon.NNMaisOcupado" xml:space="preserve"><value>{0} · {1} busiest</value></data>
+  <data name="Mon.NProcessadoresLogicos" xml:space="preserve"><value>{0} logical processors</value></data>
+  <data name="Mon.NucleoLogicoNN" xml:space="preserve"><value>Logical core {0}: {1}%{2}</value></data>
+  <data name="Mon.NUso" xml:space="preserve"><value>{0} in use</value></data>
+  <data name="Mon.Parado" xml:space="preserve"><value>Stopped</value></data>
+  <data name="Mon.ParadoColetaSoRoda" xml:space="preserve"><value>Stopped: collection only runs with the page open</value></data>
+  <data name="Mon.PasseMouseNumNucleo" xml:space="preserve"><value>Hover over a core to see the effective frequency. Windows moves tasks between cores, so a game limited by a single task doesn't always show as a core pinned at 100%.</value></data>
+  <data name="Mon.PausadoVoce" xml:space="preserve"><value>Paused by you</value></data>
+  <data name="Mon.Pausar" xml:space="preserve"><value>Pause</value></data>
+  <data name="Mon.PidN" xml:space="preserve"><value>PID {0}</value></data>
+  <data name="Mon.PlacaVideoMotor" xml:space="preserve"><value>Graphics card, by engine</value></data>
+  <data name="Mon.ProcessadorNucleoNucleo" xml:space="preserve"><value>Processor, core by core</value></data>
+  <data name="Mon.Programa" xml:space="preserve"><value>Program</value></data>
+  <data name="Mon.ProgramasMaisPesados" xml:space="preserve"><value>Heaviest programs</value></data>
+  <data name="Mon.Rede" xml:space="preserve"><value>Network</value></data>
+  <data name="Mon.Retomar" xml:space="preserve"><value>Resume</value></data>
+  <data name="Mon.SaudeDiscos" xml:space="preserve"><value>Disk health</value></data>
+  <data name="Mon.SemContadoresConfiabilidade" xml:space="preserve"><value>no reliability counters</value></data>
+  <data name="Mon.SemContadoresDisco" xml:space="preserve"><value>No disk counters</value></data>
+  <data name="Mon.SemContadoresGpuNeste" xml:space="preserve"><value>No GPU counters on this PC.</value></data>
+  <data name="Mon.TemperaturaDesgasteErrosVem" xml:space="preserve"><value>Temperature, wear and errors come from counters Windows only gives to administrators. Open NEXUS as administrator to see them; without that, the health status Windows reports applies.</value></data>
+  <data name="Mon.Temperaturas" xml:space="preserve"><value>Temperatures</value></data>
+  <data name="Mon.Ultimos5Minutos" xml:space="preserve"><value>Last 5 minutes</value></data>
+  <data name="Mon.Uso" xml:space="preserve"><value>in use</value></data>
+  <data name="Mon.UsoGpuMotorMais" xml:space="preserve"><value>GPU usage is that of the busiest engine, the same rule as Task Manager.</value></data>
+  <data name="Mon.UsoN" xml:space="preserve"><value>usage {0}%</value></data>
+  <data name="Mon.Vivo1LeituraSegundo" xml:space="preserve"><value>Live · 1 reading per second</value></data>
+  <data name="Mon.VramNN" xml:space="preserve"><value>VRAM {0} of {1}</value></data>
+  <data name="Mon.VramSemLeitura" xml:space="preserve"><value>VRAM not read</value></data>
+  <data name="Mon.VramUsoN" xml:space="preserve"><value>VRAM in use {0}</value></data>
+  <data name="Mon.WindowsNaoExposContadores" xml:space="preserve"><value>Windows didn't expose GPU counters (requires a WDDM 2.x driver).</value></data>
+  <data name="Mon.ZonasAcpiSaoSensores" xml:space="preserve"><value>ACPI zones are motherboard sensors defined by the manufacturer: they aren't the core temperature and often stay stuck at a fixed value.</value></data>
+  <data name="Mon.ZonaTermicaAcpiN" xml:space="preserve"><value>ACPI thermal zone {0}: {1} °C</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Assistant</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automatic</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Lab</value></data>

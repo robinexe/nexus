@@ -24,11 +24,11 @@ namespace Nexus.Desktop.ViewModels
         private MonitorSession? _session;
         private Task? _starting;
         private bool _ticking, _subscribed, _userPaused, _healthLoaded;
-        private string _liveStatus = "Parado";
+        private string _liveStatus = Loc.T("Mon.Parado");
         private bool _running;
-        private string _bottleneckTitle = "Coletando", _bottleneckText = "Abrindo os contadores do Windows…", _bottleneckTone = "info";
+        private string _bottleneckTitle = Loc.T("Mon.Coletando"), _bottleneckText = Loc.T("Mon.AbrindoContadoresWindows"), _bottleneckTone = "info";
         private string _temperatureNote = "";
-        private string _diskHealthNote = "Lendo a saúde dos discos…";
+        private string _diskHealthNote = Loc.T("Mon.LendoSaudeDiscos");
         private string _unavailableNote = "";
         private string _cpuName = "";
         private bool _sortByMemory, _warmingUp = true, _healthLoading;
@@ -40,7 +40,7 @@ namespace Nexus.Desktop.ViewModels
             _timer.Tick += OnTick;
             ToggleCommand = new RelayCommand(() =>
             {
-                if (Running) { _userPaused = true; Stop("Pausado por você"); }
+                if (Running) { _userPaused = true; Stop(Loc.T("Mon.PausadoVoce")); }
                 else { _userPaused = false; Start(); }
             });
             RefreshHealthCommand = new RelayCommand(() => _ = LoadHealthAsync(), () => !Busy);
@@ -54,9 +54,9 @@ namespace Nexus.Desktop.ViewModels
 
         public MonitorGauge Cpu { get; } = new("CPU", "%", 100);
         public MonitorGauge Gpu { get; } = new("GPU", "%", 100);
-        public MonitorGauge Ram { get; } = new("Memória", "%", 100);
-        public MonitorGauge Disk { get; } = new("Disco", "%", 100);
-        public MonitorGauge Net { get; } = new("Rede", "", 0);
+        public MonitorGauge Ram { get; } = new(Loc.T("Pg.Memoria"), "%", 100);
+        public MonitorGauge Disk { get; } = new(Loc.T("Pg.Disco"), "%", 100);
+        public MonitorGauge Net { get; } = new(Loc.T("Mon.Rede"), "", 0);
 
         public ObservableCollection<CoreBar> Cores { get; } = [];
         public ObservableCollection<MeterRow> GpuEngines { get; } = [];
@@ -72,7 +72,7 @@ namespace Nexus.Desktop.ViewModels
         public RelayCommand SortByMemoryCommand { get; }
 
         public bool Running { get => _running; private set { if (Set(ref _running, value)) OnPropertyChanged(nameof(ToggleText)); } }
-        public string ToggleText => Running ? "Pausar" : "Retomar";
+        public string ToggleText => Running ? Loc.T("Mon.Pausar") : Loc.T("Mon.Retomar");
         public string LiveStatus { get => _liveStatus; private set => Set(ref _liveStatus, value); }
         public string BottleneckTitle { get => _bottleneckTitle; private set => Set(ref _bottleneckTitle, value); }
         public string BottleneckText { get => _bottleneckText; private set => Set(ref _bottleneckText, value); }
@@ -126,7 +126,7 @@ namespace Nexus.Desktop.ViewModels
         private void OnHostChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(MainViewModel.SelectedPage) || sender is not MainViewModel main) return;
-            if (!ReferenceEquals(main.SelectedPage, this)) Stop("Parado: a coleta só roda com a página aberta");
+            if (!ReferenceEquals(main.SelectedPage, this)) Stop(Loc.T("Mon.ParadoColetaSoRoda"));
         }
 
         /// <summary>Começa (ou retoma) a coleta a 1 Hz. A primeira vez abre os contadores em segundo plano.</summary>
@@ -134,14 +134,15 @@ namespace Nexus.Desktop.ViewModels
         {
             if (Running) return;
             Running = true;
-            LiveStatus = "Ao vivo · 1 leitura por segundo";
+            LiveStatus = Loc.T("Mon.Vivo1LeituraSegundo");
             _timer.Start();
             if (_session is null && _starting is null) _starting = OpenSessionAsync();
         }
 
         /// <summary>Para a coleta (contadores ficam abertos, sem custo enquanto ninguém coleta).</summary>
-        public void Stop(string reason = "Parado")
+        public void Stop(string? reason = null)
         {
+            reason ??= Loc.T("Mon.Parado");
             _timer.Stop();
             Running = false;
             LiveStatus = reason;
@@ -157,8 +158,8 @@ namespace Nexus.Desktop.ViewModels
             }
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {
-                Stop("Indisponível");
-                Message = $"Não foi possível abrir os contadores do Windows: {ex.Message}";
+                Stop(Loc.T("Mon.Indisponivel"));
+                Message = Loc.F("Mon.NaoFoiPossivelAbrir", ex.Message);
             }
             finally { _starting = null; }
         }
@@ -176,7 +177,7 @@ namespace Nexus.Desktop.ViewModels
             }
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {
-                Message = $"Falha numa leitura: {ex.Message}";
+                Message = Loc.F("Mon.FalhaNumaLeituraN", ex.Message);
             }
             finally { _ticking = false; }
         }
@@ -192,8 +193,8 @@ namespace Nexus.Desktop.ViewModels
             Cpu.Value = N0(s.Cpu.TotalPercent);
             Cpu.Number = s.Cpu.TotalPercent;
             Cpu.Detail = s.Cpu.EffectiveMhz is { } mhz
-                ? $"{Ghz(mhz)} efetivo{(s.Cpu.BaseMhz is { } b ? $" · base {Ghz(b)}" : "")} · {s.Cpu.Cores.Count} lógicos"
-                : $"{s.Cpu.Cores.Count} processadores lógicos";
+                ? Loc.F("Mon.NEfetivoNN", Ghz(mhz), (s.Cpu.BaseMhz is { } b ? Loc.F("Mon.BaseN", Ghz(b)) : ""), s.Cpu.Cores.Count)
+                : Loc.F("Mon.NProcessadoresLogicos", s.Cpu.Cores.Count);
             Cpu.Series.Load(history.Cpu, 100);
             SyncCores(s.Cpu.Cores);
 
@@ -203,9 +204,9 @@ namespace Nexus.Desktop.ViewModels
                 Gpu.Value = N0(g.OverallPercent);
                 Gpu.Number = g.OverallPercent;
                 var mem = g.DedicatedBytes is { } d
-                    ? _gpuDedicatedTotal > d ? $"VRAM {Bytes(d)} de {Bytes(_gpuDedicatedTotal)}" : $"VRAM em uso {Bytes(d)}"
-                    : "VRAM sem leitura";
-                Gpu.Detail = $"{mem} · {(g.Engines.Count > 0 ? g.Engines[0].Label : "3D")} mais ocupado";
+                    ? _gpuDedicatedTotal > d ? Loc.F("Mon.VramNN", Bytes(d), Bytes(_gpuDedicatedTotal)) : Loc.F("Mon.VramUsoN", Bytes(d))
+                    : Loc.T("Mon.VramSemLeitura");
+                Gpu.Detail = Loc.F("Mon.NNMaisOcupado", mem, (g.Engines.Count > 0 ? g.Engines[0].Label : "3D"));
                 SyncRows(GpuEngines, g.Engines.Where(x => x.Percent >= 0.5 || x.Type is "3D" or "Copy" or "VideoEncode" or "VideoDecode").Take(6)
                     .Select(x => (x.Type, x.Label, x.Percent)).ToList());
             }
@@ -213,7 +214,7 @@ namespace Nexus.Desktop.ViewModels
             {
                 Gpu.Value = "—";
                 Gpu.Number = double.NaN;
-                Gpu.Detail = "O Windows não expôs os contadores de GPU (exige driver WDDM 2.x).";
+                Gpu.Detail = Loc.T("Mon.WindowsNaoExposContadores");
                 GpuEngines.Clear();
             }
             Gpu.Series.Load(history.Gpu, 100);
@@ -223,8 +224,8 @@ namespace Nexus.Desktop.ViewModels
             {
                 Ram.Value = N0(m.UsedPercent);
                 Ram.Number = m.UsedPercent;
-                Ram.Detail = $"{Bytes(m.UsedBytes)} de {Bytes(m.TotalBytes)} · disponível {Bytes(m.AvailableBytes)} · cache {Bytes(m.CacheBytes)} · " +
-                             $"comprometida {Bytes(m.CommitBytes)}/{Bytes(m.CommitLimitBytes)}";
+                Ram.Detail = Loc.F("Mon.NNDisponivelN", Bytes(m.UsedBytes), Bytes(m.TotalBytes), Bytes(m.AvailableBytes), Bytes(m.CacheBytes)) +
+                             Loc.F("Mon.ComprometidaNN", Bytes(m.CommitBytes), Bytes(m.CommitLimitBytes));
             }
             Ram.Series.Load(history.Memory, 100);
 
@@ -233,10 +234,10 @@ namespace Nexus.Desktop.ViewModels
             Disk.Number = s.DiskActiveMax;
             var read = s.Disks.Sum(x => x.ReadBytesPerSec);
             var write = s.Disks.Sum(x => x.WriteBytesPerSec);
-            Disk.Detail = s.Disks.Count == 0 ? "Sem contadores de disco" : $"ativo (o mais ocupado) · leitura {Rate(read)} · escrita {Rate(write)}";
+            Disk.Detail = s.Disks.Count == 0 ? Loc.T("Mon.SemContadoresDisco") : Loc.F("Mon.AtivoMaisOcupadoLeitura", Rate(read), Rate(write));
             Disk.Series.Load(history.Disk, 100);
             SyncActivity(Disks, s.Disks.Select(x => (x.Instance, x.Label, x.ActivePercent,
-                $"{N0(x.ActivePercent)}% ativo · ler {Rate(x.ReadBytesPerSec)} · gravar {Rate(x.WriteBytesPerSec)} · fila {x.Queue.ToString("0.#", Pt)}")).ToList());
+                Loc.F("Mon.NAtivoLerN", N0(x.ActivePercent), Rate(x.ReadBytesPerSec), Rate(x.WriteBytesPerSec), x.Queue.ToString("0.#", Pt)))).ToList());
 
             // Rede
             var net = s.NetworkTotalBytesPerSec;
@@ -248,7 +249,7 @@ namespace Nexus.Desktop.ViewModels
             Net.Series.Load(history.Network, 0);
             SyncActivity(Networks, s.Networks.Where(x => x.TotalBytesPerSec > 0 || x.LinkBitsPerSec is not null).Take(4)
                 .Select(x => (x.Name, x.Name, x.LinkBitsPerSec is { } link and > 0 ? Math.Min(100, x.TotalBytesPerSec * 8 / link * 100) : 0,
-                    $"↓ {Rate(x.ReceivedBytesPerSec)} · ↑ {Rate(x.SentBytesPerSec)}{(x.LinkBitsPerSec is { } l ? $" · link {LinkSpeed(l)}" : "")}")).ToList());
+                    $"↓ {Rate(x.ReceivedBytesPerSec)} · ↑ {Rate(x.SentBytesPerSec)}{(x.LinkBitsPerSec is { } l ? Loc.F("Mon.LinkN", LinkSpeed(l)) : "")}")).ToList());
 
             // Processos, gargalo, temperaturas
             _lastProcesses = s.Processes;
@@ -266,7 +267,7 @@ namespace Nexus.Desktop.ViewModels
             for (var i = 0; i < cores.Count; i++)
             {
                 var c = cores[i];
-                Cores[i].Update(c.Percent, $"Núcleo lógico {c.Index}: {N0(c.Percent)}%{(c.Mhz is { } m ? $" · {Ghz(m)}" : "")}");
+                Cores[i].Update(c.Percent, Loc.F("Mon.NucleoLogicoNN", c.Index, N0(c.Percent), (c.Mhz is { } m ? $" · {Ghz(m)}" : "")));
             }
         }
 
@@ -317,25 +318,25 @@ namespace Nexus.Desktop.ViewModels
             {
                 var parts = new List<string>();
                 if (g.TemperatureC is { } t) parts.Add($"{N0(t)} °C");
-                if (g.UtilizationPercent is { } u) parts.Add($"uso {N0(u)}%");
+                if (g.UtilizationPercent is { } u) parts.Add(Loc.F("Mon.UsoN", N0(u)));
                 if (g.GraphicsClockMhz is { } c) parts.Add($"{N0(c)} MHz");
                 if (g.PowerWatts is { } w) parts.Add($"{w.ToString("0", Pt)} W");
-                lines.Add($"GPU NVIDIA {g.Index}: {string.Join(" · ", parts)} (nvidia-smi, do driver)");
+                lines.Add(Loc.F("Mon.GpuNvidiaNN", g.Index, string.Join(" · ", parts)));
             }
             foreach (var z in s?.ThermalZones ?? [])
-                lines.Add($"Zona térmica ACPI {z.Zone.TrimStart('\\')}: {z.Celsius.ToString("0.0", Pt)} °C");
+                lines.Add(Loc.F("Mon.ZonaTermicaAcpiN", z.Zone.TrimStart('\\'), z.Celsius.ToString("0.0", Pt)));
             if (!lines.SequenceEqual(Temperatures))
             {
                 Temperatures.Clear();
                 foreach (var l in lines) Temperatures.Add(l);
             }
 
-            var note = "CPU: o Windows não tem leitura pública e confiável da temperatura do processador sem driver de terceiros, e o NEXUS não instala driver para isso. ";
+            var note = Loc.T("Mon.CpuWindowsNaoTem");
             note += _session?.NvidiaAvailable == true
-                ? "GPU: lida pelo nvidia-smi, a ferramenta do próprio driver NVIDIA (a cada 5 s). "
-                : "GPU: a temperatura só aparece em placas NVIDIA (nvidia-smi). AMD e Intel não a expõem ao Windows sem o software do fabricante. ";
+                ? Loc.T("Mon.GpuLidaPeloNvidia")
+                : Loc.T("Mon.GpuTemperaturaSoAparece");
             if (s?.ThermalZones.Count > 0)
-                note += "Zonas ACPI são sensores da placa-mãe definidos pelo fabricante: não são a temperatura do núcleo e muitas vezes ficam paradas num valor fixo.";
+                note += Loc.T("Mon.ZonasAcpiSaoSensores");
             TemperatureNote = note;
         }
 
@@ -344,7 +345,7 @@ namespace Nexus.Desktop.ViewModels
         private Task LoadHealthAsync() => RunAsync(async () =>
         {
             _healthLoaded = true;
-            DiskHealthNote = "Lendo a saúde dos discos (pode levar alguns segundos)…";
+            DiskHealthNote = Loc.T("Mon.LendoSaudeDiscosPode");
             HealthLoading = true;
             DiskHealthReport report;
             try { report = await new WindowsDiskHealthSource().ReadAsync(CancellationToken.None); }
@@ -355,9 +356,9 @@ namespace Nexus.Desktop.ViewModels
             if (report.Error is not null) notes.Add(report.Error);
             if (report.Disks.Any(d => !d.Disk.ReliabilityAvailable))
                 notes.Add(report.Elevated
-                    ? "Alguns discos não informam temperatura/desgaste ao Windows (comum em USB e controladoras RAID)."
-                    : "Temperatura, desgaste e erros vêm de contadores que o Windows só entrega a administradores. Abra o NEXUS como administrador para vê-los; sem isso, vale o estado de saúde que o Windows informa.");
-            notes.Add("Critérios: Crítico = Windows diz \"com defeito\", desgaste ≥ 90%, erro não corrigido, ou calor acima do seguro. Atenção = aviso do Windows, desgaste ≥ 70%, disco quente ou HD com mais de 40 mil horas.");
+                    ? Loc.T("Mon.AlgunsDiscosNaoInformam")
+                    : Loc.T("Mon.TemperaturaDesgasteErrosVem"));
+            notes.Add(Loc.T("Mon.CriteriosCriticoWindowsDiz"));
             DiskHealthNote = string.Join(Environment.NewLine, notes);
         });
 
@@ -542,13 +543,13 @@ namespace Nexus.Desktop.ViewModels
             var kind = string.Join(" · ", new[] { d.BusType, d.MediaType is "Unspecified" ? "" : d.MediaType, d.SizeBytes is { } s ? MonitorPage.Bytes(s) : "" }
                 .Where(x => !string.IsNullOrWhiteSpace(x)));
             var readings = new List<string>();
-            if (d.TemperatureC is { } t and > 0) readings.Add($"{t:0} °C{(d.TemperatureMaxC is { } mx and > 0 ? $" (máx. registrada {mx:0} °C)" : "")}");
-            if (d.WearPercent is { } w) readings.Add($"desgaste {w:0}%");
-            if (d.PowerOnHours is { } h) readings.Add($"{h.ToString("N0", Pt)} h ligado");
-            if (d.ReadErrorsTotal is { } re) readings.Add($"{re.ToString("N0", Pt)} erros de leitura corrigidos/total");
+            if (d.TemperatureC is { } t and > 0) readings.Add($"{t:0} °C{(d.TemperatureMaxC is { } mx and > 0 ? Loc.F("Mon.MaxRegistradaNC", mx) : "")}");
+            if (d.WearPercent is { } w) readings.Add(Loc.F("Mon.DesgasteN", w));
+            if (d.PowerOnHours is { } h) readings.Add(Loc.F("Mon.NHLigado", h.ToString("N0", Pt)));
+            if (d.ReadErrorsTotal is { } re) readings.Add(Loc.F("Mon.NErrosLeituraCorrigidos", re.ToString("N0", Pt)));
             var unc = (d.ReadErrorsUncorrected ?? 0) + (d.WriteErrorsUncorrected ?? 0);
-            if (d.ReadErrorsUncorrected is not null || d.WriteErrorsUncorrected is not null) readings.Add($"{unc.ToString("N0", Pt)} não corrigidos");
-            if (readings.Count == 0) readings.Add("sem contadores de confiabilidade");
+            if (d.ReadErrorsUncorrected is not null || d.WriteErrorsUncorrected is not null) readings.Add(Loc.F("Mon.NNaoCorrigidos", unc.ToString("N0", Pt)));
+            if (readings.Count == 0) readings.Add(Loc.T("Mon.SemContadoresConfiabilidade"));
             var tone = e.Verdict.Level switch
             {
                 DiskHealthLevel.Ok => "good",
@@ -556,7 +557,7 @@ namespace Nexus.Desktop.ViewModels
                 DiskHealthLevel.Critical => "bad",
                 _ => "info",
             };
-            return new DiskHealthRow(string.IsNullOrWhiteSpace(d.FriendlyName) ? $"Disco {d.DeviceId}" : d.FriendlyName, kind, e.Verdict.LevelText, tone,
+            return new DiskHealthRow(string.IsNullOrWhiteSpace(d.FriendlyName) ? Loc.F("Auto.DiscoN", d.DeviceId) : d.FriendlyName, kind, e.Verdict.LevelText, tone,
                 string.Join(" · ", readings), string.Join(Environment.NewLine, e.Verdict.Reasons));
         }
     }

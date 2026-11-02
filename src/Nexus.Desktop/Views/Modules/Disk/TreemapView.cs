@@ -183,7 +183,7 @@ public sealed class TreemapView : FrameworkElement
             var t = tiles[index];
             _tip.Content = t.Kind switch
             {
-                DiskTileKind.Folder => $"{t.Label}\n{Format.Bytes(t.Size)} · clique para abrir a pasta",
+                DiskTileKind.Folder => Loc.F("Disk.NNCliqueAbrir", t.Label, Format.Bytes(t.Size)),
                 DiskTileKind.File => $"{t.Label}\n{Format.Bytes(t.Size)} · {FileCategories.Label(t.Category ?? FileCategory.Other)}\n{t.File?.Folder}",
                 _ => $"{t.Label}\n{Format.Bytes(t.Size)}",
             };
