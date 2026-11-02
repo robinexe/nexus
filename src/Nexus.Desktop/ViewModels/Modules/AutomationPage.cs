@@ -208,7 +208,7 @@ public sealed class AutomationPage : ModulePage
     {
         var traits = PcTraitsProbe.Read(facts.SystemDrive);
         var profile = PcProfiler.Classify(facts, traits, DiagnosticRules.Evaluate(facts));
-        var catalog = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
+        var catalog = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory).Localized(Loc.Language);
         var set = RecommendationEngine.Default().Evaluate(profile, catalog, RiskModel.ReadDeclared(NexusServices.CatalogDirectory), NexusServices.ParametersFrom(facts));
         return new Built(catalog, set, traits);
     }

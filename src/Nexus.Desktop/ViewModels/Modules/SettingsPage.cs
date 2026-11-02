@@ -294,7 +294,7 @@ public sealed class SettingsPage : ModulePage
         SettingsProblem = UiSettings.Problem ?? "";
         var read = await Task.Run(() =>
         {
-            var catalog = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
+            var catalog = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory).Localized(Loc.Language);
             var scan = AutomationHandlers.ReadTaskStatus(NexusTaskKind.Scan, AutomationScheduledScanHandler.DefaultExecutable);
             var clean = AutomationHandlers.ReadTaskStatus(NexusTaskKind.Clean, AutomationScheduledScanHandler.DefaultExecutable);
             var legacy = AutomationHandlers.ReadScheduledScanState(AutomationScheduledScanHandler.DefaultExecutable);

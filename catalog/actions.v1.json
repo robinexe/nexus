@@ -6,6 +6,7 @@
     {
       "id": "win.gamemode.enable", "version": 1,
       "title": "Ativar Modo de Jogo",
+      "i18n": { "en": { "title": "Turn on Game Mode" }, "es": { "title": "Activar el Modo Juego" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": { "hive": "HKCU", "path": "Software\\Microsoft\\GameBar", "name": "AutoGameModeEnabled", "type": "DWord", "view": "Default" },
@@ -21,6 +22,7 @@
     {
       "id": "win.gamedvr.background-capture.disable", "version": 1,
       "title": "Desativar gravação em segundo plano do Xbox Game Bar",
+      "i18n": { "en": { "title": "Turn off Xbox Game Bar background recording" }, "es": { "title": "Desactivar la grabación en segundo plano de Xbox Game Bar" } },
       "classification": "Conditional",
       "condition": "Somente quando a captura em segundo plano estiver ativa e o usuário não usar o recurso.",
       "handlerKind": "RegistryValue",
@@ -35,6 +37,7 @@
     {
       "id": "win.windowed-game-optimizations.per-app", "version": 1,
       "title": "Otimizações para jogos em janela (por executável)",
+      "i18n": { "en": { "title": "Optimizations for windowed games (per executable)" }, "es": { "title": "Optimizaciones para juegos en ventana (por ejecutable)" } },
       "classification": "Conditional",
       "condition": "Jogo DX10/DX11 em janela ou sem bordas. Não se aplica a DX12/Vulkan.",
       "handlerKind": "DirectXUserGpuPreference",
@@ -51,6 +54,7 @@
     {
       "id": "power.active-scheme.high-performance.session", "version": 1,
       "title": "Plano de energia Alto desempenho durante a sessão",
+      "i18n": { "en": { "title": "High performance power plan during the session" }, "es": { "title": "Plan de energía Alto rendimiento durante la sesión" } },
       "classification": "Experimental",
       "handlerKind": "PowerActiveScheme",
       "target": { "schemeGuid": "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c" },
@@ -63,6 +67,7 @@
     {
       "id": "power.processor.min-cores-parking", "version": 1,
       "title": "Core parking: mínimo de núcleos não estacionados (AC)",
+      "i18n": { "en": { "title": "Core parking: minimum unparked cores (AC)" }, "es": { "title": "Core parking: mínimo de núcleos no estacionados (CA)" } },
       "classification": "Experimental",
       "handlerKind": "PowerSettingValue",
       "target": { "subgroup": "54533251-82be-4824-96c1-47b60b740d00", "setting": "0cc5b647-c1df-4637-891a-dec35c318583", "acdc": "AC" },
@@ -75,6 +80,7 @@
     {
       "id": "sched.win32priorityseparation.lab", "version": 1,
       "title": "Win32PrioritySeparation",
+      "i18n": { "en": { "title": "Win32PrioritySeparation" }, "es": { "title": "Win32PrioritySeparation" } },
       "classification": "Experimental",
       "handlerKind": "RegistryValue",
       "target": { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Control\\PriorityControl", "name": "Win32PrioritySeparation", "type": "DWord", "view": "Default" },
@@ -88,6 +94,7 @@
     {
       "id": "sched.mmcss.system-responsiveness.lab", "version": 1,
       "title": "MMCSS SystemResponsiveness",
+      "i18n": { "en": { "title": "MMCSS SystemResponsiveness" }, "es": { "title": "MMCSS SystemResponsiveness" } },
       "classification": "Experimental",
       "handlerKind": "RegistryValue",
       "target": { "hive": "HKLM", "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile", "name": "SystemResponsiveness", "type": "DWord", "view": "Default" },
@@ -101,6 +108,7 @@
     {
       "id": "gpu.hags.lab", "version": 1,
       "title": "Agendamento de GPU acelerado por hardware (HAGS)",
+      "i18n": { "en": { "title": "Hardware-accelerated GPU scheduling (HAGS)" }, "es": { "title": "Programación de GPU acelerada por hardware (HAGS)" } },
       "classification": "Experimental",
       "handlerKind": "RegistryValue",
       "target": { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers", "name": "HwSchMode", "type": "DWord", "view": "Default" },
@@ -114,6 +122,7 @@
     {
       "id": "svc.sysmain.manual.lab", "version": 1,
       "title": "SysMain em Manual",
+      "i18n": { "en": { "title": "SysMain set to Manual" }, "es": { "title": "SysMain en Manual" } },
       "classification": "Experimental",
       "handlerKind": "ServiceStartType",
       "target": { "service": "SysMain" },
@@ -126,6 +135,7 @@
     {
       "id": "cs2.cfg.fps_max", "version": 1,
       "title": "CS2: fps_max",
+      "i18n": { "en": { "title": "CS2: fps_max" }, "es": { "title": "CS2: fps_max" } },
       "classification": "Conditional",
       "handlerKind": "SourceCfgConvar",
       "condition": "CS2 instalado pela Steam e dump do comando cvarlist da versão instalada (console.log ao lado da pasta cfg, gravado com -condebug).",

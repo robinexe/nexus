@@ -466,7 +466,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
 
     // ------------------------------------------------------------------ quarentena reversível (aplicador)
 
-    private CatalogDocument Catalog() => _catalog ??= CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
+    private CatalogDocument Catalog() => _catalog ??= CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory).Localized(Loc.Language);
 
     /// <summary>Vaga de administrador para arquivos de Arquivos de Programas/ProgramData ou do perfil de outra conta.</summary>
     private static bool NeedsAdmin(string path)

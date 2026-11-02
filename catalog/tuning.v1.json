@@ -7,6 +7,7 @@
       "id": "fps.dwm.mpo.disable",
       "version": 1,
       "title": "Desligar o Multiplane Overlay (corrige tremedeira e tela preta)",
+      "i18n": { "en": { "title": "Turn off Multiplane Overlay (fixes flicker and black screen)" }, "es": { "title": "Desactivar Multiplane Overlay (corrige parpadeo y pantalla negra)" } },
       "classification": "Conditional",
       "condition": "Só para quem tem tremedeira, tela preta ou stutter em janelas.",
       "handlerKind": "RegistryValue",
@@ -40,6 +41,7 @@
       "id": "fps.dwm.overlay-minfps.zero",
       "version": 1,
       "title": "Corrigir apps congelando no 24H2 (Discord, Chrome)",
+      "i18n": { "en": { "title": "Fix apps freezing on 24H2 (Discord, Chrome)" }, "es": { "title": "Corregir apps que se congelan en 24H2 (Discord, Chrome)" } },
       "classification": "Experimental",
       "condition": "Só se apps congelarem em partes da janela.",
       "handlerKind": "RegistryValue",
@@ -72,6 +74,7 @@
       "id": "fps.mouse.acceleration.off.speed",
       "version": 1,
       "title": "Mouse sem aceleração (1/3: precisão do ponteiro)",
+      "i18n": { "en": { "title": "Mouse without acceleration (1/3: pointer precision)" }, "es": { "title": "Mouse sin aceleración (1/3: precisión del puntero)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -104,6 +107,7 @@
       "id": "fps.mouse.acceleration.off.threshold1",
       "version": 1,
       "title": "Mouse sem aceleração (2/3: limite 1)",
+      "i18n": { "en": { "title": "Mouse without acceleration (2/3: threshold 1)" }, "es": { "title": "Mouse sin aceleración (2/3: umbral 1)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -132,6 +136,7 @@
       "id": "fps.mouse.acceleration.off.threshold2",
       "version": 1,
       "title": "Mouse sem aceleração (3/3: limite 2)",
+      "i18n": { "en": { "title": "Mouse without acceleration (3/3: threshold 2)" }, "es": { "title": "Mouse sin aceleración (3/3: umbral 2)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -160,6 +165,7 @@
       "id": "fps.power.throttling.off",
       "version": 1,
       "title": "Desligar o Power Throttling (modo eficiência automático)",
+      "i18n": { "en": { "title": "Turn off Power Throttling (automatic efficiency mode)" }, "es": { "title": "Desactivar Power Throttling (modo de eficiencia automático)" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -195,6 +201,7 @@
       "id": "fps.power.user-presence-qos.off",
       "version": 1,
       "title": "Não rebaixar o app em foco quando você fica sem mexer (bateria)",
+      "i18n": { "en": { "title": "Don't demote the focused app when you're idle (battery)" }, "es": { "title": "No rebajar la app en foco cuando estás inactivo (batería)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -226,6 +233,7 @@
       "id": "fps.power.min-processor-state.100.ac",
       "version": 1,
       "title": "Estado mínimo do processador em 100% (na tomada)",
+      "i18n": { "en": { "title": "Minimum processor state at 100% (plugged in)" }, "es": { "title": "Estado mínimo del procesador al 100% (enchufado)" } },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -256,6 +264,7 @@
       "id": "fps.power.epp.performance.ac",
       "version": 1,
       "title": "Preferência de energia do processador: desempenho (na tomada)",
+      "i18n": { "en": { "title": "Processor energy preference: performance (plugged in)" }, "es": { "title": "Preferencia de energía del procesador: rendimiento (enchufado)" } },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -282,6 +291,7 @@
       "id": "fps.power.usb-selective-suspend.off.ac",
       "version": 1,
       "title": "Não suspender portas USB (na tomada)",
+      "i18n": { "en": { "title": "Don't suspend USB ports (plugged in)" }, "es": { "title": "No suspender los puertos USB (enchufado)" } },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -308,6 +318,7 @@
       "id": "fps.power.pcie-aspm.off.ac",
       "version": 1,
       "title": "PCIe sem economia de energia no link (na tomada)",
+      "i18n": { "en": { "title": "PCIe without link power saving (plugged in)" }, "es": { "title": "PCIe sin ahorro de energía en el enlace (enchufado)" } },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -338,6 +349,7 @@
       "id": "hw.nvme.latency-tolerance.ac",
       "version": 1,
       "title": "NVMe sem estados de energia profundos (na tomada)",
+      "i18n": { "en": { "title": "NVMe without deep power states (plugged in)" }, "es": { "title": "NVMe sin estados de energía profundos (enchufado)" } },
       "classification": "Experimental",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -364,6 +376,7 @@
       "id": "net.wifi.power-saving.dc-max-perf",
       "version": 1,
       "title": "Wi-Fi sem economia de energia (na bateria)",
+      "i18n": { "en": { "title": "Wi-Fi without power saving (on battery)" }, "es": { "title": "Wi-Fi sin ahorro de energía (con batería)" } },
       "classification": "Conditional",
       "condition": "Notebook jogando na bateria por Wi-Fi com ping oscilando. Na tomada o Windows já usa desempenho máximo.",
       "handlerKind": "PowerSettingValue",
@@ -395,6 +408,7 @@
       "id": "fps.dx.windowed-optimizations.global",
       "version": 1,
       "title": "Otimizações para jogos em janela (padrão para todos os jogos)",
+      "i18n": { "en": { "title": "Optimizations for windowed games (default for all games)" }, "es": { "title": "Optimizaciones para juegos en ventana (predeterminado para todos los juegos)" } },
       "classification": "SupportedDocumented",
       "condition": "Vale para jogos DirectX 10/11 em janela ou janela sem bordas. DX12, Vulkan e tela cheia exclusiva não mudam.",
       "handlerKind": "DirectXUserGpuPreference",
@@ -430,6 +444,7 @@
       "id": "fps.dx.vrr.global",
       "version": 1,
       "title": "Taxa de atualização variável para jogos DX11 em tela cheia",
+      "i18n": { "en": { "title": "Variable refresh rate for fullscreen DX11 games" }, "es": { "title": "Frecuencia de actualización variable para juegos DX11 en pantalla completa" } },
       "classification": "Conditional",
       "condition": "Só com monitor G-SYNC, FreeSync ou Adaptive-Sync e driver WDDM 2.6+. Sem isso o Windows nem mostra a opção e não há efeito.",
       "handlerKind": "DirectXUserGpuPreference",
@@ -461,6 +476,7 @@
       "id": "fps.dx.autohdr.off",
       "version": 1,
       "title": "Desligar o Auto HDR",
+      "i18n": { "en": { "title": "Turn off Auto HDR" }, "es": { "title": "Desactivar Auto HDR" } },
       "classification": "Conditional",
       "condition": "Só faz diferença em tela HDR com o HDR do Windows ligado e se você não gosta das cores do Auto HDR.",
       "handlerKind": "DirectXUserGpuPreference",
@@ -492,6 +508,7 @@
       "id": "fps.gamedvr.policy.off",
       "version": 1,
       "title": "Política: sem gravação de jogos em segundo plano",
+      "i18n": { "en": { "title": "Policy: no background game recording" }, "es": { "title": "Directiva: sin grabación de juegos en segundo plano" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -520,6 +537,7 @@
       "id": "sys.do.download-mode.http-only",
       "version": 1,
       "title": "Atualizações sem enviar para outros PCs (Otimização de Entrega)",
+      "i18n": { "en": { "title": "Updates without sending to other PCs (Delivery Optimization)" }, "es": { "title": "Actualizaciones sin enviar a otros PC (Optimización de distribución)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -548,6 +566,7 @@
       "id": "sys.do.background-bandwidth.cap50",
       "version": 1,
       "title": "Updates em segundo plano usando no máximo 50% da internet",
+      "i18n": { "en": { "title": "Background updates using at most 50% of the internet" }, "es": { "title": "Actualizaciones en segundo plano usando como máximo el 50% de internet" } },
       "classification": "Conditional",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -576,6 +595,7 @@
       "id": "sys.ai.recall-enablement.off",
       "version": 1,
       "title": "Recall indisponível",
+      "i18n": { "en": { "title": "Recall unavailable" }, "es": { "title": "Recall no disponible" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -607,6 +627,7 @@
       "id": "sys.ai.clicktodo.off",
       "version": 1,
       "title": "Desligar o Click to Do",
+      "i18n": { "en": { "title": "Turn off Click to Do" }, "es": { "title": "Desactivar Click to Do" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -638,6 +659,7 @@
       "id": "sys.explorer.startup-delay.off",
       "version": 1,
       "title": "Programas da inicialização abrem sem atraso",
+      "i18n": { "en": { "title": "Startup programs open without delay" }, "es": { "title": "Los programas de inicio se abren sin retraso" } },
       "classification": "Experimental",
       "handlerKind": "RegistryValue",
       "target": {
@@ -670,6 +692,7 @@
       "id": "sys.ui.transparency.off",
       "version": 1,
       "title": "Desligar transparência das janelas",
+      "i18n": { "en": { "title": "Turn off window transparency" }, "es": { "title": "Desactivar la transparencia de las ventanas" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -698,6 +721,7 @@
       "id": "sys.ui.minimize-animation.off",
       "version": 1,
       "title": "Sem animação ao minimizar e maximizar",
+      "i18n": { "en": { "title": "No animation when minimizing and maximizing" }, "es": { "title": "Sin animación al minimizar y maximizar" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -726,6 +750,7 @@
       "id": "sys.ui.taskbar-animations.off",
       "version": 1,
       "title": "Sem animações da barra de tarefas",
+      "i18n": { "en": { "title": "No taskbar animations" }, "es": { "title": "Sin animaciones de la barra de tareas" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -754,6 +779,7 @@
       "id": "sys.ui.menu-show-delay.200",
       "version": 1,
       "title": "Submenus abrem mais rápido (400→200 ms)",
+      "i18n": { "en": { "title": "Submenus open faster (400→200 ms)" }, "es": { "title": "Los submenús se abren más rápido (400→200 ms)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -782,6 +808,7 @@
       "id": "sys.ntfs.last-access.disable",
       "version": 1,
       "title": "NTFS sem gravar 'último acesso' a cada leitura",
+      "i18n": { "en": { "title": "NTFS without writing 'last access' on every read" }, "es": { "title": "NTFS sin grabar 'último acceso' en cada lectura" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -810,6 +837,7 @@
       "id": "sys.power.fast-startup.off",
       "version": 1,
       "title": "Desligar a Inicialização Rápida (desligar = desligar de verdade)",
+      "i18n": { "en": { "title": "Turn off Fast Startup (shut down = really shut down)" }, "es": { "title": "Desactivar el Inicio rápido (apagar = apagar de verdad)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -838,6 +866,7 @@
       "id": "sys.explorer.show-extensions",
       "version": 1,
       "title": "Mostrar extensões de arquivo (.exe, .pdf…)",
+      "i18n": { "en": { "title": "Show file extensions (.exe, .pdf…)" }, "es": { "title": "Mostrar las extensiones de archivo (.exe, .pdf…)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -866,6 +895,7 @@
       "id": "sys.notifications.toasts.off",
       "version": 1,
       "title": "Desligar todas as notificações pop-up",
+      "i18n": { "en": { "title": "Turn off all pop-up notifications" }, "es": { "title": "Desactivar todas las notificaciones emergentes" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -894,6 +924,7 @@
       "id": "net.ipv6.prefer-ipv4",
       "version": 1,
       "title": "Preferir IPv4 sem desligar o IPv6",
+      "i18n": { "en": { "title": "Prefer IPv4 without turning off IPv6" }, "es": { "title": "Preferir IPv4 sin desactivar IPv6" } },
       "classification": "Conditional",
       "condition": "Só se sites/jogos demorarem a conectar por IPv6.",
       "handlerKind": "RegistryValue",
@@ -923,6 +954,7 @@
       "id": "sys.svc.pcasvc.disabled",
       "version": 1,
       "title": "Desativar o Assistente de Compatibilidade de Programas",
+      "i18n": { "en": { "title": "Disable the Program Compatibility Assistant" }, "es": { "title": "Desactivar el Asistente para la compatibilidad de programas" } },
       "classification": "Conditional",
       "handlerKind": "ServiceStartType",
       "target": {
@@ -947,6 +979,7 @@
       "id": "sys.svc.trkwks.disabled",
       "version": 1,
       "title": "Desativar o Cliente de Rastreamento de Link Distribuído",
+      "i18n": { "en": { "title": "Disable the Distributed Link Tracking Client" }, "es": { "title": "Desactivar el Cliente de seguimiento de vínculos distribuidos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "ServiceStartType",
       "target": {

@@ -41,6 +41,28 @@ public sealed partial record CatalogEntry(
     /// </summary>
     public IReadOnlyList<string> Supersedes { get; init; } = [];
 
+    /// <summary>Traduções dos textos para o usuário, por idioma ("en", "es"), do campo opcional "i18n".</summary>
+    public IReadOnlyDictionary<string, CatalogTexts> Translations { get; init; } = new Dictionary<string, CatalogTexts>();
+
+    /// <summary>
+    /// Esta entrada com título, mecanismo, riscos e desfazer no idioma pedido ("en", "es", "en-US"...), onde houver tradução;
+    /// o que faltar continua em pt-BR. Só a interface usa: o aplicador e o diário guardam o catálogo original.
+    /// </summary>
+    public CatalogEntry Localized(string? language)
+    {
+        if (string.IsNullOrEmpty(language) || Translations.Count == 0) return this;
+        if (!Translations.TryGetValue(language, out var t))
+        {
+            var dash = language.IndexOf('-', StringComparison.Ordinal);
+            if (dash <= 0 || !Translations.TryGetValue(language[..dash], out t)) return this;
+        }
+        return this with
+        {
+            Definition = Definition with { Title = t.Title ?? Definition.Title, Mechanism = t.Mechanism ?? Definition.Mechanism, Risks = t.Risks ?? Definition.Risks },
+            Revert = t.Revert ?? Revert,
+        };
+    }
+
     public const int MaxUserArguments = 8;
     public const int MaxUserArgumentLength = 260;
 
@@ -163,7 +185,15 @@ public sealed partial record CatalogEntry(
     }
 }
 
-public sealed record CatalogDocument(string CatalogVersion, string Schema, IReadOnlyList<CatalogEntry> Actions, IReadOnlyList<RejectedCatalogItem> Rejected);
+public sealed record CatalogDocument(string CatalogVersion, string Schema, IReadOnlyList<CatalogEntry> Actions, IReadOnlyList<RejectedCatalogItem> Rejected)
+{
+    /// <summary>Mesmo catálogo com os textos no idioma pedido onde houver tradução (ver <see cref="CatalogEntry.Localized"/>).</summary>
+    public CatalogDocument Localized(string? language) =>
+        string.IsNullOrEmpty(language) ? this : this with { Actions = Actions.Select(a => a.Localized(language)).ToList() };
+}
+
+/// <summary>Textos traduzidos de uma ação (campo "i18n" do catálogo). Null = vale o pt-BR.</summary>
+public sealed record CatalogTexts(string? Title, string? Mechanism, string? Risks, string? Revert);
 
 /// <summary>Lê catalog/actions.v1.json. Campos desconhecidos são ignorados; campos obrigatórios ausentes geram erro.</summary>
 public static partial class CatalogLoader
@@ -307,7 +337,25 @@ public static partial class CatalogLoader
             DesiredType = Str(a, "desiredType"),
             UserParameters = userParameters,
             Supersedes = supersedes,
+            Translations = Translations(a),
         };
+    }
+
+    /// <summary>
+    /// Campo opcional "i18n": {"en": {"title": ..., "mechanism": ..., "risks": ..., "revert": ...}, "es": {...}}. Só textos
+    /// mostrados ao usuário; nunca muda alvo, valor, handler ou segurança. Campo ausente = o texto em pt-BR vale.
+    /// </summary>
+    private static Dictionary<string, CatalogTexts> Translations(JsonElement a)
+    {
+        var result = new Dictionary<string, CatalogTexts>(StringComparer.OrdinalIgnoreCase);
+        if (!a.TryGetProperty("i18n", out var i18n) || i18n.ValueKind != JsonValueKind.Object) return result;
+        foreach (var lang in i18n.EnumerateObject())
+        {
+            if (lang.Value.ValueKind != JsonValueKind.Object) continue;
+            var t = new CatalogTexts(Str(lang.Value, "title"), Str(lang.Value, "mechanism"), Str(lang.Value, "risks"), Str(lang.Value, "revert"));
+            if (t.Title is not null || t.Mechanism is not null || t.Risks is not null || t.Revert is not null) result[lang.Name] = t;
+        }
+        return result;
     }
 
     private static string? Str(JsonElement e, string name) =>

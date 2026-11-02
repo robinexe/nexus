@@ -7,6 +7,7 @@
       "id": "privacy.telemetry.required",
       "version": 1,
       "title": "Dados de diagnóstico: só os obrigatórios",
+      "i18n": { "en": { "title": "Diagnostic data: required only" }, "es": { "title": "Datos de diagnóstico: solo los obligatorios" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -43,6 +44,7 @@
       "id": "privacy.feedback.frequency.never",
       "version": 1,
       "title": "Frequência de feedback: nunca (contagem)",
+      "i18n": { "en": { "title": "Feedback frequency: never (count)" }, "es": { "title": "Frecuencia de comentarios: nunca (recuento)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -71,6 +73,7 @@
       "id": "privacy.feedback.period.never",
       "version": 1,
       "title": "Frequência de feedback: nunca (período)",
+      "i18n": { "en": { "title": "Feedback frequency: never (period)" }, "es": { "title": "Frecuencia de comentarios: nunca (período)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -99,6 +102,7 @@
       "id": "privacy.feedback.notifications.off",
       "version": 1,
       "title": "Não mostrar notificações de feedback",
+      "i18n": { "en": { "title": "Don't show feedback notifications" }, "es": { "title": "No mostrar notificaciones de comentarios" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -131,6 +135,7 @@
       "id": "privacy.tailored.user-setting.off",
       "version": 1,
       "title": "Experiências personalizadas: desligado (Configurações)",
+      "i18n": { "en": { "title": "Tailored experiences: off (Settings)" }, "es": { "title": "Experiencias personalizadas: desactivado (Configuración)" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -163,6 +168,7 @@
       "id": "privacy.tailored.policy.off",
       "version": 1,
       "title": "Não usar diagnóstico para experiências personalizadas (política)",
+      "i18n": { "en": { "title": "Don't use diagnostics for tailored experiences (policy)" }, "es": { "title": "No usar el diagnóstico para experiencias personalizadas (directiva)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -198,6 +204,7 @@
       "id": "privacy.ceip.off",
       "version": 1,
       "title": "Desligar o CEIP do Windows",
+      "i18n": { "en": { "title": "Turn off the Windows CEIP" }, "es": { "title": "Desactivar el CEIP de Windows" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -226,6 +233,7 @@
       "id": "privacy.appdiag.deny",
       "version": 1,
       "title": "Negar diagnóstico de apps a outros apps",
+      "i18n": { "en": { "title": "Deny app diagnostics to other apps" }, "es": { "title": "Denegar el diagnóstico de apps a otras apps" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -258,6 +266,7 @@
       "id": "privacy.wer.off",
       "version": 1,
       "title": "Desligar o Relatório de Erros (usuário)",
+      "i18n": { "en": { "title": "Turn off Error Reporting (user)" }, "es": { "title": "Desactivar el Informe de errores (usuario)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -286,6 +295,7 @@
       "id": "privacy.adid.user.off",
       "version": 1,
       "title": "ID de publicidade desligado (Configurações)",
+      "i18n": { "en": { "title": "Advertising ID off (Settings)" }, "es": { "title": "Id. de publicidad desactivado (Configuración)" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -318,6 +328,7 @@
       "id": "privacy.adid.policy.off",
       "version": 1,
       "title": "Desativar o ID de publicidade (política)",
+      "i18n": { "en": { "title": "Disable the advertising ID (policy)" }, "es": { "title": "Desactivar el Id. de publicidad (directiva)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -350,6 +361,7 @@
       "id": "privacy.language-list.optout",
       "version": 1,
       "title": "Não enviar lista de idiomas aos sites",
+      "i18n": { "en": { "title": "Don't send the language list to websites" }, "es": { "title": "No enviar la lista de idiomas a los sitios web" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -378,6 +390,7 @@
       "id": "privacy.suggestions.start.off",
       "version": 1,
       "title": "Sugestões no Iniciar desligadas",
+      "i18n": { "en": { "title": "Suggestions in Start off" }, "es": { "title": "Sugerencias en Inicio desactivadas" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -413,6 +426,7 @@
       "id": "privacy.suggestions.start-iris.off",
       "version": 1,
       "title": "Recomendações no Iniciar desligadas",
+      "i18n": { "en": { "title": "Recommendations in Start off" }, "es": { "title": "Recomendaciones en Inicio desactivadas" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -448,6 +462,7 @@
       "id": "privacy.suggestions.tips.off",
       "version": 1,
       "title": "Dicas e sugestões desligadas",
+      "i18n": { "en": { "title": "Tips and suggestions off" }, "es": { "title": "Consejos y sugerencias desactivados" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -480,6 +495,7 @@
       "id": "privacy.suggestions.settings-338393.off",
       "version": 1,
       "title": "Conteúdo sugerido nas Configurações (1/3)",
+      "i18n": { "en": { "title": "Suggested content in Settings (1/3)" }, "es": { "title": "Contenido sugerido en Configuración (1/3)" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -508,6 +524,7 @@
       "id": "privacy.suggestions.settings-353694.off",
       "version": 1,
       "title": "Conteúdo sugerido nas Configurações (2/3)",
+      "i18n": { "en": { "title": "Suggested content in Settings (2/3)" }, "es": { "title": "Contenido sugerido en Configuración (2/3)" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -536,6 +553,7 @@
       "id": "privacy.suggestions.settings-353696.off",
       "version": 1,
       "title": "Conteúdo sugerido nas Configurações (3/3)",
+      "i18n": { "en": { "title": "Suggested content in Settings (3/3)" }, "es": { "title": "Contenido sugerido en Configuración (3/3)" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -564,6 +582,7 @@
       "id": "privacy.suggestions.silent-apps.off",
       "version": 1,
       "title": "Não instalar apps sugeridos automaticamente",
+      "i18n": { "en": { "title": "Don't install suggested apps automatically" }, "es": { "title": "No instalar apps sugeridas automáticamente" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -596,6 +615,7 @@
       "id": "privacy.suggestions.welcome.off",
       "version": 1,
       "title": "Sem experiência de boas-vindas após atualizações",
+      "i18n": { "en": { "title": "No welcome experience after updates" }, "es": { "title": "Sin experiencia de bienvenida tras las actualizaciones" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -624,6 +644,7 @@
       "id": "privacy.suggestions.finish-setup.off",
       "version": 1,
       "title": "Sem \"concluir a configuração do dispositivo\"",
+      "i18n": { "en": { "title": "No \"finish setting up your device\"" }, "es": { "title": "Sin \"terminar de configurar el dispositivo\"" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -652,6 +673,7 @@
       "id": "privacy.suggestions.third-party.off",
       "version": 1,
       "title": "Não sugerir conteúdo de terceiros",
+      "i18n": { "en": { "title": "Don't suggest third-party content" }, "es": { "title": "No sugerir contenido de terceros" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -680,6 +702,7 @@
       "id": "privacy.suggestions.explorer-sync.off",
       "version": 1,
       "title": "Sem notificações do provedor de sincronização",
+      "i18n": { "en": { "title": "No sync provider notifications" }, "es": { "title": "Sin notificaciones del proveedor de sincronización" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -708,6 +731,7 @@
       "id": "privacy.activity.feed.off",
       "version": 1,
       "title": "Desativar o feed de atividades",
+      "i18n": { "en": { "title": "Disable the activity feed" }, "es": { "title": "Desactivar la fuente de actividades" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -740,6 +764,7 @@
       "id": "privacy.activity.publish.off",
       "version": 1,
       "title": "Não publicar atividades do usuário",
+      "i18n": { "en": { "title": "Don't publish user activities" }, "es": { "title": "No publicar las actividades del usuario" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -772,6 +797,7 @@
       "id": "privacy.activity.upload.off",
       "version": 1,
       "title": "Não enviar atividades do usuário",
+      "i18n": { "en": { "title": "Don't upload user activities" }, "es": { "title": "No enviar las actividades del usuario" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -804,6 +830,7 @@
       "id": "privacy.clipboard.cloud.off",
       "version": 1,
       "title": "Desativar sincronização da área de transferência",
+      "i18n": { "en": { "title": "Disable clipboard sync" }, "es": { "title": "Desactivar la sincronización del portapapeles" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -839,6 +866,7 @@
       "id": "privacy.activity.app-launch.off",
       "version": 1,
       "title": "Não rastrear inicialização de apps",
+      "i18n": { "en": { "title": "Don't track app launches" }, "es": { "title": "No rastrear el inicio de apps" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -867,6 +895,7 @@
       "id": "privacy.activity.recent-docs.off",
       "version": 1,
       "title": "Não rastrear documentos recentes",
+      "i18n": { "en": { "title": "Don't track recent documents" }, "es": { "title": "No rastrear los documentos recientes" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -895,6 +924,7 @@
       "id": "privacy.search.bing.off",
       "version": 1,
       "title": "Pesquisa do Iniciar sem Bing (Configurações)",
+      "i18n": { "en": { "title": "Start search without Bing (Settings)" }, "es": { "title": "Búsqueda de Inicio sin Bing (Configuración)" } },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -923,6 +953,7 @@
       "id": "privacy.search.box-suggestions.off",
       "version": 1,
       "title": "Desativar sugestões da caixa de pesquisa (política)",
+      "i18n": { "en": { "title": "Disable search box suggestions (policy)" }, "es": { "title": "Desactivar las sugerencias del cuadro de búsqueda (directiva)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -958,6 +989,7 @@
       "id": "privacy.search.highlights.off",
       "version": 1,
       "title": "Desativar destaques da pesquisa",
+      "i18n": { "en": { "title": "Disable search highlights" }, "es": { "title": "Desactivar los aspectos destacados de la búsqueda" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -989,6 +1021,7 @@
       "id": "privacy.search.location.off",
       "version": 1,
       "title": "Pesquisa sem localização",
+      "i18n": { "en": { "title": "Search without location" }, "es": { "title": "Búsqueda sin ubicación" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1021,6 +1054,7 @@
       "id": "privacy.cortana.off",
       "version": 1,
       "title": "Desativar a Cortana",
+      "i18n": { "en": { "title": "Disable Cortana" }, "es": { "title": "Desactivar Cortana" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1053,6 +1087,7 @@
       "id": "privacy.search.cloud.off",
       "version": 1,
       "title": "Pesquisa sem fontes da nuvem",
+      "i18n": { "en": { "title": "Search without cloud sources" }, "es": { "title": "Búsqueda sin fuentes de la nube" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1084,6 +1119,7 @@
       "id": "privacy.copilot.off",
       "version": 1,
       "title": "Desativar o Windows Copilot",
+      "i18n": { "en": { "title": "Disable Windows Copilot" }, "es": { "title": "Desactivar Windows Copilot" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1115,6 +1151,7 @@
       "id": "privacy.recall.snapshots.off",
       "version": 1,
       "title": "Não salvar capturas para o Recall",
+      "i18n": { "en": { "title": "Don't save snapshots for Recall" }, "es": { "title": "No guardar instantáneas para Recall" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1146,6 +1183,7 @@
       "id": "privacy.widgets.off",
       "version": 1,
       "title": "Desativar Widgets",
+      "i18n": { "en": { "title": "Disable Widgets" }, "es": { "title": "Desactivar los Widgets" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1181,6 +1219,7 @@
       "id": "privacy.news-interests.off",
       "version": 1,
       "title": "Desativar notícias e interesses",
+      "i18n": { "en": { "title": "Disable news and interests" }, "es": { "title": "Desactivar noticias e intereses" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1212,6 +1251,7 @@
       "id": "privacy.inking.text-collection.off",
       "version": 1,
       "title": "Restringir coleta implícita de texto",
+      "i18n": { "en": { "title": "Restrict implicit text collection" }, "es": { "title": "Restringir la recopilación implícita de texto" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -1240,6 +1280,7 @@
       "id": "privacy.inking.ink-collection.off",
       "version": 1,
       "title": "Restringir coleta implícita de escrita à mão",
+      "i18n": { "en": { "title": "Restrict implicit handwriting collection" }, "es": { "title": "Restringir la recopilación implícita de escritura a mano" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -1268,6 +1309,7 @@
       "id": "privacy.inking.linguistic-data.off",
       "version": 1,
       "title": "Não enviar dados linguísticos",
+      "i18n": { "en": { "title": "Don't send linguistic data" }, "es": { "title": "No enviar datos lingüísticos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -1300,6 +1342,7 @@
       "id": "privacy.speech.online.off",
       "version": 1,
       "title": "Reconhecimento de fala online desligado",
+      "i18n": { "en": { "title": "Online speech recognition off" }, "es": { "title": "Reconocimiento de voz en línea desactivado" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -1328,6 +1371,7 @@
       "id": "privacy.voice.activation.deny",
       "version": 1,
       "title": "Negar ativação por voz",
+      "i18n": { "en": { "title": "Deny voice activation" }, "es": { "title": "Denegar la activación por voz" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1363,6 +1407,7 @@
       "id": "privacy.voice.activation-lock.deny",
       "version": 1,
       "title": "Negar ativação por voz com o PC bloqueado",
+      "i18n": { "en": { "title": "Deny voice activation when the PC is locked" }, "es": { "title": "Denegar la activación por voz con el PC bloqueado" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1398,6 +1443,7 @@
       "id": "privacy.maps.auto-update.off",
       "version": 1,
       "title": "Não atualizar mapas automaticamente",
+      "i18n": { "en": { "title": "Don't update maps automatically" }, "es": { "title": "No actualizar los mapas automáticamente" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1426,6 +1472,7 @@
       "id": "privacy.maps.settings-traffic.off",
       "version": 1,
       "title": "Sem tráfego de mapas na página de Configurações",
+      "i18n": { "en": { "title": "No map traffic on the Settings page" }, "es": { "title": "Sin tráfico de mapas en la página de Configuración" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1454,6 +1501,7 @@
       "id": "privacy.messaging.cloud-sync.off",
       "version": 1,
       "title": "Sem sincronização de mensagens na nuvem",
+      "i18n": { "en": { "title": "No cloud message sync" }, "es": { "title": "Sin sincronización de mensajes en la nube" } },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -1482,6 +1530,7 @@
       "id": "privacy.sync.disable",
       "version": 1,
       "title": "Não sincronizar configurações",
+      "i18n": { "en": { "title": "Don't sync settings" }, "es": { "title": "No sincronizar la configuración" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1514,6 +1563,7 @@
       "id": "privacy.sync.no-user-override",
       "version": 1,
       "title": "Não deixar o usuário religar a sincronização",
+      "i18n": { "en": { "title": "Don't let the user turn sync back on" }, "es": { "title": "No dejar que el usuario vuelva a activar la sincronización" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1542,6 +1592,7 @@
       "id": "privacy.background-apps.deny",
       "version": 1,
       "title": "Negar apps em segundo plano",
+      "i18n": { "en": { "title": "Deny background apps" }, "es": { "title": "Denegar apps en segundo plano" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1574,6 +1625,7 @@
       "id": "privacy.location.off",
       "version": 1,
       "title": "Desativar a localização",
+      "i18n": { "en": { "title": "Disable location" }, "es": { "title": "Desactivar la ubicación" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1602,6 +1654,7 @@
       "id": "privacy.findmydevice.off",
       "version": 1,
       "title": "Desativar Encontrar meu dispositivo",
+      "i18n": { "en": { "title": "Disable Find my device" }, "es": { "title": "Desactivar Buscar mi dispositivo" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1637,6 +1690,7 @@
       "id": "privacy.edge.diagnostic.required",
       "version": 1,
       "title": "Edge: diagnóstico só obrigatório",
+      "i18n": { "en": { "title": "Edge: required diagnostics only" }, "es": { "title": "Edge: solo diagnóstico obligatorio" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1665,6 +1719,7 @@
       "id": "privacy.edge.personalization.off",
       "version": 1,
       "title": "Edge: sem personalização por histórico",
+      "i18n": { "en": { "title": "Edge: no personalization from history" }, "es": { "title": "Edge: sin personalización por el historial" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1693,6 +1748,7 @@
       "id": "privacy.edge.recommendations.off",
       "version": 1,
       "title": "Edge: sem recomendações",
+      "i18n": { "en": { "title": "Edge: no recommendations" }, "es": { "title": "Edge: sin recomendaciones" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1721,6 +1777,7 @@
       "id": "privacy.edge.feedback.off",
       "version": 1,
       "title": "Edge: sem feedback",
+      "i18n": { "en": { "title": "Edge: no feedback" }, "es": { "title": "Edge: sin comentarios" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1749,6 +1806,7 @@
       "id": "privacy.edge.shopping.off",
       "version": 1,
       "title": "Edge: sem assistente de compras",
+      "i18n": { "en": { "title": "Edge: no shopping assistant" }, "es": { "title": "Edge: sin asistente de compras" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1777,6 +1835,7 @@
       "id": "privacy.edge.dnt.on",
       "version": 1,
       "title": "Edge: enviar Do Not Track",
+      "i18n": { "en": { "title": "Edge: send Do Not Track" }, "es": { "title": "Edge: enviar Do Not Track" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1805,6 +1864,7 @@
       "id": "privacy.edge.search-suggest.off",
       "version": 1,
       "title": "Edge: sem sugestões de pesquisa",
+      "i18n": { "en": { "title": "Edge: no search suggestions" }, "es": { "title": "Edge: sin sugerencias de búsqueda" } },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1833,6 +1893,7 @@
       "id": "privacy.office.telemetry.neither",
       "version": 1,
       "title": "Office: diagnóstico \"Nenhum\"",
+      "i18n": { "en": { "title": "Office: diagnostics \"None\"" }, "es": { "title": "Office: diagnóstico \"Ninguno\"" } },
       "classification": "Conditional",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -1861,6 +1922,7 @@
       "id": "privacy.office.optional-connected.off",
       "version": 1,
       "title": "Office: sem experiências conectadas opcionais",
+      "i18n": { "en": { "title": "Office: no optional connected experiences" }, "es": { "title": "Office: sin experiencias conectadas opcionales" } },
       "classification": "Conditional",
       "handlerKind": "PrivacyPolicyValue",
       "target": {

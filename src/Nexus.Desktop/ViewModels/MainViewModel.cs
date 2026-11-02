@@ -397,7 +397,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             (doc, rows, titles) = await Task.Run(() =>
             {
-                var d = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
+                var d = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory).Localized(Loc.Language);
                 var t = new Dictionary<string, string>(StringComparer.Ordinal);
                 foreach (var e in d.Actions) t[e.Definition.Key] = e.Definition.Title;
                 var handlers = ReadOnlyServices.Handlers;

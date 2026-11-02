@@ -187,6 +187,43 @@ public sealed partial class LocalizationTests
         Assert.Equal("pt-BR", csproj.Descendants("NeutralLanguage").Single().Value);
     }
 
+    [Fact]
+    public void Catalog_translations_change_only_texts_and_cover_the_visible_catalogs()
+    {
+        var dir = Path.Combine(Root(), "catalog");
+        var doc = Nexus.Core.CatalogLoader.LoadDirectory(dir);
+        var problems = new List<string>();
+        foreach (var file in new[] { "actions.v1.json", "tuning.v1.json", "privacy.v1.json", "nvidia.v1.json" })
+        {
+            var ids = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(dir, file))).RootElement.GetProperty("actions")
+                .EnumerateArray().Select(a => a.GetProperty("id").GetString()!).ToList();
+            foreach (var id in ids)
+            {
+                var e = doc.Actions.First(a => a.Definition.Id == id);
+                foreach (var lang in new[] { "en", "es" })
+                    if (!e.Translations.TryGetValue(lang, out var t) || string.IsNullOrWhiteSpace(t.Title)) problems.Add($"{file} {id}: sem título em {lang}");
+            }
+        }
+        foreach (var e in doc.Actions.Where(a => a.Translations.Count > 0))
+            foreach (var lang in e.Translations.Keys)
+                if (!LanguageOption.Supported.Contains(lang, StringComparer.OrdinalIgnoreCase)) problems.Add($"{e.Definition.Id}: idioma desconhecido '{lang}'");
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+
+        var original = doc.Actions.First(a => a.Definition.Id == "win.gamemode.enable");
+        var en = original.Localized("en-US");
+        Assert.Equal("Turn on Game Mode", en.Definition.Title);
+        Assert.Equal("Activar el Modo Juego", original.Localized("es").Definition.Title);
+        Assert.Same(original, original.Localized("fr"));
+        // Só texto muda: chave, handler, alvo, valor e privilégio são os mesmos (o aplicador usa o catálogo original).
+        Assert.Equal(original.Definition.Key, en.Definition.Key);
+        Assert.Equal(original.Definition.HandlerKind, en.Definition.HandlerKind);
+        Assert.Equal(original.Definition.Privileges, en.Definition.Privileges);
+        Assert.Equal(original.DesiredValue, en.DesiredValue);
+        Assert.Equal(original.TargetTemplate, en.TargetTemplate);
+        Assert.Equal(original.Definition.Mechanism, en.Definition.Mechanism); // sem tradução do mecanismo: continua pt-BR
+        Assert.Equal(doc.Actions.Count, doc.Localized("en").Actions.Count);
+    }
+
     // ------------------------------------------------------------------ apoio
 
     private static Dictionary<string, Dictionary<string, string>> AllResources()
