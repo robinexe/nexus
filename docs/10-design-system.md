@@ -398,35 +398,46 @@ O build e os testes conferem tipos, propriedades, bindings de mão dupla e chave
 
 ---
 
-## 9. Modo simples (02/11/2026)
+## 9. Interface simples para todos (02/11/2026)
 
-Pedido do responsável: *"nosso aplicativo ficou com muita informação e ficou confuso, vamos facilitar a vida do usuário
-leigo"*. A interface tem dois modos (`NexusSettings.UiMode`: `"simple"`/`"full"`; null = ainda não escolheu):
+Pedidos do responsável: *"nosso aplicativo ficou com muita informação e ficou confuso, vamos facilitar a vida do usuário
+leigo"* e, em seguida, *"quero que o modo simples seja para todos usuários, quero que a interface seja fácil de entender e
+aplicar as modificações"*. Não há escolha de modo: a interface é uma só.
 
-| | Simples (padrão) | Completo |
-|---|---|---|
-| Navegação | 6 itens, ícone grande, uma palavra, sem grupos: Início, Otimizar, Limpar, Jogos, Problemas, Histórico | as 27 páginas de antes, agrupadas |
-| Cabeçalho | só "Ler de novo" (ícone) e o selo de segurança | igual a antes |
-| Rodapé | status (sem a legenda das cores) | igual a antes |
-| Pé da navegação | Ajustes + "Mostrar todas as ferramentas" | "Voltar ao modo simples" |
+| Parte | Como ficou |
+|---|---|
+| Navegação | 6 itens, ícone grande, uma palavra, sem grupos: Início, Otimizar, Limpar, Jogos, Problemas, Histórico. No pé, um link discreto "Ferramentas avançadas" |
+| Ferramentas avançadas | uma página (`AdvancedToolsPage`) com as 27 páginas de antes em ladrilhos (ícone, nome, uma linha); Ajustes primeiro; "Exportar leitura" e "Ver tudo (administrador)" ficam aqui. Uma página aberta fora da lista lateral mostra a barra "Voltar ao início · Ferramentas avançadas" |
+| Cabeçalho | o selo de segurança e o botão de reler (ícone) |
+| Primeira abertura | boas-vindas em 2 telas (o que faz; seguro e tudo se desfaz), só para quem nunca usou. Quem já usava não vê aviso. O antigo `UiMode = "full"` é migrado para `"simple"` (`UiModeStartup.Decide`) |
 
-- Primeira abertura (sem escolha gravada e sem uso anterior): boas-vindas em 3 telas (o que faz; nada muda sem você e tudo
-  se desfaz; Simples ou Completo). Quem já usava abre no simples com um aviso único ("Deixamos o NEXUS mais simples…").
-  Trocar: Ajustes › Modo do NEXUS, ou o link no pé da navegação. Regra pura em `UiModeStartup.Decide`.
-- As telas simples (`ViewModels/Simple/SimplePages.cs`, `Views/Pages/Simple.xaml`) são vitrines sobre as páginas completas
-  (Assistente, Limpeza, Placa de vídeo, Medir, diagnóstico, diário): nenhuma tem caminho de escrita próprio.
-- **Início**: anel (`ProcessRing`, o único elemento marcante) com a palavra da saúde (`SimpleHealth.Compute`: pontos de
-  atenção, lixo recuperável, ajustes recomendados ainda não feitos, driver de vídeo antigo, memória num canal só), um botão
-  "Otimizar meu PC com segurança" e no máximo 3 cartões (`ImproveCards.Top`).
-- **Otimizar**: o Assistente completo no modo automático (`AssistantPage.RunAutomaticAsync`): uma confirmação no começo
-  (inclui o aviso único do Windows), depois cada etapa de `AutoPilot.Steps` lê, confere no aplicador e aplica só o que
-  `AutoPilot.IsAutomatic` aceita (risco baixo recomendado, desfazível ou o ponto de restauração; nunca experimental,
-  opcional/avançado, irreversível, instalar driver ou trocar o modo do monitor), por `IModuleHost.ApplyConfirmedAsync`.
-  Termina com "Pronto! Liberamos X e ajustamos Y coisas.", "Ver detalhes" (relatório) e "Desfazer tudo".
-- **Limpar**: só as regras marcadas por padrão, embutidas, sem dados pessoais (`CleaningPage.CleanSafeCommand`), para a
-  quarentena ("lixeira do NEXUS") como sempre.
-- **Jogos**: por jogo, "Medir FPS" e só as opções que valem (driver NVIDIA por jogo, jogos em janela), em palavras simples.
-- **Problemas**: achados em palavras simples (`PlainFindings`), "O que fazer" em 1–2 frases; o que está bem fica recolhido.
+**Um clique onde a recomendação aparece.** Fluxo único (`ViewModels/Simple/OneClick.cs`): clique → uma frase de
+confirmação → aplica pelo aplicador (`IModuleHost.ApplyConfirmedAsync`, por nível: sua conta, depois sistema com um aviso do
+Windows) → "✓ Feito — Desfazer" no próprio lugar (`OneClickAction`, componente XAML `S.OneClick`). Desfazer volta as execuções
+pelo aplicador. O cartão/linha em que o usuário clicou fica à vista mesmo depois da releitura.
+
+- **Início**: anel (`ProcessRing`, o único elemento marcante) com a palavra da saúde (`SimpleHealth.Compute`) e um botão
+  "Otimizar meu PC com segurança". No máximo 3 cartões (`ImproveCards.Top`). O botão do cartão faz o seguinte:
+  - lixo recuperável ou pouco espaço: limpa as regras seguras (`CleaningPage.SafeRequests`);
+  - "N ajustes seguros ainda não foram feitos": aplica os recomendados dos Ajustes rápidos;
+  - achado com ação de risco baixo no catálogo (`ISimpleActions.LowRiskRequest`): "Resolver";
+  - driver de vídeo: abre Atualizar drivers já procurando a versão nova (baixar e instalar tem tela própria);
+  - memória num canal só ou BIOS: "Ver como" (é com o usuário).
+- **Otimizar**: o Assistente completo no modo automático (`AssistantPage.RunAutomaticAsync`): uma confirmação, só o que
+  `AutoPilot.IsAutomatic` aceita, resumo "Pronto! Liberamos X e ajustamos Y coisas.", "Ver detalhes" e "Desfazer tudo".
+  Abaixo, **Ajustes rápidos** (`QuickTweaksPanel`):
+  - as recomendações do Automático para este PC, em Velocidade, Jogos, Privacidade e Energia (`QuickTweakText`);
+  - cada uma com caixa de marcar, uma frase e "ligado" lido do estado atual (Detect);
+  - marcar aplica; desmarcar desfaz a execução que ligou só aquele ajuste (desta sessão ou do diário);
+  - por padrão só as recomendadas de risco baixo; "Mostrar mais opções" mostra o resto com a palavra de risco ("pode gastar
+    mais bateria", "experimental: pode não ajudar").
+- **Limpar**: "X GB podem ser liberados", "Limpar agora" (só regras seguras, para a quarentena), lista em "Ver o que será limpo".
+- **Jogos**: Modo de jogo do Windows com "Ligar" de um clique. Por jogo: "Medir FPS" e cada opção que vale com "Ligar" de um
+  clique (driver NVIDIA por jogo, jogos em janela).
+- **Problemas**: achados em palavras simples (`PlainFindings`), "O que fazer" em 1–2 frases e "Resolver" de um clique quando há
+  ação de risco baixo. O que está bem fica recolhido.
 - **Histórico**: os dois diários, "Hoje 14:30 — Limpeza: 12 itens limpos — Desfazer" (`SimpleHistoryText`), "Desfazer tudo".
-- Testes: `SimpleModeTests` (modos, escolha inicial, nota, cartões, achados, histórico, seleção do automático). O autoteste da
-  interface abre o modo simples (6 telas + boas-vindas + Otimizar de demonstração) e depois o completo.
+- Nunca aparecem chave de ação, estado cru do aplicador nem valor técnico.
+- Testes: `SimpleModeTests` (navegação, migração, nota, cartões, achados, histórico, ajustes rápidos, seleção do automático).
+- O autoteste da interface abre as 6 telas, as 2 de boas-vindas, Otimizar de demonstração, Ferramentas avançadas e cada
+  ferramenta dela.

@@ -373,4 +373,53 @@ public sealed class SimpleModeTests
         Assert.Equal("Pronto! Ajustamos 3 coisas.", SimpleOptimizeText.Summary(0, 3));
         Assert.Equal("Pronto! Seu PC já estava em dia: nada precisou mudar.", SimpleOptimizeText.Summary(0, 0));
     }
+
+    // ------------------------------------------------------------------ Ajustes rápidos e um clique
+
+    [Theory]
+    [InlineData("privacy.ads.off", QuickCategory.Privacy)]
+    [InlineData("power.active-scheme.high-performance", QuickCategory.Power)]
+    [InlineData("sys.power-throttling.off", QuickCategory.Power)]
+    [InlineData("fps.mpo.off", QuickCategory.Games)]
+    [InlineData("win.gamemode.enable", QuickCategory.Games)]
+    [InlineData("gpu.hags.lab", QuickCategory.Games)]
+    [InlineData("sys.ntfs.lastaccess", QuickCategory.Speed)]
+    [InlineData("boot.fast-startup.off", QuickCategory.Speed)]
+    public void Quick_tweaks_fall_into_plain_groups(string id, QuickCategory expected) => Assert.Equal(expected, QuickTweakText.CategoryOf(id));
+
+    [Fact]
+    public void Quick_tweak_groups_and_risk_words_are_plain()
+    {
+        Assert.Equal(["Velocidade", "Jogos", "Privacidade", "Energia"], Enum.GetValues<QuickCategory>().Select(QuickTweakText.CategoryTitle));
+        Assert.Equal("pode gastar mais bateria", QuickTweakText.RiskWord(QuickCategory.Power, ActionRisk.Low, false));
+        Assert.Equal("experimental: pode não ajudar", QuickTweakText.RiskWord(QuickCategory.Power, ActionRisk.Low, true));
+        Assert.Equal("pode ter efeito colateral", QuickTweakText.RiskWord(QuickCategory.Speed, ActionRisk.Medium, false));
+        Assert.Equal("você decide", QuickTweakText.RiskWord(QuickCategory.Privacy, ActionRisk.Low, false));
+    }
+
+    [Theory]
+    [InlineData("Libera a placa de vídeo. Ganho medido em jogos leves.", "Libera a placa de vídeo.")]
+    [InlineData("Uma frase só", "Uma frase só")]
+    [InlineData("", "")]
+    [InlineData(null, "")]
+    public void Quick_tweak_sentence_is_the_first_sentence(string? text, string expected) => Assert.Equal(expected, QuickTweakText.FirstSentence(text));
+
+    [Fact]
+    public void Long_sentences_are_cut()
+    {
+        var s = QuickTweakText.FirstSentence(new string('a', 300));
+        Assert.True(s.Length <= 140);
+        Assert.EndsWith("…", s, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Finding_cards_carry_the_fix_action_for_one_click()
+    {
+        var card = Assert.Single(ImproveCards.Top(Clean() with
+        {
+            Findings = [new DiagnosticFinding("win.gamemode", "Modo de Jogo desativado", DiagnosticSeverity.Attention, FactStatus.Detected, "x", "win.gamemode.enable")],
+        }));
+        Assert.Equal("win.gamemode", card.FindingId);
+        Assert.Equal("win.gamemode.enable", card.FixActionId);
+    }
 }
