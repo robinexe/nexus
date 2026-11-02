@@ -47,9 +47,9 @@ public sealed class KeepChangeCountdown
 
     public string Prompt(string what) => State switch
     {
-        KeepChangeState.Asking => $"Manter {what}? Volta sozinho em {SecondsLeft} s.",
-        KeepChangeState.Kept => $"Mantido: {what}.",
-        _ => "Voltando ao modo anterior…",
+        KeepChangeState.Asking => Loc.F("Shell.ManterNVoltaSozinho", what, SecondsLeft),
+        KeepChangeState.Kept => Loc.F("Shell.MantidoN", what),
+        _ => Loc.T("Shell.VoltandoModoAnterior"),
     };
 
     /// <summary>Avança o relógio. Retorna true quando ESTE tique esgotou o tempo (desfazer agora).</summary>

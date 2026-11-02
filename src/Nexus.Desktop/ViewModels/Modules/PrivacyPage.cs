@@ -17,7 +17,7 @@ namespace Nexus.Desktop.ViewModels;
 public sealed class PrivacyPage : ModulePage
 {
     public override string Title => "Privacidade";
-    public override string Group => "Proteger";
+    public override string Group => Loc.T("Nav.Proteger");
     public override string Subtitle => "Controle o que o Windows coleta e mostra sobre você.";
 
     private PrivacyCatalog? _catalog;

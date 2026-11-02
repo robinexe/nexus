@@ -30,6 +30,8 @@ public sealed record NexusSettings
     public DateTimeOffset? LastUpdateCheck { get; init; }
     /// <summary>Versão que já tentou instalar ao fechar (se o aviso do Windows foi recusado, não insiste a cada saída).</summary>
     public string? UpdateExitAttempted { get; init; }
+    /// <summary>Idioma da interface: null = igual ao Windows; "pt-BR", "en" ou "es" = fixo. Vale a partir do próximo início.</summary>
+    public string? Language { get; init; }
 
     public static NexusSettings Defaults { get; } = new();
 

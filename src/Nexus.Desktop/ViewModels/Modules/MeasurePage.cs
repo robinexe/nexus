@@ -146,7 +146,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     }
 
     public override string Title => "Medir";
-    public override string Group => "Medir";
+    public override string Group => Loc.T("Nav.Medir");
     public override string Subtitle => "O NEXUS percebe quando um jogo abre, mede cada partida e compara com a anterior. Medir não altera nada no PC.";
 
     // ------------------------------------------------------------------ estado geral

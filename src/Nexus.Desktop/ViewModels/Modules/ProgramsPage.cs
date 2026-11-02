@@ -241,7 +241,7 @@ public sealed class ProgramsPage : ModulePage
     }
 
     public override string Title => "Programas e atualizações";
-    public override string Group => "Limpar";
+    public override string Group => Loc.T("Nav.Limpar");
     public override string Subtitle => "Desinstale o que não usa, limpe o que sobrou e mantenha o resto atualizado.";
 
     // ------------------------------------------------------------------ abas

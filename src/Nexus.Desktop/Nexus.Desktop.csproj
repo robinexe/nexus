@@ -12,7 +12,12 @@
     <ApplicationIcon>Assets\nexus.ico</ApplicationIcon>
     <!-- Publicação (tools/packaging/publish.py): self-contained por RID, sem trimming (WPF e reflexão não suportam). -->
     <PublishTrimmed>false</PublishTrimmed>
+    <!-- Idiomas (docs/12-idiomas.md): Localization/Strings.resx é o pt-BR (neutro); en e es viram en/ e es/Nexus.Desktop.resources.dll. -->
+    <NeutralLanguage>pt-BR</NeutralLanguage>
   </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Nexus.Desktop.Localization" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.Persistence\Nexus.Persistence.csproj" />

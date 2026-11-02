@@ -15,7 +15,7 @@ public static class ShellMap
 
     /// <summary>Ordem dos grupos da navegação lateral (por tarefa do jogador). Grupos desconhecidos vão para o fim.</summary>
     public static readonly IReadOnlyList<string> GroupOrder =
-        ["Meu PC", "Assistente", "Automático", "Laboratório", "Otimizar", "Limpar", "Proteger", "Sistema", "Medir", "Registro"];
+        [Loc.T("Nav.MeuPc"), Loc.T("Nav.Assistente"), Loc.T("Nav.Automatico"), Loc.T("Nav.Laboratorio"), Loc.T("Nav.Otimizar"), Loc.T("Nav.Limpar"), Loc.T("Nav.Proteger"), Loc.T("Nav.Sistema"), Loc.T("Nav.Medir"), Loc.T("Nav.Registro")];
 
     private static readonly Dictionary<string, (string Icon, string Illustration)> Pages = new(StringComparer.Ordinal)
     {
@@ -89,21 +89,21 @@ public static class ShellMap
 
     private static readonly Dictionary<string, string> Actions = new(StringComparer.Ordinal)
     {
-        ["MemoryLabPage"] = "Ver a memória",
-        ["GpuLabPage"] = "Ver a placa de vídeo",
-        ["CpuLabPage"] = "Ver o processador",
-        ["CleaningPage"] = "Liberar espaço",
-        ["DiskPage"] = "Ver o disco",
-        ["SecurityPage"] = "Ver a segurança",
-        ["CatalogPage"] = "Ver os ajustes",
-        ["MeasurePage"] = "Medir uma partida",
-        ["StartupPage"] = "Ver a inicialização",
-        ["DiagnosticsPage"] = "Ver o diagnóstico",
+        ["MemoryLabPage"] = Loc.T("Nav.VerMemoria"),
+        ["GpuLabPage"] = Loc.T("Nav.VerPlacaVideo"),
+        ["CpuLabPage"] = Loc.T("Nav.VerProcessador"),
+        ["CleaningPage"] = Loc.T("Nav.LiberarEspaco"),
+        ["DiskPage"] = Loc.T("Nav.VerDisco"),
+        ["SecurityPage"] = Loc.T("Nav.VerSeguranca"),
+        ["CatalogPage"] = Loc.T("Nav.VerAjustes"),
+        ["MeasurePage"] = Loc.T("Nav.MedirPartida"),
+        ["StartupPage"] = Loc.T("Nav.VerInicializacao"),
+        ["DiagnosticsPage"] = Loc.T("Nav.VerDiagnostico"),
     };
 
     /// <summary>Verbo do botão que abre a página ("Liberar espaço", "Ver a memória"). Sem mapa: "Abrir".</summary>
     public static string ActionFor(string? pageTypeName) =>
-        pageTypeName is not null && Actions.TryGetValue(pageTypeName, out var a) ? a : "Abrir";
+        pageTypeName is not null && Actions.TryGetValue(pageTypeName, out var a) ? a : Loc.T("Shell.Abrir");
 
     /// <summary>Ícone do achado, pela mesma regra de <see cref="PageForFinding"/>.</summary>
     public static string IconForFinding(string? findingId) => IconFor(PageForFinding(findingId));

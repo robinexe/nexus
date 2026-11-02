@@ -49,6 +49,13 @@
     <!-- Lógica pura da casca: vigia da interface (suspensão não é travamento) e contagem "Manter esta taxa?". -->
     <Compile Include="..\..\src\Nexus.Desktop\Services\Shell\StallDetector.cs" Link="Shell\StallDetector.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\KeepChangeCountdown.cs" Link="Shell\KeepChangeCountdown.cs" />
+    <!-- Idiomas: Loc/LanguageOption (lógica pura) e os mesmos .resx, com o nome de recurso do Desktop (LocalizationTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\Localization\Loc.cs" Link="Localization\Loc.cs" />
+    <Compile Include="..\..\src\Nexus.Desktop\Localization\LanguageOption.cs" Link="Localization\LanguageOption.cs" />
+    <EmbeddedResource Include="..\..\src\Nexus.Desktop\Localization\Strings.resx" Link="Localization\Strings.resx" LogicalName="Nexus.Desktop.Localization.Strings.resources" />
+    <EmbeddedResource Include="..\..\src\Nexus.Desktop\Localization\Strings.en.resx" Link="Localization\Strings.en.resx" LogicalName="Nexus.Desktop.Localization.Strings.en.resources" />
+    <EmbeddedResource Include="..\..\src\Nexus.Desktop\Localization\Strings.es.resx" Link="Localization\Strings.es.resx" LogicalName="Nexus.Desktop.Localization.Strings.es.resources" />
+    <Using Include="Nexus.Desktop.Localization" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

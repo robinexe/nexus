@@ -116,7 +116,7 @@ public partial class MainWindow : Window
             try
             {
                 _tray = new TrayIcon();
-                _tray.SetTip("NEXUS — otimização com segurança");
+                _tray.SetTip(Loc.T("Shell.NexusOtimizacaoSeguranca"));
                 _tray.OpenRequested += (_, _) => RestoreFromTray();
                 _tray.OptimizeRequested += (_, _) => OptimizeFromTray();
                 _tray.ScanRequested += async (_, _) => await ScanFromTrayAsync();
@@ -125,7 +125,7 @@ public partial class MainWindow : Window
             catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or System.Runtime.InteropServices.ExternalException)
             {
                 _tray = null;
-                _vm.Notify($"Não foi possível criar o ícone da bandeja: {ex.Message}");
+                _vm.Notify(Loc.F("Shell.NaoFoiPossivelCriar", ex.Message));
             }
         }
         else if (!want && _tray is not null)
@@ -145,13 +145,13 @@ public partial class MainWindow : Window
 
     private void OnClosing(object? sender, CancelEventArgs e)
     {
-        if (_exiting || !TrayActive || !UiSettings.Current.CloseToTray) return;
+        if (_exiting || App.RelaunchRequested || !TrayActive || !UiSettings.Current.CloseToTray) return;
         e.Cancel = true;
         Hide();
         if (!_toldAboutTray)
         {
             _toldAboutTray = true;
-            _tray!.Notify("O NEXUS continua na bandeja", "Para sair de vez, clique com o botão direito no ícone e escolha Sair.");
+            _tray!.Notify(Loc.T("Shell.NexusContinuaBandeja"), Loc.T("Shell.SairVezCliqueBotao"));
         }
     }
 
@@ -167,7 +167,7 @@ public partial class MainWindow : Window
         RestoreFromTray();
         _vm.SelectedPage = _vm.Automation;
         if (_vm.Automation.OptimizeCommand.CanExecute(null)) _vm.Automation.OptimizeCommand.Execute(null);
-        else _vm.Notify("Aguarde a leitura do PC terminar e tente de novo.");
+        else _vm.Notify(Loc.T("Shell.AguardeLeituraPcTerminar"));
     }
 
     /// <summary>"Verificar agora": relê o PC (somente leitura), grava o relatório e avisa com "abrir relatório".</summary>
@@ -175,15 +175,15 @@ public partial class MainWindow : Window
     {
         try
         {
-            _tray?.Notify("Verificando o PC…", "Só leitura. Aviso quando o relatório estiver pronto.");
+            _tray?.Notify(Loc.T("Shell.VerificandoPc"), Loc.T("Shell.SoLeituraAvisoQuando"));
             await _vm.LoadAsync();
             var (report, summary) = await _vm.Automation.SaveReportAsync();
-            if (report is null) _tray?.Notify("Verificação não concluída", summary, warning: true);
-            else _tray?.Notify("Verificação do NEXUS concluída", summary + " Clique para abrir o relatório.", report);
+            if (report is null) _tray?.Notify(Loc.T("Shell.VerificacaoNaoConcluida"), summary, warning: true);
+            else _tray?.Notify(Loc.T("Shell.VerificacaoNexusConcluida"), summary + Loc.T("Shell.CliqueAbrirRelatorio"), report);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            _tray?.Notify("Verificação não concluída", ex.Message, warning: true);
+            _tray?.Notify(Loc.T("Shell.VerificacaoNaoConcluida"), ex.Message, warning: true);
         }
     }
 }

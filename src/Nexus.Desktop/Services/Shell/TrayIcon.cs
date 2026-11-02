@@ -80,12 +80,12 @@ public sealed class TrayIcon : IDisposable
     {
         var choice = TrayMenu.Show(_window.Handle,
         [
-            new(CmdOpen, "Abrir o NEXUS", IsDefault: true),
+            new(CmdOpen, Loc.T("Shell.AbrirNexus"), IsDefault: true),
             new(0, ""),
-            new(CmdOptimize, "Otimizar agora…"),
-            new(CmdScan, "Verificar agora (só leitura)"),
+            new(CmdOptimize, Loc.T("Shell.OtimizarAgora")),
+            new(CmdScan, Loc.T("Shell.VerificarAgoraSoLeitura")),
             new(0, ""),
-            new(CmdExit, "Sair"),
+            new(CmdExit, Loc.T("Shell.Sair")),
         ]);
         var handler = choice switch
         {

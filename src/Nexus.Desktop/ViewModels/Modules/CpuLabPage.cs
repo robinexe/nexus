@@ -51,7 +51,7 @@ public sealed class CpuLabPage : ModulePage
     }
 
     public override string Title => "Processador";
-    public override string Group => "Laboratório";
+    public override string Group => Loc.T("Nav.Laboratorio");
     public override string Subtitle => "Engenharia reversa do seu processador: o que ele é, como se comporta e o que o segura.";
 
     public RelayCommand MeasureCommand { get; }

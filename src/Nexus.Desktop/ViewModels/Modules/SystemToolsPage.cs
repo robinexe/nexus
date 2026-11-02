@@ -61,7 +61,7 @@ public sealed record RestorePointRow(string When, string Description, string Kin
 public sealed class SystemToolsPage : ModulePage
 {
     public override string Title => "Ferramentas do sistema";
-    public override string Group => "Sistema";
+    public override string Group => Loc.T("Nav.Sistema");
     public override string Subtitle => "Rede, drivers, apps do Windows e pontos de restauração.";
 
     private const string DnsAction = "system.network.dns-flush@1", ArpAction = "system.network.arp-flush@1";

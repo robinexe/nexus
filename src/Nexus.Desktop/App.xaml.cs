@@ -16,6 +16,14 @@ public partial class App : Application
     private EventWaitHandle? _showSignal;
     private RegisteredWaitHandle? _showWait;
 
+    /// <summary>
+    /// Idioma antes de qualquer XAML (InitializeComponent carrega os dicionários e os {l:T} logo depois deste construtor):
+    /// --lang na linha de comando, senão a preferência de Ajustes, senão o idioma do Windows (ver LanguageOption).
+    /// </summary>
+    public App() =>
+        Loc.Use(LanguageOption.Resolve(LanguageOption.FromArgs(Environment.GetCommandLineArgs()), UiSettings.Current.Language,
+            System.Globalization.CultureInfo.CurrentUICulture));
+
     protected override void OnStartup(StartupEventArgs e)
     {
         DispatcherUnhandledException += OnUnhandled;
@@ -36,9 +44,10 @@ public partial class App : Application
         }
 
         _instance = new Mutex(initiallyOwned: true, InstanceName, out var first);
-        if (!first && e.Args.Contains("--admin-relaunch"))
+        if (!first && (e.Args.Contains("--admin-relaunch") || e.Args.Contains(RelaunchArgument)))
         {
-            // Reaberto como administrador pelo próprio NEXUS: a cópia anterior está fechando; espera ela soltar a trava.
+            // Reaberto pelo próprio NEXUS (como administrador, ou para trocar o idioma): a cópia anterior está fechando;
+            // espera ela soltar a trava.
             try { first = _instance.WaitOne(TimeSpan.FromSeconds(15)); }
             catch (AbandonedMutexException) { first = true; }
         }
@@ -66,6 +75,27 @@ public partial class App : Application
         using (UiWatchdog.Phase("mostrando a janela (estilos, layout)")) window.Show();
         // Atualização do programa: procura 30 s depois de abrir e a cada 6 h (se ligada em Ajustes); docs/11-atualizacao.md.
         using (UiWatchdog.Phase("atualização: agendar procura", logAboveMs: 30)) ViewModels.AppUpdates.Instance.Start(e.Args, selfTest: false);
+    }
+
+    /// <summary>Argumento do reinício pedido em Ajustes (troca de idioma): espera a cópia atual fechar.</summary>
+    public const string RelaunchArgument = "--relaunch";
+
+    /// <summary>Verdadeiro depois de <see cref="Relaunch"/>: a janela fecha de verdade.</summary>
+    public static bool RelaunchRequested { get; private set; }
+
+    /// <summary>Reabre o NEXUS (mesma elevação) e fecha esta cópia. Usado ao trocar o idioma em Ajustes.</summary>
+    public static bool Relaunch()
+    {
+        var exe = Environment.ProcessPath;
+        if (exe is null) return false;
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe, RelaunchArgument) { UseShellExecute = false });
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { return false; }
+        RelaunchRequested = true; // "fechar para a bandeja" não segura a janela neste caso
+        Current.Shutdown();
+        return true;
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -107,7 +137,7 @@ public partial class App : Application
         try
         {
             MessageBox.Show(e.Exception.Message + "\n\nSe repetir, não aparece de novo nesta sessão. Detalhes em %LocalAppData%\\NEXUS\\desktop-erros.log.",
-                "NEXUS — erro inesperado (nada foi alterado no sistema)", MessageBoxButton.OK, MessageBoxImage.Error);
+                Loc.T("Shell.NexusErroInesperadoNada"), MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally { _showingError = false; }
     }

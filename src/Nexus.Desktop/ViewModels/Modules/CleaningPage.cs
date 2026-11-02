@@ -81,7 +81,7 @@ public sealed class CleaningPage : ModulePage
     }
 
     public override string Title => "Limpeza";
-    public override string Group => "Limpar";
+    public override string Group => Loc.T("Nav.Limpar");
     public override string Subtitle => "Libere espaço com segurança: o que sai vai para uma quarentena e pode voltar até você esvaziá-la.";
 
     public ObservableCollection<CleaningCategoryGroup> Categories { get; } = [];

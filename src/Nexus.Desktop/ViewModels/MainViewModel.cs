@@ -38,7 +38,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     private static BrokerLevel LevelFor(IEnumerable<(CatalogEntry Entry, ActionInstance Instance)> chosen) =>
         chosen.Any(c => c.Entry.Definition.Privileges == PrivilegeLevel.Admin) ? BrokerLevel.Admin : BrokerLevel.User;
     private PageViewModel _selectedPage;
-    private string _status = "Iniciando…";
+    private string _status = Loc.T("Shell.Iniciando");
     private bool _busy;
     private SystemSnapshot? _snapshot;
     private IReadOnlyList<DiagnosticFinding> _findings = [];
@@ -92,12 +92,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     {
         if (!SelfTestMode) return false;
         SelfTestRefusals++;
-        Notify("Autoteste: pedido ao aplicador recusado. Nada foi alterado.");
+        Notify(Loc.T("Shell.AutotestePedidoAplicadorRecusado"));
         return true;
     }
 
     public Task<BrokerCallResult> PlanAsync(IReadOnlyList<ActionRequest> requests, BrokerLevel level) =>
-        RefuseInSelfTest() ? Task.FromResult(new BrokerCallResult(false, null, "Autoteste: o aplicador não é iniciado."))
+        RefuseInSelfTest() ? Task.FromResult(new BrokerCallResult(false, null, Loc.T("Shell.AutotesteAplicadorNaoIniciado")))
             : CallBrokerAsync(level, b => b.Plan(requests));
 
     public Task<BrokerCallResult?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level) =>
@@ -130,7 +130,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         if (!confirm())
         {
             if (own is not null) { own.Canceled(); ApplyView.Close(); }
-            Notify("Cancelado. Nada foi alterado.");
+            Notify(Loc.T("Shell.CanceladoNadaFoiAlterado"));
             return null;
         }
         try
@@ -164,10 +164,10 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     {
         (string, string)[] actions =
         [
-            ("demonstracao-1", "Desligar a telemetria opcional"), ("demonstracao-2", "Desligar anúncios personalizados"), ("demonstracao-3", "Plano de energia: alto desempenho"),
-            ("demonstracao-4", "Modo de Jogo ligado"), ("demonstracao-5", "Agendamento de GPU acelerado por hardware"), ("demonstracao-6", "Desligar a Xbox Game Bar em segundo plano"),
+            ("demonstracao-1", Loc.T("Shell.DesligarTelemetriaOpcional")), ("demonstracao-2", Loc.T("Shell.DesligarAnunciosPersonalizados")), ("demonstracao-3", Loc.T("Shell.PlanoEnergiaAltoDesempenho")),
+            ("demonstracao-4", Loc.T("Shell.ModoJogoLigado")), ("demonstracao-5", Loc.T("Shell.AgendamentoGpuAceleradoHardware")), ("demonstracao-6", Loc.T("Shell.DesligarXboxGameBar")),
         ];
-        var p = ApplyView.Begin("Aplicar os ajustes marcados (demonstração do autoteste)", actions, BrokerLevel.Admin);
+        var p = ApplyView.Begin(Loc.T("Shell.AplicarAjustesMarcadosDemonstracao"), actions, BrokerLevel.Admin);
         p.Stage(ApplyStage.WaitingConfirmation);
         ApplyView.AdvanceClock(TimeSpan.FromSeconds(3));
         p.Stage(ApplyStage.Confirmed);
@@ -196,14 +196,14 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     }
 
     public Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level) =>
-        RevertCoreAsync(runId, level, () => Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança."));
+        RevertCoreAsync(runId, level, () => Confirm(Loc.T("Shell.Desfazer"), Loc.T("Shell.DesfazerEstaAlteracaoNexus")));
 
     public Task<BrokerCallResult?> RevertWithoutConfirmationAsync(Guid runId, BrokerLevel level) => RevertCoreAsync(runId, level, () => true);
 
     private async Task<BrokerCallResult?> RevertCoreAsync(Guid runId, BrokerLevel level, Func<bool> confirm)
     {
         if (RefuseInSelfTest()) return null;
-        var own = ApplyView.Begin("Desfazer alteração", [], level, revert: true, name: ActionName);
+        var own = ApplyView.Begin(Loc.T("Shell.DesfazerAlteracao"), [], level, revert: true, name: ActionName);
         var r = await ExecuteWithProgressAsync(confirm, level, b => b.RevertRun(runId), null, own, revert: true);
         if (r?.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
         return r;
@@ -296,7 +296,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe, "--admin-relaunch") { UseShellExecute = true, Verb = "runas" });
             System.Windows.Application.Current.Shutdown();
         }
-        catch (System.ComponentModel.Win32Exception) { Status = "Você recusou o aviso do Windows. O NEXUS continua aberto sem administrador."; }
+        catch (System.ComponentModel.Win32Exception) { Status = Loc.T("Shell.VoceRecusouAvisoWindows"); }
     }
     public RelayCommand ExportCommand { get; }
 
@@ -307,7 +307,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public RelayCommand ShowHardwareCommand { get; }
 
     public string ModeBanner { get; } =
-        "Nada muda sem você confirmar. Cada alteração fica registrada e pode ser desfeita; mudanças de sistema pedem permissão ao Windows e criam um ponto de restauração.";
+        Loc.T("Shell.NadaMudaSemVoce3");
 
     public async Task LoadAsync()
     {
@@ -315,7 +315,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         Busy = true;
         try
         {
-            Status = "Lendo hardware e configuração do Windows…";
+            Status = Loc.T("Shell.LendoHardwareConfiguracaoWindows");
             var snapshot = await Task.Run(Discovery.Capture);
             Nexus.Desktop.Services.Shell.UiWatchdog.Step($"leitura do PC pronta em {snapshot.Elapsed.TotalSeconds:0.0} s (fora da interface)");
             _snapshot = snapshot;
@@ -324,15 +324,15 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             Diagnostics.Findings = _findings;
             Overview.Cards = OverviewPage.Build(snapshot, _findings);
 
-            Status = "Lendo o estado real das ações do catálogo…";
+            Status = Loc.T("Shell.LendoEstadoRealAcoes");
             await LoadCatalogAsync(snapshot.Facts);
 
-            Status = "Lendo o histórico…";
+            Status = Loc.T("Shell.LendoHistorico");
             await LoadHistoryAsync();
 
             var unavailable = snapshot.Sections.SelectMany(s => s.Facts).Count(f => f.Status == FactStatus.Unavailable);
-            Overview.Footer = $"Leitura concluída em {snapshot.Elapsed.TotalSeconds:0.0} s · {unavailable} valor(es) indisponível(is), cada um com o motivo.";
-            Status = $"Pronto · leitura de {snapshot.TakenAt:HH:mm:ss}";
+            Overview.Footer = Loc.F("Shell.LeituraConcluidaNS", snapshot.Elapsed.TotalSeconds, unavailable);
+            Status = Loc.F("Shell.ProntoLeituraN", snapshot.TakenAt);
             Nexus.Desktop.Services.Shell.UiWatchdog.Step("leitura do PC concluída");
             await CheckPendingRecoveryAsync();
             foreach (var module in Pages.OfType<ModulePage>())
@@ -353,7 +353,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         }
         catch (Exception ex)
         {
-            Status = $"Erro na leitura: {ex.GetType().Name}: {ex.Message}";
+            Status = Loc.F("Shell.ErroLeituraNN", ex.GetType().Name, ex.Message);
         }
         finally
         {
@@ -381,7 +381,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             if (HardwarePage.OwnerSection(owner) is { } section)
                 Hardware.Sections = [.. Hardware.Sections.Where(x => x.Title != HardwarePage.OwnerSectionTitle), new SectionViewModel(section)];
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"Só você pode fazer: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = Loc.F("Shell.SoVocePodeFazer", ex.Message); }
     }
 
     private async Task LoadCatalogAsync(SystemFacts facts)
@@ -408,7 +408,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
                     if (!implemented)
                     {
                         instance = null;
-                        reason = $"handler '{e.Definition.HandlerKind}' pendente";
+                        reason = Loc.F("Shell.HandlerNPendente", e.Definition.HandlerKind);
                     }
                     return new CatalogRow(e, instance, reason, CapabilityCatalog.ForHandler(implemented, windows));
                 }).ToList();
@@ -418,12 +418,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         }
         catch (Exception ex) when (ex is IOException or JsonException or InvalidDataException or ArgumentException or UnauthorizedAccessException)
         {
-            Catalog.Version = $"catálogo indisponível: {ex.Message}";
+            Catalog.Version = Loc.F("Shell.CatalogoIndisponivelN", ex.Message);
             Catalog.Rows = [];
             return;
         }
 
-        Catalog.Version = $"{doc.CatalogVersion} ({doc.Schema}) · {doc.Actions.Count} ações · {doc.Rejected.Count} rejeitadas";
+        Catalog.Version = Loc.F("Shell.NNNAcoes", doc.CatalogVersion, doc.Schema, doc.Actions.Count, doc.Rejected.Count);
         Catalog.Rows = rows;
         Catalog.Rejected = doc.Rejected;
         Plan.Candidates.Clear();
@@ -435,12 +435,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             try
             {
                 var s = ReadOnlyServices.Handlers.Get(r.Instance!.Definition.HandlerKind).Detect(r.Instance);
-                var origin = s.Origin is ValueOrigin.PolicyEnforced or ValueOrigin.ThirdPartyManaged ? $"  (gerenciado: {s.Origin})" : "";
+                var origin = s.Origin is ValueOrigin.PolicyEnforced or ValueOrigin.ThirdPartyManaged ? Loc.F("Shell.GerenciadoN", s.Origin) : "";
                 return (Row: r, Text: s.Describe() + origin, Error: (string?)null);
             }
             catch (Exception ex)
             {
-                return (Row: r, Text: "erro de leitura", Error: $"{ex.GetType().Name}: {ex.Message}");
+                return (Row: r, Text: Loc.T("Shell.ErroLeitura"), Error: $"{ex.GetType().Name}: {ex.Message}");
             }
         }).ToList());
         foreach (var (row, text, error) in reads)
@@ -460,7 +460,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             if (chosen.Count == 0)
             {
                 Plan.Rows = [];
-                Plan.Summary = "Nenhuma ação selecionada.";
+                Plan.Summary = Loc.T("Shell.NenhumaAcaoSelecionada");
                 return;
             }
             // Simulação: a interface não roda elevada, mas aplicar eleva sozinho (aviso do Windows). Então simula como administrador
@@ -471,30 +471,30 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
                 $"{i.Action.Definition.Title} ({i.Action.Definition.Key})",
                 i.Status switch
                 {
-                    PlanStatus.Pending => "Seria aplicada",
-                    PlanStatus.AlreadyConfigured => "Já configurada",
-                    PlanStatus.NotApplicable => "Não aplicável",
-                    _ => "Bloqueada",
+                    PlanStatus.Pending => Loc.T("Shell.SeriaAplicada"),
+                    PlanStatus.AlreadyConfigured => Loc.T("Shell.JaConfigurada"),
+                    PlanStatus.NotApplicable => Loc.T("Shell.NaoAplicavel"),
+                    _ => Loc.T("Shell.Bloqueada"),
                 },
                 i.Status is PlanStatus.Pending or PlanStatus.AlreadyConfigured ? i.ObservedAtPlan.Describe() : "—",
                 i.Action.Desired.Describe(),
-                i.Status == PlanStatus.Pending ? (i.Batch == 0 ? "1 (normal)" : "2 (após reinício)") : "—",
-                (i.Action.Definition.Privileges == PrivilegeLevel.Admin && i.Status == PlanStatus.Pending ? "Pede a permissão do Windows ao aplicar. " : "") + (i.Reason ?? ""),
+                i.Status == PlanStatus.Pending ? (i.Batch == 0 ? Loc.T("Shell.N1Normal") : Loc.T("Shell.N2AposReinicio")) : "—",
+                (i.Action.Definition.Privileges == PrivilegeLevel.Admin && i.Status == PlanStatus.Pending ? Loc.T("Shell.PedePermissaoWindowsAplicar") : "") + (i.Reason ?? ""),
                 i.Status)).ToList();
             var pending = plan.Items.Count(i => i.Status == PlanStatus.Pending);
-            Plan.Summary = $"{pending} seriam aplicadas · {plan.Items.Count(i => i.Status == PlanStatus.AlreadyConfigured)} já configuradas · " +
-                           $"{plan.Items.Count(i => i.Status == PlanStatus.NotApplicable)} não aplicáveis · {plan.Items.Count(i => i.Status == PlanStatus.Blocked)} bloqueadas" +
-                           (plan.RequiresReboot ? " · exigiria reinício" : "") +
-                           (_snapshot.Facts.WindowsBuild is null ? " · ATENÇÃO: build do Windows indisponível, compatibilidade não verificada" : "") +
-                           $" · simulado às {DateTime.Now:HH:mm:ss}. Nada foi aplicado.";
+            Plan.Summary = Loc.F("Shell.NSeriamAplicadasN", pending, plan.Items.Count(i => i.Status == PlanStatus.AlreadyConfigured)) +
+                           Loc.F("Shell.NNaoAplicaveisN", plan.Items.Count(i => i.Status == PlanStatus.NotApplicable), plan.Items.Count(i => i.Status == PlanStatus.Blocked)) +
+                           (plan.RequiresReboot ? Loc.T("Shell.ExigiriaReinicio") : "") +
+                           (_snapshot.Facts.WindowsBuild is null ? Loc.T("Shell.AtencaoBuildWindowsIndisponivel") : "") +
+                           Loc.F("Shell.SimuladoNNadaFoi", DateTime.Now);
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or KeyNotFoundException)
         {
-            Plan.Summary = $"Simulação recusada: {ex.Message}";
+            Plan.Summary = Loc.F("Shell.SimulacaoRecusadaN", ex.Message);
         }
         catch (Exception ex)
         {
-            Plan.Summary = $"Simulação falhou ao ler o estado: {ex.GetType().Name}: {ex.Message}. Nada foi aplicado.";
+            Plan.Summary = Loc.F("Shell.SimulacaoFalhouLerEstado", ex.GetType().Name, ex.Message);
         }
         finally
         {
@@ -536,9 +536,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             Broker.Connected = true;
             Broker.WriteAllowed = s.ExecutionAllowed;
-            Broker.ServiceStatus = $"Aplicador pronto · versão {s.BrokerVersion} · catálogo {s.CatalogVersion}";
+            Broker.ServiceStatus = Loc.F("Shell.AplicadorProntoVersaoN", s.BrokerVersion, s.CatalogVersion);
             Broker.Gate = s.ExecutionGateReason;
-            Broker.Coordination = $"Coordenação: {s.Coordination}";
+            Broker.Coordination = Loc.F("Shell.CoordenacaoN", s.Coordination);
             if (s.ActiveSessionRunId is { } run) { Broker.LastRun = run; Broker.SessionOpen = true; }
         }
         else
@@ -561,17 +561,17 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             await BrokerStatusAsync();
             if (!Broker.Connected || !Broker.WriteAllowed)
             {
-                Broker.LastSummary = $"{DateTime.Now:HH:mm} · Não deu para aplicar: {(Broker.Connected ? Broker.Gate : Broker.ServiceStatus)}";
+                Broker.LastSummary = Loc.F("Shell.NNaoDeuAplicar", DateTime.Now, (Broker.Connected ? Broker.Gate : Broker.ServiceStatus));
                 return;
             }
         }
         var level = LevelFor(chosen);
         var requests = BrokerSession.RequestsFor(chosen);
-        var own = ApplyView.Begin("Aplicar os ajustes marcados", chosen.Select(c => (c.Entry.Definition.Key, c.Entry.Definition.Title)).ToList(), level, name: ActionName);
-        var r = await ExecuteWithProgressAsync(() => System.Windows.MessageBox.Show(BrokerSession.ConfirmationText(chosen), "Confirmar aplicação",
+        var own = ApplyView.Begin(Loc.T("Shell.AplicarAjustesMarcados"), chosen.Select(c => (c.Entry.Definition.Key, c.Entry.Definition.Title)).ToList(), level, name: ActionName);
+        var r = await ExecuteWithProgressAsync(() => System.Windows.MessageBox.Show(BrokerSession.ConfirmationText(chosen), Loc.T("Shell.ConfirmarAplicacao"),
                 System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning, System.Windows.MessageBoxResult.No) == System.Windows.MessageBoxResult.Yes,
             level, b => b.Execute(requests), null, own, revert: false);
-        if (r is null) Broker.LastMessage = Broker.LastSummary = "Aplicação cancelada. Nada foi enviado.";
+        if (r is null) Broker.LastMessage = Broker.LastSummary = Loc.T("Shell.AplicacaoCanceladaNadaFoi");
     }
 
     private IReadOnlyList<Guid> _lastRuns = [];
@@ -579,10 +579,10 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     private async Task BrokerRevertAsync()
     {
         if (Broker.LastRun is not { } run) return;
-        var answer = System.Windows.MessageBox.Show("Desfazer a última aplicação? O NEXUS volta os valores originais guardados no diário.",
-            "Confirmar reversão", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
+        var answer = System.Windows.MessageBox.Show(Loc.T("Shell.DesfazerUltimaAplicacaoNexus"),
+            Loc.T("Shell.ConfirmarReversao"), System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
         if (answer != System.Windows.MessageBoxResult.Yes) return;
-        var own = ApplyView.Begin("Reverter a última execução", [], _lastLevel, revert: true, name: ActionName);
+        var own = ApplyView.Begin(Loc.T("Shell.ReverterUltimaExecucao"), [], _lastLevel, revert: true, name: ActionName);
         // Aplicação grande = vários lotes: desfaz todos, do último para o primeiro.
         var runs = _lastRuns.Contains(run) ? _lastRuns.Reverse().ToList() : [run];
         var r = await ExecuteWithProgressAsync(() => true, _lastLevel, b =>
@@ -605,7 +605,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     private async Task BrokerRecoverAsync()
     {
-        var answer = System.Windows.MessageBox.Show("Desfazer as alterações que ficaram pela metade (registradas no diário)?", "Recuperar",
+        var answer = System.Windows.MessageBox.Show(Loc.T("Shell.DesfazerAlteracoesFicaramPela"), Loc.T("Shell.Recuperar"),
             System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
         if (answer != System.Windows.MessageBoxResult.Yes) return;
         var (user, machine) = PendingRecovery();
@@ -635,8 +635,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     {
         var (user, machine) = await Task.Run(PendingRecovery); // dois diários SQLite: fora da thread da interface
         if (user + machine == 0) return;
-        Broker.LastMessage = $"{user + machine} alteração(ões) ficaram pela metade da última vez. Use \"Recuperar interrompidas\" para desfazer.";
-        Status = $"Atenção: {user + machine} alteração(ões) pela metade. Abra Aplicar → Recuperar interrompidas.";
+        Broker.LastMessage = Loc.F("Shell.NAlteracaoOesFicaram", user + machine);
+        Status = Loc.F("Shell.AtencaoNAlteracaoOes", user + machine);
     }
 
     /// <summary>Depois de uma escrita pelo broker, relê o estado (catálogo e histórico) para a tela mostrar o que mudou.</summary>
@@ -666,29 +666,29 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             var probe = NexusServices.ProbeExecutors(path);
             coordination = probe.State switch
             {
-                CoordinationState.Active => $"Executor ativo: {probe.Holder?.Describe() ?? "dono não identificado"}.",
-                CoordinationState.Idle when probe.AbandonedByCrash => $"Nenhum executor ativo. Trava abandonada por: {probe.Holder!.Describe()}.",
-                CoordinationState.Idle => "Nenhum executor ativo.",
-                _ => $"Não foi possível verificar executores ativos: {probe.Detail}",
+                CoordinationState.Active => Loc.F("Shell.ExecutorAtivoN", probe.Holder?.Describe() ?? Loc.T("Shell.DonoNaoIdentificado")),
+                CoordinationState.Idle when probe.AbandonedByCrash => Loc.F("Shell.NenhumExecutorAtivoTrava", probe.Holder!.Describe()),
+                CoordinationState.Idle => Loc.T("Shell.NenhumExecutorAtivo"),
+                _ => Loc.F("Shell.NaoFoiPossivelVerificar", probe.Detail),
             };
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            coordination = $"Coordenação não verificada: {ex.Message}";
+            coordination = Loc.F("Shell.CoordenacaoNaoVerificadaN", ex.Message);
         }
 
         if (!File.Exists(path))
-            return (coordination, $"Nenhum diário em {path}: nenhuma execução do NEXUS foi registrada neste PC.", [], true);
+            return (coordination, Loc.F("Shell.NenhumDiarioNNenhuma", path), [], true);
         try
         {
             using var journal = SqliteJournal.OpenReadOnly(path);
             var runs = journal.Runs().OrderByDescending(r => r.StartedAt).Select(r => new HistoryRun(r.RunId, $"{r.StartedAt.ToLocalTime():dd/MM/yyyy HH:mm}",
-                r.EndedAt is null ? "não encerrada" : $"encerrada {r.EndedAt.Value.ToLocalTime():dd/MM HH:mm}", r.Profile, r.CatalogVersion)).ToList();
-            return (coordination, $"Diário {path} (somente leitura) · {runs.Count} execução(ões).", runs, false);
+                r.EndedAt is null ? Loc.T("Shell.NaoEncerrada") : Loc.F("Shell.EncerradaN", r.EndedAt.Value.ToLocalTime()), r.Profile, r.CatalogVersion)).ToList();
+            return (coordination, Loc.F("Shell.DiarioNSomenteLeitura", path, runs.Count), runs, false);
         }
         catch (Exception ex)
         {
-            return (coordination, $"Diário encontrado mas não pôde ser lido: {ex.GetType().Name}: {ex.Message}", [], false);
+            return (coordination, Loc.F("Shell.DiarioEncontradoMasNao", ex.GetType().Name, ex.Message), [], false);
         }
     }
 
@@ -703,7 +703,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         }
         catch (Exception ex)
         {
-            History.Status = $"Falha ao ler entradas: {ex.Message}";
+            History.Status = Loc.F("Shell.FalhaLerEntradasN", ex.Message);
         }
     }
 
@@ -712,15 +712,15 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         if (_snapshot is null) return;
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Exportar relatório de leitura (JSON)",
+            Title = Loc.T("Shell.ExportarRelatorioLeituraJson"),
             FileName = $"nexus-leitura-{DateTime.Now:yyyyMMdd-HHmmss}.json",
-            Filter = "JSON (*.json)|*.json",
+            Filter = Loc.T("Shell.JsonJsonJson"),
         };
         if (dialog.ShowDialog() != true) return;
         var report = new
         {
             geradoEm = DateTimeOffset.Now,
-            modo = "somente leitura",
+            modo = Loc.T("Shell.SomenteLeitura"),
             snapshot = _snapshot,
             diagnostico = _findings,
             catalogo = Catalog.Rows.Select(r => new { r.Id, r.Title, r.Handler, estadoAtual = r.Current, erro = r.ReadError, desejado = r.Desired, leitura = r.ReadLabelText, r.NotInstantiableReason }),
@@ -728,6 +728,6 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             capacidades = Capabilities.Rows,
         };
         File.WriteAllText(dialog.FileName, JsonSerializer.Serialize(report, ExportJson), new System.Text.UTF8Encoding(true));
-        Status = $"Relatório exportado para {dialog.FileName}";
+        Status = Loc.F("Shell.RelatorioExportadoN", dialog.FileName);
     }
 }

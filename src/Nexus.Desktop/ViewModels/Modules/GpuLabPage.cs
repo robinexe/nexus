@@ -59,7 +59,7 @@ public sealed class GpuLabPage : ModulePage
     }
 
     public override string Title => "Placa de vídeo";
-    public override string Group => "Laboratório";
+    public override string Group => Loc.T("Nav.Laboratorio");
     public override string Subtitle => "Engenharia reversa da sua placa de vídeo: barramento, clocks, limites e monitores.";
 
     public RelayCommand RefreshCommand { get; }

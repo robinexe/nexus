@@ -46,9 +46,9 @@ public sealed class SeverityHintConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
     {
-        DiagnosticSeverity.Attention => "Vale conferir. Não é garantia de FPS a mais: meça uma partida antes e depois de mexer.",
-        DiagnosticSeverity.Info => "Só para você saber. Não pede nenhuma ação.",
-        DiagnosticSeverity.Ok => "Está como deveria. Nada a fazer aqui.",
+        DiagnosticSeverity.Attention => Loc.T("Shell.ValeConferirNaoGarantia"),
+        DiagnosticSeverity.Info => Loc.T("Shell.SoVoceSaberNao"),
+        DiagnosticSeverity.Ok => Loc.T("Shell.EstaComoDeveriaNada"),
         _ => "",
     };
 

@@ -45,7 +45,7 @@ public sealed class AppUpdates : ObservableObject
         InstallNowCommand = new RelayCommand(InstallNow, () => _ready is not null && !_installStarted);
         LaterCommand = new RelayCommand(Later);
         OpenDownloadsCommand = new RelayCommand(OpenDownloads);
-        _status = Disabled ? "Versão de desenvolvimento: a atualização automática fica desligada." : "";
+        _status = Disabled ? Loc.T("Shell.VersaoDesenvolvimentoAtualizacaoAuto") : "";
     }
 
     /// <summary>Operação em andamento (aplicar, Assistente, leitura): não instala no meio. Padrão: olha a janela principal.</summary>
@@ -62,16 +62,16 @@ public sealed class AppUpdates : ObservableObject
     public string CurrentVersion => _version.Display;
     public string CurrentVersionText => Kind switch
     {
-        InstallKind.Development => $"NEXUS {_version.Display} · versão de desenvolvimento",
-        InstallKind.Portable => $"NEXUS {_version.Display} · portátil",
-        _ => $"NEXUS {_version.Display} · instalado",
+        InstallKind.Development => Loc.F("Shell.NexusNVersaoDesenvolvimento", _version.Display),
+        InstallKind.Portable => Loc.F("Shell.NexusNPortatil", _version.Display),
+        _ => Loc.F("Shell.NexusNInstalado", _version.Display),
     };
 
     public string KindNote => Kind switch
     {
-        InstallKind.Development => "Compilada no PC: não procura nem instala atualizações.",
-        InstallKind.Portable => "Cópia portátil: avisa quando sair versão nova, com o link para baixar. Para instalar sozinho, use o instalador.",
-        _ => "Instala sozinho: o Windows pede permissão uma vez (o NEXUS fica em Arquivos de Programas) e o NEXUS reabre.",
+        InstallKind.Development => Loc.T("Shell.CompiladaPcNaoProcura"),
+        InstallKind.Portable => Loc.T("Shell.CopiaPortatilAvisaQuando"),
+        _ => Loc.T("Shell.InstalaSozinhoWindowsPede"),
     };
 
     public bool CanCheck => !Disabled && !_working && !_installStarted;
@@ -91,12 +91,12 @@ public sealed class AppUpdates : ObservableObject
     }
 
     public Views.Controls.Tone AutoTone => Disabled ? Views.Controls.Tone.Neutral : AutoUpdate ? Views.Controls.Tone.Good : Views.Controls.Tone.Warn;
-    public string AutoChip => Disabled ? "Desligado" : AutoUpdate ? "Automático" : "Manual";
+    public string AutoChip => Disabled ? Loc.T("Shell.Desligado") : AutoUpdate ? Loc.T("Nav.Automatico") : Loc.T("Shell.Manual");
     public bool IsEnabled => !Disabled;
 
     public string LastCheckText => UiSettings.Current.LastUpdateCheck is { } t
-        ? "Última procura: " + t.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("pt-BR"))
-        : Disabled ? "" : "Ainda não procurou.";
+        ? Loc.T("Shell.UltimaProcura") + t.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("pt-BR"))
+        : Disabled ? "" : Loc.T("Shell.AindaNaoProcurou");
 
     public string Status { get => _status; private set => Set(ref _status, value); }
     public double Progress { get => _progress; private set => Set(ref _progress, value); }
@@ -113,7 +113,7 @@ public sealed class AppUpdates : ObservableObject
     public bool BannerIsNotify => _banner == BannerKind.Notify;
     public string BannerText { get => _bannerText; private set => Set(ref _bannerText, value); }
     public string BannerNote { get => _bannerNote; private set => Set(ref _bannerNote, value); }
-    public string DismissText => _banner == BannerKind.Info ? "Fechar" : "Depois";
+    public string DismissText => _banner == BannerKind.Info ? Loc.T("Shell.Fechar") : Loc.T("Shell.Depois");
     public bool HasReady => _ready is not null;
     public bool HasNotify => _notify is not null;
     public string ReadyNotes => _ready?.Notes ?? _notify?.Notes ?? "";
@@ -138,10 +138,10 @@ public sealed class AppUpdates : ObservableObject
         if (_started) return;
         _started = true;
         _disabledBySelfTest = selfTest;
-        if (selfTest) { Status = "Autoteste: atualização desligada."; RaiseState(); return; }
-        if (args.Contains("--updated")) ShowBanner(BannerKind.Info, $"NEXUS atualizado para {_version.Display}.", "");
+        if (selfTest) { Status = Loc.T("Shell.AutotesteAtualizacaoDesligada"); RaiseState(); return; }
+        if (args.Contains("--updated")) ShowBanner(BannerKind.Info, Loc.F("Shell.NexusAtualizadoN", _version.Display), "");
         else if (args.Contains("--update-failed"))
-            ShowBanner(BannerKind.Info, "A atualização não foi concluída.", "O aviso do Windows foi recusado ou o instalador falhou. Nada mudou; tente de novo em Ajustes.");
+            ShowBanner(BannerKind.Info, Loc.T("Shell.AtualizacaoNaoFoiConcluida"), Loc.T("Shell.AvisoWindowsFoiRecusado"));
         if (Disabled) return;
         if (OperatingSystem.IsWindows()) UpdateClient.CleanOld(DownloadRoot, null); // instalada a versão nova, os downloads antigos sobram
         Schedule(AutoUpdate ? FirstCheckDelay : null);
@@ -175,18 +175,18 @@ public sealed class AppUpdates : ObservableObject
         Working = true;
         try
         {
-            Status = "Procurando versão nova…";
+            Status = Loc.T("Shell.ProcurandoVersaoNova");
             using var client = new UpdateClient(_version.Version);
             var r = await client.CheckAsync();
             if (r.Status != UpdateCheckStatus.Failed) UiSettings.Update(s => s with { LastUpdateCheck = DateTimeOffset.Now });
             OnPropertyChanged(nameof(LastCheckText));
             switch (r.Status)
             {
-                case UpdateCheckStatus.UpToDate: Status = "Você está na versão mais nova."; break;
-                case UpdateCheckStatus.NotPublished: Status = "Nenhuma versão publicada ainda."; break;
-                case UpdateCheckStatus.Failed: Status = $"Não deu para procurar: {r.Message}"; break;
+                case UpdateCheckStatus.UpToDate: Status = Loc.T("Shell.VoceEstaVersaoMais"); break;
+                case UpdateCheckStatus.NotPublished: Status = Loc.T("Shell.NenhumaVersaoPublicadaAinda"); break;
+                case UpdateCheckStatus.Failed: Status = Loc.F("Shell.NaoDeuProcurarN", r.Message); break;
                 case UpdateCheckStatus.Available when r.Manifest is { } m:
-                    if (_ready?.Version == m.Version) { Status = $"NEXUS {m.Version} já está baixado e conferido."; break; }
+                    if (_ready?.Version == m.Version) { Status = Loc.F("Shell.NexusNJaEsta", m.Version); break; }
                     if (UpdateInstallation.ModeFor(Kind, m, _version.Version) == UpdateMode.Install) await DownloadAsync(client, m);
                     else Notify(m);
                     break;
@@ -194,7 +194,7 @@ public sealed class AppUpdates : ObservableObject
         }
         catch (Exception ex) when (ex is UpdateException or IOException or UnauthorizedAccessException or System.Net.Http.HttpRequestException)
         {
-            Status = $"Atualização interrompida: {ex.Message}";
+            Status = Loc.F("Shell.AtualizacaoInterrompidaN", ex.Message);
         }
         finally
         {
@@ -207,27 +207,27 @@ public sealed class AppUpdates : ObservableObject
     private void Notify(UpdateManifest m)
     {
         _notify = m;
-        var why = Kind == InstallKind.Portable ? "Cópia portátil: baixe o pacote novo." : "Esta versão é antiga demais para atualizar sozinha: baixe o instalador.";
-        Status = $"NEXUS {m.Version} disponível. {why}";
-        ShowBanner(BannerKind.Notify, $"NEXUS {m.Version} disponível", why);
+        var why = Kind == InstallKind.Portable ? Loc.T("Shell.CopiaPortatilBaixePacote") : Loc.T("Shell.EstaVersaoAntigaDemais");
+        Status = Loc.F("Shell.NexusNDisponivelN", m.Version, why);
+        ShowBanner(BannerKind.Notify, Loc.F("Shell.NexusNDisponivel", m.Version), why);
     }
 
     private async Task DownloadAsync(UpdateClient client, UpdateManifest m)
     {
-        Status = $"Baixando NEXUS {m.Version}…";
+        Status = Loc.F("Shell.BaixandoNexusN", m.Version);
         Progress = 0;
         ShowProgress = true;
         var progress = new System.Progress<DownloadProgress>(p =>
         {
             Progress = p.Fraction * 100;
-            Status = string.Create(CultureInfo.GetCultureInfo("pt-BR"), $"Baixando NEXUS {m.Version}: {p.Fraction * 100:0} % de {p.Total / 1048576.0:0.0} MB");
+            Status = Loc.F("Shell.BaixandoNexusNN", m.Version, p.Fraction * 100, p.Total / 1048576.0);
         });
         var path = await client.DownloadAsync(m, DownloadRoot, progress);
         UpdateClient.CleanOld(DownloadRoot, m.Version);
         _ready = m;
         _readyPath = path;
-        Status = $"NEXUS {m.Version} baixado e conferido (assinatura e SHA-256). Pronto para instalar.";
-        ShowBanner(BannerKind.Ready, $"NEXUS {m.Version} pronto", "O Windows pede permissão uma vez e o NEXUS reabre. Se deixar para depois, instala quando você fechar o NEXUS.");
+        Status = Loc.F("Shell.NexusNBaixadoConferido", m.Version);
+        ShowBanner(BannerKind.Ready, Loc.F("Shell.NexusNPronto", m.Version), Loc.T("Shell.WindowsPedePermissaoVez"));
     }
 
     private void RaiseState()
@@ -247,14 +247,14 @@ public sealed class AppUpdates : ObservableObject
     private void InstallNow()
     {
         if (_ready is null || _readyPath is null || _installStarted) return;
-        if (IsAppBusy()) { Status = "Termine a operação em andamento (aplicar, Assistente) e tente de novo."; BannerNote = Status; return; }
+        if (IsAppBusy()) { Status = Loc.T("Shell.TermineOperacaoAndamentoAplicar"); BannerNote = Status; return; }
         if (!StartInstaller(relaunch: true)) return;
         System.Windows.Application.Current?.Shutdown();
     }
 
     private void Later()
     {
-        if (_banner == BannerKind.Ready) Status = $"NEXUS {_ready?.Version} instala quando você fechar o NEXUS.";
+        if (_banner == BannerKind.Ready) Status = Loc.F("Shell.NexusNInstalaQuando", _ready?.Version);
         ShowBanner(BannerKind.None, "", "");
     }
 
@@ -281,7 +281,7 @@ public sealed class AppUpdates : ObservableObject
         }
         catch (Exception ex) when (ex is UpdateException or System.ComponentModel.Win32Exception or IOException or InvalidOperationException)
         {
-            Status = $"Não foi possível iniciar o instalador: {ex.Message}";
+            Status = Loc.F("Shell.NaoFoiPossivelIniciar", ex.Message);
             if (ex is UpdateException) { _ready = null; _readyPath = null; ShowBanner(BannerKind.None, "", ""); RaiseState(); }
             return false;
         }

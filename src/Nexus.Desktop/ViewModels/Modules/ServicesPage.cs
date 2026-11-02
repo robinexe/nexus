@@ -36,7 +36,7 @@ public sealed class ServicesPage : ModulePage
     }
 
     public override string Title => "Serviços";
-    public override string Group => "Sistema";
+    public override string Group => Loc.T("Nav.Sistema");
     public override string Subtitle => "Serviços do Windows explicados, com ajustes seguros e reversíveis.";
 
     public string Summary { get => _summary; private set => Set(ref _summary, value); }

@@ -17,7 +17,7 @@ public class ExplainToggle : ContentControl
     private FrameworkElement? _body;
 
     public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(nameof(Header), typeof(string), typeof(ExplainToggle),
-        new PropertyMetadata("Por que isso?"));
+        new PropertyMetadata(Loc.T("Shell.Isso")));
 
     public static readonly DependencyProperty IsExpandedProperty = DependencyProperty.Register(nameof(IsExpanded), typeof(bool), typeof(ExplainToggle),
         new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnExpandedChanged));

@@ -130,7 +130,7 @@ public sealed class MemoryDoctorPage : ModulePage
     }
 
     public override string Title => "Memória: diagnóstico";
-    public override string Group => "Laboratório";
+    public override string Group => Loc.T("Nav.Laboratorio");
     public override string Subtitle => "Quem está comendo a memória, se algo está vazando, e como resolver agora e de vez.";
 
     public ICommand SampleNowCommand { get; }

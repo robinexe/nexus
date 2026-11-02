@@ -146,7 +146,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
     }
 
     public override string Title => "Verificar arquivos";
-    public override string Group => "Proteger";
+    public override string Group => Loc.T("Nav.Proteger");
     public override string Subtitle => "Procure sinais suspeitos em arquivos e peça a opinião do Microsoft Defender.";
 
     public ObservableCollection<ScanFindingGroup> Groups { get; } = [];

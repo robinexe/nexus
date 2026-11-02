@@ -62,7 +62,7 @@ public sealed class HardwarePage : PageViewModel
 {
     private IReadOnlyList<SectionViewModel> _sections = [];
     public override string Title => "Hardware";
-    public override string Group => "Meu PC";
+    public override string Group => Loc.T("Nav.MeuPc");
     public override string Subtitle => "Leitura do sistema: cada valor mostra se foi detectado, inferido ou está indisponível, e a fonte.";
     public IReadOnlyList<SectionViewModel> Sections
     {
@@ -115,7 +115,7 @@ public sealed class DiagnosticsPage : PageViewModel
 {
     private IReadOnlyList<DiagnosticFinding> _findings = [];
     public override string Title => "Diagnóstico";
-    public override string Group => "Meu PC";
+    public override string Group => Loc.T("Nav.MeuPc");
     public override string Subtitle => "Somente leitura. Cada achado cita a evidência; nenhum presume ganho de desempenho.";
     public IReadOnlyList<DiagnosticFinding> Findings
     {
@@ -352,7 +352,7 @@ public sealed class CatalogPage : PageViewModel
     private CatalogRow? _selected;
     private string _version = "";
     public override string Title => "O que dá pra ajustar";
-    public override string Group => "Otimizar";
+    public override string Group => Loc.T("Nav.Otimizar");
     public override string Subtitle => "Cada ajuste mostra o valor lido agora no seu PC e o que ele passaria a ser. Nada é aplicado nesta página.";
     private bool _isMythsTab;
 
@@ -467,7 +467,7 @@ public sealed class PlanPage : PageViewModel
     private string _summary = "Nenhuma simulação executada.";
     private bool _busy;
     public override string Title => "Testar sem aplicar";
-    public override string Group => "Otimizar";
+    public override string Group => Loc.T("Nav.Otimizar");
     public override string Subtitle => "Simule antes de mexer: a gente relê o estado real do PC e mostra o que mudaria, em ordem e por lote. Nada é aplicado.";
     public PlanPage()
     {
@@ -585,7 +585,7 @@ public sealed class HistoryPage : PageViewModel
     private string _coordination = "";
     private bool _undoing;
     public override string Title => "Histórico";
-    public override string Group => "Registro";
+    public override string Group => Loc.T("Nav.Registro");
     public override string Subtitle => "Tudo o que o serviço registrou no diário, aberto só para leitura, e se há algum executor em uso agora.";
     public string JournalPath { get; set; } = NexusServices.DefaultJournalPath;
     public IReadOnlyList<HistoryRun> Runs
@@ -692,7 +692,7 @@ public sealed class HistoryPage : PageViewModel
 public sealed class CapabilitiesPage : PageViewModel
 {
     public override string Title => "O que já funciona";
-    public override string Group => "Registro";
+    public override string Group => Loc.T("Nav.Registro");
     public override string Subtitle => "Sem maquiagem: o que já existe nesta versão e o que foi conferido de verdade, item por item.";
     public IReadOnlyList<CapabilityRow> Rows { get; } = CapabilityCatalog.Rows(OperatingSystem.IsWindows());
 
@@ -755,7 +755,7 @@ public sealed class OverviewPage : PageViewModel
     private IReadOnlyList<OverviewCard> _cards = [];
     private string _footer = "";
     public override string Title => "Meu PC";
-    public override string Group => "Meu PC";
+    public override string Group => Loc.T("Nav.MeuPc");
     public override string Subtitle => "Resumo do que foi lido deste PC. Modo somente leitura: nada é alterado.";
     private static readonly string[] HardwareOrder = ["Processador", "GPU", "Memória", "Disco"];
 
@@ -967,7 +967,7 @@ public sealed class BrokerPage : PageViewModel
     private IReadOnlyList<BrokerResultRow> _results = [];
 
     public override string Title => "Aplicar";
-    public override string Group => "Otimizar";
+    public override string Group => Loc.T("Nav.Otimizar");
     public override string Subtitle =>
         "Aplique os ajustes marcados neste PC. Cada mudança é registrada antes e pode ser desfeita; as de sistema pedem permissão ao Windows e criam um ponto de restauração.";
 

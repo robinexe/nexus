@@ -93,7 +93,7 @@ public sealed class StartupPage : ModulePage
     }
 
     public override string Title => "Inicialização";
-    public override string Group => "Sistema";
+    public override string Group => Loc.T("Nav.Sistema");
     public override string Subtitle => "O que abre junto com o Windows e quanto pesa.";
 
     public string HeroValue { get => _heroValue; private set => Set(ref _heroValue, value); }

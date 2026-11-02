@@ -111,7 +111,7 @@ public sealed class SecurityPage : ModulePage
     }
 
     public override string Title => "Segurança";
-    public override string Group => "Proteger";
+    public override string Group => Loc.T("Nav.Proteger");
     public override string Subtitle => "Verifique ameaças com o Microsoft Defender e encontre pontos suspeitos.";
 
     public ObservableCollection<ProtectionRow> Protection { get; } = [];

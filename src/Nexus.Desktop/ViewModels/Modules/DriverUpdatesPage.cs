@@ -166,7 +166,7 @@ public sealed class GpuDriverCard : ObservableObject
 public sealed class DriverUpdatesPage : ModulePage
 {
     public override string Title => "Atualizar drivers";
-    public override string Group => "Sistema";
+    public override string Group => Loc.T("Nav.Sistema");
     public override string Subtitle => "Drivers oficiais pelo Windows Update e o driver de vídeo direto da NVIDIA e da AMD.";
 
     private const string InstallAction = "driverupdates.install@1";

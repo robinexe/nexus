@@ -124,7 +124,7 @@ public sealed class MemoryLabPage : ModulePage
     }
 
     public override string Title => "Memória RAM";
-    public override string Group => "Laboratório";
+    public override string Group => Loc.T("Nav.Laboratorio");
     public override string Subtitle => "Engenharia reversa da sua memória: módulos, canais, velocidade real e latência medida.";
 
     public ICommand MeasureCommand { get; }

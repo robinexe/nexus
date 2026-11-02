@@ -43,11 +43,11 @@ public sealed class ProcessFeedRow(string key) : ObservableObject
     /// <summary>Para o leitor de tela (o ícone não carrega o significado sozinho).</summary>
     public string StatusText => _status switch
     {
-        ProcessTaskStatus.Running => "em andamento",
+        ProcessTaskStatus.Running => Loc.T("Shell.Andamento"),
         ProcessTaskStatus.Done => "feito",
-        ProcessTaskStatus.Skipped => "não precisou",
-        ProcessTaskStatus.Failed => "não aplicado",
-        _ => "na fila",
+        ProcessTaskStatus.Skipped => Loc.T("Shell.NaoPrecisou"),
+        ProcessTaskStatus.Failed => Loc.T("Shell.NaoAplicado"),
+        _ => Loc.T("Shell.Fila"),
     };
 }
 
@@ -57,7 +57,7 @@ public sealed record ProcessSegment(int Number, string Name, string State)
     public bool IsDone => State == "done";
     public bool IsCurrent => State == "current";
     public bool IsSkipped => State == "skipped";
-    public string Tip => $"Etapa {Number}: {Name}" + State switch { "current" => " (agora)", "done" => " (feita)", "skipped" => " (pulada)", _ => "" };
+    public string Tip => Loc.F("Shell.EtapaNN", Number, Name) + State switch { "current" => " (agora)", "done" => " (feita)", "skipped" => " (pulada)", _ => "" };
 }
 
 /// <summary>
@@ -78,7 +78,7 @@ public sealed class AssistantProcess : ObservableObject
     private int _seenVersion = -1;
     private bool _isVisible, _isRunning, _isFinished, _waiting, _currentIsEstimate, _canCancel, _isApply;
     private double _percent;
-    private string _title = "", _mode = "", _position = "", _remaining = "calculando…", _elapsed = "0:00", _current = "", _summary = "", _iconKey = "Icon.Assistant";
+    private string _title = "", _mode = "", _position = "", _remaining = Loc.T("Shell.Calculando"), _elapsed = "0:00", _current = "", _summary = "", _iconKey = "Icon.Assistant";
     private Tone _ringTone = Tone.Warn;
     private IReadOnlyList<ProcessSegment> _segments = [];
     private TimeSpan _offset;
@@ -122,7 +122,7 @@ public sealed class AssistantProcess : ObservableObject
     /// <summary>Só na leitura (o pedido ao aplicador não pode ser interrompido no meio com segurança).</summary>
     public bool CanCancel { get => _canCancel; private set => Set(ref _canCancel, value); }
     public static bool Motion => ShellMotion.Enabled;
-    public static string CancelNote => "Não dá para interromper no meio: o aplicador termina, confere cada item e grava tudo no diário (dá para desfazer depois).";
+    public static string CancelNote => Loc.T("Shell.NaoInterromperMeioAplicador");
 
     public ProcessTracker? Tracker => _tracker;
     public ApplyProgressObserver? Observer => _observer;
@@ -164,7 +164,7 @@ public sealed class AssistantProcess : ObservableObject
         Percent = 0;
         RemainingText = ProcessText.Remaining(null);
         ElapsedText = ProcessText.Clock(TimeSpan.Zero);
-        CurrentText = "Preparando…";
+        CurrentText = Loc.T("Shell.Preparando");
         CurrentIsEstimate = false;
         RingTone = apply ? Tone.Warn : Tone.Info;
         IsFinished = false;
@@ -195,9 +195,9 @@ public sealed class AssistantProcess : ObservableObject
         RingTone = summary.Status switch { ProcessTaskStatus.Failed => Tone.Bad, ProcessTaskStatus.Skipped => Tone.Info, _ => Tone.Good };
         CurrentText = summary.Status switch
         {
-            ProcessTaskStatus.Failed => "Não deu certo",
-            ProcessTaskStatus.Skipped => IsApply ? "Nada foi aplicado" : "Concluído",
-            _ => IsApply ? "Etapa aplicada" : "Leitura concluída",
+            ProcessTaskStatus.Failed => Loc.T("Shell.NaoDeuCerto"),
+            ProcessTaskStatus.Skipped => IsApply ? Loc.T("Shell.NadaFoiAplicado") : Loc.T("Shell.Concluido2"),
+            _ => IsApply ? Loc.T("Shell.EtapaAplicada") : Loc.T("Shell.LeituraConcluida"),
         };
         CurrentIsEstimate = false;
         var mine = _tracker;
@@ -225,7 +225,7 @@ public sealed class AssistantProcess : ObservableObject
         t.Sample();
         Percent = Math.Round(t.Progress * 100, 1);
         IsWaiting = t.IsWaiting;
-        RemainingText = t.IsComplete ? "pronto" : t.IsWaiting ? "esperando você" : ProcessText.Remaining(t.Remaining);
+        RemainingText = t.IsComplete ? "pronto" : t.IsWaiting ? Loc.T("Shell.EsperandoVoce") : ProcessText.Remaining(t.Remaining);
         ElapsedText = ProcessText.Clock(t.Elapsed);
         if (!t.IsComplete)
         {
@@ -257,7 +257,7 @@ public static class ProcessFeed
             foreach (var item in task.Items.Take(12))
                 wanted.Add(($"{task.Key}/{i++}", item.Title, item.Status, item.Detail, true, false));
             if (task.Items.Count > 12)
-                wanted.Add(($"{task.Key}/more", $"e mais {task.Items.Count - 12}", task.Items.Skip(12).All(x => x.Status == ProcessTaskStatus.Done) ? ProcessTaskStatus.Done : ProcessTaskStatus.Pending, null, true, false));
+                wanted.Add(($"{task.Key}/more", Loc.F("Shell.MaisN", task.Items.Count - 12), task.Items.Skip(12).All(x => x.Status == ProcessTaskStatus.Done) ? ProcessTaskStatus.Done : ProcessTaskStatus.Pending, null, true, false));
         }
         for (var i = 0; i < wanted.Count; i++)
         {

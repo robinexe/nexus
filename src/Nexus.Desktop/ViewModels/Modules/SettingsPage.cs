@@ -22,7 +22,7 @@ public sealed class ScheduleEditor : ObservableObject
     private string _minute = "00";
     private bool _skipOnBattery;
     private bool _skipWhenGaming;
-    private string _status = "Lendo o Agendador…";
+    private string _status = Loc.T("Settings.LendoAgendador");
     private bool _isOn;
 
     internal ScheduleEditor(SettingsPage page, NexusTaskKind kind, bool defaultConditions)
@@ -38,8 +38,8 @@ public sealed class ScheduleEditor : ObservableObject
     public string Title => Kind.Title;
     public string Explanation => Kind.Explanation;
 
-    public static IReadOnlyList<string> Frequencies { get; } = ["Todo dia", "Toda semana", "Todo mês"];
-    public static IReadOnlyList<string> Days { get; } = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+    public static IReadOnlyList<string> Frequencies { get; } = [Loc.T("Settings.TodoDia"), Loc.T("Settings.TodaSemana"), Loc.T("Settings.TodoMes")];
+    public static IReadOnlyList<string> Days { get; } = [Loc.T("Settings.Domingo"), Loc.T("Settings.Segunda"), Loc.T("Settings.Terca"), Loc.T("Settings.Quarta"), Loc.T("Settings.Quinta"), Loc.T("Settings.Sexta"), Loc.T("Settings.Sabado")];
     public static IReadOnlyList<int> MonthDays { get; } = Enumerable.Range(1, 28).ToList();
     public static IReadOnlyList<string> Hours { get; } = Enumerable.Range(0, 24).Select(h => h.ToString("00", CultureInfo.InvariantCulture)).ToList();
     public static IReadOnlyList<string> Minutes { get; } = ["00", "15", "30", "45"];
@@ -70,11 +70,11 @@ public sealed class ScheduleEditor : ObservableObject
             _page.RaiseSchedules();
         }
     }
-    public string SaveText => IsOn ? "Salvar horário" : "Ligar";
+    public string SaveText => IsOn ? Loc.T("Settings.SalvarHorario") : Loc.T("Settings.Ligar");
 
     // ---- apresentação v2
     public Views.Controls.Tone Tone => IsOn ? Views.Controls.Tone.Good : Views.Controls.Tone.Neutral;
-    public string StateText => IsOn ? "Ligada" : "Desligada";
+    public string StateText => IsOn ? Loc.T("Settings.Ligada") : Loc.T("Settings.Desligada");
     public string IconKey => Kind == NexusTaskKind.Clean ? "Icon.Clean" : "Icon.Search";
     public bool IsClean => Kind == NexusTaskKind.Clean;
 
@@ -129,14 +129,14 @@ public sealed record DependencyLicense(string Name, string License, string Note)
 /// </summary>
 public sealed class SettingsPage : ModulePage
 {
-    public override string Title => "Ajustes";
-    public override string Group => "Registro";
-    public override string Subtitle => "Agendamentos, atualizações, notificações, bandeja, iniciar com o Windows e informações do NEXUS.";
+    public override string Title => Loc.T("Settings.Ajustes");
+    public override string Group => Loc.T("Nav.Registro");
+    public override string Subtitle => Loc.T("Settings.AgendamentosAtualizacoesNotificacoes");
 
     private CatalogDocument? _catalog;
     private string _legacyText = "";
     private bool _legacyOn;
-    private string _startText = "Lendo…";
+    private string _startText = Loc.T("Settings.Lendo");
     private bool _startOn;
     private string _cleaningRules = "";
     private string _cleaningExcluded = "";
@@ -156,6 +156,50 @@ public sealed class SettingsPage : ModulePage
         RefreshCommand = new RelayCommand(() => _ = RunAsync(RefreshAsync), () => !Busy);
         OpenTermsCommand = new RelayCommand(() => OpenLegal("TERMOS-DE-USO"));
         OpenPrivacyCommand = new RelayCommand(() => OpenLegal("PRIVACIDADE"));
+        RestartForLanguageCommand = new RelayCommand(RestartForLanguage, () => LanguageRestartNeeded);
+        var windows = LanguageOption.FromCulture(System.Globalization.CultureInfo.CurrentUICulture);
+        LanguageChoices =
+        [
+            new(null, "", windows),
+            .. LanguageOption.Choices.Select(c => new LanguageChoice(c.Code, c.NativeName, c.Code)),
+        ];
+    }
+
+    // ----- idioma (settings.json; vale a partir do próximo início: os textos são carregados uma vez, ao abrir)
+
+    /// <summary>Opção da lista de idiomas: código gravado (null = igual ao Windows), nome mostrado e idioma que resulta.</summary>
+    public sealed record LanguageChoice(string? Code, string Name, string Effective)
+    {
+        /// <summary>"Igual ao Windows" no idioma atual, com o idioma que o Windows dá entre parênteses.</summary>
+        public string Display => Code is null
+            ? Loc.F("Settings.IgualWindowsN", LanguageOption.Choices.First(c => c.Code == Effective).NativeName)
+            : Name;
+    }
+
+    public IReadOnlyList<LanguageChoice> LanguageChoices { get; }
+
+    public LanguageChoice SelectedLanguage
+    {
+        get => LanguageChoices.FirstOrDefault(c => c.Code == LanguageOption.Normalize(UiSettings.Current.Language)) ?? LanguageChoices[0];
+        set
+        {
+            if (value is null) return;
+            SettingsProblem = UiSettings.Update(s => s with { Language = value.Code }) ?? "";
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(LanguageRestartNeeded));
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    /// <summary>O idioma escolhido é diferente do que está na tela: mostra "Reiniciar agora".</summary>
+    public bool LanguageRestartNeeded => SelectedLanguage.Effective != Loc.Language;
+
+    public RelayCommand RestartForLanguageCommand { get; }
+
+    private void RestartForLanguage()
+    {
+        if (AppUpdates.IsAppBusy()) { SettingsProblem = Loc.T("Shell.TermineOperacaoAndamentoAplicar"); return; }
+        if (!App.Relaunch()) SettingsProblem = Loc.T("Settings.NaoDeuReabrir");
     }
 
     public ScheduleEditor Scan { get; }
@@ -189,12 +233,12 @@ public sealed class SettingsPage : ModulePage
     /// <summary>Agendamentos ligados (verificação e limpeza segura).</summary>
     public double ActiveSchedules => (Scan.IsOn ? 1 : 0) + (Clean.IsOn ? 1 : 0);
     public Views.Controls.Tone StartTone => StartOn ? Views.Controls.Tone.Good : Views.Controls.Tone.Neutral;
-    public string StartChip => StartOn ? "Abre com o Windows" : "Não abre sozinho";
+    public string StartChip => StartOn ? Loc.T("Settings.AbreWindows") : Loc.T("Settings.NaoAbreSozinho");
     public Views.Controls.Tone NotificationsTone => Notifications ? Views.Controls.Tone.Good : Views.Controls.Tone.Neutral;
-    public string NotificationsChip => Notifications ? "Avisos ligados" : "Sem avisos";
+    public string NotificationsChip => Notifications ? Loc.T("Settings.AvisosLigados") : Loc.T("Settings.SemAvisos");
 
     internal void RaiseSchedules() => OnPropertyChanged(nameof(ActiveSchedules));
-    public string StartButtonText => StartOn ? "Desligar" : "Ligar";
+    public string StartButtonText => StartOn ? Loc.T("Settings.Desligar") : Loc.T("Settings.Ligar");
     public string CleaningRules { get => _cleaningRules; private set => Set(ref _cleaningRules, value); }
     public string CleaningExcluded { get => _cleaningExcluded; private set => Set(ref _cleaningExcluded, value); }
     public string LastCleaning { get => _lastCleaning; private set => Set(ref _lastCleaning, value); }
@@ -225,7 +269,7 @@ public sealed class SettingsPage : ModulePage
     public static string DataDirectory => Path.GetDirectoryName(LocalBroker.JournalPath(BrokerLevel.User))!;
     public static string ReportsDirectory => ScanReport.DefaultDirectory;
     public static string SettingsFile => UiSettings.Path;
-    public static string Version => $"NEXUS {AppUpdates.Instance.CurrentVersion} · aplicador {BrokerService.Version} · .NET {Environment.Version}";
+    public static string Version => Loc.F("Settings.NexusNAplicadorN", AppUpdates.Instance.CurrentVersion, BrokerService.Version, Environment.Version);
 
     /// <summary>Atualização do programa (versão, procurar agora, automático, progresso).</summary>
     public AppUpdates Updates { get; } = AppUpdates.Instance;
@@ -233,13 +277,13 @@ public sealed class SettingsPage : ModulePage
 
     public IReadOnlyList<DependencyLicense> Licenses { get; } =
     [
-        new("Microsoft.Data.Sqlite", "MIT", "Diário (SQLite) do aplicador e leitura do histórico."),
-        new("SQLitePCLRaw (bundle e_sqlite3)", "Apache-2.0", "Ponte para o SQLite nativo; o SQLite em si é domínio público."),
-        new("System.ServiceProcess.ServiceController", "MIT", "Aplicador instalado como serviço do Windows (opcional)."),
-        new(".NET 10 e WPF", "MIT", "Runtime e interface. Sem outros pacotes de interface."),
+        new("Microsoft.Data.Sqlite", "MIT", Loc.T("Settings.DiarioSqliteAplicadorLeitura")),
+        new(Loc.T("Settings.SqlitepclrawBundleSqlite3"), "Apache-2.0", Loc.T("Settings.PonteSqliteNativoSqlite")),
+        new("System.ServiceProcess.ServiceController", "MIT", Loc.T("Settings.AplicadorInstaladoComoServico")),
+        new(Loc.T("Settings.Net10Wpf"), "MIT", Loc.T("Settings.RuntimeInterfaceSemOutros")),
     ];
 
-    public static string LicenseNote => "O NEXUS em si ainda não tem licença escolhida. Detalhes em docs/05-dependencies.md.";
+    public static string LicenseNote => Loc.T("Settings.NexusSiAindaNao");
 
     // ------------------------------------------------------------------ leitura
 
@@ -259,23 +303,23 @@ public sealed class SettingsPage : ModulePage
             return (catalog, scan, clean, legacy, start, safe, excluded);
         });
         _catalog = read.catalog;
-        CatalogText = $"Catálogo {read.catalog.CatalogVersion} · {read.catalog.Actions.Count} ações · {read.catalog.Rejected.Count} itens rejeitados (mitos e arriscados)";
+        CatalogText = Loc.F("Settings.CatalogoNNAcoes", read.catalog.CatalogVersion, read.catalog.Actions.Count, read.catalog.Rejected.Count);
         Scan.Show(read.scan);
         Clean.Show(read.clean);
         LegacyOn = read.legacy.State != ScanSchedule.Off && read.legacy.State != AutomationScheduledScanHandler.Foreign;
-        LegacyText = LegacyOn ? $"A verificação semanal antiga também está ligada ({ScanSchedule.TryParse(read.legacy.State)?.Describe() ?? read.legacy.State}). A nova acima a substitui." : "";
+        LegacyText = LegacyOn ? Loc.F("Settings.VerificacaoSemanalAntigaTambem", ScanSchedule.TryParse(read.legacy.State)?.Describe() ?? read.legacy.State) : "";
         StartOn = read.start.State is AutomationStartWithWindowsHandler.On or AutomationStartWithWindowsHandler.Stale;
-        StartText = read.start.Error is not null ? $"Não foi possível ler: {read.start.Error}" : read.start.State switch
+        StartText = read.start.Error is not null ? Loc.F("Settings.NaoFoiPossivelLer", read.start.Error) : read.start.State switch
         {
-            AutomationStartWithWindowsHandler.On => "Ligado: o NEXUS abre minimizado na bandeja quando você entra no Windows.",
-            AutomationStartWithWindowsHandler.Stale => "Ligado, mas apontando para outra pasta do NEXUS. Desligue e ligue de novo para atualizar.",
-            AutomationStartWithWindowsHandler.Foreign => "Existe uma entrada \"NEXUS\" na inicialização que não foi criada pelo NEXUS; ela não será tocada.",
-            _ => "Desligado.",
+            AutomationStartWithWindowsHandler.On => Loc.T("Settings.LigadoNexusAbreMinimizado"),
+            AutomationStartWithWindowsHandler.Stale => Loc.T("Settings.LigadoMasApontandoOutra"),
+            AutomationStartWithWindowsHandler.Foreign => Loc.T("Settings.ExisteEntradaNexusInicializacao"),
+            _ => Loc.T("Settings.Desligado"),
         };
         CleaningRules = string.Join(" · ", read.safe.Select(s => s.Title));
-        CleaningExcluded = $"Nunca entram: {read.excluded.Count} regras (administrador, histórico, cookies, shaders e outras com efeito colateral). Essas só na página Limpeza, com você escolhendo.";
+        CleaningExcluded = Loc.F("Settings.NuncaEntramNRegras", read.excluded.Count);
         var last = LastCleaningReport();
-        LastCleaning = last is null ? "Nenhuma limpeza registrada em relatório ainda." : $"Último relatório de limpeza: {File.GetLastWriteTime(last):dd/MM/yyyy HH:mm}.";
+        LastCleaning = last is null ? Loc.T("Settings.NenhumaLimpezaRegistradaRelatorio") : Loc.F("Settings.UltimoRelatorioLimpezaN", File.GetLastWriteTime(last));
     }
 
     private string ActionKey(string id) =>
@@ -297,14 +341,14 @@ public sealed class SettingsPage : ModulePage
             if (editor.Kind == NexusTaskKind.Clean)
             {
                 text.AppendLine();
-                text.AppendLine("Quando chegar a hora, o NEXUS vai limpar SEM PERGUNTAR (só estas regras):");
+                text.AppendLine(Loc.T("Settings.QuandoChegarHoraNexus"));
                 text.AppendLine(CleaningRules);
                 text.AppendLine();
-                text.AppendLine("Nunca: pastas de administrador, histórico, cookies, caches de shader ou algo irreversível.");
-                text.AppendLine("Cada limpeza fica no diário e volta em Limpeza > Histórico.");
+                text.AppendLine(Loc.T("Settings.NuncaPastasAdministradorHistorico"));
+                text.AppendLine(Loc.T("Settings.CadaLimpezaFicaDiario"));
             }
             text.AppendLine();
-            text.Append("A tarefa fica no Agendador do Windows, na sua conta, sem administrador. Dá para desligar aqui a qualquer momento.");
+            text.Append(Loc.T("Settings.TarefaFicaAgendadorWindows"));
             var r = await Host.ApplyAsync(editor.Title, text.ToString(),
                 [new ActionRequest(ActionKey(editor.Kind.ActionId), AutomationScheduledTaskHandler.On, Arguments(schedule, conditions))], BrokerLevel.User);
             if (r is not null) Message = r.Message;
@@ -317,7 +361,7 @@ public sealed class SettingsPage : ModulePage
         if (Host is null) return;
         try
         {
-            var r = await Host.ApplyAsync($"Desligar: {editor.Title}", $"Remover a tarefa {editor.Kind.TaskName} do Agendador do Windows?",
+            var r = await Host.ApplyAsync(Loc.F("Settings.DesligarN", editor.Title), Loc.F("Settings.RemoverTarefaNAgendador", editor.Kind.TaskName),
                 [new ActionRequest(ActionKey(editor.Kind.ActionId), AutomationScheduledTaskHandler.Off, Arguments(editor.Schedule, editor.Conditions))], BrokerLevel.User);
             if (r is not null) Message = r.Message;
         }
@@ -332,7 +376,7 @@ public sealed class SettingsPage : ModulePage
         if (Host is null) return;
         try
         {
-            var r = await Host.ApplyAsync("Desligar verificação semanal antiga", $"Remover a tarefa {ScheduledScanTask.TaskName} (versão antiga) do Agendador do Windows?",
+            var r = await Host.ApplyAsync(Loc.T("Settings.DesligarVerificacaoSemanalAntiga"), Loc.F("Settings.RemoverTarefaNVersao", ScheduledScanTask.TaskName),
                 [new ActionRequest(ActionKey(AutomationHandlers.ScheduledScanActionId), ScanSchedule.Off)], BrokerLevel.User);
             if (r is not null) Message = r.Message;
         }
@@ -346,12 +390,12 @@ public sealed class SettingsPage : ModulePage
         {
             var on = !StartOn;
             var text = on
-                ? "Abrir o NEXUS minimizado na bandeja sempre que você entrar no Windows?\n\n" +
-                  "Cria o valor \"NEXUS\" em HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run (sua conta, sem administrador), " +
-                  "apontando para o Nexus.Desktop.exe desta pasta. O NEXUS só lê o PC enquanto fica aberto.\n" +
-                  "Dá para desligar aqui, no Gerenciador de Tarefas ou na página Inicialização."
-                : "Parar de abrir o NEXUS quando você entra no Windows?";
-            var r = await Host.ApplyAsync(on ? "Iniciar com o Windows" : "Não iniciar com o Windows", text,
+                ? Loc.T("Settings.AbrirNexusMinimizadoBandeja") +
+                  Loc.T("Settings.CriaValorNexusHkcu") +
+                  Loc.T("Settings.ApontandoNexusDesktopExe") +
+                  Loc.T("Settings.DesligarAquiGerenciadorTarefas")
+                : Loc.T("Settings.PararAbrirNexusQuando");
+            var r = await Host.ApplyAsync(on ? Loc.T("Settings.IniciarWindows") : Loc.T("Settings.NaoIniciarWindows"), text,
                 [new ActionRequest(ActionKey(AutomationHandlers.StartWithWindowsActionId), on ? AutomationStartWithWindowsHandler.On : AutomationStartWithWindowsHandler.Off)],
                 BrokerLevel.User);
             if (r is not null) Message = r.Message;
@@ -375,7 +419,7 @@ public sealed class SettingsPage : ModulePage
     private void OpenLastCleaning()
     {
         if (LastCleaningReport() is { } file && !Nexus.Automation.Notifications.BalloonNotifier.OpenReport(file))
-            Message = "Não foi possível abrir o relatório.";
+            Message = Loc.T("Settings.NaoFoiPossivelAbrir");
     }
 
     /// <summary>
@@ -386,7 +430,7 @@ public sealed class SettingsPage : ModulePage
     {
         var dir = Path.Combine(AppContext.BaseDirectory, "legal");
         var file = new[] { stem + ".html", stem + ".txt" }.Select(n => Path.Combine(dir, n)).FirstOrDefault(File.Exists);
-        if (file is null) { Message = $"Arquivo não encontrado em {dir} (cópia de desenvolvimento: o texto está em docs\\legal no repositório)."; return; }
+        if (file is null) { Message = Loc.F("Settings.ArquivoNaoEncontradoN", dir); return; }
         try { using var _ = Process.Start(new ProcessStartInfo(file) { UseShellExecute = true }); }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = $"Não foi possível abrir: {ex.Message}"; }
     }
@@ -395,7 +439,7 @@ public sealed class SettingsPage : ModulePage
     {
         try
         {
-            if (!Directory.Exists(folder)) { Message = $"A pasta ainda não existe: {folder}"; return; }
+            if (!Directory.Exists(folder)) { Message = Loc.F("Settings.PastaAindaNaoExiste", folder); return; }
             // Explorador do Windows numa pasta do próprio NEXUS (o usuário vê e controla).
             using var _ = Process.Start(new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe")) { UseShellExecute = false, ArgumentList = { folder } });
         }

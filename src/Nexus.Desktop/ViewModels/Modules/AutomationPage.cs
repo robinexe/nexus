@@ -76,7 +76,7 @@ public sealed record OneClickRow(string Title, string Detail, string Level)
 public sealed class AutomationPage : ModulePage
 {
     public override string Title => "Otimização automática";
-    public override string Group => "Automático";
+    public override string Group => Loc.T("Nav.Automatico");
     public override string Subtitle => "O NEXUS lê o seu PC, propõe o que vale a pena e aplica com segurança.";
 
     private CatalogDocument? _catalog;

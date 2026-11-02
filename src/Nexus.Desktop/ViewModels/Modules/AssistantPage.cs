@@ -178,7 +178,7 @@ public sealed record ExtraAction(string Label, RelayCommand Command, bool Primar
 public sealed class AssistantPage : ModulePage
 {
     public override string Title => "Assistente completo";
-    public override string Group => "Automático";
+    public override string Group => Loc.T("Nav.Automatico");
     public override string Subtitle => "Passo a passo por todas as funções do NEXUS: verifica, explica, ajusta com a sua confirmação e entrega o relatório.";
 
     private readonly AssistantStateStore _store = new(AssistantStateStore.DefaultPath);

@@ -49,7 +49,7 @@ namespace Nexus.Desktop.ViewModels
         }
 
         public override string Title => "Monitor";
-        public override string Group => "Medir";
+        public override string Group => Loc.T("Nav.Medir");
         public override string Subtitle => "CPU, GPU, memória, disco e rede ao vivo, e a saúde dos discos.";
 
         public MonitorGauge Cpu { get; } = new("CPU", "%", 100);

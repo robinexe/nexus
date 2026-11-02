@@ -22,10 +22,10 @@ public class BeforeAfter : Control
         new PropertyMetadata(double.NaN, OnChanged));
 
     public static readonly DependencyProperty BeforeLabelProperty = DependencyProperty.Register(nameof(BeforeLabel), typeof(string), typeof(BeforeAfter),
-        new PropertyMetadata("Antes"));
+        new PropertyMetadata(Loc.T("Shell.Antes")));
 
     public static readonly DependencyProperty AfterLabelProperty = DependencyProperty.Register(nameof(AfterLabel), typeof(string), typeof(BeforeAfter),
-        new PropertyMetadata("Depois"));
+        new PropertyMetadata(Loc.T("Shell.Depois")));
 
     public static readonly DependencyProperty KindProperty = DependencyProperty.Register(nameof(Kind), typeof(NumberKind), typeof(BeforeAfter),
         new PropertyMetadata(NumberKind.Number, OnChanged));
@@ -115,5 +115,5 @@ public class BeforeAfter : Control
 
     protected override AutomationPeer OnCreateAutomationPeer() =>
         new DescribedPeer(this, AutomationControlType.Text, nameof(BeforeAfter),
-            () => $"{BeforeLabel}: {BeforeText}. {AfterLabel}: {AfterText}. Diferença: {DeltaText}.");
+            () => Loc.F("Shell.NNNN", BeforeLabel, BeforeText, AfterLabel, AfterText, DeltaText));
 }

@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos da interface do NEXUS (Español). Gerado e conferido por LocalizationTests: toda chave existe nos 3 idiomas, com os
+     mesmos marcadores {0}. Para editar: mude o <value>; chave nova = acrescente nos três arquivos. -->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav.Assistente" xml:space="preserve"><value>Asistente</value></data>
+  <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
+  <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratorio</value></data>
+  <data name="Nav.LiberarEspaco" xml:space="preserve"><value>Liberar espacio</value></data>
+  <data name="Nav.Limpar" xml:space="preserve"><value>Limpiar</value></data>
+  <data name="Nav.Medir" xml:space="preserve"><value>Medir</value></data>
+  <data name="Nav.MedirPartida" xml:space="preserve"><value>Medir una partida</value></data>
+  <data name="Nav.MeuPc" xml:space="preserve"><value>Mi PC</value></data>
+  <data name="Nav.Otimizar" xml:space="preserve"><value>Optimizar</value></data>
+  <data name="Nav.Proteger" xml:space="preserve"><value>Proteger</value></data>
+  <data name="Nav.Registro" xml:space="preserve"><value>Registro</value></data>
+  <data name="Nav.Sistema" xml:space="preserve"><value>Sistema</value></data>
+  <data name="Nav.VerAjustes" xml:space="preserve"><value>Ver los ajustes</value></data>
+  <data name="Nav.VerDiagnostico" xml:space="preserve"><value>Ver el diagnóstico</value></data>
+  <data name="Nav.VerDisco" xml:space="preserve"><value>Ver el disco</value></data>
+  <data name="Nav.VerInicializacao" xml:space="preserve"><value>Ver el inicio</value></data>
+  <data name="Nav.VerMemoria" xml:space="preserve"><value>Ver la memoria</value></data>
+  <data name="Nav.VerPlacaVideo" xml:space="preserve"><value>Ver la tarjeta gráfica</value></data>
+  <data name="Nav.VerProcessador" xml:space="preserve"><value>Ver el procesador</value></data>
+  <data name="Nav.VerSeguranca" xml:space="preserve"><value>Ver la seguridad</value></data>
+  <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Se abre minimizado en la bandeja. Es una entrada en Run de tu cuenta (sin administrador), con diario y deshacer; también aparece en el Administrador de tareas y en la página Inicio.</value></data>
+  <data name="Settings.AbreWindows" xml:space="preserve"><value>Se abre con Windows</value></data>
+  <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>¿Abrir NEXUS minimizado en la bandeja cada vez que inicies sesión en Windows?
+
+</value></data>
+  <data name="Settings.AbrirRelatorio" xml:space="preserve"><value>Abrir informe</value></data>
+  <data name="Settings.Agendamentos" xml:space="preserve"><value>Programaciones</value></data>
+  <data name="Settings.AgendamentosAtualizacoesNotificacoes" xml:space="preserve"><value>Programaciones, actualizaciones, avisos, bandeja, inicio con Windows e información de NEXUS.</value></data>
+  <data name="Settings.AgendamentosLigados" xml:space="preserve"><value>Programaciones activas</value></data>
+  <data name="Settings.Ajustes" xml:space="preserve"><value>Ajustes</value></data>
+  <data name="Settings.AplicadorInstaladoComoServico" xml:space="preserve"><value>Aplicador instalado como servicio de Windows (opcional).</value></data>
+  <data name="Settings.ApontandoNexusDesktopExe" xml:space="preserve"><value>que apunta a Nexus.Desktop.exe de esta carpeta. NEXUS solo lee el PC mientras está abierto.
+</value></data>
+  <data name="Settings.ArquivoNaoEncontradoN" xml:space="preserve"><value>Archivo no encontrado en {0} (copia de desarrollo: el texto está en docs\legal en el repositorio).</value></data>
+  <data name="Settings.As" xml:space="preserve"><value>a las</value></data>
+  <data name="Settings.AtualizacaoAssinada" xml:space="preserve"><value>Actualización firmada</value></data>
+  <data name="Settings.Atualizacoes" xml:space="preserve"><value>Actualizaciones</value></data>
+  <data name="Settings.AtualizarAutomaticamente" xml:space="preserve"><value>Actualizar automáticamente</value></data>
+  <data name="Settings.AvisarQuandoTarefaAgendada" xml:space="preserve"><value>Avisar cuando termine una tarea programada</value></data>
+  <data name="Settings.AvisarTambemQuandoFor" xml:space="preserve"><value>Avisar también cuando se omita</value></data>
+  <data name="Settings.AvisoAbreRelatorioClicar" xml:space="preserve"><value>El aviso abre el informe al hacer clic. Omitida = batería o juego abierto. Con 'Cerrar oculta', para salir usa Salir en el menú del icono. Menú del icono: Abrir, Optimizar ahora (muestra el plan y pide confirmación), Verificar ahora (solo lectura) y Salir. Las preferencias se guardan en settings.json.</value></data>
+  <data name="Settings.Avisos" xml:space="preserve"><value>Avisos</value></data>
+  <data name="Settings.AvisosBandeja" xml:space="preserve"><value>Avisos y bandeja</value></data>
+  <data name="Settings.AvisosLigados" xml:space="preserve"><value>Avisos activados</value></data>
+  <data name="Settings.CadaLimpezaFicaDiario" xml:space="preserve"><value>Cada limpieza queda en el diario y se puede recuperar en Limpieza &gt; Historial.</value></data>
+  <data name="Settings.CatalogoNNAcoes" xml:space="preserve"><value>Catálogo {0} · {1} acciones · {2} elementos rechazados (mitos y arriesgados)</value></data>
+  <data name="Settings.CliqueRemoveTarefaFica" xml:space="preserve"><value>Un clic quita la tarea. Queda en el Historial.</value></data>
+  <data name="Settings.ComoConferido" xml:space="preserve"><value>Cómo se verifica</value></data>
+  <data name="Settings.Confirma" xml:space="preserve"><value>Confirmas</value></data>
+  <data name="Settings.CriaValorNexusHkcu" xml:space="preserve"><value>Crea el valor "NEXUS" en HKCU\Software\Microsoft\Windows\CurrentVersion\Run (tu cuenta, sin administrador),</value></data>
+  <data name="Settings.DadosRelatorios" xml:space="preserve"><value>Datos e informes</value></data>
+  <data name="Settings.DependenciasRedistribuidas" xml:space="preserve"><value>Dependencias redistribuidas</value></data>
+  <data name="Settings.Desliga" xml:space="preserve"><value>Desactivas</value></data>
+  <data name="Settings.Desligada" xml:space="preserve"><value>Desactivada</value></data>
+  <data name="Settings.DesligadaPadrao" xml:space="preserve"><value>Desactivada por defecto</value></data>
+  <data name="Settings.Desligado" xml:space="preserve"><value>Desactivado.</value></data>
+  <data name="Settings.Desligar" xml:space="preserve"><value>Desactivar</value></data>
+  <data name="Settings.DesligarAntiga" xml:space="preserve"><value>Desactivar la antigua</value></data>
+  <data name="Settings.DesligarAquiGerenciadorTarefas" xml:space="preserve"><value>Puedes desactivarlo aquí, en el Administrador de tareas o en la página Inicio.</value></data>
+  <data name="Settings.DesligarN" xml:space="preserve"><value>Desactivar: {0}</value></data>
+  <data name="Settings.DesligarVerificacaoSemanalAntiga" xml:space="preserve"><value>Desactivar la verificación semanal antigua</value></data>
+  <data name="Settings.Dia" xml:space="preserve"><value>día</value></data>
+  <data name="Settings.DiaHoraQuandoNao" xml:space="preserve"><value>Día, hora y cuándo no ejecutar (batería, juego abierto).</value></data>
+  <data name="Settings.DiaMes" xml:space="preserve"><value>Día del mes</value></data>
+  <data name="Settings.DiarioQuarentenaPreferencias" xml:space="preserve"><value>Diario, cuarentena, preferencias</value></data>
+  <data name="Settings.DiarioSqliteAplicadorLeitura" xml:space="preserve"><value>Diario (SQLite) del aplicador y lectura del historial.</value></data>
+  <data name="Settings.DiaSemana" xml:space="preserve"><value>Día de la semana</value></data>
+  <data name="Settings.Domingo" xml:space="preserve"><value>domingo</value></data>
+  <data name="Settings.EntraNuncaEntra" xml:space="preserve"><value>Qué entra y qué nunca entra</value></data>
+  <data name="Settings.ExisteEntradaNexusInicializacao" xml:space="preserve"><value>Hay una entrada "NEXUS" en el inicio que no creó NEXUS; no se tocará.</value></data>
+  <data name="Settings.FecharXEscondeBandeja" xml:space="preserve"><value>Cerrar (X) oculta en la bandeja</value></data>
+  <data name="Settings.Frequencia" xml:space="preserve"><value>Frecuencia</value></data>
+  <data name="Settings.Hora" xml:space="preserve"><value>Hora</value></data>
+  <data name="Settings.IconeNexusBandeja" xml:space="preserve"><value>Icono de NEXUS en la bandeja</value></data>
+  <data name="Settings.Idioma" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Settings.IdiomaInterface" xml:space="preserve"><value>Idioma de la interfaz</value></data>
+  <data name="Settings.IgualWindowsN" xml:space="preserve"><value>Igual que Windows ({0})</value></data>
+  <data name="Settings.Iniciar" xml:space="preserve"><value>Iniciar</value></data>
+  <data name="Settings.IniciarWindows" xml:space="preserve"><value>Iniciar con Windows</value></data>
+  <data name="Settings.JaFunciona" xml:space="preserve"><value>Lo que ya funciona</value></data>
+  <data name="Settings.Lendo" xml:space="preserve"><value>Leyendo…</value></data>
+  <data name="Settings.LendoAgendador" xml:space="preserve"><value>Leyendo el Programador de tareas…</value></data>
+  <data name="Settings.Ligada" xml:space="preserve"><value>Activada</value></data>
+  <data name="Settings.LigadoMasApontandoOutra" xml:space="preserve"><value>Activado, pero apunta a otra carpeta de NEXUS. Desactívalo y actívalo de nuevo para actualizar.</value></data>
+  <data name="Settings.LigadoNexusAbreMinimizado" xml:space="preserve"><value>Activado: NEXUS se abre minimizado en la bandeja cuando inicias sesión en Windows.</value></data>
+  <data name="Settings.Ligar" xml:space="preserve"><value>Activar</value></data>
+  <data name="Settings.LimpezaSegura" xml:space="preserve"><value>Limpieza segura</value></data>
+  <data name="Settings.MinimizarEscondeBandeja" xml:space="preserve"><value>Minimizar oculta en la bandeja</value></data>
+  <data name="Settings.Minuto" xml:space="preserve"><value>Minuto</value></data>
+  <data name="Settings.N2" xml:space="preserve"><value> de 2</value></data>
+  <data name="Settings.NaoAbreSozinho" xml:space="preserve"><value>No se abre solo</value></data>
+  <data name="Settings.NaoAceleraSoLibera" xml:space="preserve"><value>No acelera: solo libera espacio</value></data>
+  <data name="Settings.NaoDeuReabrir" xml:space="preserve"><value>No se pudo volver a abrir NEXUS. Ciérralo y ábrelo de nuevo para cambiar el idioma.</value></data>
+  <data name="Settings.NaoFoiPossivelAbrir" xml:space="preserve"><value>No se pudo abrir el informe.</value></data>
+  <data name="Settings.NaoFoiPossivelLer" xml:space="preserve"><value>No se pudo leer: {0}</value></data>
+  <data name="Settings.NaoIniciarWindows" xml:space="preserve"><value>No iniciar con Windows</value></data>
+  <data name="Settings.NaoRodarBateria" xml:space="preserve"><value>No ejecutar con batería</value></data>
+  <data name="Settings.NaoRodarJogoAberto" xml:space="preserve"><value>No ejecutar con un juego abierto o una app en pantalla completa</value></data>
+  <data name="Settings.NenhumaLimpezaRegistradaRelatorio" xml:space="preserve"><value>Todavía no hay ninguna limpieza registrada en un informe.</value></data>
+  <data name="Settings.Net10Wpf" xml:space="preserve"><value>.NET 10 y WPF</value></data>
+  <data name="Settings.NexusNAplicadorN" xml:space="preserve"><value>NEXUS {0} · aplicador {1} · .NET {2}</value></data>
+  <data name="Settings.NexusSiAindaNao" xml:space="preserve"><value>NEXUS en sí todavía no tiene licencia elegida. Detalles en docs/05-dependencies.md.</value></data>
+  <data name="Settings.NuncaEntramNRegras" xml:space="preserve"><value>Nunca entran: {0} reglas (administrador, historial, cookies, shaders y otras con efectos secundarios). Esas solo en la página Limpieza, eligiendo tú.</value></data>
+  <data name="Settings.NuncaPastasAdministradorHistorico" xml:space="preserve"><value>Nunca: carpetas de administrador, historial, cookies, cachés de shaders ni nada irreversible.</value></data>
+  <data name="Settings.PararAbrirNexusQuando" xml:space="preserve"><value>¿Dejar de abrir NEXUS cuando inicias sesión en Windows?</value></data>
+  <data name="Settings.PastaAindaNaoExiste" xml:space="preserve"><value>La carpeta todavía no existe: {0}</value></data>
+  <data name="Settings.PonteSqliteNativoSqlite" xml:space="preserve"><value>Puente al SQLite nativo; SQLite en sí es de dominio público.</value></data>
+  <data name="Settings.PortuguesEnglishOuEspanol" xml:space="preserve"><value>Português, English o Español. Reinicia NEXUS para cambiar el idioma.</value></data>
+  <data name="Settings.Preferencias" xml:space="preserve"><value>Preferencias:</value></data>
+  <data name="Settings.PreferenciasInterfaceNadaAqui" xml:space="preserve"><value>Preferencias de la interfaz. Nada aquí cambia el sistema.</value></data>
+  <data name="Settings.Privacidade" xml:space="preserve"><value>Privacidad</value></data>
+  <data name="Settings.ProcurarAtualizacaoAgora" xml:space="preserve"><value>Buscar actualizaciones ahora</value></data>
+  <data name="Settings.ProgramaAbertoExNavegador" xml:space="preserve"><value>Un programa abierto (p. ej., el navegador) hace que su regla se omita. No se borra nada: va a la cuarentena, y cada limpieza se puede recuperar en Limpieza &gt; Historial.</value></data>
+  <data name="Settings.ProgressoDownload" xml:space="preserve"><value>Progreso de la descarga</value></data>
+  <data name="Settings.QuandoChegarHoraNexus" xml:space="preserve"><value>Cuando llegue la hora, NEXUS limpiará SIN PREGUNTAR (solo estas reglas):</value></data>
+  <data name="Settings.Quarta" xml:space="preserve"><value>miércoles</value></data>
+  <data name="Settings.Quinta" xml:space="preserve"><value>jueves</value></data>
+  <data name="Settings.ReiniciarAgora" xml:space="preserve"><value>Reiniciar ahora</value></data>
+  <data name="Settings.Relatorios" xml:space="preserve"><value>Informes</value></data>
+  <data name="Settings.RemoverTarefaNAgendador" xml:space="preserve"><value>¿Quitar la tarea {0} del Programador de tareas de Windows?</value></data>
+  <data name="Settings.RemoverTarefaNVersao" xml:space="preserve"><value>¿Quitar la tarea {0} (versión antigua) del Programador de tareas de Windows?</value></data>
+  <data name="Settings.RodaSozinho" xml:space="preserve"><value>Se ejecuta sola</value></data>
+  <data name="Settings.RuntimeInterfaceSemOutros" xml:space="preserve"><value>Runtime e interfaz. Sin otros paquetes de interfaz.</value></data>
+  <data name="Settings.Sabado" xml:space="preserve"><value>sábado</value></data>
+  <data name="Settings.SalvarHorario" xml:space="preserve"><value>Guardar horario</value></data>
+  <data name="Settings.Segunda" xml:space="preserve"><value>lunes</value></data>
+  <data name="Settings.SemAvisos" xml:space="preserve"><value>Sin avisos</value></data>
+  <data name="Settings.SemContas" xml:space="preserve"><value>Sin cuentas</value></data>
+  <data name="Settings.SemTelemetria" xml:space="preserve"><value>Sin telemetría</value></data>
+  <data name="Settings.Sexta" xml:space="preserve"><value>viernes</value></data>
+  <data name="Settings.Sobre" xml:space="preserve"><value>Acerca de</value></data>
+  <data name="Settings.SoCachesSuaConta" xml:space="preserve"><value>Solo cachés de tu cuenta</value></data>
+  <data name="Settings.SoInstalaFoiAssinado" xml:space="preserve"><value>Solo instala lo que fue firmado con la clave de NEXUS y descargado de GitHub, con tamaño y SHA-256 iguales a los del manifiesto firmado. Cualquier diferencia: el archivo se descarta y no se ejecuta nada. Sin cuenta y sin telemetría: cada 6 h NEXUS solo lee dos archivos pequeños de GitHub. La instalación pide permiso a Windows una vez y nunca se ejecuta en medio de una aplicación o del Asistente.</value></data>
+  <data name="Settings.SqlitepclrawBundleSqlite3" xml:space="preserve"><value>SQLitePCLRaw (bundle e_sqlite3)</value></data>
+  <data name="Settings.SuaContaSemAdministrador" xml:space="preserve"><value>En tu cuenta, sin administrador. Todo queda en el diario y se puede deshacer.</value></data>
+  <data name="Settings.TarefaFicaAgendadorWindows" xml:space="preserve"><value>La tarea queda en el Programador de tareas de Windows, en tu cuenta, sin administrador. Puedes desactivarla aquí en cualquier momento.</value></data>
+  <data name="Settings.TarefaVaiAgendadorWindows" xml:space="preserve"><value>La tarea va al Programador de tareas de Windows, en tu cuenta.</value></data>
+  <data name="Settings.Terca" xml:space="preserve"><value>martes</value></data>
+  <data name="Settings.TermosUso" xml:space="preserve"><value>Términos de uso</value></data>
+  <data name="Settings.TodaSemana" xml:space="preserve"><value>Todas las semanas</value></data>
+  <data name="Settings.TodoDia" xml:space="preserve"><value>Todos los días</value></data>
+  <data name="Settings.TodoMes" xml:space="preserve"><value>Todos los meses</value></data>
+  <data name="Settings.UltimoRelatorioLimpezaN" xml:space="preserve"><value>Último informe de limpieza: {0:dd/MM/yyyy HH:mm}.</value></data>
+  <data name="Settings.VaiQuarentena" xml:space="preserve"><value>Va a la cuarentena</value></data>
+  <data name="Settings.Verificacao" xml:space="preserve"><value>Verificación</value></data>
+  <data name="Settings.VerificacaoSemanalAntigaTambem" xml:space="preserve"><value>La verificación semanal antigua también está activada ({0}). La nueva de arriba la reemplaza.</value></data>
+  <data name="Settings.VerificarSoLeLimpar" xml:space="preserve"><value>Verificar solo lee. Limpiar usa la cuarentena.</value></data>
+  <data name="Settings.VoceEscolhe" xml:space="preserve"><value>Tú eliges</value></data>
+  <data name="Shell.Abrir" xml:space="preserve"><value>Abrir</value></data>
+  <data name="Shell.AbrirDownloads" xml:space="preserve"><value>Abrir descargas</value></data>
+  <data name="Shell.AbrirNexus" xml:space="preserve"><value>Abrir NEXUS</value></data>
+  <data name="Shell.AgendamentoGpuAceleradoHardware" xml:space="preserve"><value>Programación de GPU acelerada por hardware</value></data>
+  <data name="Shell.Agora" xml:space="preserve"><value>Ahora</value></data>
+  <data name="Shell.AguardeLeituraPcTerminar" xml:space="preserve"><value>Espera a que termine la lectura del PC e inténtalo de nuevo.</value></data>
+  <data name="Shell.AindaNaoProcurou" xml:space="preserve"><value>Todavía no buscó.</value></data>
+  <data name="Shell.AlgumasLeiturasSoAparecem" xml:space="preserve"><value>Algunas lecturas solo aparecen como administrador (tiempo de arranque, caché DNS, puntos de restauración, drivers en uso). Vuelve a abrir NEXUS con el permiso de Windows; leer sigue sin cambiar nada.</value></data>
+  <data name="Shell.Andamento" xml:space="preserve"><value>en curso</value></data>
+  <data name="Shell.AndamentoAplicacao" xml:space="preserve"><value>Progreso de la aplicación</value></data>
+  <data name="Shell.Antes" xml:space="preserve"><value>Antes</value></data>
+  <data name="Shell.AplicacaoCanceladaNadaFoi" xml:space="preserve"><value>Aplicación cancelada. No se envió nada.</value></data>
+  <data name="Shell.AplicadoConferido" xml:space="preserve"><value>Aplicado y verificado</value></data>
+  <data name="Shell.AplicadorProntoVersaoN" xml:space="preserve"><value>Aplicador listo · versión {0} · catálogo {1}</value></data>
+  <data name="Shell.AplicadorRespondeFimItem" xml:space="preserve"><value>El aplicador responde al final; el elemento actual se estima por el orden del pedido y el tiempo típico de cada parte.</value></data>
+  <data name="Shell.Aplicando" xml:space="preserve"><value>Aplicando</value></data>
+  <data name="Shell.Aplicar" xml:space="preserve"><value>Aplicar</value></data>
+  <data name="Shell.AplicarAjustesMarcados" xml:space="preserve"><value>Aplicar los ajustes marcados</value></data>
+  <data name="Shell.AplicarAjustesMarcadosDemonstracao" xml:space="preserve"><value>Aplicar los ajustes marcados (demostración de la autoprueba)</value></data>
+  <data name="Shell.AtencaoBuildWindowsIndisponivel" xml:space="preserve"><value> · ATENCIÓN: compilación de Windows no disponible, compatibilidad sin verificar</value></data>
+  <data name="Shell.AtencaoNAlteracaoOes" xml:space="preserve"><value>Atención: {0} cambio(s) a medias. Abre Aplicar → Recuperar interrumpidos.</value></data>
+  <data name="Shell.AtualizacaoInterrompidaN" xml:space="preserve"><value>Actualización interrumpida: {0}</value></data>
+  <data name="Shell.AtualizacaoNaoFoiConcluida" xml:space="preserve"><value>La actualización no se completó.</value></data>
+  <data name="Shell.AtualizacaoNexus" xml:space="preserve"><value>Actualización de NEXUS</value></data>
+  <data name="Shell.AtualizaSozinho" xml:space="preserve"><value>se actualiza solo</value></data>
+  <data name="Shell.AutotesteAplicadorNaoIniciado" xml:space="preserve"><value>Autoprueba: el aplicador no se inicia.</value></data>
+  <data name="Shell.AutotesteAtualizacaoDesligada" xml:space="preserve"><value>Autoprueba: actualización desactivada.</value></data>
+  <data name="Shell.AutotestePedidoAplicadorRecusado" xml:space="preserve"><value>Autoprueba: pedido al aplicador rechazado. No se cambió nada.</value></data>
+  <data name="Shell.AvisoWindowsFoiRecusado" xml:space="preserve"><value>Se rechazó el aviso de Windows o falló el instalador. No cambió nada; inténtalo de nuevo en Ajustes.</value></data>
+  <data name="Shell.BaixandoNexusN" xml:space="preserve"><value>Descargando NEXUS {0}…</value></data>
+  <data name="Shell.BaixandoNexusNN" xml:space="preserve"><value>Descargando NEXUS {0}: {1:0} % de {2:0.0} MB</value></data>
+  <data name="Shell.Bloqueada" xml:space="preserve"><value>Bloqueada</value></data>
+  <data name="Shell.Calculando" xml:space="preserve"><value>calculando…</value></data>
+  <data name="Shell.CanceladoNadaFoiAlterado" xml:space="preserve"><value>Cancelado. No se cambió nada.</value></data>
+  <data name="Shell.CatalogoIndisponivelN" xml:space="preserve"><value>catálogo no disponible: {0}</value></data>
+  <data name="Shell.CliqueAbrirRelatorio" xml:space="preserve"><value> Haz clic para abrir el informe.</value></data>
+  <data name="Shell.ComoNexusProtegeSeu" xml:space="preserve"><value>Cómo NEXUS protege tu PC</value></data>
+  <data name="Shell.CompiladaPcNaoProcura" xml:space="preserve"><value>Compilada en el PC: no busca ni instala actualizaciones.</value></data>
+  <data name="Shell.Concluido" xml:space="preserve"><value>completado</value></data>
+  <data name="Shell.Concluido2" xml:space="preserve"><value>Completado</value></data>
+  <data name="Shell.ConfirmarAplicacao" xml:space="preserve"><value>Confirmar aplicación</value></data>
+  <data name="Shell.ConfirmarReversao" xml:space="preserve"><value>Confirmar reversión</value></data>
+  <data name="Shell.CoordenacaoN" xml:space="preserve"><value>Coordinación: {0}</value></data>
+  <data name="Shell.CoordenacaoNaoVerificadaN" xml:space="preserve"><value>Coordinación no verificada: {0}</value></data>
+  <data name="Shell.CopiaPortatilAvisaQuando" xml:space="preserve"><value>Copia portátil: avisa cuando sale una versión nueva, con el enlace de descarga. Para que se instale sola, usa el instalador.</value></data>
+  <data name="Shell.CopiaPortatilBaixePacote" xml:space="preserve"><value>Copia portátil: descarga el paquete nuevo.</value></data>
+  <data name="Shell.Decorrido" xml:space="preserve"><value>Transcurrido</value></data>
+  <data name="Shell.Depois" xml:space="preserve"><value>Después</value></data>
+  <data name="Shell.Desfazendo" xml:space="preserve"><value>Deshaciendo</value></data>
+  <data name="Shell.Desfazer" xml:space="preserve"><value>Deshacer</value></data>
+  <data name="Shell.DesfazerAlteracao" xml:space="preserve"><value>Deshacer cambio</value></data>
+  <data name="Shell.DesfazerAlteracoesFicaramPela" xml:space="preserve"><value>¿Deshacer los cambios que quedaron a medias (registrados en el diario)?</value></data>
+  <data name="Shell.DesfazerEstaAlteracaoNexus" xml:space="preserve"><value>¿Deshacer este cambio? NEXUS vuelve al estado registrado en el diario antes del cambio.</value></data>
+  <data name="Shell.DesfazerNaoDeuCerto" xml:space="preserve"><value>Deshacer no funcionó por completo</value></data>
+  <data name="Shell.DesfazerUltimaAplicacaoNexus" xml:space="preserve"><value>¿Deshacer la última aplicación? NEXUS restaura los valores originales guardados en el diario.</value></data>
+  <data name="Shell.Desfeito" xml:space="preserve"><value>Deshecho</value></data>
+  <data name="Shell.Desligado" xml:space="preserve"><value>Desactivado</value></data>
+  <data name="Shell.DesligarAnunciosPersonalizados" xml:space="preserve"><value>Desactivar anuncios personalizados</value></data>
+  <data name="Shell.DesligarTelemetriaOpcional" xml:space="preserve"><value>Desactivar la telemetría opcional</value></data>
+  <data name="Shell.DesligarXboxGameBar" xml:space="preserve"><value>Desactivar la Xbox Game Bar en segundo plano</value></data>
+  <data name="Shell.DiarioEncontradoMasNao" xml:space="preserve"><value>Se encontró el diario pero no se pudo leer: {0}: {1}</value></data>
+  <data name="Shell.DiarioNSomenteLeitura" xml:space="preserve"><value>Diario {0} (solo lectura) · {1} ejecución(es).</value></data>
+  <data name="Shell.DonoNaoIdentificado" xml:space="preserve"><value>propietario no identificado</value></data>
+  <data name="Shell.EncerradaN" xml:space="preserve"><value>finalizada {0:dd/MM HH:mm}</value></data>
+  <data name="Shell.ErroLeitura" xml:space="preserve"><value>error de lectura</value></data>
+  <data name="Shell.ErroLeituraNN" xml:space="preserve"><value>Error de lectura: {0}: {1}</value></data>
+  <data name="Shell.EsperandoVoce" xml:space="preserve"><value>esperándote</value></data>
+  <data name="Shell.EstaAcontecendo" xml:space="preserve"><value>Qué está pasando</value></data>
+  <data name="Shell.EstaComoDeveriaNada" xml:space="preserve"><value>Está como debería. Nada que hacer aquí.</value></data>
+  <data name="Shell.EstaVersaoAntigaDemais" xml:space="preserve"><value>Esta versión es demasiado antigua para actualizarse sola: descarga el instalador.</value></data>
+  <data name="Shell.Estimativa" xml:space="preserve"><value>estimación</value></data>
+  <data name="Shell.EtapaAplicada" xml:space="preserve"><value>Paso aplicado</value></data>
+  <data name="Shell.EtapaNN" xml:space="preserve"><value>Paso {0}: {1}</value></data>
+  <data name="Shell.ExecutorAtivoN" xml:space="preserve"><value>Ejecutor activo: {0}.</value></data>
+  <data name="Shell.ExigiriaReinicio" xml:space="preserve"><value> · requeriría reiniciar</value></data>
+  <data name="Shell.ExportarLeitura" xml:space="preserve"><value>Exportar lectura</value></data>
+  <data name="Shell.ExportarRelatorioLeituraJson" xml:space="preserve"><value>Exportar informe de lectura (JSON)</value></data>
+  <data name="Shell.FalhaLerEntradasN" xml:space="preserve"><value>Error al leer las entradas: {0}</value></data>
+  <data name="Shell.Fechar" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="Shell.Fila" xml:space="preserve"><value>en cola</value></data>
+  <data name="Shell.GerenciadoN" xml:space="preserve"><value>  (administrado: {0})</value></data>
+  <data name="Shell.HandlerNPendente" xml:space="preserve"><value>handler '{0}' pendiente</value></data>
+  <data name="Shell.Iniciando" xml:space="preserve"><value>Iniciando…</value></data>
+  <data name="Shell.InstalaSozinhoWindowsPede" xml:space="preserve"><value>Se instala sola: Windows pide permiso una vez (NEXUS queda en Archivos de programa) y NEXUS se vuelve a abrir.</value></data>
+  <data name="Shell.Isso" xml:space="preserve"><value>¿Por qué?</value></data>
+  <data name="Shell.JaConfigurada" xml:space="preserve"><value>Ya configurada</value></data>
+  <data name="Shell.JsonJsonJson" xml:space="preserve"><value>JSON (*.json)|*.json</value></data>
+  <data name="Shell.LeHardwareWindowsNovo" xml:space="preserve"><value>Vuelve a leer el hardware y Windows. No cambia nada.</value></data>
+  <data name="Shell.LeituraConcluida" xml:space="preserve"><value>Lectura terminada</value></data>
+  <data name="Shell.LeituraConcluidaNS" xml:space="preserve"><value>Lectura terminada en {0:0.0} s · {1} valor(es) no disponible(s), cada uno con su motivo.</value></data>
+  <data name="Shell.Lendo" xml:space="preserve"><value>Leyendo</value></data>
+  <data name="Shell.LendoEstadoRealAcoes" xml:space="preserve"><value>Leyendo el estado real de las acciones del catálogo…</value></data>
+  <data name="Shell.LendoHardwareConfiguracaoWindows" xml:space="preserve"><value>Leyendo el hardware y la configuración de Windows…</value></data>
+  <data name="Shell.LendoHistorico" xml:space="preserve"><value>Leyendo el historial…</value></data>
+  <data name="Shell.LendoPc" xml:space="preserve"><value>Leyendo el PC</value></data>
+  <data name="Shell.LerNovo" xml:space="preserve"><value>Leer de nuevo</value></data>
+  <data name="Shell.MaisN" xml:space="preserve"><value>y {0} más</value></data>
+  <data name="Shell.ManterNVoltaSozinho" xml:space="preserve"><value>¿Mantener {0}? Vuelve solo en {1} s.</value></data>
+  <data name="Shell.MantidoN" xml:space="preserve"><value>Mantenido: {0}.</value></data>
+  <data name="Shell.Manual" xml:space="preserve"><value>Manual</value></data>
+  <data name="Shell.MedidoAgora" xml:space="preserve"><value>medido ahora</value></data>
+  <data name="Shell.ModoJogoLigado" xml:space="preserve"><value>Modo Juego activado</value></data>
+  <data name="Shell.MudancasSistemaAdministrador" xml:space="preserve"><value>cambios de sistema (administrador)</value></data>
+  <data name="Shell.N1Normal" xml:space="preserve"><value>1 (normal)</value></data>
+  <data name="Shell.N2AposReinicio" xml:space="preserve"><value>2 (tras reiniciar)</value></data>
+  <data name="Shell.NadaFoiAlterado" xml:space="preserve"><value>No se cambió nada</value></data>
+  <data name="Shell.NadaFoiAplicado" xml:space="preserve"><value>No se aplicó nada</value></data>
+  <data name="Shell.NadaMudaSemVoce" xml:space="preserve"><value>Nada cambia sin tu confirmación. ¿Por qué?</value></data>
+  <data name="Shell.NadaMudaSemVoce2" xml:space="preserve"><value>Nada cambia sin tu confirmación</value></data>
+  <data name="Shell.NadaMudaSemVoce3" xml:space="preserve"><value>Nada cambia sin tu confirmación. Cada cambio queda registrado y se puede deshacer; los cambios de sistema piden permiso a Windows y crean un punto de restauración.</value></data>
+  <data name="Shell.NAlteracaoOesFicaram" xml:space="preserve"><value>{0} cambio(s) quedaron a medias la última vez. Usa "Recuperar interrumpidos" para deshacerlos.</value></data>
+  <data name="Shell.NaoAplicado" xml:space="preserve"><value>no aplicado</value></data>
+  <data name="Shell.NaoAplicavel" xml:space="preserve"><value>No aplicable</value></data>
+  <data name="Shell.NaoDeuCerto" xml:space="preserve"><value>No funcionó</value></data>
+  <data name="Shell.NaoDeuProcurarN" xml:space="preserve"><value>No se pudo buscar: {0}</value></data>
+  <data name="Shell.NaoEncerrada" xml:space="preserve"><value>no finalizada</value></data>
+  <data name="Shell.NaoFoiPossivelCriar" xml:space="preserve"><value>No se pudo crear el icono de la bandeja: {0}</value></data>
+  <data name="Shell.NaoFoiPossivelIniciar" xml:space="preserve"><value>No se pudo iniciar el instalador: {0}</value></data>
+  <data name="Shell.NaoFoiPossivelVerificar" xml:space="preserve"><value>No se pudo verificar si hay ejecutores activos: {0}</value></data>
+  <data name="Shell.NaoInterromperMeioAplicador" xml:space="preserve"><value>No se puede interrumpir a mitad: el aplicador termina, verifica cada elemento y lo registra todo en el diario (se puede deshacer después).</value></data>
+  <data name="Shell.NaoPrecisou" xml:space="preserve"><value>no hizo falta</value></data>
+  <data name="Shell.Navegacao" xml:space="preserve"><value>Navegación</value></data>
+  <data name="Shell.NenhumaAcaoSelecionada" xml:space="preserve"><value>Ninguna acción seleccionada.</value></data>
+  <data name="Shell.NenhumaVersaoPublicadaAinda" xml:space="preserve"><value>Todavía no hay ninguna versión publicada.</value></data>
+  <data name="Shell.NenhumDiarioNNenhuma" xml:space="preserve"><value>No hay diario en {0}: no se registró ninguna ejecución de NEXUS en este PC.</value></data>
+  <data name="Shell.NenhumExecutorAtivo" xml:space="preserve"><value>Ningún ejecutor activo.</value></data>
+  <data name="Shell.NenhumExecutorAtivoTrava" xml:space="preserve"><value>Ningún ejecutor activo. Bloqueo abandonado por: {0}.</value></data>
+  <data name="Shell.NexusAtualizadoN" xml:space="preserve"><value>NEXUS actualizado a {0}.</value></data>
+  <data name="Shell.NexusContinuaBandeja" xml:space="preserve"><value>NEXUS sigue en la bandeja</value></data>
+  <data name="Shell.NexusErroInesperadoNada" xml:space="preserve"><value>NEXUS — error inesperado (no se cambió nada en el sistema)</value></data>
+  <data name="Shell.NexusNBaixadoConferido" xml:space="preserve"><value>NEXUS {0} descargado y verificado (firma y SHA-256). Listo para instalar.</value></data>
+  <data name="Shell.NexusNDisponivel" xml:space="preserve"><value>NEXUS {0} disponible</value></data>
+  <data name="Shell.NexusNDisponivelN" xml:space="preserve"><value>NEXUS {0} disponible. {1}</value></data>
+  <data name="Shell.NexusNInstalado" xml:space="preserve"><value>NEXUS {0} · instalado</value></data>
+  <data name="Shell.NexusNInstalaQuando" xml:space="preserve"><value>NEXUS {0} se instala cuando cierres NEXUS.</value></data>
+  <data name="Shell.NexusNJaEsta" xml:space="preserve"><value>NEXUS {0} ya está descargado y verificado.</value></data>
+  <data name="Shell.NexusNPortatil" xml:space="preserve"><value>NEXUS {0} · portátil</value></data>
+  <data name="Shell.NexusNPronto" xml:space="preserve"><value>NEXUS {0} listo</value></data>
+  <data name="Shell.NexusNVersaoDesenvolvimento" xml:space="preserve"><value>NEXUS {0} · versión de desarrollo</value></data>
+  <data name="Shell.NexusOtimizacaoSeguranca" xml:space="preserve"><value>NEXUS — optimización segura</value></data>
+  <data name="Shell.NNaoAplicaveisN" xml:space="preserve"><value>{0} no aplicables · {1} bloqueadas</value></data>
+  <data name="Shell.NNaoDeuAplicar" xml:space="preserve"><value>{0:HH:mm} · No se pudo aplicar: {1}</value></data>
+  <data name="Shell.NNNAcoes" xml:space="preserve"><value>{0} ({1}) · {2} acciones · {3} rechazadas</value></data>
+  <data name="Shell.NNNN" xml:space="preserve"><value>{0}: {1}. {2}: {3}. Diferencia: {4}.</value></data>
+  <data name="Shell.NSeriamAplicadasN" xml:space="preserve"><value>{0} se aplicarían · {1} ya configuradas ·</value></data>
+  <data name="Shell.OtimizarAgora" xml:space="preserve"><value>Optimizar ahora…</value></data>
+  <data name="Shell.PedePermissaoWindowsAplicar" xml:space="preserve"><value>Pide el permiso de Windows al aplicar.</value></data>
+  <data name="Shell.PerformanceLab" xml:space="preserve"><value>Performance Lab</value></data>
+  <data name="Shell.PlanoEnergiaAltoDesempenho" xml:space="preserve"><value>Plan de energía: alto rendimiento</value></data>
+  <data name="Shell.Preparando" xml:space="preserve"><value>Preparando…</value></data>
+  <data name="Shell.ProcurandoVersaoNova" xml:space="preserve"><value>Buscando una versión nueva…</value></data>
+  <data name="Shell.ProntoLeituraN" xml:space="preserve"><value>Listo · lectura de las {0:HH:mm:ss}</value></data>
+  <data name="Shell.Recuperar" xml:space="preserve"><value>Recuperar</value></data>
+  <data name="Shell.Referencia" xml:space="preserve"><value>referencia</value></data>
+  <data name="Shell.ReiniciarAtualizar" xml:space="preserve"><value>Reiniciar y actualizar</value></data>
+  <data name="Shell.RelatorioExportadoN" xml:space="preserve"><value>Informe exportado a {0}</value></data>
+  <data name="Shell.RespondaJanelaConfirmacaoOu" xml:space="preserve"><value>Responde a la ventana de confirmación (o al aviso de Windows) para continuar. El tiempo restante vuelve a contar después.</value></data>
+  <data name="Shell.ReverterUltimaExecucao" xml:space="preserve"><value>Revertir la última ejecución</value></data>
+  <data name="Shell.Sair" xml:space="preserve"><value>Salir</value></data>
+  <data name="Shell.SairVezCliqueBotao" xml:space="preserve"><value>Para salir del todo, haz clic derecho en el icono y elige Salir.</value></data>
+  <data name="Shell.SalvaTudoFoiLido" xml:space="preserve"><value>Guarda todo lo leído en un archivo JSON.</value></data>
+  <data name="Shell.SeriaAplicada" xml:space="preserve"><value>Se aplicaría</value></data>
+  <data name="Shell.SimulacaoFalhouLerEstado" xml:space="preserve"><value>La simulación no pudo leer el estado: {0}: {1}. No se aplicó nada.</value></data>
+  <data name="Shell.SimulacaoRecusadaN" xml:space="preserve"><value>Simulación rechazada: {0}</value></data>
+  <data name="Shell.SimuladoNNadaFoi" xml:space="preserve"><value> · simulado a las {0:HH:mm:ss}. No se aplicó nada.</value></data>
+  <data name="Shell.SoLeituraAvisoQuando" xml:space="preserve"><value>Solo lectura. Te aviso cuando el informe esté listo.</value></data>
+  <data name="Shell.SomenteLeitura" xml:space="preserve"><value>solo lectura</value></data>
+  <data name="Shell.SoVocePodeFazer" xml:space="preserve"><value>Solo tú puedes hacerlo: {0}</value></data>
+  <data name="Shell.SoVoceSaberNao" xml:space="preserve"><value>Solo para que lo sepas. No requiere ninguna acción.</value></data>
+  <data name="Shell.SuaConta" xml:space="preserve"><value>en tu cuenta</value></data>
+  <data name="Shell.TempoDecorrido" xml:space="preserve"><value>Tiempo transcurrido</value></data>
+  <data name="Shell.TempoRestante" xml:space="preserve"><value>Tiempo restante</value></data>
+  <data name="Shell.TermineOperacaoAndamentoAplicar" xml:space="preserve"><value>Termina la operación en curso (aplicar, Asistente) e inténtalo de nuevo.</value></data>
+  <data name="Shell.UltimaProcura" xml:space="preserve"><value>Última búsqueda:</value></data>
+  <data name="Shell.ValeConferirNaoGarantia" xml:space="preserve"><value>Vale la pena revisarlo. No garantiza más FPS: mide una partida antes y después de cambiarlo.</value></data>
+  <data name="Shell.VerificacaoNaoConcluida" xml:space="preserve"><value>Verificación no completada</value></data>
+  <data name="Shell.VerificacaoNexusConcluida" xml:space="preserve"><value>Verificación de NEXUS completada</value></data>
+  <data name="Shell.VerificandoPc" xml:space="preserve"><value>Verificando el PC…</value></data>
+  <data name="Shell.VerificarAgoraSoLeitura" xml:space="preserve"><value>Verificar ahora (solo lectura)</value></data>
+  <data name="Shell.VerResultado" xml:space="preserve"><value>Ver resultado</value></data>
+  <data name="Shell.VersaoDesenvolvimentoAtualizacaoAuto" xml:space="preserve"><value>Versión de desarrollo: la actualización automática queda desactivada.</value></data>
+  <data name="Shell.VerTudoAdministrador" xml:space="preserve"><value>Ver todo (administrador)</value></data>
+  <data name="Shell.Vivo" xml:space="preserve"><value>en vivo</value></data>
+  <data name="Shell.VoceEstaVersaoMais" xml:space="preserve"><value>Tienes la versión más reciente.</value></data>
+  <data name="Shell.VoceRecusouAvisoWindows" xml:space="preserve"><value>Rechazaste el aviso de Windows. NEXUS sigue abierto sin permisos de administrador.</value></data>
+  <data name="Shell.VoltandoModoAnterior" xml:space="preserve"><value>Volviendo al modo anterior…</value></data>
+  <data name="Shell.WindowsPedePermissaoVez" xml:space="preserve"><value>Windows pide permiso una vez y NEXUS se vuelve a abrir. Si lo dejas para después, se instala cuando cierres NEXUS.</value></data>
+</root>

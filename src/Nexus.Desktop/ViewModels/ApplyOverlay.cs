@@ -22,7 +22,7 @@ public sealed class ApplyOverlay : ObservableObject
     private int _seenVersion = -1;
     private bool _isVisible, _isRunning, _isFinished, _waiting, _currentIsEstimate;
     private double _percent;
-    private string _title = "", _mode = "", _remaining = "calculando…", _elapsed = "0:00", _current = "", _summary = "", _levelText = "";
+    private string _title = "", _mode = "", _remaining = Loc.T("Shell.Calculando"), _elapsed = "0:00", _current = "", _summary = "", _levelText = "";
     private Tone _ringTone = Tone.Warn;
     private TimeSpan _offset;
 
@@ -68,9 +68,9 @@ public sealed class ApplyOverlay : ObservableObject
         _progress = new HostApplyProgress(tracker, actions, level, revert, name);
         _seenVersion = -1;
         Rows.Clear();
-        Title = string.IsNullOrWhiteSpace(title) ? (revert ? "Desfazer" : "Aplicar") : title;
-        Mode = revert ? "Desfazendo" : "Aplicando";
-        LevelText = level == BrokerLevel.Admin ? "mudanças de sistema (administrador)" : "na sua conta";
+        Title = string.IsNullOrWhiteSpace(title) ? (revert ? Loc.T("Shell.Desfazer") : Loc.T("Shell.Aplicar")) : title;
+        Mode = revert ? Loc.T("Shell.Desfazendo") : Loc.T("Shell.Aplicando");
+        LevelText = level == BrokerLevel.Admin ? Loc.T("Shell.MudancasSistemaAdministrador") : Loc.T("Shell.SuaConta");
         SummaryText = "";
         Percent = 0;
         RingTone = Tone.Warn;
@@ -97,9 +97,9 @@ public sealed class ApplyOverlay : ObservableObject
         RingTone = summary.Status switch { ProcessTaskStatus.Failed => Tone.Bad, ProcessTaskStatus.Skipped => Tone.Info, _ => Tone.Good };
         CurrentText = summary.Status switch
         {
-            ProcessTaskStatus.Failed => p.IsRevert ? "Desfazer não deu certo por completo" : "Não deu certo",
-            ProcessTaskStatus.Skipped => "Nada foi alterado",
-            _ => p.IsRevert ? "Desfeito" : "Aplicado e conferido",
+            ProcessTaskStatus.Failed => p.IsRevert ? Loc.T("Shell.DesfazerNaoDeuCerto") : Loc.T("Shell.NaoDeuCerto"),
+            ProcessTaskStatus.Skipped => Loc.T("Shell.NadaFoiAlterado"),
+            _ => p.IsRevert ? Loc.T("Shell.Desfeito") : Loc.T("Shell.AplicadoConferido"),
         };
         CurrentIsEstimate = false;
         System.Windows.Input.CommandManager.InvalidateRequerySuggested();
@@ -126,7 +126,7 @@ public sealed class ApplyOverlay : ObservableObject
         t.Sample();
         Percent = Math.Round(t.Progress * 100, 1);
         IsWaiting = t.IsWaiting;
-        RemainingText = t.IsComplete ? "pronto" : t.IsWaiting ? "esperando você" : ProcessText.Remaining(t.Remaining);
+        RemainingText = t.IsComplete ? "pronto" : t.IsWaiting ? Loc.T("Shell.EsperandoVoce") : ProcessText.Remaining(t.Remaining);
         ElapsedText = ProcessText.Clock(t.Elapsed);
         if (!t.IsComplete)
         {
