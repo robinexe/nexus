@@ -2747,6 +2747,200 @@ Exige administrador (o Windows cria um ponto de restauração). </value></data>
   <data name="Svc.ValeProximoBootPede" xml:space="preserve"><value>Vale no próximo boot. Pede administrador e pode ser desfeito.</value></data>
   <data name="Svc.VoceVeEleFaz" xml:space="preserve"><value>Você vê o que ele faz e pode mudar o tipo de início.</value></data>
   <data name="Svc.WindowsUpdatePodeIr" xml:space="preserve"><value>Windows Update: pode ir para Manual, nunca Desativado.</value></data>
+  <data name="Tools.AbraRestauracaoSistemaVer" xml:space="preserve"><value> Abra a Restauração do Sistema para ver os pontos.</value></data>
+  <data name="Tools.AbrirBackups" xml:space="preserve"><value>Abrir backups</value></data>
+  <data name="Tools.AbrirConfiguracoesRede" xml:space="preserve"><value>Abrir configurações de rede</value></data>
+  <data name="Tools.AbrirConfiguracoesRedeWindows" xml:space="preserve"><value>Abrir as Configurações de rede do Windows? Lá fica a "Redefinição de rede" (reinstala adaptadores e volta Winsock/TCP-IP ao padrão). </value></data>
+  <data name="Tools.AbrirMicrosoftStore" xml:space="preserve"><value>Abrir a Microsoft Store</value></data>
+  <data name="Tools.AbrirPaginaNMicrosoft" xml:space="preserve"><value>Abrir a página de "{0}" na Microsoft Store? A instalação, se você quiser, é feita pela própria Store.</value></data>
+  <data name="Tools.AbrirRestauracaoSistemaWindows" xml:space="preserve"><value>Abrir a Restauração do Sistema do Windows? Nela você escolhe o ponto; o próprio Windows mostra o que será afetado e pede confirmação antes de reiniciar.</value></data>
+  <data name="Tools.AbrirStore" xml:space="preserve"><value>Abrir na Store</value></data>
+  <data name="Tools.AindaNaoHaBackups" xml:space="preserve"><value>Ainda não há backups de drivers.</value></data>
+  <data name="Tools.AjudaQuandoSiteMudou" xml:space="preserve"><value>Ajuda quando um site mudou de endereço ou não abre depois de trocar de DNS.
+Ganho de desempenho: nenhum (o cache existe para evitar consultas).
+</value></data>
+  <data name="Tools.AlgumDispositivoUsarPacote" xml:space="preserve"><value>se algum dispositivo usar o pacote, o próprio Windows recusa (só esse item falha; os outros seguem).
+Ganho: espaço em disco; nenhum ganho de desempenho.
+</value></data>
+  <data name="Tools.AntesNexusExportaCada" xml:space="preserve"><value>
+
+Antes, o NEXUS exporta cada pacote (pnputil /export-driver) para a pasta de dados do aplicador. A remoção é feita sem /force: </value></data>
+  <data name="Tools.AntesRemoverSalvaBackup" xml:space="preserve"><value>Antes de remover, salva um backup (Wi-Fi com a senha, protegido).</value></data>
+  <data name="Tools.AppsLista" xml:space="preserve"><value>apps da lista</value></data>
+  <data name="Tools.AppsVemWindows" xml:space="preserve"><value>Apps que vêm com o Windows</value></data>
+  <data name="Tools.Arrumar" xml:space="preserve"><value>Para arrumar</value></data>
+  <data name="Tools.AtencaoNNMuita" xml:space="preserve"><value>
+ATENÇÃO: {0} {1} para muita gente. Remova só se não usa.
+</value></data>
+  <data name="Tools.BackupDrivers" xml:space="preserve"><value>Backup de drivers</value></data>
+  <data name="Tools.BackupTodosDrivers" xml:space="preserve"><value>Backup de todos os drivers</value></data>
+  <data name="Tools.BotaoDesfazerLinhaOu" xml:space="preserve"><value>Botão Desfazer na linha ou no lote.</value></data>
+  <data name="Tools.CacheArp" xml:space="preserve"><value>Cache ARP</value></data>
+  <data name="Tools.CacheDns" xml:space="preserve"><value>No cache DNS</value></data>
+  <data name="Tools.CacheDns2" xml:space="preserve"><value>Cache DNS</value></data>
+  <data name="Tools.ConexaoQuebradaUseRedefinicao" xml:space="preserve"><value>Conexão quebrada? Use a Redefinição de rede do Windows: apaga IP/DNS/VPN feitos à mão e não tem desfazer.</value></data>
+  <data name="Tools.ContarEntradasExigeAdministrador" xml:space="preserve"><value>contar as entradas exige administrador neste Windows (limpar não exige)</value></data>
+  <data name="Tools.CopiarTodosDriversTerceiros" xml:space="preserve"><value>Copiar todos os drivers de terceiros instalados (pnputil /export-driver *) para a pasta de dados do NEXUS?
+
+</value></data>
+  <data name="Tools.CriarPontoAgora" xml:space="preserve"><value>Criar ponto agora</value></data>
+  <data name="Tools.CriarPontoRestauracao" xml:space="preserve"><value>Criar ponto de restauração</value></data>
+  <data name="Tools.DefinidoPelaEmpresaPolitica" xml:space="preserve"><value>Definido pela empresa (política de grupo): o NEXUS não remove.</value></data>
+  <data name="Tools.DesfazerLimitadoNexusReinstala" xml:space="preserve"><value>Desfazer é LIMITADO: o NEXUS reinstala sozinho só se os arquivos do app ainda estiverem no PC (app provisionado ou de outra conta). </value></data>
+  <data name="Tools.DesfazerLimitadoVezesPreciso" xml:space="preserve"><value>Desfazer é limitado: às vezes é preciso reinstalar pela Store</value></data>
+  <data name="Tools.DesfazerLote" xml:space="preserve"><value>Desfazer lote</value></data>
+  <data name="Tools.DesfazerLoteN" xml:space="preserve"><value>Desfazer lote ({0})</value></data>
+  <data name="Tools.DesfazerNaoTerminouVeja" xml:space="preserve"><value>Desfazer não terminou: veja o motivo em cada linha (ou a página Aplicar &gt; Recuperar).</value></data>
+  <data name="Tools.DesfazerReimportaPerfisGuardados" xml:space="preserve"><value>Desfazer: reimporta os perfis guardados (botão Desfazer).
+
+Exige administrador.</value></data>
+  <data name="Tools.DesligadaPoliticaOrganizacao" xml:space="preserve"><value>Desligada por política (organização).</value></data>
+  <data name="Tools.DriversAntigosSemUso" xml:space="preserve"><value>Drivers antigos sem uso e redes Wi-Fi esquecidas. Nada aqui acelera jogos.</value></data>
+  <data name="Tools.DriversGuardadosWindows" xml:space="preserve"><value>Drivers guardados no Windows</value></data>
+  <data name="Tools.DriverUsoDiscoControladoras" xml:space="preserve"><value>Driver em uso, disco/controladoras/sistema/USB/teclado, e vídeo ou rede sem versão mais nova. A remoção é feita sem /force: o Windows recusa se algum aparelho usar o pacote. Remover versões antigas libera espaço; não muda desempenho.</value></data>
+  <data name="Tools.EnderecosRedeLocal" xml:space="preserve"><value>endereços da rede local</value></data>
+  <data name="Tools.EntradasGuardadas" xml:space="preserve"><value>entradas guardadas</value></data>
+  <data name="Tools.EscolhaMaximoNItens" xml:space="preserve"><value>Escolha no máximo {0} itens por vez.</value></data>
+  <data name="Tools.EstadoProtecaoSistemaNao" xml:space="preserve"><value>Estado da Proteção do Sistema não pôde ser lido.</value></data>
+  <data name="Tools.EsvaziarCacheDnsWindows" xml:space="preserve"><value>Esvaziar o cache DNS do Windows?
+
+O que faz: os nomes de sites voltam a ser consultados no servidor DNS na próxima vez que forem usados. </value></data>
+  <data name="Tools.EsvaziarTabelaArpEnderecos" xml:space="preserve"><value>Esvaziar a tabela ARP (endereços físicos da rede local)?
+
+Ajuda depois de trocar o roteador ou quando um aparelho da rede não é encontrado.
+</value></data>
+  <data name="Tools.ExigeAdministrador" xml:space="preserve"><value>Exige administrador.</value></data>
+  <data name="Tools.ExigeAdministradorWindowsVai" xml:space="preserve"><value>Exige administrador: o Windows vai pedir confirmação.</value></data>
+  <data name="Tools.ExigeProtecaoSistemaLigada" xml:space="preserve"><value>Exige a Proteção do Sistema ligada. O Windows cria no máximo um ponto a cada 24 horas; se já houver um recente, ele vale.
+
+Exige administrador.</value></data>
+  <data name="Tools.FotoSistemaVoltarAtras" xml:space="preserve"><value>Uma foto do sistema para voltar atrás se algo der errado.</value></data>
+  <data name="Tools.GanhoDesempenhoNenhumRisco" xml:space="preserve"><value>Ganho de desempenho: nenhum.
+Risco: a conexão pode pausar por uma fração de segundo.
+Desfazer: não há o que desfazer; as entradas voltam em segundos.
+
+</value></data>
+  <data name="Tools.GanhoDesempenhoNenhumRisco2" xml:space="preserve"><value>Ganho de desempenho: nenhum.
+Risco: se for a rede que você está usando agora, a conexão cai.
+</value></data>
+  <data name="Tools.GanhoEspacoMenosAtalhos" xml:space="preserve"><value>
+Ganho: espaço e menos atalhos no menu Iniciar; nenhum ganho em jogos.
+</value></data>
+  <data name="Tools.HaVersaoMaisNova" xml:space="preserve"><value> · há versão mais nova ({0})</value></data>
+  <data name="Tools.IncluirLoteN" xml:space="preserve"><value>Incluir no lote: {0}</value></data>
+  <data name="Tools.IncluirRemoverSelecionados" xml:space="preserve"><value>Incluir em Remover selecionados</value></data>
+  <data name="Tools.LidoN" xml:space="preserve"><value>Lido às {0:HH:mm}.</value></data>
+  <data name="Tools.LimparCacheArp" xml:space="preserve"><value>Limpar cache ARP</value></data>
+  <data name="Tools.LimparCacheArp2" xml:space="preserve"><value>Limpar o cache ARP</value></data>
+  <data name="Tools.LimparCacheDns" xml:space="preserve"><value>Limpar cache DNS</value></data>
+  <data name="Tools.LimparCacheDns2" xml:space="preserve"><value>Limpar o cache DNS</value></data>
+  <data name="Tools.ListaProvisionadosExigeAdministrador" xml:space="preserve"><value> · lista de provisionados exige administrador (não lida).</value></data>
+  <data name="Tools.ListaRedesDriversApps" xml:space="preserve"><value>Lista redes, drivers, apps e pontos. Ler não muda nada.</value></data>
+  <data name="Tools.MostrarSoVersoesAntigas" xml:space="preserve"><value>Mostrar só versões antigas sem uso</value></data>
+  <data name="Tools.NadaAquiAceleraJogos" xml:space="preserve"><value>Nada aqui acelera jogos: são ferramentas de manutenção. Toda remoção guarda um backup antes e tem Desfazer; o que não tem volta é dito na confirmação. Ações que mexem no PC inteiro pedem administrador (o Windows pergunta).</value></data>
+  <data name="Tools.NaoEstiveremSeraPreciso" xml:space="preserve"><value>Se não estiverem, será preciso reinstalar pela Microsoft Store (o botão "Abrir na Store" leva direto à página).
+</value></data>
+  <data name="Tools.NaoFoiPossivelAbrir" xml:space="preserve"><value>Não foi possível abrir a Store: </value></data>
+  <data name="Tools.NaoFoiPossivelLer" xml:space="preserve"><value>Não foi possível ler os drivers: </value></data>
+  <data name="Tools.NaoFoiPossivelLer2" xml:space="preserve"><value>Não foi possível ler os apps: </value></data>
+  <data name="Tools.NaoFoiPossivelListar" xml:space="preserve"><value>Não foi possível listar.</value></data>
+  <data name="Tools.NaoRestauradoN" xml:space="preserve"><value>não restaurado: {0}</value></data>
+  <data name="Tools.NaoUsado" xml:space="preserve"><value>não usado</value></data>
+  <data name="Tools.NAppSLista" xml:space="preserve"><value>{0} app(s) da lista de pré-instalados encontrados para este usuário · {1} componente(s) protegido(s) nunca são removidos</value></data>
   <data name="Tools.NavSubtitle" xml:space="preserve"><value>Rede, drivers, apps do Windows e pontos de restauração.</value></data>
   <data name="Tools.NavTitle" xml:space="preserve"><value>Ferramentas do sistema</value></data>
+  <data name="Tools.NBackupSMais" xml:space="preserve"><value>{0} backup(s); o mais recente em {1}</value></data>
+  <data name="Tools.NenhumaRedeWiFi" xml:space="preserve"><value>Nenhuma rede Wi-Fi salva.</value></data>
+  <data name="Tools.NenhumBackupDriversFeito" xml:space="preserve"><value>Nenhum backup de drivers feito pelo NEXUS ainda.</value></data>
+  <data name="Tools.NenhumPontoRestauracaoPc" xml:space="preserve"><value>Nenhum ponto de restauração no PC.</value></data>
+  <data name="Tools.NexusGuardaAntesCopia" xml:space="preserve"><value>
+
+O NEXUS guarda antes uma cópia de cada perfil completo (com a senha), protegida pela criptografia do Windows, </value></data>
+  <data name="Tools.NexusNaoFazIsso" xml:space="preserve"><value>O NEXUS não faz isso sozinho: exige reinício, apaga configurações manuais de IP/DNS/VPN e não tem como ser desfeito.</value></data>
+  <data name="Tools.NFeito" xml:space="preserve"><value>{0}: feito.</value></data>
+  <data name="Tools.NItensRestaurados" xml:space="preserve"><value>{0} itens restaurados.</value></data>
+  <data name="Tools.NNaoConcluidoN" xml:space="preserve"><value>{0}: não concluído ({1}). {2}</value></data>
+  <data name="Tools.NNRemovidoS" xml:space="preserve"><value>{0} {1} removido(s). Use Desfazer lote para voltar todos.</value></data>
+  <data name="Tools.NNRemovidoS2" xml:space="preserve"><value>{0} de {1} removido(s); os demais mostram o motivo na linha.</value></data>
+  <data name="Tools.NPacoteSProvisionado" xml:space="preserve"><value> · {0} pacote(s) provisionado(s) (não são removidos).</value></data>
+  <data name="Tools.NPacotesTerceirosNao" xml:space="preserve"><value>{0} pacotes de terceiros. Não foi possível saber quais estão em uso (requer Windows 10 2004+): nenhuma remoção é oferecida.</value></data>
+  <data name="Tools.NPacotesTerceirosRepositorio" xml:space="preserve"><value>{0} pacotes de terceiros no repositório; {1} versão(ões) antiga(s) sem uso.</value></data>
+  <data name="Tools.NPontoSRestauracao" xml:space="preserve"><value>{0} ponto(s) de restauração.</value></data>
+  <data name="Tools.NRedeSSalva" xml:space="preserve"><value>{0} rede(s) salva(s).</value></data>
+  <data name="Tools.NRemovidoUseDesfazer" xml:space="preserve"><value>{0}: removido. Use Desfazer para voltar.</value></data>
+  <data name="Tools.NRestaurado" xml:space="preserve"><value>{0}: restaurado.</value></data>
+  <data name="Tools.NuncaRemovido" xml:space="preserve"><value>O que nunca é removido?</value></data>
+  <data name="Tools.NVersaoNN" xml:space="preserve"><value>{0} · versão {1}{2} · {3}</value></data>
+  <data name="Tools.PacoteProvisionadoContasNovas" xml:space="preserve"><value>O pacote provisionado (para contas novas) não é tocado.</value></data>
+  <data name="Tools.PastaDadosAplicadorDepois" xml:space="preserve"><value>na pasta de dados do aplicador. Depois remove: o Windows deixa de se conectar a essas redes sozinho.
+</value></data>
+  <data name="Tools.PedeAdministradorVoltaSegundos" xml:space="preserve"><value>pede administrador · volta em segundos</value></data>
+  <data name="Tools.PedirWindowsPontoRestauracao" xml:space="preserve"><value>Pedir ao Windows um ponto de restauração agora?
+
+Ele guarda arquivos de sistema, registro e drivers para voltar atrás pela Restauração do Sistema. </value></data>
+  <data name="Tools.PontosPc" xml:space="preserve"><value>pontos no PC</value></data>
+  <data name="Tools.PontosRestauracao" xml:space="preserve"><value>Pontos de restauração</value></data>
+  <data name="Tools.ProtecaoSistema" xml:space="preserve"><value>Proteção do Sistema</value></data>
+  <data name="Tools.ProtecaoSistemaDesligada" xml:space="preserve"><value>Proteção do Sistema desligada</value></data>
+  <data name="Tools.ProtecaoSistemaDesligadaTodas" xml:space="preserve"><value>Proteção do Sistema desligada em todas as unidades: não há como criar pontos.</value></data>
+  <data name="Tools.ProtecaoSistemaLigada" xml:space="preserve"><value>Proteção do Sistema ligada</value></data>
+  <data name="Tools.ProtecaoSistemaLigada2" xml:space="preserve"><value>Proteção do Sistema ligada em: </value></data>
+  <data name="Tools.ProtecaoSistemaNaoLida" xml:space="preserve"><value>Proteção do Sistema: não lida</value></data>
+  <data name="Tools.RedefinicaoRede" xml:space="preserve"><value>Redefinição de rede</value></data>
+  <data name="Tools.RedeSWiFi" xml:space="preserve"><value>rede(s) Wi-Fi</value></data>
+  <data name="Tools.RedesWiFiSalvas" xml:space="preserve"><value>Redes Wi-Fi salvas</value></data>
+  <data name="Tools.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Tools.RemoverAppWindows" xml:space="preserve"><value>Remover app do Windows</value></data>
+  <data name="Tools.RemoverDriverAntigo" xml:space="preserve"><value>Remover driver antigo</value></data>
+  <data name="Tools.RemoverNAppsSeu" xml:space="preserve"><value>Remover {0} apps para o seu usuário?
+
+{1}</value></data>
+  <data name="Tools.RemoverNNSeu" xml:space="preserve"><value>Remover "{0}" ({1}) para o seu usuário?
+
+{2}</value></data>
+  <data name="Tools.RemoverNPacotesAntigos" xml:space="preserve"><value>Remover {0} pacotes antigos do repositório de drivers?
+
+{1}</value></data>
+  <data name="Tools.RemoverNRedesWi" xml:space="preserve"><value>Remover {0} redes Wi-Fi salvas?
+
+{1}</value></data>
+  <data name="Tools.RemoverRedesAntigasEvita" xml:space="preserve"><value>Remover redes antigas evita conexões automáticas a redes que você não usa. Antes de remover, o NEXUS guarda o perfil completo com a senha, criptografado pelo Windows, e Desfazer reimporta. Se for a rede em uso, a conexão cai.</value></data>
+  <data name="Tools.RemoverRedeWiFi" xml:space="preserve"><value>Remover rede Wi-Fi salva</value></data>
+  <data name="Tools.RemoverRedeWiFi2" xml:space="preserve"><value>Remover a rede Wi-Fi salva "{0}"?</value></data>
+  <data name="Tools.RemoverRepositorioDriversPacote" xml:space="preserve"><value>Remover do repositório de drivers o pacote {0} ({1})?
+
+{2}</value></data>
+  <data name="Tools.RemoverSelecionadas" xml:space="preserve"><value>Remover selecionadas</value></data>
+  <data name="Tools.RemoverSelecionados" xml:space="preserve"><value>Remover selecionados</value></data>
+  <data name="Tools.RemovidoBackupGuardado" xml:space="preserve"><value>removido · backup guardado</value></data>
+  <data name="Tools.ResetWinsockTcpIp" xml:space="preserve"><value>Reset de Winsock/TCP-IP só serve para conexão quebrada (não acelera). Exige reinício e apaga IP, DNS e VPN configurados à mão, sem como desfazer. Por isso o NEXUS não faz sozinho: a Redefinição de rede do Windows mostra o que vai acontecer.</value></data>
+  <data name="Tools.RestauracaoSistema" xml:space="preserve"><value>Restauração do Sistema</value></data>
+  <data name="Tools.RestaurarSistema" xml:space="preserve"><value>Restaurar o sistema…</value></data>
+  <data name="Tools.RiscoBaixoAparelhoDesconectado" xml:space="preserve"><value>Risco: baixo. Um aparelho desconectado que usava um destes drivers pode pedi-lo de novo.
+Desfazer: reinstala do backup (pnputil /add-driver).
+
+</value></data>
+  <data name="Tools.RiscoNenhumConhecidoDesfazer" xml:space="preserve"><value>Risco: nenhum conhecido.
+Desfazer: não há o que desfazer; o cache se refaz sozinho.</value></data>
+  <data name="Tools.SaoUteis" xml:space="preserve"><value>são úteis</value></data>
+  <data name="Tools.SeguroRemover" xml:space="preserve"><value>seguro remover</value></data>
+  <data name="Tools.SemAdministradorRefazSozinho" xml:space="preserve"><value>sem administrador · se refaz sozinho</value></data>
+  <data name="Tools.SemResultadoAplicador" xml:space="preserve"><value>sem resultado do aplicador</value></data>
+  <data name="Tools.SemUsoHa6" xml:space="preserve"><value>sem uso há 6+ meses</value></data>
+  <data name="Tools.SiteNaoAbreDepois" xml:space="preserve"><value>Site não abre depois de trocar DNS ou roteador? Limpe o cache.</value></data>
+  <data name="Tools.SoEsteUsuario" xml:space="preserve"><value>só este usuário</value></data>
+  <data name="Tools.SoListaFechadaSo" xml:space="preserve"><value>Só uma lista fechada, só para o seu usuário.</value></data>
+  <data name="Tools.SoVoceMarcouDepois" xml:space="preserve"><value>Só o que você marcou, depois de confirmar.</value></data>
+  <data name="Tools.StoreInstaladorAplicativoWinget" xml:space="preserve"><value>Store, Instalador de Aplicativo (winget), bibliotecas, Segurança do Windows e componentes do sistema nunca aparecem aqui. Desfazer reinstala sozinho só se os arquivos do app ainda estiverem no PC; se não, reinstale pela Store (botão na linha).</value></data>
+  <data name="Tools.TambemProvisionadoFicaContas" xml:space="preserve"><value> · também provisionado (fica para contas novas)</value></data>
+  <data name="Tools.TodosUsuarios" xml:space="preserve"><value>todos os usuários</value></data>
+  <data name="Tools.UltimaConexaoDesconhecida" xml:space="preserve"><value>última conexão desconhecida</value></data>
+  <data name="Tools.UltimaConexaoN" xml:space="preserve"><value>última conexão {0:dd/MM/yyyy}</value></data>
+  <data name="Tools.UltimoLoteGuardouBackup" xml:space="preserve"><value>O último lote guardou um backup antes de remover e pode voltar.</value></data>
+  <data name="Tools.Util" xml:space="preserve"><value>é útil</value></data>
+  <data name="Tools.UtilAntesFormatarOu" xml:space="preserve"><value>Útil antes de formatar ou atualizar drivers. Não altera nada no sistema; ocupa espaço em disco.
+
+Exige administrador.</value></data>
+  <data name="Tools.VersaoAntiga" xml:space="preserve"><value>versão antiga</value></data>
+  <data name="Tools.VersoesAntigasSemUso" xml:space="preserve"><value>versões antigas sem uso</value></data>
 </root>

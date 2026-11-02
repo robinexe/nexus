@@ -81,22 +81,22 @@ public sealed class SystemToolsPage : ModulePage
     public SystemToolsPage()
     {
         RefreshCommand = new RelayCommand(() => _ = RunAsync(LoadAsync), () => !Busy);
-        FlushDnsCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync("Limpar o cache DNS",
-            "Esvaziar o cache DNS do Windows?\n\nO que faz: os nomes de sites voltam a ser consultados no servidor DNS na próxima vez que forem usados. " +
-            "Ajuda quando um site mudou de endereço ou não abre depois de trocar de DNS.\nGanho de desempenho: nenhum (o cache existe para evitar consultas).\n" +
-            "Risco: nenhum conhecido.\nDesfazer: não há o que desfazer; o cache se refaz sozinho.", DnsAction, BrokerLevel.User)), () => !Busy);
-        FlushArpCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync("Limpar o cache ARP",
-            "Esvaziar a tabela ARP (endereços físicos da rede local)?\n\nAjuda depois de trocar o roteador ou quando um aparelho da rede não é encontrado.\n" +
-            "Ganho de desempenho: nenhum.\nRisco: a conexão pode pausar por uma fração de segundo.\nDesfazer: não há o que desfazer; as entradas voltam em segundos.\n\n" +
-            "Exige administrador: o Windows vai pedir confirmação.", ArpAction, BrokerLevel.Admin)), () => !Busy);
+        FlushDnsCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync(Loc.T("Tools.LimparCacheDns2"),
+            Loc.T("Tools.EsvaziarCacheDnsWindows") +
+            Loc.T("Tools.AjudaQuandoSiteMudou") +
+            Loc.T("Tools.RiscoNenhumConhecidoDesfazer"), DnsAction, BrokerLevel.User)), () => !Busy);
+        FlushArpCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync(Loc.T("Tools.LimparCacheArp2"),
+            Loc.T("Tools.EsvaziarTabelaArpEnderecos") +
+            Loc.T("Tools.GanhoDesempenhoNenhumRisco") +
+            Loc.T("Tools.ExigeAdministradorWindowsVai"), ArpAction, BrokerLevel.Admin)), () => !Busy);
         OpenNetworkCommand = new RelayCommand(OpenNetworkSettings);
-        BackupDriversCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync("Backup de drivers",
-            "Copiar todos os drivers de terceiros instalados (pnputil /export-driver *) para a pasta de dados do NEXUS?\n\n" +
-            "Útil antes de formatar ou atualizar drivers. Não altera nada no sistema; ocupa espaço em disco.\n\nExige administrador.", DriverBackupAction, BrokerLevel.Admin)), () => !Busy);
+        BackupDriversCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync(Loc.T("Tools.BackupDrivers"),
+            Loc.T("Tools.CopiarTodosDriversTerceiros") +
+            Loc.T("Tools.UtilAntesFormatarOu"), DriverBackupAction, BrokerLevel.Admin)), () => !Busy);
         OpenDriverBackupsCommand = new RelayCommand(OpenDriverBackups);
-        CreateRestorePointCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync("Criar ponto de restauração",
-            "Pedir ao Windows um ponto de restauração agora?\n\nEle guarda arquivos de sistema, registro e drivers para voltar atrás pela Restauração do Sistema. " +
-            "Exige a Proteção do Sistema ligada. O Windows cria no máximo um ponto a cada 24 horas; se já houver um recente, ele vale.\n\nExige administrador.",
+        CreateRestorePointCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync(Loc.T("Tools.CriarPontoRestauracao"),
+            Loc.T("Tools.PedirWindowsPontoRestauracao") +
+            Loc.T("Tools.ExigeProtecaoSistemaLigada"),
             RestoreAction, BrokerLevel.Admin)), () => !Busy);
         OpenRestoreCommand = new RelayCommand(OpenSystemRestore);
         OpenProtectionCommand = new RelayCommand(OpenSystemProtection);
@@ -115,7 +115,7 @@ public sealed class SystemToolsPage : ModulePage
     public ICommand RemoveSelectedAppsCommand { get; }
     public ICommand UndoBatchCommand { get; }
     public bool CanUndoBatch => _lastBatch is not null;
-    public string UndoBatchLabel => _lastBatch is { } b ? $"Desfazer lote ({b.Label})" : "Desfazer lote";
+    public string UndoBatchLabel => _lastBatch is { } b ? Loc.F("Tools.DesfazerLoteN", b.Label) : Loc.T("Tools.DesfazerLote");
 
     private static List<SystemActionRow> Selected(IEnumerable<SystemActionRow> rows) => rows.Where(r => r.IsChecked && r.CanApply).ToList();
 
@@ -124,7 +124,7 @@ public sealed class SystemToolsPage : ModulePage
     // ------------------------------------------------------------------ estado lido
 
     public string DnsEntries { get => _dns; private set => Set(ref _dns, value); }
-    private string _dnsCaption = "entradas guardadas";
+    private string _dnsCaption = Loc.T("Tools.EntradasGuardadas");
     public string DnsCaption { get => _dnsCaption; private set => Set(ref _dnsCaption, value); }
     public string ArpEntries { get => _arp; private set => Set(ref _arp, value); }
     public ObservableCollection<SystemActionRow> WifiProfiles { get; } = [];
@@ -161,7 +161,7 @@ public sealed class SystemToolsPage : ModulePage
     public double FixableNumber => double.IsNaN(OldWifiNumber) ? double.NaN : DriverCandidates + OldWifiNumber;
     /// <summary>Verde: Proteção do Sistema ligada; vermelho: desligada; neutro: não lida.</summary>
     public UiTone ProtectionTone { get => _protectionTone; private set => Set(ref _protectionTone, value); }
-    public string ProtectionChip => ProtectionTone switch { UiTone.Good => "Proteção do Sistema ligada", UiTone.Bad => "Proteção do Sistema desligada", _ => "Proteção do Sistema: não lida" };
+    public string ProtectionChip => ProtectionTone switch { UiTone.Good => Loc.T("Tools.ProtecaoSistemaLigada"), UiTone.Bad => Loc.T("Tools.ProtecaoSistemaDesligada"), _ => Loc.T("Tools.ProtecaoSistemaNaoLida") };
     public bool HasWifi => WifiProfiles.Count > 0;
     public bool HasApps => Apps.Count > 0;
     public bool HasRestorePoints => RestorePoints.Count > 0;
@@ -206,18 +206,18 @@ public sealed class SystemToolsPage : ModulePage
         var n = await network;
         DnsEntries = n.DnsEntries is null ? "—" : N(n.DnsEntries);
         DnsCaption = n.DnsEntries is null
-            ? "contar as entradas exige administrador neste Windows (limpar não exige)"
-            : "entradas guardadas";
+            ? Loc.T("Tools.ContarEntradasExigeAdministrador")
+            : Loc.T("Tools.EntradasGuardadas");
         ArpEntries = N(n.ArpEntries);
         DnsNumber = n.DnsEntries is { } dn ? dn : double.NaN;
         ArpNumber = n.ArpEntries is { } an ? an : double.NaN;
         FillWifi(await wifi);
         FillDriverReading(await drivers);
         var b = await backups;
-        DriverBackupInfo = b.Count == 0 ? "Nenhum backup de drivers feito pelo NEXUS ainda." : $"{b.Count} backup(s); o mais recente em {b[0]}";
+        DriverBackupInfo = b.Count == 0 ? Loc.T("Tools.NenhumBackupDriversFeito") : Loc.F("Tools.NBackupSMais", b.Count, b[0]);
         FillApps(await apps);
         FillRestore(await restore);
-        Message = $"Lido às {DateTime.Now:HH:mm}.";
+        Message = Loc.F("Tools.LidoN", DateTime.Now);
         foreach (var name in new[] { nameof(WifiNumber), nameof(AppsNumber), nameof(HasWifi), nameof(HasApps), nameof(HasRestorePoints), nameof(FixableNumber) })
             OnPropertyChanged(name);
     }
@@ -230,41 +230,41 @@ public sealed class SystemToolsPage : ModulePage
         foreach (var g in r.Profiles.GroupBy(p => p.Name, StringComparer.Ordinal).OrderBy(g => g.Key, StringComparer.CurrentCultureIgnoreCase))
         {
             var p = g.First();
-            var last = r.LastConnected.TryGetValue(p.Name, out var at) ? $"última conexão {at:dd/MM/yyyy}" : "última conexão desconhecida";
-            var scope = p.Scope switch { WifiProfileScope.GroupPolicy => "empresa", WifiProfileScope.CurrentUser => "só este usuário", _ => "todos os usuários" };
+            var last = r.LastConnected.TryGetValue(p.Name, out var at) ? Loc.F("Tools.UltimaConexaoN", at) : Loc.T("Tools.UltimaConexaoDesconhecida");
+            var scope = p.Scope switch { WifiProfileScope.GroupPolicy => "empresa", WifiProfileScope.CurrentUser => Loc.T("Tools.SoEsteUsuario"), _ => Loc.T("Tools.TodosUsuarios") };
             var old = r.LastConnected.TryGetValue(p.Name, out var when) && when < DateTime.Now.AddDays(-180);
             var row = new SystemActionRow
             {
-                Key = p.Name, TargetField = "profileName", Title = p.Name, Badge = old ? "sem uso há 6+ meses" : "",
+                Key = p.Name, TargetField = "profileName", Title = p.Name, Badge = old ? Loc.T("Tools.SemUsoHa6") : "",
                 Detail = $"{scope} · {last} · {string.Join(", ", g.Select(x => x.Interface).Distinct())}",
-                Blocked = p.Removable ? null : "Definido pela empresa (política de grupo): o NEXUS não remove.",
+                Blocked = p.Removable ? null : Loc.T("Tools.DefinidoPelaEmpresaPolitica"),
             };
             row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveWifiAsync([row])), () => !Busy && row.CanApply);
             row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertRowAsync(row, BrokerLevel.Admin)), () => !Busy && row.CanRevert);
             if (old) row.Tone = "trace";
             WifiProfiles.Add(row);
         }
-        WifiNote = r.Profiles.Count == 0 ? r.Note ?? "Nenhuma rede Wi-Fi salva." : $"{r.Profiles.Select(p => p.Name).Distinct().Count()} rede(s) salva(s).";
+        WifiNote = r.Profiles.Count == 0 ? r.Note ?? Loc.T("Tools.NenhumaRedeWiFi") : Loc.F("Tools.NRedeSSalva", r.Profiles.Select(p => p.Name).Distinct().Count());
         OldWifiNumber = WifiProfiles.Count(w => w.HasBadge);
     }
 
-    private Task RemoveWifiAsync(List<SystemActionRow> rows) => ApplyBatchAsync(rows, "rede(s) Wi-Fi", "Remover rede Wi-Fi salva",
-        (rows.Count == 1 ? $"Remover a rede Wi-Fi salva \"{rows[0].Title}\"?" : $"Remover {rows.Count} redes Wi-Fi salvas?\n\n{List(rows)}") +
-        "\n\nO NEXUS guarda antes uma cópia de cada perfil completo (com a senha), protegida pela criptografia do Windows, " +
-        "na pasta de dados do aplicador. Depois remove: o Windows deixa de se conectar a essas redes sozinho.\n" +
-        "Ganho de desempenho: nenhum.\nRisco: se for a rede que você está usando agora, a conexão cai.\n" +
-        "Desfazer: reimporta os perfis guardados (botão Desfazer).\n\nExige administrador.",
+    private Task RemoveWifiAsync(List<SystemActionRow> rows) => ApplyBatchAsync(rows, Loc.T("Tools.RedeSWiFi"), Loc.T("Tools.RemoverRedeWiFi"),
+        (rows.Count == 1 ? Loc.F("Tools.RemoverRedeWiFi2", rows[0].Title) : Loc.F("Tools.RemoverNRedesWi", rows.Count, List(rows))) +
+        Loc.T("Tools.NexusGuardaAntesCopia") +
+        Loc.T("Tools.PastaDadosAplicadorDepois") +
+        Loc.T("Tools.GanhoDesempenhoNenhumRisco2") +
+        Loc.T("Tools.DesfazerReimportaPerfisGuardados"),
         row => new ActionRequest(WifiAction, Arguments: new Dictionary<string, string> { ["wifiProfile"] = row.Key }), BrokerLevel.Admin);
 
     private static string List(List<SystemActionRow> rows) =>
-        string.Join("\n", rows.Take(10).Select(r => "• " + r.ShortTitle)) + (rows.Count > 10 ? $"\n• … e mais {rows.Count - 10}" : "");
+        string.Join("\n", rows.Take(10).Select(r => "• " + r.ShortTitle)) + (rows.Count > 10 ? Loc.F("Sec.MaisN", rows.Count - 10) : "");
 
     // ------------------------------------------------------------------ drivers
 
     private void FillDriverReading(DriverReading r)
     {
         _allDrivers = [];
-        if (r.Error is not null) { DriverNote = "Não foi possível ler os drivers: " + r.Error; DriverCandidates = 0; Drivers.Clear(); return; }
+        if (r.Error is not null) { DriverNote = Loc.T("Tools.NaoFoiPossivelLer") + r.Error; DriverCandidates = 0; Drivers.Clear(); return; }
         foreach (var p in r.Packages.OrderBy(p => p.ClassName, StringComparer.CurrentCultureIgnoreCase).ThenBy(p => p.OriginalName, StringComparer.OrdinalIgnoreCase).ThenByDescending(p => p.Version))
         {
             var blocked = DriverRules.CheckRemoval(p, r.Packages, r.InUse);
@@ -275,9 +275,9 @@ public sealed class SystemToolsPage : ModulePage
                 Key = p.PublishedName,
                 TargetField = "publishedName",
                 Title = $"{p.Provider} · {p.OriginalName}",
-                Detail = $"{p.ClassName} · versão {p.VersionText}{(p.Date is { } d ? $" de {d:dd/MM/yyyy}" : "")} · {p.PublishedName}" +
-                         (newer is not null ? $" · há versão mais nova ({newer.VersionText})" : ""),
-                Badge = inUse ? "em uso" : newer is not null ? "versão antiga" : "não usado",
+                Detail = Loc.F("Tools.NVersaoNN", p.ClassName, p.VersionText, (p.Date is { } d ? $" de {d:dd/MM/yyyy}" : ""), p.PublishedName) +
+                         (newer is not null ? Loc.F("Tools.HaVersaoMaisNova", newer.VersionText) : ""),
+                Badge = inUse ? Loc.T("Mon.Uso") : newer is not null ? Loc.T("Tools.VersaoAntiga") : Loc.T("Tools.NaoUsado"),
                 Blocked = blocked,
                 Tag = newer is not null && blocked is null,
             };
@@ -289,8 +289,8 @@ public sealed class SystemToolsPage : ModulePage
         DriverCandidates = _allDrivers.Count(x => x.Tag is true);
         DriverPackagesNumber = r.Packages.Count;
         DriverNote = r.InUse is null
-            ? $"{r.Packages.Count} pacotes de terceiros. Não foi possível saber quais estão em uso (requer Windows 10 2004+): nenhuma remoção é oferecida."
-            : $"{r.Packages.Count} pacotes de terceiros no repositório; {DriverCandidates} versão(ões) antiga(s) sem uso.";
+            ? Loc.F("Tools.NPacotesTerceirosNao", r.Packages.Count)
+            : Loc.F("Tools.NPacotesTerceirosRepositorio", r.Packages.Count, DriverCandidates);
         FillDrivers();
     }
 
@@ -300,23 +300,23 @@ public sealed class SystemToolsPage : ModulePage
         foreach (var row in _allDrivers.Where(x => !OnlyCandidates || x.Tag is true || x.Applied)) Drivers.Add(row);
     }
 
-    private Task RemoveDriversAsync(List<SystemActionRow> rows) => ApplyBatchAsync(rows, "driver(s)", "Remover driver antigo",
+    private Task RemoveDriversAsync(List<SystemActionRow> rows) => ApplyBatchAsync(rows, "driver(s)", Loc.T("Tools.RemoverDriverAntigo"),
         (rows.Count == 1
-            ? $"Remover do repositório de drivers o pacote {rows[0].Key} ({rows[0].Title})?\n\n{rows[0].Detail}"
-            : $"Remover {rows.Count} pacotes antigos do repositório de drivers?\n\n{string.Join("\n", rows.Take(10).Select(r => $"• {r.Key} · {r.ShortTitle}"))}" +
-              (rows.Count > 10 ? $"\n• … e mais {rows.Count - 10}" : "")) +
-        "\n\nAntes, o NEXUS exporta cada pacote (pnputil /export-driver) para a pasta de dados do aplicador. A remoção é feita sem /force: " +
-        "se algum dispositivo usar o pacote, o próprio Windows recusa (só esse item falha; os outros seguem).\nGanho: espaço em disco; nenhum ganho de desempenho.\n" +
-        "Risco: baixo. Um aparelho desconectado que usava um destes drivers pode pedi-lo de novo.\nDesfazer: reinstala do backup (pnputil /add-driver).\n\n" +
-        "Exige administrador.",
+            ? Loc.F("Tools.RemoverRepositorioDriversPacote", rows[0].Key, rows[0].Title, rows[0].Detail)
+            : Loc.F("Tools.RemoverNPacotesAntigos", rows.Count, string.Join("\n", rows.Take(10).Select(r => $"• {r.Key} · {r.ShortTitle}"))) +
+              (rows.Count > 10 ? Loc.F("Sec.MaisN", rows.Count - 10) : "")) +
+        Loc.T("Tools.AntesNexusExportaCada") +
+        Loc.T("Tools.AlgumDispositivoUsarPacote") +
+        Loc.T("Tools.RiscoBaixoAparelhoDesconectado") +
+        Loc.T("Tools.ExigeAdministrador"),
         row => new ActionRequest(DriverAction, Arguments: new Dictionary<string, string> { ["driverInf"] = row.Key }), BrokerLevel.Admin);
 
     private void OpenDriverBackups()
     {
         var root = DriverPackageHandler.BackupRoot(AdminDataDirectory);
-        if (!Directory.Exists(root)) { Message = "Ainda não há backups de drivers."; return; }
+        if (!Directory.Exists(root)) { Message = Loc.T("Tools.AindaNaoHaBackups"); return; }
         try { VendorTools.OpenFolder(root); }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception) { Message = "Não foi possível abrir a pasta: " + ex.Message; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception) { Message = Loc.T("Clean.NaoFoiPossivelAbrir2") + ex.Message; }
     }
 
     // ------------------------------------------------------------------ apps do Windows
@@ -324,7 +324,7 @@ public sealed class SystemToolsPage : ModulePage
     private void FillApps(AppxReading r)
     {
         Apps.Clear();
-        if (r.Error is not null) { AppxNote = "Não foi possível ler os apps: " + r.Error; return; }
+        if (r.Error is not null) { AppxNote = Loc.T("Tools.NaoFoiPossivelLer2") + r.Error; return; }
         var provisioned = r.Provisioned?.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var protectedCount = 0;
         foreach (var p in r.Packages.OrderBy(p => AppxCatalog.Classify(p.Name).Class).ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
@@ -333,45 +333,45 @@ public sealed class SystemToolsPage : ModulePage
             if (cls == AppxClass.Protected) { protectedCount++; continue; }
             if (cls == AppxClass.Unknown || entry is null) continue;
             var blocked = AppxCatalog.CheckRemoval(p);
-            var prov = provisioned is null ? "" : provisioned.Contains(p.Name) ? " · também provisionado (fica para contas novas)" : "";
+            var prov = provisioned is null ? "" : provisioned.Contains(p.Name) ? Loc.T("Tools.TambemProvisionadoFicaContas") : "";
             var row = new SystemActionRow
             {
                 Key = p.Name, TargetField = "packageName", Title = entry.Title, Detail = $"{entry.Note} · {p.Name} {p.Version}{prov}",
-                Badge = cls == AppxClass.Safe ? "seguro remover" : "atenção", Blocked = blocked, Tag = p.PackageFamilyName,
+                Badge = cls == AppxClass.Safe ? Loc.T("Tools.SeguroRemover") : Loc.T("Conv.Atencao"), Blocked = blocked, Tag = p.PackageFamilyName,
             };
             row.Tone = cls == AppxClass.Safe ? "good" : "trace";
             row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => RemoveAppsAsync([row])), () => !Busy && row.CanApply);
             row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertRowAsync(row, BrokerLevel.User)), () => !Busy && row.CanRevert);
-            row.ExtraLabel = "Abrir na Store";
+            row.ExtraLabel = Loc.T("Tools.AbrirStore");
             row.ExtraCommand = new RelayCommand(() => OpenStore(row));
             Apps.Add(row);
         }
-        AppxNote = $"{Apps.Count} app(s) da lista de pré-instalados encontrados para este usuário · {protectedCount} componente(s) protegido(s) nunca são removidos" +
-                   (provisioned is null ? " · lista de provisionados exige administrador (não lida)." : $" · {provisioned.Count} pacote(s) provisionado(s) (não são removidos).");
+        AppxNote = Loc.F("Tools.NAppSLista", Apps.Count, protectedCount) +
+                   (provisioned is null ? Loc.T("Tools.ListaProvisionadosExigeAdministrador") : Loc.F("Tools.NPacoteSProvisionado", provisioned.Count));
     }
 
     private Task RemoveAppsAsync(List<SystemActionRow> rows)
     {
         var warn = rows.Where(r => AppxCatalog.Classify(r.Key).Class == AppxClass.Warn).ToList();
         var head = rows.Count == 1
-            ? $"Remover \"{rows[0].Title}\" ({rows[0].Key}) para o seu usuário?\n\n{rows[0].Detail}"
-            : $"Remover {rows.Count} apps para o seu usuário?\n\n{List(rows)}";
-        return ApplyBatchAsync(rows, "app(s)", "Remover app do Windows",
+            ? Loc.F("Tools.RemoverNNSeu", rows[0].Title, rows[0].Key, rows[0].Detail)
+            : Loc.F("Tools.RemoverNAppsSeu", rows.Count, List(rows));
+        return ApplyBatchAsync(rows, "app(s)", Loc.T("Tools.RemoverAppWindows"),
             head + "\n" +
-            (warn.Count > 0 ? $"\nATENÇÃO: {string.Join(", ", warn.Take(5).Select(w => w.ShortTitle))} {(warn.Count == 1 ? "é útil" : "são úteis")} para muita gente. Remova só se não usa.\n" : "") +
-            "\nGanho: espaço e menos atalhos no menu Iniciar; nenhum ganho em jogos.\n" +
-            "Desfazer é LIMITADO: o NEXUS reinstala sozinho só se os arquivos do app ainda estiverem no PC (app provisionado ou de outra conta). " +
-            "Se não estiverem, será preciso reinstalar pela Microsoft Store (o botão \"Abrir na Store\" leva direto à página).\n" +
-            "O pacote provisionado (para contas novas) não é tocado.",
+            (warn.Count > 0 ? Loc.F("Tools.AtencaoNNMuita", string.Join(", ", warn.Take(5).Select(w => w.ShortTitle)), (warn.Count == 1 ? Loc.T("Tools.Util") : Loc.T("Tools.SaoUteis"))) : "") +
+            Loc.T("Tools.GanhoEspacoMenosAtalhos") +
+            Loc.T("Tools.DesfazerLimitadoNexusReinstala") +
+            Loc.T("Tools.NaoEstiveremSeraPreciso") +
+            Loc.T("Tools.PacoteProvisionadoContasNovas"),
             row => new ActionRequest(AppxAction, Arguments: new Dictionary<string, string> { ["appxName"] = row.Key }), BrokerLevel.User);
     }
 
     private void OpenStore(SystemActionRow row)
     {
         if (row.Tag is not string family || !AppxCatalog.IsValidFamilyName(family)) return;
-        if (Host?.Confirm("Abrir a Microsoft Store", $"Abrir a página de \"{row.Title}\" na Microsoft Store? A instalação, se você quiser, é feita pela própria Store.") != true) return;
+        if (Host?.Confirm(Loc.T("Tools.AbrirMicrosoftStore"), Loc.F("Tools.AbrirPaginaNMicrosoft", row.Title)) != true) return;
         try { VendorTools.OpenStorePage(family); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or ArgumentException) { Message = "Não foi possível abrir a Store: " + ex.Message; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or ArgumentException) { Message = Loc.T("Tools.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     // ------------------------------------------------------------------ pontos de restauração
@@ -383,36 +383,36 @@ public sealed class SystemToolsPage : ModulePage
             foreach (var p in items.Take(30))
                 RestorePoints.Add(new RestorePointRow(p.Created is { } c ? c.ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture) : "?", p.Description, RestoreParsers.TypeName(p.Type)));
         RestoreNote = r.Points.Items is null
-            ? (r.Points.Error ?? "Não foi possível listar.") + " Abra a Restauração do Sistema para ver os pontos."
-            : r.Points.Items.Count == 0 ? "Nenhum ponto de restauração no PC." : $"{r.Points.Items.Count} ponto(s) de restauração.";
+            ? (r.Points.Error ?? Loc.T("Tools.NaoFoiPossivelListar")) + Loc.T("Tools.AbraRestauracaoSistemaVer")
+            : r.Points.Items.Count == 0 ? Loc.T("Tools.NenhumPontoRestauracaoPc") : Loc.F("Tools.NPontoSRestauracao", r.Points.Items.Count);
         RestorePointNumber = r.Points.Items is { } list ? list.Count : double.NaN;
         ProtectionTone = r.DisabledByPolicy ? UiTone.Bad : r.ProtectedDrives is null ? UiTone.Neutral : r.ProtectedDrives.Count == 0 ? UiTone.Bad : UiTone.Good;
         OnPropertyChanged(nameof(ProtectionChip));
-        ProtectionStatus = r.DisabledByPolicy ? "Desligada por política (organização)."
-            : r.ProtectedDrives is null ? "Estado da Proteção do Sistema não pôde ser lido."
-            : r.ProtectedDrives.Count == 0 ? "Proteção do Sistema desligada em todas as unidades: não há como criar pontos."
-            : "Proteção do Sistema ligada em: " + string.Join(", ", r.ProtectedDrives.Select(d => d + ":"));
+        ProtectionStatus = r.DisabledByPolicy ? Loc.T("Tools.DesligadaPoliticaOrganizacao")
+            : r.ProtectedDrives is null ? Loc.T("Tools.EstadoProtecaoSistemaNao")
+            : r.ProtectedDrives.Count == 0 ? Loc.T("Tools.ProtecaoSistemaDesligadaTodas")
+            : Loc.T("Tools.ProtecaoSistemaLigada2") + string.Join(", ", r.ProtectedDrives.Select(d => d + ":"));
     }
 
     private void OpenSystemRestore()
     {
-        if (Host?.Confirm("Restauração do Sistema", "Abrir a Restauração do Sistema do Windows? Nela você escolhe o ponto; o próprio Windows mostra o que será afetado e pede confirmação antes de reiniciar.") != true) return;
+        if (Host?.Confirm(Loc.T("Tools.RestauracaoSistema"), Loc.T("Tools.AbrirRestauracaoSistemaWindows")) != true) return;
         try { VendorTools.OpenSystemRestore(); }
-        catch (System.ComponentModel.Win32Exception ex) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (System.ComponentModel.Win32Exception ex) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     private void OpenSystemProtection()
     {
         try { VendorTools.OpenSystemProtection(); }
-        catch (System.ComponentModel.Win32Exception ex) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (System.ComponentModel.Win32Exception ex) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     private void OpenNetworkSettings()
     {
-        if (Host?.Confirm("Redefinição de rede", "Abrir as Configurações de rede do Windows? Lá fica a \"Redefinição de rede\" (reinstala adaptadores e volta Winsock/TCP-IP ao padrão). " +
-                "O NEXUS não faz isso sozinho: exige reinício, apaga configurações manuais de IP/DNS/VPN e não tem como ser desfeito.") != true) return;
+        if (Host?.Confirm(Loc.T("Tools.RedefinicaoRede"), Loc.T("Tools.AbrirConfiguracoesRedeWindows") +
+                Loc.T("Tools.NexusNaoFazIsso")) != true) return;
         try { VendorTools.OpenNetworkSettings(); }
-        catch (System.ComponentModel.Win32Exception ex) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (System.ComponentModel.Win32Exception ex) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     // ------------------------------------------------------------------ aplicar / desfazer
@@ -428,9 +428,9 @@ public sealed class SystemToolsPage : ModulePage
         var (outcome, detail) = First(r);
         Message = outcome switch
         {
-            "Verified" => $"{title}: feito.",
+            "Verified" => Loc.F("Tools.NFeito", title),
             "" => r.Message,
-            _ => $"{title}: não concluído ({outcome}). {detail}",
+            _ => Loc.F("Tools.NNaoConcluidoN", title, outcome, detail),
         };
         await LoadAsync();
     }
@@ -443,7 +443,7 @@ public sealed class SystemToolsPage : ModulePage
         Func<SystemActionRow, ActionRequest> request, BrokerLevel level)
     {
         if (Host is null || rows.Count == 0) return;
-        if (rows.Count > MaxBatch) { Message = $"Escolha no máximo {MaxBatch} itens por vez."; return; }
+        if (rows.Count > MaxBatch) { Message = Loc.F("Tools.EscolhaMaximoNItens", MaxBatch); return; }
         var r = await Host.ApplyAsync(rows.Count == 1 ? title : $"{title} ({rows.Count})", confirmation, rows.Select(request).ToList(), level);
         if (r is null) return;
         var results = r.Response?.Results ?? [];
@@ -462,13 +462,13 @@ public sealed class SystemToolsPage : ModulePage
             {
                 row.RunId = r.Response?.RunId;
                 row.Applied = true;
-                row.Status = "removido · backup guardado";
+                row.Status = Loc.T("Tools.RemovidoBackupGuardado");
                 row.Tone = "good";
                 done++;
             }
             else
             {
-                row.Status = res is null ? "sem resultado do aplicador" : $"{Translate(res.Outcome)}: {res.Detail}";
+                row.Status = res is null ? Loc.T("Tools.SemResultadoAplicador") : $"{Translate(res.Outcome)}: {res.Detail}";
                 row.Tone = "bad";
             }
         }
@@ -479,9 +479,9 @@ public sealed class SystemToolsPage : ModulePage
             OnPropertyChanged(nameof(UndoBatchLabel));
         }
         Message = rows.Count == 1
-            ? (done == 1 ? $"{rows[0].Title}: removido. Use Desfazer para voltar." : rows[0].Status)
-            : done == rows.Count ? $"{done} {noun} removido(s). Use Desfazer lote para voltar todos."
-            : $"{done} de {rows.Count} removido(s); os demais mostram o motivo na linha.";
+            ? (done == 1 ? Loc.F("Tools.NRemovidoUseDesfazer", rows[0].Title) : rows[0].Status)
+            : done == rows.Count ? Loc.F("Tools.NNRemovidoS", done, noun)
+            : Loc.F("Tools.NNRemovidoS2", done, rows.Count);
     }
 
     /// <summary>Desfazer de uma linha: o diário é por execução, então desfaz o lote em que ela foi removida (dito no status).</summary>
@@ -518,7 +518,7 @@ public sealed class SystemToolsPage : ModulePage
             }
             else
             {
-                row.Status = $"não restaurado: {res?.Detail ?? r.Message}";
+                row.Status = Loc.F("Tools.NaoRestauradoN", res?.Detail ?? r.Message);
                 row.Tone = "bad";
             }
         }
@@ -528,19 +528,19 @@ public sealed class SystemToolsPage : ModulePage
             OnPropertyChanged(nameof(CanUndoBatch));
             OnPropertyChanged(nameof(UndoBatchLabel));
         }
-        Message = all ? (rows.Count == 1 ? $"{rows[0].Title}: restaurado." : $"{rows.Count} itens restaurados.")
-                      : "Desfazer não terminou: veja o motivo em cada linha (ou a página Aplicar > Recuperar).";
+        Message = all ? (rows.Count == 1 ? Loc.F("Tools.NRestaurado", rows[0].Title) : Loc.F("Tools.NItensRestaurados", rows.Count))
+                      : Loc.T("Tools.DesfazerNaoTerminouVeja");
     }
 
     private static string Translate(string outcome) => outcome switch
     {
         "Blocked" => "bloqueado",
-        "NotApplicable" => "não se aplica",
-        "FailedAndCompensated" => "falhou (nada mudou)",
+        "NotApplicable" => Loc.T("Drv.NaoAplica"),
+        "FailedAndCompensated" => Loc.T("Drv.FalhouNadaMudou"),
         "Failed" => "falhou",
-        "Interrupted" => "interrompido (veja Aplicar > Recuperar)",
-        "SkippedExternalChange" => "mudou enquanto isso; nada feito",
-        "AlreadyConfigured" => "já estava assim",
+        "Interrupted" => Loc.T("Drv.InterrompidoVejaAplicarRecuperar"),
+        "SkippedExternalChange" => Loc.T("Drv.MudouEnquantoIssoNada"),
+        "AlreadyConfigured" => Loc.T("Asst.JaEstavaAssim"),
         _ => outcome,
     };
 }
