@@ -245,7 +245,12 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     docs/12-idiomas.md); escolha em Ajustes (Igual ao Windows/pt/en/es, reinicia). CI abre a interface em pt-BR, en e es
     (0 exceções, 0 bindings quebrados). Corrigido: %3B no SatelliteResourceLanguages (MSB1006), binding das barras do
     BeforeAfter. Instalador 1.0.0-ci.21. 2114 testes.
-21. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
+21. **02/11 tarde:** interface simples para todos (6 telas: Início com nota do PC, Otimizar automático + Ajustes rápidos,
+    Limpar, Jogos, Problemas, Histórico; "Ferramentas avançadas" em ladrilhos; um clique com frase de confirmação e
+    "Feito ✓ — Desfazer"); docs/10-design-system.md §9. Defeito achado só no CI: NullReference no CanExecute da navegação
+    durante o InitializeComponent + janela de erro modal no autoteste (travava o CI 20 min) — corrigidos; workflow
+    diag-ui.yml grava a pilha .NET. Instalador 1.0.0-ci.22. 2178 testes.
+22. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
     diagnósticos, idiomas), rodar _claude\Configurar-Atualizacoes.cmd, certificado de assinatura de código, publicar a
     1.0.0 (tag v1.0.0) e subir VersionPrefix para 1.0.1. Depois: VALORANT, investigador de travadinhas, A/B automático, IA. NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
