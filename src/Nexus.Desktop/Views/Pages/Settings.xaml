@@ -323,8 +323,12 @@
                   <TextBlock Text="{x:Static vm:SettingsPage.LicenseNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,6,0,0"/>
                 </StackPanel>
               </c:ExplainToggle>
-              <Button Content="O que já funciona" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,4,0,0"
-                      Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="CapabilitiesPage"/>
+              <WrapPanel Margin="-8,4,0,0">
+                <Button Content="O que já funciona" Style="{StaticResource Button.Ghost}"
+                        Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="CapabilitiesPage"/>
+                <Button Content="Termos de uso" Style="{StaticResource Button.Ghost}" Command="{Binding OpenTermsCommand}"/>
+                <Button Content="Privacidade" Style="{StaticResource Button.Ghost}" Command="{Binding OpenPrivacyCommand}"/>
+              </WrapPanel>
             </StackPanel>
           </Border>
         </UniformGrid>

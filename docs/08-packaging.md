@@ -88,8 +88,12 @@ Mitigações:
 
 - Instala em `%ProgramFiles%\NEXUS` (`PrivilegesRequired=admin`) **com a ACL herdada de Arquivos de Programas**: só
   administradores, SYSTEM e TrustedInstaller alteram. Nenhuma permissão extra é dada a usuários.
-- Atalho no Menu Iniciar (todos os usuários) e "NEXUS - avisos de terceiros" (abre `THIRD-PARTY-NOTICES.txt`); Área de
-  Trabalho opcional (desmarcado).
+- **Termos de uso** na página de licença do instalador (instalar exige aceitar; em `/VERYSILENT`, como na atualização
+  automática, a página não aparece). Fonte: `docs/legal/TERMOS-DE-USO.md` e `docs/legal/PRIVACIDADE.md`; a publicação gera
+  `legal\*.txt` (UTF-8 com BOM, o que o Inno mostra) e `legal\*.html` (o que Ajustes → Sobre → "Termos de uso" /
+  "Privacidade" abre) com `tools/packaging/legal_docs.py`. Ao mudar os textos, mude a data no topo deles.
+- Atalho no Menu Iniciar (todos os usuários), "NEXUS - avisos de terceiros" (abre `THIRD-PARTY-NOTICES.txt`), "NEXUS - termos
+  de uso" e "NEXUS - privacidade"; Área de Trabalho opcional (desmarcado).
 - **PresentMon embutido** em `%ProgramFiles%\NEXUS\tools\PresentMon` (pasta protegida). O Medir confere hash/assinatura antes de
   executar (`docs/modules/measure.md`).
 - **"Medir FPS sem pedir permissão toda vez"**: opção **marcada por padrão** (também vale em `/VERYSILENT`; para não aplicar,

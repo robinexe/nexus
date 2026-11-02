@@ -16,7 +16,8 @@ O que faz, por RID:
      instalado, arquitetura PE certa.
   4. Copia tools\\service (serviço opcional do aplicador) e os scripts de tools\\packaging usados pelo instalador; confere o
      PresentMon embutido (tools\\PresentMon\\PresentMon.exe, SHA-256 conhecido), a licença dele e THIRD-PARTY-NOTICES.txt.
-  5. Grava VERSAO.txt e LEIA-ME-PORTATIL.txt e cria artifacts/NEXUS-<versão>-<rid>-portatil.zip (entradas ordenadas e com
+  5. Grava VERSAO.txt, LEIA-ME-PORTATIL.txt e legal\\ (Termos de uso e Política de privacidade de docs/legal em .txt e .html,
+     tools/packaging/legal_docs.py; o instalador mostra legal\\TERMOS-DE-USO.txt) e cria artifacts/NEXUS-<versão>-<rid>-portatil.zip (entradas ordenadas e com
      data fixa: o mesmo conteúdo gera o mesmo ZIP).
 
 Lock files: antes de publicar, a solução é restaurada com --locked-mode (versões e hashes conferidos contra os
@@ -39,6 +40,8 @@ import subprocess
 import sys
 import zipfile
 from pathlib import Path
+
+import legal_docs  # mesma pasta (tools/packaging)
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECTS = [  # ordem de publicação; a junção exige arquivos comuns idênticos, então a ordem não muda o resultado
@@ -65,6 +68,8 @@ EXTRA_FILES = [  # (origem relativa à raiz, destino relativo à pasta publicada
 # confere que chegou intacto (mesmo SHA-256 de src/Nexus.Measurement/PresentMonTrust.cs e de docs/05-dependencies.md).
 PRESENTMON = ("tools/PresentMon/PresentMon.exe", "b2a706bc6ad475749e3b7e3409263aa1e6906d45bdcf993f6dbc0f660188f1af")
 PRESENTMON_FILES = ["tools/PresentMon/LICENSE.txt", "THIRD-PARTY-NOTICES.txt"]
+# Termos e privacidade: o instalador mostra o .txt (LicenseFile do nexus.iss) e Ajustes → Sobre abre o .html.
+LEGAL_FILES = [f"legal/{stem}.{ext}" for stem, _ in legal_docs.DOCS for ext in ("txt", "html")]
 ZIP_DATE = (2020, 1, 1, 0, 0, 0)
 SRC_COPY = ROOT / "artifacts" / "src"
 
@@ -320,6 +325,11 @@ def verify(target: Path, rid: str) -> list[str]:
         if not (target / f).is_file():
             fail(f"falta {f} na pasta publicada")
     report.append("PresentMon 2.6.0 embutido (SHA-256 conferido), licença e avisos de terceiros presentes")
+
+    for f in LEGAL_FILES:
+        if not (target / f).is_file():
+            fail(f"falta {f} (termos de uso / privacidade) na pasta publicada")
+    report.append("termos de uso e política de privacidade presentes (legal\\)")
     return report
 
 
@@ -424,6 +434,7 @@ def main() -> None:
         if not args.skip_publish:
             log(f"  lock files: {check_lock_files(SRC_COPY)} conferidos (só seções por RID acrescentadas)")
         write_texts(target, rid, full_version, commit)
+        legal_docs.write(target)
         for line in verify(target, rid):
             log("  " + line)
         size = sum(p.stat().st_size for p in target.rglob("*") if p.is_file())

@@ -154,6 +154,8 @@ public sealed class SettingsPage : ModulePage
         OpenReportsCommand = new RelayCommand(() => OpenFolder(ScanReport.DefaultDirectory));
         OpenLastCleaningCommand = new RelayCommand(OpenLastCleaning, () => LastCleaningReport() is not null);
         RefreshCommand = new RelayCommand(() => _ = RunAsync(RefreshAsync), () => !Busy);
+        OpenTermsCommand = new RelayCommand(() => OpenLegal("TERMOS-DE-USO"));
+        OpenPrivacyCommand = new RelayCommand(() => OpenLegal("PRIVACIDADE"));
     }
 
     public ScheduleEditor Scan { get; }
@@ -164,6 +166,8 @@ public sealed class SettingsPage : ModulePage
     public RelayCommand OpenReportsCommand { get; }
     public RelayCommand OpenLastCleaningCommand { get; }
     public RelayCommand RefreshCommand { get; }
+    public RelayCommand OpenTermsCommand { get; }
+    public RelayCommand OpenPrivacyCommand { get; }
 
     public string LegacyText { get => _legacyText; private set => Set(ref _legacyText, value); }
     public bool LegacyOn { get => _legacyOn; private set => Set(ref _legacyOn, value); }
@@ -372,6 +376,19 @@ public sealed class SettingsPage : ModulePage
     {
         if (LastCleaningReport() is { } file && !Nexus.Automation.Notifications.BalloonNotifier.OpenReport(file))
             Message = "Não foi possível abrir o relatório.";
+    }
+
+    /// <summary>
+    /// Termos de uso / Política de privacidade: legal\&lt;nome&gt;.html (ou .txt) da pasta do NEXUS, gerados de docs/legal pela
+    /// publicação (tools/packaging/legal_docs.py). Só arquivos fixos desta pasta; abre no programa padrão do Windows.
+    /// </summary>
+    private void OpenLegal(string stem)
+    {
+        var dir = Path.Combine(AppContext.BaseDirectory, "legal");
+        var file = new[] { stem + ".html", stem + ".txt" }.Select(n => Path.Combine(dir, n)).FirstOrDefault(File.Exists);
+        if (file is null) { Message = $"Arquivo não encontrado em {dir} (cópia de desenvolvimento: o texto está em docs\\legal no repositório)."; return; }
+        try { using var _ = Process.Start(new ProcessStartInfo(file) { UseShellExecute = true }); }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = $"Não foi possível abrir: {ex.Message}"; }
     }
 
     private void OpenFolder(string folder)

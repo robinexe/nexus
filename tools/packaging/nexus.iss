@@ -19,6 +19,8 @@
 ;  - Atualização automática: o NEXUS baixa o instalador novo (manifesto assinado, SHA-256) e o roda com
 ;    /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS [/RELAUNCH=1]; ver docs/11-atualizacao.md.
 ;  - Assinatura Authenticode: preparada e desligada (defina SignToolName; ver docs/08-packaging.md).
+;  - Termos de uso (docs/legal/TERMOS-DE-USO.md, convertido em legal\TERMOS-DE-USO.txt pela publicação) na página de licença:
+;    instalar exige aceitar. Política de privacidade junto (legal\PRIVACIDADE.*); atalhos no Menu Iniciar para os dois.
 
 #ifndef AppVersion
   #define AppVersion "1.0.0"
@@ -71,6 +73,7 @@ CloseApplications=yes
 RestartApplications=no
 SetupLogging=yes
 ShowLanguageDialog=no
+LicenseFile={#SourceDir}\legal\TERMOS-DE-USO.txt
 #ifdef SignToolName
 SignTool={#SignToolName}
 SignedUninstaller=yes
@@ -107,6 +110,8 @@ Source: "{#SourceDir}\*"; DestDir: "{tmp}\nexus-servico"; Flags: ignoreversion r
 Name: "{autoprograms}\NEXUS"; Filename: "{app}\Nexus.Desktop.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\NEXUS"; Filename: "{app}\Nexus.Desktop.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 Name: "{autoprograms}\NEXUS - avisos de terceiros"; Filename: "{app}\THIRD-PARTY-NOTICES.txt"
+Name: "{autoprograms}\NEXUS - termos de uso"; Filename: "{app}\legal\TERMOS-DE-USO.html"
+Name: "{autoprograms}\NEXUS - privacidade"; Filename: "{app}\legal\PRIVACIDADE.html"
 
 [Run]
 Filename: "{app}\Nexus.Desktop.exe"; Description: "{cm:LaunchNexus}"; Flags: postinstall nowait skipifsilent runasoriginaluser

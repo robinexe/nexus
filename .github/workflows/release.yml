@@ -189,7 +189,7 @@ jobs:
           $p = Start-Process $setup.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/LOG=saida\instalacao.log' -Wait -PassThru
           if ($p.ExitCode -ne 0) { Get-Content saida\instalacao.log -Tail 40; Write-Error "Instalador saiu com $($p.ExitCode)"; exit 1 }
           $app = Join-Path $env:ProgramFiles 'NEXUS'
-          foreach ($f in 'Nexus.Desktop.exe','nexus-broker.exe','nexus.exe','nexus-task.exe','nexus-recover.exe','catalog\actions.v1.json','unins000.exe','tools\Remove-NexusTasks.ps1','tools\service\Uninstall-Broker.ps1') {
+          foreach ($f in 'Nexus.Desktop.exe','nexus-broker.exe','nexus.exe','nexus-task.exe','nexus-recover.exe','catalog\actions.v1.json','legal\TERMOS-DE-USO.txt','legal\PRIVACIDADE.html','unins000.exe','tools\Remove-NexusTasks.ps1','tools\service\Uninstall-Broker.ps1') {
             if (-not (Test-Path (Join-Path $app $f))) { Write-Error "Falta $f em $app"; exit 1 }
           }
           "Atalho no Menu Iniciar: $(Test-Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\NEXUS.lnk")"
