@@ -240,7 +240,14 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     volta sozinha em 15 s; vigia da interface ignora suspensão (os "travamentos" de 1038 s/9629 s eram o notebook dormindo);
     abertura sem leituras bloqueantes na thread da interface + cronômetro no desktop-diag.log; SSD/HD por IOCTL sem admin.
     2091 testes. Depois de publicar 1.0.0: subir VersionPrefix para 1.0.1.
-20. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+20. **02/11 manhã:** idiomas pt-BR/en/es (resx + {l:T}, 3391 chaves, todas as 30 páginas; títulos de todas as ações do
+    catálogo; textos das bibliotecas Nexus.*, mecanismo/riscos do catálogo, relatório e CLI continuam em pt-BR — ver
+    docs/12-idiomas.md); escolha em Ajustes (Igual ao Windows/pt/en/es, reinicia). CI abre a interface em pt-BR, en e es
+    (0 exceções, 0 bindings quebrados). Corrigido: %3B no SatelliteResourceLanguages (MSB1006), binding das barras do
+    BeforeAfter. Instalador 1.0.0-ci.21. 2114 testes.
+21. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
+    diagnósticos, idiomas), rodar _claude\Configurar-Atualizacoes.cmd, certificado de assinatura de código, publicar a
+    1.0.0 (tag v1.0.0) e subir VersionPrefix para 1.0.1. Depois: VALORANT, investigador de travadinhas, A/B automático, IA. NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
