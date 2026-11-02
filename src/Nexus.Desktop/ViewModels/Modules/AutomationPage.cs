@@ -131,6 +131,9 @@ public sealed class AutomationPage : ModulePage
     public int PlanCount => _plan.Count;
     /// <summary>Ações de risco baixo que o Automático recomenda para este PC (a tela Início conta as que ainda mudariam algo).</summary>
     public IReadOnlyList<string> CandidateActionKeys => _candidates.Select(c => c.Request.ActionId).ToList();
+    /// <summary>Recomendações com ação para este PC (fazer ou considerar), para os Ajustes rápidos da interface simples.</summary>
+    public IReadOnlyList<Recommendation> ActionableRecommendations => _set is null ? []
+        : [.. _set.Actionable.Where(r => r.Kind is RecommendationKind.Recommend or RecommendationKind.Consider && r.ActionKey is not null)];
     public string PlanCountText => PlanNumberRaw.ToString(CultureInfo.InvariantCulture);
     /// <summary>"Limpeza segura: 9 regras, 1,2 GB recuperáveis (vão para a quarentena)".</summary>
     public string CleaningText { get => _cleaningText; private set { if (Set(ref _cleaningText, value)) { Raise(nameof(HasCleaning), nameof(PlanNumber)); OnPropertyChanged(nameof(PlanCountText)); } } }

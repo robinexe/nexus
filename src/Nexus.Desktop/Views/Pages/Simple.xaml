@@ -53,6 +53,26 @@
     <Setter Property="Margin" Value="0,0,0,18"/>
   </Style>
 
+  <!-- Botão de um clique com o resultado no lugar: [Ação] → "Aplicando…" → "✓ Feito — Desfazer". -->
+  <DataTemplate x:Key="S.OneClick" DataType="{x:Type sv:OneClickAction}">
+    <Grid VerticalAlignment="Center">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}">
+        <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,10,0"
+                   Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}"/>
+        <Button Style="{StaticResource Button.Secondary}" Margin="0" MinWidth="110" Content="{Binding ActionText}" Command="{Binding ApplyCommand}"/>
+      </StackPanel>
+      <TextBlock Text="{l:T Simple.One.Working}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Trace}" VerticalAlignment="Center"
+                 HorizontalAlignment="Right" Visibility="{Binding IsWorking, Converter={StaticResource BoolToVis}}"/>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding IsDone, Converter={StaticResource BoolToVis}}"
+                  AutomationProperties.LiveSetting="Polite">
+        <c:Icon Data="{StaticResource Icon.Check}" Size="17" Foreground="{StaticResource Brush.Good}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Body}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource Brush.Good}" VerticalAlignment="Center"/>
+        <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.One.Undo}" Command="{Binding UndoCommand}" Margin="8,0,0,0"
+                Visibility="{Binding CanUndo, Converter={StaticResource BoolToVis}}"/>
+      </StackPanel>
+    </Grid>
+  </DataTemplate>
+
   <!-- ================================================================== INÍCIO -->
   <DataTemplate DataType="{x:Type sv:HomePage}">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
@@ -99,9 +119,10 @@
                       <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
                     </Grid>
                     <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0">
+                      <ContentControl Content="{Binding OneClick}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"
+                                      Visibility="{Binding IsOneClick, Converter={StaticResource BoolToVis}}"/>
                       <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
-                              Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Target}"
-                              Visibility="{Binding Navigates, Converter={StaticResource BoolToVis}}"/>
+                              Command="{Binding OpenCommand}" Visibility="{Binding IsOpen, Converter={StaticResource BoolToVis}}"/>
                       <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
                               Command="{Binding ToggleHowToCommand}" Visibility="{Binding IsHowTo, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
@@ -225,6 +246,49 @@
             </Button>
           </WrapPanel>
         </StackPanel>
+
+        <!-- Ajustes rápidos: um a um, ligar aplica e desligar desfaz (some enquanto a rodada automática trabalha). -->
+        <StackPanel DataContext="{Binding QuickTweaks}" Margin="0,8,0,0"
+                    Visibility="{Binding DataContext.Running, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource FalseToVisible}}">
+          <TextBlock Text="{l:T Simple.Quick.Title}" Style="{StaticResource S.Section}"/>
+          <TextBlock Text="{l:T Simple.Quick.Lead}" Style="{StaticResource S.Lead}" FontSize="15" Margin="0,-6,0,16"/>
+          <TextBlock Text="{l:T Simple.Quick.Empty}" Style="{StaticResource S.Lead}" FontSize="15" Visibility="{Binding HasAny, Converter={StaticResource FalseToVisible}}"/>
+          <ItemsControl ItemsSource="{Binding Groups}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type sv:QuickTweakGroup}">
+                <Border Style="{StaticResource S.Card}">
+                  <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                      <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="19" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H2}" FontSize="18" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding Items}" Focusable="False">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type sv:QuickTweakRow}">
+                          <DockPanel Margin="0,8">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                              <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Good}" VerticalAlignment="Center" Margin="0,0,10,0"
+                                         Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}"/>
+                              <CheckBox IsChecked="{Binding IsOn, Mode=OneWay}" Command="{Binding ToggleCommand}" VerticalAlignment="Center"
+                                        AutomationProperties.Name="{Binding Title}"/>
+                            </StackPanel>
+                            <StackPanel>
+                              <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" FontSize="15.5" Foreground="{StaticResource Brush.Text}"/>
+                              <TextBlock Text="{Binding Sentence}" Style="{StaticResource Text.Small}" Margin="0,2,0,0" Visibility="{Binding HasSentence, Converter={StaticResource BoolToVis}}"/>
+                              <c:StatusChip Tone="Warn" Text="{Binding RiskWord}" HorizontalAlignment="Left" Margin="0,6,0,0" Visibility="{Binding ShowRisk, Converter={StaticResource BoolToVis}}"/>
+                            </StackPanel>
+                          </DockPanel>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,4,0,0" Content="{Binding MoreText}" Command="{Binding ToggleMoreCommand}"
+                  Visibility="{Binding HasMore, Converter={StaticResource BoolToVis}}"/>
+        </StackPanel>
       </StackPanel>
     </ScrollViewer>
   </DataTemplate>
@@ -302,9 +366,8 @@
         <!-- Modo de jogo do Windows (resumo) -->
         <Border Style="{StaticResource S.Card}" Margin="0,0,0,24">
           <DockPanel>
-            <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" Content="{l:T Simple.Card.TweaksAction}"
-                    Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SimpleOptimizePage"
-                    Visibility="{Binding GameModeOff, Converter={StaticResource BoolToVis}}"/>
+            <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding GameModeAction}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"
+                            Visibility="{Binding HasGameModeAction, Converter={StaticResource BoolToVis}}"/>
             <Grid Width="44" Height="44" Margin="0,0,16,0">
               <Ellipse Fill="{Binding GameModeTone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
               <c:Icon Data="{StaticResource Icon.Games}" Size="21" Foreground="{Binding GameModeTone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
@@ -336,21 +399,16 @@
                     </Border>
                     <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}" FontSize="19" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
                   </DockPanel>
-                  <StackPanel Margin="64,14,0,0" Visibility="{Binding HasOptions, Converter={StaticResource BoolToVis}}">
-                    <CheckBox IsChecked="{Binding LowLatency}" Margin="0,0,0,8" Visibility="{Binding CanNvidia, Converter={StaticResource BoolToVis}}">
-                      <TextBlock Text="{l:T Simple.Games.LowLatency}" FontSize="15"/>
-                    </CheckBox>
-                    <CheckBox IsChecked="{Binding MaxPower}" Margin="0,0,0,8" Visibility="{Binding CanNvidia, Converter={StaticResource BoolToVis}}">
-                      <TextBlock Text="{l:T Simple.Games.MaxPower}" FontSize="15"/>
-                    </CheckBox>
-                    <CheckBox IsChecked="{Binding FpsCap}" Margin="0,0,0,8" Visibility="{Binding CanFps, Converter={StaticResource BoolToVis}}">
-                      <TextBlock Text="{Binding FpsText}" FontSize="15"/>
-                    </CheckBox>
-                    <CheckBox IsChecked="{Binding Windowed}" Margin="0,0,0,8" Visibility="{Binding CanWindowed, Converter={StaticResource BoolToVis}}">
-                      <TextBlock Text="{l:T Simple.Games.Windowed}" FontSize="15"/>
-                    </CheckBox>
-                    <Button Style="{StaticResource Button.Primary}" Content="{l:T Simple.Games.Apply}" Command="{Binding ApplyCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
-                  </StackPanel>
+                  <ItemsControl ItemsSource="{Binding Options}" Focusable="False" Margin="64,10,0,0" Visibility="{Binding HasOptions, Converter={StaticResource BoolToVis}}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="{x:Type sv:GameOption}">
+                        <DockPanel Margin="0,6">
+                          <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding Action}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"/>
+                          <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
                   <c:StatusChip Tone="Good" Text="{l:T Simple.Games.WindowedOn}" HorizontalAlignment="Left" Margin="64,10,0,0"
                                 Visibility="{Binding WindowedOn, Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
@@ -386,6 +444,8 @@
                     <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
                   </Grid>
                   <StackPanel DockPanel.Dock="Right" Margin="16,0,0,0" VerticalAlignment="Center">
+                    <ContentControl Content="{Binding Fix}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"
+                                    Visibility="{Binding HasFix, Converter={StaticResource BoolToVis}}"/>
                     <Button Style="{StaticResource Button.Secondary}" Margin="0" MinWidth="110" Content="{Binding ActionText}"
                             Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Target}"
                             Visibility="{Binding HasTarget, Converter={StaticResource BoolToVis}}"/>

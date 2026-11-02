@@ -192,6 +192,10 @@ public sealed record ImproveCard(ImproveKind Kind, string Text, string ActionTex
 {
     /// <summary>Explicação de uma ou duas frases (só alguns cartões, como o da memória: "Ver como" abre isto).</summary>
     public string? HowTo { get; init; }
+    /// <summary>Achado do diagnóstico que gerou o cartão (null nos outros).</summary>
+    public string? FindingId { get; init; }
+    /// <summary>Ação do catálogo que resolve o achado (o botão a aplica com um clique quando é de risco baixo).</summary>
+    public string? FixActionId { get; init; }
 }
 
 public static class ImproveCards
@@ -226,7 +230,7 @@ public static class ImproveCards
                 _ => (Loc.T("Simple.Card.WhatToDo"), "SimpleProblemsPage"),
             };
             list.Add(new ImproveCard(kind, plain.Title, action, target, kind == ImproveKind.LowDisk ? 68 : f.Owner is not null ? 45 : 40, plain.IconKey)
-            { HowTo = plain.WhatToDo });
+            { HowTo = plain.WhatToDo, FindingId = f.Id, FixActionId = f.RelatedActionId });
         }
         return list;
     }
@@ -409,5 +413,72 @@ public static class SimpleOptimizeText
             (false, 1) => Loc.T("Simple.Opt.Done1"),
             _ => Loc.T("Simple.Opt.DoneNothing"),
         };
+    }
+}
+
+// ================================================================== Ajustes rápidos (ligar/desligar em palavras simples)
+
+/// <summary>Os grupos dos ajustes rápidos, na ordem da tela.</summary>
+public enum QuickCategory { Speed, Games, Privacy, Power }
+
+/// <summary>Classificação e textos dos ajustes rápidos (lógica pura, testada): grupo pelo id da ação, palavra de risco.</summary>
+public static class QuickTweakText
+{
+    /// <summary>Grupo do ajuste pelo id da ação do catálogo (o id nunca aparece na tela).</summary>
+    public static QuickCategory CategoryOf(string actionId)
+    {
+        var id = (actionId ?? "").ToLowerInvariant();
+        if (id.StartsWith("privacy.", StringComparison.Ordinal)) return QuickCategory.Privacy;
+        if (id.StartsWith("power.", StringComparison.Ordinal) || id.Contains("power", StringComparison.Ordinal) || id.Contains("energy", StringComparison.Ordinal) ||
+            id.Contains("throttl", StringComparison.Ordinal) || id.Contains("aspm", StringComparison.Ordinal) || id.Contains(".epp", StringComparison.Ordinal) ||
+            id.Contains("battery", StringComparison.Ordinal) || id.Contains("parking", StringComparison.Ordinal)) return QuickCategory.Power;
+        if (id.StartsWith("fps.", StringComparison.Ordinal) || id.StartsWith("gpu", StringComparison.Ordinal) || id.StartsWith("nvidia.", StringComparison.Ordinal) ||
+            id.StartsWith("cs2.", StringComparison.Ordinal) || id.Contains("game", StringComparison.Ordinal) || id.Contains("mpo", StringComparison.Ordinal) ||
+            id.Contains("mouse", StringComparison.Ordinal) || id.Contains("windowed", StringComparison.Ordinal) || id.Contains("directx", StringComparison.Ordinal)) return QuickCategory.Games;
+        return QuickCategory.Speed;
+    }
+
+    public static string CategoryTitle(QuickCategory c) => c switch
+    {
+        QuickCategory.Speed => Loc.T("Simple.Quick.Speed"),
+        QuickCategory.Games => Loc.T("Simple.Quick.Games"),
+        QuickCategory.Privacy => Loc.T("Simple.Quick.Privacy"),
+        _ => Loc.T("Simple.Quick.Power"),
+    };
+
+    public static string CategoryIcon(QuickCategory c) => c switch
+    {
+        QuickCategory.Speed => "Icon.Bolt",
+        QuickCategory.Games => "Icon.Games",
+        QuickCategory.Privacy => "Icon.Privacy",
+        _ => "Icon.Cpu",
+    };
+
+    /// <summary>
+    /// A palavra de risco dos ajustes de "Mostrar mais opções" (os recomendados não têm): energia gasta bateria; experimental pode
+    /// não ajudar; risco médio/alto pode ter efeito colateral; o resto é "você decide".
+    /// </summary>
+    public static string RiskWord(QuickCategory category, Nexus.Automation.ActionRisk? risk, bool experimental)
+    {
+        if (experimental) return Loc.T("Simple.Quick.RiskExperimental");
+        if (category == QuickCategory.Power) return Loc.T("Simple.Quick.RiskBattery");
+        return risk switch
+        {
+            Nexus.Automation.ActionRisk.High => Loc.T("Simple.Quick.RiskHigh"),
+            Nexus.Automation.ActionRisk.Medium => Loc.T("Simple.Quick.RiskMedium"),
+            _ => Loc.T("Simple.Quick.RiskChoice"),
+        };
+    }
+
+    /// <summary>A primeira frase de um texto (as explicações das regras têm várias); no máximo ~140 caracteres.</summary>
+    public static string FirstSentence(string? text)
+    {
+        var t = (text ?? "").Trim();
+        if (t.Length == 0) return "";
+        var end = -1;
+        for (var i = 0; i < t.Length - 1; i++)
+            if (t[i] is '.' or '!' or '?' && t[i + 1] == ' ') { end = i; break; }
+        var first = end >= 0 ? t[..(end + 1)] : t;
+        return first.Length <= 140 ? first : first[..137].TrimEnd() + "…";
     }
 }

@@ -3823,19 +3823,6 @@ Começar agora?</value></data>
   <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Limitar FPS para ficar mais estável ({0} FPS)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Jogo em janela mais fluido</value></data>
   <data name="Simple.Games.WindowedOn" xml:space="preserve"><value>Jogo em janela mais fluido: já ligado</value></data>
-  <data name="Simple.Games.Apply" xml:space="preserve"><value>Aplicar</value></data>
-  <data name="Simple.Games.ApplyTitle" xml:space="preserve"><value>Jogos: {0}</value></data>
-  <data name="Simple.Games.ConfirmNv" xml:space="preserve"><value>{0}: o NEXUS vai gravar no driver da NVIDIA, só para este jogo:
-
-{1}
-
-O Windows pede permissão de administrador. Volta como era em Histórico.</value></data>
-  <data name="Simple.Games.ConfirmWindowed" xml:space="preserve"><value>{0}: ligar "jogo em janela mais fluido" (otimização do Windows para jogos em janela), só para este jogo.
-
-Volta como era em Histórico.</value></data>
-  <data name="Simple.Games.DoneNv" xml:space="preserve"><value>Ajustes da placa de vídeo aplicados.</value></data>
-  <data name="Simple.Games.DoneWindowed" xml:space="preserve"><value>Jogo em janela mais fluido ligado.</value></data>
-  <data name="Simple.Games.UndoHint" xml:space="preserve"><value>Para voltar como era, use Histórico.</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problemas</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>O que precisa de você e como resolver.</value></data>
   <data name="Simple.Problems.Count1" xml:space="preserve"><value>1 coisa precisa de você.</value></data>
@@ -3871,7 +3858,6 @@ Cada coisa volta como era antes. O que é do sistema pede permissão de administ
   <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Otimizar (trabalhando, demonstração)</value></data>
   <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Otimizar (pronto, demonstração)</value></data>
   <data name="Simple.SelfTest.DemoPrefix" xml:space="preserve"><value>[Demonstração] </value></data>
-  <data name="Simple.Games.Failed" xml:space="preserve"><value>Não deu para aplicar. Os detalhes estão em Ferramentas avançadas › Aplicar.</value></data>
   <data name="Simple.Hist.UndoFailed" xml:space="preserve"><value>Não deu para desfazer tudo. Veja em Ver tudo em detalhes.</value></data>
   <data name="Simple.Welcome.Start" xml:space="preserve"><value>Começar</value></data>
   <data name="Simple.Adv.Title" xml:space="preserve"><value>Ferramentas avançadas</value></data>
@@ -3880,4 +3866,36 @@ Cada coisa volta como era antes. O que é do sistema pede permissão de administ
   <data name="Simple.Adv.Link" xml:space="preserve"><value>Ferramentas avançadas</value></data>
   <data name="Simple.Adv.Tip" xml:space="preserve"><value>Todas as outras ferramentas: hardware, laboratórios, programas, serviços, Ajustes…</value></data>
   <data name="Simple.Adv.Back" xml:space="preserve"><value>Voltar ao início</value></data>
+  <data name="Simple.Games.TurnOn" xml:space="preserve"><value>Ligar</value></data>
+  <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: ligar "{1}"? Dá para desfazer.</value></data>
+  <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ligar "{1}"? O Windows pede permissão de administrador. Dá para desfazer.</value></data>
+  <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>Ligar o Modo de jogo do Windows? Dá para desfazer.</value></data>
+  <data name="Simple.One.Fix" xml:space="preserve"><value>Resolver</value></data>
+  <data name="Simple.One.Working" xml:space="preserve"><value>Aplicando…</value></data>
+  <data name="Simple.One.Done" xml:space="preserve"><value>Feito</value></data>
+  <data name="Simple.One.Already" xml:space="preserve"><value>Já estava assim</value></data>
+  <data name="Simple.One.Failed" xml:space="preserve"><value>Não deu certo</value></data>
+  <data name="Simple.One.Undo" xml:space="preserve"><value>Desfazer</value></data>
+  <data name="Simple.One.Undone" xml:space="preserve"><value>Desfeito</value></data>
+  <data name="Simple.One.UndoFailed" xml:space="preserve"><value>Não deu para desfazer: veja em Histórico</value></data>
+  <data name="Simple.One.ConfirmClean" xml:space="preserve"><value>Limpar {0} de arquivos inúteis? Vão para a lixeira do NEXUS e dá para desfazer.</value></data>
+  <data name="Simple.One.ConfirmTweaks" xml:space="preserve"><value>Aplicar {0} ajustes seguros? Tudo pode ser desfeito.</value></data>
+  <data name="Simple.One.ConfirmFix" xml:space="preserve"><value>{0} O NEXUS resolve agora e dá para desfazer. Continuar?</value></data>
+  <data name="Simple.Quick.Title" xml:space="preserve"><value>Ajustes rápidos</value></data>
+  <data name="Simple.Quick.Lead" xml:space="preserve"><value>Marque para ligar, desmarque para desfazer. Só o que vale para este PC.</value></data>
+  <data name="Simple.Quick.Empty" xml:space="preserve"><value>Nada para ajustar agora: o NEXUS confere de novo a cada abertura.</value></data>
+  <data name="Simple.Quick.Speed" xml:space="preserve"><value>Velocidade</value></data>
+  <data name="Simple.Quick.Games" xml:space="preserve"><value>Jogos</value></data>
+  <data name="Simple.Quick.Privacy" xml:space="preserve"><value>Privacidade</value></data>
+  <data name="Simple.Quick.Power" xml:space="preserve"><value>Energia</value></data>
+  <data name="Simple.Quick.More" xml:space="preserve"><value>Mostrar mais opções</value></data>
+  <data name="Simple.Quick.Less" xml:space="preserve"><value>Mostrar só as recomendadas</value></data>
+  <data name="Simple.Quick.RiskBattery" xml:space="preserve"><value>pode gastar mais bateria</value></data>
+  <data name="Simple.Quick.RiskExperimental" xml:space="preserve"><value>experimental: pode não ajudar</value></data>
+  <data name="Simple.Quick.RiskMedium" xml:space="preserve"><value>pode ter efeito colateral</value></data>
+  <data name="Simple.Quick.RiskHigh" xml:space="preserve"><value>só se você souber o que faz</value></data>
+  <data name="Simple.Quick.RiskChoice" xml:space="preserve"><value>você decide</value></data>
+  <data name="Simple.Quick.ConfirmOn" xml:space="preserve"><value>Ligar "{0}"? Dá para desfazer.</value></data>
+  <data name="Simple.Quick.ConfirmOff" xml:space="preserve"><value>Desfazer "{0}" e voltar como era?</value></data>
+  <data name="Simple.Quick.NothingToUndo" xml:space="preserve"><value>Já estava assim (ou foi feito junto com outros): desfaça em Histórico</value></data>
 </root>

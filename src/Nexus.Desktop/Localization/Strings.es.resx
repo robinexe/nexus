@@ -3823,19 +3823,6 @@ Solo entra lo que es de bajo riesgo y se puede deshacer en Historial. Windows pe
   <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Limitar los FPS para que vaya más estable ({0} FPS)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Juego en ventana más fluido</value></data>
   <data name="Simple.Games.WindowedOn" xml:space="preserve"><value>Juego en ventana más fluido: ya activado</value></data>
-  <data name="Simple.Games.Apply" xml:space="preserve"><value>Aplicar</value></data>
-  <data name="Simple.Games.ApplyTitle" xml:space="preserve"><value>Juegos: {0}</value></data>
-  <data name="Simple.Games.ConfirmNv" xml:space="preserve"><value>{0}: NEXUS va a guardar en el driver de NVIDIA, solo para este juego:
-
-{1}
-
-Windows pide permiso de administrador. Vuelve como estaba en Historial.</value></data>
-  <data name="Simple.Games.ConfirmWindowed" xml:space="preserve"><value>{0}: activar "juego en ventana más fluido" (optimización de Windows para juegos en ventana), solo para este juego.
-
-Vuelve como estaba en Historial.</value></data>
-  <data name="Simple.Games.DoneNv" xml:space="preserve"><value>Ajustes de la tarjeta gráfica aplicados.</value></data>
-  <data name="Simple.Games.DoneWindowed" xml:space="preserve"><value>Juego en ventana más fluido activado.</value></data>
-  <data name="Simple.Games.UndoHint" xml:space="preserve"><value>Para volver como estaba, usa Historial.</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problemas</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>Lo que necesita de ti y cómo resolverlo.</value></data>
   <data name="Simple.Problems.Count1" xml:space="preserve"><value>1 cosa necesita de ti.</value></data>
@@ -3871,7 +3858,6 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Optimizar (trabajando, demostración)</value></data>
   <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Optimizar (listo, demostración)</value></data>
   <data name="Simple.SelfTest.DemoPrefix" xml:space="preserve"><value>[Demostración] </value></data>
-  <data name="Simple.Games.Failed" xml:space="preserve"><value>No se pudo aplicar. Los detalles están en Herramientas avanzadas › Aplicar.</value></data>
   <data name="Simple.Hist.UndoFailed" xml:space="preserve"><value>No se pudo deshacer todo. Mira en Ver todo en detalle.</value></data>
   <data name="Simple.Welcome.Start" xml:space="preserve"><value>Empezar</value></data>
   <data name="Simple.Adv.Title" xml:space="preserve"><value>Herramientas avanzadas</value></data>
@@ -3880,4 +3866,36 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Adv.Link" xml:space="preserve"><value>Herramientas avanzadas</value></data>
   <data name="Simple.Adv.Tip" xml:space="preserve"><value>Todas las demás herramientas: hardware, laboratorios, programas, servicios, Ajustes…</value></data>
   <data name="Simple.Adv.Back" xml:space="preserve"><value>Volver al inicio</value></data>
+  <data name="Simple.Games.TurnOn" xml:space="preserve"><value>Activar</value></data>
+  <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: ¿activar "{1}"? Se puede deshacer.</value></data>
+  <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ¿activar "{1}"? Windows pide permiso de administrador. Se puede deshacer.</value></data>
+  <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>¿Activar el Modo de juego de Windows? Se puede deshacer.</value></data>
+  <data name="Simple.One.Fix" xml:space="preserve"><value>Resolver</value></data>
+  <data name="Simple.One.Working" xml:space="preserve"><value>Aplicando…</value></data>
+  <data name="Simple.One.Done" xml:space="preserve"><value>Hecho</value></data>
+  <data name="Simple.One.Already" xml:space="preserve"><value>Ya estaba así</value></data>
+  <data name="Simple.One.Failed" xml:space="preserve"><value>No funcionó</value></data>
+  <data name="Simple.One.Undo" xml:space="preserve"><value>Deshacer</value></data>
+  <data name="Simple.One.Undone" xml:space="preserve"><value>Deshecho</value></data>
+  <data name="Simple.One.UndoFailed" xml:space="preserve"><value>No se pudo deshacer: mira en Historial</value></data>
+  <data name="Simple.One.ConfirmClean" xml:space="preserve"><value>¿Limpiar {0} de archivos inútiles? Van a la papelera de NEXUS y se puede deshacer.</value></data>
+  <data name="Simple.One.ConfirmTweaks" xml:space="preserve"><value>¿Aplicar {0} ajustes seguros? Todo se puede deshacer.</value></data>
+  <data name="Simple.One.ConfirmFix" xml:space="preserve"><value>{0} NEXUS lo resuelve ahora y se puede deshacer. ¿Continuar?</value></data>
+  <data name="Simple.Quick.Title" xml:space="preserve"><value>Ajustes rápidos</value></data>
+  <data name="Simple.Quick.Lead" xml:space="preserve"><value>Marca para activar, desmarca para deshacer. Solo lo que sirve para este PC.</value></data>
+  <data name="Simple.Quick.Empty" xml:space="preserve"><value>Nada que ajustar ahora: NEXUS vuelve a revisar cada vez que lo abres.</value></data>
+  <data name="Simple.Quick.Speed" xml:space="preserve"><value>Velocidad</value></data>
+  <data name="Simple.Quick.Games" xml:space="preserve"><value>Juegos</value></data>
+  <data name="Simple.Quick.Privacy" xml:space="preserve"><value>Privacidad</value></data>
+  <data name="Simple.Quick.Power" xml:space="preserve"><value>Energía</value></data>
+  <data name="Simple.Quick.More" xml:space="preserve"><value>Mostrar más opciones</value></data>
+  <data name="Simple.Quick.Less" xml:space="preserve"><value>Mostrar solo las recomendadas</value></data>
+  <data name="Simple.Quick.RiskBattery" xml:space="preserve"><value>puede gastar más batería</value></data>
+  <data name="Simple.Quick.RiskExperimental" xml:space="preserve"><value>experimental: puede no ayudar</value></data>
+  <data name="Simple.Quick.RiskMedium" xml:space="preserve"><value>puede tener efectos secundarios</value></data>
+  <data name="Simple.Quick.RiskHigh" xml:space="preserve"><value>solo si sabes lo que haces</value></data>
+  <data name="Simple.Quick.RiskChoice" xml:space="preserve"><value>tú decides</value></data>
+  <data name="Simple.Quick.ConfirmOn" xml:space="preserve"><value>¿Activar "{0}"? Se puede deshacer.</value></data>
+  <data name="Simple.Quick.ConfirmOff" xml:space="preserve"><value>¿Deshacer "{0}" y volver como estaba?</value></data>
+  <data name="Simple.Quick.NothingToUndo" xml:space="preserve"><value>Ya estaba así (o se hizo junto con otros): deshazlo en Historial</value></data>
 </root>

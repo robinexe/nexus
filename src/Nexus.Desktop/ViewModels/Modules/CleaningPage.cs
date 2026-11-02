@@ -95,6 +95,14 @@ public sealed class CleaningPage : ModulePage
     public IReadOnlyList<CleaningSafeItem> SafeItems => SafeRows().OrderByDescending(r => r.Bytes).Select(r => new CleaningSafeItem(r.Title, r.SizeText)).ToList();
     public RelayCommand CleanSafeCommand { get; }
 
+    /// <summary>Os pedidos do "Limpar agora" de um clique (cartão da tela Início), num lote novo: sua conta e sistema.</summary>
+    internal IReadOnlyList<(ActionRequest Request, BrokerLevel Level)> SafeRequests()
+    {
+        var batch = CleaningBatchId.New(DateTime.UtcNow);
+        return [.. SafeRows().OrderBy(r => r.Rule.Admin)
+            .Select(r => (RequestFor(r.Rule, batch), r.Rule.Admin ? BrokerLevel.Admin : BrokerLevel.User))];
+    }
+
     /// <summary>Marca só as regras seguras e limpa pelo caminho de sempre (confirmação com a lista, quarentena, desfazer).</summary>
     private async Task CleanSafeAsync()
     {

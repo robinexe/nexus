@@ -13,7 +13,7 @@ using Nexus.Persistence;
 
 namespace Nexus.Desktop.ViewModels;
 
-public sealed class MainViewModel : ObservableObject, IModuleHost
+public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleActions
 {
     private static readonly JsonSerializerOptions ExportJson = new()
     {
@@ -80,6 +80,11 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         Advanced.Setup(ShellNavigation.Advanced(Pages, p => p.GetType().Name), ExportCommand, RelaunchAsAdminCommand, CanRelaunchAsAdmin);
         var startup = SelfTestMode ? new UiStartup(false, false) : UiModeStartup.Decide(UiSettings.Current.UiMode, HadPriorUse());
         Welcome.IsVisible = startup.ShowWelcome;
+        Home.Actions = this;
+        SimpleProblems.Actions = this;
+        SimpleGames.Actions = this;
+        SimpleOptimize.QuickTweaks.Host = this;
+        SimpleOptimize.QuickTweaks.FindRun = SimpleHistory.FindSingleActionRun;
         if (startup.SaveSimple) SaveSimple();
         _selectedPage = Home;
 
@@ -133,14 +138,13 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         _ = Cleaning.OnShownAsync();
     }
 
-    /// <summary>Junta as leituras que já existem na nota e nos cartões do modo simples (Início, Problemas, Jogos).</summary>
+    /// <summary>Junta as leituras que já existem na nota, nos cartões e nos ajustes rápidos (Início, Otimizar, Problemas, Jogos).</summary>
     private void RefreshSimple()
     {
         if (_snapshot is null) return;
         var f = _snapshot.Facts;
-        var keys = Automation.CandidateActionKeys.ToHashSet(StringComparer.Ordinal);
-        int? pending = Catalog.Rows.Count == 0 || keys.Count == 0 ? null
-            : Catalog.Rows.Count(r => keys.Contains(r.Entry.Definition.Key) && r.ReadState == "change");
+        SimpleOptimize.QuickTweaks.Update(BuildQuickTweaks());
+        int? pending = Catalog.Rows.Count == 0 || Automation.ActionableRecommendations.Count == 0 ? null : SimpleOptimize.QuickTweaks.Pending.Count;
         var gpu = SimpleHealth.MainGpu(f.Gpus);
         Home.Update(new HealthInputs
         {
@@ -153,7 +157,71 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         });
         SimpleProblems.Update(_findings, Assistant.PendingUserActions);
         var gm = _findings.FirstOrDefault(x => x.Id == "win.gamemode");
-        SimpleGames.SetGameMode(gm is null || gm.Basis == FactStatus.Unavailable ? null : gm.Severity != DiagnosticSeverity.Attention);
+        SimpleGames.SetGameMode(gm is null || gm.Basis == FactStatus.Unavailable ? null : gm.Severity != DiagnosticSeverity.Attention, gm?.RelatedActionId);
+    }
+
+    // ------------------------------------------------------------------ pedidos das telas simples (ISimpleActions)
+
+    private IReadOnlyDictionary<string, Nexus.Automation.ActionRisk> _declaredRisk = new Dictionary<string, Nexus.Automation.ActionRisk>();
+
+    /// <summary>Ação do catálogo que dá para pedir de um clique: lida neste PC, sem parâmetro do usuário, reversível, sem sessão.</summary>
+    private CatalogRow? ApplicableRow(string idOrKey) => Catalog.Rows.FirstOrDefault(r =>
+        (r.Entry.Definition.Id == idOrKey || r.Entry.Definition.Key == idOrKey) && r.Instance is not null && r.Entry.UserParameters.Count == 0 &&
+        !r.Entry.Definition.Irreversible && r.Entry.Definition.Persistence == PersistenceKind.Persistent);
+
+    private static bool IsExperimental(CatalogEntry e) => e.Definition.Classification is Classification.Experimental or Classification.Rejected
+        or Classification.Obsolete or Classification.Incompatible or Classification.Ineffective;
+
+    private Nexus.Automation.ActionRisk RiskOf(CatalogEntry e) =>
+        Nexus.Automation.RiskModel.Of(e, _declaredRisk.TryGetValue(e.Definition.Key, out var d) ? d : null);
+
+    private static BrokerLevel LevelOf(CatalogEntry e) => e.Definition.Privileges == PrivilegeLevel.Admin ? BrokerLevel.Admin : BrokerLevel.User;
+
+    /// <summary>Valor do pedido: só quando o catálogo oferece escolha (allowedValues), como no aplicador. Null = não dá para pedir.</summary>
+    private static (bool Ok, string? Value) ValueFor(CatalogEntry e, string? wanted) =>
+        e.DesiredValue is not null ? (true, null)
+        : e.Definition.AllowedValues is { Count: > 0 } allowed ? (wanted is not null && allowed.Contains(wanted, StringComparer.Ordinal), wanted)
+        : (true, null);
+
+    (ActionRequest Request, BrokerLevel Level)? ISimpleActions.LowRiskRequest(string actionIdOrKey)
+    {
+        if (ApplicableRow(actionIdOrKey) is not { } row || IsExperimental(row.Entry) || RiskOf(row.Entry) != Nexus.Automation.ActionRisk.Low) return null;
+        var (ok, value) = ValueFor(row.Entry, null);
+        return ok ? (new ActionRequest(row.Entry.Definition.Key, value), LevelOf(row.Entry)) : null;
+    }
+
+    IReadOnlyList<(ActionRequest Request, BrokerLevel Level)> ISimpleActions.SafeCleanupRequests() => Cleaning.SafeRequests();
+
+    IReadOnlyList<(ActionRequest Request, BrokerLevel Level)> ISimpleActions.PendingTweakRequests() =>
+        [.. SimpleOptimize.QuickTweaks.Pending.Select(d => (d.Request, d.Level))];
+
+    void ISimpleActions.CleanupChanged()
+    {
+        if (Cleaning.RescanCommand.CanExecute(null)) Cleaning.RescanCommand.Execute(null);
+    }
+
+    /// <summary>
+    /// Os ajustes rápidos: as recomendações do Automático para este PC que viram uma ação do catálogo pedível de um clique.
+    /// Recomendado (aparece por padrão) = as de um clique do Automático (risco baixo); o resto vai para "Mostrar mais opções".
+    /// "Ligado" vem da leitura do estado atual (Detect) do catálogo.
+    /// </summary>
+    private List<QuickTweakData> BuildQuickTweaks()
+    {
+        var list = new List<QuickTweakData>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var rec in Automation.ActionableRecommendations)
+        {
+            if (rec.ActionKey is not { } key || ApplicableRow(key) is not { } row || !seen.Add(row.Entry.Definition.Key)) continue;
+            var (ok, value) = ValueFor(row.Entry, rec.Value);
+            if (!ok) continue;
+            var category = QuickTweakText.CategoryOf(row.Entry.Definition.Id);
+            var experimental = IsExperimental(row.Entry);
+            var recommended = rec.OneClick && !experimental && RiskOf(row.Entry) == Nexus.Automation.ActionRisk.Low;
+            list.Add(new QuickTweakData(row.Entry.Definition.Key, row.Title, QuickTweakText.FirstSentence(rec.Reason), category,
+                row.ReadState == "same", recommended, recommended ? "" : QuickTweakText.RiskWord(category, RiskOf(row.Entry), experimental),
+                new ActionRequest(row.Entry.Definition.Key, value), LevelOf(row.Entry)));
+        }
+        return list;
     }
 
     /// <summary>Depois de "Otimizar meu PC com segurança": relê o PC e mede a limpeza de novo, para a nota mostrar o resultado.</summary>
@@ -505,6 +573,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             (doc, rows, titles) = await Task.Run(() =>
             {
+                _declaredRisk = Nexus.Automation.RiskModel.ReadDeclared(NexusServices.CatalogDirectory);
                 var d = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory).Localized(Loc.Language);
                 var t = new Dictionary<string, string>(StringComparer.Ordinal);
                 foreach (var e in d.Actions) t[e.Definition.Key] = e.Definition.Title;

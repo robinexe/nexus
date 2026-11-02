@@ -3823,19 +3823,6 @@ Start now?</value></data>
   <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Cap FPS for a steadier game ({0} FPS)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Smoother windowed game</value></data>
   <data name="Simple.Games.WindowedOn" xml:space="preserve"><value>Smoother windowed game: already on</value></data>
-  <data name="Simple.Games.Apply" xml:space="preserve"><value>Apply</value></data>
-  <data name="Simple.Games.ApplyTitle" xml:space="preserve"><value>Games: {0}</value></data>
-  <data name="Simple.Games.ConfirmNv" xml:space="preserve"><value>{0}: NEXUS will save this in the NVIDIA driver, for this game only:
-
-{1}
-
-Windows will ask for administrator permission. It goes back to how it was in History.</value></data>
-  <data name="Simple.Games.ConfirmWindowed" xml:space="preserve"><value>{0}: turn on "smoother windowed game" (Windows optimization for windowed games), for this game only.
-
-It goes back to how it was in History.</value></data>
-  <data name="Simple.Games.DoneNv" xml:space="preserve"><value>Graphics card settings applied.</value></data>
-  <data name="Simple.Games.DoneWindowed" xml:space="preserve"><value>Smoother windowed game turned on.</value></data>
-  <data name="Simple.Games.UndoHint" xml:space="preserve"><value>To go back to how it was, use History.</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problems</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>What needs you and how to fix it.</value></data>
   <data name="Simple.Problems.Count1" xml:space="preserve"><value>1 thing needs you.</value></data>
@@ -3871,7 +3858,6 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Optimize (working, demo)</value></data>
   <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Optimize (done, demo)</value></data>
   <data name="Simple.SelfTest.DemoPrefix" xml:space="preserve"><value>[Demo] </value></data>
-  <data name="Simple.Games.Failed" xml:space="preserve"><value>Couldn't apply it. Details are in Advanced tools › Apply.</value></data>
   <data name="Simple.Hist.UndoFailed" xml:space="preserve"><value>Couldn't undo everything. Check See everything in detail.</value></data>
   <data name="Simple.Welcome.Start" xml:space="preserve"><value>Get started</value></data>
   <data name="Simple.Adv.Title" xml:space="preserve"><value>Advanced tools</value></data>
@@ -3880,4 +3866,36 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.Adv.Link" xml:space="preserve"><value>Advanced tools</value></data>
   <data name="Simple.Adv.Tip" xml:space="preserve"><value>All the other tools: hardware, labs, programs, services, Settings…</value></data>
   <data name="Simple.Adv.Back" xml:space="preserve"><value>Back to home</value></data>
+  <data name="Simple.Games.TurnOn" xml:space="preserve"><value>Turn on</value></data>
+  <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: turn on "{1}"? You can undo it.</value></data>
+  <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: turn on "{1}"? Windows will ask for administrator permission. You can undo it.</value></data>
+  <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>Turn on Windows Game Mode? You can undo it.</value></data>
+  <data name="Simple.One.Fix" xml:space="preserve"><value>Fix it</value></data>
+  <data name="Simple.One.Working" xml:space="preserve"><value>Applying…</value></data>
+  <data name="Simple.One.Done" xml:space="preserve"><value>Done</value></data>
+  <data name="Simple.One.Already" xml:space="preserve"><value>It was already like that</value></data>
+  <data name="Simple.One.Failed" xml:space="preserve"><value>That didn't work</value></data>
+  <data name="Simple.One.Undo" xml:space="preserve"><value>Undo</value></data>
+  <data name="Simple.One.Undone" xml:space="preserve"><value>Undone</value></data>
+  <data name="Simple.One.UndoFailed" xml:space="preserve"><value>Couldn't undo: check History</value></data>
+  <data name="Simple.One.ConfirmClean" xml:space="preserve"><value>Clean {0} of junk files? They go to the NEXUS bin and you can undo it.</value></data>
+  <data name="Simple.One.ConfirmTweaks" xml:space="preserve"><value>Apply {0} safe tweaks? Everything can be undone.</value></data>
+  <data name="Simple.One.ConfirmFix" xml:space="preserve"><value>{0} NEXUS fixes it now and you can undo it. Continue?</value></data>
+  <data name="Simple.Quick.Title" xml:space="preserve"><value>Quick tweaks</value></data>
+  <data name="Simple.Quick.Lead" xml:space="preserve"><value>Tick to turn on, untick to undo. Only what fits this PC.</value></data>
+  <data name="Simple.Quick.Empty" xml:space="preserve"><value>Nothing to tweak right now: NEXUS checks again every time you open it.</value></data>
+  <data name="Simple.Quick.Speed" xml:space="preserve"><value>Speed</value></data>
+  <data name="Simple.Quick.Games" xml:space="preserve"><value>Games</value></data>
+  <data name="Simple.Quick.Privacy" xml:space="preserve"><value>Privacy</value></data>
+  <data name="Simple.Quick.Power" xml:space="preserve"><value>Power</value></data>
+  <data name="Simple.Quick.More" xml:space="preserve"><value>Show more options</value></data>
+  <data name="Simple.Quick.Less" xml:space="preserve"><value>Show only the recommended ones</value></data>
+  <data name="Simple.Quick.RiskBattery" xml:space="preserve"><value>may use more battery</value></data>
+  <data name="Simple.Quick.RiskExperimental" xml:space="preserve"><value>experimental: may not help</value></data>
+  <data name="Simple.Quick.RiskMedium" xml:space="preserve"><value>may have side effects</value></data>
+  <data name="Simple.Quick.RiskHigh" xml:space="preserve"><value>only if you know what you're doing</value></data>
+  <data name="Simple.Quick.RiskChoice" xml:space="preserve"><value>your call</value></data>
+  <data name="Simple.Quick.ConfirmOn" xml:space="preserve"><value>Turn on "{0}"? You can undo it.</value></data>
+  <data name="Simple.Quick.ConfirmOff" xml:space="preserve"><value>Undo "{0}" and put it back how it was?</value></data>
+  <data name="Simple.Quick.NothingToUndo" xml:space="preserve"><value>Already like that (or done with other changes): undo it in History</value></data>
 </root>

@@ -18,34 +18,45 @@ namespace Nexus.Desktop.ViewModels.Simple;
 // A lógica que decide o que mostrar está em SimpleLogic.cs (pura, testada).
 // =====================================================================================================================
 
-/// <summary>Cartão "O que dá para melhorar": uma frase e um botão (navega ou, em "Ver como", abre a explicação aqui mesmo).</summary>
+/// <summary>
+/// Cartão "O que dá para melhorar": uma frase e UM botão. O botão aplica com um clique quando o NEXUS sabe resolver (limpar,
+/// ajustes seguros, achado com ação de risco baixo) e mostra "Feito ✓ — Desfazer" no próprio cartão; quando a solução é com
+/// você (comprar memória, BIOS), "Ver como" abre a explicação ali mesmo; o driver de vídeo abre Atualizar drivers já procurando.
+/// </summary>
 public sealed class ImproveCardRow : ObservableObject
 {
     private bool _showHowTo;
 
-    public ImproveCardRow(ImproveCard card)
+    public ImproveCardRow(ImproveCard card, OneClickAction? oneClick, RelayCommand? open)
     {
         Card = card;
+        OneClick = oneClick;
+        OpenCommand = open;
         ToggleHowToCommand = new RelayCommand(() => ShowHowTo = !ShowHowTo);
     }
 
     public ImproveCard Card { get; }
     public string Text => Card.Text;
-    public string ActionText => Card.ActionText;
     public string IconKey => Card.IconKey;
-    public string Target => Card.Target;
     public string HowTo => Card.HowTo ?? "";
-    /// <summary>O botão abre a explicação no próprio cartão (memória: o que comprar) em vez de levar a outra tela.</summary>
-    public bool IsHowTo => Card.Kind == ImproveKind.SingleChannel;
-    public bool Navigates => !IsHowTo;
+    /// <summary>Aplica com um clique (null quando a solução não é uma ação do NEXUS).</summary>
+    public OneClickAction? OneClick { get; }
+    public bool IsOneClick => OneClick is not null;
+    /// <summary>Abre outra tela já fazendo a primeira parte (driver de vídeo: procurar a versão nova).</summary>
+    public RelayCommand? OpenCommand { get; }
+    public bool IsOpen => OneClick is null && OpenCommand is not null;
+    /// <summary>A solução é com você: o botão abre a explicação no próprio cartão.</summary>
+    public bool IsHowTo => OneClick is null && OpenCommand is null;
+    public string ActionText => IsHowTo ? Loc.T("Simple.Card.SeeHow") : Card.ActionText;
     public bool ShowHowTo { get => _showHowTo; private set => Set(ref _showHowTo, value); }
     public RelayCommand ToggleHowToCommand { get; }
+    /// <summary>Clique em andamento ou feito: o cartão fica até a próxima vez (o resultado e o Desfazer continuam à vista).</summary>
+    internal bool Pinned => OneClick is { IsReady: false } || OneClick is { HasNote: true };
 }
 
 /// <summary>
-/// Início (modo simples): o anel com a palavra grande ("Seu PC está ótimo / pode melhorar / precisa de atenção"), um botão
-/// "Otimizar meu PC com segurança" e no máximo 3 cartões. A nota vem de leituras que já existem (a janela junta e chama
-/// <see cref="Update"/>); nada aqui escreve.
+/// Início: o anel com a palavra grande ("Seu PC está ótimo / pode melhorar / precisa de atenção"), um botão
+/// "Otimizar meu PC com segurança" e no máximo 3 cartões, cada um resolvido com um clique onde está.
 /// </summary>
 public sealed class HomePage : ModulePage
 {
@@ -59,15 +70,63 @@ public sealed class HomePage : ModulePage
     public override string Group => Loc.T("Simple.Nav.Group");
     public override string Subtitle => Loc.T("Simple.Home.Subtitle");
 
+    /// <summary>De onde vêm os pedidos dos cartões (a janela).</summary>
+    internal ISimpleActions? Actions { get; set; }
+
     /// <summary>Chamado pela janela sempre que uma leitura muda (diagnóstico, limpeza medida, catálogo relido).</summary>
     public void Update(HealthInputs inputs)
     {
         _inputs = inputs ?? throw new ArgumentNullException(nameof(inputs));
         _result = inputs.HasData ? SimpleHealth.Compute(inputs) : new HealthResult(double.NaN, HealthLevel.Great);
-        Cards = inputs.HasData ? ImproveCards.Top(inputs).Select(c => new ImproveCardRow(c)).ToList() : [];
+        if (!inputs.HasData) Cards = [];
+        else
+        {
+            // Cartão em que o usuário acabou de clicar continua (com "Feito ✓ — Desfazer"); os outros lugares vêm da leitura nova.
+            var kept = _cards.Where(c => c.Pinned).ToList();
+            var fresh = ImproveCards.Top(inputs, ImproveCards.Max + kept.Count).Where(c => kept.All(k => k.Card.Kind != c.Kind))
+                .Take(Math.Max(0, ImproveCards.Max - kept.Count)).Select(Row);
+            Cards = [.. kept, .. fresh];
+        }
         foreach (var n in new[] { nameof(IsLoading), nameof(HasData), nameof(Score), nameof(Level), nameof(Headline), nameof(Word), nameof(Tone),
                      nameof(HasCards), nameof(NoCards) })
             OnPropertyChanged(n);
+    }
+
+    private QuickApplier? Applier() => Host is null ? null : new QuickApplier(Host);
+
+    private ImproveCardRow Row(ImproveCard c)
+    {
+        var a = Actions;
+        switch (c.Kind)
+        {
+            case ImproveKind.Cleanup or ImproveKind.LowDisk when a is not null:
+                var bytes = ImproveCards.Bytes(_inputs.RecoverableBytes);
+                return new ImproveCardRow(c, new OneClickAction(Loc.T("Simple.Card.CleanupAction"), Applier,
+                    q => q.ApplyAsync(Loc.T("Simple.Clean.Now"), Loc.F("Simple.One.ConfirmClean", bytes), a.SafeCleanupRequests()), a.CleanupChanged), null);
+            case ImproveKind.PendingTweaks when a is not null:
+                return new ImproveCardRow(c, new OneClickAction(Loc.T("Simple.Card.TweaksAction"), Applier, q =>
+                {
+                    var items = a.PendingTweakRequests();
+                    return q.ApplyAsync(Loc.T("Simple.Quick.Title"), Loc.F("Simple.One.ConfirmTweaks", items.Count), items);
+                }), null);
+            case ImproveKind.Finding when a is not null && c.FixActionId is { } fix && a.LowRiskRequest(fix) is { } req:
+                return new ImproveCardRow(c, new OneClickAction(Loc.T("Simple.One.Fix"), Applier,
+                    q => q.ApplyAsync(Loc.T("Simple.One.Fix"), Loc.F("Simple.One.ConfirmFix", c.Text), [req])), null);
+            case ImproveKind.GpuDriver:
+                return new ImproveCardRow(c, null, new RelayCommand(() => _ = OpenDriversAsync()));
+            default:
+                return new ImproveCardRow(c, null, null);
+        }
+    }
+
+    /// <summary>"Atualizar" o driver de vídeo: abre Atualizar drivers e já procura a versão nova da placa dedicada (só leitura).</summary>
+    private async Task OpenDriversAsync()
+    {
+        if (Host?.FindPage(typeof(DriverUpdatesPage)) is not DriverUpdatesPage page) return;
+        Host.Navigate(page);
+        await page.OnShownAsync();
+        var card = page.Gpus.FirstOrDefault(g => !g.Status.Integrated && g.CanUpdateInApp) ?? page.Gpus.FirstOrDefault(g => g.CanUpdateInApp);
+        if (card?.CheckCommand is { } check && check.CanExecute(null)) check.Execute(null);
     }
 
     public HealthInputs Inputs => _inputs;
@@ -141,6 +200,8 @@ public sealed class SimpleOptimizePage : ModulePage
     public AssistantPage Assistant { get; }
     /// <summary>A palavra da saúde depois da rodada ("Seu PC está ótimo").</summary>
     public HomePage Home { get; }
+    /// <summary>"Ajustes rápidos": os ajustes recomendados para este PC, para ligar e desligar um a um.</summary>
+    public QuickTweaksPanel QuickTweaks { get; } = new();
     public IReadOnlyList<OptimizePhaseRow> Phases { get => _phases; private set => Set(ref _phases, value); }
     public double Percent => Assistant.AutoPercent;
     /// <summary>Ocupada enquanto a rodada roda (o autoteste espera).</summary>
@@ -193,54 +254,32 @@ public sealed class SimpleCleanPage : ModulePage
     public override Task OnShownAsync() => Cleaning.OnShownAsync();
 }
 
-/// <summary>Um jogo na tela Jogos: nome, inicial (no lugar do ícone), opções em palavras simples que valem para ele e "Medir FPS".</summary>
-public sealed class SimpleGameRow : ObservableObject
+/// <summary>Uma opção de um jogo, em palavras simples, com o botão de um clique ("Ligar" → "Feito ✓ — Desfazer").</summary>
+public sealed record GameOption(string Text, OneClickAction Action);
+
+/// <summary>Um jogo na tela Jogos: nome, inicial (no lugar do ícone), as opções que valem para ele e "Medir FPS".</summary>
+public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOption> options, bool windowedOn, RelayCommand measure)
 {
-    private bool _lowLatency, _maxPower, _fpsCap, _windowed;
-
-    public SimpleGameRow(string name, string exe, string? exePath, bool nvidia, bool windowedAvailable, bool windowedOn, string? fps)
-    {
-        Name = name;
-        Exe = exe;
-        ExePath = exePath;
-        CanNvidia = nvidia;
-        CanWindowed = windowedAvailable && !windowedOn && exePath is not null;
-        WindowedOn = windowedOn;
-        Fps = fps;
-    }
-
-    public string Name { get; }
-    /// <summary>Nome do executável (ex.: cs2.exe).</summary>
-    public string Exe { get; }
-    /// <summary>Caminho completo (só quando a biblioteca da loja informou): necessário para "jogos em janela".</summary>
-    public string? ExePath { get; }
+    public string Name { get; } = name;
+    /// <summary>Nome do executável (ex.: cs2.exe), só para Medir.</summary>
+    public string Exe { get; } = exe;
     public string Initial => Name.Length > 0 ? char.ToUpper(Name[0], Loc.Culture).ToString() : "?";
-    /// <summary>Placa e driver NVIDIA ativos: as três opções do driver por jogo valem.</summary>
-    public bool CanNvidia { get; }
-    public bool CanWindowed { get; }
-    public bool WindowedOn { get; }
-    public string? Fps { get; }
-    public bool CanFps => CanNvidia && Fps is not null;
-    public string FpsText => Loc.F("Simple.Games.FpsCap", Fps ?? "60");
-    public bool HasOptions => CanNvidia || CanWindowed;
-    public bool LowLatency { get => _lowLatency; set { if (Set(ref _lowLatency, value)) OnPropertyChanged(nameof(AnyChosen)); } }
-    public bool MaxPower { get => _maxPower; set { if (Set(ref _maxPower, value)) OnPropertyChanged(nameof(AnyChosen)); } }
-    public bool FpsCap { get => _fpsCap; set { if (Set(ref _fpsCap, value)) OnPropertyChanged(nameof(AnyChosen)); } }
-    public bool Windowed { get => _windowed; set { if (Set(ref _windowed, value)) OnPropertyChanged(nameof(AnyChosen)); } }
-    public bool AnyChosen => _lowLatency || _maxPower || _fpsCap || _windowed;
-    public RelayCommand? ApplyCommand { get; internal set; }
-    public RelayCommand? MeasureCommand { get; internal set; }
+    public IReadOnlyList<GameOption> Options { get; } = options;
+    public bool HasOptions => Options.Count > 0;
+    public bool WindowedOn { get; } = windowedOn;
+    public RelayCommand MeasureCommand { get; } = measure;
 }
 
 /// <summary>
-/// Jogos (modo simples): os jogos achados nas lojas (Steam, Epic…) em cartões; para cada um, "Medir FPS" e só as opções que
-/// valem para ele, em palavras simples (as mesmas ações do driver NVIDIA por jogo e de "jogos em janela" da página Placa de
-/// vídeo), e um resumo do Modo de jogo do Windows. Aplica pelo aplicador, com confirmação, e dá para desfazer em Histórico.
+/// Jogos: os jogos achados nas lojas (Steam, Epic…) em cartões; para cada um, "Medir FPS" e só as opções que valem para ele, em
+/// palavras simples, cada uma com um clique (as mesmas ações do driver NVIDIA por jogo e de "jogos em janela" da página Placa de
+/// vídeo), e um resumo do Modo de jogo do Windows com "Ligar" de um clique. Tudo pelo aplicador, com uma frase de confirmação.
 /// </summary>
 public sealed class SimpleGamesPage : ModulePage
 {
     private bool _loading = true;
     private bool? _gameModeOn;
+    private OneClickAction? _gameModeAction;
 
     public SimpleGamesPage(GpuLabPage gpu, MeasurePage measure)
     {
@@ -254,6 +293,7 @@ public sealed class SimpleGamesPage : ModulePage
 
     public GpuLabPage Gpu { get; }
     public MeasurePage Measure { get; }
+    internal ISimpleActions? Actions { get; set; }
     public ObservableCollection<SimpleGameRow> Games { get; } = [];
     public bool IsLoading { get => _loading; private set { if (Set(ref _loading, value)) { OnPropertyChanged(nameof(NoGames)); OnPropertyChanged(nameof(HasGames)); } } }
     public bool HasGames => !_loading && Games.Count > 0;
@@ -266,16 +306,23 @@ public sealed class SimpleGamesPage : ModulePage
         _ => Loc.T("Simple.Games.GameModeUnknown"),
     };
     public Tone GameModeTone => _gameModeOn switch { true => Tone.Good, false => Tone.Warn, _ => Tone.Neutral };
-    public bool GameModeOff => _gameModeOn == false;
+    /// <summary>Ligar o Modo de jogo com um clique (só quando está desligado e o catálogo tem a ação).</summary>
+    public OneClickAction? GameModeAction { get => _gameModeAction; private set { if (Set(ref _gameModeAction, value)) OnPropertyChanged(nameof(HasGameModeAction)); } }
+    public bool HasGameModeAction => _gameModeAction is not null;
 
     /// <summary>A janela informa o Modo de jogo a cada leitura (achado win.gamemode do diagnóstico).</summary>
-    public void SetGameMode(bool? on)
+    public void SetGameMode(bool? on, string? fixActionId)
     {
         _gameModeOn = on;
+        if (on == false && Actions is { } a && fixActionId is not null && a.LowRiskRequest(fixActionId) is { } req)
+            GameModeAction ??= new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier,
+                q => q.ApplyAsync(Loc.T("Simple.Games.GameModeOff"), Loc.T("Simple.Games.ConfirmGameMode"), [req]));
+        else if (_gameModeAction is not { HasNote: true }) GameModeAction = null; // depois de ligar, o "Feito ✓ — Desfazer" fica
         OnPropertyChanged(nameof(GameModeText));
         OnPropertyChanged(nameof(GameModeTone));
-        OnPropertyChanged(nameof(GameModeOff));
     }
+
+    private QuickApplier? Applier() => Host is null ? null : new QuickApplier(Host);
 
     public override async Task OnShownAsync()
     {
@@ -297,73 +344,52 @@ public sealed class SimpleGamesPage : ModulePage
         {
             var exe = Path.GetFileName(w.ExePath);
             if (string.IsNullOrEmpty(exe) || !seen.Add(exe)) continue;
-            Games.Add(Wire(new SimpleGameRow(w.Name, exe, w.ExePath, nv.ContainsKey(exe), true, w.IsOn, Gpu.SelectedNvFps)));
+            Games.Add(Make(w.Name, exe, nv.ContainsKey(exe), w.IsOn ? null : w.ExePath, w.IsOn));
         }
         foreach (var g in nv.Values)
-            if (seen.Add(g.Exe)) Games.Add(Wire(new SimpleGameRow(g.Name, g.Exe, null, true, false, false, Gpu.SelectedNvFps)));
+            if (seen.Add(g.Exe)) Games.Add(Make(g.Name, g.Exe, true, null, false));
         OnPropertyChanged(nameof(HasGames));
         OnPropertyChanged(nameof(NoGames));
     }
 
-    private SimpleGameRow Wire(SimpleGameRow row)
+    /// <summary>As opções que valem para o jogo: driver NVIDIA (administrador) e jogos em janela (sua conta).</summary>
+    private SimpleGameRow Make(string name, string exe, bool nvidia, string? windowedPath, bool windowedOn)
     {
-        row.ApplyCommand = new RelayCommand(() => _ = RunAsync(() => ApplyAsync(row)), () => !Busy && row.AnyChosen && Host is not null);
-        row.MeasureCommand = new RelayCommand(() => MeasureGame(row));
-        return row;
+        var options = new List<GameOption>();
+        if (nvidia)
+        {
+            var args = new Dictionary<string, string> { ["exe"] = exe };
+            options.Add(Option(name, Loc.T("Simple.Games.LowLatency"), new ActionRequest(NvidiaDrsActions.LowLatency, null, args), BrokerLevel.Admin));
+            options.Add(Option(name, Loc.T("Simple.Games.MaxPower"), new ActionRequest(NvidiaDrsActions.MaxPower, null, args), BrokerLevel.Admin));
+            if (Gpu.SelectedNvFps is { } fps && NvidiaDrsActions.FpsCaps.Contains(fps))
+                options.Add(Option(name, Loc.F("Simple.Games.FpsCap", fps), new ActionRequest(NvidiaDrsActions.FpsCap, fps, args), BrokerLevel.Admin));
+        }
+        if (windowedPath is not null)
+            options.Add(Option(name, Loc.T("Simple.Games.Windowed"),
+                new ActionRequest(GpuLabPage.WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = windowedPath }), BrokerLevel.User));
+        return new SimpleGameRow(name, exe, options, windowedOn, new RelayCommand(() => { Measure.ManualExe = exe; Host?.Navigate(Measure); }));
     }
 
-    private void MeasureGame(SimpleGameRow row)
-    {
-        Measure.ManualExe = row.Exe;
-        Host?.Navigate(Measure);
-    }
-
-    /// <summary>As opções marcadas viram as mesmas ações da página Placa de vídeo: driver NVIDIA (administrador) e jogos em janela (sua conta).</summary>
-    private async Task ApplyAsync(SimpleGameRow row)
-    {
-        if (Host is null) return;
-        var done = new List<string>();
-        var nv = new List<ActionRequest>();
-        var lines = new List<string>();
-        var exe = new Dictionary<string, string> { ["exe"] = row.Exe };
-        if (row.CanNvidia && row.LowLatency) { nv.Add(new ActionRequest(NvidiaDrsActions.LowLatency, null, exe)); lines.Add(Loc.T("Simple.Games.LowLatency")); }
-        if (row.CanNvidia && row.MaxPower) { nv.Add(new ActionRequest(NvidiaDrsActions.MaxPower, null, exe)); lines.Add(Loc.T("Simple.Games.MaxPower")); }
-        if (row.CanFps && row.FpsCap && row.Fps is { } fps && NvidiaDrsActions.FpsCaps.Contains(fps))
-        {
-            nv.Add(new ActionRequest(NvidiaDrsActions.FpsCap, fps, exe));
-            lines.Add(row.FpsText);
-        }
-        if (nv.Count > 0)
-        {
-            var text = Loc.F("Simple.Games.ConfirmNv", row.Name, string.Join("\n", lines.Select(l => "• " + l)));
-            var r = await Host.ApplyAsync(Loc.F("Simple.Games.ApplyTitle", row.Name), text, nv, BrokerLevel.Admin);
-            if (r is null) { Message = Loc.T("Shell.CanceladoNadaFoiAlterado"); return; }
-            done.Add(r.Ok ? Loc.T("Simple.Games.DoneNv") : Loc.T("Simple.Games.Failed"));
-        }
-        if (row.CanWindowed && row.Windowed && row.ExePath is { } path)
-        {
-            var text = Loc.F("Simple.Games.ConfirmWindowed", row.Name);
-            var r = await Host.ApplyAsync(Loc.F("Simple.Games.ApplyTitle", row.Name),
-                text, [new ActionRequest(GpuLabPage.WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = path })], BrokerLevel.User);
-            if (r is null) { Message = Loc.T("Shell.CanceladoNadaFoiAlterado"); return; }
-            done.Add(r.Ok ? Loc.T("Simple.Games.DoneWindowed") : Loc.T("Simple.Games.Failed"));
-        }
-        row.LowLatency = row.MaxPower = row.FpsCap = row.Windowed = false;
-        Message = string.Join(" ", done) + " " + Loc.T("Simple.Games.UndoHint");
-    }
+    private GameOption Option(string game, string text, ActionRequest request, BrokerLevel level) =>
+        new(text, new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier, q => q.ApplyAsync(game,
+            level == BrokerLevel.Admin ? Loc.F("Simple.Games.ConfirmAdmin", game, text) : Loc.F("Simple.Games.Confirm", game, text), [(request, level)])));
 }
 
-/// <summary>Um problema que precisa do usuário: uma frase, o que fazer (1–2 frases) e, quando dá, um botão.</summary>
-public sealed record ProblemRow(string Title, string WhatToDo, string IconKey, int Impact, string Target = "", string ActionText = "")
+/// <summary>Um problema que precisa do usuário: uma frase, o que fazer (1–2 frases) e, quando o NEXUS resolve, um botão de um clique.</summary>
+public sealed record ProblemRow(string Key, string Title, string WhatToDo, string IconKey, int Impact, string Target = "", string ActionText = "")
 {
-    public bool HasTarget => Target.Length > 0;
+    /// <summary>Resolve com um clique ("Resolver" → "Feito ✓ — Desfazer").</summary>
+    public OneClickAction? Fix { get; init; }
+    public bool HasFix => Fix is not null;
+    /// <summary>Sem ação do NEXUS: abre a tela que explica/resolve.</summary>
+    public bool HasTarget => Fix is null && Target.Length > 0;
     public RelayCommand? OpenCommand { get; init; }
     public bool HasLink => OpenCommand is not null;
 }
 
 /// <summary>
-/// Problemas (modo simples): o que precisa de você (diagnóstico + "só você pode fazer" + o que o Assistente anotou), cada um
-/// com "O que fazer", do maior impacto para o menor; o que está bem fica recolhido em "Está tudo certo com: …".
+/// Problemas: o que precisa de você (diagnóstico + "só você pode fazer" + o que o Assistente anotou), cada um com "O que fazer",
+/// do maior impacto para o menor, e "Resolver" de um clique quando o NEXUS sabe resolver; o que está bem fica recolhido.
 /// </summary>
 public sealed class SimpleProblemsPage : ModulePage
 {
@@ -375,6 +401,7 @@ public sealed class SimpleProblemsPage : ModulePage
     public override string Group => Loc.T("Simple.Nav.Group");
     public override string Subtitle => Loc.T("Simple.Problems.Subtitle");
 
+    internal ISimpleActions? Actions { get; set; }
     public IReadOnlyList<ProblemRow> Items { get => _items; private set => Set(ref _items, value); }
     public bool IsLoading => !_hasData;
     public bool HasItems => _items.Count > 0;
@@ -384,20 +411,27 @@ public sealed class SimpleProblemsPage : ModulePage
     public string FineHeader => Loc.F("Simple.Problems.FineHeader", string.Join(", ", _fine));
     public string CountText => _items.Count == 1 ? Loc.T("Simple.Problems.Count1") : Loc.F("Simple.Problems.CountN", _items.Count);
 
+    private QuickApplier? Applier() => Host is null ? null : new QuickApplier(Host);
+
     /// <summary>A janela chama a cada leitura (achados do diagnóstico e do "só você pode fazer"; ações anotadas pelo Assistente).</summary>
     public void Update(IReadOnlyList<DiagnosticFinding> findings, IReadOnlyList<UserAction> userActions)
     {
         ArgumentNullException.ThrowIfNull(findings);
         ArgumentNullException.ThrowIfNull(userActions);
-        var rows = new List<ProblemRow>();
-        foreach (var f in findings.Where(f => f.Severity == DiagnosticSeverity.Attention))
+        // Linha em que o usuário acabou de clicar fica (com "Feito ✓ — Desfazer") mesmo que o problema tenha sumido da leitura.
+        var kept = _items.Where(r => r.Fix is { IsReady: false } || r.Fix is { HasNote: true }).ToList();
+        var rows = new List<ProblemRow>(kept);
+        foreach (var f in findings.Where(f => f.Severity == DiagnosticSeverity.Attention && kept.All(k => k.Key != f.Id)))
         {
             var p = PlainFindings.For(f);
             var (target, action) = TargetFor(f.Id);
-            rows.Add(new ProblemRow(p.Title, p.WhatToDo, p.IconKey, PlainFindings.ImpactOf(f), target, action));
+            var fix = Actions is { } a && f.RelatedActionId is { } id && a.LowRiskRequest(id) is { } req
+                ? new OneClickAction(Loc.T("Simple.One.Fix"), Applier, q => q.ApplyAsync(Loc.T("Simple.One.Fix"), Loc.F("Simple.One.ConfirmFix", p.Title), [req]))
+                : null;
+            rows.Add(new ProblemRow(f.Id, p.Title, p.WhatToDo, p.IconKey, PlainFindings.ImpactOf(f), target, action) { Fix = fix });
         }
         foreach (var u in userActions.Where(u => rows.All(r => r.Title != u.Title)))
-            rows.Add(new ProblemRow(u.Title, u.Why, "Icon.User", 30)
+            rows.Add(new ProblemRow("user:" + u.Title, u.Title, u.Why, "Icon.User", 30)
             {
                 OpenCommand = u.Link is { } link && link.StartsWith("https://", StringComparison.Ordinal) ? new RelayCommand(() => OpenLink(link)) : null,
             });
@@ -407,7 +441,7 @@ public sealed class SimpleProblemsPage : ModulePage
         foreach (var n in new[] { nameof(IsLoading), nameof(HasItems), nameof(NoItems), nameof(HasFine), nameof(FineHeader), nameof(CountText) }) OnPropertyChanged(n);
     }
 
-    /// <summary>Onde resolver: o que o NEXUS faz sozinho vai para Otimizar/Limpar; hardware e BIOS não têm botão (é com você); o resto abre a página completa.</summary>
+    /// <summary>Onde resolver quando não há ação de um clique: limpeza e otimizar ficam nas telas simples; hardware e BIOS não têm botão (é com você); o resto abre a página completa.</summary>
     private static (string Target, string Action) TargetFor(string id) => id switch
     {
         "win.gamemode" or "win.gamedvr.capture" => ("SimpleOptimizePage", Loc.T("Simple.Card.TweaksAction")),
@@ -426,7 +460,7 @@ public sealed class SimpleProblemsPage : ModulePage
 }
 
 /// <summary>Uma linha do Histórico simples: "Hoje 14:30 — Limpeza: 12 itens limpos — Desfazer".</summary>
-public sealed record SimpleHistoryRow(Guid RunId, BrokerLevel Level, DateTimeOffset Started, string When, string What, bool Active)
+public sealed record SimpleHistoryRow(Guid RunId, BrokerLevel Level, DateTimeOffset Started, string When, string What, bool Active, IReadOnlyList<string> Keys)
 {
     public bool Undone => !Active;
     public RelayCommand? UndoCommand { get; init; }
@@ -451,6 +485,14 @@ public sealed class SimpleHistoryPage : ModulePage
     public bool HasRows => _rows.Count > 0;
     public bool NoRows => _loaded && _rows.Count == 0;
     public RelayCommand UndoAllCommand { get; }
+
+    /// <summary>
+    /// A execução que ligou só este ajuste e ainda vale (a mais nova), para desligar nos Ajustes rápidos sem desfazer outras coisas
+    /// junto. Null se ele foi feito junto com outros (aí, Desfazer aqui no Histórico).
+    /// </summary>
+    public (Guid Run, BrokerLevel Level)? FindSingleActionRun(string actionKey) =>
+        _rows.Where(r => r.Active && r.Keys.Count == 1 && r.Keys[0] == actionKey).OrderByDescending(r => r.Started)
+            .Select(r => ((Guid, BrokerLevel)?)(r.RunId, r.Level)).FirstOrDefault();
 
     public override Task OnShownAsync() => LoadAsync();
 
@@ -486,7 +528,7 @@ public sealed class SimpleHistoryPage : ModulePage
                 var active = entries.Any(e => e.State is JournalState.Applied or JournalState.Verified);
                 // Só o que mudou algo de verdade (execução recusada ou já igual não é "o que o NEXUS mudou").
                 if (!active && !entries.Any(e => e.State == JournalState.Reverted)) continue;
-                list.Add(new SimpleHistoryRow(run.RunId, level, run.StartedAt, "", SimpleHistoryText.Describe(keys), active));
+                list.Add(new SimpleHistoryRow(run.RunId, level, run.StartedAt, "", SimpleHistoryText.Describe(keys), active, keys));
             }
         }
         catch (Exception ex) when (ex is not OutOfMemoryException) { } // diário ilegível: a tela só fica sem as linhas dele
