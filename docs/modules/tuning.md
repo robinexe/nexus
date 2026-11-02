@@ -20,6 +20,10 @@ com honestidade (a maioria é PEQUENO). Tudo passa pelo aplicador, com diário e
 | `fps.power.usb-selective-suspend.off.ac` | Não suspender portas USB (na tomada) | Conditional | None |
 | `fps.power.pcie-aspm.off.ac` | PCIe sem economia de energia no link (na tomada) | Conditional | None |
 | `hw.nvme.latency-tolerance.ac` | NVMe sem estados de energia profundos (na tomada) | Experimental | None |
+| `net.wifi.power-saving.dc-max-perf` | Wi-Fi sem economia de energia (na bateria) | Conditional | None |
+| `fps.dx.windowed-optimizations.global` | Otimizações para jogos em janela (padrão para todos os jogos) | SupportedDocumented | GameRestart |
+| `fps.dx.vrr.global` | Taxa de atualização variável para jogos DX11 em tela cheia | Conditional | GameRestart |
+| `fps.dx.autohdr.off` | Desligar o Auto HDR | Conditional | GameRestart |
 | `fps.gamedvr.policy.off` | Política: sem gravação de jogos em segundo plano | SupportedDocumented | NextLogon |
 | `sys.do.download-mode.http-only` | Atualizações sem enviar para outros PCs (Otimização de Entrega) | SupportedDocumented | Recommended |
 | `sys.do.background-bandwidth.cap50` | Updates em segundo plano usando no máximo 50% da internet | Conditional | None |
@@ -38,6 +42,36 @@ com honestidade (a maioria é PEQUENO). Tudo passa pelo aplicador, com diário e
 | `sys.svc.pcasvc.disabled` | Desativar o Assistente de Compatibilidade de Programas | Conditional | Recommended |
 | `sys.svc.trkwks.disabled` | Desativar o Cliente de Rastreamento de Link Distribuído | SupportedDocumented | Recommended |
 
+## Padrões globais do DirectX
+
+Configurações > Sistema > Tela > Elementos gráficos > "Padrões" grava tudo num único REG_SZ:
+`HKCU\Software\Microsoft\DirectX\UserGpuPreferences\DirectXUserGlobalSettings`, ex.: `SwapEffectUpgradeEnable=1;VRROptimizeEnable=0;AutoHDREnable=1;`.
+O handler `DirectXUserGpuPreference` (o mesmo da preferência por jogo) com `name = DirectXUserGlobalSettings` troca UM token e
+preserva os outros (inclusive desconhecidos) e a ordem. No valor global só aceita `SwapEffectUpgradeEnable`, `VRROptimizeEnable`
+e `AutoHDREnable` com desejado `0`/`1` (`GpuPreference` é só por executável; `VRROptimizeEnable` é só global).
+Desfazer: devolve o token ao valor anterior; se o token não existia, remove só ele; se o valor inteiro não existia (perfil novo,
+Windows Server) e ficou vazio, remove o valor. Tokens que o usuário mudou depois são mantidos.
+
+- Otimizações em janela: blt → flip em DX10/DX11 janela/sem bordas; menos latência, libera VRR e Auto HDR. Chegou no Insider 22545
+  (devblog) e saiu no 22H2, por isso `minBuild 22621`. Ligar o Auto HDR força esta opção ligada (support.microsoft.com 3f006843).
+- VRR: botão de 1903 (`minBuild 18362`) para jogos DX11 em tela cheia sem VRR nativo; exige monitor G-SYNC/FreeSync/Adaptive-Sync e
+  driver WDDM 2.6+ (devblogs.microsoft.com/directx/os-variable-refresh-rate). Sem monitor VRR não faz nada.
+- Auto HDR desligado (`minBuild 22000`): ganho de FPS pequeno ou nenhum; motivo real é cor.
+- Nomes dos tokens `VRROptimizeEnable`/`AutoHDREnable`: confirmados em guias (elevenforum, majorgeeks), não em página da Microsoft.
+
+## Valores na bateria (DC)
+
+`PowerSettingValue` aceita `"acdc": "DC"` no alvo (PowerRead/WriteDCValueIndex). Sem `acdc` (ou `"AC"`) continua AC, então
+entradas antigas do diário restauram como antes. O `acdc` vai no alvo gravado no diário (e o broker confere o alvo contra o
+catálogo), então Detect/Apply/Restore usam sempre o mesmo índice. Configuração que não existe no sistema (leitura falha) vira
+NotApplicable em vez de falhar.
+
+- `net.wifi.power-saving.dc-max-perf`: subgrupo "Configurações do adaptador sem fio" `19cbb8fa-5279-450e-9fac-8a3d5fedd0c1`,
+  "Modo de economia de energia" `12bbebe6-58d6-4636-95bb-3217ef867c1a`, índices 0 = desempenho máximo, 1 = economia baixa,
+  2 = economia média (padrão na bateria), 3 = economia máxima. GUIDs conferidos em duas fontes independentes (elevenforum,
+  thewindowsclub, com `powercfg /SETDCVALUEINDEX`); semântica dos modos na documentação da Intel (artigo 000046272).
+  Não há página da Microsoft que liste esses GUIDs; vale conferir no PC com `powercfg /q SCHEME_CURRENT 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1`.
+
 ## Mitos (não entram, aparecem como 'não fazer')
 
 - `myth.tuning.network-throttling-index`: NetworkThrottlingIndex limita só tráfego acima de ~10.000 pacotes/s enquanto há mídia tocando; jogo manda dezenas a centenas. Medição mostrou DPC do ndis.sys pior sem o limite. Não reduz ping. (https://learn.microsoft.com/en-us/archive/blogs/markrussinovich/vista-multimedia-playback-and-network-throughput)
@@ -54,8 +88,6 @@ com honestidade (a maioria é PEQUENO). Tudo passa pelo aplicador, com diário e
 ## Ficou de fora (precisa de handler novo ou decisão)
 
 - Perfis do driver NVIDIA (Low Latency, limite de FPS, V-Sync para G-SYNC, modo de energia por jogo): handler NVAPI DRS.
-- Padrões globais do DirectX (otimizações em janela, VRR, Auto HDR): merge na string DirectXUserGlobalSettings.
-- Wi-Fi sem economia na bateria (valor DC do plano): o handler de energia só escreve AC.
 - Tarefas agendadas da Microsoft (Compatibility Appraiser, CEIP, DiskDiagnostic): o handler recusa tarefas \\Microsoft\\ por desenho.
 - Horário ativo do Windows Update: o handler de políticas não toca WindowsUpdate por desenho (segurança).
 - Integridade de Memória (HVCI) / VBS: DeviceGuard é protegido pela SafetyPolicy; ganho real 2-10%, mas reduz proteção e anticheats exigem.
