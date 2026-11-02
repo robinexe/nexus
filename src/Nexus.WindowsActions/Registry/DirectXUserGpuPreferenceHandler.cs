@@ -6,17 +6,27 @@ namespace Nexus.WindowsActions.Registry;
 /// Edita UM token dentro do REG_SZ de HKCU\Software\Microsoft\DirectX\UserGpuPreferences
 /// (ex.: "GpuPreference=2;SwapEffectUpgradeEnable=1;"), preservando os demais tokens e a ordem.
 /// Alvo: name (caminho do executável ou DirectXUserGlobalSettings), token.
+/// No valor global (<see cref="GlobalSettingsName"/>, os "Padrões" de Configurações > Tela > Elementos gráficos) só são aceitos
+/// SwapEffectUpgradeEnable, VRROptimizeEnable e AutoHDREnable com valor desejado 0 ou 1; GpuPreference é só por executável.
+/// Restore devolve exatamente o estado do token: ausente → remove só o token (e o valor, se ele não existia e ficou vazio).
 /// </summary>
 public sealed class DirectXUserGpuPreferenceHandler : IActionHandler, IRestoreValidator
 {
     public const string Kind = "DirectXUserGpuPreference";
     public const string KeyPath = @"Software\Microsoft\DirectX\UserGpuPreferences";
-    private static readonly HashSet<string> AllowedTokens = new(StringComparer.Ordinal) { "SwapEffectUpgradeEnable", "GpuPreference", "AutoHDREnable" };
+    public const string GlobalSettingsName = "DirectXUserGlobalSettings";
+    private static readonly HashSet<string> PerAppTokens = new(StringComparer.Ordinal) { "SwapEffectUpgradeEnable", "GpuPreference", "AutoHDREnable" };
+    private static readonly HashSet<string> GlobalTokens = new(StringComparer.Ordinal) { "SwapEffectUpgradeEnable", "VRROptimizeEnable", "AutoHDREnable" };
     private readonly IRegistryBackend _reg;
 
     public DirectXUserGpuPreferenceHandler(IRegistryBackend backend) => _reg = backend;
 
     public string HandlerKind => Kind;
+
+    private static bool IsGlobal(string name) => string.Equals(name, GlobalSettingsName, StringComparison.OrdinalIgnoreCase);
+
+    private static bool TokenAllowed(string name, string? token) =>
+        token is not null && (IsGlobal(name) ? GlobalTokens : PerAppTokens).Contains(token);
 
     private static RegistryTarget TargetOf(ActionInstance a) => new(RegHive.HKCU, KeyPath, a.Target["name"], RegView.Default, UserHive.Of(a));
 
@@ -24,7 +34,7 @@ public sealed class DirectXUserGpuPreferenceHandler : IActionHandler, IRestoreVa
     {
         if (!action.Target.TryGetValue("name", out var name) || string.IsNullOrWhiteSpace(name))
             return Applicability.Blocked("Executável não informado.");
-        if (!action.Target.TryGetValue("token", out var token) || !AllowedTokens.Contains(token))
+        if (!action.Target.TryGetValue("token", out var token) || !TokenAllowed(name, token))
             return Applicability.Blocked("Token não permitido.");
         if (UserHive.Check(action, RegHive.HKCU) is { } sidProblem) return Applicability.Blocked(sidProblem);
         var existing = _reg.Read(TargetOf(action));
@@ -32,13 +42,15 @@ public sealed class DirectXUserGpuPreferenceHandler : IActionHandler, IRestoreVa
             return Applicability.Blocked($"Valor existente é {existing.Kind}, não REG_SZ; o NEXUS não altera o tipo.");
         if (action.Desired.Exists && (action.Desired.Type != "Token" || action.Desired.Value is null || action.Desired.Value.Contains(';') || action.Desired.Value.Contains('=')))
             return Applicability.Blocked("Valor de token inválido.");
+        if (IsGlobal(name) && action.Desired.Exists && action.Desired.Value is not ("0" or "1"))
+            return Applicability.Blocked("Padrão global do DirectX aceita só 0 ou 1.");
         return Applicability.Ok;
     }
 
     public string? CheckRestore(ActionInstance action, StateSnapshot original)
     {
         if (!action.Target.TryGetValue("name", out var name) || string.IsNullOrWhiteSpace(name)) return "Executável não informado.";
-        if (!action.Target.TryGetValue("token", out var token) || !AllowedTokens.Contains(token)) return "Token não permitido.";
+        if (!action.Target.TryGetValue("token", out var token) || !TokenAllowed(name, token)) return "Token não permitido.";
         if (UserHive.Check(action, RegHive.HKCU) is { } sidProblem) return sidProblem;
         if (original.Exists && (original.Type != "Token" || original.Value is null || original.Value.Contains(';') || original.Value.Contains('=')))
             return "Valor original de token inválido.";
