@@ -30,23 +30,23 @@ Windows em idioma sem tradução (francês, alemão…) abre em pt-BR. pt-PT abr
 - o ResourceManager acha en/es (satélites) e cai no pt-BR para idioma desconhecido; ordem de escolha do idioma;
 - `publish.py` publica os três idiomas; títulos do catálogo traduzidos não mudam chave, handler, alvo, valor ou privilégio.
 
-## O que está traduzido (rodada de 02/11/2026)
+## O que está traduzido (02/11/2026)
 
-Casca (navegação de todas as páginas, barra de status, tela de progresso da aplicação, bandeja, avisos de atualização,
-erros), Meu PC, Hardware, Diagnóstico, O que dá pra ajustar, Testar sem aplicar, Aplicar, Histórico, O que já funciona,
-Assistente completo (inclusive nomes e explicações das 13 etapas), Otimização automática, Limpeza, Privacidade,
-Inicialização, Atualizar drivers, Placa de vídeo, Medir (com o mostrador de FPS) e Ajustes — XAML e textos montados nos
-ViewModels, inclusive confirmações. Catálogo: títulos de `actions`, `tuning`, `privacy` e `nvidia` (110 ações).
+Toda a interface do Desktop: casca (navegação, barra de status, tela de progresso, bandeja, atualização, erros) e as 30
+páginas — XAML e textos montados nos ViewModels, inclusive confirmações e mensagens. `XamlNotYetTranslated` está vazia.
+Nomes e explicações das 13 etapas do Assistente. Títulos de todas as ações de todos os catálogos (`catalog/*.v1.json`).
+Números e datas da tela usam a cultura do idioma escolhido (`Loc.Culture`: 3.4 GB em inglês, 3,4 GB em pt-BR/es).
 
 ## O que continua em pt-BR
 
-- Páginas: Processador, Memória RAM, Memória: diagnóstico, Espaço em disco, Programas e atualizações, Verificar arquivos,
-  Segurança, Serviços, Ferramentas do sistema e Monitor (só título e subtítulo da navegação estão traduzidos).
 - Textos que vêm das bibliotecas dos módulos (`Nexus.*`): achados do diagnóstico, recomendações, fatos e propostas do
-  Assistente, nomes de regras de limpeza, itens de privacidade (a página Privacidade mostra os títulos da biblioteca),
-  motivos de recusa do aplicador, relatório HTML do Assistente, linha de comando `nexus`.
-- Mecanismo, riscos e desfazer das ações do catálogo, e títulos dos demais catálogos (boot, cleaning, services…).
-- Números e datas dos módulos ainda formatados em pt-BR em vários pontos (`CultureInfo("pt-BR")` fixo).
+  Assistente, nomes e avisos de regras de limpeza, itens de privacidade (a página Privacidade mostra os títulos da
+  biblioteca), veredictos de serviços/segurança/programas, motivos de recusa do aplicador, relatório HTML do Assistente,
+  linha de comando `nexus`. A interface mostra esses textos como recebe.
+- Mecanismo, riscos e desfazer das ações do catálogo (só os títulos estão traduzidos).
+- Formatos de data escritos à mão (`dd/MM/yyyy`) continuam nessa ordem em todos os idiomas; só os separadores e números
+  seguem o idioma. `AssistantPage` lê em pt-BR os números que as bibliotecas escrevem (de propósito).
+- Aplicador, diário, catálogo e exportações (CSV, relatório da limpeza) não dependem do idioma.
 
 ## Como acrescentar um idioma
 
