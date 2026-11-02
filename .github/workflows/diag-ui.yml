@@ -1,0 +1,41 @@
+name: diag-ui
+# Diagnóstico rápido: abre a interface no modo de autoteste e, se não andar em 90 s, grava a pilha .NET de todas as threads.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pilha:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Build
+        shell: pwsh
+        run: |
+          dotnet restore src/Nexus.Desktop --locked-mode
+          dotnet build src/Nexus.Desktop -c Release --no-restore
+          dotnet tool install --global dotnet-stack
+      - name: Abrir e capturar a pilha
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force saida | Out-Null
+          $exe = Resolve-Path 'src/Nexus.Desktop/bin/Release/net10.0-windows/Nexus.Desktop.exe'
+          $out = Join-Path $PWD 'saida/ui.json'
+          $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"'), '--lang', 'pt-BR' -PassThru
+          Start-Sleep 90
+          if (Test-Path saida/ui.progress.txt) { Get-Content saida/ui.progress.txt -Tail 10 }
+          $diag = Join-Path $env:LOCALAPPDATA 'NEXUS\desktop-diag.log'
+          if (Test-Path $diag) { Get-Content $diag -Tail 30 }
+          if (-not $p.HasExited) {
+            & "$env:USERPROFILE\.dotnet\tools\dotnet-stack.exe" report -p $p.Id | Tee-Object saida/pilha.txt
+            $p.Kill()
+          } else { "saiu com $($p.ExitCode)" }
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: diag-ui
+          path: saida/
