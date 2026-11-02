@@ -6,6 +6,369 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Asst.AbraListaMarqueNao" xml:space="preserve"><value>Open the list and check what you no longer use. Then come back to the Assistant.</value></data>
+  <data name="Asst.AbrirAjustes" xml:space="preserve"><value>Open Settings</value></data>
+  <data name="Asst.AbrirAplicarRecuperar" xml:space="preserve"><value>Open Apply › Recover</value></data>
+  <data name="Asst.AbrirAtualizarDrivers" xml:space="preserve"><value>Open Update drivers</value></data>
+  <data name="Asst.AbrirEstaPaginaNavegador" xml:space="preserve"><value>Open this page in the browser?
+
+{0}
+
+NEXUS doesn't download or install anything.</value></data>
+  <data name="Asst.AbrirInicializacao" xml:space="preserve"><value>Open Startup</value></data>
+  <data name="Asst.AbrirLaboratorioMemoria" xml:space="preserve"><value>Open Memory lab</value></data>
+  <data name="Asst.AbrirLaboratorioVideo" xml:space="preserve"><value>Open Graphics lab</value></data>
+  <data name="Asst.AbrirLimpezaTodasRegras" xml:space="preserve"><value>Open Cleanup (all rules)</value></data>
+  <data name="Asst.AbrirMedir" xml:space="preserve"><value>Open Measure</value></data>
+  <data name="Asst.AbrirMemoriaDiagnostico" xml:space="preserve"><value>Open Memory: diagnosis</value></data>
+  <data name="Asst.AbrirNavegador" xml:space="preserve"><value>Open in browser</value></data>
+  <data name="Asst.AbrirOtimizacaoAutomatica" xml:space="preserve"><value>Open Automatic optimization</value></data>
+  <data name="Asst.AbrirPagina" xml:space="preserve"><value>Open page</value></data>
+  <data name="Asst.AbrirPrivacidadeItemItem" xml:space="preserve"><value>Open Privacy (item by item)</value></data>
+  <data name="Asst.AbrirServicos" xml:space="preserve"><value>Open Services</value></data>
+  <data name="Asst.AcheiN" xml:space="preserve"><value>found one from {0:dd/MM HH:mm}</value></data>
+  <data name="Asst.AindaLimpar" xml:space="preserve"><value>What can still be cleaned</value></data>
+  <data name="Asst.AlgumasPedemAdministradorAviso" xml:space="preserve"><value> · some need administrator (a Windows prompt)</value></data>
+  <data name="Asst.AndamentoEtapa" xml:space="preserve"><value>Step progress</value></data>
+  <data name="Asst.AntesDepois" xml:space="preserve"><value>Before → after</value></data>
+  <data name="Asst.AplicadorIndisponivelAgoraEle" xml:space="preserve"><value>applier unavailable now; it checks before writing</value></data>
+  <data name="Asst.AplicadorIndisponivelConferirAgora" xml:space="preserve"><value>Applier unavailable to check now ({0}); it checks again before writing.</value></data>
+  <data name="Asst.AplicadorRespondeFimCada" xml:space="preserve"><value>The applier answers at the end of each group; the current item is estimated from the typical time of each part.</value></data>
+  <data name="Asst.AplicandoDemonstracaoAutoteste" xml:space="preserve"><value>Applying (self-test demo)</value></data>
+  <data name="Asst.AplicarMarcados" xml:space="preserve"><value>Apply checked</value></data>
+  <data name="Asst.AplicarRecomendado" xml:space="preserve"><value>Apply recommended</value></data>
+  <data name="Asst.AssistenteCompleto" xml:space="preserve"><value>Full assistant</value></data>
+  <data name="Asst.AssistenteConcluidoRelatorioFica" xml:space="preserve"><value>Assistant finished. The report is at </value></data>
+  <data name="Asst.CacheChrome" xml:space="preserve"><value>Chrome cache</value></data>
+  <data name="Asst.CacheEdge" xml:space="preserve"><value>Edge cache</value></data>
+  <data name="Asst.CacheOtimizacaoEntrega" xml:space="preserve"><value>Delivery Optimization cache</value></data>
+  <data name="Asst.CadaEtapaLeParte" xml:space="preserve"><value>Each step reads one part of the PC. Reading changes nothing.</value></data>
+  <data name="Asst.CadaMotivoRelatorio" xml:space="preserve"><value>Each with its reason in the report.</value></data>
+  <data name="Asst.CanceladoNadaFoiAlterado" xml:space="preserve"><value>Canceled. Nothing was changed in this step; you can choose again or skip.</value></data>
+  <data name="Asst.Cancelar" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Asst.CancelarLeitura" xml:space="preserve"><value>Cancel reading</value></data>
+  <data name="Asst.Comecar" xml:space="preserve"><value>Start</value></data>
+  <data name="Asst.ComecarNovo" xml:space="preserve"><value>Start over</value></data>
+  <data name="Asst.ComecarZeroJaFoi" xml:space="preserve"><value>Start from scratch? What was already applied stays applied, but the assistant's saved progress is replaced and the button </value></data>
+  <data name="Asst.ComoFunciona" xml:space="preserve"><value>How it works</value></data>
+  <data name="Asst.Concluir" xml:space="preserve"><value>Finish</value></data>
+  <data name="Asst.ConferindoAplicadorFatoMudaria" xml:space="preserve"><value>Checking with the applier what would actually change (nothing is changed)…</value></data>
+  <data name="Asst.ConferindoAplicadorMudariaNada" xml:space="preserve"><value>Checking with the applier what would change (nothing is changed)</value></data>
+  <data name="Asst.Continuar" xml:space="preserve"><value>Continue</value></data>
+  <data name="Asst.DefenderN" xml:space="preserve"><value>Defender: {0}</value></data>
+  <data name="Asst.DefenderNaoFoiPossivel" xml:space="preserve"><value>Defender: could not finish ({0}).</value></data>
+  <data name="Asst.DeixePcOtimizadoPasso" xml:space="preserve"><value>Get your PC optimized, step by step</value></data>
+  <data name="Asst.DepoisApareceProximoBoot" xml:space="preserve"><value>The "after" shows up at the next boot (Startup page).</value></data>
+  <data name="Asst.Desfazer" xml:space="preserve"><value> · can be undone</value></data>
+  <data name="Asst.DesfazerNExecucaoOes" xml:space="preserve"><value>Undo the assistant's {0} run(s), from last to first? Windows may ask for confirmation for each one </value></data>
+  <data name="Asst.DesfazerTudoAssistenteFez" xml:space="preserve"><value>Undo everything the assistant did</value></data>
+  <data name="Asst.DesfazerTudoAssistenteFez2" xml:space="preserve"><value>"Undo everything the assistant did" will only apply to the new round (previous ones stay on the History page).</value></data>
+  <data name="Asst.EfeitoImediato" xml:space="preserve"><value> · immediate effect</value></data>
+  <data name="Asst.Encontrei" xml:space="preserve"><value>What I found</value></data>
+  <data name="Asst.Escolher" xml:space="preserve"><value>Choose</value></data>
+  <data name="Asst.EspacoLivreDisco" xml:space="preserve"><value>Free disk space</value></data>
+  <data name="Asst.EsperandoLeituraPcTerminar" xml:space="preserve"><value>Waiting for the PC reading to finish…</value></data>
+  <data name="Asst.EtapaAnteriorN" xml:space="preserve"><value>Previous step: {0}</value></data>
+  <data name="Asst.EtapaNN" xml:space="preserve"><value>Step {0} of {1}</value></data>
+  <data name="Asst.Etapas" xml:space="preserve"><value> steps</value></data>
+  <data name="Asst.Explica" xml:space="preserve"><value>Explains</value></data>
+  <data name="Asst.Exportar" xml:space="preserve"><value>Export</value></data>
+  <data name="Asst.ExportarRelatorioAssistente" xml:space="preserve"><value>Export assistant report</value></data>
+  <data name="Asst.FicaramFora" xml:space="preserve"><value>Left out</value></data>
+  <data name="Asst.FimAntesDepoisTudo" xml:space="preserve"><value>At the end, before → after. Everything can go back.</value></data>
+  <data name="Asst.GravandoRelatorio" xml:space="preserve"><value>Saving the report</value></data>
+  <data name="Asst.GravandoRelatorioHtmlSua" xml:space="preserve"><value>Saving the report (HTML) to your folder…</value></data>
+  <data name="Asst.Importa" xml:space="preserve"><value>Why does it matter?</value></data>
+  <data name="Asst.JaEstavaAssim" xml:space="preserve"><value>already like this</value></data>
+  <data name="Asst.LendoNovoN" xml:space="preserve"><value>Reading again: {0}…</value></data>
+  <data name="Asst.LendoNovoNumerosDepois" xml:space="preserve"><value>Reading the numbers again for the "after" and putting the report together…</value></data>
+  <data name="Asst.LendoNovoNumerosDepois2" xml:space="preserve"><value>Reading the numbers again for the "after"…</value></data>
+  <data name="Asst.LendoPcSoLeitura" xml:space="preserve"><value>Reading the PC (read-only)</value></data>
+  <data name="Asst.LendoPontosRestauracaoWindows" xml:space="preserve"><value>Reading Windows restore points (read-only)…</value></data>
+  <data name="Asst.Leva1020Minutos" xml:space="preserve"><value>Takes 10 to 20 minutes. You confirm each group of changes and can stop at any time.</value></data>
+  <data name="Asst.LidoNovo" xml:space="preserve"><value>read again</value></data>
+  <data name="Asst.LigarMedicaoAutomaticaMostrador" xml:space="preserve"><value>Turn on automatic measurement and display</value></data>
+  <data name="Asst.LogsAntigosWindowsUpdate" xml:space="preserve"><value>Old Windows Update logs</value></data>
+  <data name="Asst.MaisNovoNMais" xml:space="preserve"><value>the newest is from {0:dd/MM HH:mm} (more than 24 h)</value></data>
+  <data name="Asst.MedicaoAutomaticaLigadaJogue" xml:space="preserve"><value>Automatic measurement on: play a normal match and NEXUS measures on its own. The display shows up when a game opens.</value></data>
+  <data name="Asst.MedicaoAutomaticaMostradorAbrir" xml:space="preserve"><value>Automatic measurement and display when a game opens (NEXUS preference)</value></data>
+  <data name="Asst.MedicaoAutomaticaMostradorVoltaram" xml:space="preserve"><value>Automatic measurement and display went back to what they were.</value></data>
+  <data name="Asst.Medindo" xml:space="preserve"><value>Measuring</value></data>
+  <data name="Asst.MedindoProcessadorMemoria" xml:space="preserve"><value>Measuring the processor and memory</value></data>
+  <data name="Asst.MedindoProcessadorMemoria15" xml:space="preserve"><value>Measuring the processor and memory (≈15 s). Close games and heavy programs for a fair number…</value></data>
+  <data name="Asst.MedirCpuRam15" xml:space="preserve"><value>Measure CPU and RAM (≈15 s)</value></data>
+  <data name="Asst.MedirNovo" xml:space="preserve"><value>Measure again</value></data>
+  <data name="Asst.MiniaturasExplorador" xml:space="preserve"><value>Explorer thumbnails</value></data>
+  <data name="Asst.MontandoRelatorio" xml:space="preserve"><value>Putting the report together</value></data>
+  <data name="Asst.MostraNumerosRecomendaRisco" xml:space="preserve"><value>Shows the numbers and what it recommends, with the risk.</value></data>
+  <data name="Asst.MotivoCadaRecusaEsta" xml:space="preserve"><value> (the reason for each refusal is in the report)</value></data>
+  <data name="Asst.MovendoQuarentenaCacheChrome" xml:space="preserve"><value>Moving to quarantine: Chrome cache…</value></data>
+  <data name="Asst.MudancaAplicada" xml:space="preserve"><value>change applied</value></data>
+  <data name="Asst.MudancasAplicadas" xml:space="preserve"><value>Changes applied</value></data>
+  <data name="Asst.MudancasAplicadas2" xml:space="preserve"><value>changes applied</value></data>
+  <data name="Asst.MudancasSistema2Mudancas" xml:space="preserve"><value>System changes: 2 changes</value></data>
+  <data name="Asst.N13Etapas" xml:space="preserve"><value>The 13 steps</value></data>
+  <data name="Asst.N13EtapasSegurancaPrimeiro" xml:space="preserve"><value>13 steps: security first, then cleanup, programs, startup, privacy, drivers, memory and performance. Takes 10 to 20 minutes and you can stop and resume whenever you want.</value></data>
+  <data name="Asst.N1Escolhida" xml:space="preserve"><value>1 chosen</value></data>
+  <data name="Asst.N1ItemLido" xml:space="preserve"><value>1 item read</value></data>
+  <data name="Asst.N1MudancaRecomendada" xml:space="preserve"><value>1 recommended change</value></data>
+  <data name="Asst.N3Feitas1Nao" xml:space="preserve"><value>3 done · 1 not needed · 9 s</value></data>
+  <data name="Asst.N6Escolhidas" xml:space="preserve"><value>6 chosen</value></data>
+  <data name="Asst.NadaAlteradoAlgoFor" xml:space="preserve"><value>Nothing is changed. If something is found, removal is done by Defender itself (Windows Security).
+
+Continue?</value></data>
+  <data name="Asst.NadaConferir" xml:space="preserve"><value>nothing to check</value></data>
+  <data name="Asst.NadaMarcado" xml:space="preserve"><value>Nothing checked.</value></data>
+  <data name="Asst.NaoAlteraWindows" xml:space="preserve"><value>Doesn't change Windows.</value></data>
+  <data name="Asst.NaoConseguiAbrirNavegador" xml:space="preserve"><value>Couldn't open the browser: {0}</value></data>
+  <data name="Asst.NaoConseguiAbrirRelatorio" xml:space="preserve"><value>Couldn't open the report: {0}</value></data>
+  <data name="Asst.NaoConseguiExportarN" xml:space="preserve"><value>Couldn't export: {0}</value></data>
+  <data name="Asst.NaoConseguiGravarRelatorio" xml:space="preserve"><value>Couldn't save the report</value></data>
+  <data name="Asst.NaoConseguiGravarRelatorio2" xml:space="preserve"><value>Couldn't save the report: {0}</value></data>
+  <data name="Asst.NaoConseguiLerEsta" xml:space="preserve"><value>Couldn't read this part now</value></data>
+  <data name="Asst.NaoConseguiSalvarProgresso" xml:space="preserve"><value>Couldn't save the progress: {0}</value></data>
+  <data name="Asst.NaoDeuLerDaqui" xml:space="preserve"><value>couldn't read from here; the applier checks</value></data>
+  <data name="Asst.NaoFoiPossivelAbrir" xml:space="preserve"><value>Could not open the browser: {0}</value></data>
+  <data name="Asst.NaoFoiPossivelAbrir2" xml:space="preserve"><value>Could not open: {0}</value></data>
+  <data name="Asst.NenhumPontoWindows" xml:space="preserve"><value>no restore point in Windows</value></data>
+  <data name="Asst.NEscolhidas" xml:space="preserve"><value>{0} chosen</value></data>
+  <data name="Asst.NexusVaiPedirMicrosoft" xml:space="preserve"><value>NEXUS will ask Microsoft Defender for a quick scan (a few minutes), with the official MpCmdRun tool.
+
+</value></data>
+  <data name="Asst.NItemNsJa" xml:space="preserve"><value>{0} item(s) are already as recommended or don't apply to this PC.</value></data>
+  <data name="Asst.NItensLidos" xml:space="preserve"><value>{0} items read</value></data>
+  <data name="Asst.NMudancaSJa" xml:space="preserve"><value>{0} change(s) already applied.</value></data>
+  <data name="Asst.NMudancasRecomendadas" xml:space="preserve"><value>{0} recommended changes</value></data>
+  <data name="Asst.NNEtapas" xml:space="preserve"><value>{0} of {1} steps</value></data>
+  <data name="Asst.NNMudariamAlgo" xml:space="preserve"><value>{0} of {1} would change something</value></data>
+  <data name="Asst.NProgramaSMarcados" xml:space="preserve"><value>{0} program(s) checked by the assistant. Review them and, if you want, use "Uninstall selected". Then come back to the Assistant.</value></data>
+  <data name="Asst.NVoceDecidirDesmarcadas" xml:space="preserve"><value> · {0} for you to decide (unchecked)</value></data>
+  <data name="Asst.Opcional" xml:space="preserve"><value> · optional</value></data>
+  <data name="Asst.PaginaHtmlHtmlHtml" xml:space="preserve"><value>HTML page (*.html)|*.html</value></data>
+  <data name="Asst.PararContinuarDepois" xml:space="preserve"><value>Stop and continue later</value></data>
+  <data name="Asst.PassoPassoTodasFuncoes" xml:space="preserve"><value>Step by step through every NEXUS feature: checks, explains, tweaks with your confirmation and delivers the report.</value></data>
+  <data name="Asst.PermissaoAdministradorNasMudancas" xml:space="preserve"><value>(and administrator permission for system changes). Cleanup comes back from quarantine to its original place.</value></data>
+  <data name="Asst.PreparandoMudancasEscolhidas" xml:space="preserve"><value>Preparing the chosen changes</value></data>
+  <data name="Asst.ProcurandoAtualizacoesPodeLevar" xml:space="preserve"><value>Looking for updates (may take up to 1 min)</value></data>
+  <data name="Asst.ProcurandoPontoRestauracaoRecente" xml:space="preserve"><value>Looking for a recent restore point</value></data>
+  <data name="Asst.ProcurarAtualizacoes" xml:space="preserve"><value>Look for updates</value></data>
+  <data name="Asst.ProcurarWindowsUpdate" xml:space="preserve"><value>Search Windows Update</value></data>
+  <data name="Asst.ProgressoSalvoEstavaIlegivel" xml:space="preserve"><value>The saved progress was unreadable and was set aside. Start over.</value></data>
+  <data name="Asst.ProgressoSalvoUseRetomar" xml:space="preserve"><value>Progress saved. Use "Resume" to continue where you left off.</value></data>
+  <data name="Asst.ProximoPasso" xml:space="preserve"><value>Next step</value></data>
+  <data name="Asst.PuladaVoce" xml:space="preserve"><value>Skipped by you.</value></data>
+  <data name="Asst.PularEtapa" xml:space="preserve"><value>Skip step</value></data>
+  <data name="Asst.Quarentena" xml:space="preserve"><value>in quarantine</value></data>
+  <data name="Asst.Recomendo" xml:space="preserve"><value>I recommend</value></data>
+  <data name="Asst.RelatorioDesfazer" xml:space="preserve"><value>Report and undo</value></data>
+  <data name="Asst.RelatorioFim" xml:space="preserve"><value>Report at the end</value></data>
+  <data name="Asst.RelatorioGerado" xml:space="preserve"><value>Report generated.</value></data>
+  <data name="Asst.RespondaJanelaConfirmacaoContinuar" xml:space="preserve"><value>Answer the confirmation window to continue. The time left resumes counting afterwards.</value></data>
+  <data name="Asst.RetomarOndeParei" xml:space="preserve"><value>Resume where I left off</value></data>
+  <data name="Asst.RevisarPaginaProgramas" xml:space="preserve"><value>Review on the Programs page</value></data>
+  <data name="Asst.RevisarPaginaSeguranca" xml:space="preserve"><value>Review on the Security page</value></data>
+  <data name="Asst.RiscoN" xml:space="preserve"><value>risk {0}</value></data>
+  <data name="Asst.RiscoNN" xml:space="preserve"><value>risk {0} · {1}</value></data>
+  <data name="Asst.SeguirSemAplicar" xml:space="preserve"><value>Continue without applying</value></data>
+  <data name="Asst.SoVocePodeResolver" xml:space="preserve"><value>What only you can fix.</value></data>
+  <data name="Asst.SuaConta4Mudancas" xml:space="preserve"><value>On your account: 4 changes</value></data>
+  <data name="Asst.TemporariosWindows" xml:space="preserve"><value>Windows temporary files</value></data>
+  <data name="Asst.TermineOuPuleEtapas" xml:space="preserve"><value>Finish (or skip) the previous steps first.</value></data>
+  <data name="Asst.TodasDesfazerRegistrado" xml:space="preserve"><value>All with undo recorded.</value></data>
+  <data name="Asst.TudoPodeSerDesfeito" xml:space="preserve"><value>Everything can be undone</value></data>
+  <data name="Asst.Verifica" xml:space="preserve"><value>Checks</value></data>
+  <data name="Asst.VerificacaoCancelada" xml:space="preserve"><value>Check canceled.</value></data>
+  <data name="Asst.VerificacaoRapidaDefender" xml:space="preserve"><value>Defender quick scan</value></data>
+  <data name="Asst.VerificacaoRapidaDefenderAndamento" xml:space="preserve"><value>Defender quick scan in progress…</value></data>
+  <data name="Asst.VerificacaoRapidaMicrosoftDefender" xml:space="preserve"><value>Microsoft Defender quick scan</value></data>
+  <data name="Asst.Verificada" xml:space="preserve"><value>Checked.</value></data>
+  <data name="Asst.VerificadaNadaAplicado" xml:space="preserve"><value>Checked; nothing applied.</value></data>
+  <data name="Asst.Verificando" xml:space="preserve"><value>Checking</value></data>
+  <data name="Asst.VerificandoDefender" xml:space="preserve"><value>Scanning with Defender</value></data>
+  <data name="Asst.VerificandoN" xml:space="preserve"><value>Checking: {0}</value></data>
+  <data name="Asst.VoceConfirmaCadaGrupo" xml:space="preserve"><value>You confirm each group</value></data>
+  <data name="Asst.VoceFazer" xml:space="preserve"><value>For you to do</value></data>
+  <data name="Asst.VoceParouEtapaN" xml:space="preserve"><value>You stopped at step {0} of {1} ({2}) on {3:dd/MM HH:mm}. </value></data>
+  <data name="Asst.VoceRevisar" xml:space="preserve"><value>For you to review</value></data>
+  <data name="Asst.Voltar" xml:space="preserve"><value>Back</value></data>
+  <data name="AsstStep.AbreJuntoWindowsQuanto" xml:space="preserve"><value>What opens with Windows and how much it delays boot (measured by Windows itself).</value></data>
+  <data name="AsstStep.Agenda" xml:space="preserve"><value>Schedule</value></data>
+  <data name="AsstStep.AjustesAutomaticoRecomendaPerfil" xml:space="preserve"><value>The tweaks Automatic recommends for your PC's profile.</value></data>
+  <data name="AsstStep.AntesComecar" xml:space="preserve"><value>Before you start</value></data>
+  <data name="AsstStep.AntivirusFirewallAtualizacoesPontos" xml:space="preserve"><value>Antivirus, firewall, updates and suspicious startup points.</value></data>
+  <data name="AsstStep.AtualizacoesDisponiveisProgramasMaio" xml:space="preserve"><value>Available updates and the biggest and oldest programs.</value></data>
+  <data name="AsstStep.AtualizacoesDriverWindowsUpdate" xml:space="preserve"><value>Driver updates from Windows Update and the age of the graphics driver.</value></data>
+  <data name="AsstStep.CachesTemporariosProgramasRecriam" xml:space="preserve"><value>Caches and temporary files that programs recreate on their own.</value></data>
+  <data name="AsstStep.CadaProgramaAbreBoot" xml:space="preserve"><value>Every program that opens at boot competes for disk and processor in the first minutes.</value></data>
+  <data name="AsstStep.ConhecendoSeuPc" xml:space="preserve"><value>Getting to know your PC</value></data>
+  <data name="AsstStep.Desempenho" xml:space="preserve"><value>Performance</value></data>
+  <data name="AsstStep.DesempenhoNaoValeNada" xml:space="preserve"><value>Performance is worth nothing on a compromised PC.</value></data>
+  <data name="AsstStep.Drivers" xml:space="preserve"><value>Drivers</value></data>
+  <data name="AsstStep.DriverVideoNovoCorrige" xml:space="preserve"><value>A new graphics driver fixes crashes and improves recent games.</value></data>
+  <data name="AsstStep.Inicializacao" xml:space="preserve"><value>Startup</value></data>
+  <data name="AsstStep.InicializacaoServicos" xml:space="preserve"><value>Startup and services</value></data>
+  <data name="AsstStep.Inicio" xml:space="preserve"><value>Start</value></data>
+  <data name="AsstStep.LiberaEspacoSemTocar" xml:space="preserve"><value>Frees space without touching documents, passwords or history. Everything goes to quarantine and can come back.</value></data>
+  <data name="AsstStep.Limpeza" xml:space="preserve"><value>Cleanup</value></data>
+  <data name="AsstStep.ManterDia" xml:space="preserve"><value>Keep it up to date</value></data>
+  <data name="AsstStep.MedicaoAutomaticaFpsProxima" xml:space="preserve"><value>Automatic FPS measurement in the next match and the on-screen display.</value></data>
+  <data name="AsstStep.MedirVerdade" xml:space="preserve"><value>Measure for real</value></data>
+  <data name="AsstStep.MenosDadosEnviadosMenos" xml:space="preserve"><value>Less data sent and fewer ads in Start. It doesn't speed up the PC; it's about what leaves it.</value></data>
+  <data name="AsstStep.MuitosPcsPerdemDesempenho" xml:space="preserve"><value>Many PCs lose performance because of hardware details no program fixes on its own: a single RAM stick, a monitor at 60 Hz, an old driver.</value></data>
+  <data name="AsstStep.PcVoltaAcumularLixo" xml:space="preserve"><value>The PC builds up junk again and settings change with updates. A weekly check lets you know.</value></data>
+  <data name="AsstStep.PontoRestauracaoRedeSeguranca" xml:space="preserve"><value>A restore point is Windows' safety net: if something goes wrong, you can roll back the whole system.</value></data>
+  <data name="AsstStep.PoucaMemoriaLivreVerdade" xml:space="preserve"><value>Too little truly free memory causes hitches; the page file keeps games from closing by themselves.</value></data>
+  <data name="AsstStep.ProcessadorPlacaVideoMemoria" xml:space="preserve"><value>Processor, graphics card and memory; RAM channels, monitor refresh rate, graphics driver age and the PCIe link.</value></data>
+  <data name="AsstStep.ProgramaDesatualizadoPortaEntrada" xml:space="preserve"><value>An outdated program is a doorway for attacks; a forgotten program takes up space and sometimes opens with Windows.</value></data>
+  <data name="AsstStep.Programas" xml:space="preserve"><value>Programs</value></data>
+  <data name="AsstStep.QuemMaisUsaRam" xml:space="preserve"><value>Who uses the most RAM now, memory compression and the page file.</value></data>
+  <data name="AsstStep.Relatorio" xml:space="preserve"><value>Report</value></data>
+  <data name="AsstStep.RelatorioFinal" xml:space="preserve"><value>Final report</value></data>
+  <data name="AsstStep.Seguranca" xml:space="preserve"><value>Security</value></data>
+  <data name="AsstStep.SemMedirOtimizacaoChute" xml:space="preserve"><value>Without measuring, "optimization" is a guess. One match before and another after show whether anything changed.</value></data>
+  <data name="AsstStep.SoEntraTemFonte" xml:space="preserve"><value>Only what has a source and low risk goes in; the rest is for you to decide.</value></data>
+  <data name="AsstStep.TelemetriaOpcionalAnunciosSugestoes" xml:space="preserve"><value>Optional telemetry, ads, suggestions and activity tracking.</value></data>
+  <data name="AsstStep.TomadaOuBateriaEspaco" xml:space="preserve"><value>Plugged in or on battery, free disk space, changes left halfway and a restore point.</value></data>
+  <data name="AsstStep.TudoFoiVerificadoAlterado" xml:space="preserve"><value>Everything that was checked, changed and skipped, with before and after numbers.</value></data>
+  <data name="AsstStep.VerificacaoSemanalSoLeitura" xml:space="preserve"><value>Weekly check (read-only) and, if you want, scheduled safe cleanup.</value></data>
+  <data name="AsstStep.VoceSaberMudouGuardar" xml:space="preserve"><value>So you know what changed, keep it and undo whenever you want.</value></data>
+  <data name="Auto.AcaoCandidata" xml:space="preserve"><value>candidate action</value></data>
+  <data name="Auto.AcoesCandidatas" xml:space="preserve"><value>candidate actions</value></data>
+  <data name="Auto.AcoesSegurasEstePc" xml:space="preserve"><value>Safe actions for this PC</value></data>
+  <data name="Auto.AdminAlgunsCasos" xml:space="preserve"><value>Admin in some cases</value></data>
+  <data name="Auto.AjustesCliqueJaEstao" xml:space="preserve"><value>The one-click tweaks are already set; only the safe cleanup is left.</value></data>
+  <data name="Auto.ApagarCacheShaders" xml:space="preserve"><value>Delete the shader cache</value></data>
+  <data name="Auto.Aplicada" xml:space="preserve"><value>Applied</value></data>
+  <data name="Auto.AplicadaConferida" xml:space="preserve"><value>Applied and verified</value></data>
+  <data name="Auto.Bateria" xml:space="preserve"><value>On battery</value></data>
+  <data name="Auto.BateriaN" xml:space="preserve"><value>On battery · {0}%</value></data>
+  <data name="Auto.BotaoVoltaTudoOrdem" xml:space="preserve"><value>One button reverts everything, in reverse order.</value></data>
+  <data name="Auto.ComunsGuiasMasSeu" xml:space="preserve"><value>Common in guides, but on your PC they don't help or get in the way.</value></data>
+  <data name="Auto.ConferidoPeloAplicador" xml:space="preserve"><value>Checked by the applier</value></data>
+  <data name="Auto.ConferirNovo" xml:space="preserve"><value>Check again</value></data>
+  <data name="Auto.ConfigurarAjustes" xml:space="preserve"><value>Configure in Settings</value></data>
+  <data name="Auto.ConfirmadoPeloAplicador" xml:space="preserve"><value>confirmed by the applier</value></data>
+  <data name="Auto.ConflitoNaoSobrescrevemos" xml:space="preserve"><value>Conflict: we don't overwrite</value></data>
+  <data name="Auto.ConflitoReverter" xml:space="preserve"><value>Conflict when reverting</value></data>
+  <data name="Auto.ConselhosHardware" xml:space="preserve"><value>Hardware advice</value></data>
+  <data name="Auto.DependeSeuCaso" xml:space="preserve"><value>Depends on your case</value></data>
+  <data name="Auto.DesfazerCancelado" xml:space="preserve"><value>Undo canceled.</value></data>
+  <data name="Auto.DesfazerTudo" xml:space="preserve"><value>Undo everything</value></data>
+  <data name="Auto.DesfazTudo" xml:space="preserve"><value>Undoes everything</value></data>
+  <data name="Auto.DesligarArquivoPaginacao" xml:space="preserve"><value>Turn off the page file</value></data>
+  <data name="Auto.DesligarSmtHyperThreading" xml:space="preserve"><value>Turn off SMT/Hyper-Threading on any PC</value></data>
+  <data name="Auto.DesligarVbsHvciOu" xml:space="preserve"><value>Turn off VBS, HVCI or Defender</value></data>
+  <data name="Auto.DiscoN" xml:space="preserve"><value>Disk {0}</value></data>
+  <data name="Auto.Documentado" xml:space="preserve"><value>Documented</value></data>
+  <data name="Auto.DocumentadoPeloFabricante" xml:space="preserve"><value>Documented by the vendor</value></data>
+  <data name="Auto.EntraOtimizarAgora" xml:space="preserve"><value>included in Optimize now</value></data>
+  <data name="Auto.EspacoRecuperavelNasRegras" xml:space="preserve"><value>Recoverable space in the safe rules: before {0} → after {1}. </value></data>
+  <data name="Auto.ExigeReinicio" xml:space="preserve"><value>Requires restart</value></data>
+  <data name="Auto.Experimental" xml:space="preserve"><value>Experimental</value></data>
+  <data name="Auto.Falhou" xml:space="preserve"><value>Failed</value></data>
+  <data name="Auto.FalhouFoiDesfeita" xml:space="preserve"><value>Failed and was undone</value></data>
+  <data name="Auto.FicaAteVoceReverter" xml:space="preserve"><value>Stays until you revert it</value></data>
+  <data name="Auto.FicouPassado" xml:space="preserve"><value>A thing of the past</value></data>
+  <data name="Auto.GanhoEsperado" xml:space="preserve"><value>Expected gain: </value></data>
+  <data name="Auto.Hipotese" xml:space="preserve"><value>Hypothesis</value></data>
+  <data name="Auto.Incompativel" xml:space="preserve"><value>Incompatible</value></data>
+  <data name="Auto.Interrompida" xml:space="preserve"><value>Interrupted</value></data>
+  <data name="Auto.JaEstavaAssim" xml:space="preserve"><value>Already like this</value></data>
+  <data name="Auto.JaEstavaOriginal" xml:space="preserve"><value>Already at the original</value></data>
+  <data name="Auto.LeituraPcAindaNao" xml:space="preserve"><value>The PC reading hasn't finished yet.</value></data>
+  <data name="Auto.LendoSeuPc" xml:space="preserve"><value>Reading your PC…</value></data>
+  <data name="Auto.LePc" xml:space="preserve"><value>Reads the PC</value></data>
+  <data name="Auto.LimpadorRegistro" xml:space="preserve"><value>Registry cleaner</value></data>
+  <data name="Auto.LimparMemoriaEsperaToda" xml:space="preserve"><value>Clear standby memory all the time</value></data>
+  <data name="Auto.LimpezaSeguraN" xml:space="preserve"><value>Safe cleanup: {0}</value></data>
+  <data name="Auto.LimpezaSeguraNadaLimpar" xml:space="preserve"><value>Safe cleanup: nothing to clean now.</value></data>
+  <data name="Auto.LimpezaSeguraNN" xml:space="preserve"><value>Safe cleanup: {0} {1}, {2} recoverable (they go to quarantine, with undo).</value></data>
+  <data name="Auto.LimpezaSeguraNN2" xml:space="preserve"><value>Safe cleanup ({0} {1}, about {2}):</value></data>
+  <data name="Auto.LimpezaSeguraNRecuperaveis" xml:space="preserve"><value>Safe cleanup: {0} recoverable (applier unavailable to check).</value></data>
+  <data name="Auto.MantidaVoce" xml:space="preserve"><value>Kept by you</value></data>
+  <data name="Auto.MecanismoConhecido" xml:space="preserve"><value>Known mechanism</value></data>
+  <data name="Auto.MexerHpetDynamicTick" xml:space="preserve"><value>Tinker with HPET and dynamic tick in BCD</value></data>
+  <data name="Auto.MontaPlano" xml:space="preserve"><value>Builds the plan</value></data>
+  <data name="Auto.MudancasSistemaCanceladasSua" xml:space="preserve"><value>System changes canceled; the ones on your account stay applied.</value></data>
+  <data name="Auto.MudaPratica" xml:space="preserve"><value>What changes in practice?</value></data>
+  <data name="Auto.N1FicouForaPlano" xml:space="preserve"><value>1 was left out of the plan</value></data>
+  <data name="Auto.NadaReverter" xml:space="preserve"><value>Nothing to revert</value></data>
+  <data name="Auto.NadaRiscoBaixoAplicar" xml:space="preserve"><value>Nothing low-risk to apply in one click for this PC.</value></data>
+  <data name="Auto.NaoFazEfeito" xml:space="preserve"><value>Has no effect</value></data>
+  <data name="Auto.NaoFoiPossivelMontar" xml:space="preserve"><value>Could not build the recommendations: {0}</value></data>
+  <data name="Auto.NaoRecomendado" xml:space="preserve"><value>Not recommended</value></data>
+  <data name="Auto.NaoRecomendadoEstePc" xml:space="preserve"><value>Not recommended for this PC</value></data>
+  <data name="Auto.NenhumaRecomendacaoAgora" xml:space="preserve"><value>No recommendation now.</value></data>
+  <data name="Auto.NEvitar" xml:space="preserve"><value>{0} to avoid</value></data>
+  <data name="Auto.NexusLeSeuPc" xml:space="preserve"><value>NEXUS reads your PC, proposes what's worth it and applies it safely.</value></data>
+  <data name="Auto.NFazer" xml:space="preserve"><value>{0} to do</value></data>
+  <data name="Auto.NFicaramForaPlano" xml:space="preserve"><value>{0} were left out of the plan</value></data>
+  <data name="Auto.NForamQuarentenaMesmo" xml:space="preserve"><value>{0} went to quarantine (on the same disk: the space really comes back when it's emptied).</value></data>
+  <data name="Auto.NNRiscoBaixo" xml:space="preserve"><value>{0} low-risk {1}. Checking with the applier…</value></data>
+  <data name="Auto.NNValidados" xml:space="preserve"><value>{0} of {1} validated</value></data>
+  <data name="Auto.NolazymodeMmcss" xml:space="preserve"><value>MMCSS NoLazyMode</value></data>
+  <data name="Auto.NotebookOuDesktopTomada" xml:space="preserve"><value>Laptop or desktop, plugged in or on battery, graphics, memory and disk.</value></data>
+  <data name="Auto.NPontoSPedem" xml:space="preserve"><value>{0} point(s) need attention · {1} recommendation(s).</value></data>
+  <data name="Auto.NPuladaSPrograma" xml:space="preserve"><value> {0} skipped because a program is open.</value></data>
+  <data name="Auto.ObservadoTeste" xml:space="preserve"><value>Observed in testing</value></data>
+  <data name="Auto.Obsoleto" xml:space="preserve"><value>Obsolete</value></data>
+  <data name="Auto.OriginalGuardado" xml:space="preserve"><value>Original saved</value></data>
+  <data name="Auto.OtimizacaoAutomatica" xml:space="preserve"><value>Automatic optimization</value></data>
+  <data name="Auto.OtimizarAgora" xml:space="preserve"><value>Optimize now</value></data>
+  <data name="Auto.OtimizarAgoraMudancasSistema" xml:space="preserve"><value>Optimize now: system changes</value></data>
+  <data name="Auto.PedeAdministrador" xml:space="preserve"><value>needs administrator</value></data>
+  <data name="Auto.PerfilDetectado" xml:space="preserve"><value>Detected profile</value></data>
+  <data name="Auto.PlacaVideoDedicada" xml:space="preserve"><value>Dedicated graphics card</value></data>
+  <data name="Auto.Planejada" xml:space="preserve"><value>Planned</value></data>
+  <data name="Auto.PlanoApareceDepoisLeitura" xml:space="preserve"><value>The plan shows up after the PC reading.</value></data>
+  <data name="Auto.PlanoN" xml:space="preserve"><value>Plan: {0}</value></data>
+  <data name="Auto.PlanoOtimizarAgora" xml:space="preserve"><value>The Optimize now plan</value></data>
+  <data name="Auto.PoucaMemoria" xml:space="preserve"><value>Low memory</value></data>
+  <data name="Auto.PoucoEspacoLivre" xml:space="preserve"><value>Low free space</value></data>
+  <data name="Auto.PrecisaAdmin" xml:space="preserve"><value>Needs admin</value></data>
+  <data name="Auto.Previa" xml:space="preserve"><value>preview</value></data>
+  <data name="Auto.PreviaAplicadorIndisponivel" xml:space="preserve"><value>preview (applier unavailable)</value></data>
+  <data name="Auto.PrioridadeN" xml:space="preserve"><value>priority {0}</value></data>
+  <data name="Auto.PrioridadeSfioMmcss" xml:space="preserve"><value>MMCSS SFIO priority</value></data>
+  <data name="Auto.PrioridadeTempoRealJogo" xml:space="preserve"><value>Realtime priority for the game</value></data>
+  <data name="Auto.ProximoLogon" xml:space="preserve"><value>At next sign-in</value></data>
+  <data name="Auto.PuladaMudouFora" xml:space="preserve"><value>Skipped: changed externally</value></data>
+  <data name="Auto.ReabraJogo" xml:space="preserve"><value>Reopen the game</value></data>
+  <data name="Auto.RecomendacoesEstePc" xml:space="preserve"><value>Recommendations for this PC</value></data>
+  <data name="Auto.Recusado" xml:space="preserve"><value>Refused</value></data>
+  <data name="Auto.Regra" xml:space="preserve"><value>rule</value></data>
+  <data name="Auto.Regras" xml:space="preserve"><value>rules</value></data>
+  <data name="Auto.ReinicioRecomendado" xml:space="preserve"><value>Restart recommended</value></data>
+  <data name="Auto.RelatoComunidade" xml:space="preserve"><value>Community report</value></data>
+  <data name="Auto.Restaurando" xml:space="preserve"><value>Restoring</value></data>
+  <data name="Auto.Revertida" xml:space="preserve"><value>Reverted</value></data>
+  <data name="Auto.SemAdmin" xml:space="preserve"><value>No admin</value></data>
+  <data name="Auto.SemEfeito" xml:space="preserve"><value>No effect</value></data>
+  <data name="Auto.SemProvaGanho" xml:space="preserve"><value>No proof of gain</value></data>
+  <data name="Auto.ServicoTimerResolution" xml:space="preserve"><value>Timer resolution service</value></data>
+  <data name="Auto.SeuPc" xml:space="preserve"><value>Your PC: </value></data>
+  <data name="Auto.SeuPcJaEsta" xml:space="preserve"><value>Your PC is already the way NEXUS would recommend for this profile.</value></data>
+  <data name="Auto.SoCachesTemporariosSua" xml:space="preserve"><value>Only caches and temporary files from your account. Nothing is deleted: it goes to the NEXUS quarantine and comes back with "Undo everything" or in Cleanup &gt; History.</value></data>
+  <data name="Auto.SoEntraTemRisco" xml:space="preserve"><value>Only low-risk items that need no choice go in. System changes ask Windows for permission and create a restore point. Safe cleanup goes to quarantine.</value></data>
+  <data name="Auto.SoNestaSessao" xml:space="preserve"><value>This session only</value></data>
+  <data name="Auto.SoRiscoBaixoConferido" xml:space="preserve"><value>Only low risk, checked by the applier first.</value></data>
+  <data name="Auto.SoVideoIntegrado" xml:space="preserve"><value>Integrated graphics only</value></data>
+  <data name="Auto.SuaConta" xml:space="preserve"><value>your account</value></data>
+  <data name="Auto.TcpnodelayTcpackfrequencyPing" xml:space="preserve"><value>TCPNoDelay and TcpAckFrequency for ping</value></data>
+  <data name="Auto.TodosNValidados" xml:space="preserve"><value>all {0} validated</value></data>
+  <data name="Auto.Tomada" xml:space="preserve"><value>Plugged in</value></data>
+  <data name="Auto.TrocarDnsBaixarPing" xml:space="preserve"><value>Change DNS to lower ping</value></data>
+  <data name="Auto.ValeHora" xml:space="preserve"><value>Takes effect immediately</value></data>
+  <data name="Auto.VeListaAprovaSistema" xml:space="preserve"><value>See the list and approve. System changes ask for Windows permission.</value></data>
+  <data name="Auto.VerDetalhes" xml:space="preserve"><value>See details</value></data>
+  <data name="Auto.VerDetalhesN" xml:space="preserve"><value>See details: {0}</value></data>
+  <data name="Auto.VerificacaoN" xml:space="preserve"><value>Check: {0}</value></data>
+  <data name="Auto.VerificacaoSemanalAntigaTambem" xml:space="preserve"><value>The old weekly check is also on (you can turn it off in Settings).</value></data>
+  <data name="Auto.VerificacaoSoLePc" xml:space="preserve"><value>The check only reads the PC. Scheduled safe cleanup is optional (off by default): only caches and temporary files from your account, to quarantine, with undo.</value></data>
+  <data name="Auto.VoltarPadraoFixoScript" xml:space="preserve"><value>Go back to a fixed script "default"</value></data>
+  <data name="Auto.Windows10" xml:space="preserve"><value>Windows 10</value></data>
+  <data name="Auto.Windows11" xml:space="preserve"><value>Windows 11</value></data>
+  <data name="Auto.WindowsNumHdd" xml:space="preserve"><value>Windows on an HDD</value></data>
   <data name="Cap.Acoes" xml:space="preserve"><value>Actions</value></data>
   <data name="Cap.AcoesReaisVmRegistro" xml:space="preserve"><value>Real actions in a VM (registry, power, SysMain, core parking)</value></data>
   <data name="Cap.AdiadoForaCatalogoAtivo" xml:space="preserve"><value>Postponed: out of the active catalog until a handler exists (listed under rejected).</value></data>
@@ -76,6 +439,7 @@
   <data name="Nav.VerSeguranca" xml:space="preserve"><value>See security</value></data>
   <data name="Pg.AbreListaAjustesNada" xml:space="preserve"><value>Opens the tweak list. Nothing is applied.</value></data>
   <data name="Pg.AbrirFonteNavegador" xml:space="preserve"><value>Open the source in the browser</value></data>
+  <data name="Pg.Administrador" xml:space="preserve"><value>administrator</value></data>
   <data name="Pg.Agora" xml:space="preserve"><value>now</value></data>
   <data name="Pg.AgoraSeuPc" xml:space="preserve"><value>Now on your PC</value></data>
   <data name="Pg.AindaNaoExisteNesta" xml:space="preserve"><value>Doesn't exist in this version yet.</value></data>
@@ -310,6 +674,7 @@
   <data name="Pg.PrecisaOutroAmbiente" xml:space="preserve"><value>Needs another environment.</value></data>
   <data name="Pg.Problema" xml:space="preserve"><value>With problems</value></data>
   <data name="Pg.Processador" xml:space="preserve"><value>Processor</value></data>
+  <data name="Pg.Pronto" xml:space="preserve"><value>ready</value></data>
   <data name="Pg.ProntoAplicar" xml:space="preserve"><value>Ready to apply</value></data>
   <data name="Pg.ProntoAplicarNestePc" xml:space="preserve"><value>Ready to apply on this PC</value></data>
   <data name="Pg.QuandoVale" xml:space="preserve"><value>When it applies</value></data>
@@ -362,6 +727,8 @@
   <data name="Pg.Validado2" xml:space="preserve"><value>Validated</value></data>
   <data name="Pg.ValidadoExisteRegistroTeste" xml:space="preserve"><value>Validated = there is a record of a real test. Without it, it stays as not validated.</value></data>
   <data name="Pg.ValidadoTesteReal" xml:space="preserve"><value>Validated with a real test</value></data>
+  <data name="Pg.Valor" xml:space="preserve"><value>value</value></data>
+  <data name="Pg.Valores" xml:space="preserve"><value>values</value></data>
   <data name="Pg.ValoresLidosSeuPc" xml:space="preserve"><value>Values read from your PC</value></data>
   <data name="Pg.ValorHojeVaiDiario" xml:space="preserve"><value>Today's value goes to the journal before writing.</value></data>
   <data name="Pg.ValorOriginalCadaAjuste" xml:space="preserve"><value>The original value of each tweak is saved in the journal.</value></data>

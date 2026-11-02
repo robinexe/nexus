@@ -432,7 +432,7 @@ public sealed class SettingsPage : ModulePage
         var file = new[] { stem + ".html", stem + ".txt" }.Select(n => Path.Combine(dir, n)).FirstOrDefault(File.Exists);
         if (file is null) { Message = Loc.F("Settings.ArquivoNaoEncontradoN", dir); return; }
         try { using var _ = Process.Start(new ProcessStartInfo(file) { UseShellExecute = true }); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = $"Não foi possível abrir: {ex.Message}"; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = Loc.F("Asst.NaoFoiPossivelAbrir2", ex.Message); }
     }
 
     private void OpenFolder(string folder)
@@ -443,6 +443,6 @@ public sealed class SettingsPage : ModulePage
             // Explorador do Windows numa pasta do próprio NEXUS (o usuário vê e controla).
             using var _ = Process.Start(new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe")) { UseShellExecute = false, ArgumentList = { folder } });
         }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = $"Não foi possível abrir: {ex.Message}"; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = Loc.F("Asst.NaoFoiPossivelAbrir2", ex.Message); }
     }
 }

@@ -149,11 +149,11 @@ public sealed class AssistantProcess : ObservableObject
     public ProcessTracker Begin(AssistantStepId step, string mode, bool apply, IReadOnlyList<ProcessSegment> segments, bool canCancel = false, TimeSpan offset = default)
     {
         _offset = offset;
-        _tracker = new ProcessTracker(AssistantSteps.Info(step).Title, Now);
+        _tracker = new ProcessTracker(AssistantStepTexts.Info(step).Title, Now);
         _observer = apply ? new ApplyProgressObserver(_tracker, step) : null;
         _seenVersion = -1;
         Rows.Clear();
-        Title = AssistantSteps.Info(step).Title;
+        Title = AssistantStepTexts.Info(step).Title;
         Mode = mode;
         IsApply = apply;
         Position = ProcessText.Position(step);
@@ -225,7 +225,7 @@ public sealed class AssistantProcess : ObservableObject
         t.Sample();
         Percent = Math.Round(t.Progress * 100, 1);
         IsWaiting = t.IsWaiting;
-        RemainingText = t.IsComplete ? "pronto" : t.IsWaiting ? Loc.T("Shell.EsperandoVoce") : ProcessText.Remaining(t.Remaining);
+        RemainingText = t.IsComplete ? Loc.T("Pg.Pronto") : t.IsWaiting ? Loc.T("Shell.EsperandoVoce") : ProcessText.Remaining(t.Remaining);
         ElapsedText = ProcessText.Clock(t.Elapsed);
         if (!t.IsComplete)
         {

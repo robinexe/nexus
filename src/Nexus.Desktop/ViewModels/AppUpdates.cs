@@ -294,7 +294,7 @@ public sealed class AppUpdates : ObservableObject
             // Página pública de downloads no navegador (o usuário vê e decide).
             using var _ = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(UpdatePolicy.ReleasesPage.ToString()) { UseShellExecute = true });
         }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Status = $"Não foi possível abrir o navegador: {ex.Message}"; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Status = Loc.F("Asst.NaoFoiPossivelAbrir", ex.Message); }
     }
 
     private static bool DefaultIsAppBusy()

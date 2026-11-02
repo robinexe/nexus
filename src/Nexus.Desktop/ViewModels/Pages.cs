@@ -51,7 +51,7 @@ public sealed class SectionViewModel(DiscoverySection s)
     public int DetectedCount => Facts.Count(f => f.Status == FactStatus.Detected);
     public int UnavailableCount => Facts.Count(f => f.Status == FactStatus.Unavailable);
     /// <summary>"8 valores · 1 sem leitura".</summary>
-    public string CountText => PageText.Plural(Facts.Count, "valor", "valores") + (UnavailableCount > 0 ? Loc.F("Pg.NSemLeitura", UnavailableCount) : "");
+    public string CountText => PageText.Plural(Facts.Count, Loc.T("Pg.Valor"), Loc.T("Pg.Valores")) + (UnavailableCount > 0 ? Loc.F("Pg.NSemLeitura", UnavailableCount) : "");
     public bool HasTables => Tables.Count > 0;
     /// <summary>Fontes distintas da seção, para o "De onde vêm estes valores?".</summary>
     public string Sources => string.Join(" · ", Facts.Select(f => f.Source).Concat(Tables.Select(t => t.Source))

@@ -126,7 +126,7 @@ public sealed class ApplyOverlay : ObservableObject
         t.Sample();
         Percent = Math.Round(t.Progress * 100, 1);
         IsWaiting = t.IsWaiting;
-        RemainingText = t.IsComplete ? "pronto" : t.IsWaiting ? Loc.T("Shell.EsperandoVoce") : ProcessText.Remaining(t.Remaining);
+        RemainingText = t.IsComplete ? Loc.T("Pg.Pronto") : t.IsWaiting ? Loc.T("Shell.EsperandoVoce") : ProcessText.Remaining(t.Remaining);
         ElapsedText = ProcessText.Clock(t.Elapsed);
         if (!t.IsComplete)
         {

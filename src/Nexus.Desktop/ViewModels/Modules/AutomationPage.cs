@@ -17,7 +17,7 @@ public sealed class RecommendationRow
     {
         Title = r.Title;
         Reason = r.Reason;
-        Gain = r.Gain is null ? "" : "Ganho esperado: " + r.Gain;
+        Gain = r.Gain is null ? "" : Loc.T("Auto.GanhoEsperado") + r.Gain;
         Kind = ScanReport.KindText(r.Kind.ToString());
         Tone = r.Kind switch
         {
@@ -26,10 +26,10 @@ public sealed class RecommendationRow
             RecommendationKind.Info => "muted",
             _ => "signal",
         };
-        var meta = new List<string> { $"prioridade {r.PriorityText}" };
-        if (r.Risk is { } risk) meta.Add($"risco {RiskModel.Text(risk)}");
-        if (r.Privileges == PrivilegeLevel.Admin) meta.Add("pede administrador");
-        if (r.OneClick) meta.Add("entra no Otimizar agora");
+        var meta = new List<string> { Loc.F("Auto.PrioridadeN", r.PriorityText) };
+        if (r.Risk is { } risk) meta.Add(Loc.F("Asst.RiscoN", RiskModel.Text(risk)));
+        if (r.Privileges == PrivilegeLevel.Admin) meta.Add(Loc.T("Auto.PedeAdministrador"));
+        if (r.OneClick) meta.Add(Loc.T("Auto.EntraOtimizarAgora"));
         Meta = string.Join(" · ", meta);
         DetailsCommand = details;
         IconKey = r.ModulePrefix is { } prefix ? PageText.ActionIcon(prefix) : r.Kind == RecommendationKind.Info ? "Icon.Hardware" : "Icon.Sparkle";
@@ -75,9 +75,9 @@ public sealed record OneClickRow(string Title, string Detail, string Level)
 /// </summary>
 public sealed class AutomationPage : ModulePage
 {
-    public override string Title => "Otimização automática";
+    public override string Title => Loc.T("Auto.OtimizacaoAutomatica");
     public override string Group => Loc.T("Nav.Automatico");
-    public override string Subtitle => "O NEXUS lê o seu PC, propõe o que vale a pena e aplica com segurança.";
+    public override string Subtitle => Loc.T("Auto.NexusLeSeuPc");
 
     private CatalogDocument? _catalog;
     private RecommendationSet? _set;
@@ -85,7 +85,7 @@ public sealed class AutomationPage : ModulePage
     private OneClickPlan _plan = OneClickPlan.Empty;
     private readonly List<(Guid Run, BrokerLevel Level)> _runs = [];
     private bool _shown, _planVerified, _refreshing;
-    private string _headline = "Lendo seu PC…";
+    private string _headline = Loc.T("Auto.LendoSeuPc");
     private IReadOnlyList<string> _chips = [];
     private IReadOnlyList<string> _notes = [];
     private IReadOnlyList<RecommendationRow> _recommendations = [];
@@ -93,11 +93,11 @@ public sealed class AutomationPage : ModulePage
     private IReadOnlyList<RecommendationRow> _advice = [];
     private IReadOnlyList<OneClickRow> _planRows = [];
     private IReadOnlyList<string> _planSkipped = [];
-    private string _planSummary = "O plano aparece depois da leitura do PC.";
+    private string _planSummary = Loc.T("Auto.PlanoApareceDepoisLeitura");
     private string _planGains = "";
     private string _planState = "";
     private string _result = "";
-    private string _scheduleText = "Lendo o Agendador…";
+    private string _scheduleText = Loc.T("Settings.LendoAgendador");
     private CleaningPlan _cleaning = CleaningPlan.None;
     private string _cleaningText = "";
 
@@ -150,14 +150,14 @@ public sealed class AutomationPage : ModulePage
     public bool HasSkipped => _planSkipped.Count > 0;
     public bool HasGains => _planGains.Length > 0;
     public bool HasCleaning => _cleaningText.Length > 0;
-    public string UndoText => CanUndo ? "Desfazer tudo" : "";
+    public string UndoText => CanUndo ? Loc.T("Auto.DesfazerTudo") : "";
     public double RecommendCount => _recommendations.Count;
     public double AvoidCount => _avoid.Count;
     public double AdviceCount => _advice.Count;
     public bool HasRecommendations => _recommendations.Count > 0;
     public bool NoRecommendations => _set is not null && _recommendations.Count == 0;
     public bool IsVerified => _planVerified;
-    public string SkippedTitle => _planSkipped.Count == 1 ? "1 ficou fora do plano" : $"{_planSkipped.Count} ficaram fora do plano";
+    public string SkippedTitle => _planSkipped.Count == 1 ? Loc.T("Auto.N1FicouForaPlano") : Loc.F("Auto.NFicaramForaPlano", _planSkipped.Count);
     public IReadOnlyList<string> ScheduleLines => _scheduleText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
     private void Raise(params string[] names)
@@ -191,7 +191,7 @@ public sealed class AutomationPage : ModulePage
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException or ArgumentException)
         {
-            Message = $"Não foi possível montar as recomendações: {ex.Message}";
+            Message = Loc.F("Auto.NaoFoiPossivelMontar", ex.Message);
         }
         finally { _refreshing = false; }
     }
@@ -215,18 +215,18 @@ public sealed class AutomationPage : ModulePage
 
     private void ShowProfile(PcProfile p, PcTraits t)
     {
-        Headline = "Seu PC: " + p.Headline;
+        Headline = Loc.T("Auto.SeuPc") + p.Headline;
         var chips = new List<string>();
-        if (p.Has(PcProfiler.OnBattery)) chips.Add(t.BatteryPercent is { } b ? $"Na bateria · {b}%" : "Na bateria");
-        else if (p.Has(PcProfiler.Laptop) && p.Has(PcProfiler.OnAc)) chips.Add("Na tomada");
-        if (p.Has(PcProfiler.Gamer)) chips.Add("Placa de vídeo dedicada");
-        if (p.Has(PcProfiler.GpuIntegratedOnly)) chips.Add("Só vídeo integrado");
-        if (p.Has(PcProfiler.LowRam)) chips.Add("Pouca memória");
-        if (p.Has(PcProfiler.Hdd)) chips.Add("Windows num HDD");
-        if (p.Has(PcProfiler.LowDisk)) chips.Add("Pouco espaço livre");
-        if (p.Has(PcProfiler.Win11)) chips.Add("Windows 11");
-        else if (p.Has(PcProfiler.Win10)) chips.Add("Windows 10");
-        if (t.SystemDriveBus is { } bus) chips.Add($"Disco {bus}");
+        if (p.Has(PcProfiler.OnBattery)) chips.Add(t.BatteryPercent is { } b ? Loc.F("Auto.BateriaN", b) : Loc.T("Auto.Bateria"));
+        else if (p.Has(PcProfiler.Laptop) && p.Has(PcProfiler.OnAc)) chips.Add(Loc.T("Auto.Tomada"));
+        if (p.Has(PcProfiler.Gamer)) chips.Add(Loc.T("Auto.PlacaVideoDedicada"));
+        if (p.Has(PcProfiler.GpuIntegratedOnly)) chips.Add(Loc.T("Auto.SoVideoIntegrado"));
+        if (p.Has(PcProfiler.LowRam)) chips.Add(Loc.T("Auto.PoucaMemoria"));
+        if (p.Has(PcProfiler.Hdd)) chips.Add(Loc.T("Auto.WindowsNumHdd"));
+        if (p.Has(PcProfiler.LowDisk)) chips.Add(Loc.T("Auto.PoucoEspacoLivre"));
+        if (p.Has(PcProfiler.Win11)) chips.Add(Loc.T("Auto.Windows11"));
+        else if (p.Has(PcProfiler.Win10)) chips.Add(Loc.T("Auto.Windows10"));
+        if (t.SystemDriveBus is { } bus) chips.Add(Loc.F("Auto.DiscoN", bus));
         ProfileChips = chips;
         ProfileNotes = p.Notes;
     }
@@ -269,13 +269,13 @@ public sealed class AutomationPage : ModulePage
     private void ShowPreview()
     {
         PlanRows = _candidates.Select(c => new OneClickRow(c.Recommendation.Title, c.Recommendation.Reason,
-            c.Recommendation.Privileges == PrivilegeLevel.Admin ? "administrador" : "sua conta")).ToList();
+            c.Recommendation.Privileges == PrivilegeLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta"))).ToList();
         PlanSkipped = [];
         PlanSummary = _candidates.Count == 0
-            ? "Nada de risco baixo a aplicar em um clique para este PC."
-            : $"{_candidates.Count} {(_candidates.Count == 1 ? "ação candidata" : "ações candidatas")} de risco baixo. Conferindo com o aplicador…";
+            ? Loc.T("Auto.NadaRiscoBaixoAplicar")
+            : Loc.F("Auto.NNRiscoBaixo", _candidates.Count, (_candidates.Count == 1 ? Loc.T("Auto.AcaoCandidata") : Loc.T("Auto.AcoesCandidatas")));
         PlanGains = string.Join(Environment.NewLine, _candidates.Select(c => c.Recommendation.Gain).Where(g => g is not null).Distinct());
-        PlanState = "prévia";
+        PlanState = Loc.T("Auto.Previa");
         OnPropertyChanged(nameof(PlanCountText));
         Raise(nameof(PlanNumber), nameof(IsVerified));
     }
@@ -288,7 +288,7 @@ public sealed class AutomationPage : ModulePage
         _cleaning = await PrepareCleaningAsync(host);
         if (_candidates.Count == 0) { _plan = OneClickPlan.Empty; _planVerified = true; ShowPlan(); return; }
         var (results, problem) = await OneClickPlanner.SimulateAsync(_candidates.Select(c => c.Request).ToList(), q => host.PlanAsync(q, BrokerLevel.User));
-        if (problem is not null) { PlanState = "prévia (aplicador indisponível)"; Message = problem; return; }
+        if (problem is not null) { PlanState = Loc.T("Auto.PreviaAplicadorIndisponivel"); Message = problem; return; }
         _plan = OneClickPlanner.Build(_candidates, results);
         _planVerified = true;
         ShowPlan();
@@ -320,7 +320,7 @@ public sealed class AutomationPage : ModulePage
         var batch = CleaningBatchId.New(DateTime.UtcNow);
         var requests = SafeCleaningSelector.Requests(prep.safe, batch);
         var (results, problem) = await OneClickPlanner.SimulateAsync(requests, q => host.PlanAsync(q, BrokerLevel.User));
-        if (problem is not null) { CleaningText = $"Limpeza segura: {SafeCleaningSelector.Bytes(prep.before)} recuperáveis (aplicador indisponível para conferir)."; return CleaningPlan.None; }
+        if (problem is not null) { CleaningText = Loc.F("Auto.LimpezaSeguraNRecuperaveis", SafeCleaningSelector.Bytes(prep.before)); return CleaningPlan.None; }
         var pending = new List<ActionRequest>();
         var rules = new List<CleaningRule>();
         var skipped = new List<string>();
@@ -331,30 +331,30 @@ public sealed class AutomationPage : ModulePage
             else if (r is { Outcome: "Blocked" }) skipped.Add($"{item.Title}: {r.Detail}");
         }
         CleaningText = pending.Count == 0
-            ? "Limpeza segura: nada para limpar agora."
-            : $"Limpeza segura: {pending.Count} {(pending.Count == 1 ? "regra" : "regras")}, {SafeCleaningSelector.Bytes(prep.before)} recuperáveis (vão para a quarentena, com desfazer)."
-              + (skipped.Count > 0 ? $" {skipped.Count} pulada(s) por programa aberto." : "");
+            ? Loc.T("Auto.LimpezaSeguraNadaLimpar")
+            : Loc.F("Auto.LimpezaSeguraNN", pending.Count, (pending.Count == 1 ? Loc.T("Auto.Regra") : Loc.T("Auto.Regras")), SafeCleaningSelector.Bytes(prep.before))
+              + (skipped.Count > 0 ? Loc.F("Auto.NPuladaSPrograma", skipped.Count) : "");
         return new CleaningPlan(pending, rules, batch, prep.before, prep.folders, skipped);
     }
 
     private string CleaningConfirmation()
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine(CultureInfo.InvariantCulture, $"Limpeza segura ({_cleaning.Requests.Count} {(_cleaning.Requests.Count == 1 ? "regra" : "regras")}, cerca de {SafeCleaningSelector.Bytes(_cleaning.Before)}):");
+        sb.AppendLine(Loc.F("Auto.LimpezaSeguraNN2", _cleaning.Requests.Count, (_cleaning.Requests.Count == 1 ? Loc.T("Auto.Regra") : Loc.T("Auto.Regras")), SafeCleaningSelector.Bytes(_cleaning.Before)));
         foreach (var rule in _cleaning.Rules) sb.AppendLine(CultureInfo.InvariantCulture, $"• {rule.Title}");
-        sb.Append("Só caches e temporários da sua conta. Nada é apagado: vai para a quarentena do NEXUS e volta em \"Desfazer tudo\" ou em Limpeza > Histórico.");
+        sb.Append(Loc.T("Auto.SoCachesTemporariosSua"));
         return sb.ToString();
     }
 
     private void ShowPlan()
     {
         PlanRows = _plan.User.Concat(_plan.Admin).Select(i => new OneClickRow(i.Recommendation.Title, i.Recommendation.Reason,
-            i.Level == BrokerLevel.Admin ? "administrador" : "sua conta")).ToList();
+            i.Level == BrokerLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta"))).ToList();
         PlanSkipped = _plan.Skipped.Select(s => $"{s.Recommendation.Title}: {s.Reason}").ToList();
         PlanSummary = _plan.Summary;
         PlanGains = string.Join(Environment.NewLine, _plan.Gains);
-        PlanState = "confirmado pelo aplicador";
-        if (_plan.IsEmpty && _cleaning.Requests.Count > 0) PlanSummary = "Os ajustes de um clique já estão assim; falta só a limpeza segura.";
+        PlanState = Loc.T("Auto.ConfirmadoPeloAplicador");
+        if (_plan.IsEmpty && _cleaning.Requests.Count > 0) PlanSummary = Loc.T("Auto.AjustesCliqueJaEstao");
         OnPropertyChanged(nameof(PlanCount));
         OnPropertyChanged(nameof(PlanCountText));
         Raise(nameof(PlanNumber), nameof(IsVerified));
@@ -382,10 +382,10 @@ public sealed class AutomationPage : ModulePage
                 confirmation = (_plan.User.Count > 0 ? confirmation + Environment.NewLine + Environment.NewLine : "") + CleaningConfirmation();
             }
             if (requests.Count == 0) continue;
-            var title = level == BrokerLevel.User ? "Otimizar agora" : "Otimizar agora: mudanças de sistema";
+            var title = level == BrokerLevel.User ? Loc.T("Auto.OtimizarAgora") : Loc.T("Auto.OtimizarAgoraMudancasSistema");
             var r = await Host.ApplyAsync(title, confirmation, requests, level);
             if (level == BrokerLevel.User && r is { Response.Ok: true } && cleaning.Requests.Count > 0) cleaned = true;
-            if (r is null) { lines.Add(level == BrokerLevel.User ? "Cancelado. Nada foi alterado." : "Mudanças de sistema canceladas; as da sua conta continuam aplicadas."); break; }
+            if (r is null) { lines.Add(level == BrokerLevel.User ? Loc.T("Shell.CanceladoNadaFoiAlterado") : Loc.T("Auto.MudancasSistemaCanceladasSua")); break; }
             lines.Add(r.Message);
             if (r.Response is { Ok: true, RunId: { } run }) _runs.Add((run, level));
             else break;
@@ -394,8 +394,8 @@ public sealed class AutomationPage : ModulePage
         {
             var after = await Task.Run(() => SafeCleaningSelector.MeasureAsync(cleaning.Rules, folders, SystemProcessProbe.Instance));
             var moved = await Task.Run(() => MovedBytes(cleaning.Batch));
-            lines.Add($"Espaço recuperável nas regras seguras: antes {SafeCleaningSelector.Bytes(cleaning.Before)} → depois {SafeCleaningSelector.Bytes(after)}. " +
-                      $"{SafeCleaningSelector.Bytes(moved)} foram para a quarentena (no mesmo disco: o espaço volta de fato quando ela for esvaziada).");
+            lines.Add(Loc.F("Auto.EspacoRecuperavelNasRegras", SafeCleaningSelector.Bytes(cleaning.Before), SafeCleaningSelector.Bytes(after)) +
+                      Loc.F("Auto.NForamQuarentenaMesmo", SafeCleaningSelector.Bytes(moved)));
         }
         Result = string.Join(Environment.NewLine, lines);
         OnPropertyChanged(nameof(CanUndo));
@@ -421,7 +421,7 @@ public sealed class AutomationPage : ModulePage
     public async Task<(string? Report, string Summary)> SaveReportAsync()
     {
         var facts = Host?.Facts;
-        if (facts is null || _set is null || _catalog is null) return (null, "A leitura do PC ainda não terminou.");
+        if (facts is null || _set is null || _catalog is null) return (null, Loc.T("Auto.LeituraPcAindaNao"));
         var set = _set;
         var version = _catalog.CatalogVersion;
         return await Task.Run(() =>
@@ -431,7 +431,7 @@ public sealed class AutomationPage : ModulePage
             var files = scan.Save(ScanReport.DefaultDirectory, html: true);
             var attention = findings.Count(f => f.Severity == DiagnosticSeverity.Attention);
             return ((string?)files.FirstOrDefault(f => f.EndsWith(".html", StringComparison.OrdinalIgnoreCase)),
-                $"{attention} ponto(s) pedem atenção · {set.Actionable.Count()} recomendação(ões).");
+                Loc.F("Auto.NPontoSPedem", attention, set.Actionable.Count()));
         });
     }
 
@@ -443,7 +443,7 @@ public sealed class AutomationPage : ModulePage
         foreach (var (run, level) in Enumerable.Reverse(_runs).ToList())
         {
             var r = await Host.RevertAsync(run, level);
-            if (r is null) { lines.Add("Desfazer cancelado."); break; }
+            if (r is null) { lines.Add(Loc.T("Auto.DesfazerCancelado")); break; }
             lines.Add(r.Message);
             if (r.Response?.FullyRestored == true) _runs.Remove((run, level));
         }
@@ -460,8 +460,8 @@ public sealed class AutomationPage : ModulePage
             AutomationHandlers.ReadTaskStatus(NexusTaskKind.Scan, AutomationScheduledScanHandler.DefaultExecutable),
             AutomationHandlers.ReadTaskStatus(NexusTaskKind.Clean, AutomationScheduledScanHandler.DefaultExecutable),
             AutomationHandlers.ReadScheduledScanState(AutomationScheduledScanHandler.DefaultExecutable).State));
-        var lines = new List<string> { $"Verificação: {scan.Describe()}", $"Limpeza segura: {clean.Describe()}" };
-        if (legacy != ScanSchedule.Off) lines.Add("A verificação semanal antiga também está ligada (dá para desligar em Ajustes).");
+        var lines = new List<string> { Loc.F("Auto.VerificacaoN", scan.Describe()), Loc.F("Auto.LimpezaSeguraN", clean.Describe()) };
+        if (legacy != ScanSchedule.Off) lines.Add(Loc.T("Auto.VerificacaoSemanalAntigaTambem"));
         ScheduleText = string.Join(Environment.NewLine, lines);
     }
 }

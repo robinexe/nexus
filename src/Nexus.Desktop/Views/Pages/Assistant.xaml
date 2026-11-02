@@ -12,6 +12,7 @@
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
                     xmlns:opt="clr-namespace:Nexus.Desktop.Views.Optimize">
@@ -98,7 +99,7 @@
       <DataTemplate x:Key="As.UserAction" DataType="{x:Type vm:UserActionRow}">
         <Border Style="{StaticResource Panel.Notice}" Margin="0,0,0,8">
           <DockPanel>
-            <Button DockPanel.Dock="Right" Content="Abrir página" Style="{StaticResource Button.Ghost}" Command="{Binding OpenCommand}" VerticalAlignment="Top"
+            <Button DockPanel.Dock="Right" Content="{l:T Asst.AbrirPagina}" Style="{StaticResource Button.Ghost}" Command="{Binding OpenCommand}" VerticalAlignment="Top"
                     Margin="12,0,0,0" Visibility="{Binding HasLink, Converter={StaticResource BoolToVis}}"/>
             <c:Icon Data="{StaticResource Icon.User}" Size="18" Foreground="{StaticResource Brush.Trace}" Margin="0,1,12,0" VerticalAlignment="Top"/>
             <StackPanel>
@@ -170,7 +171,7 @@
         <Border Background="{StaticResource Brush.Bg}" BorderBrush="{StaticResource Brush.TraceLine}" BorderThickness="1"
                 CornerRadius="{StaticResource Radius.Panel}" ClipToBounds="True" Margin="0,0,0,18" SnapsToDevicePixels="True"
                 Visibility="{Binding ProcessView.IsVisible, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding ProcessView.IsVisible}"
-                AutomationProperties.Name="Andamento da etapa">
+                AutomationProperties.Name="{l:T Asst.AndamentoEtapa}">
           <Grid>
             <Rectangle Fill="{StaticResource Brush.Graticule}" Opacity="0.35"/>
             <Rectangle>
@@ -196,9 +197,9 @@
                   <StackPanel Orientation="Horizontal">
                     <Ellipse Width="8" Height="8" Fill="{Binding RingTone, Converter={StaticResource ToneBrush}}" VerticalAlignment="Center" Margin="0,0,7,0"
                              c:Pulse.IsOn="{Binding IsRunning}"/>
-                    <TextBlock Text="ao vivo" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
+                    <TextBlock Text="{l:T Shell.Vivo}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
                                Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
-                    <TextBlock Text="concluído" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
+                    <TextBlock Text="{l:T Shell.Concluido}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" FontFamily="{StaticResource Font.Numbers}"
                                Visibility="{Binding IsFinished, Converter={StaticResource BoolToVis}}"/>
                   </StackPanel>
                 </Border>
@@ -225,21 +226,21 @@
                   <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <c:AnimatedNumber Value="{Binding Percent}" Kind="Percent" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="58"
                                       Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center" AutomationProperties.LiveSetting="Off"/>
-                    <TextBlock Text="concluído" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" Margin="0,-6,0,0"/>
+                    <TextBlock Text="{l:T Shell.Concluido}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" Margin="0,-6,0,0"/>
                   </StackPanel>
                 </Grid>
 
                 <StackPanel Grid.Column="1" Margin="34,6,0,0">
                   <UniformGrid Columns="2" Margin="0,0,0,16">
                     <StackPanel>
-                      <TextBlock Text="Tempo restante" Style="{StaticResource Text.MetricLabel}"/>
+                      <TextBlock Text="{l:T Shell.TempoRestante}" Style="{StaticResource Text.MetricLabel}"/>
                       <TextBlock Text="{Binding RemainingText}" FontFamily="{StaticResource Font.Numbers}" FontSize="30" Foreground="{StaticResource Brush.Trace}"
-                                 TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" AutomationProperties.Name="Tempo restante"/>
+                                 TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" AutomationProperties.Name="{l:T Shell.TempoRestante}"/>
                     </StackPanel>
                     <StackPanel>
-                      <TextBlock Text="Decorrido" Style="{StaticResource Text.MetricLabel}"/>
+                      <TextBlock Text="{l:T Shell.Decorrido}" Style="{StaticResource Text.MetricLabel}"/>
                       <TextBlock Text="{Binding ElapsedText}" FontFamily="{StaticResource Font.Numbers}" FontSize="30" Foreground="{StaticResource Brush.Signal}"
-                                 TextWrapping="NoWrap" Margin="0,2,0,0" AutomationProperties.Name="Tempo decorrido"/>
+                                 TextWrapping="NoWrap" Margin="0,2,0,0" AutomationProperties.Name="{l:T Shell.TempoDecorrido}"/>
                     </StackPanel>
                   </UniformGrid>
 
@@ -262,17 +263,17 @@
                       <DockPanel>
                         <Border DockPanel.Dock="Right" Background="{StaticResource Brush.SignalSoft}" CornerRadius="{StaticResource Radius.Chip}" Padding="8,2" Margin="10,0,0,0"
                                 VerticalAlignment="Top" Visibility="{Binding CurrentIsEstimate, Converter={StaticResource BoolToVis}}"
-                                ToolTip="O aplicador responde no fim de cada grupo; o item de agora é estimado pelo tempo típico de cada parte.">
-                          <TextBlock Text="estimativa" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" FontSize="11.5"/>
+                                ToolTip="{l:T Asst.AplicadorRespondeFimCada}">
+                          <TextBlock Text="{l:T Shell.Estimativa}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" FontSize="11.5"/>
                         </Border>
-                        <TextBlock Text="Agora" Style="{StaticResource Text.MetricLabel}"/>
+                        <TextBlock Text="{l:T Shell.Agora}" Style="{StaticResource Text.MetricLabel}"/>
                       </DockPanel>
                       <TextBlock Text="{Binding CurrentText}" Style="{StaticResource Text.Body}" FontSize="15" Margin="0,4,0,0" MaxHeight="42" TextTrimming="CharacterEllipsis"
                                  ToolTip="{Binding CurrentText}" AutomationProperties.LiveSetting="Polite"/>
                       <TextBlock Text="{Binding SummaryText}" FontFamily="{StaticResource Font.Numbers}" FontSize="22" Foreground="{StaticResource Brush.Good}" Margin="0,6,0,0"
                                  TextWrapping="Wrap" Visibility="{Binding IsFinished, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding IsFinished}"
                                  AutomationProperties.LiveSetting="Assertive"/>
-                      <TextBlock Text="Responda à janela de confirmação para continuar. O tempo restante volta a contar depois." Style="{StaticResource Text.Small}"
+                      <TextBlock Text="{l:T Asst.RespondaJanelaConfirmacaoContinuar}" Style="{StaticResource Text.Small}"
                                  Foreground="{StaticResource Brush.Signal}" Margin="0,6,0,0" Visibility="{Binding IsWaiting, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
                   </Border>
@@ -280,7 +281,7 @@
                   <!-- Barra das 13 etapas -->
                   <DockPanel Margin="0,18,0,6">
                     <TextBlock DockPanel.Dock="Right" Text="{Binding Position}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}"/>
-                    <TextBlock Text="As 13 etapas" Style="{StaticResource Text.MetricLabel}"/>
+                    <TextBlock Text="{l:T Asst.N13Etapas}" Style="{StaticResource Text.MetricLabel}"/>
                   </DockPanel>
                   <ItemsControl ItemsSource="{Binding Segments}" Focusable="False" Margin="-2,0">
                     <ItemsControl.ItemsPanel>
@@ -311,8 +312,8 @@
 
               <!-- Feed: cada tarefa com estado; resultados do aplicador recuados embaixo do lote -->
               <DockPanel Margin="0,0,0,8">
-                <TextBlock DockPanel.Dock="Right" Text="atualiza sozinho" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
-                <TextBlock Text="O que está acontecendo" Style="{StaticResource Text.H2}"/>
+                <TextBlock DockPanel.Dock="Right" Text="{l:T Shell.AtualizaSozinho}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
+                <TextBlock Text="{l:T Shell.EstaAcontecendo}" Style="{StaticResource Text.H2}"/>
               </DockPanel>
               <Border Style="{StaticResource Panel.Inset}" Padding="14,8">
                 <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource As.FeedRow}" Focusable="False"/>
@@ -320,7 +321,7 @@
 
               <!-- Cancelar só onde é de verdade (leitura); aplicando, diz por que não. -->
               <DockPanel Margin="0,14,0,0">
-                <Button DockPanel.Dock="Right" Content="Cancelar leitura" Style="{StaticResource Button.Ghost}"
+                <Button DockPanel.Dock="Right" Content="{l:T Asst.CancelarLeitura}" Style="{StaticResource Button.Ghost}"
                         Command="{Binding DataContext.CancelScanCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                         Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}"/>
                 <StackPanel Orientation="Horizontal" Visibility="{Binding IsApply, Converter={StaticResource BoolToVis}}">
@@ -337,30 +338,30 @@
 
         <!-- ================================================================ TELA INICIAL -->
         <StackPanel Visibility="{Binding ShowStart, Converter={StaticResource BoolToVis}}">
-          <c:HeroPanel Illustration="{StaticResource Illo.Assistant}" Title="Deixe o PC otimizado, passo a passo"
-                       Number="{x:Static vm:AssistantPage.StepCount}" Suffix=" etapas" Caption="{Binding StartText}"
+          <c:HeroPanel Illustration="{StaticResource Illo.Assistant}" Title="{l:T Asst.DeixePcOtimizadoPasso}"
+                       Number="{x:Static vm:AssistantPage.StepCount}" Suffix="{l:T Asst.Etapas}" Caption="{Binding StartText}"
                        ActionText="{Binding StartActionText}" Command="{Binding StartActionCommand}"
                        SecondaryText="{Binding RestartText}" SecondaryCommand="{Binding StartCommand}">
             <StackPanel Width="200">
-              <c:StatusChip Tone="Good" Text="Tudo pode ser desfeito" HorizontalAlignment="Left"/>
-              <c:StatusChip Tone="Info" Text="Você confirma cada grupo" HorizontalAlignment="Left" Margin="0,8,0,0"/>
-              <c:StatusChip Tone="Info" Text="Relatório no fim" HorizontalAlignment="Left" Margin="0,8,0,0"/>
-              <Button Content="Desfazer tudo que o assistente fez" Style="{StaticResource Button.Danger}" Command="{Binding UndoAllCommand}" Margin="0,14,0,0"
+              <c:StatusChip Tone="Good" Text="{l:T Asst.TudoPodeSerDesfeito}" HorizontalAlignment="Left"/>
+              <c:StatusChip Tone="Info" Text="{l:T Asst.VoceConfirmaCadaGrupo}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+              <c:StatusChip Tone="Info" Text="{l:T Asst.RelatorioFim}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+              <Button Content="{l:T Asst.DesfazerTudoAssistenteFez}" Style="{StaticResource Button.Danger}" Command="{Binding UndoAllCommand}" Margin="0,14,0,0"
                       HorizontalAlignment="Left" Visibility="{Binding CanUndoAll, Converter={StaticResource BoolToVis}}"/>
             </StackPanel>
           </c:HeroPanel>
 
           <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,22">
             <StackPanel>
-              <TextBlock Text="Como funciona" Style="{StaticResource Text.H2}" Margin="0,0,0,14"/>
+              <TextBlock Text="{l:T Asst.ComoFunciona}" Style="{StaticResource Text.H2}" Margin="0,0,0,14"/>
               <c:HowItWorks>
-                <c:StepItem Icon="{StaticResource Icon.Search}" Title="Verifica" Text="Cada etapa lê uma parte do PC. Ler não muda nada."/>
-                <c:StepItem Icon="{StaticResource Icon.Info}" Title="Explica" Text="Mostra os números e o que recomenda, com o risco."/>
-                <c:StepItem Icon="{StaticResource Icon.Check}" Title="Você confirma" Text="Nada é aplicado sem o seu clique." Tone="Warn"/>
-                <c:StepItem Icon="{StaticResource Icon.Undo}" Title="Relatório e desfazer" Text="No fim, antes → depois. Tudo pode voltar." Tone="Good"/>
+                <c:StepItem Icon="{StaticResource Icon.Search}" Title="{l:T Asst.Verifica}" Text="{l:T Asst.CadaEtapaLeParte}"/>
+                <c:StepItem Icon="{StaticResource Icon.Info}" Title="{l:T Asst.Explica}" Text="{l:T Asst.MostraNumerosRecomendaRisco}"/>
+                <c:StepItem Icon="{StaticResource Icon.Check}" Title="{l:T Pg.VoceConfirma}" Text="{l:T Pg.NadaAplicadoSemSeu}" Tone="Warn"/>
+                <c:StepItem Icon="{StaticResource Icon.Undo}" Title="{l:T Asst.RelatorioDesfazer}" Text="{l:T Asst.FimAntesDepoisTudo}" Tone="Good"/>
               </c:HowItWorks>
               <c:ExplainToggle Margin="0,12,0,0"
-                               Content="13 etapas: segurança primeiro, depois limpeza, programas, inicialização, privacidade, drivers, memória e desempenho. Leva de 10 a 20 minutos e dá para parar e retomar quando quiser."/>
+                               Content="{l:T Asst.N13EtapasSegurancaPrimeiro}"/>
             </StackPanel>
           </Border>
         </StackPanel>
@@ -368,7 +369,7 @@
         <!-- ================================================================ TRILHA (início e passo a passo) -->
         <DockPanel Margin="0,0,0,8">
           <TextBlock DockPanel.Dock="Right" Text="{Binding ProgressText}" Style="{StaticResource Text.Small}" VerticalAlignment="Bottom"/>
-          <TextBlock Text="As 13 etapas" Style="{StaticResource Text.H2}"/>
+          <TextBlock Text="{l:T Asst.N13Etapas}" Style="{StaticResource Text.H2}"/>
         </DockPanel>
         <Border Style="{StaticResource Panel.Card}" Padding="10,10,10,8" Margin="0,0,0,18">
           <ItemsControl ItemsSource="{Binding StepBar}" ItemTemplate="{StaticResource As.Node}" Focusable="False">
@@ -387,11 +388,11 @@
           <c:HeroPanel Illustration="{Binding StepIllustrationKey, Converter={StaticResource ResourceByKey}}" Title="{Binding StepCounter}"
                        ValueText="{Binding StepTitle}" Caption="{Binding StepChecks}">
             <StackPanel Width="164">
-              <c:RingMeter Value="{Binding ProgressPercent}" Label="concluído" Width="136" Height="136" Thickness="11" HorizontalAlignment="Center"/>
+              <c:RingMeter Value="{Binding ProgressPercent}" Label="{l:T Shell.Concluido}" Width="136" Height="136" Thickness="11" HorizontalAlignment="Center"/>
               <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Text.Small}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,10,0,0"/>
             </StackPanel>
           </c:HeroPanel>
-          <c:ExplainToggle Header="Por que importa?" Margin="0,0,0,16">
+          <c:ExplainToggle Header="{l:T Asst.Importa}" Margin="0,0,0,16">
             <TextBlock Text="{Binding StepWhy}" Style="{StaticResource Text.Small}"/>
           </c:ExplainToggle>
 
@@ -399,7 +400,7 @@
           <Border Style="{StaticResource Panel.Card}" Padding="20,16" Margin="0,0,0,14" Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}">
             <StackPanel>
               <DockPanel Margin="0,0,0,14">
-                <Button DockPanel.Dock="Right" Content="Cancelar" Style="{StaticResource Button.Ghost}" Command="{Binding CancelScanCommand}"/>
+                <Button DockPanel.Dock="Right" Content="{l:T Asst.Cancelar}" Style="{StaticResource Button.Ghost}" Command="{Binding CancelScanCommand}"/>
                 <c:Icon Data="{Binding StepIconKey, Converter={StaticResource ResourceByKey}}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding ScanStatus}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"
                            AutomationProperties.LiveSetting="Polite"/>
@@ -411,7 +412,7 @@
           <!-- Etapa normal -->
           <StackPanel Visibility="{Binding ShowStep, Converter={StaticResource BoolToVis}}">
             <StackPanel Visibility="{Binding IsNormalStep, Converter={StaticResource BoolToVis}}">
-              <TextBlock Text="O que encontrei" Style="{StaticResource Text.H2}" Margin="0,0,0,10" Visibility="{Binding HasFacts, Converter={StaticResource BoolToVis}}"/>
+              <TextBlock Text="{l:T Asst.Encontrei}" Style="{StaticResource Text.H2}" Margin="0,0,0,10" Visibility="{Binding HasFacts, Converter={StaticResource BoolToVis}}"/>
               <ItemsControl ItemsSource="{Binding FactCards}" Focusable="False" Margin="-6,0,-6,8">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>
@@ -437,7 +438,7 @@
                       <c:Icon Data="{StaticResource Icon.Sparkle}" Size="19" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
                     </Grid>
                     <StackPanel>
-                      <TextBlock Text="Recomendo" Style="{StaticResource Text.MetricLabel}" Foreground="{StaticResource Brush.Trace}"/>
+                      <TextBlock Text="{l:T Asst.Recomendo}" Style="{StaticResource Text.MetricLabel}" Foreground="{StaticResource Brush.Trace}"/>
                       <TextBlock Text="{Binding Recommendation}" Style="{StaticResource Text.H2}" Margin="0,4,0,0"/>
                       <TextBlock Text="{Binding ChangesSummary}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"
                                  Visibility="{Binding HasChanges, Converter={StaticResource BoolToVis}}"/>
@@ -446,17 +447,17 @@
                   <ItemsControl ItemsSource="{Binding Changes}" ItemTemplate="{StaticResource As.Change}" Focusable="False" Margin="0,12,0,0"
                                 Visibility="{Binding Choosing, Converter={StaticResource BoolToVis}}" opt:Reveal.Trigger="{Binding Choosing}"/>
                   <WrapPanel Margin="0,14,0,0">
-                    <Button Content="Aplicar recomendado" Style="{StaticResource Button.Primary}" Command="{Binding ApplyRecommendedCommand}" Margin="0,0,10,8"
+                    <Button Content="{l:T Asst.AplicarRecomendado}" Style="{StaticResource Button.Primary}" Command="{Binding ApplyRecommendedCommand}" Margin="0,0,10,8"
                             Visibility="{Binding HasChanges, Converter={StaticResource BoolToVis}}"/>
-                    <Button Content="Aplicar marcados" Style="{StaticResource Button.Primary}" Command="{Binding ApplySelectedCommand}" Margin="0,0,10,8"
+                    <Button Content="{l:T Asst.AplicarMarcados}" Style="{StaticResource Button.Primary}" Command="{Binding ApplySelectedCommand}" Margin="0,0,10,8"
                             Visibility="{Binding Choosing, Converter={StaticResource BoolToVis}}"/>
-                    <Button Content="Escolher" Style="{StaticResource Button.Secondary}" Command="{Binding ChooseCommand}" Margin="0,0,10,8"
+                    <Button Content="{l:T Asst.Escolher}" Style="{StaticResource Button.Secondary}" Command="{Binding ChooseCommand}" Margin="0,0,10,8"
                             Visibility="{Binding HasChanges, Converter={StaticResource BoolToVis}}"/>
-                    <Button Content="Continuar" Style="{StaticResource Button.Primary}" Command="{Binding ContinueCommand}" Margin="0,0,10,8"
+                    <Button Content="{l:T Asst.Continuar}" Style="{StaticResource Button.Primary}" Command="{Binding ContinueCommand}" Margin="0,0,10,8"
                             Visibility="{Binding NoChanges, Converter={StaticResource BoolToVis}}"/>
-                    <Button Content="Seguir sem aplicar" Style="{StaticResource Button.Ghost}" Command="{Binding ContinueCommand}" Margin="0,0,10,8"
+                    <Button Content="{l:T Asst.SeguirSemAplicar}" Style="{StaticResource Button.Ghost}" Command="{Binding ContinueCommand}" Margin="0,0,10,8"
                             Visibility="{Binding HasChanges, Converter={StaticResource BoolToVis}}"/>
-                    <Button Content="Pular etapa" Style="{StaticResource Button.Ghost}" Command="{Binding SkipCommand}" Margin="0,0,10,8"/>
+                    <Button Content="{l:T Asst.PularEtapa}" Style="{StaticResource Button.Ghost}" Command="{Binding SkipCommand}" Margin="0,0,10,8"/>
                   </WrapPanel>
                 </StackPanel>
               </Border>
@@ -466,7 +467,7 @@
                 <StackPanel>
                   <DockPanel Margin="0,0,0,6">
                     <c:Icon Data="{StaticResource Icon.Search}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0"/>
-                    <TextBlock Text="Para você revisar" Style="{StaticResource Text.H2}"/>
+                    <TextBlock Text="{l:T Asst.VoceRevisar}" Style="{StaticResource Text.H2}"/>
                   </DockPanel>
                   <ItemsControl ItemsSource="{Binding Review}" Focusable="False">
                     <ItemsControl.ItemTemplate>
@@ -517,14 +518,14 @@
             <StackPanel Visibility="{Binding IsReportStep, Converter={StaticResource BoolToVis}}">
               <UniformGrid Columns="3" Margin="-7,0,-7,16">
                 <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Check}" Number="{Binding ReportAppliedNumber}" Tone="Good"
-                            Label="Mudanças aplicadas" Detail="Todas com desfazer registrado."/>
+                            Label="{l:T Asst.MudancasAplicadas}" Detail="{l:T Asst.TodasDesfazerRegistrado}"/>
                 <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Info}" Number="{Binding ReportSkippedNumber}"
-                            Label="Ficaram de fora" Detail="Cada uma com o motivo no relatório."/>
+                            Label="{l:T Asst.FicaramFora}" Detail="{l:T Asst.CadaMotivoRelatorio}"/>
                 <c:StatTile Margin="7,0" Icon="{StaticResource Icon.User}" Number="{Binding ReportUserActionsNumber}" Tone="Warn"
-                            Label="Para você fazer" Detail="O que só você pode resolver."/>
+                            Label="{l:T Asst.VoceFazer}" Detail="{l:T Asst.SoVocePodeResolver}"/>
               </UniformGrid>
 
-              <TextBlock Text="Antes → depois" Style="{StaticResource Text.H2}" Margin="0,0,0,10"/>
+              <TextBlock Text="{l:T Asst.AntesDepois}" Style="{StaticResource Text.H2}" Margin="0,0,0,10"/>
               <ItemsControl ItemsSource="{Binding ReportCards}" Focusable="False" Margin="-7,0">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>
@@ -537,7 +538,7 @@
                       <StackPanel>
                         <TextBlock Text="{Binding Label}" Style="{StaticResource Text.MetricLabel}"/>
                         <c:BeforeAfter Before="{Binding Before}" After="{Binding After}" Kind="{Binding Kind}" HigherIsBetter="{Binding HigherIsBetter}"
-                                       BeforeLabel="Antes" AfterLabel="Depois" Margin="0,10,0,0"
+                                       BeforeLabel="{l:T Shell.Antes}" AfterLabel="{l:T Shell.Depois}" Margin="0,10,0,0"
                                        Visibility="{Binding HasBars, Converter={StaticResource BoolToVis}}"/>
                         <TextBlock Text="{Binding Display}" Style="{StaticResource Text.Readout}" Margin="0,6,0,0"
                                    Visibility="{Binding NoBars, Converter={StaticResource BoolToVis}}"/>
@@ -559,7 +560,7 @@
                       <c:Icon Data="{StaticResource Icon.ArrowRight}" Size="19" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
                     </Grid>
                     <StackPanel>
-                      <TextBlock Text="Próximo passo" Style="{StaticResource Text.MetricLabel}" Foreground="{StaticResource Brush.Trace}"/>
+                      <TextBlock Text="{l:T Asst.ProximoPasso}" Style="{StaticResource Text.MetricLabel}" Foreground="{StaticResource Brush.Trace}"/>
                       <TextBlock Text="{Binding ReportNextStep}" Style="{StaticResource Text.H2}" Margin="0,4,0,0"/>
                     </StackPanel>
                   </DockPanel>
@@ -567,16 +568,16 @@
                     <Button Style="{StaticResource Button.Primary}" Command="{Binding OpenReportCommand}" Margin="0,0,10,8">
                       <StackPanel Orientation="Horizontal">
                         <c:Icon Data="{StaticResource Icon.Page}" Size="14" Margin="0,0,6,0"/>
-                        <TextBlock Text="Abrir relatório" TextWrapping="NoWrap"/>
+                        <TextBlock Text="{l:T Settings.AbrirRelatorio}" TextWrapping="NoWrap"/>
                       </StackPanel>
                     </Button>
                     <Button Style="{StaticResource Button.Secondary}" Command="{Binding ExportReportCommand}" Margin="0,0,10,8">
                       <StackPanel Orientation="Horizontal">
                         <c:Icon Data="{StaticResource Icon.Export}" Size="14" Margin="0,0,6,0"/>
-                        <TextBlock Text="Exportar" TextWrapping="NoWrap"/>
+                        <TextBlock Text="{l:T Asst.Exportar}" TextWrapping="NoWrap"/>
                       </StackPanel>
                     </Button>
-                    <Button Content="Concluir" Style="{StaticResource Button.Secondary}" Command="{Binding FinishCommand}" Margin="0,0,10,8"/>
+                    <Button Content="{l:T Asst.Concluir}" Style="{StaticResource Button.Secondary}" Command="{Binding FinishCommand}" Margin="0,0,10,8"/>
                   </WrapPanel>
                   <TextBlock Text="{Binding ReportPath}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"
                              TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding ReportPath}"/>
@@ -604,11 +605,11 @@
                       <ScaleTransform ScaleX="-1"/>
                     </c:Icon.RenderTransform>
                   </c:Icon>
-                  <TextBlock Text="Voltar" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{l:T Asst.Voltar}" TextWrapping="NoWrap"/>
                 </StackPanel>
               </Button>
-              <Button Content="Parar e continuar depois" Style="{StaticResource Button.Ghost}" Command="{Binding StopCommand}" Margin="0,0,10,8"/>
-              <Button Content="Desfazer tudo que o assistente fez" Style="{StaticResource Button.Danger}" Command="{Binding UndoAllCommand}" Margin="0,0,10,8"
+              <Button Content="{l:T Asst.PararContinuarDepois}" Style="{StaticResource Button.Ghost}" Command="{Binding StopCommand}" Margin="0,0,10,8"/>
+              <Button Content="{l:T Asst.DesfazerTudoAssistenteFez}" Style="{StaticResource Button.Danger}" Command="{Binding UndoAllCommand}" Margin="0,0,10,8"
                       Visibility="{Binding CanUndoAll, Converter={StaticResource BoolToVis}}"/>
             </WrapPanel>
           </Border>
