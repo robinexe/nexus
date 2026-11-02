@@ -1916,8 +1916,140 @@ Undo: returns exactly to the previous setting.</value></data>
 
 Risk: low; it takes a few GB on disk.
 </value></data>
+  <data name="MemDoc.Administrador" xml:space="preserve"><value>administrator · </value></data>
+  <data name="MemDoc.AtacaCausa" xml:space="preserve"><value> · tackles the cause</value></data>
+  <data name="MemDoc.AvisaQuandoJogoEsta" xml:space="preserve"><value>Warns when a game is open and free memory drops below 5%. Never acts by itself.</value></data>
+  <data name="MemDoc.BarraRamUsoModificada" xml:space="preserve"><value>RAM bar: in use, modified, cache and free</value></data>
+  <data name="MemDoc.Cache" xml:space="preserve"><value>cache</value></data>
+  <data name="MemDoc.CacheMemoriaLivreSao" xml:space="preserve"><value>Cache and free memory are available memory. The number that matters is committed memory reaching the limit.</value></data>
+  <data name="MemDoc.CadaSolucaoDizFaz" xml:space="preserve"><value>Each fix says what it does, how long it lasts and the cost; temporary ones happen again until the cause is fixed.</value></data>
+  <data name="MemDoc.Comprometida" xml:space="preserve"><value>committed</value></data>
+  <data name="MemDoc.ComprometidaLimite" xml:space="preserve"><value>Committed / limit</value></data>
+  <data name="MemDoc.ConfiguracaoMemoriaNaoLida" xml:space="preserve"><value>Memory configuration not read: {0}</value></data>
+  <data name="MemDoc.Confirmacao12" xml:space="preserve"><value>Confirmation 1 of 2</value></data>
+  <data name="MemDoc.ContinuaLendoEnquantoNexus" xml:space="preserve"><value>Keeps reading while NEXUS is open (nothing is written to disk).</value></data>
+  <data name="MemDoc.ContinuarPaginaFechada" xml:space="preserve"><value>Keep going with the page closed</value></data>
+  <data name="MemDoc.Custo" xml:space="preserve"><value>Cost: </value></data>
+  <data name="MemDoc.CustoJogoProgramasReleem" xml:space="preserve"><value>Cost: the game and programs reread from disk what was cached.
+Nothing to undo. Requires administrator.</value></data>
+  <data name="MemDoc.DeixePaginaAbertaVazamento" xml:space="preserve"><value>Leave the page open: a leak only shows after 15 minutes of non-stop growth.</value></data>
+  <data name="MemDoc.DesfazerBotaoDesfazerAqui" xml:space="preserve"><value>Undo: "Undo" button here or on the Apply page.</value></data>
+  <data name="MemDoc.DesligadoInicializacaoValeProximo" xml:space="preserve"><value>Turned off at startup. Takes effect at the next sign-in.</value></data>
+  <data name="MemDoc.DesligadoPadraoJogoAberto" xml:space="preserve"><value>Off by default. With a game open and free memory below 5% (with a large cache), NEXUS warns and offers to empty the standby list. Each time it asks for your confirmation and administrator permission. It only helps with stutters on low RAM; the real fix is more memory.</value></data>
+  <data name="MemDoc.DesligarInicializacao" xml:space="preserve"><value>Turn off at startup</value></data>
+  <data name="MemDoc.DisponivelDevolvidaHoraQuem" xml:space="preserve"><value>Available: handed back instantly to whoever needs it.</value></data>
+  <data name="MemDoc.EnquantoPaginaEstaAberta" xml:space="preserve"><value>While the page is open (or with "keep going with the page closed"). Scale: the larger of RAM and the committed memory limit; the kernel's non-paged pool has its own scale.</value></data>
+  <data name="MemDoc.EsperandoIrDisco" xml:space="preserve"><value>waiting to go to disk</value></data>
+  <data name="MemDoc.EsperandoSerGravadaDisco" xml:space="preserve"><value>Waiting to be written to disk before becoming available.</value></data>
+  <data name="MemDoc.Estavel" xml:space="preserve"><value>stable</value></data>
+  <data name="MemDoc.EsvaziarListaEspera" xml:space="preserve"><value>Empty the standby list</value></data>
+  <data name="MemDoc.EsvaziarListaEsperaAgora" xml:space="preserve"><value>Empty the standby list now</value></data>
+  <data name="MemDoc.EsvaziarListaEsperaPode" xml:space="preserve"><value> Emptying the standby list may reduce stutters in this case (lasts minutes).</value></data>
+  <data name="MemDoc.ExigeAdministradorWindowsVai" xml:space="preserve"><value>
+Requires administrator (Windows will ask for permission).</value></data>
+  <data name="MemDoc.Feito" xml:space="preserve"><value>Done.</value></data>
+  <data name="MemDoc.FeitoNLembreIsso" xml:space="preserve"><value>Done at {0:HH:mm}. Remember: this will happen again.</value></data>
+  <data name="MemDoc.GpuNRamUso" xml:space="preserve"><value>GPU: {0} of RAM in use as shared video memory</value></data>
+  <data name="MemDoc.GraficoAparecePartirSegunda" xml:space="preserve"><value>The chart shows from the second reading on.</value></data>
+  <data name="MemDoc.HistoricoApagadoRecomecandoObservar" xml:space="preserve"><value>History cleared: starting to watch again.</value></data>
+  <data name="MemDoc.IntervaloEntreLeiturasMinutos" xml:space="preserve"><value>Interval between readings, in minutes</value></data>
+  <data name="MemDoc.IntervaloLeituraNMin" xml:space="preserve"><value>Reading interval: {0} min.</value></data>
+  <data name="MemDoc.JaEstavaAssim" xml:space="preserve"><value>It was already like this.</value></data>
+  <data name="MemDoc.JaEstavaDesligado" xml:space="preserve"><value>It was already off.</value></data>
+  <data name="MemDoc.JogaForaCacheArquivos" xml:space="preserve"><value>Throws away the RAM file cache (the same as RAMMap's "Empty Standby List").
+
+How long it lasts: minutes.
+</value></data>
+  <data name="MemDoc.KernelPoolNaoPaginado" xml:space="preserve"><value>Kernel: non-paged pool {0} · paged {1}</value></data>
+  <data name="MemDoc.LerAgora" xml:space="preserve"><value>Read now</value></data>
+  <data name="MemDoc.LerCada" xml:space="preserve"><value>Read every</value></data>
+  <data name="MemDoc.LigarAviso" xml:space="preserve"><value>Turn on the warning</value></data>
+  <data name="MemDoc.LimiteRamArquivoPaginacao" xml:space="preserve"><value>Limit = RAM + page file. When it's reached, Windows refuses memory.</value></data>
+  <data name="MemDoc.LinhaSoSobeNunca" xml:space="preserve"><value>A line that only rises and never falls is a sign of a leak.</value></data>
+  <data name="MemDoc.LinhaTempo" xml:space="preserve"><value>Timeline</value></data>
+  <data name="MemDoc.ListaEsperaEsvaziadaModo" xml:space="preserve"><value>Standby list emptied (watch-while-playing mode).</value></data>
+  <data name="MemDoc.Livre" xml:space="preserve"><value>free</value></data>
+  <data name="MemDoc.Livre2" xml:space="preserve"><value>Free</value></data>
+  <data name="MemDoc.MaquinaVirtual" xml:space="preserve"><value>virtual machine</value></data>
+  <data name="MemDoc.MemoriaAppNasUltimas" xml:space="preserve"><value>App memory over the last readings</value></data>
+  <data name="MemDoc.MemoriaComprometidaPcNas" xml:space="preserve"><value>PC committed memory over the last readings</value></data>
+  <data name="MemDoc.MemoriaComprometidaPrivada" xml:space="preserve"><value>Committed memory (private)</value></data>
+  <data name="MemDoc.MemoriaKernelEscalaPropria" xml:space="preserve"><value>kernel memory (own scale)</value></data>
+  <data name="MemDoc.MemoriaLivreMuitoBaixa" xml:space="preserve"><value>Very low free memory with a game open: see Memory: diagnosis.</value></data>
+  <data name="MemDoc.MemoriaUso" xml:space="preserve"><value>Memory in use</value></data>
+  <data name="MemDoc.Min" xml:space="preserve"><value>min</value></data>
+  <data name="MemDoc.Modificada" xml:space="preserve"><value>Modified</value></data>
+  <data name="MemDoc.N1Processo" xml:space="preserve"><value>1 process</value></data>
+  <data name="MemDoc.NadaAquiLimpadorRam" xml:space="preserve"><value>Nothing here is a "RAM cleaner". It freezes when committed memory hits the limit or something only grows.</value></data>
+  <data name="MemDoc.NadaAquiLimpadorRam2" xml:space="preserve"><value>Nothing here is a "RAM cleaner". Cached memory (standby list) is available memory: Windows hands it back instantly. </value></data>
+  <data name="MemDoc.NadaForaNormalAte" xml:space="preserve"><value>Nothing out of the ordinary so far.</value></data>
+  <data name="MemDoc.NaoFeitoN" xml:space="preserve"><value>Not done: {0}</value></data>
+  <data name="MemDoc.NaoHaDesfazerAcao" xml:space="preserve"><value>Nothing to undo: it's an immediate-effect action.</value></data>
+  <data name="MemDoc.Navegador" xml:space="preserve"><value>browser</value></data>
   <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Who is eating memory, whether something is leaking, and how to fix it now and for good.</value></data>
   <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memory: diagnosis</value></data>
+  <data name="MemDoc.NDeixaAbrirWindows" xml:space="preserve"><value>{0} stops opening with Windows ({1}).
+
+How long it lasts: permanent.
+Cost: {2}
+Undo: "Undo" button here or on the Startup page.</value></data>
+  <data name="MemDoc.NDeN" xml:space="preserve"><value>{0} of {1}</value></data>
+  <data name="MemDoc.NDesfeito" xml:space="preserve"><value>{0}: undone.</value></data>
+  <data name="MemDoc.NHSemParar" xml:space="preserve"><value>+{0}/h non-stop</value></data>
+  <data name="MemDoc.NNaoAbreWindows" xml:space="preserve"><value>{0} doesn't open with Windows (nothing to turn off). See the Startup page.</value></data>
+  <data name="MemDoc.NNNQuanto" xml:space="preserve"><value>{0}
+
+{1}
+{2}
+
+How long it lasts: {3}
+Cost: {4}
+
+</value></data>
+  <data name="MemDoc.NNVoceVai" xml:space="preserve"><value>{0}
+
+{1}?
+
+You'll confirm once more next.</value></data>
+  <data name="MemDoc.NProcessos" xml:space="preserve"><value>{0} processes</value></data>
+  <data name="MemDoc.NTagsLidas" xml:space="preserve"><value> · {0} tags read</value></data>
+  <data name="MemDoc.NUsoNComprometida" xml:space="preserve"><value>{0} in use of {1} · committed {2:0}% of the limit</value></data>
+  <data name="MemDoc.Observando" xml:space="preserve"><value>watching…</value></data>
+  <data name="MemDoc.ObservandoDesdeNN" xml:space="preserve"><value>Watching since {0:HH:mm} ({1}). </value></data>
+  <data name="MemDoc.OndeVaiRam" xml:space="preserve"><value>Where the RAM goes</value></data>
+  <data name="MemDoc.Orientacao" xml:space="preserve"><value>guidance</value></data>
+  <data name="MemDoc.OutraPagina" xml:space="preserve"><value>another page</value></data>
+  <data name="MemDoc.PertoLimiteProgramasPodem" xml:space="preserve"><value>Near the limit: programs may close by themselves for lack of memory.</value></data>
+  <data name="MemDoc.PressaoMemoria" xml:space="preserve"><value>Memory pressure</value></data>
+  <data name="MemDoc.Programa" xml:space="preserve"><value>program</value></data>
+  <data name="MemDoc.QuantoDura" xml:space="preserve"><value>How long it lasts: </value></data>
+  <data name="MemDoc.QuemMaisUsaMemoria" xml:space="preserve"><value>Who uses the most memory</value></data>
+  <data name="MemDoc.Ram" xml:space="preserve"><value>in RAM</value></data>
+  <data name="MemDoc.RecomecarHistorico" xml:space="preserve"><value>Restart history</value></data>
+  <data name="MemDoc.ResolverAgora" xml:space="preserve"><value>Fix now</value></data>
+  <data name="MemDoc.ResolverVez" xml:space="preserve"><value>Fix for good</value></data>
+  <data name="MemDoc.Reversivel" xml:space="preserve"><value>reversible</value></data>
+  <data name="MemDoc.SemDesfazer" xml:space="preserve"><value>no undo</value></data>
+  <data name="MemDoc.SemDesfazerAdministrador" xml:space="preserve"><value>No undo · administrator</value></data>
+  <data name="MemDoc.SemUsoNenhumPouca" xml:space="preserve"><value>Not used at all. Little free memory with lots of cache is normal.</value></data>
+  <data name="MemDoc.Servico" xml:space="preserve"><value>service</value></data>
+  <data name="MemDoc.SobeDesce" xml:space="preserve"><value>goes up and down</value></data>
+  <data name="MemDoc.SomadoAppNavegadorConta" xml:space="preserve"><value>Summed per app: the browser counts all tabs.</value></data>
+  <data name="MemDoc.TagNEncontradaN" xml:space="preserve"><value>Tag '{0}' found in: {1}.</value></data>
+  <data name="MemDoc.TagNNenhumDriver" xml:space="preserve"><value>Tag '{0}': no driver in System32\drivers contains that text.</value></data>
+  <data name="MemDoc.TemporarioVoltaAcontecer" xml:space="preserve"><value> · temporary, it happens again</value></data>
+  <data name="MemDoc.TodosNumeros" xml:space="preserve"><value>All the numbers</value></data>
+  <data name="MemDoc.TotalDisponivelModificadaComo" xml:space="preserve"><value>Total − available − modified (like Task Manager).</value></data>
+  <data name="MemDoc.TravaPcMemoriaComprometida" xml:space="preserve"><value>What freezes the PC is COMMITTED memory hitting the limit, or a program/driver that only grows (a leak). </value></data>
+  <data name="MemDoc.TudoCianoEstaDisponivel" xml:space="preserve"><value>Everything in cyan is available: Windows hands it back instantly to whoever needs it.</value></data>
+  <data name="MemDoc.UltimaLeituraNCada" xml:space="preserve"><value>Last reading: {0:HH:mm:ss} · every {1} min · {2} readings</value></data>
+  <data name="MemDoc.UltimasHoras" xml:space="preserve"><value>Last hours</value></data>
+  <data name="MemDoc.Uso" xml:space="preserve"><value>In use</value></data>
+  <data name="MemDoc.VazamentoSoApontadoDepois" xml:space="preserve"><value>A leak is only flagged after at least 15 min of non-stop growth.</value></data>
+  <data name="MemDoc.Vigiando" xml:space="preserve"><value>Watching: </value></data>
+  <data name="MemDoc.VigiandoAvisoQuandoJogo" xml:space="preserve"><value>Watching: warning when a game is open and free memory drops below 5%.</value></data>
+  <data name="MemDoc.VigiarEnquantoJogo" xml:space="preserve"><value>Watch while I play</value></data>
+  <data name="MemDoc.VramDedicadaUsoN" xml:space="preserve"><value> · dedicated VRAM in use {0}</value></data>
   <data name="Mon.AbrindoContadoresWindows" xml:space="preserve"><value>Opening Windows counters…</value></data>
   <data name="Mon.AlgunsDiscosNaoInformam" xml:space="preserve"><value>Some disks don't report temperature/wear to Windows (common with USB and RAID controllers).</value></data>
   <data name="Mon.AtivoMaisOcupadoLeitura" xml:space="preserve"><value>active (the busiest) · read {0} · write {1}</value></data>

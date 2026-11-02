@@ -1916,8 +1916,140 @@ Desfazer: volta exatamente a configuração anterior.</value></data>
 
 Risco: baixo; ocupa alguns GB no disco.
 </value></data>
+  <data name="MemDoc.Administrador" xml:space="preserve"><value>administrador · </value></data>
+  <data name="MemDoc.AtacaCausa" xml:space="preserve"><value> · ataca a causa</value></data>
+  <data name="MemDoc.AvisaQuandoJogoEsta" xml:space="preserve"><value>Avisa quando um jogo está aberto e a memória livre cai abaixo de 5%. Nunca age sozinho.</value></data>
+  <data name="MemDoc.BarraRamUsoModificada" xml:space="preserve"><value>Barra da RAM: em uso, modificada, cache e livre</value></data>
+  <data name="MemDoc.Cache" xml:space="preserve"><value>cache</value></data>
+  <data name="MemDoc.CacheMemoriaLivreSao" xml:space="preserve"><value>Cache e memória livre são memória disponível. O número que importa é a comprometida chegando no limite.</value></data>
+  <data name="MemDoc.CadaSolucaoDizFaz" xml:space="preserve"><value>Cada solução diz o que faz, quanto dura e o custo; as temporárias voltam a acontecer até a causa ser resolvida.</value></data>
+  <data name="MemDoc.Comprometida" xml:space="preserve"><value>comprometida</value></data>
+  <data name="MemDoc.ComprometidaLimite" xml:space="preserve"><value>Comprometida / limite</value></data>
+  <data name="MemDoc.ConfiguracaoMemoriaNaoLida" xml:space="preserve"><value>Configuração da memória não lida: {0}</value></data>
+  <data name="MemDoc.Confirmacao12" xml:space="preserve"><value>Confirmação 1 de 2</value></data>
+  <data name="MemDoc.ContinuaLendoEnquantoNexus" xml:space="preserve"><value>Continua lendo enquanto o NEXUS estiver aberto (nada é gravado em disco).</value></data>
+  <data name="MemDoc.ContinuarPaginaFechada" xml:space="preserve"><value>Continuar com a página fechada</value></data>
+  <data name="MemDoc.Custo" xml:space="preserve"><value>Custo: </value></data>
+  <data name="MemDoc.CustoJogoProgramasReleem" xml:space="preserve"><value>Custo: o jogo e os programas releem do disco o que estava em cache.
+Não há o que desfazer. Exige administrador.</value></data>
+  <data name="MemDoc.DeixePaginaAbertaVazamento" xml:space="preserve"><value>Deixe a página aberta: vazamento só aparece depois de 15 minutos subindo sem parar.</value></data>
+  <data name="MemDoc.DesfazerBotaoDesfazerAqui" xml:space="preserve"><value>Desfazer: botão "Desfazer" aqui ou na página Aplicar.</value></data>
+  <data name="MemDoc.DesligadoInicializacaoValeProximo" xml:space="preserve"><value>Desligado da inicialização. Vale no próximo login.</value></data>
+  <data name="MemDoc.DesligadoPadraoJogoAberto" xml:space="preserve"><value>Desligado por padrão. Com um jogo aberto e a memória livre abaixo de 5% (com cache grande), o NEXUS avisa e oferece esvaziar a lista de espera. Cada vez pede sua confirmação e permissão de administrador. Só ajuda em engasgos com pouca RAM; a solução de verdade é mais memória.</value></data>
+  <data name="MemDoc.DesligarInicializacao" xml:space="preserve"><value>Desligar da inicialização</value></data>
+  <data name="MemDoc.DisponivelDevolvidaHoraQuem" xml:space="preserve"><value>Disponível: devolvida na hora a quem precisar.</value></data>
+  <data name="MemDoc.EnquantoPaginaEstaAberta" xml:space="preserve"><value>Enquanto a página está aberta (ou com "continuar com a página fechada"). Escala: o maior entre a RAM e o limite de memória comprometida; o pool não paginado do kernel tem escala própria.</value></data>
+  <data name="MemDoc.EsperandoIrDisco" xml:space="preserve"><value>esperando ir ao disco</value></data>
+  <data name="MemDoc.EsperandoSerGravadaDisco" xml:space="preserve"><value>Esperando ser gravada no disco antes de virar disponível.</value></data>
+  <data name="MemDoc.Estavel" xml:space="preserve"><value>estável</value></data>
+  <data name="MemDoc.EsvaziarListaEspera" xml:space="preserve"><value>Esvaziar a lista de espera</value></data>
+  <data name="MemDoc.EsvaziarListaEsperaAgora" xml:space="preserve"><value>Esvaziar a lista de espera agora</value></data>
+  <data name="MemDoc.EsvaziarListaEsperaPode" xml:space="preserve"><value> Esvaziar a lista de espera pode reduzir engasgos neste caso (efeito de minutos).</value></data>
+  <data name="MemDoc.ExigeAdministradorWindowsVai" xml:space="preserve"><value>
+Exige administrador (o Windows vai pedir permissão).</value></data>
+  <data name="MemDoc.Feito" xml:space="preserve"><value>Feito.</value></data>
+  <data name="MemDoc.FeitoNLembreIsso" xml:space="preserve"><value>Feito às {0:HH:mm}. Lembre: isso volta a acontecer.</value></data>
+  <data name="MemDoc.GpuNRamUso" xml:space="preserve"><value>GPU: {0} da RAM em uso como memória de vídeo compartilhada</value></data>
+  <data name="MemDoc.GraficoAparecePartirSegunda" xml:space="preserve"><value>O gráfico aparece a partir da segunda leitura.</value></data>
+  <data name="MemDoc.HistoricoApagadoRecomecandoObservar" xml:space="preserve"><value>Histórico apagado: recomeçando a observar.</value></data>
+  <data name="MemDoc.IntervaloEntreLeiturasMinutos" xml:space="preserve"><value>Intervalo entre leituras, em minutos</value></data>
+  <data name="MemDoc.IntervaloLeituraNMin" xml:space="preserve"><value>Intervalo de leitura: {0} min.</value></data>
+  <data name="MemDoc.JaEstavaAssim" xml:space="preserve"><value>Já estava assim.</value></data>
+  <data name="MemDoc.JaEstavaDesligado" xml:space="preserve"><value>Já estava desligado.</value></data>
+  <data name="MemDoc.JogaForaCacheArquivos" xml:space="preserve"><value>Joga fora o cache de arquivos da RAM (o mesmo que "Empty Standby List" do RAMMap).
+
+Quanto dura: minutos.
+</value></data>
+  <data name="MemDoc.KernelPoolNaoPaginado" xml:space="preserve"><value>Kernel: pool não paginado {0} · paginado {1}</value></data>
+  <data name="MemDoc.LerAgora" xml:space="preserve"><value>Ler agora</value></data>
+  <data name="MemDoc.LerCada" xml:space="preserve"><value>Ler a cada</value></data>
+  <data name="MemDoc.LigarAviso" xml:space="preserve"><value>Ligar o aviso</value></data>
+  <data name="MemDoc.LimiteRamArquivoPaginacao" xml:space="preserve"><value>Limite = RAM + arquivo de paginação. Chegou nele, o Windows recusa memória.</value></data>
+  <data name="MemDoc.LinhaSoSobeNunca" xml:space="preserve"><value>Linha que só sobe e nunca desce é sinal de vazamento.</value></data>
+  <data name="MemDoc.LinhaTempo" xml:space="preserve"><value>Linha do tempo</value></data>
+  <data name="MemDoc.ListaEsperaEsvaziadaModo" xml:space="preserve"><value>Lista de espera esvaziada (modo vigiar enquanto jogo).</value></data>
+  <data name="MemDoc.Livre" xml:space="preserve"><value>livre</value></data>
+  <data name="MemDoc.Livre2" xml:space="preserve"><value>Livre</value></data>
+  <data name="MemDoc.MaquinaVirtual" xml:space="preserve"><value>máquina virtual</value></data>
+  <data name="MemDoc.MemoriaAppNasUltimas" xml:space="preserve"><value>Memória do app nas últimas leituras</value></data>
+  <data name="MemDoc.MemoriaComprometidaPcNas" xml:space="preserve"><value>Memória comprometida do PC nas últimas leituras</value></data>
+  <data name="MemDoc.MemoriaComprometidaPrivada" xml:space="preserve"><value>Memória comprometida (privada)</value></data>
+  <data name="MemDoc.MemoriaKernelEscalaPropria" xml:space="preserve"><value>memória do kernel (escala própria)</value></data>
+  <data name="MemDoc.MemoriaLivreMuitoBaixa" xml:space="preserve"><value>Memória livre muito baixa com um jogo aberto: veja Memória: diagnóstico.</value></data>
+  <data name="MemDoc.MemoriaUso" xml:space="preserve"><value>Memória em uso</value></data>
+  <data name="MemDoc.Min" xml:space="preserve"><value>min</value></data>
+  <data name="MemDoc.Modificada" xml:space="preserve"><value>Modificada</value></data>
+  <data name="MemDoc.N1Processo" xml:space="preserve"><value>1 processo</value></data>
+  <data name="MemDoc.NadaAquiLimpadorRam" xml:space="preserve"><value>Nada aqui é "limpador de RAM". Trava quando a memória comprometida chega no limite ou algo só cresce.</value></data>
+  <data name="MemDoc.NadaAquiLimpadorRam2" xml:space="preserve"><value>Nada aqui é "limpador de RAM". Memória em cache (lista de espera) é memória disponível: o Windows devolve na hora. </value></data>
+  <data name="MemDoc.NadaForaNormalAte" xml:space="preserve"><value>Nada fora do normal até agora.</value></data>
+  <data name="MemDoc.NaoFeitoN" xml:space="preserve"><value>Não feito: {0}</value></data>
+  <data name="MemDoc.NaoHaDesfazerAcao" xml:space="preserve"><value>Não há o que desfazer: é uma ação de efeito imediato.</value></data>
+  <data name="MemDoc.Navegador" xml:space="preserve"><value>navegador</value></data>
   <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Quem está comendo a memória, se algo está vazando, e como resolver agora e de vez.</value></data>
   <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memória: diagnóstico</value></data>
+  <data name="MemDoc.NDeixaAbrirWindows" xml:space="preserve"><value>{0} deixa de abrir com o Windows ({1}).
+
+Quanto dura: permanente.
+Custo: {2}
+Desfazer: botão "Desfazer" aqui ou na página Inicialização.</value></data>
+  <data name="MemDoc.NDeN" xml:space="preserve"><value>{0} de {1}</value></data>
+  <data name="MemDoc.NDesfeito" xml:space="preserve"><value>{0}: desfeito.</value></data>
+  <data name="MemDoc.NHSemParar" xml:space="preserve"><value>+{0}/h sem parar</value></data>
+  <data name="MemDoc.NNaoAbreWindows" xml:space="preserve"><value>{0} não abre com o Windows (nada a desligar). Veja a página Inicialização.</value></data>
+  <data name="MemDoc.NNNQuanto" xml:space="preserve"><value>{0}
+
+{1}
+{2}
+
+Quanto dura: {3}
+Custo: {4}
+
+</value></data>
+  <data name="MemDoc.NNVoceVai" xml:space="preserve"><value>{0}
+
+{1}?
+
+Você vai confirmar mais uma vez a seguir.</value></data>
+  <data name="MemDoc.NProcessos" xml:space="preserve"><value>{0} processos</value></data>
+  <data name="MemDoc.NTagsLidas" xml:space="preserve"><value> · {0} tags lidas</value></data>
+  <data name="MemDoc.NUsoNComprometida" xml:space="preserve"><value>{0} em uso de {1} · comprometida {2:0}% do limite</value></data>
+  <data name="MemDoc.Observando" xml:space="preserve"><value>observando…</value></data>
+  <data name="MemDoc.ObservandoDesdeNN" xml:space="preserve"><value>Observando desde {0:HH:mm} ({1}). </value></data>
+  <data name="MemDoc.OndeVaiRam" xml:space="preserve"><value>Para onde vai a RAM</value></data>
+  <data name="MemDoc.Orientacao" xml:space="preserve"><value>orientação</value></data>
+  <data name="MemDoc.OutraPagina" xml:space="preserve"><value>outra página</value></data>
+  <data name="MemDoc.PertoLimiteProgramasPodem" xml:space="preserve"><value>Perto do limite: programas podem fechar sozinhos por falta de memória.</value></data>
+  <data name="MemDoc.PressaoMemoria" xml:space="preserve"><value>Pressão de memória</value></data>
+  <data name="MemDoc.Programa" xml:space="preserve"><value>programa</value></data>
+  <data name="MemDoc.QuantoDura" xml:space="preserve"><value>Quanto dura: </value></data>
+  <data name="MemDoc.QuemMaisUsaMemoria" xml:space="preserve"><value>Quem mais usa memória</value></data>
+  <data name="MemDoc.Ram" xml:space="preserve"><value>na RAM</value></data>
+  <data name="MemDoc.RecomecarHistorico" xml:space="preserve"><value>Recomeçar histórico</value></data>
+  <data name="MemDoc.ResolverAgora" xml:space="preserve"><value>Resolver agora</value></data>
+  <data name="MemDoc.ResolverVez" xml:space="preserve"><value>Resolver de vez</value></data>
+  <data name="MemDoc.Reversivel" xml:space="preserve"><value>reversível</value></data>
+  <data name="MemDoc.SemDesfazer" xml:space="preserve"><value>sem desfazer</value></data>
+  <data name="MemDoc.SemDesfazerAdministrador" xml:space="preserve"><value>Sem desfazer · administrador</value></data>
+  <data name="MemDoc.SemUsoNenhumPouca" xml:space="preserve"><value>Sem uso nenhum. Pouca memória livre com muito cache é normal.</value></data>
+  <data name="MemDoc.Servico" xml:space="preserve"><value>serviço</value></data>
+  <data name="MemDoc.SobeDesce" xml:space="preserve"><value>sobe e desce</value></data>
+  <data name="MemDoc.SomadoAppNavegadorConta" xml:space="preserve"><value>Somado por app: o navegador conta todas as abas.</value></data>
+  <data name="MemDoc.TagNEncontradaN" xml:space="preserve"><value>Tag '{0}' encontrada em: {1}.</value></data>
+  <data name="MemDoc.TagNNenhumDriver" xml:space="preserve"><value>Tag '{0}': nenhum driver em System32\drivers contém esse texto.</value></data>
+  <data name="MemDoc.TemporarioVoltaAcontecer" xml:space="preserve"><value> · temporário, volta a acontecer</value></data>
+  <data name="MemDoc.TodosNumeros" xml:space="preserve"><value>Todos os números</value></data>
+  <data name="MemDoc.TotalDisponivelModificadaComo" xml:space="preserve"><value>Total − disponível − modificada (como o Gerenciador de Tarefas).</value></data>
+  <data name="MemDoc.TravaPcMemoriaComprometida" xml:space="preserve"><value>O que trava o PC é a memória COMPROMETIDA chegar no limite, ou um programa/driver que só cresce (vazamento). </value></data>
+  <data name="MemDoc.TudoCianoEstaDisponivel" xml:space="preserve"><value>Tudo em ciano está disponível: o Windows devolve na hora a quem precisar.</value></data>
+  <data name="MemDoc.UltimaLeituraNCada" xml:space="preserve"><value>Última leitura: {0:HH:mm:ss} · a cada {1} min · {2} leituras</value></data>
+  <data name="MemDoc.UltimasHoras" xml:space="preserve"><value>Últimas horas</value></data>
+  <data name="MemDoc.Uso" xml:space="preserve"><value>Em uso</value></data>
+  <data name="MemDoc.VazamentoSoApontadoDepois" xml:space="preserve"><value>Vazamento só é apontado depois de pelo menos 15 min subindo sem parar.</value></data>
+  <data name="MemDoc.Vigiando" xml:space="preserve"><value>Vigiando: </value></data>
+  <data name="MemDoc.VigiandoAvisoQuandoJogo" xml:space="preserve"><value>Vigiando: aviso quando um jogo estiver aberto e a memória livre cair abaixo de 5%.</value></data>
+  <data name="MemDoc.VigiarEnquantoJogo" xml:space="preserve"><value>Vigiar enquanto jogo</value></data>
+  <data name="MemDoc.VramDedicadaUsoN" xml:space="preserve"><value> · VRAM dedicada em uso {0}</value></data>
   <data name="Mon.AbrindoContadoresWindows" xml:space="preserve"><value>Abrindo os contadores do Windows…</value></data>
   <data name="Mon.AlgunsDiscosNaoInformam" xml:space="preserve"><value>Alguns discos não informam temperatura/desgaste ao Windows (comum em USB e controladoras RAID).</value></data>
   <data name="Mon.AtivoMaisOcupadoLeitura" xml:space="preserve"><value>ativo (o mais ocupado) · leitura {0} · escrita {1}</value></data>

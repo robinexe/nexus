@@ -23,14 +23,12 @@ public sealed record DoctorConsumerRow(string Name, string Private, string Worki
     IReadOnlyList<double>? History = null)
 {
     public UiTone TrendToneKind => TrendTone switch { "bad" => UiTone.Bad, "good" => UiTone.Good, _ => UiTone.Info };
-    public string IconKey => Kind switch
-    {
-        "navegador" => "Icon.Browser",
-        "serviço" => "Icon.Services",
-        "máquina virtual" => "Icon.Pc",
-        "Windows" => "Icon.Windows",
-        _ => "Icon.Apps",
-    };
+    public string IconKey =>
+        Kind == Loc.T("MemDoc.Navegador") ? "Icon.Browser"
+        : Kind == Loc.T("MemDoc.Servico") ? "Icon.Services"
+        : Kind == Loc.T("MemDoc.MaquinaVirtual") ? "Icon.Pc"
+        : Kind == "Windows" ? "Icon.Windows"
+        : "Icon.Apps";
 }
 
 /// <summary>Evento da linha do tempo.</summary>
@@ -45,17 +43,17 @@ public sealed class DoctorFixRow : ObservableObject
     public required FixOption Fix { get; init; }
     public string Title => Fix.Title;
     public string WhatItDoes => Fix.WhatItDoes;
-    public string HowLong => "Quanto dura: " + Fix.HowLong;
-    public string Cost => "Custo: " + Fix.Cost;
+    public string HowLong => Loc.T("MemDoc.QuantoDura") + Fix.HowLong;
+    public string Cost => Loc.T("MemDoc.Custo") + Fix.Cost;
     public bool IsTemporary => Fix.Term == FixTerm.Temporary;
     public bool HasButton => Fix.Kind != FixKind.Info;
     public string ButtonText => Fix.Kind switch
     {
-        FixKind.Navigate => "Abrir",
-        FixKind.DisableStartup => "Desligar da inicialização",
-        _ => Fix.Term == FixTerm.Temporary ? "Resolver agora" : "Resolver de vez",
+        FixKind.Navigate => Loc.T("Shell.Abrir"),
+        FixKind.DisableStartup => Loc.T("MemDoc.DesligarInicializacao"),
+        _ => Fix.Term == FixTerm.Temporary ? Loc.T("MemDoc.ResolverAgora") : Loc.T("MemDoc.ResolverVez"),
     };
-    public string Badge => (Fix.Admin ? "administrador · " : "") + (Fix.Kind == FixKind.Info ? "orientação" : Fix.Reversible || Fix.Kind == FixKind.DisableStartup ? "reversível" : Fix.Kind == FixKind.Navigate ? "outra página" : "sem desfazer");
+    public string Badge => (Fix.Admin ? Loc.T("MemDoc.Administrador") : "") + (Fix.Kind == FixKind.Info ? Loc.T("MemDoc.Orientacao") : Fix.Reversible || Fix.Kind == FixKind.DisableStartup ? Loc.T("MemDoc.Reversivel") : Fix.Kind == FixKind.Navigate ? Loc.T("MemDoc.OutraPagina") : Loc.T("MemDoc.SemDesfazer"));
     public ICommand? ApplyCommand { get; set; }
     public ICommand? RevertCommand { get; set; }
     public string Status { get => _status; set => Set(ref _status, value); }
@@ -77,7 +75,7 @@ public sealed class DoctorSuspectRow
     public required Suspect Suspect { get; init; }
     public string Title => Suspect.Title;
     public string Severity => Suspect.Severity;
-    public string SeverityText => Suspect.Severity switch { "bad" => "Problema", "warn" => "Atenção", _ => "Informação" };
+    public string SeverityText => Suspect.Severity switch { "bad" => Loc.T("Gpu.Problema"), "warn" => Loc.T("Gpu.Atencao"), _ => Loc.T("Mem.Informacao") };
     public string Evidence => Suspect.Evidence;
     public string Explanation => Suspect.Explanation;
     public IReadOnlyList<DoctorFixRow> Temporary { get; init; } = [];
@@ -111,7 +109,7 @@ public sealed class MemoryDoctorPage : ModulePage
     private bool _subscribed, _sampling, _contextLoaded, _keepRecording, _gameGuard, _visible;
     private int _intervalMinutes = 1;
     private DateTimeOffset? _lastPurge;
-    private string _headline = "Lendo a memória…", _headlineTone = "info", _subline = "", _kernelText = "", _gpuText = "", _historyText = "";
+    private string _headline = Loc.T("Mem.LendoMemoria"), _headlineTone = "info", _subline = "", _kernelText = "", _gpuText = "", _historyText = "";
     private string _guardText = "", _poolNote = "", _lastSample = "";
     private Geometry? _usedGeometry, _commitGeometry, _poolGeometry;
     private bool _guardSuggest;
@@ -190,7 +188,7 @@ public sealed class MemoryDoctorPage : ModulePage
         {
             if (!IntervalOptions.Contains(value) || !Set(ref _intervalMinutes, value)) return;
             _timer.Interval = TimeSpan.FromMinutes(value);
-            AddEvent($"Intervalo de leitura: {value} min.", "info");
+            AddEvent(Loc.F("MemDoc.IntervaloLeituraNMin", value), "info");
         }
     }
 
@@ -208,15 +206,15 @@ public sealed class MemoryDoctorPage : ModulePage
         set
         {
             if (!Set(ref _gameGuard, value)) return;
-            GuardText = value ? "Vigiando: aviso quando um jogo estiver aberto e a memória livre cair abaixo de 5%." : "";
+            GuardText = value ? Loc.T("MemDoc.VigiandoAvisoQuandoJogo") : "";
             if (!value) GuardSuggest = false;
         }
     }
 
     public static string HonestText =>
-        "Nada aqui é \"limpador de RAM\". Memória em cache (lista de espera) é memória disponível: o Windows devolve na hora. " +
-        "O que trava o PC é a memória COMPROMETIDA chegar no limite, ou um programa/driver que só cresce (vazamento). " +
-        "Cada solução diz o que faz, quanto dura e o custo; as temporárias voltam a acontecer até a causa ser resolvida.";
+        Loc.T("MemDoc.NadaAquiLimpadorRam2") +
+        Loc.T("MemDoc.TravaPcMemoriaComprometida") +
+        Loc.T("MemDoc.CadaSolucaoDizFaz");
 
     // ------------------------------------------------------------------ ciclo de vida
 
@@ -228,7 +226,7 @@ public sealed class MemoryDoctorPage : ModulePage
             host.PropertyChanged += OnHostChanged;
             _subscribed = true;
         }
-        if (!OperatingSystem.IsWindows()) { Headline = "Disponível só no Windows"; return; }
+        if (!OperatingSystem.IsWindows()) { Headline = Loc.T("Mem.DisponivelSoWindows"); return; }
         _timer.Start();
         if (!_contextLoaded) _ = LoadContextAsync();
         if (_history.Latest is null || DateTimeOffset.Now - _history.Latest.At > TimeSpan.FromSeconds(30)) await SampleAsync();
@@ -247,7 +245,7 @@ public sealed class MemoryDoctorPage : ModulePage
         _seenSuspects.Clear();
         Timeline.Clear();
         OnPropertyChanged(nameof(HasTimeline));
-        AddEvent("Histórico apagado: recomeçando a observar.", "info");
+        AddEvent(Loc.T("MemDoc.HistoricoApagadoRecomecandoObservar"), "info");
         _ = SampleAsync();
     }
 
@@ -278,7 +276,7 @@ public sealed class MemoryDoctorPage : ModulePage
             };
             Rebuild();
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = $"Configuração da memória não lida: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = Loc.F("MemDoc.ConfiguracaoMemoriaNaoLida", ex.Message); }
     }
 
     private async Task SampleAsync()
@@ -290,7 +288,7 @@ public sealed class MemoryDoctorPage : ModulePage
         {
             var snap = await Task.Run(() => WindowsDoctorReader.Read());
             _history.Add(snap);
-            LastSample = $"Última leitura: {snap.At.ToLocalTime():HH:mm:ss} · a cada {_intervalMinutes} min · {_history.Count} leituras";
+            LastSample = Loc.F("MemDoc.UltimaLeituraNCada", snap.At.ToLocalTime(), _intervalMinutes, _history.Count);
             PoolNote = snap.Problems.TryGetValue("tags do pool", out var why) ? why : "";
             ShowNow(snap);
             ShowConsumers();
@@ -299,7 +297,7 @@ public sealed class MemoryDoctorPage : ModulePage
             Rebuild();
             CheckGuard(snap);
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = $"Leitura falhou: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = Loc.F("Priv.LeituraFalhouN", ex.Message); }
         finally
         {
             _sampling = false;
@@ -312,16 +310,16 @@ public sealed class MemoryDoctorPage : ModulePage
         var s = snap.System;
         if (s.Total <= 0) return;
         var used = (double)s.InUse / s.Total;
-        Headline = $"{Gb(s.InUse)} em uso de {Gb(s.Total)} · comprometida {s.CommitRatio * 100:0}% do limite";
+        Headline = Loc.F("MemDoc.NUsoNComprometida", Gb(s.InUse), Gb(s.Total), s.CommitRatio * 100);
         HeadlineTone = s.CommitRatio >= 0.9 || used >= 0.92 ? "bad" : s.CommitRatio >= 0.8 || used >= 0.85 ? "warn" : "good";
         Subline = s.CommitRatio >= 0.9
-            ? "Perto do limite: programas podem fechar sozinhos por falta de memória."
-            : "Cache e memória livre são memória disponível. O número que importa é a comprometida chegando no limite.";
+            ? Loc.T("MemDoc.PertoLimiteProgramasPodem")
+            : Loc.T("MemDoc.CacheMemoriaLivreSao");
         InUseBytes = s.InUse;
         TotalBytes = s.Total;
         UsedPercent = used * 100;
         CommitPercent = s.CommitRatio * 100;
-        CommitText = $"{Gb(s.CommitTotal)} de {Gb(s.CommitLimit)}";
+        CommitText = Loc.F("MemDoc.NDeN", Gb(s.CommitTotal), Gb(s.CommitLimit));
         var modified = Math.Max(0, s.Modified ?? 0);
         var standby = Math.Max(0, s.Standby ?? 0);
         var free = Math.Max(0, s.Total - s.InUse - modified - standby);
@@ -338,15 +336,15 @@ public sealed class MemoryDoctorPage : ModulePage
         OnPropertyChanged(nameof(HasSample));
         OnPropertyChanged(nameof(HasChart));
         Bars.Clear();
-        Bars.Add(new DoctorBar("Em uso", Gb(s.InUse), used, used >= 0.92 ? "bad" : used >= 0.85 ? "warn" : "good", "Total − disponível − modificada (como o Gerenciador de Tarefas)."));
-        if (s.Modified is { } mod) Bars.Add(new DoctorBar("Modificada", Gb(mod), (double)mod / s.Total, "info", "Esperando ser gravada no disco antes de virar disponível."));
-        if (s.Standby is { } sb) Bars.Add(new DoctorBar("Cache (lista de espera)", Gb(sb), (double)sb / s.Total, "info", "Disponível: devolvida na hora a quem precisar."));
-        if (s.FreeZero is { } fz) Bars.Add(new DoctorBar("Livre", Gb(fz), (double)fz / s.Total, "info", "Sem uso nenhum. Pouca memória livre com muito cache é normal."));
-        Bars.Add(new DoctorBar("Comprometida / limite", $"{Gb(s.CommitTotal)} de {Gb(s.CommitLimit)}", s.CommitRatio, s.CommitRatio >= 0.9 ? "bad" : s.CommitRatio >= 0.8 ? "warn" : "good",
-            "Limite = RAM + arquivo de paginação. Chegou nele, o Windows recusa memória."));
-        KernelText = $"Kernel: pool não paginado {Gb(s.NonPagedPool)} · paginado {Gb(s.PagedPool)}" +
-                     (snap.PoolTags is { Count: > 0 } tags ? $" · {tags.Count} tags lidas" : "");
-        GpuText = s.GpuShared is { } gs ? $"GPU: {Gb(gs)} da RAM em uso como memória de vídeo compartilhada" + (s.GpuDedicated is { } gd ? $" · VRAM dedicada em uso {Gb(gd)}" : "") : "";
+        Bars.Add(new DoctorBar(Loc.T("MemDoc.Uso"), Gb(s.InUse), used, used >= 0.92 ? "bad" : used >= 0.85 ? "warn" : "good", Loc.T("MemDoc.TotalDisponivelModificadaComo")));
+        if (s.Modified is { } mod) Bars.Add(new DoctorBar(Loc.T("MemDoc.Modificada"), Gb(mod), (double)mod / s.Total, "info", Loc.T("MemDoc.EsperandoSerGravadaDisco")));
+        if (s.Standby is { } sb) Bars.Add(new DoctorBar(Loc.T("Mem.CacheListaEspera"), Gb(sb), (double)sb / s.Total, "info", Loc.T("MemDoc.DisponivelDevolvidaHoraQuem")));
+        if (s.FreeZero is { } fz) Bars.Add(new DoctorBar(Loc.T("MemDoc.Livre2"), Gb(fz), (double)fz / s.Total, "info", Loc.T("MemDoc.SemUsoNenhumPouca")));
+        Bars.Add(new DoctorBar(Loc.T("MemDoc.ComprometidaLimite"), Loc.F("MemDoc.NDeN", Gb(s.CommitTotal), Gb(s.CommitLimit)), s.CommitRatio, s.CommitRatio >= 0.9 ? "bad" : s.CommitRatio >= 0.8 ? "warn" : "good",
+            Loc.T("MemDoc.LimiteRamArquivoPaginacao")));
+        KernelText = Loc.F("MemDoc.KernelPoolNaoPaginado", Gb(s.NonPagedPool), Gb(s.PagedPool)) +
+                     (snap.PoolTags is { Count: > 0 } tags ? Loc.F("MemDoc.NTagsLidas", tags.Count) : "");
+        GpuText = s.GpuShared is { } gs ? Loc.F("MemDoc.GpuNRamUso", Gb(gs)) + (s.GpuDedicated is { } gd ? Loc.F("MemDoc.VramDedicadaUsoN", Gb(gd)) : "") : "";
     }
 
     private void ShowConsumers()
@@ -357,23 +355,23 @@ public sealed class MemoryDoctorPage : ModulePage
             var v = LeakDetector.Evaluate(_history.Group(g.Key, x => x.PrivateBytes), LeakThresholds.PrivateBytes);
             var (trend, tone) = v.Kind switch
             {
-                TrendKind.Insufficient => ("observando…", "info"),
-                TrendKind.Leak => ($"+{MemoryDoctorEngine.Bytes(v.SlopePerHour)}/h sem parar", "bad"),
-                TrendKind.Noisy => ("sobe e desce", "info"),
-                _ => (v.SlopePerHour > 0 ? $"+{MemoryDoctorEngine.Bytes(v.SlopePerHour)}/h" : "estável", "good"),
+                TrendKind.Insufficient => (Loc.T("MemDoc.Observando"), "info"),
+                TrendKind.Leak => (Loc.F("MemDoc.NHSemParar", MemoryDoctorEngine.Bytes(v.SlopePerHour)), "bad"),
+                TrendKind.Noisy => (Loc.T("MemDoc.SobeDesce"), "info"),
+                _ => (v.SlopePerHour > 0 ? $"+{MemoryDoctorEngine.Bytes(v.SlopePerHour)}/h" : Loc.T("MemDoc.Estavel"), "good"),
             };
             var kind = g.Kind switch
             {
-                AppKind.Browser => "navegador", AppKind.ServiceHost or AppKind.Service => "serviço", AppKind.VirtualMachine => "máquina virtual",
-                AppKind.System => "Windows", _ => "programa",
+                AppKind.Browser => Loc.T("MemDoc.Navegador"), AppKind.ServiceHost or AppKind.Service => Loc.T("MemDoc.Servico"), AppKind.VirtualMachine => Loc.T("MemDoc.MaquinaVirtual"),
+                AppKind.System => "Windows", _ => Loc.T("MemDoc.Programa"),
             };
             var history = _history.Group(g.Key, x => x.PrivateBytes).Select(t => t.Value).ToList();
-            Consumers.Add(new DoctorConsumerRow(g.DisplayName, Gb(g.PrivateBytes), Gb(g.WorkingSet), g.ProcessCount == 1 ? "1 processo" : $"{g.ProcessCount} processos", trend, tone, kind, history));
+            Consumers.Add(new DoctorConsumerRow(g.DisplayName, Gb(g.PrivateBytes), Gb(g.WorkingSet), g.ProcessCount == 1 ? Loc.T("MemDoc.N1Processo") : Loc.F("MemDoc.NProcessos", g.ProcessCount), trend, tone, kind, history));
         }
         var snaps = _history.Snapshots;
         var first = snaps.Count == 0 ? null : snaps[0];
-        HistoryText = first is null ? "" : $"Observando desde {first.At.ToLocalTime():HH:mm} ({LeakDetector.Minutes(DateTimeOffset.Now - first.At)}). " +
-            "Vazamento só é apontado depois de pelo menos 15 min subindo sem parar.";
+        HistoryText = first is null ? "" : Loc.F("MemDoc.ObservandoDesdeNN", first.At.ToLocalTime(), LeakDetector.Minutes(DateTimeOffset.Now - first.At)) +
+            Loc.T("MemDoc.VazamentoSoApontadoDepois");
     }
 
     private void ShowTimelineChart()
@@ -420,7 +418,7 @@ public sealed class MemoryDoctorPage : ModulePage
         foreach (var (tag, drivers) in found)
         {
             _tagDrivers[tag] = drivers;
-            AddEvent(drivers.Count == 0 ? $"Tag '{tag}': nenhum driver em System32\\drivers contém esse texto." : $"Tag '{tag}' encontrada em: {string.Join(", ", drivers)}.", "info");
+            AddEvent(drivers.Count == 0 ? Loc.F("MemDoc.TagNNenhumDriver", tag) : Loc.F("MemDoc.TagNEncontradaN", tag, string.Join(", ", drivers)), "info");
         }
         _context = _context with { TagDrivers = new Dictionary<string, IReadOnlyList<string>>(_tagDrivers) };
     }
@@ -439,7 +437,7 @@ public sealed class MemoryDoctorPage : ModulePage
             {
                 Suspect = s,
                 Trend = trend,
-                TrendLabel = appTrend.Count > 1 ? "Memória do app nas últimas leituras" : "Memória comprometida do PC nas últimas leituras",
+                TrendLabel = appTrend.Count > 1 ? Loc.T("MemDoc.MemoriaAppNasUltimas") : Loc.T("MemDoc.MemoriaComprometidaPcNas"),
                 Temporary = s.Temporary.Select(f => FixRow(s, f)).ToList(),
                 Permanent = s.Permanent.Select(f => FixRow(s, f)).ToList(),
                 Sources = s.Sources.Select(Source).ToList(),
@@ -484,29 +482,29 @@ public sealed class MemoryDoctorPage : ModulePage
         if (f.ActionKey is null) return;
         if (f.Guard == ProcessGuard.Forbidden) { row.Status = f.GuardReason; return; }
         if (f.Guard == ProcessGuard.Sensitive &&
-            !Host.Confirm("Confirmação 1 de 2", $"{f.GuardReason}\n\n{f.Title}?\n\nVocê vai confirmar mais uma vez a seguir."))
+            !Host.Confirm(Loc.T("MemDoc.Confirmacao12"), Loc.F("MemDoc.NNVoceVai", f.GuardReason, f.Title)))
         {
-            row.Status = "Cancelado.";
+            row.Status = Loc.T("Clean.Cancelado");
             return;
         }
-        var text = $"{suspect.Title}\n\n{f.Title}\n{f.WhatItDoes}\n\nQuanto dura: {f.HowLong}\nCusto: {f.Cost}\n\n" +
-                   (f.Reversible ? "Desfazer: botão \"Desfazer\" aqui ou na página Aplicar." : "Não há o que desfazer: é uma ação de efeito imediato.") +
-                   (f.Admin ? "\nExige administrador (o Windows vai pedir permissão)." : "");
+        var text = Loc.F("MemDoc.NNNQuanto", suspect.Title, f.Title, f.WhatItDoes, f.HowLong, f.Cost) +
+                   (f.Reversible ? Loc.T("MemDoc.DesfazerBotaoDesfazerAqui") : Loc.T("MemDoc.NaoHaDesfazerAcao")) +
+                   (f.Admin ? Loc.T("MemDoc.ExigeAdministradorWindowsVai") : "");
         var r = await Host.ApplyAsync(f.Title, text, [new ActionRequest(f.ActionKey, f.Value, f.Arguments)], f.Admin ? BrokerLevel.Admin : BrokerLevel.User);
-        if (r is null) { row.Status = "Cancelado. Nada foi alterado."; return; }
+        if (r is null) { row.Status = Loc.T("Shell.CanceladoNadaFoiAlterado"); return; }
         var item = r.Response?.Results is { Count: > 0 } items ? items[0] : null;
         var outcome = item?.Outcome ?? "";
         if (outcome is "Verified" or "AlreadyConfigured")
         {
             row.RunId = outcome == "Verified" && f.Reversible ? r.Response?.RunId : null;
             row.RunLevel = f.Admin ? BrokerLevel.Admin : BrokerLevel.User;
-            row.Status = outcome == "AlreadyConfigured" ? "Já estava assim." : f.Term == FixTerm.Temporary ? $"Feito às {DateTime.Now:HH:mm}. Lembre: isso volta a acontecer." : "Feito.";
+            row.Status = outcome == "AlreadyConfigured" ? Loc.T("MemDoc.JaEstavaAssim") : f.Term == FixTerm.Temporary ? Loc.F("MemDoc.FeitoNLembreIsso", DateTime.Now) : Loc.T("MemDoc.Feito");
             _applied[key] = row;
             if (f.ActionKey == DoctorActions.StandbyPurge) _lastPurge = DateTimeOffset.Now;
             AddEvent($"{f.Title}: {row.Status}", "good");
             if (f.Term == FixTerm.Temporary) _ = SampleAsync();
         }
-        else row.Status = item?.Detail is { Length: > 0 } d ? $"Não feito: {d}" : $"Não feito: {r.Message}";
+        else row.Status = item?.Detail is { Length: > 0 } d ? Loc.F("MemDoc.NaoFeitoN", d) : Loc.F("MemDoc.NaoFeitoN", r.Message);
         Message = row.Status;
     }
 
@@ -518,11 +516,11 @@ public sealed class MemoryDoctorPage : ModulePage
         if (r.Response?.FullyRestored == true)
         {
             row.RunId = null;
-            row.Status = "Desfeito.";
+            row.Status = Loc.T("Svc.Desfeito");
             _applied.Remove(key);
-            AddEvent($"{row.Title}: desfeito.", "info");
+            AddEvent(Loc.F("MemDoc.NDesfeito", row.Title), "info");
         }
-        else row.Status = $"Não desfeito: {r.Message}";
+        else row.Status = Loc.F("Mem.NaoDesfeitoN", r.Message);
         Message = row.Status;
     }
 
@@ -537,22 +535,22 @@ public sealed class MemoryDoctorPage : ModulePage
         var match = items.FirstOrDefault(i => i.Enabled && !i.IsMicrosoft && i.ExecutablePath is { } p &&
                                               string.Equals(System.IO.Path.GetFileNameWithoutExtension(p), exe, StringComparison.OrdinalIgnoreCase) &&
                                               StartupPage.ToggleRequest(i) is not null);
-        if (match is null) { row.Status = $"{exe} não abre com o Windows (nada a desligar). Veja a página Inicialização."; return; }
+        if (match is null) { row.Status = Loc.F("MemDoc.NNaoAbreWindows", exe); return; }
         var req = StartupPage.ToggleRequest(match)!.Value;
-        var r = await Host.ApplyAsync("Desligar da inicialização",
-            $"{match.Name} deixa de abrir com o Windows ({match.SourceLabel}).\n\nQuanto dura: permanente.\nCusto: {row.Fix.Cost}\nDesfazer: botão \"Desfazer\" aqui ou na página Inicialização.",
+        var r = await Host.ApplyAsync(Loc.T("MemDoc.DesligarInicializacao"),
+            Loc.F("MemDoc.NDeixaAbrirWindows", match.Name, match.SourceLabel, row.Fix.Cost),
             [new ActionRequest(req.Key, "disabled", req.Args)], req.Level);
-        if (r is null) { row.Status = "Cancelado. Nada foi alterado."; return; }
+        if (r is null) { row.Status = Loc.T("Shell.CanceladoNadaFoiAlterado"); return; }
         var outcome = r.Response?.Results is { Count: > 0 } items2 ? items2[0].Outcome : "";
         if (outcome is "Verified" or "AlreadyConfigured")
         {
             row.RunId = outcome == "Verified" ? r.Response?.RunId : null;
             row.RunLevel = req.Level;
-            row.Status = outcome == "Verified" ? "Desligado da inicialização. Vale no próximo login." : "Já estava desligado.";
+            row.Status = outcome == "Verified" ? Loc.T("MemDoc.DesligadoInicializacaoValeProximo") : Loc.T("MemDoc.JaEstavaDesligado");
             _applied[key] = row;
             AddEvent($"{match.Name}: {row.Status}", "good");
         }
-        else row.Status = $"Não feito: {r.Message}";
+        else row.Status = Loc.F("MemDoc.NaoFeitoN", r.Message);
         Message = row.Status;
     }
 
@@ -564,10 +562,10 @@ public sealed class MemoryDoctorPage : ModulePage
         var game = WindowsDoctorReader.RunningGame(snap.Processes);
         var d = Nexus.Lab.Memory.Problems.GameGuard.Decide(new GameGuardSettings(true), snap.System, game, DateTimeOffset.Now, _lastPurge);
         GuardSuggest = d.Suggest;
-        GuardText = d.Suggest ? d.Reason + " Esvaziar a lista de espera pode reduzir engasgos neste caso (efeito de minutos)." : "Vigiando: " + d.Reason;
+        GuardText = d.Suggest ? d.Reason + Loc.T("MemDoc.EsvaziarListaEsperaPode") : Loc.T("MemDoc.Vigiando") + d.Reason;
         if (d.Suggest)
         {
-            Host?.Notify("Memória livre muito baixa com um jogo aberto: veja Memória: diagnóstico.");
+            Host?.Notify(Loc.T("MemDoc.MemoriaLivreMuitoBaixa"));
             AddEvent(d.Reason, "warn");
         }
     }
@@ -575,15 +573,15 @@ public sealed class MemoryDoctorPage : ModulePage
     private async Task PurgeFromGuardAsync()
     {
         if (Host is null) return;
-        var r = await Host.ApplyAsync("Esvaziar a lista de espera",
-            "Joga fora o cache de arquivos da RAM (o mesmo que \"Empty Standby List\" do RAMMap).\n\nQuanto dura: minutos.\n" +
-            "Custo: o jogo e os programas releem do disco o que estava em cache.\nNão há o que desfazer. Exige administrador.",
+        var r = await Host.ApplyAsync(Loc.T("MemDoc.EsvaziarListaEspera"),
+            Loc.T("MemDoc.JogaForaCacheArquivos") +
+            Loc.T("MemDoc.CustoJogoProgramasReleem"),
             [new ActionRequest(DoctorActions.StandbyPurge)], BrokerLevel.Admin);
         if (r?.Response?.Results is { Count: > 0 } items && items[0].Outcome == "Verified")
         {
             _lastPurge = DateTimeOffset.Now;
             GuardSuggest = false;
-            AddEvent("Lista de espera esvaziada (modo vigiar enquanto jogo).", "good");
+            AddEvent(Loc.T("MemDoc.ListaEsperaEsvaziadaModo"), "good");
             _ = SampleAsync();
         }
     }

@@ -10,6 +10,7 @@
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
                     xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell">
@@ -55,7 +56,7 @@
                       Visibility="{Binding CanRevert, Converter={StaticResource BoolToVis}}">
                 <StackPanel Orientation="Horizontal">
                   <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
-                  <TextBlock Text="Desfazer" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{l:T Shell.Desfazer}" TextWrapping="NoWrap"/>
                 </StackPanel>
               </Button>
             </WrapPanel>
@@ -108,16 +109,16 @@
               <StackPanel Visibility="{Binding HasTemporary, Converter={StaticResource BoolToVis}}">
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                   <c:Icon Data="{StaticResource Icon.Bolt}" Size="16" Foreground="{StaticResource Brush.Trace}" Margin="0,0,6,0"/>
-                  <TextBlock Text="Resolver agora" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.Trace}" VerticalAlignment="Center"/>
-                  <TextBlock Text=" · temporário, volta a acontecer" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+                  <TextBlock Text="{l:T MemDoc.ResolverAgora}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.Trace}" VerticalAlignment="Center"/>
+                  <TextBlock Text="{l:T MemDoc.TemporarioVoltaAcontecer}" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding Temporary}" ItemTemplate="{StaticResource Doc.Fix}" Focusable="False"/>
               </StackPanel>
               <StackPanel Grid.Column="2" Visibility="{Binding HasPermanent, Converter={StaticResource BoolToVis}}">
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                   <c:Icon Data="{StaticResource Icon.Check}" Size="16" Foreground="{StaticResource Brush.Good}" Margin="0,0,6,0"/>
-                  <TextBlock Text="Resolver de vez" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.Good}" VerticalAlignment="Center"/>
-                  <TextBlock Text=" · ataca a causa" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+                  <TextBlock Text="{l:T MemDoc.ResolverVez}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.Good}" VerticalAlignment="Center"/>
+                  <TextBlock Text="{l:T MemDoc.AtacaCausa}" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding Permanent}" ItemTemplate="{StaticResource Doc.Fix}" Focusable="False"/>
               </StackPanel>
@@ -140,14 +141,14 @@
         </Border>
 
         <!-- ===== 1. Destaque ===== -->
-        <c:HeroPanel Illustration="{StaticResource Illo.MemoryDoctor}" Title="Memória em uso"
+        <c:HeroPanel Illustration="{StaticResource Illo.MemoryDoctor}" Title="{l:T MemDoc.MemoriaUso}"
                      Number="{Binding InUseBytes}" Kind="Bytes" IsLoading="{Binding IsLoading}" Caption="{Binding Subline}"
-                     ActionText="Ler agora" Command="{Binding SampleNowCommand}"
-                     SecondaryText="Recomeçar histórico" SecondaryCommand="{Binding ClearCommand}">
+                     ActionText="{l:T MemDoc.LerAgora}" Command="{Binding SampleNowCommand}"
+                     SecondaryText="{l:T MemDoc.RecomecarHistorico}" SecondaryCommand="{Binding ClearCommand}">
           <StackPanel Width="170">
-            <c:RingMeter Value="{Binding CommitPercent}" WarnAt="80" BadAt="90" HigherIsBetter="False" Label="do limite"
+            <c:RingMeter Value="{Binding CommitPercent}" WarnAt="80" BadAt="90" HigherIsBetter="False" Label="{l:T Mem.Limite}"
                          Width="132" Height="132" Thickness="11" HorizontalAlignment="Center"/>
-            <TextBlock Text="Pressão de memória" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            <TextBlock Text="{l:T MemDoc.PressaoMemoria}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
             <TextBlock Text="{Binding CommitText}" FontFamily="{StaticResource Font.Numbers}" FontSize="13" Foreground="{StaticResource Brush.TextMuted}" HorizontalAlignment="Center"/>
           </StackPanel>
         </c:HeroPanel>
@@ -157,12 +158,12 @@
           <StackPanel>
             <DockPanel Margin="0,0,0,4">
               <c:Icon Data="{StaticResource Icon.Ram}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
-              <TextBlock Text="Para onde vai a RAM" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+              <TextBlock Text="{l:T MemDoc.OndeVaiRam}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
             </DockPanel>
-            <TextBlock Text="Tudo em ciano está disponível: o Windows devolve na hora a quem precisar." Style="{StaticResource Text.Small}" Margin="0,0,0,12"/>
+            <TextBlock Text="{l:T MemDoc.TudoCianoEstaDisponivel}" Style="{StaticResource Text.Small}" Margin="0,0,0,12"/>
             <c:SkeletonLoader Shape="Lines" Lines="2" Margin="0,0,0,8" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
             <Border Height="22" CornerRadius="5" ClipToBounds="True" Background="{StaticResource Brush.Bg}" Visibility="{Binding HasSample, Converter={StaticResource BoolToVis}}"
-                    AutomationProperties.Name="Barra da RAM: em uso, modificada, cache e livre">
+                    AutomationProperties.Name="{l:T MemDoc.BarraRamUsoModificada}">
               <Grid RenderTransformOrigin="0,0.5">
                 <Grid.RenderTransform>
                   <ScaleTransform ScaleX="0"/>
@@ -195,15 +196,15 @@
             </Border>
             <WrapPanel Margin="0,10,0,0" Visibility="{Binding HasSample, Converter={StaticResource BoolToVis}}">
               <Border Width="12" Height="12" CornerRadius="2" Background="{StaticResource Brush.Trace}" Margin="0,0,6,4" VerticalAlignment="Center"/>
-              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="em uso"/> <Run Text="{Binding InUseText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
+              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="{l:T Mon.Uso}"/> <Run Text="{Binding InUseText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
               <Border Width="12" Height="12" CornerRadius="2" Background="{StaticResource Brush.TextDim}" Margin="0,0,6,4" VerticalAlignment="Center"/>
-              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="esperando ir ao disco"/> <Run Text="{Binding ModifiedText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
+              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="{l:T MemDoc.EsperandoIrDisco}"/> <Run Text="{Binding ModifiedText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
               <Border Width="12" Height="12" CornerRadius="2" Background="{StaticResource Brush.Signal}" Margin="0,0,6,4" VerticalAlignment="Center"/>
-              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="cache"/> <Run Text="{Binding StandbyText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
+              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="{l:T MemDoc.Cache}"/> <Run Text="{Binding StandbyText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
               <Border Width="12" Height="12" CornerRadius="2" Background="{StaticResource Brush.SignalSoft}" Margin="0,0,6,4" VerticalAlignment="Center"/>
-              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="livre"/> <Run Text="{Binding FreeText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
+              <TextBlock Style="{StaticResource Doc.LegendText}"><Run Text="{l:T MemDoc.Livre}"/> <Run Text="{Binding FreeText, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Text}"/></TextBlock>
             </WrapPanel>
-            <c:ExplainToggle Header="Todos os números" Margin="0,4,0,0">
+            <c:ExplainToggle Header="{l:T MemDoc.TodosNumeros}" Margin="0,4,0,0">
               <StackPanel>
                 <ItemsControl ItemsSource="{Binding Bars}" Focusable="False">
                   <ItemsControl.ItemTemplate>
@@ -233,12 +234,12 @@
         <Border Style="{StaticResource Panel.Inset}" Padding="16,10" Margin="0,0,0,14">
           <WrapPanel VerticalAlignment="Center">
             <c:Icon Data="{StaticResource Icon.History}" Size="16" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0"/>
-            <TextBlock Text="Ler a cada" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <TextBlock Text="{l:T MemDoc.LerCada}" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,6,0"/>
             <ComboBox ItemsSource="{Binding IntervalOptions}" SelectedItem="{Binding IntervalMinutes}" Width="64" VerticalAlignment="Center"
-                      AutomationProperties.Name="Intervalo entre leituras, em minutos"/>
-            <TextBlock Text="min" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="6,0,20,0"/>
-            <CheckBox Content="Continuar com a página fechada" IsChecked="{Binding KeepRecording}" VerticalAlignment="Center" Margin="0,0,20,0"
-                      ToolTip="Continua lendo enquanto o NEXUS estiver aberto (nada é gravado em disco)."/>
+                      AutomationProperties.Name="{l:T MemDoc.IntervaloEntreLeiturasMinutos}"/>
+            <TextBlock Text="{l:T MemDoc.Min}" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="6,0,20,0"/>
+            <CheckBox Content="{l:T MemDoc.ContinuarPaginaFechada}" IsChecked="{Binding KeepRecording}" VerticalAlignment="Center" Margin="0,0,20,0"
+                      ToolTip="{l:T MemDoc.ContinuaLendoEnquantoNexus}"/>
             <TextBlock Text="{Binding LastSample}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center"/>
           </WrapPanel>
         </Border>
@@ -248,7 +249,7 @@
           <DockPanel>
             <c:Icon Data="{StaticResource Icon.Info}" Size="16" Foreground="{StaticResource Brush.Trace}" Margin="0,1,10,0" VerticalAlignment="Top"/>
             <StackPanel>
-              <TextBlock Text="Nada aqui é &quot;limpador de RAM&quot;. Trava quando a memória comprometida chega no limite ou algo só cresce."
+              <TextBlock Text="{l:T MemDoc.NadaAquiLimpadorRam}"
                          Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
               <c:ExplainToggle Margin="0,2,0,0" Content="{x:Static vm:MemoryDoctorPage.HonestText}"/>
             </StackPanel>
@@ -256,12 +257,12 @@
         </Border>
 
         <!-- ===== 3. Suspeitos ===== -->
-        <TextBlock Text="Suspeitos" Style="{StaticResource Text.H2}" Margin="0,0,0,2"/>
+        <TextBlock Text="{l:T Scan.Suspeitos}" Style="{StaticResource Text.H2}" Margin="0,0,0,2"/>
         <TextBlock Text="{Binding HistoryText}" Style="{StaticResource Text.Small}" Margin="0,0,0,12" Visibility="{Binding HistoryText, Converter={StaticResource NullToCollapsed}}"/>
         <c:SkeletonLoader Shape="Lines" Lines="4" Margin="4,0,4,16" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
-        <c:EmptyState Illustration="{StaticResource Illo.MemoryDoctor}" Text="Nada fora do normal até agora."
-                      Detail="Deixe a página aberta: vazamento só aparece depois de 15 minutos subindo sem parar."
-                      ActionText="Ler agora" Command="{Binding SampleNowCommand}" Margin="0,0,0,14"
+        <c:EmptyState Illustration="{StaticResource Illo.MemoryDoctor}" Text="{l:T MemDoc.NadaForaNormalAte}"
+                      Detail="{l:T MemDoc.DeixePaginaAbertaVazamento}"
+                      ActionText="{l:T MemDoc.LerAgora}" Command="{Binding SampleNowCommand}" Margin="0,0,0,14"
                       Visibility="{Binding NoSuspects, Converter={StaticResource BoolToVis}}"/>
         <ItemsControl ItemsSource="{Binding Suspects}" ItemTemplate="{StaticResource Doc.Suspect}" Focusable="False"/>
 
@@ -270,18 +271,18 @@
           <StackPanel>
             <DockPanel Margin="0,0,0,4">
               <c:Icon Data="{StaticResource Icon.Games}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
-              <TextBlock Text="Vigiar enquanto jogo" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+              <TextBlock Text="{l:T MemDoc.VigiarEnquantoJogo}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
             </DockPanel>
-            <TextBlock Text="Avisa quando um jogo está aberto e a memória livre cai abaixo de 5%. Nunca age sozinho." Style="{StaticResource Text.Small}" Margin="0,0,0,8"/>
-            <CheckBox Content="Ligar o aviso" IsChecked="{Binding GameGuard}"/>
+            <TextBlock Text="{l:T MemDoc.AvisaQuandoJogoEsta}" Style="{StaticResource Text.Small}" Margin="0,0,0,8"/>
+            <CheckBox Content="{l:T MemDoc.LigarAviso}" IsChecked="{Binding GameGuard}"/>
             <TextBlock Text="{Binding GuardText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,6,0,0"
                        Visibility="{Binding GuardText, Converter={StaticResource NullToCollapsed}}"/>
             <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding GuardSuggest, Converter={StaticResource BoolToVis}}">
-              <Button Content="Esvaziar a lista de espera agora" Command="{Binding PurgeNowCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,10,0"/>
-              <c:StatusChip Tone="Bad" Text="Sem desfazer · administrador" VerticalAlignment="Center"/>
+              <Button Content="{l:T MemDoc.EsvaziarListaEsperaAgora}" Command="{Binding PurgeNowCommand}" Style="{StaticResource Button.Secondary}" Margin="0,0,10,0"/>
+              <c:StatusChip Tone="Bad" Text="{l:T MemDoc.SemDesfazerAdministrador}" VerticalAlignment="Center"/>
             </StackPanel>
             <c:ExplainToggle Margin="0,4,0,0"
-                             Content="Desligado por padrão. Com um jogo aberto e a memória livre abaixo de 5% (com cache grande), o NEXUS avisa e oferece esvaziar a lista de espera. Cada vez pede sua confirmação e permissão de administrador. Só ajuda em engasgos com pouca RAM; a solução de verdade é mais memória."/>
+                             Content="{l:T MemDoc.DesligadoPadraoJogoAberto}"/>
           </StackPanel>
         </Border>
 
@@ -290,9 +291,9 @@
           <StackPanel>
             <DockPanel Margin="0,0,0,4">
               <c:Icon Data="{StaticResource Icon.Apps}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
-              <TextBlock Text="Quem mais usa memória" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+              <TextBlock Text="{l:T MemDoc.QuemMaisUsaMemoria}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
             </DockPanel>
-            <TextBlock Text="Somado por app: o navegador conta todas as abas." Style="{StaticResource Text.Small}" Margin="0,0,0,8"/>
+            <TextBlock Text="{l:T MemDoc.SomadoAppNavegadorConta}" Style="{StaticResource Text.Small}" Margin="0,0,0,8"/>
             <c:SkeletonLoader Shape="Lines" Lines="5" Margin="0,4,0,4" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
             <ItemsControl ItemsSource="{Binding Consumers}" Focusable="False">
               <ItemsControl.ItemTemplate>
@@ -313,13 +314,13 @@
                       <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
                         <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
                         <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis">
-                          <Run Text="{Binding Kind, Mode=OneWay}"/> <Run Text="·"/> <Run Text="{Binding Processes, Mode=OneWay}"/> <Run Text="·"/> <Run Text="{Binding WorkingSet, Mode=OneWay}"/> <Run Text="na RAM"/>
+                          <Run Text="{Binding Kind, Mode=OneWay}"/> <Run Text="·"/> <Run Text="{Binding Processes, Mode=OneWay}"/> <Run Text="·"/> <Run Text="{Binding WorkingSet, Mode=OneWay}"/> <Run Text="{l:T MemDoc.Ram}"/>
                         </TextBlock>
                       </StackPanel>
                       <c:Sparkline Grid.Column="2" Values="{Binding History}" Height="28" Margin="0,0,12,0" VerticalAlignment="Center"
                                    Stroke="{Binding TrendToneKind, Converter={StaticResource ToneBrush}}"/>
                       <TextBlock Grid.Column="3" Text="{Binding Private}" FontFamily="{StaticResource Font.Numbers}" FontSize="16" Foreground="{StaticResource Brush.Trace}"
-                                 VerticalAlignment="Center" TextWrapping="NoWrap" ToolTip="Memória comprometida (privada)"/>
+                                 VerticalAlignment="Center" TextWrapping="NoWrap" ToolTip="{l:T MemDoc.MemoriaComprometidaPrivada}"/>
                       <c:StatusChip Grid.Column="4" Tone="{Binding TrendToneKind}" Text="{Binding Trend}" VerticalAlignment="Center" MinWidth="120"/>
                     </Grid>
                   </Border>
@@ -334,16 +335,16 @@
           <StackPanel>
             <DockPanel Margin="0,0,0,4">
               <c:Icon Data="{StaticResource Icon.TrendUp}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
-              <TextBlock Text="Últimas horas" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+              <TextBlock Text="{l:T MemDoc.UltimasHoras}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
             </DockPanel>
-            <TextBlock Text="Linha que só sobe e nunca desce é sinal de vazamento." Style="{StaticResource Text.Small}" Margin="0,0,0,8"/>
+            <TextBlock Text="{l:T MemDoc.LinhaSoSobeNunca}" Style="{StaticResource Text.Small}" Margin="0,0,0,8"/>
             <WrapPanel Margin="0,0,0,8">
               <Border Width="14" Height="3" CornerRadius="1.5" Background="{StaticResource Brush.Signal}" Margin="0,0,6,4" VerticalAlignment="Center"/>
-              <TextBlock Text="em uso" Style="{StaticResource Doc.LegendText}"/>
+              <TextBlock Text="{l:T Mon.Uso}" Style="{StaticResource Doc.LegendText}"/>
               <Border Width="14" Height="3" CornerRadius="1.5" Background="{StaticResource Brush.Trace}" Margin="0,0,6,4" VerticalAlignment="Center"/>
-              <TextBlock Text="comprometida" Style="{StaticResource Doc.LegendText}"/>
+              <TextBlock Text="{l:T MemDoc.Comprometida}" Style="{StaticResource Doc.LegendText}"/>
               <Border Width="14" Height="2" Background="{StaticResource Brush.Bad}" Margin="0,0,6,4" VerticalAlignment="Center"/>
-              <TextBlock Text="memória do kernel (escala própria)" Style="{StaticResource Doc.LegendText}"/>
+              <TextBlock Text="{l:T MemDoc.MemoriaKernelEscalaPropria}" Style="{StaticResource Doc.LegendText}"/>
             </WrapPanel>
             <Grid Height="150">
               <Grid.RenderTransform>
@@ -368,11 +369,11 @@
               <Path Data="{Binding CommitGeometry}" Stretch="Fill" Stroke="{StaticResource Brush.Trace}" StrokeThickness="2" Margin="8"/>
               <Path Data="{Binding UsedGeometry}" Stretch="Fill" Stroke="{StaticResource Brush.Signal}" StrokeThickness="2" Margin="8"/>
               <Path Data="{Binding PoolGeometry}" Stretch="Fill" Stroke="{StaticResource Brush.Bad}" StrokeThickness="1.5" StrokeDashArray="3 2" Margin="8"/>
-              <TextBlock Text="O gráfico aparece a partir da segunda leitura." Style="{StaticResource Text.Small}" HorizontalAlignment="Center" VerticalAlignment="Center"
+              <TextBlock Text="{l:T MemDoc.GraficoAparecePartirSegunda}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" VerticalAlignment="Center"
                          Visibility="{Binding HasChart, Converter={StaticResource FalseToVisible}}"/>
             </Grid>
-            <c:ExplainToggle Header="Como ler o gráfico" Margin="0,6,0,0"
-                             Content="Enquanto a página está aberta (ou com &quot;continuar com a página fechada&quot;). Escala: o maior entre a RAM e o limite de memória comprometida; o pool não paginado do kernel tem escala própria."/>
+            <c:ExplainToggle Header="{l:T Gpu.ComoLerGrafico}" Margin="0,6,0,0"
+                             Content="{l:T MemDoc.EnquantoPaginaEstaAberta}"/>
           </StackPanel>
         </Border>
 
@@ -381,7 +382,7 @@
           <StackPanel>
             <DockPanel Margin="0,0,0,8">
               <c:Icon Data="{StaticResource Icon.History}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
-              <TextBlock Text="Linha do tempo" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+              <TextBlock Text="{l:T MemDoc.LinhaTempo}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
             </DockPanel>
             <ItemsControl ItemsSource="{Binding Timeline}" Focusable="False">
               <ItemsControl.ItemTemplate>

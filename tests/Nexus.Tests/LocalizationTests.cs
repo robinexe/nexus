@@ -17,7 +17,7 @@ public sealed partial class LocalizationTests
     /// listada já não tiver texto fixo (para a lista não mentir) ou se uma página fora dela tiver.
     /// </summary>
     private static readonly HashSet<string> XamlNotYetTranslated = new(StringComparer.Ordinal)
-    { "Views/Pages/MemoryDoctor.xaml",
+    {
     };
 
     /// <summary>Textos fixos permitidos em XAML traduzido: marcas e nomes próprios iguais em todo idioma.</summary>
