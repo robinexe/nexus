@@ -3687,4 +3687,52 @@ Desfazer: não há o que desfazer; o cache se refaz sozinho.</value></data>
 Exige administrador.</value></data>
   <data name="Tools.VersaoAntiga" xml:space="preserve"><value>versão antiga</value></data>
   <data name="Tools.VersoesAntigasSemUso" xml:space="preserve"><value>versões antigas sem uso</value></data>
+  <data name="Simple.Health.Great" xml:space="preserve"><value>Seu PC está ótimo</value></data>
+  <data name="Simple.Health.Improve" xml:space="preserve"><value>Seu PC pode melhorar</value></data>
+  <data name="Simple.Health.Attention" xml:space="preserve"><value>Seu PC precisa de atenção</value></data>
+  <data name="Simple.Health.WordGreat" xml:space="preserve"><value>ótimo</value></data>
+  <data name="Simple.Health.WordImprove" xml:space="preserve"><value>pode melhorar</value></data>
+  <data name="Simple.Health.WordAttention" xml:space="preserve"><value>atenção</value></data>
+  <data name="Simple.Card.Cleanup" xml:space="preserve"><value>{0} de arquivos inúteis</value></data>
+  <data name="Simple.Card.CleanupAction" xml:space="preserve"><value>Limpar</value></data>
+  <data name="Simple.Card.Driver" xml:space="preserve"><value>Driver da placa de vídeo de {0}</value></data>
+  <data name="Simple.Card.DriverAction" xml:space="preserve"><value>Atualizar</value></data>
+  <data name="Simple.Card.SingleChannel" xml:space="preserve"><value>Memória num canal só: comprar outro pente igual dobra a velocidade</value></data>
+  <data name="Simple.Card.SingleChannelHow" xml:space="preserve"><value>Seu PC tem um pente de memória só. Compre outro igual (mesmo tamanho e velocidade) e encaixe no espaço vazio: a memória passa a trabalhar em dobro.</value></data>
+  <data name="Simple.Card.SeeHow" xml:space="preserve"><value>Ver como</value></data>
+  <data name="Simple.Card.Tweaks1" xml:space="preserve"><value>1 ajuste seguro ainda não foi feito</value></data>
+  <data name="Simple.Card.TweaksN" xml:space="preserve"><value>{0} ajustes seguros ainda não foram feitos</value></data>
+  <data name="Simple.Card.TweaksAction" xml:space="preserve"><value>Otimizar</value></data>
+  <data name="Simple.Card.WhatToDo" xml:space="preserve"><value>O que fazer</value></data>
+  <data name="Simple.F.GameModeOff" xml:space="preserve"><value>O Modo de jogo do Windows está desligado.</value></data>
+  <data name="Simple.F.GameModeOffDo" xml:space="preserve"><value>Toque em Otimizar: o NEXUS liga com segurança e você pode desfazer.</value></data>
+  <data name="Simple.F.CaptureOn" xml:space="preserve"><value>A Game Bar grava vídeo dos jogos o tempo todo.</value></data>
+  <data name="Simple.F.CaptureOnDo" xml:space="preserve"><value>Desligar isso libera a placa de vídeo. Toque em Otimizar para resolver.</value></data>
+  <data name="Simple.F.MemSlow" xml:space="preserve"><value>A memória está mais lenta do que poderia.</value></data>
+  <data name="Simple.F.MemSlowDo" xml:space="preserve"><value>Ligue o perfil de velocidade da memória (XMP ou EXPO) na BIOS do PC. O manual da placa-mãe mostra onde.</value></data>
+  <data name="Simple.F.LowDisk" xml:space="preserve"><value>Pouco espaço livre no disco do Windows.</value></data>
+  <data name="Simple.F.LowDiskDo" xml:space="preserve"><value>Use Limpar e apague arquivos grandes que você não usa mais.</value></data>
+  <data name="Simple.F.Hdd" xml:space="preserve"><value>O Windows está num disco antigo (HD).</value></data>
+  <data name="Simple.F.HddDo" xml:space="preserve"><value>Trocar por um SSD é a melhoria que mais acelera o PC.</value></data>
+  <data name="Simple.F.Rebar" xml:space="preserve"><value>Um recurso que ajuda a placa de vídeo está desligado na BIOS.</value></data>
+  <data name="Simple.F.RebarDo" xml:space="preserve"><value>Ligue "Resizable BAR" (ou "Smart Access Memory") na BIOS. O manual da placa-mãe mostra onde.</value></data>
+  <data name="Simple.F.Mux" xml:space="preserve"><value>O notebook usa a placa de vídeo pelo caminho mais lento.</value></data>
+  <data name="Simple.F.MuxDo" xml:space="preserve"><value>No programa do fabricante do notebook, escolha o modo "só placa dedicada" quando for jogar.</value></data>
+  <data name="Simple.F.Pcie" xml:space="preserve"><value>A placa de vídeo está numa conexão mais lenta.</value></data>
+  <data name="Simple.F.PcieDo" xml:space="preserve"><value>Confira se ela está encaixada no slot principal da placa-mãe.</value></data>
+  <data name="Simple.F.Security" xml:space="preserve"><value>Algo na proteção do Windows pede atenção.</value></data>
+  <data name="Simple.F.SecurityDo" xml:space="preserve"><value>Abra os detalhes para ver o que está desligado e como ligar.</value></data>
+  <data name="Simple.F.Gpu" xml:space="preserve"><value>Uma configuração da placa de vídeo pode melhorar.</value></data>
+  <data name="Simple.F.GpuDo" xml:space="preserve"><value>Abra os detalhes para ver a sugestão e o que muda.</value></data>
+  <data name="Simple.F.Startup" xml:space="preserve"><value>Muitos programas abrem junto com o Windows.</value></data>
+  <data name="Simple.F.StartupDo" xml:space="preserve"><value>Toque em Otimizar: o NEXUS desliga os que só atrasam, e dá para desfazer.</value></data>
+  <data name="Simple.F.GenericDo" xml:space="preserve"><value>Abra os detalhes para ver como resolver.</value></data>
+  <data name="Simple.Topic.Memory" xml:space="preserve"><value>memória</value></data>
+  <data name="Simple.Topic.Disk" xml:space="preserve"><value>disco</value></data>
+  <data name="Simple.Topic.Gpu" xml:space="preserve"><value>placa de vídeo</value></data>
+  <data name="Simple.Topic.Security" xml:space="preserve"><value>segurança</value></data>
+  <data name="Simple.Topic.Power" xml:space="preserve"><value>energia</value></data>
+  <data name="Simple.Topic.Games" xml:space="preserve"><value>jogos</value></data>
+  <data name="Simple.Topic.Startup" xml:space="preserve"><value>inicialização</value></data>
+  <data name="Simple.Topic.Windows" xml:space="preserve"><value>Windows</value></data>
 </root>

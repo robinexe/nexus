@@ -3687,4 +3687,52 @@ Deshacer: no hay nada que deshacer; la caché se rehace sola.</value></data>
 Requiere administrador.</value></data>
   <data name="Tools.VersaoAntiga" xml:space="preserve"><value>versión antigua</value></data>
   <data name="Tools.VersoesAntigasSemUso" xml:space="preserve"><value>versiones antiguas sin uso</value></data>
+  <data name="Simple.Health.Great" xml:space="preserve"><value>Tu PC está genial</value></data>
+  <data name="Simple.Health.Improve" xml:space="preserve"><value>Tu PC puede mejorar</value></data>
+  <data name="Simple.Health.Attention" xml:space="preserve"><value>Tu PC necesita atención</value></data>
+  <data name="Simple.Health.WordGreat" xml:space="preserve"><value>genial</value></data>
+  <data name="Simple.Health.WordImprove" xml:space="preserve"><value>puede mejorar</value></data>
+  <data name="Simple.Health.WordAttention" xml:space="preserve"><value>atención</value></data>
+  <data name="Simple.Card.Cleanup" xml:space="preserve"><value>{0} de archivos inútiles</value></data>
+  <data name="Simple.Card.CleanupAction" xml:space="preserve"><value>Limpiar</value></data>
+  <data name="Simple.Card.Driver" xml:space="preserve"><value>Driver de la tarjeta gráfica de {0}</value></data>
+  <data name="Simple.Card.DriverAction" xml:space="preserve"><value>Actualizar</value></data>
+  <data name="Simple.Card.SingleChannel" xml:space="preserve"><value>Memoria en un solo canal: comprar otro módulo igual duplica la velocidad</value></data>
+  <data name="Simple.Card.SingleChannelHow" xml:space="preserve"><value>Tu PC tiene un solo módulo de memoria. Compra otro igual (mismo tamaño y velocidad) y colócalo en la ranura libre: la memoria trabaja al doble.</value></data>
+  <data name="Simple.Card.SeeHow" xml:space="preserve"><value>Ver cómo</value></data>
+  <data name="Simple.Card.Tweaks1" xml:space="preserve"><value>Falta hacer 1 ajuste seguro</value></data>
+  <data name="Simple.Card.TweaksN" xml:space="preserve"><value>Faltan hacer {0} ajustes seguros</value></data>
+  <data name="Simple.Card.TweaksAction" xml:space="preserve"><value>Optimizar</value></data>
+  <data name="Simple.Card.WhatToDo" xml:space="preserve"><value>Qué hacer</value></data>
+  <data name="Simple.F.GameModeOff" xml:space="preserve"><value>El Modo de juego de Windows está desactivado.</value></data>
+  <data name="Simple.F.GameModeOffDo" xml:space="preserve"><value>Pulsa Optimizar: NEXUS lo activa con seguridad y puedes deshacerlo.</value></data>
+  <data name="Simple.F.CaptureOn" xml:space="preserve"><value>La Game Bar graba tus juegos todo el tiempo.</value></data>
+  <data name="Simple.F.CaptureOnDo" xml:space="preserve"><value>Desactivarlo libera la tarjeta gráfica. Pulsa Optimizar para resolverlo.</value></data>
+  <data name="Simple.F.MemSlow" xml:space="preserve"><value>La memoria va más lenta de lo que podría.</value></data>
+  <data name="Simple.F.MemSlowDo" xml:space="preserve"><value>Activa el perfil de velocidad de la memoria (XMP o EXPO) en la BIOS del PC. El manual de la placa base indica dónde.</value></data>
+  <data name="Simple.F.LowDisk" xml:space="preserve"><value>Poco espacio libre en el disco de Windows.</value></data>
+  <data name="Simple.F.LowDiskDo" xml:space="preserve"><value>Usa Limpiar y borra archivos grandes que ya no uses.</value></data>
+  <data name="Simple.F.Hdd" xml:space="preserve"><value>Windows está en un disco antiguo (HDD).</value></data>
+  <data name="Simple.F.HddDo" xml:space="preserve"><value>Cambiar a un SSD es la mejora que más acelera el PC.</value></data>
+  <data name="Simple.F.Rebar" xml:space="preserve"><value>Una función que ayuda a la tarjeta gráfica está desactivada en la BIOS.</value></data>
+  <data name="Simple.F.RebarDo" xml:space="preserve"><value>Activa "Resizable BAR" (o "Smart Access Memory") en la BIOS. El manual de la placa base indica dónde.</value></data>
+  <data name="Simple.F.Mux" xml:space="preserve"><value>El portátil usa la tarjeta gráfica por el camino más lento.</value></data>
+  <data name="Simple.F.MuxDo" xml:space="preserve"><value>En la aplicación del fabricante del portátil, elige el modo "solo gráfica dedicada" al jugar.</value></data>
+  <data name="Simple.F.Pcie" xml:space="preserve"><value>La tarjeta gráfica está en una conexión más lenta.</value></data>
+  <data name="Simple.F.PcieDo" xml:space="preserve"><value>Comprueba que esté en la ranura principal de la placa base.</value></data>
+  <data name="Simple.F.Security" xml:space="preserve"><value>Algo en la protección de Windows necesita atención.</value></data>
+  <data name="Simple.F.SecurityDo" xml:space="preserve"><value>Abre los detalles para ver qué está desactivado y cómo activarlo.</value></data>
+  <data name="Simple.F.Gpu" xml:space="preserve"><value>Un ajuste de la tarjeta gráfica puede mejorar.</value></data>
+  <data name="Simple.F.GpuDo" xml:space="preserve"><value>Abre los detalles para ver la sugerencia y qué cambia.</value></data>
+  <data name="Simple.F.Startup" xml:space="preserve"><value>Muchos programas se abren con Windows.</value></data>
+  <data name="Simple.F.StartupDo" xml:space="preserve"><value>Pulsa Optimizar: NEXUS desactiva los que solo retrasan, y puedes deshacerlo.</value></data>
+  <data name="Simple.F.GenericDo" xml:space="preserve"><value>Abre los detalles para ver cómo resolverlo.</value></data>
+  <data name="Simple.Topic.Memory" xml:space="preserve"><value>memoria</value></data>
+  <data name="Simple.Topic.Disk" xml:space="preserve"><value>disco</value></data>
+  <data name="Simple.Topic.Gpu" xml:space="preserve"><value>tarjeta gráfica</value></data>
+  <data name="Simple.Topic.Security" xml:space="preserve"><value>seguridad</value></data>
+  <data name="Simple.Topic.Power" xml:space="preserve"><value>energía</value></data>
+  <data name="Simple.Topic.Games" xml:space="preserve"><value>juegos</value></data>
+  <data name="Simple.Topic.Startup" xml:space="preserve"><value>inicio</value></data>
+  <data name="Simple.Topic.Windows" xml:space="preserve"><value>Windows</value></data>
 </root>

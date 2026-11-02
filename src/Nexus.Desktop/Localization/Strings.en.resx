@@ -3687,4 +3687,52 @@ Undo: nothing to undo; the cache rebuilds by itself.</value></data>
 Requires administrator.</value></data>
   <data name="Tools.VersaoAntiga" xml:space="preserve"><value>old version</value></data>
   <data name="Tools.VersoesAntigasSemUso" xml:space="preserve"><value>old unused versions</value></data>
+  <data name="Simple.Health.Great" xml:space="preserve"><value>Your PC is in great shape</value></data>
+  <data name="Simple.Health.Improve" xml:space="preserve"><value>Your PC could be better</value></data>
+  <data name="Simple.Health.Attention" xml:space="preserve"><value>Your PC needs attention</value></data>
+  <data name="Simple.Health.WordGreat" xml:space="preserve"><value>great</value></data>
+  <data name="Simple.Health.WordImprove" xml:space="preserve"><value>could be better</value></data>
+  <data name="Simple.Health.WordAttention" xml:space="preserve"><value>attention</value></data>
+  <data name="Simple.Card.Cleanup" xml:space="preserve"><value>{0} of junk files</value></data>
+  <data name="Simple.Card.CleanupAction" xml:space="preserve"><value>Clean</value></data>
+  <data name="Simple.Card.Driver" xml:space="preserve"><value>Graphics card driver from {0}</value></data>
+  <data name="Simple.Card.DriverAction" xml:space="preserve"><value>Update</value></data>
+  <data name="Simple.Card.SingleChannel" xml:space="preserve"><value>Memory in single channel: buying a matching second stick doubles its speed</value></data>
+  <data name="Simple.Card.SingleChannelHow" xml:space="preserve"><value>Your PC has only one memory stick. Buy a matching one (same size and speed) and fit it in the empty slot: memory then works twice as fast.</value></data>
+  <data name="Simple.Card.SeeHow" xml:space="preserve"><value>See how</value></data>
+  <data name="Simple.Card.Tweaks1" xml:space="preserve"><value>1 safe tweak hasn't been made yet</value></data>
+  <data name="Simple.Card.TweaksN" xml:space="preserve"><value>{0} safe tweaks haven't been made yet</value></data>
+  <data name="Simple.Card.TweaksAction" xml:space="preserve"><value>Optimize</value></data>
+  <data name="Simple.Card.WhatToDo" xml:space="preserve"><value>What to do</value></data>
+  <data name="Simple.F.GameModeOff" xml:space="preserve"><value>Windows Game Mode is turned off.</value></data>
+  <data name="Simple.F.GameModeOffDo" xml:space="preserve"><value>Tap Optimize: NEXUS turns it on safely and you can undo it.</value></data>
+  <data name="Simple.F.CaptureOn" xml:space="preserve"><value>Game Bar is recording your games all the time.</value></data>
+  <data name="Simple.F.CaptureOnDo" xml:space="preserve"><value>Turning it off frees up your graphics card. Tap Optimize to fix it.</value></data>
+  <data name="Simple.F.MemSlow" xml:space="preserve"><value>Your memory is running slower than it could.</value></data>
+  <data name="Simple.F.MemSlowDo" xml:space="preserve"><value>Turn on the memory speed profile (XMP or EXPO) in the PC's BIOS. The motherboard manual shows where.</value></data>
+  <data name="Simple.F.LowDisk" xml:space="preserve"><value>Little free space on the Windows drive.</value></data>
+  <data name="Simple.F.LowDiskDo" xml:space="preserve"><value>Use Clean and delete big files you no longer use.</value></data>
+  <data name="Simple.F.Hdd" xml:space="preserve"><value>Windows is on an old hard drive (HDD).</value></data>
+  <data name="Simple.F.HddDo" xml:space="preserve"><value>Switching to an SSD is the upgrade that speeds up a PC the most.</value></data>
+  <data name="Simple.F.Rebar" xml:space="preserve"><value>A feature that helps the graphics card is off in the BIOS.</value></data>
+  <data name="Simple.F.RebarDo" xml:space="preserve"><value>Turn on "Resizable BAR" (or "Smart Access Memory") in the BIOS. The motherboard manual shows where.</value></data>
+  <data name="Simple.F.Mux" xml:space="preserve"><value>The laptop sends graphics through the slower path.</value></data>
+  <data name="Simple.F.MuxDo" xml:space="preserve"><value>In the laptop maker's app, pick the "dedicated GPU only" mode when you play.</value></data>
+  <data name="Simple.F.Pcie" xml:space="preserve"><value>The graphics card is on a slower connection.</value></data>
+  <data name="Simple.F.PcieDo" xml:space="preserve"><value>Check that it's seated in the motherboard's main slot.</value></data>
+  <data name="Simple.F.Security" xml:space="preserve"><value>Something in Windows protection needs attention.</value></data>
+  <data name="Simple.F.SecurityDo" xml:space="preserve"><value>Open the details to see what's off and how to turn it on.</value></data>
+  <data name="Simple.F.Gpu" xml:space="preserve"><value>A graphics card setting could be better.</value></data>
+  <data name="Simple.F.GpuDo" xml:space="preserve"><value>Open the details to see the suggestion and what changes.</value></data>
+  <data name="Simple.F.Startup" xml:space="preserve"><value>Lots of programs start with Windows.</value></data>
+  <data name="Simple.F.StartupDo" xml:space="preserve"><value>Tap Optimize: NEXUS turns off the ones that just slow things down, and you can undo it.</value></data>
+  <data name="Simple.F.GenericDo" xml:space="preserve"><value>Open the details to see how to fix it.</value></data>
+  <data name="Simple.Topic.Memory" xml:space="preserve"><value>memory</value></data>
+  <data name="Simple.Topic.Disk" xml:space="preserve"><value>disk</value></data>
+  <data name="Simple.Topic.Gpu" xml:space="preserve"><value>graphics card</value></data>
+  <data name="Simple.Topic.Security" xml:space="preserve"><value>security</value></data>
+  <data name="Simple.Topic.Power" xml:space="preserve"><value>power</value></data>
+  <data name="Simple.Topic.Games" xml:space="preserve"><value>games</value></data>
+  <data name="Simple.Topic.Startup" xml:space="preserve"><value>startup</value></data>
+  <data name="Simple.Topic.Windows" xml:space="preserve"><value>Windows</value></data>
 </root>

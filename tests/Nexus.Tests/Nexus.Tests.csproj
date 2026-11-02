@@ -49,6 +49,8 @@
     <!-- Lógica pura da casca: vigia da interface (suspensão não é travamento) e contagem "Manter esta taxa?". -->
     <Compile Include="..\..\src\Nexus.Desktop\Services\Shell\StallDetector.cs" Link="Shell\StallDetector.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\KeepChangeCountdown.cs" Link="Shell\KeepChangeCountdown.cs" />
+    <!-- Modo simples: modos da navegação, nota de saúde, "o que dá para melhorar", achados em palavras simples (SimpleModeTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\SimpleLogic.cs" Link="Shell\SimpleLogic.cs" />
     <!-- Idiomas: Loc/LanguageOption (lógica pura) e os mesmos .resx, com o nome de recurso do Desktop (LocalizationTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\Localization\Loc.cs" Link="Localization\Loc.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\Localization\LanguageOption.cs" Link="Localization\LanguageOption.cs" />
