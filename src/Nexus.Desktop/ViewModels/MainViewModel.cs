@@ -192,12 +192,16 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         }
     }
 
-    public async Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level)
+    public Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level) =>
+        RevertCoreAsync(runId, level, () => Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança."));
+
+    public Task<BrokerCallResult?> RevertWithoutConfirmationAsync(Guid runId, BrokerLevel level) => RevertCoreAsync(runId, level, () => true);
+
+    private async Task<BrokerCallResult?> RevertCoreAsync(Guid runId, BrokerLevel level, Func<bool> confirm)
     {
         if (RefuseInSelfTest()) return null;
         var own = ApplyView.Begin("Desfazer alteração", [], level, revert: true, name: ActionName);
-        var r = await ExecuteWithProgressAsync(() => Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança."),
-            level, b => b.RevertRun(runId), null, own, revert: true);
+        var r = await ExecuteWithProgressAsync(confirm, level, b => b.RevertRun(runId), null, own, revert: true);
         if (r?.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
         return r;
     }

@@ -322,8 +322,12 @@ public sealed class GpuLabPage : ModulePage
             {
                 var mode = DisplayMode.TryParse(args["mode"]);
                 var text = $"Trocar {args["device"]} para {mode?.Label}?\n\nÉ a mesma troca de Configurações > Tela > Taxa de atualização, só com um modo que o próprio monitor anuncia. " +
-                           "O driver é consultado antes (teste) e a resolução não muda.\n\nSe a tela piscar ou ficar preta (cabo antigo), aguarde alguns segundos; depois use Desfazer aqui ou na página Aplicar.";
-                await ApplyAsync(f.Title, text, new ActionRequest(GpuDiagnostics.DisplayModeAction, null, Copy(args)), BrokerLevel.User, $"{args["device"]} a {mode?.Hz} Hz");
+                           "O driver é consultado antes (teste) e a resolução não muda.\n\n" +
+                           $"Depois de trocar, o NEXUS pergunta se você quer manter. Sem resposta em {KeepChangeCountdown.DefaultSeconds} s (tela preta, cabo antigo), " +
+                           "volta sozinho ao modo de antes, como faz o próprio Windows.";
+                var label = $"{args["device"]} a {mode?.Hz} Hz";
+                await ApplyAsync(f.Title, text, new ActionRequest(GpuDiagnostics.DisplayModeAction, null, Copy(args)), BrokerLevel.User, label,
+                    change => StartKeepCountdown(change, mode is null ? "esta taxa" : $"{mode.Hz} Hz"));
                 break;
             }
             case GpuFixKind.AppGpuPreference when args is not null:
@@ -361,11 +365,16 @@ public sealed class GpuLabPage : ModulePage
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = $"Não foi possível abrir o navegador: {ex.Message}"; }
     }
 
-    private async Task ApplyAsync(string title, string text, ActionRequest request, BrokerLevel level, string change)
+    private async Task ApplyAsync(string title, string text, ActionRequest request, BrokerLevel level, string change, Action<GpuAppliedChange>? applied = null)
     {
         var r = await Host!.ApplyAsync(title, text, [request], level);
         if (r is null) return;
-        if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange(change, run, level, this));
+        if (r.Response is { Ok: true, RunId: { } run })
+        {
+            var c = new GpuAppliedChange(change, run, level, this);
+            Changes.Insert(0, c);
+            applied?.Invoke(c);
+        }
         Message = StartupPage.Describe(r);
         _report = null;
         var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true));
@@ -377,6 +386,7 @@ public sealed class GpuLabPage : ModulePage
     internal Task UndoAsync(GpuAppliedChange c) => RunAsync(async () =>
     {
         if (Host is null) return;
+        if (ReferenceEquals(c, _keepChange) && _keep is { Finished: false } && _keep.Keep()) { _keepTimer?.Stop(); RaiseKeep(); } // Desfazer manual vence a contagem
         var r = await Host.RevertAsync(c.RunId, c.Level);
         if (r is null) return;
         if (r.Response?.FullyRestored == true) Changes.Remove(c);
@@ -387,6 +397,98 @@ public sealed class GpuLabPage : ModulePage
         await ReadCs2Async(report);
         await ReadNvidiaAsync();
     });
+
+    // ------------------------------------------------------------------ "Manter esta taxa?" (volta sozinho, como no Windows)
+
+    private KeepChangeCountdown? _keep;
+    private GpuAppliedChange? _keepChange;
+    private string _keepWhat = "";
+    private long _keepLastTick;
+    private System.Windows.Threading.DispatcherTimer? _keepTimer;
+    private RelayCommand? _keepModeCommand, _revertModeNowCommand;
+
+    /// <summary>A pergunta está na tela (contando).</summary>
+    public bool KeepModeAsking => _keep is { Finished: false };
+    /// <summary>"Manter esta taxa? Volta sozinho em 15 s."</summary>
+    public string KeepModePrompt => _keep?.Prompt(_keepWhat) ?? "";
+    /// <summary>Linha de apoio: o que mudou e o que acontece sem resposta.</summary>
+    public string KeepModeDetail => _keepChange is null ? "" : $"Agora: {_keepChange.Text}. Se a tela ficou preta ou piscando, não faça nada: o modo anterior volta sozinho.";
+    /// <summary>Fração do tempo que resta (1 → 0), para a barra.</summary>
+    public double KeepModeFraction => _keep?.Fraction ?? 0;
+    public RelayCommand KeepModeCommand => _keepModeCommand ??= new RelayCommand(KeepMode, () => KeepModeAsking);
+    public RelayCommand RevertModeNowCommand => _revertModeNowCommand ??= new RelayCommand(() => { if (_keep?.RevertNow() == true) FinishKeep(); }, () => KeepModeAsking);
+
+    private void StartKeepCountdown(GpuAppliedChange change, string what)
+    {
+        _keep = new KeepChangeCountdown();
+        _keepChange = change;
+        _keepWhat = what;
+        _keepLastTick = Stopwatch.GetTimestamp();
+        if (_keepTimer is null)
+        {
+            _keepTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Normal) { Interval = TimeSpan.FromMilliseconds(250) };
+            _keepTimer.Tick += (_, _) => OnKeepTick();
+        }
+        _keepTimer.Start();
+        RaiseKeep();
+        Host?.Notify($"Monitor trocado para {what}. Volta sozinho em {KeepChangeCountdown.DefaultSeconds} s se você não clicar em Manter.");
+    }
+
+    private void OnKeepTick()
+    {
+        if (_keep is null) { _keepTimer?.Stop(); return; }
+        var now = Stopwatch.GetTimestamp();
+        var elapsed = Stopwatch.GetElapsedTime(_keepLastTick, now);
+        _keepLastTick = now;
+        if (_keep.Tick(elapsed)) { FinishKeep(); return; }
+        RaiseKeep();
+    }
+
+    private void KeepMode()
+    {
+        if (_keep?.Keep() != true) return;
+        _keepTimer?.Stop();
+        Message = $"Mantido: {_keepChange?.Text}. Para voltar depois, use Desfazer.";
+        RaiseKeep();
+    }
+
+    /// <summary>"Voltar agora" ou tempo esgotado: desfaz pelo aplicador sem outra pergunta (o usuário já aceitou ao trocar).</summary>
+    private void FinishKeep()
+    {
+        _keepTimer?.Stop();
+        RaiseKeep();
+        if (_keep is not { ShouldRevert: true } || _keepChange is not { } change) return;
+        var timedOut = _keep.State == KeepChangeState.TimedOut;
+        _ = AutoRevertAsync(change, timedOut);
+    }
+
+    private async Task AutoRevertAsync(GpuAppliedChange change, bool timedOut)
+    {
+        if (Host is null) return;
+        try
+        {
+            var r = await Host.RevertWithoutConfirmationAsync(change.RunId, change.Level);
+            if (r is null) return;
+            if (r.Response?.FullyRestored == true) Changes.Remove(change);
+            Message = (timedOut ? $"Sem resposta em {KeepChangeCountdown.DefaultSeconds} s: o monitor voltou ao modo anterior. " : "O monitor voltou ao modo anterior. ") + r.Message;
+            var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true));
+            _report = report;
+            Build(report);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            Message = $"Não deu para voltar o modo do monitor sozinho: {ex.Message}. Use Desfazer aqui ou na página Aplicar.";
+        }
+    }
+
+    private void RaiseKeep()
+    {
+        OnPropertyChanged(nameof(KeepModeAsking));
+        OnPropertyChanged(nameof(KeepModePrompt));
+        OnPropertyChanged(nameof(KeepModeDetail));
+        OnPropertyChanged(nameof(KeepModeFraction));
+        System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+    }
 
     // ------------------------------------------------------------------ por jogo, sem driver: janela (DX10/11) e fps_max do CS2
 

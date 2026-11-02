@@ -46,8 +46,9 @@
     <!-- Lógica pura do design system (sem WPF), compilada também aqui para os testes (DesignSystemTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\Views\Controls\DesignMath.cs" Link="DesignSystem\DesignMath.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\Views\Shell\ShellMap.cs" Link="DesignSystem\ShellMap.cs" />
-    <!-- Lógica pura da casca: vigia da interface (suspensão não é travamento). -->
+    <!-- Lógica pura da casca: vigia da interface (suspensão não é travamento) e contagem "Manter esta taxa?". -->
     <Compile Include="..\..\src\Nexus.Desktop\Services\Shell\StallDetector.cs" Link="Shell\StallDetector.cs" />
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\KeepChangeCountdown.cs" Link="Shell\KeepChangeCountdown.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

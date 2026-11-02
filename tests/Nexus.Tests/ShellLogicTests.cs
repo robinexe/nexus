@@ -1,8 +1,9 @@
 using Nexus.Desktop.Services.Shell;
+using Nexus.Desktop.ViewModels;
 
 namespace Nexus.Tests;
 
-/// <summary>Lógica pura da casca: vigia da interface (suspensão não é travamento) .</summary>
+/// <summary>Lógica pura da casca: vigia da interface (suspensão não é travamento) e a contagem "Manter esta taxa?".</summary>
 [Trait("Category", "Unit")]
 public sealed class ShellLogicTests
 {
@@ -98,4 +99,74 @@ public sealed class ShellLogicTests
         var e = d.Tick(c.Wall, c.Awake);
         Assert.Equal(StallEventKind.Stalled, e.Kind); // a interface também não respondeu nesse tempo
     }
+
+    // ------------------------------------------------------------------ KeepChangeCountdown
+
+    [Fact]
+    public void Countdown_times_out_after_15_seconds_and_asks_to_revert()
+    {
+        var k = new KeepChangeCountdown();
+        Assert.Equal(15, k.SecondsLeft);
+        Assert.Equal("Manter esta taxa? Volta sozinho em 15 s.", k.Prompt("esta taxa"));
+        var fired = 0;
+        for (var i = 0; i < 14; i++) if (k.Tick(TimeSpan.FromSeconds(1))) fired++;
+        Assert.Equal(0, fired);
+        Assert.Equal(1, k.SecondsLeft);
+        Assert.False(k.Finished);
+        Assert.True(k.Tick(TimeSpan.FromSeconds(1)));
+        Assert.Equal(KeepChangeState.TimedOut, k.State);
+        Assert.True(k.ShouldRevert);
+        Assert.Equal(0, k.SecondsLeft);
+        Assert.Equal(0, k.Fraction);
+        Assert.False(k.Tick(TimeSpan.FromSeconds(1))); // só uma vez
+    }
+
+    [Fact]
+    public void Countdown_rounds_seconds_up_with_subsecond_ticks()
+    {
+        var k = new KeepChangeCountdown(15);
+        k.Tick(TimeSpan.FromMilliseconds(250));
+        Assert.Equal(15, k.SecondsLeft);
+        k.Tick(TimeSpan.FromMilliseconds(750));
+        Assert.Equal(14, k.SecondsLeft);
+        Assert.Equal(14.0 / 15, k.Fraction, 6);
+    }
+
+    [Fact]
+    public void Keep_wins_and_later_timeout_does_nothing()
+    {
+        var k = new KeepChangeCountdown();
+        k.Tick(TimeSpan.FromSeconds(5));
+        Assert.True(k.Keep());
+        Assert.False(k.ShouldRevert);
+        Assert.False(k.Tick(TimeSpan.FromSeconds(30)));
+        Assert.False(k.RevertNow());
+        Assert.Equal(KeepChangeState.Kept, k.State);
+    }
+
+    [Fact]
+    public void Revert_now_wins_and_keep_after_is_ignored()
+    {
+        var k = new KeepChangeCountdown();
+        Assert.True(k.RevertNow());
+        Assert.True(k.ShouldRevert);
+        Assert.False(k.Keep());
+        Assert.False(k.Tick(TimeSpan.FromSeconds(20)));
+        Assert.Equal(KeepChangeState.RevertRequested, k.State);
+    }
+
+    [Fact]
+    public void Timeout_wins_over_late_keep_click()
+    {
+        var k = new KeepChangeCountdown(2);
+        Assert.True(k.Tick(TimeSpan.FromSeconds(3)));
+        Assert.False(k.Keep());
+        Assert.True(k.ShouldRevert);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Countdown_rejects_non_positive_duration(int s) =>
+        Assert.Throws<ArgumentOutOfRangeException>(() => new KeepChangeCountdown(s));
 }
