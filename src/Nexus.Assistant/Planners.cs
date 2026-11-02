@@ -91,7 +91,8 @@ public static class StepPlanners
     public sealed record PcMeasurements(double? SingleThreadGhz = null, double? ReadGbps = null, double? CopyGbps = null);
 
     public static StepScan MyPc(AssistantCatalog catalog, SystemFacts facts, PcProfile profile, MemoryAnalysis? memory,
-        IReadOnlyList<MemoryFinding> memoryFindings, IReadOnlyList<GpuFinding> gpuFindings, PcMeasurements? measured = null)
+        IReadOnlyList<MemoryFinding> memoryFindings, IReadOnlyList<GpuFinding> gpuFindings, PcMeasurements? measured = null,
+        IReadOnlyList<DiagnosticFinding>? ownerFindings = null)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
@@ -120,8 +121,11 @@ public static class StepPlanners
 
         var users = new List<UserAction>();
         var notes = new List<string>();
+        var owner = (ownerFindings ?? []).Where(f => f.Owner is not null && f.Severity != DiagnosticSeverity.Ok).ToList();
+        var ownerIds = owner.Select(f => f.Id).ToHashSet(StringComparer.Ordinal);
         foreach (var f in memoryFindings)
         {
+            if (f.Id is "xmp-off" or "speed-limited" && ownerIds.Contains(OwnerChecks.XmpId)) continue; // o mesmo ponto vem de OwnerChecks
             switch (f.Id)
             {
                 case "single-channel":
@@ -149,7 +153,7 @@ public static class StepPlanners
                 var url = f.FixArguments?.GetValueOrDefault("url");
                 users.Add(new UserAction("Atualizar o driver de vídeo pelo site oficial do fabricante", f.Advice, url));
             }
-            else if (f.Id.StartsWith("pcie.width.", StringComparison.Ordinal))
+            else if (f.Id.StartsWith("pcie.width.", StringComparison.Ordinal) && !ownerIds.Contains(OwnerChecks.PcieId))
             {
                 list.Add(new StepFact("Link PCIe da placa", f.Title, f.Level == "bad" ? "bad" : "warn", f.Evidence));
                 notes.Add(f.Advice);
@@ -169,6 +173,12 @@ public static class StepPlanners
             else if (f.Id == "power.battery")
                 notes.Add(f.Advice);
         }
+        // "Só você pode fazer" (BIOS, hardware, software do fabricante): atenção primeiro, cada um com ganho medido e fonte.
+        foreach (var f in owner.OrderBy(f => f.Severity == DiagnosticSeverity.Attention ? 0 : 1))
+        {
+            users.Add(new UserAction(f.Title, $"{f.Owner!.Explanation} Ganho medido: {f.Owner.Gain} ({f.Owner.SourceTitle})", f.Owner.SourceUrl));
+            list.Add(new StepFact(OwnerFactLabel(f.Id), f.Title, f.Severity == DiagnosticSeverity.Attention ? "warn" : "info", f.Evidence));
+        }
         var rec = users.Count > 0
             ? $"Encontrei {Plural(users.Count, "ponto que só você pode resolver", "pontos que só você pode resolver")} (vão para o relatório). " +
               (changes.Count > 0 ? "E há ajustes do Windows que o NEXUS faz por você." : "")
@@ -178,6 +188,15 @@ public static class StepPlanners
         if (measured?.ReadGbps is { } r1) metrics.Add(("ram", "Memória (leitura, medida)", string.Create(Pt, $"{r1:0.0} GB/s")));
         return new StepScan(list, changes, users, notes, rec) { Metrics = M([.. metrics]) };
     }
+
+    private static string OwnerFactLabel(string id) => id switch
+    {
+        OwnerChecks.ReBarId => "Resizable BAR",
+        OwnerChecks.XmpId => "Perfil da memória",
+        OwnerChecks.MuxId => "Tela do notebook",
+        OwnerChecks.PcieId => "Link PCIe da placa",
+        _ => "Hardware",
+    };
 
     private static string? FirstUrl(MemoryFinding f) => f.Sources.Count > 0 ? f.Sources[0].Url : null;
 

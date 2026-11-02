@@ -92,6 +92,21 @@ public sealed class HardwarePage : PageViewModel
     public double UnavailableNumber => HasData ? UnavailableCount : double.NaN;
 
     private int CountFacts(FactStatus status) => Sections.SelectMany(s => s.Facts).Count(f => f.Status == status);
+
+    public const string OwnerSectionTitle = "O que só você pode fazer";
+
+    /// <summary>
+    /// Pontos "só você pode fazer" (BIOS, hardware, software do fabricante) como uma seção da página: título, situação, explicação
+    /// com o ganho medido e a fonte. Só informa; null quando não há nada a mostrar.
+    /// </summary>
+    public static DiscoverySection? OwnerSection(IEnumerable<DiagnosticFinding> findings)
+    {
+        ArgumentNullException.ThrowIfNull(findings);
+        var facts = findings.Where(f => f.Owner is not null).Select(f => new Fact(f.Title,
+            f.Severity switch { DiagnosticSeverity.Attention => "Vale conferir", DiagnosticSeverity.Info => "Para saber", _ => "Em ordem" },
+            f.Basis, $"{f.Owner!.SourceTitle} ({f.Owner.SourceUrl})", $"{f.Evidence} {f.Owner.Explanation} Ganho medido: {f.Owner.Gain}")).ToList();
+        return facts.Count == 0 ? null : new DiscoverySection(OwnerSectionTitle, facts);
+    }
 }
 
 // ------------------------------------------------------------------ Diagnóstico
@@ -182,6 +197,24 @@ public sealed class FindingCard(DiagnosticFinding finding)
     public string Target => ShellMap.PageForFinding(Finding.Id);
     public string ActionText => ShellMap.ActionFor(Target);
     public bool HasTarget => Target != "DiagnosticsPage";
+
+    // ---- "só você pode fazer": explicação, ganho medido e fonte (só informa; nada é aplicado)
+
+    public bool IsOwnerAction => Finding.Owner is not null;
+    public string OwnerExplanation => Finding.Owner?.Explanation ?? "";
+    public string OwnerGain => Finding.Owner?.Gain ?? "";
+    public string OwnerSource => Finding.Owner?.SourceTitle ?? "";
+    public string OwnerSourceUrl => Finding.Owner?.SourceUrl ?? "";
+    /// <summary>Abre a fonte no navegador: só as páginas fixas de <see cref="OwnerChecks.SourceUrls"/>.</summary>
+    public RelayCommand OpenSourceCommand => _open ??= new RelayCommand(OpenSource, () => OwnerChecks.SourceUrls.Contains(OwnerSourceUrl));
+    private RelayCommand? _open;
+
+    private void OpenSource()
+    {
+        if (!OwnerChecks.SourceUrls.Contains(OwnerSourceUrl)) return;
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(OwnerSourceUrl) { UseShellExecute = true })?.Dispose(); }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { }
+    }
 }
 
 // ------------------------------------------------------------------ Catálogo

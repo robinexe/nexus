@@ -6,7 +6,9 @@ public enum DiagnosticSeverity { Ok, Info, Attention }
 
 /// <param name="Basis">Detected = conclusão direta de um valor lido; Inferred = depende de uma regra; Unavailable = não deu para avaliar.</param>
 /// <param name="RelatedActionId">Ação do catálogo relacionada (só referência; nada é aplicado).</param>
-public sealed record DiagnosticFinding(string Id, string Title, DiagnosticSeverity Severity, FactStatus Basis, string Evidence, string? RelatedActionId = null);
+/// <param name="Owner">Preenchido nos pontos que só o dono do PC resolve (BIOS, hardware): explicação, ganho medido e fonte.</param>
+public sealed record DiagnosticFinding(string Id, string Title, DiagnosticSeverity Severity, FactStatus Basis, string Evidence, string? RelatedActionId = null,
+    OwnerAdvice? Owner = null);
 
 /// <summary>
 /// Diagnóstico SOMENTE LEITURA sobre o retrato do sistema. Cada regra cita a evidência; nenhuma regra presume ganho de
@@ -127,8 +129,7 @@ public static class DiagnosticRules
         {
             var enabled = f.StartupItems.Count(i => i.Enabled != false);
             list.Add(new("startup.count", $"{enabled} item(ns) de inicialização habilitado(s)", DiagnosticSeverity.Info, FactStatus.Inferred,
-                "Desativar itens só faz sentido para residentes com atividade concorrente observada durante o jogo (investigação pendente).",
-                "startup.run-entry.disable"));
+                "Desativar itens só faz sentido para residentes com atividade concorrente observada durante o jogo. A página Inicialização mostra o impacto de cada um e desliga com Desfazer."));
         }
 
         // SysMain

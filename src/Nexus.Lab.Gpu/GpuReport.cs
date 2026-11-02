@@ -68,6 +68,8 @@ public sealed record GpuAdapter
     public PcieLinkState Pcie { get; init; } = new(null, null, null, null);
     public bool? HagsSupported { get; init; }
     public bool? HagsEnabled { get; init; }
+    /// <summary>D3D12_OPTIONS16.GPUUploadHeapSupported (null = não consultado/indisponível). Em GPU dedicada, true prova Resizable BAR ligado.</summary>
+    public bool? GpuUploadHeapSupported { get; init; }
     public NvidiaReading? Nvidia { get; init; }
 
     public GpuVendor Vendor => GpuIdentity.VendorOf(VendorId);

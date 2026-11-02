@@ -127,7 +127,7 @@ public sealed class GpuLabPage : ModulePage
                 try { _nvml = NvmlSession.TryOpen(out _nvmlStatus); }
                 catch (Exception ex) when (ex is not OutOfMemoryException) { _nvmlStatus = $"NVML indisponível: {ex.Message}"; }
             }
-            return GpuLabScanner.Scan(_nvml, _nvmlStatus);
+            return GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true);
         });
         _report = report;
         Build(report);
@@ -155,7 +155,7 @@ public sealed class GpuLabPage : ModulePage
         Cards.Clear();
         if (primary is not null)
         {
-            Cards.Add(PcieCard(primary));
+            Cards.Add(PcieCard(primary, r.IsLaptop));
             Cards.Add(LimitsCard(primary));
             Cards.Add(MemoryCard(primary));
             Cards.Add(MonitorCard(r));
@@ -212,13 +212,15 @@ public sealed class GpuLabPage : ModulePage
         return string.Join(" · ", parts);
     }
 
-    private static GpuStatCard PcieCard(GpuAdapter a)
+    private static GpuStatCard PcieCard(GpuAdapter a, bool laptop)
     {
         if (a.IsIntegrated) return new("Barramento", "Integrada", "Fica dentro do processador: não usa slot PCIe.", "info", "Icon.Hardware");
-        var (level, text) = Pcie.IdleVerdict(a.Pcie, false);
-        if (!a.Pcie.HasData) return new("Barramento PCIe", "—", text, "info", "Icon.Hardware");
-        var detail = $"Placa: {a.Pcie.Describe(current: false)}" + (a.Pcie.PortMaxGen is { } pg ? $" · porta: PCIe {Pcie.GenLabel(pg)} x{a.Pcie.PortMaxWidth?.ToString(CultureInfo.InvariantCulture) ?? "?"}" : "") + ". " + text;
-        return new("Barramento PCIe (agora)", a.Pcie.Describe(), detail, level, "Icon.Hardware");
+        var (link, note) = HardwareCaps.PcieWithGpuCeiling(a);
+        var (level, text) = Pcie.IdleVerdict(link, false, laptop);
+        if (!link.HasData) return new("Barramento PCIe", "—", text, "info", "Icon.Hardware");
+        var detail = $"GPU: {link.Describe(current: false)}" + (link.PortMaxGen is { } pg ? $" · porta: PCIe {Pcie.GenLabel(pg)} x{link.PortMaxWidth?.ToString(CultureInfo.InvariantCulture) ?? "?"}" : "") + ". " + text +
+                     (note is null ? "" : " " + note);
+        return new("Barramento PCIe (agora)", link.Describe(), detail, level, "Icon.Hardware");
     }
 
     private static GpuStatCard LimitsCard(GpuAdapter a)
@@ -259,12 +261,13 @@ public sealed class GpuLabPage : ModulePage
         var hags = a.HagsEnabled ?? (r.Settings.HwSchMode == 2 ? true : r.Settings.HwSchMode == 1 ? false : null);
         yield return new("Agendamento por hardware (HAGS)", hags is null ? "não informado" : hags.Value ? "ligado" : "desligado",
             hags == true ? "good" : "info", a.HagsEnabled is null ? "Lido do registro do Windows." : "Informado pelo driver.");
-        if (a.Nvidia?.Bar1TotalBytes is { } bar1)
+        if (!a.IsIntegrated)
         {
-            var on = bar1 > 300UL << 20;
-            yield return new("Resizable BAR", on ? "ligado" : "desligado", on ? "good" : "info", $"Janela BAR1 de {bar1 >> 20} MB (NVML).");
+            var rb = HardwareCaps.ResizableBar(a);
+            yield return rb.Enabled is { } on
+                ? new("Resizable BAR", on ? "ligado" : "desligado", on ? "good" : HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", $"{rb.Evidence} Fonte: {rb.Source}.")
+                : new("Resizable BAR", "não dá para afirmar", HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", rb.Evidence);
         }
-        else yield return new("Resizable BAR", "sem leitura", "info", "Só dá para ler em placas NVIDIA (NVML).");
         yield return new("MPO (planos de sobreposição)", r.Settings.OverlayTestMode == 5 ? "desligado no registro" : "padrão do Windows",
             r.Settings.OverlayTestMode == 5 ? "warn" : "good", "Desligar o MPO à mão só se recomenda para tela piscando.");
         yield return new("Modo de Jogo", r.Settings.AutoGameModeEnabled == 0 ? "desligado" : "ligado", r.Settings.AutoGameModeEnabled == 0 ? "warn" : "good",
@@ -348,7 +351,7 @@ public sealed class GpuLabPage : ModulePage
         if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange(change, run, level, this));
         Message = StartupPage.Describe(r);
         _report = null;
-        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus));
+        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true));
         _report = report;
         Build(report);
     }
@@ -360,7 +363,7 @@ public sealed class GpuLabPage : ModulePage
         if (r is null) return;
         if (r.Response?.FullyRestored == true) Changes.Remove(c);
         Message = r.Message;
-        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus));
+        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true));
         _report = report;
         Build(report);
         await ReadNvidiaAsync();
@@ -625,7 +628,7 @@ public sealed class GpuLabPage : ModulePage
 
     private void Analyze(GpuAdapter gpu, List<GpuTelemetrySample> samples)
     {
-        var a = RecordingAnalyzer.Analyze(samples, gpu.Nvidia?.MaxGraphicsClockMhz, gpu.Pcie, _report?.IsLaptop ?? false);
+        var a = RecordingAnalyzer.Analyze(samples, gpu.Nvidia?.MaxGraphicsClockMhz, HardwareCaps.PcieWithGpuCeiling(gpu).Link, _report?.IsLaptop ?? false);
         Verdict = a.Verdict;
         VerdictTone = a.VerdictLevel;
         RecordFindings.Clear();

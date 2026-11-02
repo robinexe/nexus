@@ -81,10 +81,12 @@ public static class GpuDiagnostics
         // PCIe (repouso)
         foreach (var a in hw.Where(a => !a.IsIntegrated && a.Pcie.HasData))
         {
-            var (level, text) = Pcie.IdleVerdict(a.Pcie, false);
+            var (link, ceilingNote) = HardwareCaps.PcieWithGpuCeiling(a);
+            var (level, text) = Pcie.IdleVerdict(link, false, r.IsLaptop);
             if (level == "good") continue;
-            list.Add(new($"pcie.width.{a.Luid}", level, $"{a.Name} em {a.Pcie.Describe()}",
-                $"Agora: {a.Pcie.Describe()}. Placa: {a.Pcie.Describe(current: false)}." + (a.Pcie.PortMaxWidth is { } pw ? $" Porta: x{pw}." : ""),
+            list.Add(new($"pcie.width.{a.Luid}", level, $"{a.Name} em {link.Describe()}",
+                $"Agora: {link.Describe()}. GPU: {link.Describe(current: false)}." + (link.PortMaxWidth is { } pw ? $" Porta: x{pw}." : "") +
+                (ceilingNote is null ? "" : " " + ceilingNote),
                 "DEVPKEY_PciDevice_CurrentLinkWidth/MaxLinkWidth", text));
         }
 
@@ -174,18 +176,25 @@ public static class GpuDiagnostics
                 list.Add(new("nv.power.lowered", "warn", "Limite de potência abaixo do padrão",
                     $"Limite atual {lim:0} W; padrão da placa {def:0} W.", "NVML (nvmlDeviceGetPowerManagementLimit)",
                     "Algum programa (MSI Afterburner, modo silencioso do fabricante) baixou o limite. Volte ao padrão no programa que mudou."));
-            if (nv.Bar1TotalBytes is { } bar1 && primary.Architecture.ResizableBarCapable)
-            {
-                var vram = nv.VramTotalBytes ?? primary.DedicatedVideoBytes;
-                if (bar1 <= 300UL << 20)
-                    list.Add(new("rebar.off", "info", "Resizable BAR desligado",
-                        $"Janela BAR1 de {bar1 >> 20} MB (com ReBAR ela cobre a VRAM inteira, {vram >> 20} MB).", "NVML (nvmlDeviceGetBAR1MemoryInfo)",
-                        r.IsLaptop
-                            ? "Em notebook depende de BIOS do fabricante; muitos modelos não oferecem. Ganho típico 0–10% em jogos que a NVIDIA habilita."
-                            : "Ative na BIOS: \"Above 4G Decoding\" e \"Re-Size BAR\" (exige boot UEFI/CSM desligado). Ganho típico 0–10% em jogos que a NVIDIA habilita."));
-                else if (bar1 >= vram / 2)
-                    list.Add(new("rebar.on", "good", "Resizable BAR ligado", $"Janela BAR1 de {bar1 >> 20} MB para {vram >> 20} MB de VRAM.", "NVML (nvmlDeviceGetBAR1MemoryInfo)", "Nada a fazer."));
-            }
+        }
+
+        // Resizable BAR (NVML BAR1 ou D3D12 upload heaps; só afirma o que a fonte prova)
+        if (primary is { IsIntegrated: false } && primary.Architecture.ResizableBarCapable)
+        {
+            var rb = HardwareCaps.ResizableBar(primary);
+            var arc = HardwareCaps.IsIntelArcDiscrete(primary);
+            var how = r.IsLaptop
+                ? "Em notebook depende da BIOS do fabricante; muitos modelos não oferecem a opção."
+                : "Ative na BIOS: \"Above 4G Decoding\" e \"Re-Size BAR\" (exige boot UEFI, com CSM desligado).";
+            var gain = arc ? "Na Intel Arc é obrigatório: sem ele a A770 perde ~20–24% em média (TechPowerUp)."
+                : primary.Vendor == GpuVendor.Amd ? "Na AMD (Smart Access Memory) o ganho médio medido foi ~7% (TechSpot)."
+                : "Na NVIDIA o ganho médio medido foi de 0–2% (TechSpot): só alguns jogos ganham.";
+            if (rb.Enabled == false)
+                list.Add(new("rebar.off", arc ? "warn" : "info", "Resizable BAR desligado", rb.Evidence, rb.Source, $"{gain} {how}"));
+            else if (rb.Enabled == true)
+                list.Add(new("rebar.on", "good", "Resizable BAR ligado", rb.Evidence, rb.Source, "Nada a fazer."));
+            else if (arc)
+                list.Add(new("rebar.check", "warn", "Intel Arc: confira o Resizable BAR na BIOS", rb.Evidence, rb.Source, $"{gain} {how}"));
         }
         return list;
     }

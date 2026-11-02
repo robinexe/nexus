@@ -55,7 +55,9 @@ public static class Pcie
     /// Leitura honesta do link EM REPOUSO. A geração cai sozinha quando a GPU está ociosa (ASPM / gerência de energia
     /// do link): isso é normal e não indica defeito. Só a largura e a geração SOB CARGA dizem algo.
     /// </summary>
-    public static (string Level, string Text) IdleVerdict(PcieLinkState s, bool integrated)
+    /// <param name="laptop">Notebook: a largura do link é fiação da placa-mãe (decisão de fábrica), então largura menor vira
+    /// informação, não alerta.</param>
+    public static (string Level, string Text) IdleVerdict(PcieLinkState s, bool integrated, bool laptop = false)
     {
         if (integrated) return ("info", "Integrada ao processador: não usa um slot PCIe externo.");
         if (!s.HasData) return ("info", "O Windows não expôs o estado do link para esta placa.");
@@ -63,8 +65,17 @@ public static class Pcie
         var level = "good";
         if (s.CurrentWidth is { } cw && s.AttainableWidth is { } aw && cw < aw)
         {
-            level = "warn";
-            notes.Add($"Rodando em x{cw}, mas placa e porta suportam x{aw}. Em desktop: placa no slot errado, encaixe ou sujeira no conector. Em notebook a largura é fixa de fábrica.");
+            if (laptop)
+            {
+                level = "info";
+                notes.Add($"Rodando em x{cw}; a GPU suporta x{aw}. Em notebook isso é quase sempre projeto do fabricante (muitos ligam a GPU em x8) e não muda com ajuste nenhum. " +
+                          "O custo costuma ser de poucos %: os jogos raramente usam a banda inteira do barramento.");
+            }
+            else
+            {
+                level = "warn";
+                notes.Add($"Rodando em x{cw}, mas placa e porta suportam x{aw}. Em desktop: placa no slot errado, encaixe ou sujeira no conector.");
+            }
         }
         if (s.CurrentGen is { } cg && s.AttainableGen is { } ag && cg < ag)
             notes.Add($"Geração {GenLabel(cg)} agora (máx. {GenLabel(ag)}). Em repouso a GPU baixa a geração para economizar energia; meça com um jogo aberto.");

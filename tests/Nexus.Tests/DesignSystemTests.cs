@@ -181,6 +181,11 @@ public sealed partial class DesignSystemTests
     [InlineData("sec.hvci", "SecurityPage")]
     [InlineData("power.scheme", "CpuLabPage")]
     [InlineData("win.gamemode", "CatalogPage")]
+    [InlineData("owner.rebar", "GpuLabPage")]
+    [InlineData("owner.pcie", "GpuLabPage")]
+    [InlineData("owner.mux", "GpuLabPage")]
+    [InlineData("owner.xmp", "MemoryLabPage")]
+    [InlineData("startup.count", "StartupPage")]
     [InlineData("proc.elevated", "DiagnosticsPage")]
     [InlineData(null, "DiagnosticsPage")]
     public void Findings_open_the_page_that_solves_them(string? id, string page)

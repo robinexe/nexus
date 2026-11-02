@@ -88,9 +88,23 @@
                     <TextBlock Text="{Binding Title}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
                     <TextBlock Text="{Binding Evidence}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,4,0,0"
                                MaxHeight="38" TextTrimming="CharacterEllipsis" ToolTip="{Binding Evidence}"/>
+                    <StackPanel Margin="0,6,0,0" Visibility="{Binding IsOwnerAction, Converter={StaticResource BoolToVis}}">
+                      <TextBlock Text="Só você pode fazer: o NEXUS não mexe em BIOS nem em hardware." Style="{StaticResource Text.Small}"
+                                 Foreground="{StaticResource Brush.TextDim}"/>
+                      <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap" Margin="0,2,0,0">
+                        <Run Text="Ganho medido:" Foreground="{StaticResource Brush.Trace}"/> <Run Text="{Binding OwnerGain, Mode=OneWay}"/>
+                      </TextBlock>
+                    </StackPanel>
                     <c:ExplainToggle Margin="0,2,0,0">
                       <StackPanel>
                         <TextBlock Text="{Binding Evidence}" Style="{StaticResource Text.Small}"/>
+                        <StackPanel Margin="0,6,0,0" Visibility="{Binding IsOwnerAction, Converter={StaticResource BoolToVis}}">
+                          <TextBlock Text="{Binding OwnerExplanation}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap"/>
+                          <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,4,0,0" Command="{Binding OpenSourceCommand}"
+                                  ToolTip="{Binding OwnerSourceUrl}" AutomationProperties.Name="Abrir a fonte no navegador">
+                            <TextBlock Text="{Binding OwnerSource}" TextWrapping="Wrap" Foreground="{StaticResource Brush.Signal}"/>
+                          </Button>
+                        </StackPanel>
                         <TextBlock Text="{Binding Severity, Converter={StaticResource SeverityHint}}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                           <TextBlock Text="Base da conclusão" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center" Margin="0,0,8,0"/>
