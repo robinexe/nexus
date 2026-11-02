@@ -57,7 +57,7 @@ public sealed class ServicesPage : ModulePage
     public ObservableCollection<PresetRow> Presets { get; } = [];
     public IReadOnlyList<StartTypeOption> StartTypes { get; } =
     [
-        new("Automatic", "Automático"), new("AutomaticDelayed", "Automático (atrasado)"), new("Manual", "Manual"), new("Disabled", "Desativado"),
+        new("Automatic", Loc.T("Nav.Automatico")), new("AutomaticDelayed", Loc.T("Svc.AutomaticoAtrasado")), new("Manual", Loc.T("Shell.Manual")), new("Disabled", Loc.T("Svc.Desativado")),
     ];
 
     public string SearchText { get => _search; set { if (Set(ref _search, value ?? "")) ApplyFilter(); } }
@@ -138,8 +138,8 @@ public sealed class ServicesPage : ModulePage
         Presets.Clear();
         foreach (var p in presets)
             Presets.Add(new PresetRow(p, byName, this, previous.TryGetValue(p.Id, out var old) ? old : null));
-        Summary = $"{rows.Count} serviços · {rows.Count(r => r.Info.IsRunning)} em execução · {rows.Count(r => r.Info.IsAutomatic)} automáticos · " +
-                  $"{rows.Count(r => !r.IsMicrosoft)} de terceiros";
+        Summary = Loc.F("Svc.NServicosNExecucao", rows.Count, rows.Count(r => r.Info.IsRunning), rows.Count(r => r.Info.IsAutomatic)) +
+                  Loc.F("Svc.NTerceiros", rows.Count(r => !r.IsMicrosoft));
         foreach (var name in new[] { nameof(TotalCount), nameof(RunningCount), nameof(AutomaticCount), nameof(ThirdPartyCount), nameof(ProtectedCount), nameof(RunningPercent) })
             OnPropertyChanged(name);
         ApplyFilter();
@@ -168,13 +168,13 @@ public sealed class ServicesPage : ModulePage
     {
         if (Host is null || _selected is not { CanChange: true } s || _chosen is not { } c) return;
         var warning = c.Value == "Disabled"
-            ? "\n\nDesativado: o serviço não abre nem quando um programa pedir. Tudo o que depende dele para de funcionar até desfazer."
-            : c.Value == "Manual" ? "\n\nManual: o serviço não abre no boot, mas abre quando algum programa pedir." : "";
-        var deps = s.Info.Dependencies.Count > 0 ? $"\n\nEle depende de: {string.Join(", ", s.Info.Dependencies)}." : "";
-        var text = $"Mudar \"{s.Info.DisplayName}\" ({s.Info.Name}) de {ServicePresets.StartTypeLabel(s.Info.StartType)} para {c.Label}?" +
-                   warning + deps + "\n\nNão para nem inicia o serviço agora: vale a partir do próximo boot. Exige administrador; " +
-                   "o NEXUS guarda o tipo anterior e Desfazer volta exatamente a ele.";
-        var r = await Host.ApplyAsync("Tipo de início do serviço", text,
+            ? Loc.T("Svc.DesativadoServicoNaoAbre")
+            : c.Value == "Manual" ? Loc.T("Svc.ManualServicoNaoAbre") : "";
+        var deps = s.Info.Dependencies.Count > 0 ? Loc.F("Svc.EleDependeN", string.Join(", ", s.Info.Dependencies)) : "";
+        var text = Loc.F("Svc.MudarNNN", s.Info.DisplayName, s.Info.Name, ServicePresets.StartTypeLabel(s.Info.StartType), c.Label) +
+                   warning + deps + Loc.T("Svc.NaoNemIniciaServico") +
+                   Loc.T("Svc.NexusGuardaTipoAnterior");
+        var r = await Host.ApplyAsync(Loc.T("Svc.TipoInicioServico"), text,
             [new ActionRequest(ServicePresets.IndividualActionKey, c.Value, new Dictionary<string, string> { ["service"] = s.Info.Name })], BrokerLevel.Admin);
         if (r is null) return;
         if (r.Response is { Ok: true, RunId: { } run })
@@ -190,11 +190,11 @@ public sealed class ServicesPage : ModulePage
     {
         if (Host is null) return;
         var pending = preset.Items.Where(i => i.Pending).ToList();
-        if (pending.Count == 0) { Message = "Nada a mudar: este preset já está aplicado (ou os serviços não existem neste PC)."; return; }
+        if (pending.Count == 0) { Message = Loc.T("Svc.NadaMudarEstePreset"); return; }
         var lines = string.Join("\n", pending.Select(i => $"• {i.DisplayName}: {i.Before} → {i.After}"));
-        var text = $"{preset.Title}\n\n{lines}\n\n{preset.Honesty}\n\nExige administrador (o Windows cria um ponto de restauração). " +
-                   "Desfazer volta cada serviço ao tipo anterior.";
-        var r = await Host.ApplyAsync("Aplicar preset de serviços", text,
+        var text = Loc.F("Svc.NNNExige", preset.Title, lines, preset.Honesty) +
+                   Loc.T("Svc.DesfazerVoltaCadaServico");
+        var r = await Host.ApplyAsync(Loc.T("Svc.AplicarPresetServicos"), text,
             pending.Select(i => new ActionRequest(i.Item.ActionKey)).ToList(), BrokerLevel.Admin);
         if (r is null) return;
         if (r.Response is { Ok: true, RunId: { } run }) preset.Applied(run);
@@ -226,23 +226,23 @@ public sealed class ServiceRow
         PublisherText = publisher.Describe();
         IsMicrosoft = isMicrosoft;
         Protection = ServicePolicy.Check(info.Name, null)
-                     ?? (info.IsPerUser ? "Serviço por usuário: o Windows recria a cada logon; não é alterado." : null);
+                     ?? (info.IsPerUser ? Loc.T("Svc.ServicoUsuarioWindowsRecria") : null);
     }
 
     public ServiceInfo Info { get; }
     public string PublisherText { get; }
     public bool IsMicrosoft { get; }
-    public string Origin => IsMicrosoft ? "Microsoft" : "Terceiro";
+    public string Origin => IsMicrosoft ? "Microsoft" : Loc.T("Svc.Terceiro");
     public string? Protection { get; }
     public bool CanChange => Protection is null && Nexus.Boot.Handlers.BootServiceStartTypeHandler.IsValidName(Info.Name);
     public string StartTypeText => ServicePresets.StartTypeLabel(Info.StartType);
     public string StateText => ServicePresets.StateLabel(Info.State);
     public bool IsRunning => Info.IsRunning;
-    public string DescriptionText => string.IsNullOrWhiteSpace(Info.Description) ? "Sem descrição." : Info.Description!;
+    public string DescriptionText => string.IsNullOrWhiteSpace(Info.Description) ? Loc.T("Svc.SemDescricao") : Info.Description!;
     public string AccountText => string.IsNullOrWhiteSpace(Info.Account) ? "—" : Info.Account!;
-    public string DependenciesText => Info.Dependencies.Count == 0 ? "Nenhuma" : string.Join(", ", Info.Dependencies);
+    public string DependenciesText => Info.Dependencies.Count == 0 ? Loc.T("Svc.Nenhuma") : string.Join(", ", Info.Dependencies);
     public string ProtectionText => Protection ?? (Info.Name.Equals("wuauserv", StringComparison.OrdinalIgnoreCase)
-        ? "Windows Update: pode ir para Manual, nunca Desativado."
+        ? Loc.T("Svc.WindowsUpdatePodeIr")
         : "");
     /// <summary>Selo do estado: verde = rodando agora, neutro = parado.</summary>
     public Tone StateTone => Info.IsRunning ? Tone.Good : Tone.Neutral;
@@ -272,14 +272,14 @@ public sealed class PresetRow : ObservableObject
         ApplyCommand = new RelayCommand(() => _ = page.ApplyPresetAsync(this), () => !page.Busy && Items.Any(i => i.Pending));
         UndoCommand = new RelayCommand(() => _ = page.UndoPresetAsync(this), () => !page.Busy && _runId is not null);
         var pending = Items.Count(i => i.Pending);
-        _status = _runId is not null ? "Aplicado pelo NEXUS (pode desfazer)." :
-            pending == 0 ? "Já está assim neste PC." : $"{pending} de {Items.Count} serviços mudariam.";
+        _status = _runId is not null ? Loc.T("Svc.AplicadoPeloNexusPode") :
+            pending == 0 ? Loc.T("Svc.JaEstaAssimNeste") : Loc.F("Svc.NNServicosMudariam", pending, Items.Count);
     }
 
     public ServicePreset Preset { get; }
     public string Title => Preset.Title;
     public string Summary => Preset.Summary;
-    public string ForWho => "Para quem: " + Preset.ForWho;
+    public string ForWho => Loc.T("Svc.Quem") + Preset.ForWho;
     /// <summary>Aviso pelo tipo do disco do sistema (ex.: preset "só para SSD" num PC com o Windows num HD). Null = nada.</summary>
     public string? DiskWarning { get; }
     public string Honesty => DiskWarning is null ? Preset.Honesty : DiskWarning + " " + Preset.Honesty;
@@ -288,7 +288,7 @@ public sealed class PresetRow : ObservableObject
     public bool CanUndo => _runId is not null;
     public string Status { get => _status; private set { if (Set(ref _status, value)) OnPropertyChanged(nameof(StatusTone)); } }
     public double PendingCount => Items.Count(i => i.Pending);
-    public string ChangeText => PendingCount == 0 ? "Nada muda" : $"{PendingCount} de {Items.Count} mudam";
+    public string ChangeText => PendingCount == 0 ? Loc.T("Svc.NadaMuda") : Loc.F("Svc.NNMudam", PendingCount, Items.Count);
     /// <summary>Selo do estado: verde = aplicado ou já assim, âmbar = há mudanças a fazer.</summary>
     public Tone StatusTone => _runId is not null || Items.All(i => !i.Pending) ? Tone.Good : Tone.Warn;
     public string IconKey => Preset.Id switch
@@ -306,14 +306,14 @@ public sealed class PresetRow : ObservableObject
     {
         _runId = run;
         OnPropertyChanged(nameof(CanUndo));
-        Status = "Aplicado pelo NEXUS (pode desfazer).";
+        Status = Loc.T("Svc.AplicadoPeloNexusPode");
     }
 
     internal void Undone()
     {
         _runId = null;
         OnPropertyChanged(nameof(CanUndo));
-        Status = "Desfeito.";
+        Status = Loc.T("Svc.Desfeito");
     }
 }
 
@@ -322,12 +322,12 @@ public sealed class PresetItemRow(ServicePresetItem item, ServiceRow? service)
     public ServicePresetItem Item { get; } = item;
     public string DisplayName => service?.Info.DisplayName ?? Item.Service;
     public bool Exists => service is not null;
-    public string Before => service is null ? "não existe neste PC" : ServicePresets.StartTypeLabel(service.Info.StartType);
+    public string Before => service is null ? Loc.T("Svc.NaoExisteNestePc") : ServicePresets.StartTypeLabel(service.Info.StartType);
     public string After => ServicePresets.StartTypeLabel(Item.StartType);
     public bool Pending => service is not null && service.Info.StartType != Item.StartType;
     public string Why => Item.Why;
-    public string Line => $"{DisplayName}: {Before} → {After}" + (Pending ? "" : " (sem mudança)");
+    public string Line => $"{DisplayName}: {Before} → {After}" + (Pending ? "" : Loc.T("Svc.SemMudanca"));
     /// <summary>Selo do "depois": âmbar = muda, verde = já está assim, neutro = não existe neste PC.</summary>
     public Tone AfterTone => !Exists ? Tone.Neutral : Pending ? Tone.Warn : Tone.Good;
-    public string StateText => !Exists ? "não existe aqui" : Pending ? "muda" : "já está assim";
+    public string StateText => !Exists ? Loc.T("Svc.NaoExisteAqui") : Pending ? Loc.T("Svc.Muda") : Loc.T("Svc.JaEstaAssim");
 }

@@ -1899,8 +1899,122 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Prog.NavTitle" xml:space="preserve"><value>Programs and updates</value></data>
   <data name="Scan.NavSubtitle" xml:space="preserve"><value>Look for suspicious signs in files and ask Microsoft Defender's opinion.</value></data>
   <data name="Scan.NavTitle" xml:space="preserve"><value>Scan files</value></data>
+  <data name="Sec.AbrirSegurancaWindows" xml:space="preserve"><value>Open Windows Security</value></data>
+  <data name="Sec.AbrirWindowsN" xml:space="preserve"><value>Open in Windows: {0}</value></data>
+  <data name="Sec.Alta" xml:space="preserve"><value>High</value></data>
+  <data name="Sec.AmeacasDefenderJaEncontrou" xml:space="preserve"><value>Threats Defender has already found</value></data>
+  <data name="Sec.AntivirusMicrosoftDefenderOu" xml:space="preserve"><value>The antivirus is Microsoft Defender (or yours, if you have another). NEXUS has no virus engine of its own: it would be worse than Defender. It reads the state, explains and asks Defender to scan with the official tool (MpCmdRun). Removing or quarantining is done by Defender itself.</value></data>
+  <data name="Sec.AntivirusWindowsFazVerificacao" xml:space="preserve"><value>Windows' antivirus does the scan. NEXUS only asks and shows.</value></data>
+  <data name="Sec.ArquivosEnvolvidos" xml:space="preserve"><value>Files involved</value></data>
+  <data name="Sec.AtencaoFuncionaMasVale" xml:space="preserve"><value>Attention: works, but worth checking</value></data>
+  <data name="Sec.AtualizacaoAssinaturas" xml:space="preserve"><value>Signature update</value></data>
+  <data name="Sec.AtualizarAssinaturas" xml:space="preserve"><value>Update signatures</value></data>
+  <data name="Sec.Baixa" xml:space="preserve"><value>Low</value></data>
+  <data name="Sec.ComoVerificar" xml:space="preserve"><value>How to check: </value></data>
+  <data name="Sec.ConfereDefenderFirewallWindows" xml:space="preserve"><value>Checks Defender, firewall and Windows. Reading changes nothing.</value></data>
+  <data name="Sec.CorrigirPontoSuspeito" xml:space="preserve"><value>Fix suspicious spot</value></data>
+  <data name="Sec.CorrigirReversivel" xml:space="preserve"><value>Fix (reversible)</value></data>
+  <data name="Sec.DefenderProcuraAmeacasVoce" xml:space="preserve"><value>Defender looks for threats. You see the time and its messages.</value></data>
+  <data name="Sec.EscolhaPastaDefenderVerificar" xml:space="preserve"><value>Choose the folder for Defender to scan</value></data>
+  <data name="Sec.Fato" xml:space="preserve"><value>Fact</value></data>
+  <data name="Sec.Fazer" xml:space="preserve"><value>What to do: </value></data>
+  <data name="Sec.GravidadeN" xml:space="preserve"><value>Severity {0}</value></data>
+  <data name="Sec.HeuristicasNexusInicializacaoTarefas" xml:space="preserve"><value>NEXUS heuristics: startup, scheduled tasks, hosts, proxy, forced extensions, Defender exclusions, IFEO, AppInit and Winlogon. A suspicious spot is not proof of a virus: NEXUS never removes anything by itself. Where a reversible fix exists, the button appears.</value></data>
+  <data name="Sec.HistoricoProtecao" xml:space="preserve"><value>Protection history</value></data>
+  <data name="Sec.Inspecionando" xml:space="preserve"><value>Inspecting…</value></data>
+  <data name="Sec.InspecionarRegistro" xml:space="preserve"><value>Inspect registry</value></data>
+  <data name="Sec.InspetorRegistro" xml:space="preserve"><value>Registry inspector</value></data>
+  <data name="Sec.InspetorSoRodaQuando" xml:space="preserve"><value>The inspector only runs when you ask.</value></data>
+  <data name="Sec.IssoAquiNaoHa" xml:space="preserve"><value>That's why there's no "clean everything" here. The inspector only shows leftovers pointing to files that no longer exist (useful to tidy Programs and Features and Run). Each entry is fully copied first and can be recreated with Undo. A disconnected external disk never counts as a leftover.</value></data>
+  <data name="Sec.IssoNaoDeixaPc" xml:space="preserve"><value>
+
+This does NOT make the PC faster; it only tidies lists like Programs and Features. Each entry is fully copied first (all subkeys, types and data) and can be recreated with Undo.</value></data>
+  <data name="Sec.ItensVerde" xml:space="preserve"><value>Items in green</value></data>
+  <data name="Sec.LendoEstadoProtecao" xml:space="preserve"><value>Reading the protection state…</value></data>
+  <data name="Sec.LidoN" xml:space="preserve"><value>Read at {0:dd/MM/yyyy HH:mm}</value></data>
+  <data name="Sec.LimiteNVezDemais" xml:space="preserve"><value>
+
+Limit of {0} at a time: the rest are left for next time.</value></data>
+  <data name="Sec.LimparRegistroDeixaPc" xml:space="preserve"><value>"Cleaning the registry makes the PC faster."</value></data>
+  <data name="Sec.LimparSelecao" xml:space="preserve"><value>Clear selection</value></data>
+  <data name="Sec.MaisN" xml:space="preserve"><value>
+• … and {0} more</value></data>
+  <data name="Sec.Media" xml:space="preserve"><value>Medium</value></data>
+  <data name="Sec.Mito" xml:space="preserve"><value>Myth</value></data>
+  <data name="Sec.MostraSobrasApontamArquivos" xml:space="preserve"><value>Shows leftovers pointing to files that no longer exist. You choose.</value></data>
+  <data name="Sec.NAndamentoDefenderNao" xml:space="preserve"><value>{0} in progress… Defender doesn't report a percentage; the time and its messages show up here.</value></data>
+  <data name="Sec.NaoDeuLer" xml:space="preserve"><value>What couldn't be read</value></data>
+  <data name="Sec.NaoFoiPossivelInspecionar" xml:space="preserve"><value>Could not inspect: {0}</value></data>
   <data name="Sec.NavSubtitle" xml:space="preserve"><value>Check for threats with Microsoft Defender and find suspicious spots.</value></data>
   <data name="Sec.NavTitle" xml:space="preserve"><value>Security</value></data>
+  <data name="Sec.NenhumaAmeacaRegistrada" xml:space="preserve"><value>No threats recorded</value></data>
+  <data name="Sec.NenhumaSobraEncontradaPelas" xml:space="preserve"><value>No leftover found by the inspector's (conservative) rules.</value></data>
+  <data name="Sec.NenhumPontoSuspeito" xml:space="preserve"><value>No suspicious spots.</value></data>
+  <data name="Sec.NenhumPontoSuspeitoEncontrado" xml:space="preserve"><value>No suspicious spot found by the NEXUS checks.</value></data>
+  <data name="Sec.NexusVaiPedirMicrosoft" xml:space="preserve"><value>NEXUS will ask Microsoft Defender for {0}, using the official MpCmdRun tool.
+
+No settings are changed. If something is found, removal or quarantine is done by Defender itself (Windows Security).
+
+Continue?</value></data>
+  <data name="Sec.NGravidadeAltaN" xml:space="preserve"><value>{0} high severity, {1} medium, {2} low/informational.</value></data>
+  <data name="Sec.NItensProtecaoVerde" xml:space="preserve"><value>of {0} protection items in green</value></data>
+  <data name="Sec.NNaoFoiPossivel" xml:space="preserve"><value>{0}: could not finish ({1}).</value></data>
+  <data name="Sec.NNItensVerde" xml:space="preserve"><value>{0} of {1} items in green · {2} in attention · {3} in red</value></data>
+  <data name="Sec.NNNexusFaz" xml:space="preserve"><value>{0}
+
+{1}
+
+What NEXUS does: {2}
+
+The previous state is saved in the journal and can be undone here or on the Apply page.</value></data>
+  <data name="Sec.NSobraSPodem" xml:space="preserve"><value>{0} leftover(s) that can be removed with a copy and {1} informational only. Removing doesn't make the PC faster.</value></data>
+  <data name="Sec.OuHistoricoNaoPode" xml:space="preserve"><value>(or the history couldn't be read)</value></data>
+  <data name="Sec.Padrao" xml:space="preserve"><value>(Default)</value></data>
+  <data name="Sec.PedeAcao" xml:space="preserve"><value>Needs action</value></data>
+  <data name="Sec.PedirMicrosoftDefenderBaixar" xml:space="preserve"><value>Ask Microsoft Defender to download the latest signatures (MpCmdRun -SignatureUpdate)? Needs internet.</value></data>
+  <data name="Sec.PodeLevarMaisHora" xml:space="preserve"><value>May take over an hour and slow the PC down while it runs.</value></data>
+  <data name="Sec.PontosSuspeitosRevisar" xml:space="preserve"><value>Suspicious spots to review</value></data>
+  <data name="Sec.PontosSuspeitosSaoMostrados" xml:space="preserve"><value>Suspicious spots are shown. Nothing is removed by itself.</value></data>
+  <data name="Sec.ProtegidoPontosAtencao" xml:space="preserve"><value>Protected, with points of attention</value></data>
+  <data name="Sec.RegistroBancoDadosIndexado" xml:space="preserve"><value>The registry is an indexed database; leftover entries aren't read in normal use and weigh nothing. Microsoft doesn't support registry cleaners and warns they have caused serious problems (KB 2563254, "Microsoft support policy for the use of registry cleaning utilities").</value></data>
+  <data name="Sec.RemoverNSobraS" xml:space="preserve"><value>Remove {0} registry leftover(s) {1}?
+
+</value></data>
+  <data name="Sec.RemoverOuQuarentenaTarefa" xml:space="preserve"><value>Removing or quarantining is Defender's job: it knows how to undo, restore false positives and clean what's in use. NEXUS shows what was found and what to do.</value></data>
+  <data name="Sec.RemoverSelecionadasCopia" xml:space="preserve"><value>Remove selected (with copy)</value></data>
+  <data name="Sec.RemoverSobrasRegistro" xml:space="preserve"><value>Remove registry leftovers</value></data>
+  <data name="Sec.Resolvida" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Sec.Revisa" xml:space="preserve"><value>Reviews</value></data>
+  <data name="Sec.RiscoHaProtecaoDesligada" xml:space="preserve"><value>At risk: there's protection off or a pending threat</value></data>
+  <data name="Sec.SeuUsuario" xml:space="preserve"><value>Your user</value></data>
+  <data name="Sec.SeuUsuario2" xml:space="preserve"><value>from your user</value></data>
+  <data name="Sec.SobrasNaoSaoLidas" xml:space="preserve"><value>Leftovers aren't read in normal use and weigh nothing. Removing them only tidies lists.</value></data>
+  <data name="Sec.SuaProtecaoItemItem" xml:space="preserve"><value>Your protection, item by item</value></data>
+  <data name="Sec.Suspeito" xml:space="preserve"><value>Why it's suspicious: </value></data>
+  <data name="Sec.SuspeitoNaoProvaVirus" xml:space="preserve"><value>suspicious is not proof of a virus</value></data>
+  <data name="Sec.Tempo" xml:space="preserve"><value>time</value></data>
+  <data name="Sec.TodaCorrecaoFeitaAqui" xml:space="preserve"><value>Every fix made here saves the previous state.</value></data>
+  <data name="Sec.TodoPc" xml:space="preserve"><value>from the whole PC</value></data>
+  <data name="Sec.TodoPcPedeAdministrador" xml:space="preserve"><value>The whole PC (needs administrator)</value></data>
+  <data name="Sec.UltimaCorrecaoFeitaAqui" xml:space="preserve"><value>The last fix made here can be undone (also on the Apply page).</value></data>
+  <data name="Sec.VaiPedirPermissaoAdministrador" xml:space="preserve"><value>
+
+It will ask for administrator permission (UAC) and create a restore point.</value></data>
+  <data name="Sec.Verde" xml:space="preserve"><value>in green</value></data>
+  <data name="Sec.Verde2" xml:space="preserve"><value>green</value></data>
+  <data name="Sec.VerdeLigadoDia" xml:space="preserve"><value>In green: on and up to date</value></data>
+  <data name="Sec.VerificacaoAndamento" xml:space="preserve"><value>Scan in progress</value></data>
+  <data name="Sec.VerificacaoCompleta" xml:space="preserve"><value>Full scan</value></data>
+  <data name="Sec.VerificacaoCompletaPodeLevar" xml:space="preserve"><value>a full scan (may take over an hour and slow the PC down while it runs)</value></data>
+  <data name="Sec.VerificacaoN" xml:space="preserve"><value>a scan of "{0}"</value></data>
+  <data name="Sec.VerificacaoPersonalizada" xml:space="preserve"><value>Custom scan</value></data>
+  <data name="Sec.VerificacaoRapida" xml:space="preserve"><value>Quick scan</value></data>
+  <data name="Sec.VerificacaoRapidaAlgunsMinutos" xml:space="preserve"><value>a quick scan (a few minutes)</value></data>
+  <data name="Sec.VerificacoesNexusNaoAcharam" xml:space="preserve"><value>The NEXUS checks found nothing out of the ordinary right now.</value></data>
+  <data name="Sec.VerificarMicrosoftDefender" xml:space="preserve"><value>Scan with Microsoft Defender</value></data>
+  <data name="Sec.VerificarPasta" xml:space="preserve"><value>Scan a folder…</value></data>
+  <data name="Sec.Vermelho" xml:space="preserve"><value>red</value></data>
+  <data name="Sec.VermelhoProtecaoDesligadaOu" xml:space="preserve"><value>In red: protection off or pending threat</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Opens minimized in the tray. It is a Run entry on your account (no administrator), with journal and undo; it also shows up in Task Manager and on the Startup page.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Opens with Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>Open NEXUS minimized in the tray every time you sign in to Windows?
@@ -2216,8 +2330,94 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Shell.VoceRecusouAvisoWindows" xml:space="preserve"><value>You declined the Windows prompt. NEXUS stays open without administrator rights.</value></data>
   <data name="Shell.VoltandoModoAnterior" xml:space="preserve"><value>Going back to the previous mode…</value></data>
   <data name="Shell.WindowsPedePermissaoVez" xml:space="preserve"><value>Windows asks for permission once and NEXUS reopens. If you leave it for later, it installs when you close NEXUS.</value></data>
+  <data name="Svc.AjustesProntos" xml:space="preserve"><value>Ready-made tweaks</value></data>
+  <data name="Svc.AntesDepois" xml:space="preserve"><value>before → after</value></data>
+  <data name="Svc.AplicadoPeloNexusPode" xml:space="preserve"><value>Applied by NEXUS (can be undone).</value></data>
+  <data name="Svc.AplicarEsteServico" xml:space="preserve"><value>Apply to this service</value></data>
+  <data name="Svc.AplicarN" xml:space="preserve"><value>Apply: {0}</value></data>
+  <data name="Svc.AplicarPresetServicos" xml:space="preserve"><value>Apply services preset</value></data>
+  <data name="Svc.AutomaticoAtrasado" xml:space="preserve"><value>Automatic (delayed)</value></data>
+  <data name="Svc.BuscarNomeNomeInterno" xml:space="preserve"><value>Search by name, internal name or description</value></data>
+  <data name="Svc.BuscarServicos" xml:space="preserve"><value>Search services</value></data>
+  <data name="Svc.CadaAjusteMostraMuda" xml:space="preserve"><value>Each tweak shows what changes and why.</value></data>
+  <data name="Svc.CadaServicoVoltaTipo" xml:space="preserve"><value>Each service goes back to its previous type.</value></data>
+  <data name="Svc.Conta" xml:space="preserve"><value>Account: </value></data>
+  <data name="Svc.Depende" xml:space="preserve"><value>Depends on: </value></data>
+  <data name="Svc.Desativado" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Svc.DesativadoServicoNaoAbre" xml:space="preserve"><value>
+
+Disabled: the service won't start even when a program asks. Everything that depends on it stops working until you undo.</value></data>
+  <data name="Svc.DesfazerVoltaCadaServico" xml:space="preserve"><value>Undo returns each service to its previous type.</value></data>
+  <data name="Svc.Desfeito" xml:space="preserve"><value>Undone.</value></data>
+  <data name="Svc.Editor" xml:space="preserve"><value>Publisher: </value></data>
+  <data name="Svc.EleDependeN" xml:space="preserve"><value>
+
+It depends on: {0}.</value></data>
+  <data name="Svc.EscolhaServicoLista" xml:space="preserve"><value>Pick a service from the list.</value></data>
+  <data name="Svc.EssenciaisNexusNaoDeixa" xml:space="preserve"><value>Essential: NEXUS won't let them be changed.</value></data>
+  <data name="Svc.Estado" xml:space="preserve"><value>State</value></data>
+  <data name="Svc.Execucao" xml:space="preserve"><value>Running</value></data>
+  <data name="Svc.IniciamSozinhos" xml:space="preserve"><value>Start by themselves</value></data>
+  <data name="Svc.InstaladosOutrosProgramas" xml:space="preserve"><value>Installed by other programs.</value></data>
+  <data name="Svc.JaEstaAssim" xml:space="preserve"><value>already like this</value></data>
+  <data name="Svc.JaEstaAssimNeste" xml:space="preserve"><value>Already like this on this PC.</value></data>
+  <data name="Svc.ListaServicosQuemFez" xml:space="preserve"><value>Lists the services and who made each one. Reading changes nothing.</value></data>
+  <data name="Svc.MaioriaFicaManualSo" xml:space="preserve"><value>Most stay on Manual and only start when needed. Only tweaks with a clear reason are here.</value></data>
+  <data name="Svc.MaioriaServicosJaFica" xml:space="preserve"><value>Most services already sit stopped on Manual and only start when needed: turning services off almost never gives FPS. Only tweaks with a clear reason are here, always reversible. Essential services (RPC, Defender, firewall, network, sound, anti-cheat) can't be changed. Requires administrator; Windows creates a restore point.</value></data>
+  <data name="Svc.MaisDetalhes" xml:space="preserve"><value>More details</value></data>
+  <data name="Svc.ManualServicoNaoAbre" xml:space="preserve"><value>
+
+Manual: the service doesn't start at boot, but starts when a program asks.</value></data>
+  <data name="Svc.Muda" xml:space="preserve"><value>changes</value></data>
+  <data name="Svc.MudarNNN" xml:space="preserve"><value>Change "{0}" ({1}) from {2} to {3}?</value></data>
+  <data name="Svc.MudarTipoInicio" xml:space="preserve"><value>Change the startup type</value></data>
+  <data name="Svc.NadaMuda" xml:space="preserve"><value>Nothing changes</value></data>
+  <data name="Svc.NadaMudarEstePreset" xml:space="preserve"><value>Nothing to change: this preset is already applied (or the services don't exist on this PC).</value></data>
+  <data name="Svc.NaoExisteAqui" xml:space="preserve"><value>doesn't exist here</value></data>
+  <data name="Svc.NaoExisteNestePc" xml:space="preserve"><value>doesn't exist on this PC</value></data>
+  <data name="Svc.NaoNemIniciaServico" xml:space="preserve"><value>
+
+Doesn't stop or start the service now: takes effect from the next boot. Requires administrator; </value></data>
   <data name="Svc.NavSubtitle" xml:space="preserve"><value>Windows services explained, with safe, reversible tweaks.</value></data>
   <data name="Svc.NavTitle" xml:space="preserve"><value>Services</value></data>
+  <data name="Svc.Nenhuma" xml:space="preserve"><value>None</value></data>
+  <data name="Svc.NenhumServicoEsseFiltro" xml:space="preserve"><value>No service with this filter.</value></data>
+  <data name="Svc.NexusGuardaTipoAnterior" xml:space="preserve"><value>NEXUS saves the previous type and Undo returns exactly to it.</value></data>
+  <data name="Svc.NNMudam" xml:space="preserve"><value>{0} of {1} change</value></data>
+  <data name="Svc.NNNExige" xml:space="preserve"><value>{0}
+
+{1}
+
+{2}
+
+Requires administrator (Windows creates a restore point). </value></data>
+  <data name="Svc.NNServicosMudariam" xml:space="preserve"><value>{0} of {1} services would change.</value></data>
+  <data name="Svc.NovoTipoInicio" xml:space="preserve"><value>New startup type</value></data>
+  <data name="Svc.NServicosNExecucao" xml:space="preserve"><value>{0} services · {1} running · {2} automatic · </value></data>
+  <data name="Svc.NTerceiros" xml:space="preserve"><value>{0} third-party</value></data>
+  <data name="Svc.Origem" xml:space="preserve"><value>Origin</value></data>
+  <data name="Svc.Protegidos" xml:space="preserve"><value>Protected</value></data>
+  <data name="Svc.QuaseNuncaFps" xml:space="preserve"><value>Almost never gives FPS</value></data>
+  <data name="Svc.Quem" xml:space="preserve"><value>For whom: </value></data>
+  <data name="Svc.Rodando" xml:space="preserve"><value>running</value></data>
+  <data name="Svc.RodandoAgora" xml:space="preserve"><value>Running now</value></data>
+  <data name="Svc.SemDescricao" xml:space="preserve"><value>No description.</value></data>
+  <data name="Svc.SemMudanca" xml:space="preserve"><value> (no change)</value></data>
+  <data name="Svc.Servico" xml:space="preserve"><value>Service</value></data>
+  <data name="Svc.Servicos" xml:space="preserve"><value> services</value></data>
+  <data name="Svc.ServicoUsuarioWindowsRecria" xml:space="preserve"><value>Per-user service: Windows recreates it at each sign-in; it isn't changed.</value></data>
+  <data name="Svc.SoTipoInicioVale" xml:space="preserve"><value>Only the startup type. Takes effect at the next boot.</value></data>
+  <data name="Svc.Terceiro" xml:space="preserve"><value>Third-party</value></data>
+  <data name="Svc.Terceiros" xml:space="preserve"><value>Third-party</value></data>
+  <data name="Svc.Terceiros2" xml:space="preserve"><value>Third-party</value></data>
+  <data name="Svc.TipoAutomaticoAbremBoot" xml:space="preserve"><value>Automatic type: start at boot.</value></data>
+  <data name="Svc.TipoInicioServico" xml:space="preserve"><value>Service startup type</value></data>
+  <data name="Svc.TodosInstaladosNestePc" xml:space="preserve"><value>All installed on this PC.</value></data>
+  <data name="Svc.TodosServicos" xml:space="preserve"><value>All services</value></data>
+  <data name="Svc.TroqueFiltroOuApague" xml:space="preserve"><value>Change the filter or clear the search.</value></data>
+  <data name="Svc.ValeProximoBootPede" xml:space="preserve"><value>Takes effect at the next boot. Needs administrator and can be undone.</value></data>
+  <data name="Svc.VoceVeEleFaz" xml:space="preserve"><value>You see what it does and can change the startup type.</value></data>
+  <data name="Svc.WindowsUpdatePodeIr" xml:space="preserve"><value>Windows Update: can go to Manual, never Disabled.</value></data>
   <data name="Tools.NavSubtitle" xml:space="preserve"><value>Network, drivers, Windows apps and restore points.</value></data>
   <data name="Tools.NavTitle" xml:space="preserve"><value>System tools</value></data>
 </root>

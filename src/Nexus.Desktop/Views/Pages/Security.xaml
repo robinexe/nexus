@@ -12,6 +12,7 @@
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls">
   <DataTemplate DataType="{x:Type vm:SecurityPage}">
@@ -54,12 +55,12 @@
         </Border>
 
         <!-- ===== 1. Destaque ===== -->
-        <c:HeroPanel Illustration="{StaticResource Illo.Security}" Title="Itens em verde"
+        <c:HeroPanel Illustration="{StaticResource Illo.Security}" Title="{l:T Sec.ItensVerde}"
                      Number="{Binding GoodNumber}" IsLoading="{Binding IsLoading}"
                      Accent="{Binding HeadlineUiTone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"
                      Caption="{Binding Headline}"
-                     ActionText="Verificação rápida" Command="{Binding QuickScanCommand}"
-                     SecondaryText="Ler de novo" SecondaryCommand="{Binding RefreshCommand}">
+                     ActionText="{l:T Sec.VerificacaoRapida}" Command="{Binding QuickScanCommand}"
+                     SecondaryText="{l:T Shell.LerNovo}" SecondaryCommand="{Binding RefreshCommand}">
           <StackPanel Width="200">
             <!-- Escudo-placar: contorno e fundo na cor do estado, % em verde no centro. -->
             <Grid Width="118" Height="128" HorizontalAlignment="Center"
@@ -71,21 +72,21 @@
               <StackPanel VerticalAlignment="Center" Margin="0,0,0,10">
                 <c:AnimatedNumber Value="{Binding ScorePercent}" Kind="Percent" FontFamily="{StaticResource Font.Numbers}" FontSize="28"
                                   Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center"/>
-                <TextBlock Text="em verde" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{l:T Sec.Verde}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
               </StackPanel>
             </Grid>
             <UniformGrid Columns="3" Margin="0,12,0,0">
-              <StackPanel ToolTip="Em verde: ligado e em dia">
+              <StackPanel ToolTip="{l:T Sec.VerdeLigadoDia}">
                 <c:AnimatedNumber Value="{Binding GoodNumber}" Style="{StaticResource S.CountNumber}" Foreground="{StaticResource Brush.Good}"/>
-                <TextBlock Text="verde" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{l:T Sec.Verde2}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
               </StackPanel>
-              <StackPanel ToolTip="Em atenção: funciona, mas vale conferir">
+              <StackPanel ToolTip="{l:T Sec.AtencaoFuncionaMasVale}">
                 <c:AnimatedNumber Value="{Binding WarnNumber}" Style="{StaticResource S.CountNumber}" Foreground="{StaticResource Brush.Trace}"/>
-                <TextBlock Text="atenção" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{l:T Conv.Atencao}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
               </StackPanel>
-              <StackPanel ToolTip="Em vermelho: proteção desligada ou ameaça pendente">
+              <StackPanel ToolTip="{l:T Sec.VermelhoProtecaoDesligadaOu}">
                 <c:AnimatedNumber Value="{Binding BadNumber}" Style="{StaticResource S.CountNumber}" Foreground="{StaticResource Brush.Bad}"/>
-                <TextBlock Text="vermelho" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
+                <TextBlock Text="{l:T Sec.Vermelho}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center"/>
               </StackPanel>
             </UniformGrid>
           </StackPanel>
@@ -100,12 +101,12 @@
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <c:Icon Data="{StaticResource Icon.History}" Size="16" Foreground="{StaticResource Brush.Trace}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-            <TextBlock Grid.Column="1" Text="A última correção feita aqui pode ser desfeita (também na página Aplicar)." Style="{StaticResource Text.Small}"
+            <TextBlock Grid.Column="1" Text="{l:T Sec.UltimaCorrecaoFeitaAqui}" Style="{StaticResource Text.Small}"
                        Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
             <Button Grid.Column="2" Command="{Binding UndoCommand}" Style="{StaticResource Button.Secondary}" Margin="12,0,0,0">
               <StackPanel Orientation="Horizontal">
                 <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
-                <TextBlock Text="Desfazer" TextWrapping="NoWrap"/>
+                <TextBlock Text="{l:T Shell.Desfazer}" TextWrapping="NoWrap"/>
               </StackPanel>
             </Button>
           </Grid>
@@ -125,8 +126,8 @@
                 <c:Icon Data="{StaticResource Icon.Scan}" Size="19" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
               </Grid>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Verificar com o Microsoft Defender" Style="{StaticResource Text.H2}"/>
-                <TextBlock Text="O antivírus do Windows faz a verificação. O NEXUS só pede e mostra." Style="{StaticResource Text.Small}"/>
+                <TextBlock Text="{l:T Sec.VerificarMicrosoftDefender}" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="{l:T Sec.AntivirusWindowsFazVerificacao}" Style="{StaticResource Text.Small}"/>
               </StackPanel>
               <TextBlock Grid.Column="2" Text="{Binding ReadAt}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Top"/>
             </Grid>
@@ -145,52 +146,52 @@
                   <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
                     <TextBlock Text="{Binding ScanElapsed}" FontFamily="{StaticResource Font.Numbers}" FontSize="26" Foreground="{StaticResource Brush.Trace}"
                                HorizontalAlignment="Right" TextWrapping="NoWrap"/>
-                    <TextBlock Text="tempo" Style="{StaticResource Text.Small}" HorizontalAlignment="Right"/>
+                    <TextBlock Text="{l:T Sec.Tempo}" Style="{StaticResource Text.Small}" HorizontalAlignment="Right"/>
                   </StackPanel>
-                  <Button Grid.Column="2" Content="Cancelar" Style="{StaticResource Button.Secondary}" Command="{Binding CancelScanCommand}" VerticalAlignment="Center"
+                  <Button Grid.Column="2" Content="{l:T Asst.Cancelar}" Style="{StaticResource Button.Secondary}" Command="{Binding CancelScanCommand}" VerticalAlignment="Center"
                           Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}"/>
                 </Grid>
                 <ProgressBar IsIndeterminate="True" Height="4" Margin="0,10,0,0" Foreground="{StaticResource Brush.Signal}"
-                             Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}" AutomationProperties.Name="Verificação em andamento"/>
+                             Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}" AutomationProperties.Name="{l:T Sec.VerificacaoAndamento}"/>
                 <TextBlock Text="{Binding ScanLine}" Style="{StaticResource S.Code}" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
                            ToolTip="{Binding ScanLine}" Visibility="{Binding ScanLine, Converter={StaticResource NullToCollapsed}}"/>
               </StackPanel>
             </Border>
 
             <WrapPanel Margin="0,14,0,0">
-              <Button Content="Verificação completa" Style="{StaticResource Button.Secondary}" Command="{Binding FullScanCommand}" Margin="0,0,8,6"
-                      ToolTip="Pode levar mais de uma hora e deixar o PC mais lento enquanto roda."/>
-              <Button Content="Verificar uma pasta…" Style="{StaticResource Button.Secondary}" Command="{Binding CustomScanCommand}" Margin="0,0,8,6"/>
+              <Button Content="{l:T Sec.VerificacaoCompleta}" Style="{StaticResource Button.Secondary}" Command="{Binding FullScanCommand}" Margin="0,0,8,6"
+                      ToolTip="{l:T Sec.PodeLevarMaisHora}"/>
+              <Button Content="{l:T Sec.VerificarPasta}" Style="{StaticResource Button.Secondary}" Command="{Binding CustomScanCommand}" Margin="0,0,8,6"/>
               <Button Style="{StaticResource Button.Secondary}" Command="{Binding UpdateSignaturesCommand}" Margin="0,0,8,6">
                 <StackPanel Orientation="Horizontal">
                   <c:Icon Data="{StaticResource Icon.Refresh}" Size="14" Margin="0,0,6,0"/>
-                  <TextBlock Text="Atualizar assinaturas" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{l:T Sec.AtualizarAssinaturas}" TextWrapping="NoWrap"/>
                 </StackPanel>
               </Button>
               <Button Style="{StaticResource Button.Ghost}" Command="{Binding OpenSecurityCommand}" Margin="0,0,0,6">
                 <StackPanel Orientation="Horizontal">
-                  <TextBlock Text="Abrir Segurança do Windows" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{l:T Sec.AbrirSegurancaWindows}" TextWrapping="NoWrap"/>
                   <c:Icon Data="{StaticResource Icon.ChevronRight}" Size="14" Margin="6,0,0,0"/>
                 </StackPanel>
               </Button>
             </WrapPanel>
             <c:ExplainToggle Margin="0,4,0,0"
-                             Content="O antivírus é o Microsoft Defender (ou o seu, se tiver outro). O NEXUS não tem motor de vírus próprio: seria pior que o Defender. Ele lê o estado, explica e pede ao Defender para verificar pela ferramenta oficial (MpCmdRun). Remover ou pôr em quarentena é feito pelo próprio Defender."/>
+                             Content="{l:T Sec.AntivirusMicrosoftDefenderOu}"/>
           </StackPanel>
         </Border>
 
         <!-- ===== 3. Como funciona ===== -->
         <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,20">
           <c:HowItWorks>
-            <c:StepItem Icon="{StaticResource Icon.Search}" Title="Lê" Text="Confere Defender, firewall e o Windows. Ler não muda nada."/>
-            <c:StepItem Icon="{StaticResource Icon.Scan}" Title="Verifica" Text="O Defender procura ameaças. Você vê o tempo e as mensagens." Tone="Warn"/>
-            <c:StepItem Icon="{StaticResource Icon.Warning}" Title="Revisa" Text="Pontos suspeitos são mostrados. Nada é removido sozinho."/>
-            <c:StepItem Icon="{StaticResource Icon.Undo}" Title="Desfaz" Text="Toda correção feita aqui guarda o estado anterior." Tone="Good"/>
+            <c:StepItem Icon="{StaticResource Icon.Search}" Title="{l:T Pg.Le}" Text="{l:T Sec.ConfereDefenderFirewallWindows}"/>
+            <c:StepItem Icon="{StaticResource Icon.Scan}" Title="{l:T Asst.Verifica}" Text="{l:T Sec.DefenderProcuraAmeacasVoce}" Tone="Warn"/>
+            <c:StepItem Icon="{StaticResource Icon.Warning}" Title="{l:T Sec.Revisa}" Text="{l:T Sec.PontosSuspeitosSaoMostrados}"/>
+            <c:StepItem Icon="{StaticResource Icon.Undo}" Title="{l:T Pg.Desfaz}" Text="{l:T Sec.TodaCorrecaoFeitaAqui}" Tone="Good"/>
           </c:HowItWorks>
         </Border>
 
         <!-- ===== 4. Placar item a item ===== -->
-        <TextBlock Text="Sua proteção, item a item" Style="{StaticResource Text.H2}" Margin="0,0,0,12"/>
+        <TextBlock Text="{l:T Sec.SuaProtecaoItemItem}" Style="{StaticResource Text.H2}" Margin="0,0,0,12"/>
         <c:SkeletonLoader Shape="Tiles" Columns="3" Height="150" Margin="0,0,0,16" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         <ItemsControl ItemsSource="{Binding Protection}" Margin="-7,0,-7,14" Focusable="False">
           <ItemsControl.ItemsPanel>
@@ -202,9 +203,9 @@
                 <DockPanel>
                   <Button DockPanel.Dock="Bottom" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,6,0,0"
                           Command="{Binding OpenCommand}" Visibility="{Binding OpenCommand, Converter={StaticResource NullToCollapsed}}"
-                          AutomationProperties.Name="{Binding Name, StringFormat='Abrir no Windows: {0}'}">
+                          AutomationProperties.Name="{Binding Name, StringFormat={l:T Sec.AbrirWindowsN}}">
                     <StackPanel Orientation="Horizontal">
-                      <TextBlock Text="Abrir no Windows" TextWrapping="NoWrap"/>
+                      <TextBlock Text="{l:T Clean.AbrirWindows}" TextWrapping="NoWrap"/>
                       <c:Icon Data="{StaticResource Icon.ChevronRight}" Size="14" Margin="6,0,0,0"/>
                     </StackPanel>
                   </Button>
@@ -233,12 +234,12 @@
 
         <!-- ===== 5a. Pontos suspeitos ===== -->
         <DockPanel Margin="0,0,0,4">
-          <c:StatusChip DockPanel.Dock="Right" Tone="Info" Text="suspeito não é prova de vírus" VerticalAlignment="Center"/>
-          <TextBlock Text="Pontos suspeitos para revisar" Style="{StaticResource Text.H2}"/>
+          <c:StatusChip DockPanel.Dock="Right" Tone="Info" Text="{l:T Sec.SuspeitoNaoProvaVirus}" VerticalAlignment="Center"/>
+          <TextBlock Text="{l:T Sec.PontosSuspeitosRevisar}" Style="{StaticResource Text.H2}"/>
         </DockPanel>
         <TextBlock Text="{Binding FindingSummary}" Style="{StaticResource Text.Small}" Margin="0,0,0,4"/>
         <c:ExplainToggle Margin="0,0,0,12"
-                         Content="Heurísticas do NEXUS: inicialização, tarefas agendadas, hosts, proxy, extensões forçadas, exclusões do Defender, IFEO, AppInit e Winlogon. Um ponto suspeito não é prova de vírus: o NEXUS nunca remove nada sozinho. Onde houver correção reversível, o botão aparece."/>
+                         Content="{l:T Sec.HeuristicasNexusInicializacaoTarefas}"/>
         <ContentControl Focusable="False" Margin="0,0,0,20">
           <ContentControl.Style>
             <Style TargetType="ContentControl">
@@ -254,8 +255,8 @@
               </Style.Triggers>
             </Style>
           </ContentControl.Style>
-          <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="Nenhum ponto suspeito."
-                        Detail="As verificações do NEXUS não acharam nada fora do comum agora."/>
+          <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="{l:T Sec.NenhumPontoSuspeito}"
+                        Detail="{l:T Sec.VerificacoesNexusNaoAcharam}"/>
         </ContentControl>
         <ItemsControl ItemsSource="{Binding Findings}" Margin="0,0,0,20" Focusable="False">
           <ItemsControl.ItemTemplate>
@@ -280,13 +281,13 @@
                     <c:ExplainToggle>
                       <StackPanel>
                         <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}">
-                          <Run Text="Por que é suspeito: " Foreground="{StaticResource Brush.TextMuted}"/><Run Text="{Binding Why, Mode=OneWay}"/>
+                          <Run Text="{l:T Sec.Suspeito}" Foreground="{StaticResource Brush.TextMuted}"/><Run Text="{Binding Why, Mode=OneWay}"/>
                         </TextBlock>
                         <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,4,0,0">
-                          <Run Text="Como verificar: " Foreground="{StaticResource Brush.TextMuted}"/><Run Text="{Binding HowToVerify, Mode=OneWay}"/>
+                          <Run Text="{l:T Sec.ComoVerificar}" Foreground="{StaticResource Brush.TextMuted}"/><Run Text="{Binding HowToVerify, Mode=OneWay}"/>
                         </TextBlock>
                         <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,4,0,0">
-                          <Run Text="O que fazer: " Foreground="{StaticResource Brush.TextMuted}"/><Run Text="{Binding Suggested, Mode=OneWay}"/>
+                          <Run Text="{l:T Sec.Fazer}" Foreground="{StaticResource Brush.TextMuted}"/><Run Text="{Binding Suggested, Mode=OneWay}"/>
                         </TextBlock>
                         <TextBlock Text="{Binding Evidence}" Style="{StaticResource S.Code}" Margin="0,6,0,0"/>
                       </StackPanel>
@@ -296,7 +297,7 @@
                           Command="{Binding FixCommand}" Visibility="{Binding FixCommand, Converter={StaticResource NullToCollapsed}}">
                     <StackPanel Orientation="Horizontal">
                       <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
-                      <TextBlock Text="Corrigir (reversível)" TextWrapping="NoWrap"/>
+                      <TextBlock Text="{l:T Sec.CorrigirReversivel}" TextWrapping="NoWrap"/>
                     </StackPanel>
                   </Button>
                 </Grid>
@@ -311,16 +312,16 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <TextBlock Text="Ameaças que o Defender já encontrou" Style="{StaticResource Text.H2}"/>
+          <TextBlock Text="{l:T Sec.AmeacasDefenderJaEncontrou}" Style="{StaticResource Text.H2}"/>
           <Button Grid.Column="1" Style="{StaticResource Button.Ghost}" Command="{Binding OpenHistoryCommand}">
             <StackPanel Orientation="Horizontal">
-              <TextBlock Text="Histórico de proteção" TextWrapping="NoWrap"/>
+              <TextBlock Text="{l:T Sec.HistoricoProtecao}" TextWrapping="NoWrap"/>
               <c:Icon Data="{StaticResource Icon.ChevronRight}" Size="14" Margin="6,0,0,0"/>
             </StackPanel>
           </Button>
         </Grid>
         <c:ExplainToggle Margin="0,0,0,12"
-                         Content="Remover ou pôr em quarentena é tarefa do Defender: ele sabe desfazer, restaurar falso positivo e limpar o que está em uso. O NEXUS mostra o que foi encontrado e o que fazer."/>
+                         Content="{l:T Sec.RemoverOuQuarentenaTarefa}"/>
         <Border Padding="16,12" Margin="0,0,0,20">
           <Border.Style>
             <Style TargetType="Border" BasedOn="{StaticResource Panel.Card}">
@@ -337,8 +338,8 @@
             </Style>
           </Border.Style>
           <DockPanel>
-            <c:StatusChip Tone="Good" Text="Nenhuma ameaça registrada" Margin="0,0,12,0"/>
-            <TextBlock Text="(ou o histórico não pôde ser lido)" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center"/>
+            <c:StatusChip Tone="Good" Text="{l:T Sec.NenhumaAmeacaRegistrada}" Margin="0,0,12,0"/>
+            <TextBlock Text="{l:T Sec.OuHistoricoNaoPode}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center"/>
           </DockPanel>
         </Border>
         <ItemsControl ItemsSource="{Binding Threats}" Margin="0,0,0,20" Focusable="False">
@@ -357,7 +358,7 @@
                     <TextBlock Text="{Binding Meta}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" Margin="0,2,0,0"/>
                     <TextBlock Text="{Binding Recommendation}" Style="{StaticResource Text.Small}" Margin="0,4,0,0"
                                Foreground="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"/>
-                    <c:ExplainToggle Header="Arquivos envolvidos" Margin="0,2,0,0" Visibility="{Binding Resources, Converter={StaticResource NullToCollapsed}}">
+                    <c:ExplainToggle Header="{l:T Sec.ArquivosEnvolvidos}" Margin="0,2,0,0" Visibility="{Binding Resources, Converter={StaticResource NullToCollapsed}}">
                       <TextBlock Text="{Binding Resources}" Style="{StaticResource S.Code}"/>
                     </c:ExplainToggle>
                   </StackPanel>
@@ -381,41 +382,41 @@
                 <c:Icon Data="{StaticResource Icon.Search}" Size="19" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
               </Grid>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Inspetor de registro" Style="{StaticResource Text.H2}"/>
-                <TextBlock Text="Mostra sobras que apontam para arquivos que não existem mais. Você escolhe." Style="{StaticResource Text.Small}"/>
+                <TextBlock Text="{l:T Sec.InspetorRegistro}" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="{l:T Sec.MostraSobrasApontamArquivos}" Style="{StaticResource Text.Small}"/>
               </StackPanel>
             </Grid>
             <UniformGrid Columns="2" Margin="-6,0,-6,8">
               <Border Background="{StaticResource Brush.BadSoft}" CornerRadius="{StaticResource Radius.Control}" Padding="12,10" Margin="6,0">
                 <DockPanel>
-                  <c:StatusChip DockPanel.Dock="Top" Tone="Bad" Text="Mito" HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                  <TextBlock Text="&quot;Limpar o registro deixa o PC mais rápido.&quot;" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
+                  <c:StatusChip DockPanel.Dock="Top" Tone="Bad" Text="{l:T Sec.Mito}" HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                  <TextBlock Text="{l:T Sec.LimparRegistroDeixaPc}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
                 </DockPanel>
               </Border>
               <Border Background="{StaticResource Brush.GoodSoft}" CornerRadius="{StaticResource Radius.Control}" Padding="12,10" Margin="6,0">
                 <DockPanel>
-                  <c:StatusChip DockPanel.Dock="Top" Tone="Good" Text="Fato" HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                  <TextBlock Text="Sobras não são lidas no uso normal e não pesam. Remover só arruma listas." Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
+                  <c:StatusChip DockPanel.Dock="Top" Tone="Good" Text="{l:T Sec.Fato}" HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                  <TextBlock Text="{l:T Sec.SobrasNaoSaoLidas}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
                 </DockPanel>
               </Border>
             </UniformGrid>
             <c:ExplainToggle Margin="0,0,0,8">
               <StackPanel>
                 <TextBlock Style="{StaticResource Text.Small}"
-                           Text="O registro é um banco de dados indexado; entradas que sobram não são lidas no uso normal e não pesam. A Microsoft não dá suporte a limpadores de registro e avisa que eles já causaram problemas sérios (KB 2563254, &quot;Microsoft support policy for the use of registry cleaning utilities&quot;)."/>
+                           Text="{l:T Sec.RegistroBancoDadosIndexado}"/>
                 <TextBlock Style="{StaticResource Text.Small}" Margin="0,6,0,0"
-                           Text="Por isso aqui não há &quot;limpar tudo&quot;. O inspetor só mostra sobras que apontam para arquivos que não existem mais (útil para arrumar Programas e Recursos e o Executar). Cada entrada é copiada por inteiro antes e pode ser recriada com Desfazer. Disco externo desligado nunca conta como sobra."/>
+                           Text="{l:T Sec.IssoAquiNaoHa}"/>
               </StackPanel>
             </c:ExplainToggle>
             <WrapPanel>
               <Button Style="{StaticResource Button.Secondary}" Command="{Binding InspectCommand}" Margin="0,0,8,6">
                 <StackPanel Orientation="Horizontal">
                   <c:Icon Data="{StaticResource Icon.Search}" Size="14" Margin="0,0,6,0"/>
-                  <TextBlock Text="Inspecionar registro" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{l:T Sec.InspecionarRegistro}" TextWrapping="NoWrap"/>
                 </StackPanel>
               </Button>
-              <Button Content="Remover selecionadas (com cópia)" Style="{StaticResource Button.Secondary}" Command="{Binding RemoveOrphansCommand}" Margin="0,0,8,6"/>
-              <Button Content="Limpar seleção" Style="{StaticResource Button.Ghost}" Command="{Binding SelectNoneCommand}" Margin="0,0,0,6"/>
+              <Button Content="{l:T Sec.RemoverSelecionadasCopia}" Style="{StaticResource Button.Secondary}" Command="{Binding RemoveOrphansCommand}" Margin="0,0,8,6"/>
+              <Button Content="{l:T Sec.LimparSelecao}" Style="{StaticResource Button.Ghost}" Command="{Binding SelectNoneCommand}" Margin="0,0,0,6"/>
             </WrapPanel>
             <TextBlock Text="{Binding InspectorStatus}" Style="{StaticResource Text.Small}" Margin="0,2,0,6" AutomationProperties.LiveSetting="Polite"/>
             <c:SkeletonLoader Shape="Lines" Lines="4" Margin="0,4,0,8" Visibility="{Binding Inspecting, Converter={StaticResource BoolToVis}}"/>
@@ -448,7 +449,7 @@
         </Border>
 
         <!-- O que não foi lido (honestidade sobre lacunas) -->
-        <c:ExplainToggle Header="O que não deu para ler">
+        <c:ExplainToggle Header="{l:T Sec.NaoDeuLer}">
           <ItemsControl ItemsSource="{Binding Notes}" Focusable="False">
             <ItemsControl.ItemTemplate>
               <DataTemplate>

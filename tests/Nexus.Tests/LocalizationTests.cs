@@ -20,7 +20,7 @@ public sealed partial class LocalizationTests
     { "Views/Pages/CpuLab.xaml",
         "Views/Pages/Disk.xaml", "Views/Pages/MemoryDoctor.xaml", "Views/Pages/MemoryLab.xaml",
         "Views/Pages/Monitor.xaml",
-        "Views/Pages/Programs.xaml", "Views/Pages/Scanner.xaml", "Views/Pages/Security.xaml", "Views/Pages/Services.xaml", "Views/Pages/SystemTools.xaml",
+        "Views/Pages/Programs.xaml", "Views/Pages/Scanner.xaml", "Views/Pages/SystemTools.xaml",
     };
 
     /// <summary>Textos fixos permitidos em XAML traduzido: marcas e nomes próprios iguais em todo idioma.</summary>
@@ -28,7 +28,7 @@ public sealed partial class LocalizationTests
     {
         "NEXUS Performance Lab", "NEXUS", "NVIDIA", "AMD", "Intel", "PresentMon", "Microsoft Defender", "Windows Update",
         // Unidades e siglas iguais em todo idioma.
-        "FPS", "GPU", "CPU", "RAM", "VRAM", "Hz", "MHz", "GHz", "ms", "ns", "GB", "MB", "GB/s", "W", "°C",
+        "Microsoft", "Windows", "Steam", "Epic", "FPS", "GPU", "CPU", "RAM", "VRAM", "Hz", "MHz", "GHz", "ms", "ns", "GB", "MB", "GB/s", "W", "°C",
     };
 
     /// <summary>Atributos que mostram texto ao usuário (mesma lista da ferramenta de conversão).</summary>

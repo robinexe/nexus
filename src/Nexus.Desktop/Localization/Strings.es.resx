@@ -1899,8 +1899,122 @@ Es el mismo cambio de Configuración &gt; Pantalla &gt; Frecuencia de actualizac
   <data name="Prog.NavTitle" xml:space="preserve"><value>Programas y actualizaciones</value></data>
   <data name="Scan.NavSubtitle" xml:space="preserve"><value>Busca señales sospechosas en archivos y pide la opinión de Microsoft Defender.</value></data>
   <data name="Scan.NavTitle" xml:space="preserve"><value>Analizar archivos</value></data>
+  <data name="Sec.AbrirSegurancaWindows" xml:space="preserve"><value>Abrir Seguridad de Windows</value></data>
+  <data name="Sec.AbrirWindowsN" xml:space="preserve"><value>Abrir en Windows: {0}</value></data>
+  <data name="Sec.Alta" xml:space="preserve"><value>Alta</value></data>
+  <data name="Sec.AmeacasDefenderJaEncontrou" xml:space="preserve"><value>Amenazas que Defender ya encontró</value></data>
+  <data name="Sec.AntivirusMicrosoftDefenderOu" xml:space="preserve"><value>El antivirus es Microsoft Defender (o el tuyo, si tienes otro). NEXUS no tiene motor antivirus propio: sería peor que Defender. Lee el estado, explica y pide a Defender que analice con la herramienta oficial (MpCmdRun). Quitar o poner en cuarentena lo hace el propio Defender.</value></data>
+  <data name="Sec.AntivirusWindowsFazVerificacao" xml:space="preserve"><value>El antivirus de Windows hace el análisis. NEXUS solo lo pide y lo muestra.</value></data>
+  <data name="Sec.ArquivosEnvolvidos" xml:space="preserve"><value>Archivos implicados</value></data>
+  <data name="Sec.AtencaoFuncionaMasVale" xml:space="preserve"><value>En atención: funciona, pero conviene revisarlo</value></data>
+  <data name="Sec.AtualizacaoAssinaturas" xml:space="preserve"><value>Actualización de firmas</value></data>
+  <data name="Sec.AtualizarAssinaturas" xml:space="preserve"><value>Actualizar firmas</value></data>
+  <data name="Sec.Baixa" xml:space="preserve"><value>Baja</value></data>
+  <data name="Sec.ComoVerificar" xml:space="preserve"><value>Cómo verificar:</value></data>
+  <data name="Sec.ConfereDefenderFirewallWindows" xml:space="preserve"><value>Verifica Defender, firewall y Windows. Leer no cambia nada.</value></data>
+  <data name="Sec.CorrigirPontoSuspeito" xml:space="preserve"><value>Corregir punto sospechoso</value></data>
+  <data name="Sec.CorrigirReversivel" xml:space="preserve"><value>Corregir (reversible)</value></data>
+  <data name="Sec.DefenderProcuraAmeacasVoce" xml:space="preserve"><value>Defender busca amenazas. Ves el tiempo y los mensajes.</value></data>
+  <data name="Sec.EscolhaPastaDefenderVerificar" xml:space="preserve"><value>Elige la carpeta que Defender debe analizar</value></data>
+  <data name="Sec.Fato" xml:space="preserve"><value>Hecho</value></data>
+  <data name="Sec.Fazer" xml:space="preserve"><value>Qué hacer:</value></data>
+  <data name="Sec.GravidadeN" xml:space="preserve"><value>Gravedad {0}</value></data>
+  <data name="Sec.HeuristicasNexusInicializacaoTarefas" xml:space="preserve"><value>Heurísticas de NEXUS: inicio, tareas programadas, hosts, proxy, extensiones forzadas, exclusiones de Defender, IFEO, AppInit y Winlogon. Un punto sospechoso no es prueba de virus: NEXUS nunca quita nada solo. Donde haya una corrección reversible, aparece el botón.</value></data>
+  <data name="Sec.HistoricoProtecao" xml:space="preserve"><value>Historial de protección</value></data>
+  <data name="Sec.Inspecionando" xml:space="preserve"><value>Inspeccionando…</value></data>
+  <data name="Sec.InspecionarRegistro" xml:space="preserve"><value>Inspeccionar el registro</value></data>
+  <data name="Sec.InspetorRegistro" xml:space="preserve"><value>Inspector del registro</value></data>
+  <data name="Sec.InspetorSoRodaQuando" xml:space="preserve"><value>El inspector solo se ejecuta cuando lo pides.</value></data>
+  <data name="Sec.IssoAquiNaoHa" xml:space="preserve"><value>Por eso aquí no hay "limpiar todo". El inspector solo muestra restos que apuntan a archivos que ya no existen (útil para ordenar Programas y características y Ejecutar). Cada entrada se copia entera antes y se puede recrear con Deshacer. Un disco externo desconectado nunca cuenta como resto.</value></data>
+  <data name="Sec.IssoNaoDeixaPc" xml:space="preserve"><value>
+
+Esto NO hace el PC más rápido; solo ordena listas como Programas y características. Cada entrada se copia entera antes (todas las subclaves, tipos y datos) y se puede recrear con Deshacer.</value></data>
+  <data name="Sec.ItensVerde" xml:space="preserve"><value>Elementos en verde</value></data>
+  <data name="Sec.LendoEstadoProtecao" xml:space="preserve"><value>Leyendo el estado de protección…</value></data>
+  <data name="Sec.LidoN" xml:space="preserve"><value>Leído el {0:dd/MM/yyyy HH:mm}</value></data>
+  <data name="Sec.LimiteNVezDemais" xml:space="preserve"><value>
+
+Límite de {0} por vez: las demás quedan para la próxima.</value></data>
+  <data name="Sec.LimparRegistroDeixaPc" xml:space="preserve"><value>"Limpiar el registro hace el PC más rápido."</value></data>
+  <data name="Sec.LimparSelecao" xml:space="preserve"><value>Borrar selección</value></data>
+  <data name="Sec.MaisN" xml:space="preserve"><value>
+• … y {0} más</value></data>
+  <data name="Sec.Media" xml:space="preserve"><value>Media</value></data>
+  <data name="Sec.Mito" xml:space="preserve"><value>Mito</value></data>
+  <data name="Sec.MostraSobrasApontamArquivos" xml:space="preserve"><value>Muestra restos que apuntan a archivos que ya no existen. Tú eliges.</value></data>
+  <data name="Sec.NAndamentoDefenderNao" xml:space="preserve"><value>{0} en curso… Defender no informa porcentaje; el tiempo y sus mensajes aparecen aquí.</value></data>
+  <data name="Sec.NaoDeuLer" xml:space="preserve"><value>Lo que no se pudo leer</value></data>
+  <data name="Sec.NaoFoiPossivelInspecionar" xml:space="preserve"><value>No se pudo inspeccionar: {0}</value></data>
   <data name="Sec.NavSubtitle" xml:space="preserve"><value>Busca amenazas con Microsoft Defender y encuentra puntos sospechosos.</value></data>
   <data name="Sec.NavTitle" xml:space="preserve"><value>Seguridad</value></data>
+  <data name="Sec.NenhumaAmeacaRegistrada" xml:space="preserve"><value>Ninguna amenaza registrada</value></data>
+  <data name="Sec.NenhumaSobraEncontradaPelas" xml:space="preserve"><value>Ningún resto encontrado por las reglas (conservadoras) del inspector.</value></data>
+  <data name="Sec.NenhumPontoSuspeito" xml:space="preserve"><value>Ningún punto sospechoso.</value></data>
+  <data name="Sec.NenhumPontoSuspeitoEncontrado" xml:space="preserve"><value>Ningún punto sospechoso encontrado en las verificaciones de NEXUS.</value></data>
+  <data name="Sec.NexusVaiPedirMicrosoft" xml:space="preserve"><value>NEXUS pedirá a Microsoft Defender {0}, con la herramienta oficial MpCmdRun.
+
+No se cambia ninguna configuración. Si se encuentra algo, la eliminación o cuarentena la hace el propio Defender (Seguridad de Windows).
+
+¿Continuar?</value></data>
+  <data name="Sec.NGravidadeAltaN" xml:space="preserve"><value>{0} de gravedad alta, {1} media, {2} baja/informativa.</value></data>
+  <data name="Sec.NItensProtecaoVerde" xml:space="preserve"><value>de {0} elementos de protección en verde</value></data>
+  <data name="Sec.NNaoFoiPossivel" xml:space="preserve"><value>{0}: no se pudo completar ({1}).</value></data>
+  <data name="Sec.NNItensVerde" xml:space="preserve"><value>{0} de {1} elementos en verde · {2} en atención · {3} en rojo</value></data>
+  <data name="Sec.NNNexusFaz" xml:space="preserve"><value>{0}
+
+{1}
+
+Qué hace NEXUS: {2}
+
+El estado anterior queda guardado en el diario y se puede deshacer aquí o en la página Aplicar.</value></data>
+  <data name="Sec.NSobraSPodem" xml:space="preserve"><value>{0} resto(s) que se pueden quitar con copia y {1} solo informativo(s). Quitar no hace el PC más rápido.</value></data>
+  <data name="Sec.OuHistoricoNaoPode" xml:space="preserve"><value>(o no se pudo leer el historial)</value></data>
+  <data name="Sec.Padrao" xml:space="preserve"><value>(Predeterminado)</value></data>
+  <data name="Sec.PedeAcao" xml:space="preserve"><value>Requiere acción</value></data>
+  <data name="Sec.PedirMicrosoftDefenderBaixar" xml:space="preserve"><value>¿Pedir a Microsoft Defender que descargue las firmas más recientes (MpCmdRun -SignatureUpdate)? Necesita internet.</value></data>
+  <data name="Sec.PodeLevarMaisHora" xml:space="preserve"><value>Puede tardar más de una hora y hacer el PC más lento mientras se ejecuta.</value></data>
+  <data name="Sec.PontosSuspeitosRevisar" xml:space="preserve"><value>Puntos sospechosos para revisar</value></data>
+  <data name="Sec.PontosSuspeitosSaoMostrados" xml:space="preserve"><value>Se muestran los puntos sospechosos. No se quita nada solo.</value></data>
+  <data name="Sec.ProtegidoPontosAtencao" xml:space="preserve"><value>Protegido, con puntos de atención</value></data>
+  <data name="Sec.RegistroBancoDadosIndexado" xml:space="preserve"><value>El registro es una base de datos indexada; las entradas que sobran no se leen en el uso normal y no pesan. Microsoft no da soporte a los limpiadores de registro y avisa que ya causaron problemas serios (KB 2563254, "Microsoft support policy for the use of registry cleaning utilities").</value></data>
+  <data name="Sec.RemoverNSobraS" xml:space="preserve"><value>¿Quitar {0} resto(s) del registro {1}?
+
+</value></data>
+  <data name="Sec.RemoverOuQuarentenaTarefa" xml:space="preserve"><value>Quitar o poner en cuarentena es tarea de Defender: sabe deshacer, restaurar falsos positivos y limpiar lo que está en uso. NEXUS muestra lo que se encontró y qué hacer.</value></data>
+  <data name="Sec.RemoverSelecionadasCopia" xml:space="preserve"><value>Quitar seleccionadas (con copia)</value></data>
+  <data name="Sec.RemoverSobrasRegistro" xml:space="preserve"><value>Quitar restos del registro</value></data>
+  <data name="Sec.Resolvida" xml:space="preserve"><value>Resuelta</value></data>
+  <data name="Sec.Revisa" xml:space="preserve"><value>Revisa</value></data>
+  <data name="Sec.RiscoHaProtecaoDesligada" xml:space="preserve"><value>En riesgo: hay protección desactivada o una amenaza pendiente</value></data>
+  <data name="Sec.SeuUsuario" xml:space="preserve"><value>Tu usuario</value></data>
+  <data name="Sec.SeuUsuario2" xml:space="preserve"><value>de tu usuario</value></data>
+  <data name="Sec.SobrasNaoSaoLidas" xml:space="preserve"><value>Los restos no se leen en el uso normal y no pesan. Quitarlos solo ordena listas.</value></data>
+  <data name="Sec.SuaProtecaoItemItem" xml:space="preserve"><value>Tu protección, elemento por elemento</value></data>
+  <data name="Sec.Suspeito" xml:space="preserve"><value>Por qué es sospechoso:</value></data>
+  <data name="Sec.SuspeitoNaoProvaVirus" xml:space="preserve"><value>sospechoso no es prueba de virus</value></data>
+  <data name="Sec.Tempo" xml:space="preserve"><value>tiempo</value></data>
+  <data name="Sec.TodaCorrecaoFeitaAqui" xml:space="preserve"><value>Cada corrección hecha aquí guarda el estado anterior.</value></data>
+  <data name="Sec.TodoPc" xml:space="preserve"><value>de todo el PC</value></data>
+  <data name="Sec.TodoPcPedeAdministrador" xml:space="preserve"><value>Todo el PC (pide administrador)</value></data>
+  <data name="Sec.UltimaCorrecaoFeitaAqui" xml:space="preserve"><value>La última corrección hecha aquí se puede deshacer (también en la página Aplicar).</value></data>
+  <data name="Sec.VaiPedirPermissaoAdministrador" xml:space="preserve"><value>
+
+Pedirá permiso de administrador (UAC) y creará un punto de restauración.</value></data>
+  <data name="Sec.Verde" xml:space="preserve"><value>en verde</value></data>
+  <data name="Sec.Verde2" xml:space="preserve"><value>verde</value></data>
+  <data name="Sec.VerdeLigadoDia" xml:space="preserve"><value>En verde: activado y al día</value></data>
+  <data name="Sec.VerificacaoAndamento" xml:space="preserve"><value>Análisis en curso</value></data>
+  <data name="Sec.VerificacaoCompleta" xml:space="preserve"><value>Análisis completo</value></data>
+  <data name="Sec.VerificacaoCompletaPodeLevar" xml:space="preserve"><value>un análisis completo (puede tardar más de una hora y hacer el PC más lento mientras se ejecuta)</value></data>
+  <data name="Sec.VerificacaoN" xml:space="preserve"><value>el análisis de "{0}"</value></data>
+  <data name="Sec.VerificacaoPersonalizada" xml:space="preserve"><value>Análisis personalizado</value></data>
+  <data name="Sec.VerificacaoRapida" xml:space="preserve"><value>Análisis rápido</value></data>
+  <data name="Sec.VerificacaoRapidaAlgunsMinutos" xml:space="preserve"><value>un análisis rápido (unos minutos)</value></data>
+  <data name="Sec.VerificacoesNexusNaoAcharam" xml:space="preserve"><value>Las verificaciones de NEXUS no encontraron nada fuera de lo común ahora.</value></data>
+  <data name="Sec.VerificarMicrosoftDefender" xml:space="preserve"><value>Analizar con Microsoft Defender</value></data>
+  <data name="Sec.VerificarPasta" xml:space="preserve"><value>Analizar una carpeta…</value></data>
+  <data name="Sec.Vermelho" xml:space="preserve"><value>rojo</value></data>
+  <data name="Sec.VermelhoProtecaoDesligadaOu" xml:space="preserve"><value>En rojo: protección desactivada o amenaza pendiente</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Se abre minimizado en la bandeja. Es una entrada en Run de tu cuenta (sin administrador), con diario y deshacer; también aparece en el Administrador de tareas y en la página Inicio.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Se abre con Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>¿Abrir NEXUS minimizado en la bandeja cada vez que inicies sesión en Windows?
@@ -2216,8 +2330,94 @@ Es el mismo cambio de Configuración &gt; Pantalla &gt; Frecuencia de actualizac
   <data name="Shell.VoceRecusouAvisoWindows" xml:space="preserve"><value>Rechazaste el aviso de Windows. NEXUS sigue abierto sin permisos de administrador.</value></data>
   <data name="Shell.VoltandoModoAnterior" xml:space="preserve"><value>Volviendo al modo anterior…</value></data>
   <data name="Shell.WindowsPedePermissaoVez" xml:space="preserve"><value>Windows pide permiso una vez y NEXUS se vuelve a abrir. Si lo dejas para después, se instala cuando cierres NEXUS.</value></data>
+  <data name="Svc.AjustesProntos" xml:space="preserve"><value>Ajustes listos</value></data>
+  <data name="Svc.AntesDepois" xml:space="preserve"><value>antes → después</value></data>
+  <data name="Svc.AplicadoPeloNexusPode" xml:space="preserve"><value>Aplicado por NEXUS (se puede deshacer).</value></data>
+  <data name="Svc.AplicarEsteServico" xml:space="preserve"><value>Aplicar a este servicio</value></data>
+  <data name="Svc.AplicarN" xml:space="preserve"><value>Aplicar: {0}</value></data>
+  <data name="Svc.AplicarPresetServicos" xml:space="preserve"><value>Aplicar preset de servicios</value></data>
+  <data name="Svc.AutomaticoAtrasado" xml:space="preserve"><value>Automático (retrasado)</value></data>
+  <data name="Svc.BuscarNomeNomeInterno" xml:space="preserve"><value>Buscar por nombre, nombre interno o descripción</value></data>
+  <data name="Svc.BuscarServicos" xml:space="preserve"><value>Buscar servicios</value></data>
+  <data name="Svc.CadaAjusteMostraMuda" xml:space="preserve"><value>Cada ajuste muestra qué cambia y por qué.</value></data>
+  <data name="Svc.CadaServicoVoltaTipo" xml:space="preserve"><value>Cada servicio vuelve a su tipo anterior.</value></data>
+  <data name="Svc.Conta" xml:space="preserve"><value>Cuenta:</value></data>
+  <data name="Svc.Depende" xml:space="preserve"><value>Depende de:</value></data>
+  <data name="Svc.Desativado" xml:space="preserve"><value>Desactivado</value></data>
+  <data name="Svc.DesativadoServicoNaoAbre" xml:space="preserve"><value>
+
+Desactivado: el servicio no se abre ni cuando un programa lo pide. Todo lo que depende de él deja de funcionar hasta deshacer.</value></data>
+  <data name="Svc.DesfazerVoltaCadaServico" xml:space="preserve"><value>Deshacer devuelve cada servicio a su tipo anterior.</value></data>
+  <data name="Svc.Desfeito" xml:space="preserve"><value>Deshecho.</value></data>
+  <data name="Svc.Editor" xml:space="preserve"><value>Editor:</value></data>
+  <data name="Svc.EleDependeN" xml:space="preserve"><value>
+
+Depende de: {0}.</value></data>
+  <data name="Svc.EscolhaServicoLista" xml:space="preserve"><value>Elige un servicio de la lista.</value></data>
+  <data name="Svc.EssenciaisNexusNaoDeixa" xml:space="preserve"><value>Esenciales: NEXUS no deja tocarlos.</value></data>
+  <data name="Svc.Estado" xml:space="preserve"><value>Estado</value></data>
+  <data name="Svc.Execucao" xml:space="preserve"><value>En ejecución</value></data>
+  <data name="Svc.IniciamSozinhos" xml:space="preserve"><value>Se inician solos</value></data>
+  <data name="Svc.InstaladosOutrosProgramas" xml:space="preserve"><value>Instalados por otros programas.</value></data>
+  <data name="Svc.JaEstaAssim" xml:space="preserve"><value>ya está así</value></data>
+  <data name="Svc.JaEstaAssimNeste" xml:space="preserve"><value>Ya está así en este PC.</value></data>
+  <data name="Svc.ListaServicosQuemFez" xml:space="preserve"><value>Lista los servicios y quién hizo cada uno. Leer no cambia nada.</value></data>
+  <data name="Svc.MaioriaFicaManualSo" xml:space="preserve"><value>La mayoría queda en Manual y solo se abre cuando hace falta. Aquí solo hay ajustes con un motivo claro.</value></data>
+  <data name="Svc.MaioriaServicosJaFica" xml:space="preserve"><value>La mayoría de los servicios ya está detenida en Manual y solo se abre cuando hace falta: desactivar servicios casi nunca da FPS. Aquí solo hay ajustes con un motivo claro, siempre reversibles. Los servicios esenciales (RPC, Defender, firewall, red, sonido, anticheat) no se pueden cambiar. Requiere administrador; Windows crea un punto de restauración.</value></data>
+  <data name="Svc.MaisDetalhes" xml:space="preserve"><value>Más detalles</value></data>
+  <data name="Svc.ManualServicoNaoAbre" xml:space="preserve"><value>
+
+Manual: el servicio no se abre al arrancar, pero se abre cuando algún programa lo pide.</value></data>
+  <data name="Svc.Muda" xml:space="preserve"><value>cambia</value></data>
+  <data name="Svc.MudarNNN" xml:space="preserve"><value>¿Cambiar "{0}" ({1}) de {2} a {3}?</value></data>
+  <data name="Svc.MudarTipoInicio" xml:space="preserve"><value>Cambiar el tipo de inicio</value></data>
+  <data name="Svc.NadaMuda" xml:space="preserve"><value>No cambia nada</value></data>
+  <data name="Svc.NadaMudarEstePreset" xml:space="preserve"><value>Nada que cambiar: este preset ya está aplicado (o los servicios no existen en este PC).</value></data>
+  <data name="Svc.NaoExisteAqui" xml:space="preserve"><value>no existe aquí</value></data>
+  <data name="Svc.NaoExisteNestePc" xml:space="preserve"><value>no existe en este PC</value></data>
+  <data name="Svc.NaoNemIniciaServico" xml:space="preserve"><value>
+
+No detiene ni inicia el servicio ahora: vale a partir del próximo arranque. Requiere administrador;</value></data>
   <data name="Svc.NavSubtitle" xml:space="preserve"><value>Servicios de Windows explicados, con ajustes seguros y reversibles.</value></data>
   <data name="Svc.NavTitle" xml:space="preserve"><value>Servicios</value></data>
+  <data name="Svc.Nenhuma" xml:space="preserve"><value>Ninguna</value></data>
+  <data name="Svc.NenhumServicoEsseFiltro" xml:space="preserve"><value>Ningún servicio con ese filtro.</value></data>
+  <data name="Svc.NexusGuardaTipoAnterior" xml:space="preserve"><value>NEXUS guarda el tipo anterior y Deshacer vuelve exactamente a él.</value></data>
+  <data name="Svc.NNMudam" xml:space="preserve"><value>{0} de {1} cambian</value></data>
+  <data name="Svc.NNNExige" xml:space="preserve"><value>{0}
+
+{1}
+
+{2}
+
+Requiere administrador (Windows crea un punto de restauración).</value></data>
+  <data name="Svc.NNServicosMudariam" xml:space="preserve"><value>{0} de {1} servicios cambiarían.</value></data>
+  <data name="Svc.NovoTipoInicio" xml:space="preserve"><value>Nuevo tipo de inicio</value></data>
+  <data name="Svc.NServicosNExecucao" xml:space="preserve"><value>{0} servicios · {1} en ejecución · {2} automáticos ·</value></data>
+  <data name="Svc.NTerceiros" xml:space="preserve"><value>{0} de terceros</value></data>
+  <data name="Svc.Origem" xml:space="preserve"><value>Origen</value></data>
+  <data name="Svc.Protegidos" xml:space="preserve"><value>Protegidos</value></data>
+  <data name="Svc.QuaseNuncaFps" xml:space="preserve"><value>Casi nunca da FPS</value></data>
+  <data name="Svc.Quem" xml:space="preserve"><value>Para quién:</value></data>
+  <data name="Svc.Rodando" xml:space="preserve"><value>en ejecución</value></data>
+  <data name="Svc.RodandoAgora" xml:space="preserve"><value>En ejecución ahora</value></data>
+  <data name="Svc.SemDescricao" xml:space="preserve"><value>Sin descripción.</value></data>
+  <data name="Svc.SemMudanca" xml:space="preserve"><value> (sin cambio)</value></data>
+  <data name="Svc.Servico" xml:space="preserve"><value>Servicio</value></data>
+  <data name="Svc.Servicos" xml:space="preserve"><value> servicios</value></data>
+  <data name="Svc.ServicoUsuarioWindowsRecria" xml:space="preserve"><value>Servicio por usuario: Windows lo recrea en cada inicio de sesión; no se cambia.</value></data>
+  <data name="Svc.SoTipoInicioVale" xml:space="preserve"><value>Solo el tipo de inicio. Vale en el próximo arranque.</value></data>
+  <data name="Svc.Terceiro" xml:space="preserve"><value>Tercero</value></data>
+  <data name="Svc.Terceiros" xml:space="preserve"><value>De terceros</value></data>
+  <data name="Svc.Terceiros2" xml:space="preserve"><value>Terceros</value></data>
+  <data name="Svc.TipoAutomaticoAbremBoot" xml:space="preserve"><value>Tipo automático: se abren al arrancar.</value></data>
+  <data name="Svc.TipoInicioServico" xml:space="preserve"><value>Tipo de inicio del servicio</value></data>
+  <data name="Svc.TodosInstaladosNestePc" xml:space="preserve"><value>Todos los instalados en este PC.</value></data>
+  <data name="Svc.TodosServicos" xml:space="preserve"><value>Todos los servicios</value></data>
+  <data name="Svc.TroqueFiltroOuApague" xml:space="preserve"><value>Cambia el filtro o borra la búsqueda.</value></data>
+  <data name="Svc.ValeProximoBootPede" xml:space="preserve"><value>Vale en el próximo arranque. Pide administrador y se puede deshacer.</value></data>
+  <data name="Svc.VoceVeEleFaz" xml:space="preserve"><value>Ves lo que hace y puedes cambiar el tipo de inicio.</value></data>
+  <data name="Svc.WindowsUpdatePodeIr" xml:space="preserve"><value>Windows Update: puede ir a Manual, nunca a Desactivado.</value></data>
   <data name="Tools.NavSubtitle" xml:space="preserve"><value>Red, drivers, apps de Windows y puntos de restauración.</value></data>
   <data name="Tools.NavTitle" xml:space="preserve"><value>Herramientas del sistema</value></data>
 </root>

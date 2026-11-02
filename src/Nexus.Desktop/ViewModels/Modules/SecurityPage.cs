@@ -32,12 +32,12 @@ public sealed class FindingRow(Finding f, RelayCommand? fix)
     public string Why => f.Why;
     public string HowToVerify => f.HowToVerify;
     public string Suggested => f.Suggested;
-    public string SeverityText => f.Severity switch { Severity.High => "Alta", Severity.Medium => "Média", Severity.Low => "Baixa", _ => "Info" };
+    public string SeverityText => f.Severity switch { Severity.High => Loc.T("Sec.Alta"), Severity.Medium => Loc.T("Sec.Media"), Severity.Low => Loc.T("Sec.Baixa"), _ => "Info" };
     public string ToneKey => f.Severity switch { Severity.High => "Bad", Severity.Medium => "Warn", Severity.Low => "Unknown", _ => "Info" };
     public RelayCommand? FixCommand => fix;
     public UiTone Tone => f.Severity switch { Severity.High => UiTone.Bad, Severity.Medium => UiTone.Warn, Severity.Low => UiTone.Neutral, _ => UiTone.Info };
     public string IconKey => SecurityPage.ToneIcon(Tone);
-    public string SeverityLabel => $"Gravidade {SeverityText.ToLowerInvariant()}";
+    public string SeverityLabel => Loc.F("Sec.GravidadeN", SeverityText.ToLowerInvariant());
 }
 
 public sealed class ThreatRow(ThreatRecord t)
@@ -48,7 +48,7 @@ public sealed class ThreatRow(ThreatRecord t)
     public string Recommendation => t.Recommendation;
     public string ToneKey => t.Active || t.Recommendation.StartsWith("Ação", StringComparison.Ordinal) ? "Bad" : "Good";
     public UiTone Tone => ToneKey == "Bad" ? UiTone.Bad : UiTone.Good;
-    public string StateText => ToneKey == "Bad" ? "Pede ação" : "Resolvida";
+    public string StateText => ToneKey == "Bad" ? Loc.T("Sec.PedeAcao") : Loc.T("Sec.Resolvida");
     public string IconKey => SecurityPage.ToneIcon(Tone);
 }
 
@@ -61,9 +61,9 @@ public sealed class OrphanRow(RegistryOrphan o) : ObservableObject
     public string Reason => o.Reason;
     public string Location => o.ValueName is null ? o.Key.ToString() : $"{o.Key} → {Text(o.ValueName)}";
     public bool Removable => o.Removable;
-    public string ScopeText => o.Scope == RegScope.Machine ? "Todo o PC (pede administrador)" : "Seu usuário";
+    public string ScopeText => o.Scope == RegScope.Machine ? Loc.T("Sec.TodoPcPedeAdministrador") : Loc.T("Sec.SeuUsuario");
     public bool IsSelected { get => _selected; set => Set(ref _selected, value && o.Removable); }
-    private static string Text(string s) => s.Length == 0 ? "(Padrão)" : s;
+    private static string Text(string s) => s.Length == 0 ? Loc.T("Sec.Padrao") : s;
 }
 
 /// <summary>
@@ -82,14 +82,14 @@ public sealed class SecurityPage : ModulePage
     private bool _inspecting;
     private bool _reading;
     private double _scorePercent = double.NaN, _goodNumber = double.NaN, _warnNumber = double.NaN, _badNumber = double.NaN;
-    private string _headline = "Lendo o estado de proteção…";
+    private string _headline = Loc.T("Sec.LendoEstadoProtecao");
     private string _headlineTone = "Unknown";
     private string _scoreText = "";
     private string _readAt = "";
     private string _scanStatus = "";
     private string _scanLine = "";
     private string _scanElapsed = "";
-    private string _inspectorStatus = "O inspetor só roda quando você pede.";
+    private string _inspectorStatus = Loc.T("Sec.InspetorSoRodaQuando");
     /// <summary>Execuções desta sessão da página (ex.: órfãs do PC e do usuário, cada escopo num pedido); Desfazer reverte todas, da mais nova à mais antiga.</summary>
     private readonly List<(Guid Run, BrokerLevel Level)> _lastRuns = [];
     private Action? _cancelScan;
@@ -150,7 +150,7 @@ public sealed class SecurityPage : ModulePage
     public bool HasFindings => Findings.Count > 0;
     public bool HasThreats => Threats.Count > 0;
     public bool HasOrphans => Orphans.Count > 0;
-    public string ScoreCaption => Protection.Count == 0 ? "" : $"de {Protection.Count} itens de proteção em verde";
+    public string ScoreCaption => Protection.Count == 0 ? "" : Loc.F("Sec.NItensProtecaoVerde", Protection.Count);
 
     internal static UiTone UiToneOf(Tone t) => t switch { Tone.Good => UiTone.Good, Tone.Warn => UiTone.Warn, Tone.Bad => UiTone.Bad, _ => UiTone.Info };
     internal static string ToneIcon(UiTone t) => t switch { UiTone.Good => "Icon.Check", UiTone.Warn => "Icon.Warning", UiTone.Bad => "Icon.Error", _ => "Icon.Info" };
@@ -158,8 +158,8 @@ public sealed class SecurityPage : ModulePage
     public int FindingCount => Findings.Count;
     public int ThreatCount => Threats.Count;
     public int OrphanCount => Orphans.Count;
-    public string FindingSummary => Findings.Count == 0 ? "Nenhum ponto suspeito encontrado nas verificações do NEXUS." :
-        $"{Findings.Count(f => f.ToneKey == "Bad")} de gravidade alta, {Findings.Count(f => f.ToneKey == "Warn")} média, {Findings.Count(f => f.ToneKey is "Unknown" or "Info")} baixa/informativa.";
+    public string FindingSummary => Findings.Count == 0 ? Loc.T("Sec.NenhumPontoSuspeitoEncontrado") :
+        Loc.F("Sec.NGravidadeAltaN", Findings.Count(f => f.ToneKey == "Bad"), Findings.Count(f => f.ToneKey == "Warn"), Findings.Count(f => f.ToneKey is "Unknown" or "Info"));
 
     public RelayCommand RefreshCommand { get; }
     public RelayCommand QuickScanCommand { get; }
@@ -182,7 +182,7 @@ public sealed class SecurityPage : ModulePage
 
     private async Task LoadAsync()
     {
-        Headline = "Lendo o estado de proteção…";
+        Headline = Loc.T("Sec.LendoEstadoProtecao");
         HeadlineTone = "Unknown";
         _reading = true;
         OnPropertyChanged(nameof(IsLoading));
@@ -206,17 +206,17 @@ public sealed class SecurityPage : ModulePage
         var warn = report.Protection.Count(p => p.Tone == Tone.Warn);
         var good = report.Protection.Count(p => p.Tone == Tone.Good);
         var activeThreats = report.Threats.Count(t => t.Active || t.Recommendation.StartsWith("Ação", StringComparison.Ordinal));
-        (Headline, HeadlineTone) = (bad > 0 || activeThreats > 0) ? ("Em risco: há proteção desligada ou ameaça pendente", "Bad")
-            : warn > 0 ? ("Protegido, com pontos de atenção", "Warn")
-            : ("Protegido", "Good");
-        ScoreText = $"{good} de {report.Protection.Count} itens em verde · {warn} em atenção · {bad} em vermelho";
+        (Headline, HeadlineTone) = (bad > 0 || activeThreats > 0) ? (Loc.T("Sec.RiscoHaProtecaoDesligada"), "Bad")
+            : warn > 0 ? (Loc.T("Sec.ProtegidoPontosAtencao"), "Warn")
+            : (Loc.T("Priv.Protegido2"), "Good");
+        ScoreText = Loc.F("Sec.NNItensVerde", good, report.Protection.Count, warn, bad);
         ScorePercent = report.Protection.Count == 0 ? double.NaN : 100.0 * good / report.Protection.Count;
         GoodNumber = good;
         WarnNumber = warn;
         BadNumber = bad;
         foreach (var name in new[] { nameof(ProtectionTotal), nameof(FindingNumber), nameof(ThreatNumber), nameof(HasFindings), nameof(HasThreats), nameof(ScoreCaption) })
             OnPropertyChanged(name);
-        ReadAt = $"Lido em {report.ReadAt.ToLocalTime():dd/MM/yyyy HH:mm}";
+        ReadAt = Loc.F("Sec.LidoN", report.ReadAt.ToLocalTime());
         Message = "";
         OnPropertyChanged(nameof(FindingCount));
         OnPropertyChanged(nameof(ThreatCount));
@@ -239,33 +239,33 @@ public sealed class SecurityPage : ModulePage
         string? path = null;
         if (kind == ScanKind.Custom)
         {
-            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Escolha a pasta para o Defender verificar" };
+            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.T("Sec.EscolhaPastaDefenderVerificar") };
             if (dlg.ShowDialog() != true) return;
             path = dlg.FolderName;
         }
         var what = kind switch
         {
-            ScanKind.Quick => "uma verificação rápida (alguns minutos)",
-            ScanKind.Full => "uma verificação completa (pode levar mais de uma hora e deixar o PC mais lento enquanto roda)",
-            _ => $"a verificação de \"{path}\"",
+            ScanKind.Quick => Loc.T("Sec.VerificacaoRapidaAlgunsMinutos"),
+            ScanKind.Full => Loc.T("Sec.VerificacaoCompletaPodeLevar"),
+            _ => Loc.F("Sec.VerificacaoN", path),
         };
-        if (!Host.Confirm("Verificar com o Microsoft Defender",
-                $"O NEXUS vai pedir ao Microsoft Defender {what}, usando a ferramenta oficial MpCmdRun.\n\nNada é alterado nas configurações. Se algo for encontrado, a remoção ou quarentena é feita pelo próprio Defender (Segurança do Windows).\n\nContinuar?"))
+        if (!Host.Confirm(Loc.T("Sec.VerificarMicrosoftDefender"),
+                Loc.F("Sec.NexusVaiPedirMicrosoft", what)))
             return;
-        await RunDefenderAsync(kind == ScanKind.Full ? "Verificação completa" : kind == ScanKind.Quick ? "Verificação rápida" : "Verificação personalizada",
+        await RunDefenderAsync(kind == ScanKind.Full ? Loc.T("Sec.VerificacaoCompleta") : kind == ScanKind.Quick ? Loc.T("Sec.VerificacaoRapida") : Loc.T("Sec.VerificacaoPersonalizada"),
             (progress, ct) => DefenderScanner.ScanAsync(kind, path, progress, ct));
     }
 
     private async Task UpdateAsync()
     {
-        if (Host is null || !Host.Confirm("Atualizar assinaturas", "Pedir ao Microsoft Defender para baixar as assinaturas mais recentes (MpCmdRun -SignatureUpdate)? Precisa de internet.")) return;
-        await RunDefenderAsync("Atualização de assinaturas", DefenderScanner.UpdateSignaturesAsync);
+        if (Host is null || !Host.Confirm(Loc.T("Sec.AtualizarAssinaturas"), Loc.T("Sec.PedirMicrosoftDefenderBaixar"))) return;
+        await RunDefenderAsync(Loc.T("Sec.AtualizacaoAssinaturas"), DefenderScanner.UpdateSignaturesAsync);
     }
 
     private async Task RunDefenderAsync(string label, Func<Action<string, TimeSpan>, CancellationToken, Task<DefenderRunResult>> run)
     {
         Scanning = true;
-        ScanStatus = $"{label} em andamento… O Defender não informa porcentagem; o tempo e as mensagens dele aparecem aqui.";
+        ScanStatus = Loc.F("Sec.NAndamentoDefenderNao", label);
         ScanLine = "";
         ScanOutput.Clear();
         using var cts = new CancellationTokenSource();
@@ -285,7 +285,7 @@ public sealed class SecurityPage : ModulePage
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            ScanStatus = $"{label}: não foi possível concluir ({ex.Message}).";
+            ScanStatus = Loc.F("Sec.NNaoFoiPossivel", label, ex.Message);
         }
         finally
         {
@@ -305,11 +305,11 @@ public sealed class SecurityPage : ModulePage
         if (Host is null) return;
         var args = f.FixSelection is { } sel ? new Dictionary<string, string> { ["selection"] = sel } : null;
         var level = LevelOf(actionId);
-        var text = $"{f.Title}\n\n{f.Evidence}\n\nO que o NEXUS faz: {f.Suggested}\n\nO estado anterior é guardado no diário e pode ser desfeito aqui ou na página Aplicar." +
-                   (level == BrokerLevel.Admin ? "\n\nVai pedir permissão de administrador (UAC) e criar um ponto de restauração." : "");
+        var text = Loc.F("Sec.NNNexusFaz", f.Title, f.Evidence, f.Suggested) +
+                   (level == BrokerLevel.Admin ? Loc.T("Sec.VaiPedirPermissaoAdministrador") : "");
         await RunAsync(async () =>
         {
-            var r = await Host.ApplyAsync("Corrigir ponto suspeito", text, [new ActionRequest(actionId + "@1", null, args)], level);
+            var r = await Host.ApplyAsync(Loc.T("Sec.CorrigirPontoSuspeito"), text, [new ActionRequest(actionId + "@1", null, args)], level);
             AfterWrite(r, level);
             if (r is { Ok: true }) await LoadAsync();
         });
@@ -351,13 +351,13 @@ public sealed class SecurityPage : ModulePage
     {
         Inspecting = true;
         try { await InspectCoreAsync(); }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { InspectorStatus = $"Não foi possível inspecionar: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { InspectorStatus = Loc.F("Sec.NaoFoiPossivelInspecionar", ex.Message); }
         finally { Inspecting = false; }
     }
 
     private async Task InspectCoreAsync()
     {
-        InspectorStatus = "Inspecionando…";
+        InspectorStatus = Loc.T("Sec.Inspecionando");
         var list = await Task.Run(() =>
         {
             var reg = new WindowsSecurityRegistry();
@@ -368,8 +368,8 @@ public sealed class SecurityPage : ModulePage
         foreach (var o in list.OrderByDescending(o => o.Removable).ThenBy(o => o.Category, StringComparer.Ordinal).ThenBy(o => o.Display, StringComparer.OrdinalIgnoreCase))
             Orphans.Add(new OrphanRow(o));
         InspectorStatus = list.Count == 0
-            ? "Nenhuma sobra encontrada pelas regras (conservadoras) do inspetor."
-            : $"{list.Count(o => o.Removable)} sobra(s) que podem ser removidas com cópia e {list.Count(o => !o.Removable)} só informativa(s). Remover não deixa o PC mais rápido.";
+            ? Loc.T("Sec.NenhumaSobraEncontradaPelas")
+            : Loc.F("Sec.NSobraSPodem", list.Count(o => o.Removable), list.Count(o => !o.Removable));
         OnPropertyChanged(nameof(OrphanCount));
         OnPropertyChanged(nameof(HasOrphans));
     }
@@ -387,18 +387,18 @@ public sealed class SecurityPage : ModulePage
                 var machine = group.Key == RegScope.Machine;
                 var actionId = machine ? "security.registry.orphans.machine" : "security.registry.orphans.user";
                 var level = machine ? BrokerLevel.Admin : BrokerLevel.User;
-                var text = $"Remover {items.Count} sobra(s) de registro {(machine ? "de todo o PC" : "do seu usuário")}?\n\n" +
-                           string.Join("\n", items.Take(8).Select(i => "• " + i.Display)) + (items.Count > 8 ? $"\n• … e mais {items.Count - 8}" : "") +
-                           "\n\nIsso NÃO deixa o PC mais rápido; só arruma listas como Programas e Recursos. Cada entrada é copiada por inteiro antes (todas as subchaves, tipos e dados) e pode ser recriada com Desfazer." +
-                           (group.Count() > MaxPerRequest ? $"\n\nLimite de {MaxPerRequest} por vez: as demais ficam para a próxima." : "") +
-                           (machine ? "\n\nVai pedir permissão de administrador (UAC) e criar um ponto de restauração." : "");
+                var text = Loc.F("Sec.RemoverNSobraS", items.Count, (machine ? Loc.T("Sec.TodoPc") : Loc.T("Sec.SeuUsuario2"))) +
+                           string.Join("\n", items.Take(8).Select(i => "• " + i.Display)) + (items.Count > 8 ? Loc.F("Sec.MaisN", items.Count - 8) : "") +
+                           Loc.T("Sec.IssoNaoDeixaPc") +
+                           (group.Count() > MaxPerRequest ? Loc.F("Sec.LimiteNVezDemais", MaxPerRequest) : "") +
+                           (machine ? Loc.T("Sec.VaiPedirPermissaoAdministrador") : "");
                 // Lote: a regra do catálogo aceita até 28 identificadores por instância; acima disso, a mesma ação vai repetida no
                 // pedido com seleções disjuntas (alvos diferentes). Uma confirmação, uma execução, um desfazer.
                 var requests = items.Chunk(MaxSelection)
                     .Select(chunk => new ActionRequest(actionId + "@1", null,
                         new Dictionary<string, string> { ["selection"] = string.Join(",", chunk.Select(i => i.Orphan.Selection)) }))
                     .ToList();
-                var r = await Host.ApplyAsync("Remover sobras de registro", text, requests, level);
+                var r = await Host.ApplyAsync(Loc.T("Sec.RemoverSobrasRegistro"), text, requests, level);
                 AfterWrite(r, level);
             }
             await InspectCoreAsync();
