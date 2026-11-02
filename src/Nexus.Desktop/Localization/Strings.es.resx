@@ -743,6 +743,14 @@ Pide permiso de administrador (aviso de Windows) y crea antes un punto de restau
 </value></data>
   <data name="Clean.VoltaEsvaziar" xml:space="preserve"><value>Vuelve al vaciar.</value></data>
   <data name="Clean.WindowsVoceVeEscolhe" xml:space="preserve"><value>Windows (tú ves y eliges). NEXUS no ejecuta DISM /StartComponentCleanup: quita al instante las versiones antiguas, sin la espera</value></data>
+  <data name="Conv.Atencao" xml:space="preserve"><value>atención</value></data>
+  <data name="Conv.Detectado" xml:space="preserve"><value>detectado</value></data>
+  <data name="Conv.Inferido" xml:space="preserve"><value>deducido</value></data>
+  <data name="Conv.Informativo" xml:space="preserve"><value>informativo</value></data>
+  <data name="Cpu.NavSubtitle" xml:space="preserve"><value>Ingeniería inversa de tu procesador: qué es, cómo se comporta y qué lo frena.</value></data>
+  <data name="Cpu.NavTitle" xml:space="preserve"><value>Procesador</value></data>
+  <data name="Disk.NavSubtitle" xml:space="preserve"><value>Mira qué ocupa tu disco, carpeta por carpeta. Solo lee: este análisis no borra nada.</value></data>
+  <data name="Disk.NavTitle" xml:space="preserve"><value>Espacio en disco</value></data>
   <data name="Drv.AbrirAtualizacoesOpcionais" xml:space="preserve"><value>Abrir actualizaciones opcionales</value></data>
   <data name="Drv.AbrirN" xml:space="preserve"><value>Abrir {0}</value></data>
   <data name="Drv.AbrirNAppOficial" xml:space="preserve"><value>¿Abrir {0}? Es la app oficial del fabricante, ya instalada en el PC; en ella ves e instalas drivers de la tarjeta gráfica.</value></data>
@@ -1448,6 +1456,12 @@ Es el mismo cambio de Configuración &gt; Pantalla &gt; Frecuencia de actualizac
   <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>Aplicaste {0} después de la última partida de {1}.</value></data>
   <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>Si Windows pide permiso para PresentMon, acéptalo para medir.</value></data>
   <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>de Windows, sin entrar en el juego). La versión</value></data>
+  <data name="Mem.NavSubtitle" xml:space="preserve"><value>Ingeniería inversa de tu memoria: módulos, canales, velocidad real y latencia medida.</value></data>
+  <data name="Mem.NavTitle" xml:space="preserve"><value>Memoria RAM</value></data>
+  <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Quién se está comiendo la memoria, si algo tiene fugas y cómo resolverlo ahora y para siempre.</value></data>
+  <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memoria: diagnóstico</value></data>
+  <data name="Mon.NavSubtitle" xml:space="preserve"><value>CPU, GPU, memoria, disco y red en vivo, y la salud de los discos.</value></data>
+  <data name="Mon.NavTitle" xml:space="preserve"><value>Monitor</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Asistente</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratorio</value></data>
@@ -1881,6 +1895,12 @@ Es el mismo cambio de Configuración &gt; Pantalla &gt; Frecuencia de actualizac
   <data name="Priv.VoltarDesfazerOuConfiguracoes" xml:space="preserve"><value> · para volver: Deshacer o Configuración de Windows</value></data>
   <data name="Priv.WindowsBuildN" xml:space="preserve"><value>Windows compilación {0}</value></data>
   <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>Windows no abrió la Configuración.</value></data>
+  <data name="Prog.NavSubtitle" xml:space="preserve"><value>Desinstala lo que no usas, limpia lo que sobró y mantén el resto actualizado.</value></data>
+  <data name="Prog.NavTitle" xml:space="preserve"><value>Programas y actualizaciones</value></data>
+  <data name="Scan.NavSubtitle" xml:space="preserve"><value>Busca señales sospechosas en archivos y pide la opinión de Microsoft Defender.</value></data>
+  <data name="Scan.NavTitle" xml:space="preserve"><value>Analizar archivos</value></data>
+  <data name="Sec.NavSubtitle" xml:space="preserve"><value>Busca amenazas con Microsoft Defender y encuentra puntos sospechosos.</value></data>
+  <data name="Sec.NavTitle" xml:space="preserve"><value>Seguridad</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Se abre minimizado en la bandeja. Es una entrada en Run de tu cuenta (sin administrador), con diario y deshacer; también aparece en el Administrador de tareas y en la página Inicio.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Se abre con Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>¿Abrir NEXUS minimizado en la bandeja cada vez que inicies sesión en Windows?
@@ -2196,4 +2216,8 @@ Es el mismo cambio de Configuración &gt; Pantalla &gt; Frecuencia de actualizac
   <data name="Shell.VoceRecusouAvisoWindows" xml:space="preserve"><value>Rechazaste el aviso de Windows. NEXUS sigue abierto sin permisos de administrador.</value></data>
   <data name="Shell.VoltandoModoAnterior" xml:space="preserve"><value>Volviendo al modo anterior…</value></data>
   <data name="Shell.WindowsPedePermissaoVez" xml:space="preserve"><value>Windows pide permiso una vez y NEXUS se vuelve a abrir. Si lo dejas para después, se instala cuando cierres NEXUS.</value></data>
+  <data name="Svc.NavSubtitle" xml:space="preserve"><value>Servicios de Windows explicados, con ajustes seguros y reversibles.</value></data>
+  <data name="Svc.NavTitle" xml:space="preserve"><value>Servicios</value></data>
+  <data name="Tools.NavSubtitle" xml:space="preserve"><value>Red, drivers, apps de Windows y puntos de restauración.</value></data>
+  <data name="Tools.NavTitle" xml:space="preserve"><value>Herramientas del sistema</value></data>
 </root>

@@ -240,9 +240,9 @@ public sealed class ProgramsPage : ModulePage
         PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Message)) OnPropertyChanged(nameof(HasMessage)); };
     }
 
-    public override string Title => "Programas e atualizações";
+    public override string Title => Loc.T("Prog.NavTitle");
     public override string Group => Loc.T("Nav.Limpar");
-    public override string Subtitle => "Desinstale o que não usa, limpe o que sobrou e mantenha o resto atualizado.";
+    public override string Subtitle => Loc.T("Prog.NavSubtitle");
 
     // ------------------------------------------------------------------ abas
 

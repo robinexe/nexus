@@ -55,7 +55,8 @@ internal sealed class UiSelfTestRunner
         _screenshots = screenshots;
     }
 
-    /// <summary>"--selftest-ui ARQUIVO [--no-screenshots]" nos argumentos; null se não for autoteste.</summary>
+    /// <summary>"--selftest-ui ARQUIVO [--no-screenshots]" nos argumentos; null se não for autoteste. "--lang en|es" (lido pelo
+    /// construtor de App, ver LanguageOption) fotografa a interface em outro idioma.</summary>
     public static (string Path, bool Screenshots)? Parse(IReadOnlyList<string> args)
     {
         for (var i = 0; i < args.Count; i++)

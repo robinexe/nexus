@@ -48,12 +48,12 @@ public sealed class StatusTextConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
     {
-        FactStatus.Detected => "detectado",
-        FactStatus.Inferred => "inferido",
-        FactStatus.Unavailable => "indisponível",
+        FactStatus.Detected => Loc.T("Conv.Detectado"),
+        FactStatus.Inferred => Loc.T("Conv.Inferido"),
+        FactStatus.Unavailable => Loc.T("Pg.Indisponivel"),
         DiagnosticSeverity.Ok => "ok",
-        DiagnosticSeverity.Info => "informativo",
-        DiagnosticSeverity.Attention => "atenção",
+        DiagnosticSeverity.Info => Loc.T("Conv.Informativo"),
+        DiagnosticSeverity.Attention => Loc.T("Conv.Atencao"),
         CapabilityLabel l => CapabilityText.Of(l),
         null => "",
         var v => v.ToString() ?? "",

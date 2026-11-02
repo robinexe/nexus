@@ -123,9 +123,9 @@ public sealed class MemoryLabPage : ModulePage
         RefreshStateCommand = new RelayCommand(() => _ = LoadStateAsync(), () => !_stateLoading);
     }
 
-    public override string Title => "Memória RAM";
+    public override string Title => Loc.T("Mem.NavTitle");
     public override string Group => Loc.T("Nav.Laboratorio");
-    public override string Subtitle => "Engenharia reversa da sua memória: módulos, canais, velocidade real e latência medida.";
+    public override string Subtitle => Loc.T("Mem.NavSubtitle");
 
     public ICommand MeasureCommand { get; }
     public ICommand CancelCommand { get; }

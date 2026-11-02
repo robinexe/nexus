@@ -35,9 +35,9 @@ public sealed class ServicesPage : ModulePage
         UndoCommand = new RelayCommand(() => _ = RunAsync(() => UndoAsync(_lastRun, () => { _lastRun = null; LastChange = ""; })), () => !Busy && _lastRun is not null);
     }
 
-    public override string Title => "Serviços";
+    public override string Title => Loc.T("Svc.NavTitle");
     public override string Group => Loc.T("Nav.Sistema");
-    public override string Subtitle => "Serviços do Windows explicados, com ajustes seguros e reversíveis.";
+    public override string Subtitle => Loc.T("Svc.NavSubtitle");
 
     public string Summary { get => _summary; private set => Set(ref _summary, value); }
 

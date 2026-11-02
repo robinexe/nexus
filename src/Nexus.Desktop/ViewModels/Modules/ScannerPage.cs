@@ -145,9 +145,9 @@ public sealed class ScannerPage : ModulePage, IDisposable
         ClearResultsCommand = new RelayCommand(() => { Groups.Clear(); NotifyResults(); }, () => !_scanning);
     }
 
-    public override string Title => "Verificar arquivos";
+    public override string Title => Loc.T("Scan.NavTitle");
     public override string Group => Loc.T("Nav.Proteger");
-    public override string Subtitle => "Procure sinais suspeitos em arquivos e peça a opinião do Microsoft Defender.";
+    public override string Subtitle => Loc.T("Scan.NavSubtitle");
 
     public ObservableCollection<ScanFindingGroup> Groups { get; } = [];
     public ObservableCollection<ScanDriveRow> Drives { get; } = [];

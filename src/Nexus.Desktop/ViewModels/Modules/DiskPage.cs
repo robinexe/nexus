@@ -73,9 +73,9 @@ public sealed class DiskPage : ModulePage, IDisposable
         _scan = null;
     }
 
-    public override string Title => "Espaço em disco";
+    public override string Title => Loc.T("Disk.NavTitle");
     public override string Group => Loc.T("Nav.Limpar");
-    public override string Subtitle => "Veja o que ocupa o seu disco, pasta por pasta. Só lê: nada é apagado por esta análise.";
+    public override string Subtitle => Loc.T("Disk.NavSubtitle");
 
     public ObservableCollection<DiskVolumeRow> Volumes { get; } = [];
 

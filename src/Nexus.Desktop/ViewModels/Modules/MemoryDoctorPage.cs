@@ -129,9 +129,9 @@ public sealed class MemoryDoctorPage : ModulePage
         PurgeNowCommand = new RelayCommand(() => _ = RunAsync(PurgeFromGuardAsync), () => !Busy);
     }
 
-    public override string Title => "Memória: diagnóstico";
+    public override string Title => Loc.T("MemDoc.NavTitle");
     public override string Group => Loc.T("Nav.Laboratorio");
-    public override string Subtitle => "Quem está comendo a memória, se algo está vazando, e como resolver agora e de vez.";
+    public override string Subtitle => Loc.T("MemDoc.NavSubtitle");
 
     public ICommand SampleNowCommand { get; }
     public ICommand ClearCommand { get; }

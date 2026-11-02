@@ -83,7 +83,10 @@ Quem grava os arquivos de relatório pedidos é o `nexus.exe`. Limite honesto: a
 assembly; as leituras chamadas nos módulos são leituras por contrato (revisadas nos testes de cada módulo). Efeitos
 colaterais conhecidos de ferramentas de terceiros: o winget pode atualizar o próprio cache de fontes ao listar atualizações.
 
-## 2. `Nexus.Desktop.exe --selftest-ui ARQ.json [--no-screenshots]`
+## 2. `Nexus.Desktop.exe --selftest-ui ARQ.json [--no-screenshots] [--lang en|es|pt-BR]`
+
+`--lang` abre a interface no idioma pedido sem mudar a preferência de Ajustes (docs/12-idiomas.md): use um JSON por idioma
+(ex.: `--selftest-ui ui-en.json --lang en`) para fotografar todas as páginas em inglês ou espanhol.
 
 Abre a janela de verdade e:
 

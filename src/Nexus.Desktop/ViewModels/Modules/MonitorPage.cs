@@ -48,9 +48,9 @@ namespace Nexus.Desktop.ViewModels
             SortByMemoryCommand = new RelayCommand(() => SortByMemory = true);
         }
 
-        public override string Title => "Monitor";
+        public override string Title => Loc.T("Mon.NavTitle");
         public override string Group => Loc.T("Nav.Medir");
-        public override string Subtitle => "CPU, GPU, memória, disco e rede ao vivo, e a saúde dos discos.";
+        public override string Subtitle => Loc.T("Mon.NavSubtitle");
 
         public MonitorGauge Cpu { get; } = new("CPU", "%", 100);
         public MonitorGauge Gpu { get; } = new("GPU", "%", 100);

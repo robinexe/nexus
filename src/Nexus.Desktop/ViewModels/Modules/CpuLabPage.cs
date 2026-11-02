@@ -50,9 +50,9 @@ public sealed class CpuLabPage : ModulePage
         RefreshCommand = new RelayCommand(() => _ = RunAsync(LoadAsync), () => !Busy && !Measuring);
     }
 
-    public override string Title => "Processador";
+    public override string Title => Loc.T("Cpu.NavTitle");
     public override string Group => Loc.T("Nav.Laboratorio");
-    public override string Subtitle => "Engenharia reversa do seu processador: o que ele é, como se comporta e o que o segura.";
+    public override string Subtitle => Loc.T("Cpu.NavSubtitle");
 
     public RelayCommand MeasureCommand { get; }
     public RelayCommand SustainedCommand { get; }

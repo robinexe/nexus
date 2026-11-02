@@ -743,6 +743,14 @@ Asks for administrator permission (Windows prompt) and creates a restore point f
 </value></data>
   <data name="Clean.VoltaEsvaziar" xml:space="preserve"><value>Comes back when emptied.</value></data>
   <data name="Clean.WindowsVoceVeEscolhe" xml:space="preserve"><value>(you see and choose). NEXUS doesn't run DISM /StartComponentCleanup: it removes old versions right away, without the </value></data>
+  <data name="Conv.Atencao" xml:space="preserve"><value>attention</value></data>
+  <data name="Conv.Detectado" xml:space="preserve"><value>detected</value></data>
+  <data name="Conv.Inferido" xml:space="preserve"><value>inferred</value></data>
+  <data name="Conv.Informativo" xml:space="preserve"><value>informational</value></data>
+  <data name="Cpu.NavSubtitle" xml:space="preserve"><value>Reverse engineering of your processor: what it is, how it behaves and what holds it back.</value></data>
+  <data name="Cpu.NavTitle" xml:space="preserve"><value>Processor</value></data>
+  <data name="Disk.NavSubtitle" xml:space="preserve"><value>See what takes up your disk, folder by folder. Read-only: this analysis deletes nothing.</value></data>
+  <data name="Disk.NavTitle" xml:space="preserve"><value>Disk space</value></data>
   <data name="Drv.AbrirAtualizacoesOpcionais" xml:space="preserve"><value>Open optional updates</value></data>
   <data name="Drv.AbrirN" xml:space="preserve"><value>Open {0}</value></data>
   <data name="Drv.AbrirNAppOficial" xml:space="preserve"><value>Open {0}? It's the manufacturer's official app, already installed on the PC; in it you see and install graphics card drivers.</value></data>
@@ -1448,6 +1456,12 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>You applied {0} after the last match of {1}. </value></data>
   <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>If Windows asks for permission for PresentMon, accept it to measure.</value></data>
   <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>for Windows, without hooking into the game). Version </value></data>
+  <data name="Mem.NavSubtitle" xml:space="preserve"><value>Reverse engineering of your memory: modules, channels, real speed and measured latency.</value></data>
+  <data name="Mem.NavTitle" xml:space="preserve"><value>RAM</value></data>
+  <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Who is eating memory, whether something is leaking, and how to fix it now and for good.</value></data>
+  <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memory: diagnosis</value></data>
+  <data name="Mon.NavSubtitle" xml:space="preserve"><value>CPU, GPU, memory, disk and network live, plus disk health.</value></data>
+  <data name="Mon.NavTitle" xml:space="preserve"><value>Monitor</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Assistant</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automatic</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Lab</value></data>
@@ -1881,6 +1895,12 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Priv.VoltarDesfazerOuConfiguracoes" xml:space="preserve"><value> · to go back: Undo or Windows Settings</value></data>
   <data name="Priv.WindowsBuildN" xml:space="preserve"><value>Windows build {0}</value></data>
   <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>Windows didn't open Settings.</value></data>
+  <data name="Prog.NavSubtitle" xml:space="preserve"><value>Uninstall what you don't use, clean up what's left and keep the rest up to date.</value></data>
+  <data name="Prog.NavTitle" xml:space="preserve"><value>Programs and updates</value></data>
+  <data name="Scan.NavSubtitle" xml:space="preserve"><value>Look for suspicious signs in files and ask Microsoft Defender's opinion.</value></data>
+  <data name="Scan.NavTitle" xml:space="preserve"><value>Scan files</value></data>
+  <data name="Sec.NavSubtitle" xml:space="preserve"><value>Check for threats with Microsoft Defender and find suspicious spots.</value></data>
+  <data name="Sec.NavTitle" xml:space="preserve"><value>Security</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Opens minimized in the tray. It is a Run entry on your account (no administrator), with journal and undo; it also shows up in Task Manager and on the Startup page.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Opens with Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>Open NEXUS minimized in the tray every time you sign in to Windows?
@@ -2196,4 +2216,8 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Shell.VoceRecusouAvisoWindows" xml:space="preserve"><value>You declined the Windows prompt. NEXUS stays open without administrator rights.</value></data>
   <data name="Shell.VoltandoModoAnterior" xml:space="preserve"><value>Going back to the previous mode…</value></data>
   <data name="Shell.WindowsPedePermissaoVez" xml:space="preserve"><value>Windows asks for permission once and NEXUS reopens. If you leave it for later, it installs when you close NEXUS.</value></data>
+  <data name="Svc.NavSubtitle" xml:space="preserve"><value>Windows services explained, with safe, reversible tweaks.</value></data>
+  <data name="Svc.NavTitle" xml:space="preserve"><value>Services</value></data>
+  <data name="Tools.NavSubtitle" xml:space="preserve"><value>Network, drivers, Windows apps and restore points.</value></data>
+  <data name="Tools.NavTitle" xml:space="preserve"><value>System tools</value></data>
 </root>

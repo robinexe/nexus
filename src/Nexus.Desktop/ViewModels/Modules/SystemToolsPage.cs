@@ -60,9 +60,9 @@ public sealed record RestorePointRow(string When, string Description, string Kin
 /// </summary>
 public sealed class SystemToolsPage : ModulePage
 {
-    public override string Title => "Ferramentas do sistema";
+    public override string Title => Loc.T("Tools.NavTitle");
     public override string Group => Loc.T("Nav.Sistema");
-    public override string Subtitle => "Rede, drivers, apps do Windows e pontos de restauração.";
+    public override string Subtitle => Loc.T("Tools.NavSubtitle");
 
     private const string DnsAction = "system.network.dns-flush@1", ArpAction = "system.network.arp-flush@1";
     private const string WifiAction = "system.wifi.profile-remove@1", DriverAction = "system.driver.package-remove@1";

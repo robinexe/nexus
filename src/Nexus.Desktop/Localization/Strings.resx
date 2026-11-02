@@ -743,6 +743,14 @@ Pede permissão de administrador (aviso do Windows) e cria um ponto de restaura�
 </value></data>
   <data name="Clean.VoltaEsvaziar" xml:space="preserve"><value>Volta ao esvaziar.</value></data>
   <data name="Clean.WindowsVoceVeEscolhe" xml:space="preserve"><value>Windows (você vê e escolhe). O NEXUS não roda DISM /StartComponentCleanup: remove na hora as versões antigas, sem a espera </value></data>
+  <data name="Conv.Atencao" xml:space="preserve"><value>atenção</value></data>
+  <data name="Conv.Detectado" xml:space="preserve"><value>detectado</value></data>
+  <data name="Conv.Inferido" xml:space="preserve"><value>inferido</value></data>
+  <data name="Conv.Informativo" xml:space="preserve"><value>informativo</value></data>
+  <data name="Cpu.NavSubtitle" xml:space="preserve"><value>Engenharia reversa do seu processador: o que ele é, como se comporta e o que o segura.</value></data>
+  <data name="Cpu.NavTitle" xml:space="preserve"><value>Processador</value></data>
+  <data name="Disk.NavSubtitle" xml:space="preserve"><value>Veja o que ocupa o seu disco, pasta por pasta. Só lê: nada é apagado por esta análise.</value></data>
+  <data name="Disk.NavTitle" xml:space="preserve"><value>Espaço em disco</value></data>
   <data name="Drv.AbrirAtualizacoesOpcionais" xml:space="preserve"><value>Abrir atualizações opcionais</value></data>
   <data name="Drv.AbrirN" xml:space="preserve"><value>Abrir {0}</value></data>
   <data name="Drv.AbrirNAppOficial" xml:space="preserve"><value>Abrir o {0}? É o app oficial do fabricante, já instalado no PC; nele você vê e instala drivers da placa de vídeo.</value></data>
@@ -1448,6 +1456,12 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>Você aplicou {0} depois da última partida de {1}. </value></data>
   <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>Se o Windows pedir permissão para o PresentMon, aceite para medir.</value></data>
   <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>do Windows, sem entrar no jogo). A versão </value></data>
+  <data name="Mem.NavSubtitle" xml:space="preserve"><value>Engenharia reversa da sua memória: módulos, canais, velocidade real e latência medida.</value></data>
+  <data name="Mem.NavTitle" xml:space="preserve"><value>Memória RAM</value></data>
+  <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Quem está comendo a memória, se algo está vazando, e como resolver agora e de vez.</value></data>
+  <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memória: diagnóstico</value></data>
+  <data name="Mon.NavSubtitle" xml:space="preserve"><value>CPU, GPU, memória, disco e rede ao vivo, e a saúde dos discos.</value></data>
+  <data name="Mon.NavTitle" xml:space="preserve"><value>Monitor</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Assistente</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratório</value></data>
@@ -1881,6 +1895,12 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Priv.VoltarDesfazerOuConfiguracoes" xml:space="preserve"><value> · para voltar: Desfazer ou Configurações do Windows</value></data>
   <data name="Priv.WindowsBuildN" xml:space="preserve"><value>Windows build {0}</value></data>
   <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>O Windows não abriu as Configurações.</value></data>
+  <data name="Prog.NavSubtitle" xml:space="preserve"><value>Desinstale o que não usa, limpe o que sobrou e mantenha o resto atualizado.</value></data>
+  <data name="Prog.NavTitle" xml:space="preserve"><value>Programas e atualizações</value></data>
+  <data name="Scan.NavSubtitle" xml:space="preserve"><value>Procure sinais suspeitos em arquivos e peça a opinião do Microsoft Defender.</value></data>
+  <data name="Scan.NavTitle" xml:space="preserve"><value>Verificar arquivos</value></data>
+  <data name="Sec.NavSubtitle" xml:space="preserve"><value>Verifique ameaças com o Microsoft Defender e encontre pontos suspeitos.</value></data>
+  <data name="Sec.NavTitle" xml:space="preserve"><value>Segurança</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Abre minimizado na bandeja. É uma entrada no Run da sua conta (sem administrador), com diário e desfazer; também aparece no Gerenciador de Tarefas e na página Inicialização.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Abre com o Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>Abrir o NEXUS minimizado na bandeja sempre que você entrar no Windows?
@@ -2196,4 +2216,8 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Shell.VoceRecusouAvisoWindows" xml:space="preserve"><value>Você recusou o aviso do Windows. O NEXUS continua aberto sem administrador.</value></data>
   <data name="Shell.VoltandoModoAnterior" xml:space="preserve"><value>Voltando ao modo anterior…</value></data>
   <data name="Shell.WindowsPedePermissaoVez" xml:space="preserve"><value>O Windows pede permissão uma vez e o NEXUS reabre. Se deixar para depois, instala quando você fechar o NEXUS.</value></data>
+  <data name="Svc.NavSubtitle" xml:space="preserve"><value>Serviços do Windows explicados, com ajustes seguros e reversíveis.</value></data>
+  <data name="Svc.NavTitle" xml:space="preserve"><value>Serviços</value></data>
+  <data name="Tools.NavSubtitle" xml:space="preserve"><value>Rede, drivers, apps do Windows e pontos de restauração.</value></data>
+  <data name="Tools.NavTitle" xml:space="preserve"><value>Ferramentas do sistema</value></data>
 </root>

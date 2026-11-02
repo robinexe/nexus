@@ -110,9 +110,9 @@ public sealed class SecurityPage : ModulePage
         UndoCommand = new RelayCommand(() => _ = UndoAsync(), () => !Busy && _lastRuns.Count > 0);
     }
 
-    public override string Title => "Segurança";
+    public override string Title => Loc.T("Sec.NavTitle");
     public override string Group => Loc.T("Nav.Proteger");
-    public override string Subtitle => "Verifique ameaças com o Microsoft Defender e encontre pontos suspeitos.";
+    public override string Subtitle => Loc.T("Sec.NavSubtitle");
 
     public ObservableCollection<ProtectionRow> Protection { get; } = [];
     public ObservableCollection<FindingRow> Findings { get; } = [];
