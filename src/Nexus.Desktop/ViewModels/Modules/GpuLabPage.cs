@@ -45,6 +45,12 @@ public sealed class GpuLabPage : ModulePage
         Findings.CollectionChanged += (_, _) => { OnPropertyChanged(nameof(HasFindings)); OnPropertyChanged(nameof(ShowNoFindings)); };
         RefreshCommand = new RelayCommand(() => _ = LoadAsync(), () => !Busy && !IsRecording);
         RecordCommand = new RelayCommand(() => _ = ToggleRecordingAsync(), () => _hasReport && (!Busy || IsRecording));
+        ApplyNvCommand = new RelayCommand(() => _ = ApplyNvAsync(), () => !Busy && NvAvailable && SelectedNvGame is not null && (NvLowLatency || NvMaxPower || NvFpsCap || NvVsync));
+        ApplyShaderCacheCommand = new RelayCommand(() => _ = ApplyShaderCacheAsync(), () => !Busy && NvAvailable && SelectedShaderCache is not null);
+        foreach (var f in NvidiaDrsActions.FpsCaps) NvFpsOptions.Add(f);
+        ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[0], "100 GB"));
+        ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[1], "Ilimitado"));
+        _selectedShaderCache = ShaderCacheOptions[0];
     }
 
     public override string Title => "Placa de vídeo";
@@ -126,6 +132,7 @@ public sealed class GpuLabPage : ModulePage
         _report = report;
         Build(report);
         HasReport = true;
+        await ReadNvidiaAsync();
     });
 
     private void Build(GpuLabReport r)
@@ -356,6 +363,180 @@ public sealed class GpuLabPage : ModulePage
         var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus));
         _report = report;
         Build(report);
+        await ReadNvidiaAsync();
+    });
+
+    // ------------------------------------------------------------------ driver NVIDIA por jogo (perfis DRS)
+
+    // Só leitura aqui (INvidiaDrsReader); a gravação é do handler NvidiaDrsSetting no aplicador.
+    private readonly INvidiaDrsReader _drs = NvidiaDrsFactory.Reader();
+    private bool _nvAvailable, _nvLowLatency, _nvMaxPower, _nvFpsCap, _nvVsync;
+    private string _nvStatus = "Lendo o driver NVIDIA…", _shaderCacheText = "", _nvFpsHint = "";
+    private NvGameOption? _selectedNvGame;
+    private string? _selectedNvFps;
+    private NvChoice? _selectedShaderCache;
+
+    public RelayCommand ApplyNvCommand { get; }
+    public RelayCommand ApplyShaderCacheCommand { get; }
+    /// <summary>NVAPI abriu (placa e driver NVIDIA ativos).</summary>
+    public bool NvAvailable { get => _nvAvailable; private set => Set(ref _nvAvailable, value); }
+    /// <summary>"Sem placa/driver NVIDIA…" ou o resumo do que foi lido.</summary>
+    public string NvStatus { get => _nvStatus; private set => Set(ref _nvStatus, value); }
+    public ObservableCollection<NvGameOption> NvGames { get; } = [];
+    public bool HasNvGames => NvGames.Count > 0;
+    public NvGameOption? SelectedNvGame
+    {
+        get => _selectedNvGame;
+        set { if (Set(ref _selectedNvGame, value)) _ = ReadNvGameAsync(); }
+    }
+    public bool NvLowLatency { get => _nvLowLatency; set => Set(ref _nvLowLatency, value); }
+    public bool NvMaxPower { get => _nvMaxPower; set => Set(ref _nvMaxPower, value); }
+    public bool NvFpsCap { get => _nvFpsCap; set => Set(ref _nvFpsCap, value); }
+    public bool NvVsync { get => _nvVsync; set => Set(ref _nvVsync, value); }
+    public ObservableCollection<string> NvFpsOptions { get; } = [];
+    public string? SelectedNvFps { get => _selectedNvFps; set => Set(ref _selectedNvFps, value); }
+    /// <summary>"Monitor a 144 Hz: sugestão 141 FPS (3 abaixo, para o G-SYNC)".</summary>
+    public string NvFpsHint { get => _nvFpsHint; private set => Set(ref _nvFpsHint, value); }
+    /// <summary>Valores atuais do perfil do jogo escolhido.</summary>
+    public ObservableCollection<GpuKeyValue> NvCurrent { get; } = [];
+    public string ShaderCacheText { get => _shaderCacheText; private set => Set(ref _shaderCacheText, value); }
+    public ObservableCollection<NvChoice> ShaderCacheOptions { get; } = [];
+    public NvChoice? SelectedShaderCache { get => _selectedShaderCache; set => Set(ref _selectedShaderCache, value); }
+
+    /// <summary>Disponibilidade, cache de sombreador (global), jogos com executável e a sugestão de limite pelo monitor.</summary>
+    private async Task ReadNvidiaAsync()
+    {
+        var (unavailable, cache) = await Task.Run(() =>
+        {
+            try
+            {
+                var u = _drs.Unavailable();
+                return (u, u is null ? DescribeSetting(DrsTarget.Base, NvidiaDrsSettings.ShaderCacheMaxSize) : "");
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { return ((string?)$"Sem placa/driver NVIDIA utilizável: {ex.Message}", ""); }
+        });
+        NvAvailable = unavailable is null;
+        NvStatus = unavailable ?? "Driver NVIDIA encontrado. Os ajustes vão para o perfil do jogo no próprio driver, como no Painel de Controle NVIDIA.";
+        ShaderCacheText = cache;
+
+        var previous = SelectedNvGame?.Exe;
+        NvGames.Clear();
+        foreach (var g in _report?.Games ?? [])
+        {
+            var exe = g.ExePath is null ? null : System.IO.Path.GetFileName(g.ExePath);
+            if (NvidiaDrsSettings.IsValidExe(exe) && NvGames.All(x => !string.Equals(x.Exe, exe, StringComparison.OrdinalIgnoreCase)))
+                NvGames.Add(new NvGameOption(g.Name, exe!, g.ExePathSure));
+        }
+        OnPropertyChanged(nameof(HasNvGames));
+        var monitors = _report?.Monitors ?? [];
+        var monitor = monitors.FirstOrDefault(m => m.Primary) ?? (monitors.Count > 0 ? monitors[0] : null);
+        if (monitor is not null && NvidiaDrsSettings.NearestAllowedCap(monitor.Current.Hz, NvidiaDrsActions.FpsCaps) is { } cap)
+        {
+            SelectedNvFps ??= cap;
+            NvFpsHint = $"Monitor principal a {monitor.Current.Hz} Hz: sugestão {cap} FPS (pelo menos 3 abaixo da taxa, para ficar dentro do G-SYNC).";
+        }
+        else
+        {
+            SelectedNvFps ??= "60";
+            NvFpsHint = "Com G-SYNC, use pelo menos 3 FPS abaixo da taxa do monitor.";
+        }
+        if (NvAvailable && NvGames.Count > 0)
+            SelectedNvGame = NvGames.FirstOrDefault(x => x.Exe == previous) ?? NvGames[0];
+        System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+    }
+
+    private string DescribeSetting(DrsTarget target, uint id)
+    {
+        var spec = NvidiaDrsSettings.All[id];
+        try
+        {
+            var r = _drs.Read(target, id);
+            if (!r.ProfileFound) return "padrão do driver (o jogo não tem perfil no driver)";
+            if (!r.InProfile || r.Value is not { } v) return "padrão do driver";
+            return spec.Describe(v) + (r.IsPredefined ? " (definido pela NVIDIA)" : "");
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { return "sem leitura: " + ex.Message; }
+    }
+
+    private async Task ReadNvGameAsync()
+    {
+        var game = SelectedNvGame;
+        NvCurrent.Clear();
+        if (game is null || !NvAvailable) return;
+        var rows = await Task.Run(() =>
+        {
+            var target = DrsTarget.App(game.Exe);
+            var list = new List<GpuKeyValue>();
+            try
+            {
+                var profile = _drs.Read(target, NvidiaDrsSettings.PrerenderLimit);
+                list.Add(new("Perfil no driver", profile.ProfileFound ? profile.ProfileName ?? "?" : "nenhum (o NEXUS cria \"NEXUS - " + game.Exe + "\")", ""));
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { list.Add(new("Perfil no driver", "sem leitura", ex.Message)); return list; }
+            foreach (var id in new[] { NvidiaDrsSettings.PrerenderLimit, NvidiaDrsSettings.PreferredPstate, NvidiaDrsSettings.FrameRateLimit, NvidiaDrsSettings.VsyncMode })
+                list.Add(new(NvidiaDrsSettings.All[id].Name, DescribeSetting(target, id), ""));
+            return list;
+        });
+        if (!ReferenceEquals(game, SelectedNvGame)) return;
+        foreach (var r in rows) NvCurrent.Add(r);
+    }
+
+    private Task ApplyNvAsync() => RunAsync(async () =>
+    {
+        if (Host is null || SelectedNvGame is not { } game) return;
+        var exe = game.Exe;
+        var requests = new List<ActionRequest>();
+        var lines = new List<string>();
+        if (NvLowLatency)
+        {
+            requests.Add(new ActionRequest(NvidiaDrsActions.LowLatency, null, new Dictionary<string, string> { ["exe"] = exe }));
+            lines.Add("• Modo de baixa latência: ligado (1 quadro na fila; vale em DirectX 9/11 sem Reflex)");
+        }
+        if (NvMaxPower)
+        {
+            requests.Add(new ActionRequest(NvidiaDrsActions.MaxPower, null, new Dictionary<string, string> { ["exe"] = exe }));
+            lines.Add("• Energia: preferir desempenho máximo (só com este jogo aberto; mais calor e consumo)");
+        }
+        var fps = SelectedNvFps;
+        if (NvFpsCap)
+        {
+            if (fps is null || !NvidiaDrsActions.FpsCaps.Contains(fps)) { Message = "Escolha um limite de FPS da lista."; return; }
+            requests.Add(new ActionRequest(NvidiaDrsActions.FpsCap, fps, new Dictionary<string, string> { ["exe"] = exe }));
+            lines.Add($"• Taxa máxima de quadros: {fps} FPS");
+        }
+        if (NvVsync)
+        {
+            var capInProfile = NvCurrent.Any(r => r.Label == NvidiaDrsSettings.All[NvidiaDrsSettings.FrameRateLimit].Name && r.Value.EndsWith(" FPS", StringComparison.Ordinal));
+            if (!NvFpsCap && !capInProfile)
+            {
+                Message = "V-Sync no driver só faz sentido com G-SYNC E limite de FPS abaixo da taxa do monitor. Marque também o limite de FPS.";
+                return;
+            }
+            requests.Add(new ActionRequest(NvidiaDrsActions.VsyncOn, null, new Dictionary<string, string> { ["exe"] = exe }));
+            lines.Add("• V-Sync: ligado no driver (para G-SYNC; desligue o V-Sync dentro do jogo)");
+        }
+        if (requests.Count == 0) return;
+        var text = $"Gravar no perfil do driver NVIDIA de {game.Name} ({exe}):\n\n{string.Join("\n", lines)}\n\n" +
+                   "É o mesmo banco de perfis do Painel de Controle NVIDIA. Vale na próxima vez que o jogo abrir. " +
+                   "Exige administrador (o Windows pede permissão e um ponto de restauração é criado). Desfazer devolve o que o perfil tinha.";
+        var r = await Host.ApplyAsync("Aplicar no driver NVIDIA", text, requests, BrokerLevel.Admin);
+        if (r is null) return;
+        if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange($"driver NVIDIA em {exe} ({requests.Count} ajuste(s))", run, BrokerLevel.Admin, this));
+        Message = StartupPage.Describe(r);
+        await ReadNvGameAsync();
+    });
+
+    private Task ApplyShaderCacheAsync() => RunAsync(async () =>
+    {
+        if (Host is null || SelectedShaderCache is not { } choice) return;
+        var text = $"Mudar o tamanho do cache de sombreador do driver NVIDIA para {choice.Label} (perfil global)?\n\n" +
+                   "O driver guarda os sombreadores já compilados dos jogos; quando o cache enche, apaga os antigos e o jogo volta a compilar durante a partida (travadinhas). " +
+                   "Não aumenta FPS. A pasta do cache (%LOCALAPPDATA%\\NVIDIA\\DXCache) pode crescer muitos GB. Exige administrador; Desfazer devolve o tamanho anterior.";
+        var r = await Host.ApplyAsync("Cache de sombreador NVIDIA", text, [new ActionRequest(NvidiaDrsActions.ShaderCache, choice.Value)], BrokerLevel.Admin);
+        if (r is null) return;
+        if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange($"cache de sombreador NVIDIA: {choice.Label}", run, BrokerLevel.Admin, this));
+        Message = StartupPage.Describe(r);
+        ShaderCacheText = await Task.Run(() => DescribeSetting(DrsTarget.Base, NvidiaDrsSettings.ShaderCacheMaxSize));
     });
 
     // ------------------------------------------------------------------ gravação
@@ -631,3 +812,12 @@ public sealed class GpuAppliedChange
     public BrokerLevel Level { get; }
     public RelayCommand UndoCommand { get; }
 }
+
+/// <summary>Jogo com executável conhecido, para os ajustes do driver NVIDIA (só o nome do arquivo vai para o perfil).</summary>
+public sealed record NvGameOption(string Name, string Exe, bool ExeSure)
+{
+    public string Label => ExeSure ? $"{Name} ({Exe})" : $"{Name} ({Exe}, provável)";
+}
+
+/// <summary>Opção com valor do catálogo e rótulo.</summary>
+public sealed record NvChoice(string Value, string Label);

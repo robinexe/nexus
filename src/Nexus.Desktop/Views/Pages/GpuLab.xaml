@@ -6,7 +6,7 @@
     4. Monitores: antes → depois (Hz de agora × o máximo que o monitor aguenta) com "Usar 144 Hz".
     5. Gravar enquanto joga: como funciona em 4 passos, gráfico com legenda (entra da esquerda para a direita), veredito.
     6. O que segura a placa: cartões com selo e Corrigir; recursos (HAGS, Resizable BAR, MPO, Modo de Jogo) como selos;
-       jogos e a GPU de cada um (notebook híbrido). 7. Ficha técnica recolhida (leituras do driver, GPUs, notas).
+       jogos e a GPU de cada um (notebook híbrido). 6b. Driver NVIDIA por jogo (perfis DRS) e cache de sombreador. 7. Ficha técnica recolhida (leituras do driver, GPUs, notas).
   Toda correção vai pelo aplicador (Host.ApplyAsync) com diário e Desfazer; a gravação só lê sensores.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -317,6 +317,94 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <!-- ===== 6b. Driver NVIDIA por jogo (perfis do driver, pelo aplicador) ===== -->
+        <ContentControl Content="Driver NVIDIA por jogo" Tag="{StaticResource Icon.Settings}" ContentTemplate="{StaticResource G.SectionHeader}" Focusable="False" Margin="0,8,0,2"/>
+        <TextBlock Text="Os mesmos ajustes do Painel de Controle NVIDIA, gravados no perfil do jogo. Com Desfazer." Style="{StaticResource Text.Small}" Margin="0,0,0,12"/>
+        <Border Style="{StaticResource Panel.Card}" Padding="16,12" Margin="0,0,0,14" Visibility="{Binding NvAvailable, Converter={StaticResource FalseToVisible}}">
+          <DockPanel>
+            <c:Icon Data="{StaticResource Icon.Info}" Size="16" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0" VerticalAlignment="Top"/>
+            <TextBlock Text="{Binding NvStatus}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
+          </DockPanel>
+        </Border>
+        <Grid Margin="0,0,0,14" Visibility="{Binding NvAvailable, Converter={StaticResource BoolToVis}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="14"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <!-- Por jogo -->
+          <Border Style="{StaticResource Panel.Card}" VerticalAlignment="Top">
+            <StackPanel>
+              <DockPanel Margin="0,0,0,8">
+                <c:Icon Data="{StaticResource Icon.Games}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
+                <TextBlock Text="Escolha o jogo" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+              </DockPanel>
+              <TextBlock Style="{StaticResource Text.Small}" Visibility="{Binding HasNvGames, Converter={StaticResource FalseToVisible}}"
+                         Text="Nenhum jogo da Steam ou da Epic com executável encontrado."/>
+              <ComboBox ItemsSource="{Binding NvGames}" SelectedItem="{Binding SelectedNvGame}" DisplayMemberPath="Label" MinWidth="260" HorizontalAlignment="Left"
+                        AutomationProperties.Name="Jogo para os ajustes do driver NVIDIA" Visibility="{Binding HasNvGames, Converter={StaticResource BoolToVis}}"/>
+              <ItemsControl ItemsSource="{Binding NvCurrent}" Focusable="False" Margin="0,10,0,6">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="{x:Type vm:GpuKeyValue}">
+                    <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,6" ToolTip="{Binding Note}" Background="Transparent">
+                      <DockPanel>
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding Value}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="12,0,0,0"/>
+                        <TextBlock Text="{Binding Label}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
+                      </DockPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="O que gravar" Style="{StaticResource Text.Label}" Margin="0,8,0,4"/>
+              <CheckBox IsChecked="{Binding NvLowLatency}" Margin="0,4">
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"
+                           Text="Modo de baixa latência: ligado. Menos atraso quando a placa está no limite (DirectX 9/11, jogo sem Reflex)."/>
+              </CheckBox>
+              <CheckBox IsChecked="{Binding NvMaxPower}" Margin="0,4">
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"
+                           Text="Preferir desempenho máximo. A placa não baixa o clock com o jogo aberto. Mais calor e consumo."/>
+              </CheckBox>
+              <DockPanel Margin="0,4">
+                <CheckBox IsChecked="{Binding NvFpsCap}" VerticalAlignment="Center">
+                  <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Text="Limitar o FPS em"/>
+                </CheckBox>
+                <ComboBox ItemsSource="{Binding NvFpsOptions}" SelectedItem="{Binding SelectedNvFps}" MinWidth="80" Margin="10,0,0,0" HorizontalAlignment="Left"
+                          AutomationProperties.Name="Limite de FPS"/>
+              </DockPanel>
+              <TextBlock Text="{Binding NvFpsHint}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="26,0,0,4"/>
+              <CheckBox IsChecked="{Binding NvVsync}" Margin="0,4">
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"
+                           Text="V-Sync ligado no driver. Só com monitor G-SYNC e limite de FPS; desligue o V-Sync dentro do jogo."/>
+              </CheckBox>
+              <c:ExplainToggle Margin="0,4,0,0">
+                <StackPanel>
+                  <TextBlock Style="{StaticResource Text.Small}"
+                             Text="Fica no banco de perfis do driver, o mesmo do Painel de Controle NVIDIA. Vale na próxima vez que o jogo abrir. Se o jogo não tem perfil no driver, o NEXUS cria um chamado &quot;NEXUS - jogo.exe&quot;; Desfazer devolve o que havia e apaga esse perfil se ficar vazio."/>
+                  <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,6,0,0"
+                             Text="Fontes: NvApiDriverSettings.h (NVIDIA), notas do driver NVIDIA e testes da Blur Busters (G-SYNC: V-Sync no driver + limite 3 FPS abaixo da taxa)."/>
+                </StackPanel>
+              </c:ExplainToggle>
+              <Button Style="{StaticResource Button.Secondary}" Content="Aplicar no driver" Command="{Binding ApplyNvCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+            </StackPanel>
+          </Border>
+          <!-- Cache de sombreador (global) -->
+          <Border Grid.Column="2" Style="{StaticResource Panel.Card}" VerticalAlignment="Top">
+            <StackPanel>
+              <DockPanel Margin="0,0,0,8">
+                <c:Icon Data="{StaticResource Icon.Disk}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
+                <TextBlock Text="Cache de sombreador" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+              </DockPanel>
+              <TextBlock Text="Agora" Style="{StaticResource Text.Label}"/>
+              <TextBlock Text="{Binding ShaderCacheText}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}" Margin="0,2,0,8"/>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,0,0,8"
+                         Text="Cache cheio faz o jogo voltar a compilar sombreadores durante a partida (travadinhas). Maior evita isso; não aumenta FPS."/>
+              <ComboBox ItemsSource="{Binding ShaderCacheOptions}" SelectedItem="{Binding SelectedShaderCache}" DisplayMemberPath="Label" MinWidth="140" HorizontalAlignment="Left"
+                        AutomationProperties.Name="Tamanho do cache de sombreador"/>
+              <Button Style="{StaticResource Button.Secondary}" Content="Aplicar no driver" Command="{Binding ApplyShaderCacheCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"/>
             </StackPanel>
           </Border>
         </Grid>
