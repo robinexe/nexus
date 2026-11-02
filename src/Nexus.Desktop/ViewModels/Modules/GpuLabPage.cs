@@ -29,8 +29,8 @@ public sealed class GpuLabPage : ModulePage
     private bool _nvmlTried;
     private CancellationTokenSource? _recording;
 
-    private string _heroTitle = "Lendo a placa de vídeo…", _heroDetail = "", _hybridText = "", _vendorNote = "";
-    private string _recordStatus = "Abra um jogo, volte aqui e clique em Gravar. Você tem 10 s para voltar ao jogo; o NEXUS observa 60 s.";
+    private string _heroTitle = Loc.T("Gpu.LendoPlacaVideo"), _heroDetail = "", _hybridText = "", _vendorNote = "";
+    private string _recordStatus = Loc.T("Gpu.AbraJogoVolteAqui");
     private string _verdict = "", _verdictTone = "info";
     private bool _isRecording, _hasReport, _isHybrid;
     private double _recordProgress;
@@ -53,14 +53,14 @@ public sealed class GpuLabPage : ModulePage
         foreach (var v in Cs2Install.FpsMaxValues) Cs2FpsOptions.Add(v);
         _selectedCs2Fps = "400";
         foreach (var f in NvidiaDrsActions.FpsCaps) NvFpsOptions.Add(f);
-        ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[0], "100 GB"));
-        ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[1], "Ilimitado"));
+        ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[0], Loc.T("Gpu.N100Gb")));
+        ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[1], Loc.T("Gpu.Ilimitado")));
         _selectedShaderCache = ShaderCacheOptions[0];
     }
 
-    public override string Title => "Placa de vídeo";
+    public override string Title => Loc.T("Pg.PlacaVideo");
     public override string Group => Loc.T("Nav.Laboratorio");
-    public override string Subtitle => "Engenharia reversa da sua placa de vídeo: barramento, clocks, limites e monitores.";
+    public override string Subtitle => Loc.T("Gpu.EngenhariaReversaSuaPlaca");
 
     public RelayCommand RefreshCommand { get; }
     public RelayCommand RecordCommand { get; }
@@ -104,7 +104,7 @@ public sealed class GpuLabPage : ModulePage
 
     // Gravação
     public bool IsRecording { get => _isRecording; private set { if (Set(ref _isRecording, value)) OnPropertyChanged(nameof(RecordButtonText)); } }
-    public string RecordButtonText => IsRecording ? "Parar e analisar" : "Gravar enquanto jogo (60 s)";
+    public string RecordButtonText => IsRecording ? Loc.T("Gpu.PararAnalisar") : Loc.T("Gpu.GravarEnquantoJogo60");
     public string RecordStatus { get => _recordStatus; private set => Set(ref _recordStatus, value); }
     public double RecordProgress { get => _recordProgress; private set => Set(ref _recordProgress, value); }
     public IReadOnlyList<GpuTelemetrySample> Samples { get => _samples; private set => Set(ref _samples, value); }
@@ -130,7 +130,7 @@ public sealed class GpuLabPage : ModulePage
             {
                 _nvmlTried = true;
                 try { _nvml = NvmlSession.TryOpen(out _nvmlStatus); }
-                catch (Exception ex) when (ex is not OutOfMemoryException) { _nvmlStatus = $"NVML indisponível: {ex.Message}"; }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { _nvmlStatus = Loc.F("Gpu.NvmlIndisponivelN", ex.Message); }
             }
             return GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true);
         });
@@ -146,10 +146,10 @@ public sealed class GpuLabPage : ModulePage
         var primary = r.Primary;
         var hybrid = r.Hybrid;
         IsHybrid = hybrid.IsHybrid;
-        HeroTitle = primary is null ? "Nenhuma GPU de hardware encontrada" : GpuDiagnostics.HeroLine(primary);
-        HeroDetail = primary is null ? "O Windows só mostra o adaptador básico (sem driver do fabricante)." : PrimaryDetail(primary);
+        HeroTitle = primary is null ? Loc.T("Gpu.NenhumaGpuHardwareEncontrada") : GpuDiagnostics.HeroLine(primary);
+        HeroDetail = primary is null ? Loc.T("Gpu.WindowsSoMostraAdaptador") : PrimaryDetail(primary);
         HybridText = hybrid.Description;
-        HeroCaption = primary is null ? "Sem driver do fabricante" : primary.Name + (primary.IsIntegrated ? " · integrada" : " · dedicada");
+        HeroCaption = primary is null ? Loc.T("Gpu.SemDriverFabricante") : primary.Name + (primary.IsIntegrated ? Loc.T("Gpu.Integrada") : Loc.T("Gpu.Dedicada"));
         var vram = primary is null ? 0UL : primary.Nvidia?.VramTotalBytes ?? primary.DedicatedVideoBytes;
         VramBytes = vram > 0 ? vram : double.NaN;
         var vramUsed = primary?.Nvidia?.VramUsedBytes ?? primary?.LocalUsageBytes;
@@ -174,10 +174,10 @@ public sealed class GpuLabPage : ModulePage
         VendorNote = primary switch
         {
             null => "",
-            { Nvidia: not null } => $"Fonte dos clocks, limites e motivos: {r.NvmlStatus}.",
-            { Vendor: GpuVendor.Nvidia } => $"Placa NVIDIA, mas a NVML não abriu ({r.NvmlStatus}). Sem clocks, limites e motivos de limitação.",
-            { Vendor: GpuVendor.Amd } => "AMD: os clocks, a potência e os motivos de limitação só saem pela biblioteca ADLX, que exige o SDK da AMD. Sem ela o NEXUS mostra o que o Windows expõe (uso, VRAM, PCIe, driver) e diz o que falta, em vez de inventar.",
-            { Vendor: GpuVendor.Intel } => "Intel: clocks e potência só pela biblioteca do driver (IGCL), que exige SDK. O NEXUS mostra o que o Windows expõe (uso, VRAM, PCIe, driver).",
+            { Nvidia: not null } => Loc.F("Gpu.FonteClocksLimitesMotivos", r.NvmlStatus),
+            { Vendor: GpuVendor.Nvidia } => Loc.F("Gpu.PlacaNvidiaMasNvml", r.NvmlStatus),
+            { Vendor: GpuVendor.Amd } => Loc.T("Gpu.AmdClocksPotenciaMotivos"),
+            { Vendor: GpuVendor.Intel } => Loc.T("Gpu.IntelClocksPotenciaSo"),
             _ => "",
         };
 
@@ -221,93 +221,93 @@ public sealed class GpuLabPage : ModulePage
     {
         var parts = new List<string>();
         if (a.Architecture != GpuArchitecture.Unknown) parts.Add($"{a.Architecture.Family} ({a.Architecture.Year})");
-        parts.Add(a.IsIntegrated ? "integrada ao processador" : "dedicada");
-        if (a.IsHighPerformance) parts.Add("a GPU de alto desempenho do Windows");
-        parts.Add($"PCI {a.VendorId:X4}:{a.DeviceId:X4}");
+        parts.Add(a.IsIntegrated ? Loc.T("Gpu.IntegradaProcessador") : Loc.T("Drv.Dedicada"));
+        if (a.IsHighPerformance) parts.Add(Loc.T("Gpu.GpuAltoDesempenhoWindows"));
+        parts.Add(Loc.F("Gpu.PciNN", a.VendorId, a.DeviceId));
         var v = a.DriverInfoDecoded;
-        if (!string.IsNullOrEmpty(v.WindowsVersion)) parts.Add($"driver {v.WindowsVersion} no Windows");
+        if (!string.IsNullOrEmpty(v.WindowsVersion)) parts.Add(Loc.F("Gpu.DriverNWindows", v.WindowsVersion));
         return string.Join(" · ", parts);
     }
 
     private static GpuStatCard PcieCard(GpuAdapter a, bool laptop)
     {
-        if (a.IsIntegrated) return new("Barramento", "Integrada", "Fica dentro do processador: não usa slot PCIe.", "info", "Icon.Hardware");
+        if (a.IsIntegrated) return new(Loc.T("Gpu.Barramento"), Loc.T("Gpu.Integrada2"), Loc.T("Gpu.FicaDentroProcessadorNao"), "info", "Icon.Hardware");
         var (link, note) = HardwareCaps.PcieWithGpuCeiling(a);
         var (level, text) = Pcie.IdleVerdict(link, false, laptop);
-        if (!link.HasData) return new("Barramento PCIe", "—", text, "info", "Icon.Hardware");
-        var detail = $"GPU: {link.Describe(current: false)}" + (link.PortMaxGen is { } pg ? $" · porta: PCIe {Pcie.GenLabel(pg)} x{link.PortMaxWidth?.ToString(CultureInfo.InvariantCulture) ?? "?"}" : "") + ". " + text +
+        if (!link.HasData) return new(Loc.T("Gpu.BarramentoPcie"), "—", text, "info", "Icon.Hardware");
+        var detail = $"GPU: {link.Describe(current: false)}" + (link.PortMaxGen is { } pg ? Loc.F("Gpu.PortaPcieNX", Pcie.GenLabel(pg), link.PortMaxWidth?.ToString(CultureInfo.InvariantCulture) ?? "?") : "") + ". " + text +
                      (note is null ? "" : " " + note);
-        return new("Barramento PCIe (agora)", link.Describe(), detail, level, "Icon.Hardware");
+        return new(Loc.T("Gpu.BarramentoPcieAgora"), link.Describe(), detail, level, "Icon.Hardware");
     }
 
     private static GpuStatCard LimitsCard(GpuAdapter a)
     {
-        if (a.Nvidia is not { } nv) return new("Limites", "sem leitura", "O driver desta placa não expõe limites de potência/temperatura sem SDK.", "info", "Icon.Bolt");
+        if (a.Nvidia is not { } nv) return new(Loc.T("Gpu.Limites"), Loc.T("Gpu.SemLeitura"), Loc.T("Gpu.DriverDestaPlacaNao"), "info", "Icon.Bolt");
         var value = nv.EnforcedPowerLimitWatts ?? nv.PowerLimitWatts;
         var parts = new List<string>();
-        if (nv.DefaultPowerLimitWatts is { } d) parts.Add($"padrão {d:0} W");
-        if (nv.MinPowerLimitWatts is { } lo && nv.MaxPowerLimitWatts is { } hi && hi > 0) parts.Add($"faixa {lo:0}–{hi:0} W");
-        if (nv.SlowdownTemperatureC is { } t) parts.Add($"reduz clock a {t:0} °C");
-        if (nv.MaxGraphicsClockMhz is { } c) parts.Add($"clock máx. {c:0} MHz");
-        return new("Limite de potência", value is { } v ? $"{v:0} W" : "—", string.Join(" · ", parts), "info", "Icon.Bolt");
+        if (nv.DefaultPowerLimitWatts is { } d) parts.Add(Loc.F("Gpu.PadraoNW", d));
+        if (nv.MinPowerLimitWatts is { } lo && nv.MaxPowerLimitWatts is { } hi && hi > 0) parts.Add(Loc.F("Gpu.FaixaNNW", lo, hi));
+        if (nv.SlowdownTemperatureC is { } t) parts.Add(Loc.F("Gpu.ReduzClockNC", t));
+        if (nv.MaxGraphicsClockMhz is { } c) parts.Add(Loc.F("Gpu.ClockMaxNMhz", c));
+        return new(Loc.T("Gpu.LimitePotencia"), value is { } v ? $"{v:0} W" : "—", string.Join(" · ", parts), "info", "Icon.Bolt");
     }
 
     private static GpuStatCard MemoryCard(GpuAdapter a)
     {
         var total = a.Nvidia?.VramTotalBytes ?? a.DedicatedVideoBytes;
         var parts = new List<string>();
-        if (a.LocalBudgetBytes is { } b) parts.Add($"orçamento do Windows {GpuDiagnostics.FormatGb(b)}");
-        if ((a.Nvidia?.VramUsedBytes ?? a.LocalUsageBytes) is { } u) parts.Add($"em uso {GpuDiagnostics.FormatGb(u)}");
-        if (a.SharedSystemBytes > 0) parts.Add($"pode emprestar até {GpuDiagnostics.FormatGb(a.SharedSystemBytes)} da RAM");
-        return new(a.IsIntegrated ? "Memória (reservada da RAM)" : "Memória de vídeo", total > 0 ? GpuDiagnostics.FormatGb(total) : "—", string.Join(" · ", parts), "info", "Icon.Ram");
+        if (a.LocalBudgetBytes is { } b) parts.Add(Loc.F("Gpu.OrcamentoWindowsN", GpuDiagnostics.FormatGb(b)));
+        if ((a.Nvidia?.VramUsedBytes ?? a.LocalUsageBytes) is { } u) parts.Add(Loc.F("Gpu.UsoN", GpuDiagnostics.FormatGb(u)));
+        if (a.SharedSystemBytes > 0) parts.Add(Loc.F("Gpu.PodeEmprestarAteN", GpuDiagnostics.FormatGb(a.SharedSystemBytes)));
+        return new(a.IsIntegrated ? Loc.T("Gpu.MemoriaReservadaRam") : Loc.T("Gpu.MemoriaVideo"), total > 0 ? GpuDiagnostics.FormatGb(total) : "—", string.Join(" · ", parts), "info", "Icon.Ram");
     }
 
     private static GpuStatCard MonitorCard(GpuLabReport r)
     {
         var m = r.Monitors.FirstOrDefault(x => x.Primary) ?? (r.Monitors.Count > 0 ? r.Monitors[0] : null);
-        if (m is null) return new("Monitor", "—", "Nenhum monitor lido.", "info", "Icon.Monitor");
+        if (m is null) return new("Monitor", "—", Loc.T("Gpu.NenhumMonitorLido"), "info", "Icon.Monitor");
         var best = m.Advice.BelowMaxRefresh ? m.Advice.Best : null;
-        return new("Monitor principal", $"{m.Current.Hz} Hz",
-            best is not null ? $"Aceita {best.Hz} Hz nesta resolução." : "Já na maior taxa desta resolução.", best is not null ? "warn" : "good", "Icon.Monitor",
-            best is not null ? $"pode {best.Hz} Hz" : "no máximo");
+        return new(Loc.T("Gpu.MonitorPrincipal"), $"{m.Current.Hz} Hz",
+            best is not null ? Loc.F("Gpu.AceitaNHzNesta", best.Hz) : Loc.T("Gpu.JaMaiorTaxaDesta"), best is not null ? "warn" : "good", "Icon.Monitor",
+            best is not null ? Loc.F("Gpu.PodeNHz", best.Hz) : Loc.T("Gpu.Maximo"));
     }
 
     /// <summary>Recursos da placa como selos (o mesmo conteúdo do antigo cartão "Recursos": HAGS, Resizable BAR, MPO, Modo de Jogo, energia).</summary>
     private static IEnumerable<GpuCheckRow> FeatureChecks(GpuLabReport r, GpuAdapter a)
     {
         var hags = a.HagsEnabled ?? (r.Settings.HwSchMode == 2 ? true : r.Settings.HwSchMode == 1 ? false : null);
-        yield return new("Agendamento por hardware (HAGS)", hags is null ? "não informado" : hags.Value ? "ligado" : "desligado",
-            hags == true ? "good" : "info", a.HagsEnabled is null ? "Lido do registro do Windows." : "Informado pelo driver.");
+        yield return new(Loc.T("Gpu.AgendamentoHardwareHags"), hags is null ? Loc.T("Gpu.NaoInformado") : hags.Value ? Loc.T("Gpu.Ligado") : Loc.T("Gpu.Desligado"),
+            hags == true ? "good" : "info", a.HagsEnabled is null ? Loc.T("Gpu.LidoRegistroWindows") : Loc.T("Gpu.InformadoPeloDriver"));
         if (!a.IsIntegrated)
         {
             var rb = HardwareCaps.ResizableBar(a);
             yield return rb.Enabled is { } on
-                ? new("Resizable BAR", on ? "ligado" : "desligado", on ? "good" : HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", $"{rb.Evidence} Fonte: {rb.Source}.")
-                : new("Resizable BAR", "não dá para afirmar", HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", rb.Evidence);
+                ? new(Loc.T("Gpu.ResizableBar"), on ? Loc.T("Gpu.Ligado") : Loc.T("Gpu.Desligado"), on ? "good" : HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", Loc.F("Gpu.NFonteN", rb.Evidence, rb.Source))
+                : new(Loc.T("Gpu.ResizableBar"), Loc.T("Gpu.NaoAfirmar"), HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", rb.Evidence);
         }
-        yield return new("MPO (planos de sobreposição)", r.Settings.OverlayTestMode == 5 ? "desligado no registro" : "padrão do Windows",
-            r.Settings.OverlayTestMode == 5 ? "warn" : "good", "Desligar o MPO à mão só se recomenda para tela piscando.");
-        yield return new("Modo de Jogo", r.Settings.AutoGameModeEnabled == 0 ? "desligado" : "ligado", r.Settings.AutoGameModeEnabled == 0 ? "warn" : "good",
-            "Dá prioridade ao jogo em primeiro plano.");
-        if (r.Settings.OnBattery == true) yield return new("Energia", "na bateria", "warn", "Na bateria a GPU é limitada pelo notebook.");
+        yield return new(Loc.T("Gpu.MpoPlanosSobreposicao"), r.Settings.OverlayTestMode == 5 ? Loc.T("Gpu.DesligadoRegistro") : Loc.T("Gpu.PadraoWindows"),
+            r.Settings.OverlayTestMode == 5 ? "warn" : "good", Loc.T("Gpu.DesligarMpoMaoSo"));
+        yield return new(Loc.T("Gpu.ModoJogo"), r.Settings.AutoGameModeEnabled == 0 ? Loc.T("Gpu.Desligado") : Loc.T("Gpu.Ligado"), r.Settings.AutoGameModeEnabled == 0 ? "warn" : "good",
+            Loc.T("Gpu.PrioridadeJogoPrimeiroPlano"));
+        if (r.Settings.OnBattery == true) yield return new(Loc.T("Gpu.Energia"), Loc.T("Gpu.Bateria"), "warn", Loc.T("Gpu.BateriaGpuLimitadaPelo"));
     }
 
     private static IEnumerable<GpuKeyValue> NvidiaRows(NvidiaReading n)
     {
         static string F(double? v, string unit, string fmt = "0") => v is { } x ? x.ToString(fmt, Pt) + unit : "—";
-        yield return new("Clock gráfico", $"{F(n.GraphicsClockMhz, " MHz")} agora", $"máximo {F(n.MaxGraphicsClockMhz, " MHz")}");
-        yield return new("Clock da memória", $"{F(n.MemoryClockMhz, " MHz")} agora", $"máximo {F(n.MaxMemoryClockMhz, " MHz")}");
-        yield return new("Potência", $"{F(n.PowerWatts, " W", "0.0")} agora",
-            $"limite {F(n.EnforcedPowerLimitWatts ?? n.PowerLimitWatts, " W")} · padrão {F(n.DefaultPowerLimitWatts, " W")} · faixa {F(n.MinPowerLimitWatts, "")}–{F(n.MaxPowerLimitWatts, " W")}");
-        yield return new("Temperatura", $"{F(n.TemperatureC, " °C")} agora",
-            $"reduz clock a {F(n.SlowdownTemperatureC, " °C")} · desliga a {F(n.ShutdownTemperatureC, " °C")}" + (n.MaxOperatingTemperatureC is { } mo ? $" · alvo máx. {mo:0} °C" : ""));
-        yield return new("Ventoinha", n.FanPercent is { } fan ? $"{fan:0}%" : "—", n.FanPercent is null ? "Em notebook a ventoinha é do fabricante do notebook, não da placa." : "");
-        yield return new("Uso", $"{F(n.UtilizationPercent, "%")} GPU · {F(n.MemoryUtilizationPercent, "%")} memória", n.PerformanceState is { } ps ? $"estado P{ps} (P0 = máximo, P8 = repouso)" : "");
-        yield return new("PCIe (pela placa)", n.PcieGen is { } g ? $"Gen {g} x{n.PcieWidth}" : "—", n.PcieMaxGen is { } mg ? $"máximo Gen {mg} x{n.PcieMaxWidth}" : "");
+        yield return new(Loc.T("Gpu.ClockGrafico"), Loc.F("Gpu.NAgora", F(n.GraphicsClockMhz, " MHz")), Loc.F("Gpu.MaximoN", F(n.MaxGraphicsClockMhz, " MHz")));
+        yield return new(Loc.T("Gpu.ClockMemoria"), Loc.F("Gpu.NAgora", F(n.MemoryClockMhz, " MHz")), Loc.F("Gpu.MaximoN", F(n.MaxMemoryClockMhz, " MHz")));
+        yield return new(Loc.T("Gpu.Potencia2"), Loc.F("Gpu.NAgora", F(n.PowerWatts, " W", "0.0")),
+            Loc.F("Gpu.LimiteNPadraoN", F(n.EnforcedPowerLimitWatts ?? n.PowerLimitWatts, " W"), F(n.DefaultPowerLimitWatts, " W"), F(n.MinPowerLimitWatts, ""), F(n.MaxPowerLimitWatts, " W")));
+        yield return new(Loc.T("Gpu.Temperatura2"), Loc.F("Gpu.NAgora", F(n.TemperatureC, " °C")),
+            Loc.F("Gpu.ReduzClockNDesliga", F(n.SlowdownTemperatureC, " °C"), F(n.ShutdownTemperatureC, " °C")) + (n.MaxOperatingTemperatureC is { } mo ? Loc.F("Gpu.AlvoMaxNC", mo) : ""));
+        yield return new(Loc.T("Gpu.Ventoinha"), n.FanPercent is { } fan ? $"{fan:0}%" : "—", n.FanPercent is null ? Loc.T("Gpu.NotebookVentoinhaFabricanteNotebook") : "");
+        yield return new(Loc.T("Gpu.Uso2"), Loc.F("Gpu.NGpuNMemoria", F(n.UtilizationPercent, "%"), F(n.MemoryUtilizationPercent, "%")), n.PerformanceState is { } ps ? Loc.F("Gpu.EstadoPNP0", ps) : "");
+        yield return new(Loc.T("Gpu.PciePelaPlaca"), n.PcieGen is { } g ? Loc.F("Gpu.GenNXN", g, n.PcieWidth) : "—", n.PcieMaxGen is { } mg ? Loc.F("Gpu.MaximoGenNX", mg, n.PcieMaxWidth) : "");
         var reasons = n.ReasonsMask is { } m ? ThrottleReasons.Describe(m) : [];
-        yield return new("Limitando agora", reasons.Count == 0 ? (n.ReasonsMask is null ? "—" : "nada") : reasons[0], reasons.Count > 1 ? string.Join("; ", reasons.Skip(1)) : "Em repouso é normal aparecer \"ociosa\". O que importa é o que aparece com um jogo aberto: use a gravação.");
+        yield return new(Loc.T("Gpu.LimitandoAgora"), reasons.Count == 0 ? (n.ReasonsMask is null ? "—" : Loc.T("Gpu.Nada")) : reasons[0], reasons.Count > 1 ? string.Join("; ", reasons.Skip(1)) : Loc.T("Gpu.RepousoNormalAparecerOciosa"));
         yield return new("VRAM", n.VramTotalBytes is { } t ? $"{GpuDiagnostics.FormatGb(n.VramUsedBytes ?? 0)} de {GpuDiagnostics.FormatGb(t)}" : "—",
-            n.Bar1TotalBytes is { } b ? $"janela BAR1 {b >> 20} MB" : "");
+            n.Bar1TotalBytes is { } b ? Loc.F("Gpu.JanelaBar1NMb", b >> 20) : "");
     }
 
     // ------------------------------------------------------------------ correções (sempre pelo aplicador)
@@ -321,31 +321,31 @@ public sealed class GpuLabPage : ModulePage
             case GpuFixKind.DisplayMode when args is not null:
             {
                 var mode = DisplayMode.TryParse(args["mode"]);
-                var text = $"Trocar {args["device"]} para {mode?.Label}?\n\nÉ a mesma troca de Configurações > Tela > Taxa de atualização, só com um modo que o próprio monitor anuncia. " +
-                           "O driver é consultado antes (teste) e a resolução não muda.\n\n" +
-                           $"Depois de trocar, o NEXUS pergunta se você quer manter. Sem resposta em {KeepChangeCountdown.DefaultSeconds} s (tela preta, cabo antigo), " +
-                           "volta sozinho ao modo de antes, como faz o próprio Windows.";
-                var label = $"{args["device"]} a {mode?.Hz} Hz";
+                var text = Loc.F("Gpu.TrocarNNMesma", args["device"], mode?.Label) +
+                           Loc.T("Gpu.DriverConsultadoAntesTeste") +
+                           Loc.F("Gpu.DepoisTrocarNexusPergunta", KeepChangeCountdown.DefaultSeconds) +
+                           Loc.T("Gpu.VoltaSozinhoModoAntes");
+                var label = Loc.F("Gpu.NNHz", args["device"], mode?.Hz);
                 await ApplyAsync(f.Title, text, new ActionRequest(GpuDiagnostics.DisplayModeAction, null, Copy(args)), BrokerLevel.User, label,
-                    change => StartKeepCountdown(change, mode is null ? "esta taxa" : $"{mode.Hz} Hz"));
+                    change => StartKeepCountdown(change, mode is null ? Loc.T("Gpu.EstaTaxa") : $"{mode.Hz} Hz"));
                 break;
             }
             case GpuFixKind.AppGpuPreference when args is not null:
             {
-                var text = $"Marcar \"alto desempenho\" para:\n{args["exePath"]}\n\nO jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). " +
-                           "É o mesmo ajuste de Configurações > Tela > Elementos gráficos e vale a partir da próxima vez que o jogo abrir.";
-                await ApplyAsync("Usar a GPU dedicada", text, new ActionRequest(GpuDiagnostics.AppPreferenceAction, null, Copy(args)), BrokerLevel.User,
-                    $"Alto desempenho: {System.IO.Path.GetFileName(args["exePath"])}");
+                var text = Loc.F("Gpu.MarcarAltoDesempenhoN", args["exePath"]) +
+                           Loc.T("Gpu.MesmoAjusteConfiguracoesTela");
+                await ApplyAsync(Loc.T("Gpu.UsarGpuDedicada"), text, new ActionRequest(GpuDiagnostics.AppPreferenceAction, null, Copy(args)), BrokerLevel.User,
+                    Loc.F("Gpu.AltoDesempenhoN", System.IO.Path.GetFileName(args["exePath"])));
                 break;
             }
             case GpuFixKind.GameMode:
-                await ApplyAsync("Ligar Modo de Jogo", "Ligar o Modo de Jogo do Windows?\n\nEle dá prioridade ao jogo em primeiro plano e segura atualizações durante a partida.",
-                    new ActionRequest(GpuDiagnostics.GameModeAction), BrokerLevel.User, "Modo de Jogo ligado");
+                await ApplyAsync(Loc.T("Gpu.LigarModoJogo"), Loc.T("Gpu.LigarModoJogoWindows"),
+                    new ActionRequest(GpuDiagnostics.GameModeAction), BrokerLevel.User, Loc.T("Shell.ModoJogoLigado"));
                 break;
             case GpuFixKind.Hags:
-                await ApplyAsync("Ligar HAGS", "Ligar o agendamento de GPU acelerado por hardware?\n\nNecessário para a geração de quadros do DLSS (RTX 40/50). " +
-                    "Exige administrador (o Windows vai pedir permissão e um ponto de restauração é criado) e só vale depois de reiniciar.",
-                    new ActionRequest(GpuDiagnostics.HagsAction, "2"), BrokerLevel.Admin, "HAGS ligado (reinicie para valer)");
+                await ApplyAsync(Loc.T("Gpu.LigarHags"), Loc.T("Gpu.LigarAgendamentoGpuAcelerado") +
+                    Loc.T("Gpu.ExigeAdministradorWindowsVai"),
+                    new ActionRequest(GpuDiagnostics.HagsAction, "2"), BrokerLevel.Admin, Loc.T("Gpu.HagsLigadoReinicieValer"));
                 break;
             case GpuFixKind.OpenLink when args is not null && args.TryGetValue("url", out var url):
                 OpenOfficialPage(url);
@@ -360,9 +360,9 @@ public sealed class GpuLabPage : ModulePage
         // Só as páginas oficiais fixas da biblioteca; o NEXUS nunca baixa nada.
         var allowed = new[] { GpuVendor.Nvidia, GpuVendor.Amd, GpuVendor.Intel }.Select(DriverInfo.OfficialDownloadPage).ToHashSet(StringComparer.Ordinal);
         if (!allowed.Contains(url) || Host is null) return;
-        if (!Host.Confirm("Abrir site oficial", $"Abrir no navegador a página oficial de drivers?\n\n{url}\n\nO NEXUS não baixa nem instala nada: escolha o driver lá, no site do fabricante.")) return;
+        if (!Host.Confirm(Loc.T("Gpu.AbrirSiteOficial"), Loc.F("Gpu.AbrirNavegadorPaginaOficial", url))) return;
         try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose(); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = $"Não foi possível abrir o navegador: {ex.Message}"; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = Loc.F("Asst.NaoFoiPossivelAbrir", ex.Message); }
     }
 
     private async Task ApplyAsync(string title, string text, ActionRequest request, BrokerLevel level, string change, Action<GpuAppliedChange>? applied = null)
@@ -412,7 +412,7 @@ public sealed class GpuLabPage : ModulePage
     /// <summary>"Manter esta taxa? Volta sozinho em 15 s."</summary>
     public string KeepModePrompt => _keep?.Prompt(_keepWhat) ?? "";
     /// <summary>Linha de apoio: o que mudou e o que acontece sem resposta.</summary>
-    public string KeepModeDetail => _keepChange is null ? "" : $"Agora: {_keepChange.Text}. Se a tela ficou preta ou piscando, não faça nada: o modo anterior volta sozinho.";
+    public string KeepModeDetail => _keepChange is null ? "" : Loc.F("Gpu.AgoraNTelaFicou", _keepChange.Text);
     /// <summary>Fração do tempo que resta (1 → 0), para a barra.</summary>
     public double KeepModeFraction => _keep?.Fraction ?? 0;
     public RelayCommand KeepModeCommand => _keepModeCommand ??= new RelayCommand(KeepMode, () => KeepModeAsking);
@@ -431,7 +431,7 @@ public sealed class GpuLabPage : ModulePage
         }
         _keepTimer.Start();
         RaiseKeep();
-        Host?.Notify($"Monitor trocado para {what}. Volta sozinho em {KeepChangeCountdown.DefaultSeconds} s se você não clicar em Manter.");
+        Host?.Notify(Loc.F("Gpu.MonitorTrocadoNVolta", what, KeepChangeCountdown.DefaultSeconds));
     }
 
     private void OnKeepTick()
@@ -448,7 +448,7 @@ public sealed class GpuLabPage : ModulePage
     {
         if (_keep?.Keep() != true) return;
         _keepTimer?.Stop();
-        Message = $"Mantido: {_keepChange?.Text}. Para voltar depois, use Desfazer.";
+        Message = Loc.F("Gpu.MantidoNVoltarDepois", _keepChange?.Text);
         RaiseKeep();
     }
 
@@ -470,14 +470,14 @@ public sealed class GpuLabPage : ModulePage
             var r = await Host.RevertWithoutConfirmationAsync(change.RunId, change.Level);
             if (r is null) return;
             if (r.Response?.FullyRestored == true) Changes.Remove(change);
-            Message = (timedOut ? $"Sem resposta em {KeepChangeCountdown.DefaultSeconds} s: o monitor voltou ao modo anterior. " : "O monitor voltou ao modo anterior. ") + r.Message;
+            Message = (timedOut ? Loc.F("Gpu.SemRespostaNS", KeepChangeCountdown.DefaultSeconds) : Loc.T("Gpu.MonitorVoltouModoAnterior")) + r.Message;
             var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true));
             _report = report;
             Build(report);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            Message = $"Não deu para voltar o modo do monitor sozinho: {ex.Message}. Use Desfazer aqui ou na página Aplicar.";
+            Message = Loc.F("Gpu.NaoDeuVoltarModo", ex.Message);
         }
     }
 
@@ -495,7 +495,7 @@ public sealed class GpuLabPage : ModulePage
     public const string WindowedPerAppAction = "win.windowed-game-optimizations.per-app@1";
     private WindowedGameOption? _selectedWindowedGame;
     private string? _cs2CfgDir, _selectedCs2Fps;
-    private string _cs2Status = "Procurando o Counter-Strike 2 na Steam…";
+    private string _cs2Status = Loc.T("Gpu.ProcurandoCounterStrike2");
     private bool _cs2Found;
 
     public RelayCommand ApplyWindowedCommand { get; }
@@ -523,14 +523,14 @@ public sealed class GpuLabPage : ModulePage
         Cs2Found = cfg is not null;
         if (cfg is null)
         {
-            Cs2Status = "Counter-Strike 2 não encontrado nas bibliotecas da Steam.";
+            Cs2Status = Loc.T("Gpu.CounterStrike2Nao");
             return;
         }
         var (current, dump) = await Task.Run(() => (Cs2Install.ReadFpsMax(cfg), Cs2Install.ReadDump(cfg)));
-        Cs2Status = $"CS2 em {cfg}. fps_max no autoexec.cfg: {current ?? "não definido (o jogo usa o padrão, 400)"}. " +
+        Cs2Status = Loc.F("Gpu.Cs2NFpsMax", cfg, current ?? Loc.T("Gpu.NaoDefinidoJogoUsa")) +
                     (dump is null
-                        ? "Falta a lista de comandos desta versão: abra o CS2 com -condebug nas opções de inicialização da Steam, digite cvarlist no console e feche o jogo. Sem ela o NEXUS não grava (é a prova de que fps_max existe na sua versão)."
-                        : $"Lista de comandos desta versão encontrada ({dump.Count} itens, {dump.SourceDescription}).");
+                        ? Loc.T("Gpu.FaltaListaComandosDesta")
+                        : Loc.F("Gpu.ListaComandosDestaVersao", dump.Count, dump.SourceDescription));
         if (current is not null && Cs2FpsOptions.Contains(current)) SelectedCs2Fps = current;
     }
 
@@ -538,24 +538,24 @@ public sealed class GpuLabPage : ModulePage
     {
         if (Host is null || SelectedWindowedGame is not { } g) return;
         var exe = g.ExePath;
-        var text = $"Ligar \"Otimizações para jogos em janela\" só para:\n{exe}\n\n" +
-                   "O Windows passa a apresentar este jogo no modo flip (menos atraso em janela e sem bordas, e permite G-SYNC/FreeSync em janela). " +
-                   "Só vale para jogos DirectX 10/11 em janela ou sem bordas: em DirectX 12, Vulkan ou tela cheia exclusiva não muda nada. " +
-                   "É a mesma opção de Configurações > Sistema > Tela > Elementos gráficos, por jogo, e vale na próxima vez que o jogo abrir. Desfazer devolve o que era.";
-        await ApplyAsync("Otimizações para jogos em janela neste jogo", text,
+        var text = Loc.F("Gpu.LigarOtimizacoesJogosJanela", exe) +
+                   Loc.T("Gpu.WindowsPassaApresentarEste") +
+                   Loc.T("Gpu.SoValeJogosDirectx") +
+                   Loc.T("Gpu.MesmaOpcaoConfiguracoesSistema");
+        await ApplyAsync(Loc.T("Gpu.OtimizacoesJogosJanelaNeste"), text,
             new ActionRequest(WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = exe }), BrokerLevel.User,
-            $"Janela otimizada: {System.IO.Path.GetFileName(exe)}");
+            Loc.F("Gpu.JanelaOtimizadaN", System.IO.Path.GetFileName(exe)));
     });
 
     private Task ApplyCs2FpsAsync() => RunAsync(async () =>
     {
         if (Host is null || _cs2CfgDir is not { } cfg || SelectedCs2Fps is not { } fps) return;
-        var text = $"Gravar fps_max {fps} no autoexec.cfg do CS2?\n\n{cfg}\n\n" +
-                   (fps == "0" ? "0 tira o limite do jogo. " : "O jogo não passa desse FPS. Com G-SYNC/FreeSync, um limite um pouco abaixo da taxa do monitor (ex.: 141 em 144 Hz) mantém o VRR ativo. ") +
-                   "Só a linha do fps_max muda; o resto do arquivo fica igual. Vale na próxima vez que o jogo abrir (se o CS2 não ler o autoexec sozinho, adicione +exec autoexec nas opções de inicialização). " +
-                   "A Steam Cloud pode sobrescrever o arquivo. Desfazer devolve a linha que havia.";
-        await ApplyAsync("CS2: limite de FPS", text,
-            new ActionRequest(Cs2Install.FpsMaxActionKey, fps, new Dictionary<string, string> { ["cs2CfgDir"] = cfg }), BrokerLevel.User, $"CS2 fps_max {fps}");
+        var text = Loc.F("Gpu.GravarFpsMaxN", fps, cfg) +
+                   (fps == "0" ? Loc.T("Gpu.N0TiraLimiteJogo") : Loc.T("Gpu.JogoNaoPassaDesse")) +
+                   Loc.T("Gpu.SoLinhaFpsMax") +
+                   Loc.T("Gpu.SteamCloudPodeSobrescrever");
+        await ApplyAsync(Loc.T("Gpu.Cs2LimiteFps"), text,
+            new ActionRequest(Cs2Install.FpsMaxActionKey, fps, new Dictionary<string, string> { ["cs2CfgDir"] = cfg }), BrokerLevel.User, Loc.F("Gpu.Cs2FpsMaxN", fps));
     });
 
     // ------------------------------------------------------------------ driver NVIDIA por jogo (perfis DRS)
@@ -563,7 +563,7 @@ public sealed class GpuLabPage : ModulePage
     // Só leitura aqui (INvidiaDrsReader); a gravação é do handler NvidiaDrsSetting no aplicador.
     private readonly INvidiaDrsReader _drs = NvidiaDrsFactory.Reader();
     private bool _nvAvailable, _nvLowLatency, _nvMaxPower, _nvFpsCap, _nvVsync;
-    private string _nvStatus = "Lendo o driver NVIDIA…", _shaderCacheText = "", _nvFpsHint = "";
+    private string _nvStatus = Loc.T("Gpu.LendoDriverNvidia"), _shaderCacheText = "", _nvFpsHint = "";
     private NvGameOption? _selectedNvGame;
     private string? _selectedNvFps;
     private NvChoice? _selectedShaderCache;
@@ -605,10 +605,10 @@ public sealed class GpuLabPage : ModulePage
                 var u = _drs.Unavailable();
                 return (u, u is null ? DescribeSetting(DrsTarget.Base, NvidiaDrsSettings.ShaderCacheMaxSize) : "");
             }
-            catch (Exception ex) when (ex is not OutOfMemoryException) { return ((string?)$"Sem placa/driver NVIDIA utilizável: {ex.Message}", ""); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { return ((string?)Loc.F("Gpu.SemPlacaDriverNvidia", ex.Message), ""); }
         });
         NvAvailable = unavailable is null;
-        NvStatus = unavailable ?? "Driver NVIDIA encontrado. Os ajustes vão para o perfil do jogo no próprio driver, como no Painel de Controle NVIDIA.";
+        NvStatus = unavailable ?? Loc.T("Gpu.DriverNvidiaEncontradoAjustes");
         ShaderCacheText = cache;
 
         var previous = SelectedNvGame?.Exe;
@@ -625,12 +625,12 @@ public sealed class GpuLabPage : ModulePage
         if (monitor is not null && NvidiaDrsSettings.NearestAllowedCap(monitor.Current.Hz, NvidiaDrsActions.FpsCaps) is { } cap)
         {
             SelectedNvFps ??= cap;
-            NvFpsHint = $"Monitor principal a {monitor.Current.Hz} Hz: sugestão {cap} FPS (pelo menos 3 abaixo da taxa, para ficar dentro do G-SYNC).";
+            NvFpsHint = Loc.F("Gpu.MonitorPrincipalNHz", monitor.Current.Hz, cap);
         }
         else
         {
             SelectedNvFps ??= "60";
-            NvFpsHint = "Com G-SYNC, use pelo menos 3 FPS abaixo da taxa do monitor.";
+            NvFpsHint = Loc.T("Gpu.GSyncUsePelo");
         }
         if (NvAvailable && NvGames.Count > 0)
             SelectedNvGame = NvGames.FirstOrDefault(x => x.Exe == previous) ?? NvGames[0];
@@ -643,11 +643,11 @@ public sealed class GpuLabPage : ModulePage
         try
         {
             var r = _drs.Read(target, id);
-            if (!r.ProfileFound) return "padrão do driver (o jogo não tem perfil no driver)";
-            if (!r.InProfile || r.Value is not { } v) return "padrão do driver";
-            return spec.Describe(v) + (r.IsPredefined ? " (definido pela NVIDIA)" : "");
+            if (!r.ProfileFound) return Loc.T("Gpu.PadraoDriverJogoNao");
+            if (!r.InProfile || r.Value is not { } v) return Loc.T("Gpu.PadraoDriver");
+            return spec.Describe(v) + (r.IsPredefined ? Loc.T("Gpu.DefinidoPelaNvidia") : "");
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { return "sem leitura: " + ex.Message; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { return Loc.T("Gpu.SemLeitura2") + ex.Message; }
     }
 
     private async Task ReadNvGameAsync()
@@ -662,9 +662,9 @@ public sealed class GpuLabPage : ModulePage
             try
             {
                 var profile = _drs.Read(target, NvidiaDrsSettings.PrerenderLimit);
-                list.Add(new("Perfil no driver", profile.ProfileFound ? profile.ProfileName ?? "?" : "nenhum (o NEXUS cria \"NEXUS - " + game.Exe + "\")", ""));
+                list.Add(new(Loc.T("Gpu.PerfilDriver"), profile.ProfileFound ? profile.ProfileName ?? "?" : Loc.T("Gpu.NenhumNexusCriaNexus") + game.Exe + "\")", ""));
             }
-            catch (Exception ex) when (ex is not OutOfMemoryException) { list.Add(new("Perfil no driver", "sem leitura", ex.Message)); return list; }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { list.Add(new(Loc.T("Gpu.PerfilDriver"), Loc.T("Gpu.SemLeitura"), ex.Message)); return list; }
             foreach (var id in new[] { NvidiaDrsSettings.PrerenderLimit, NvidiaDrsSettings.PreferredPstate, NvidiaDrsSettings.FrameRateLimit, NvidiaDrsSettings.VsyncMode })
                 list.Add(new(NvidiaDrsSettings.All[id].Name, DescribeSetting(target, id), ""));
             return list;
@@ -682,38 +682,38 @@ public sealed class GpuLabPage : ModulePage
         if (NvLowLatency)
         {
             requests.Add(new ActionRequest(NvidiaDrsActions.LowLatency, null, new Dictionary<string, string> { ["exe"] = exe }));
-            lines.Add("• Modo de baixa latência: ligado (1 quadro na fila; vale em DirectX 9/11 sem Reflex)");
+            lines.Add(Loc.T("Gpu.ModoBaixaLatenciaLigado2"));
         }
         if (NvMaxPower)
         {
             requests.Add(new ActionRequest(NvidiaDrsActions.MaxPower, null, new Dictionary<string, string> { ["exe"] = exe }));
-            lines.Add("• Energia: preferir desempenho máximo (só com este jogo aberto; mais calor e consumo)");
+            lines.Add(Loc.T("Gpu.EnergiaPreferirDesempenhoMaximo"));
         }
         var fps = SelectedNvFps;
         if (NvFpsCap)
         {
-            if (fps is null || !NvidiaDrsActions.FpsCaps.Contains(fps)) { Message = "Escolha um limite de FPS da lista."; return; }
+            if (fps is null || !NvidiaDrsActions.FpsCaps.Contains(fps)) { Message = Loc.T("Gpu.EscolhaLimiteFpsLista"); return; }
             requests.Add(new ActionRequest(NvidiaDrsActions.FpsCap, fps, new Dictionary<string, string> { ["exe"] = exe }));
-            lines.Add($"• Taxa máxima de quadros: {fps} FPS");
+            lines.Add(Loc.F("Gpu.TaxaMaximaQuadrosN", fps));
         }
         if (NvVsync)
         {
             var capInProfile = NvCurrent.Any(r => r.Label == NvidiaDrsSettings.All[NvidiaDrsSettings.FrameRateLimit].Name && r.Value.EndsWith(" FPS", StringComparison.Ordinal));
             if (!NvFpsCap && !capInProfile)
             {
-                Message = "V-Sync no driver só faz sentido com G-SYNC E limite de FPS abaixo da taxa do monitor. Marque também o limite de FPS.";
+                Message = Loc.T("Gpu.VSyncDriverSo");
                 return;
             }
             requests.Add(new ActionRequest(NvidiaDrsActions.VsyncOn, null, new Dictionary<string, string> { ["exe"] = exe }));
-            lines.Add("• V-Sync: ligado no driver (para G-SYNC; desligue o V-Sync dentro do jogo)");
+            lines.Add(Loc.T("Gpu.VSyncLigadoDriver2"));
         }
         if (requests.Count == 0) return;
-        var text = $"Gravar no perfil do driver NVIDIA de {game.Name} ({exe}):\n\n{string.Join("\n", lines)}\n\n" +
-                   "É o mesmo banco de perfis do Painel de Controle NVIDIA. Vale na próxima vez que o jogo abrir. " +
-                   "Exige administrador (o Windows pede permissão e um ponto de restauração é criado). Desfazer devolve o que o perfil tinha.";
-        var r = await Host.ApplyAsync("Aplicar no driver NVIDIA", text, requests, BrokerLevel.Admin);
+        var text = Loc.F("Gpu.GravarPerfilDriverNvidia", game.Name, exe, string.Join("\n", lines)) +
+                   Loc.T("Gpu.MesmoBancoPerfisPainel") +
+                   Loc.T("Gpu.ExigeAdministradorWindowsPede");
+        var r = await Host.ApplyAsync(Loc.T("Gpu.AplicarDriverNvidia"), text, requests, BrokerLevel.Admin);
         if (r is null) return;
-        if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange($"driver NVIDIA em {exe} ({requests.Count} ajuste(s))", run, BrokerLevel.Admin, this));
+        if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange(Loc.F("Gpu.DriverNvidiaNN", exe, requests.Count), run, BrokerLevel.Admin, this));
         Message = StartupPage.Describe(r);
         await ReadNvGameAsync();
     });
@@ -721,12 +721,12 @@ public sealed class GpuLabPage : ModulePage
     private Task ApplyShaderCacheAsync() => RunAsync(async () =>
     {
         if (Host is null || SelectedShaderCache is not { } choice) return;
-        var text = $"Mudar o tamanho do cache de sombreador do driver NVIDIA para {choice.Label} (perfil global)?\n\n" +
-                   "O driver guarda os sombreadores já compilados dos jogos; quando o cache enche, apaga os antigos e o jogo volta a compilar durante a partida (travadinhas). " +
-                   "Não aumenta FPS. A pasta do cache (%LOCALAPPDATA%\\NVIDIA\\DXCache) pode crescer muitos GB. Exige administrador; Desfazer devolve o tamanho anterior.";
-        var r = await Host.ApplyAsync("Cache de sombreador NVIDIA", text, [new ActionRequest(NvidiaDrsActions.ShaderCache, choice.Value)], BrokerLevel.Admin);
+        var text = Loc.F("Gpu.MudarTamanhoCacheSombreador", choice.Label) +
+                   Loc.T("Gpu.DriverGuardaSombreadoresJa") +
+                   Loc.T("Gpu.NaoAumentaFpsPasta");
+        var r = await Host.ApplyAsync(Loc.T("Gpu.CacheSombreadorNvidia"), text, [new ActionRequest(NvidiaDrsActions.ShaderCache, choice.Value)], BrokerLevel.Admin);
         if (r is null) return;
-        if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange($"cache de sombreador NVIDIA: {choice.Label}", run, BrokerLevel.Admin, this));
+        if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange(Loc.F("Gpu.CacheSombreadorNvidiaN", choice.Label), run, BrokerLevel.Admin, this));
         Message = StartupPage.Describe(r);
         ShaderCacheText = await Task.Run(() => DescribeSetting(DrsTarget.Base, NvidiaDrsSettings.ShaderCacheMaxSize));
     });
@@ -750,7 +750,7 @@ public sealed class GpuLabPage : ModulePage
         {
             for (var i = RecordDelaySeconds; i > 0 && !cts.IsCancellationRequested; i--)
             {
-                RecordStatus = $"Começa em {i} s: volte para o jogo e jogue normalmente.";
+                RecordStatus = Loc.F("Gpu.ComecaNSVolte", i);
                 await Delay(1000, cts.Token);
             }
             var nvIndex = await Task.Run(() => NvidiaIndex(gpu));
@@ -766,8 +766,8 @@ public sealed class GpuLabPage : ModulePage
                 Samples = samples.ToList();
                 Bands = RecordingAnalyzer.Bands(samples);
                 RecordProgress = Math.Min(1, t / RecordSeconds);
-                RecordStatus = $"Gravando {t:0}/{RecordSeconds} s" + (sample?.GraphicsClockMhz is { } c ? $" · {c:0} MHz" : "") +
-                               (sample?.UtilizationPercent is { } u ? $" · uso {u:0}%" : "") + (sample?.TemperatureC is { } tc ? $" · {tc:0} °C" : "");
+                RecordStatus = Loc.F("Gpu.GravandoNNS", t, RecordSeconds) + (sample?.GraphicsClockMhz is { } c ? Loc.F("Gpu.NMhz", c) : "") +
+                               (sample?.UtilizationPercent is { } u ? Loc.F("Gpu.UsoN2", u) : "") + (sample?.TemperatureC is { } tc ? $" · {tc:0} °C" : "");
                 nextTick += 1000;
                 var wait = nextTick - clock.ElapsedMilliseconds;
                 if (wait > 0) await Delay((int)wait, cts.Token);
@@ -776,7 +776,7 @@ public sealed class GpuLabPage : ModulePage
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            RecordStatus = $"A gravação parou: {ex.Message}";
+            RecordStatus = Loc.F("Gpu.GravacaoParouN", ex.Message);
         }
         finally
         {
@@ -822,11 +822,11 @@ public sealed class GpuLabPage : ModulePage
         VerdictTone = a.VerdictLevel;
         RecordFindings.Clear();
         foreach (var f in a.Findings)
-            RecordFindings.Add(new GpuFindingRow(new GpuFinding("rec." + f.Title, f.Level, f.Title, f.Evidence, "NVML durante a gravação", f.Advice ?? ""), this));
-        var summary = new List<string> { $"{a.Samples} s gravados, {a.LoadSamples} com a GPU trabalhando (uso ≥ {RecordingAnalyzer.LoadThresholdPercent:0}%)" };
-        if (a.AvgClockUnderLoad is { } c) summary.Add($"clock médio {c:0} MHz");
-        if (a.AvgPowerUnderLoad is { } p) summary.Add($"potência média {p:0} W");
-        if (a.MaxTemperature is { } t) summary.Add($"máxima {t:0} °C");
+            RecordFindings.Add(new GpuFindingRow(new GpuFinding("rec." + f.Title, f.Level, f.Title, f.Evidence, Loc.T("Gpu.NvmlDuranteGravacao"), f.Advice ?? ""), this));
+        var summary = new List<string> { Loc.F("Gpu.NSGravadosN", a.Samples, a.LoadSamples, RecordingAnalyzer.LoadThresholdPercent) };
+        if (a.AvgClockUnderLoad is { } c) summary.Add(Loc.F("Gpu.ClockMedioNMhz", c));
+        if (a.AvgPowerUnderLoad is { } p) summary.Add(Loc.F("Gpu.PotenciaMediaNW", p));
+        if (a.MaxTemperature is { } t) summary.Add(Loc.F("Gpu.MaximaNC", t));
         RecordStatus = string.Join(" · ", summary) + ".";
     }
 }
@@ -872,14 +872,14 @@ public sealed class GpuAdapterRow
     {
         ArgumentNullException.ThrowIfNull(a);
         Name = a.Name;
-        var role = a.IsHighPerformance ? "alto desempenho" : a.IsMinimumPower ? "economia de energia" : "";
-        Kind = (a.IsIntegrated ? "integrada" : "dedicada") + (role.Length > 0 ? " · " + role : "");
-        Architecture = a.Architecture == GpuArchitecture.Unknown ? "arquitetura não identificada" : $"{a.Architecture.Name} · {a.Architecture.Family}";
+        var role = a.IsHighPerformance ? Loc.T("Gpu.AltoDesempenho") : a.IsMinimumPower ? Loc.T("Gpu.EconomiaEnergia") : "";
+        Kind = (a.IsIntegrated ? Loc.T("Drv.Integrada") : Loc.T("Drv.Dedicada")) + (role.Length > 0 ? " · " + role : "");
+        Architecture = a.Architecture == GpuArchitecture.Unknown ? Loc.T("Gpu.ArquiteturaNaoIdentificada") : $"{a.Architecture.Name} · {a.Architecture.Family}";
         var v = a.DriverInfoDecoded;
-        Driver = (v.VendorVersion is { } vv ? $"driver {vv} ({v.WindowsVersion})" : string.IsNullOrEmpty(v.WindowsVersion) ? "driver não informado" : $"driver {v.WindowsVersion}") +
+        Driver = (v.VendorVersion is { } vv ? Loc.F("Gpu.DriverNN", vv, v.WindowsVersion) : string.IsNullOrEmpty(v.WindowsVersion) ? Loc.T("Gpu.DriverNaoInformado") : Loc.F("Gpu.DriverN", v.WindowsVersion)) +
                  (a.DriverDate is { } d ? $" de {d.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)}" : "");
-        Memory = a.DedicatedVideoBytes > 0 ? $"{GpuDiagnostics.FormatGb(a.DedicatedVideoBytes)} dedicada" : "sem memória dedicada";
-        Ids = $"PCI {a.VendorId:X4}:{a.DeviceId:X4} · subsistema {a.SubSysId:X8} · LUID {a.Luid:X}";
+        Memory = a.DedicatedVideoBytes > 0 ? Loc.F("Gpu.NDedicada", GpuDiagnostics.FormatGb(a.DedicatedVideoBytes)) : Loc.T("Gpu.SemMemoriaDedicada");
+        Ids = Loc.F("Gpu.PciNNSubsistema", a.VendorId, a.DeviceId, a.SubSysId, a.Luid);
     }
 
     public string Name { get; }
@@ -897,16 +897,16 @@ public sealed class GpuMonitorRow
     {
         ArgumentNullException.ThrowIfNull(m);
         ArgumentNullException.ThrowIfNull(page);
-        Name = !string.IsNullOrWhiteSpace(m.FriendlyName) ? m.FriendlyName : m.Internal ? "Tela do notebook" : m.Device;
+        Name = !string.IsNullOrWhiteSpace(m.FriendlyName) ? m.FriendlyName : m.Internal ? Loc.T("Gpu.TelaNotebook") : m.Device;
         Mode = m.Current.Label;
-        Max = m.Advice.Best is { } b ? $"máximo nesta resolução: {b.Hz} Hz" : "";
+        Max = m.Advice.Best is { } b ? Loc.F("Gpu.MaximoNestaResolucaoN", b.Hz) : "";
         Detail = string.Join(" · ", new[]
         {
             m.Device + (m.Primary ? " (principal)" : ""),
             m.Connection,
-            string.IsNullOrEmpty(m.AdapterName) ? "" : "desenhado pela " + m.AdapterName,
-            m.HdrSupported == true ? (m.HdrEnabled == true ? "HDR ligado" : "HDR disponível (desligado)") : m.HdrSupported == false ? "sem HDR" : "",
-            m.BitsPerColor is { } bpc ? $"{bpc} bits por cor" : "",
+            string.IsNullOrEmpty(m.AdapterName) ? "" : Loc.T("Gpu.DesenhadoPela") + m.AdapterName,
+            m.HdrSupported == true ? (m.HdrEnabled == true ? Loc.T("Gpu.HdrLigado") : Loc.T("Gpu.HdrDisponivelDesligado")) : m.HdrSupported == false ? Loc.T("Gpu.SemHdr") : "",
+            m.BitsPerColor is { } bpc ? Loc.F("Gpu.NBitsCor", bpc) : "",
         }.Where(s => !string.IsNullOrEmpty(s)));
         Tone = m.Advice.BelowMaxRefresh ? "warn" : "good";
         CurrentHz = m.Current.Hz;
@@ -927,7 +927,7 @@ public sealed class GpuMonitorRow
     public double CurrentHz { get; }
     public double MaxHz { get; }
     public bool IsBelowMax { get; }
-    public string StatusText => IsBelowMax ? "Abaixo do que o monitor aguenta" : "Na taxa máxima";
+    public string StatusText => IsBelowMax ? Loc.T("Gpu.AbaixoMonitorAguenta") : Loc.T("Gpu.TaxaMaxima");
     public GpuFinding? Fix { get; }
     public bool HasFix => Fix is not null;
     public string FixLabel { get; }
@@ -949,14 +949,14 @@ public sealed class GpuFindingRow
     public string Title => Finding.Title;
     public string Evidence => Finding.Evidence;
     public string Advice => Finding.Advice;
-    public string Source => "Fonte: " + Finding.Source;
+    public string Source => Loc.T("Gpu.Fonte") + Finding.Source;
     public string Tone => Finding.Level;
     public UiTone ToneKind => GpuTones.Of(Finding.Level);
     public string IconKey => GpuTones.IconOf(Finding.Level);
-    public string LevelText => Finding.Level switch { "bad" => "Problema", "warn" => "Atenção", "good" => "Tudo certo", _ => "Para saber" };
+    public string LevelText => Finding.Level switch { "bad" => Loc.T("Gpu.Problema"), "warn" => Loc.T("Gpu.Atencao"), "good" => Loc.T("Gpu.TudoCerto"), _ => Loc.T("Pg.Saber") };
     public bool HasAdvice => !string.IsNullOrWhiteSpace(Finding.Advice);
     public bool HasFix => Finding.Fix != GpuFixKind.None;
-    public string FixLabel => Finding.FixLabel ?? "Corrigir";
+    public string FixLabel => Finding.FixLabel ?? Loc.T("Gpu.Corrigir");
     public RelayCommand FixCommand { get; }
 }
 
@@ -969,7 +969,7 @@ public sealed class GpuGameRow
         ArgumentNullException.ThrowIfNull(page);
         Name = g.Name;
         Store = g.Store;
-        Exe = g.ExePath is null ? "executável não encontrado" : g.ExePath + (g.ExePathSure ? "" : " (provável)");
+        Exe = g.ExePath is null ? Loc.T("Gpu.ExecutavelNaoEncontrado") : g.ExePath + (g.ExePathSure ? "" : Loc.T("Gpu.Provavel"));
         Preference = GameLibraries.PreferenceLabel(preference);
         IsHigh = preference == 2;
         Fix = fix;
@@ -991,12 +991,12 @@ public sealed class GpuGameRow
 public sealed record WindowedGameOption(string Name, string ExePath, int? SwapEffectUpgrade, bool ExeSure)
 {
     public bool IsOn => SwapEffectUpgrade == 1;
-    public string Label => Name + (ExeSure ? "" : " (executável provável)");
+    public string Label => Name + (ExeSure ? "" : Loc.T("Gpu.ExecutavelProvavel"));
     public string StateText => SwapEffectUpgrade switch
     {
-        1 => "Já ligado para este jogo.",
-        0 => "Desligado para este jogo (alguém marcou \"não\").",
-        _ => "Segue a opção geral do Windows (sem escolha própria).",
+        1 => Loc.T("Gpu.JaLigadoEsteJogo"),
+        0 => Loc.T("Gpu.DesligadoEsteJogoAlguem"),
+        _ => Loc.T("Gpu.SegueOpcaoGeralWindows"),
     } + " " + ExePath;
 }
 
@@ -1021,7 +1021,7 @@ public sealed class GpuAppliedChange
 /// <summary>Jogo com executável conhecido, para os ajustes do driver NVIDIA (só o nome do arquivo vai para o perfil).</summary>
 public sealed record NvGameOption(string Name, string Exe, bool ExeSure)
 {
-    public string Label => ExeSure ? $"{Name} ({Exe})" : $"{Name} ({Exe}, provável)";
+    public string Label => ExeSure ? $"{Name} ({Exe})" : Loc.F("Gpu.NNProvavel", Name, Exe);
 }
 
 /// <summary>Opção com valor do catálogo e rótulo.</summary>

@@ -743,6 +743,436 @@ Pede permissão de administrador (aviso do Windows) e cria um ponto de restaura�
 </value></data>
   <data name="Clean.VoltaEsvaziar" xml:space="preserve"><value>Volta ao esvaziar.</value></data>
   <data name="Clean.WindowsVoceVeEscolhe" xml:space="preserve"><value>Windows (você vê e escolhe). O NEXUS não roda DISM /StartComponentCleanup: remove na hora as versões antigas, sem a espera </value></data>
+  <data name="Drv.AbrirAtualizacoesOpcionais" xml:space="preserve"><value>Abrir atualizações opcionais</value></data>
+  <data name="Drv.AbrirN" xml:space="preserve"><value>Abrir {0}</value></data>
+  <data name="Drv.AbrirNAppOficial" xml:space="preserve"><value>Abrir o {0}? É o app oficial do fabricante, já instalado no PC; nele você vê e instala drivers da placa de vídeo.</value></data>
+  <data name="Drv.AbrirNavegadorPaginaOficial" xml:space="preserve"><value>Abrir no navegador a página oficial da Microsoft sobre "{0}"?
+
+{1}</value></data>
+  <data name="Drv.AbrirNavegadorPaginaOficial2" xml:space="preserve"><value>Abrir no navegador a página oficial de drivers da {0}?
+
+{1}
+
+</value></data>
+  <data name="Drv.AbrirWindowsUpdate" xml:space="preserve"><value>Abrir Windows Update</value></data>
+  <data name="Drv.AchadasPeloWindowsUpdate" xml:space="preserve"><value>Achadas pelo Windows Update agora. Instalar guarda o driver atual para Desfazer.</value></data>
+  <data name="Drv.AdrenalinNN" xml:space="preserve"><value>Adrenalin {0}  ({1})</value></data>
+  <data name="Drv.AlgoEstranhoVolteDriver" xml:space="preserve"><value>Algo estranho? Volte ao driver anterior.</value></data>
+  <data name="Drv.AssinaturaConferidaNInstalando" xml:space="preserve"><value>Assinatura conferida: {0}. Instalando pelo aplicador…</value></data>
+  <data name="Drv.AssistenteAmdAbertoSiga" xml:space="preserve"><value>Assistente da AMD aberto. Siga a janela dele; depois volte aqui e clique em Procurar versão nova.</value></data>
+  <data name="Drv.AssistenteOficialAmd" xml:space="preserve"><value>Assistente oficial da AMD</value></data>
+  <data name="Drv.AtualizacoesDriver" xml:space="preserve"><value>Atualizações de driver</value></data>
+  <data name="Drv.AtualizarDrivers" xml:space="preserve"><value>Atualizar drivers</value></data>
+  <data name="Drv.BaixandoAssistenteAmd" xml:space="preserve"><value>Baixando o assistente da AMD…</value></data>
+  <data name="Drv.BaixandoServidorOficial" xml:space="preserve"><value>Baixando do servidor oficial da </value></data>
+  <data name="Drv.BaixarAbrirAssistenteOficial" xml:space="preserve"><value>Baixar e abrir o assistente oficial da AMD</value></data>
+  <data name="Drv.BaixarAutoDetectAnd" xml:space="preserve"><value>Baixar o "Auto-Detect and Install" do servidor oficial da AMD (~50 MB) e abrir?
+
+</value></data>
+  <data name="Drv.BaixarInstalar" xml:space="preserve"><value>Baixar e instalar</value></data>
+  <data name="Drv.BaixarInstalarNN" xml:space="preserve"><value>Baixar e instalar {0} ({1})</value></data>
+  <data name="Drv.BuscaCancelada" xml:space="preserve"><value>Busca cancelada.</value></data>
+  <data name="Drv.BuscaConcluidaNS" xml:space="preserve"><value>Busca concluída em {0:0} s, às {1:HH:mm}.</value></data>
+  <data name="Drv.BuscaNaoTerminou" xml:space="preserve"><value>A busca não terminou.</value></data>
+  <data name="Drv.BuscaUsaProprioWindows" xml:space="preserve"><value>A busca usa o próprio Windows Update. Nada é instalado sem você escolher.</value></data>
+  <data name="Drv.BuscaUsaProprioWindows2" xml:space="preserve"><value>A busca usa o próprio Windows Update e leva de 30 s a alguns minutos.</value></data>
+  <data name="Drv.CancelarBusca" xml:space="preserve"><value>Cancelar busca</value></data>
+  <data name="Drv.CliqueProcurarAtualizacoesBusca" xml:space="preserve"><value>Clique em Procurar atualizações. A busca usa o próprio Windows Update e pode levar alguns minutos.</value></data>
+  <data name="Drv.ComoNexusBaixaInstala" xml:space="preserve"><value>Como o NEXUS baixa e instala o driver de vídeo?</value></data>
+  <data name="Drv.CompareVersaoFabricanteAntes" xml:space="preserve"><value>Compare a versão com a do fabricante antes de instalar.</value></data>
+  <data name="Drv.ConferindoAssinatura" xml:space="preserve"><value>Conferindo assinatura…</value></data>
+  <data name="Drv.ConfirmacaoListaTudoAntes" xml:space="preserve"><value>Uma confirmação lista tudo antes. Pede administrador. O Windows pode pedir reinício.</value></data>
+  <data name="Drv.CriaPontoRestauracaoGuarda" xml:space="preserve"><value>Cria um ponto de restauração e guarda o driver atual.</value></data>
+  <data name="Drv.DataNaoInformada" xml:space="preserve"><value>data não informada</value></data>
+  <data name="Drv.De" xml:space="preserve"><value> · de </value></data>
+  <data name="Drv.Dedicada" xml:space="preserve"><value>dedicada</value></data>
+  <data name="Drv.Desfazer" xml:space="preserve"><value>Desfazer: </value></data>
+  <data name="Drv.DesfazerN" xml:space="preserve"><value>Desfazer ({0})</value></data>
+  <data name="Drv.DesfazerNaoTerminou" xml:space="preserve"><value>Desfazer não terminou: </value></data>
+  <data name="Drv.DesfazerNaoTerminouTodos" xml:space="preserve"><value>Desfazer não terminou para todos: veja o motivo em cada linha (ou use a Restauração do Sistema).</value></data>
+  <data name="Drv.DesfazerVoltarDriverAnterior" xml:space="preserve"><value>Desfazer (voltar ao driver anterior)</value></data>
+  <data name="Drv.DetalhesAtualizacao" xml:space="preserve"><value>Detalhes da atualização</value></data>
+  <data name="Drv.DetalhesN" xml:space="preserve"><value>Detalhes: {0}</value></data>
+  <data name="Drv.Dias" xml:space="preserve"><value>dias</value></data>
+  <data name="Drv.DispositivosSemDriver" xml:space="preserve"><value>Dispositivos sem driver</value></data>
+  <data name="Drv.DownloadCancelado" xml:space="preserve"><value>Download cancelado.</value></data>
+  <data name="Drv.DownloadPausadoBaixarInstalar" xml:space="preserve"><value>Download pausado. "Baixar e instalar" continua de onde parou.</value></data>
+  <data name="Drv.DriverAnteriorFoiGuardado" xml:space="preserve"><value>O driver anterior foi guardado. Algo estranho? Volte para ele.</value></data>
+  <data name="Drv.DriverAnteriorReinstalado" xml:space="preserve"><value>driver anterior reinstalado</value></data>
+  <data name="Drv.DriverAnteriorReinstaladoTela" xml:space="preserve"><value>Driver anterior reinstalado. Se a tela ficar estranha, reinicie o PC.</value></data>
+  <data name="Drv.DriverNInstaladoDriver" xml:space="preserve"><value>Driver {0} instalado. Driver anterior guardado para Desfazer.</value></data>
+  <data name="Drv.DriverNJaEstava" xml:space="preserve"><value>O driver {0} já estava instalado.</value></data>
+  <data name="Drv.DriversAnterioresReinstaladosAlgo" xml:space="preserve"><value>Drivers anteriores reinstalados. Se algo ainda estiver estranho, reinicie o PC.</value></data>
+  <data name="Drv.DriversOficiaisPeloWindows" xml:space="preserve"><value>Drivers oficiais pelo Windows Update e o driver de vídeo direto da NVIDIA e da AMD.</value></data>
+  <data name="Drv.EscolhaMaximoNAtualizacoes" xml:space="preserve"><value>Escolha no máximo {0} atualizações por vez.</value></data>
+  <data name="Drv.FalhouNadaMudou" xml:space="preserve"><value>falhou (nada mudou)</value></data>
+  <data name="Drv.HardwareId" xml:space="preserve"><value>Hardware ID </value></data>
+  <data name="Drv.IdadeDriver" xml:space="preserve"><value>Idade do driver</value></data>
+  <data name="Drv.IncluirInstalacaoN" xml:space="preserve"><value>Incluir na instalação: {0}</value></data>
+  <data name="Drv.IncluirInstalarSelecionadas" xml:space="preserve"><value>Incluir em Instalar selecionadas</value></data>
+  <data name="Drv.Instala" xml:space="preserve"><value>Instala</value></data>
+  <data name="Drv.InstalacaoCanceladaInstaladorBaixado" xml:space="preserve"><value>Instalação cancelada. O instalador baixado fica guardado para a próxima vez.</value></data>
+  <data name="Drv.InstaladaDriverAnteriorGuardado" xml:space="preserve"><value>instalada · driver anterior guardado</value></data>
+  <data name="Drv.InstaladorAmdNaoNexus" xml:space="preserve"><value>(é o instalador da AMD, não o NEXUS: o Desfazer do NEXUS não cobre essa instalação; o próprio Windows mantém o driver anterior em Gerenciador de Dispositivos &gt; Reverter driver).</value></data>
+  <data name="Drv.InstalandoPeloWindowsUpdate" xml:space="preserve"><value>instalando pelo Windows Update…</value></data>
+  <data name="Drv.Instalar" xml:space="preserve"><value>Instalar</value></data>
+  <data name="Drv.InstalarDriver" xml:space="preserve"><value>Instalar driver</value></data>
+  <data name="Drv.InstalarDriverNN" xml:space="preserve"><value>Instalar driver {0} {1}</value></data>
+  <data name="Drv.InstalarDriversN" xml:space="preserve"><value>Instalar drivers ({0})</value></data>
+  <data name="Drv.InstalarN" xml:space="preserve"><value>Instalar: {0}</value></data>
+  <data name="Drv.InstalarSelecionadas" xml:space="preserve"><value>Instalar selecionadas</value></data>
+  <data name="Drv.InstalarTodasN" xml:space="preserve"><value>Instalar todas ({0})</value></data>
+  <data name="Drv.Integrada" xml:space="preserve"><value>integrada</value></data>
+  <data name="Drv.InterrompidoVejaAplicarRecuperar" xml:space="preserve"><value>interrompido (veja Aplicar &gt; Recuperar)</value></data>
+  <data name="Drv.JaEstavaInstalada" xml:space="preserve"><value>já estava instalada</value></data>
+  <data name="Drv.MarcarTodas" xml:space="preserve"><value>Marcar todas</value></data>
+  <data name="Drv.MarqueQuerOpcionaisSo" xml:space="preserve"><value>Marque o que quer. Opcionais só se algo não funciona.</value></data>
+  <data name="Drv.MudouEnquantoIssoNada" xml:space="preserve"><value>mudou enquanto isso; nada feito</value></data>
+  <data name="Drv.NaoAplica" xml:space="preserve"><value>não se aplica</value></data>
+  <data name="Drv.NaoDeuConsultarFabricante" xml:space="preserve"><value>Não deu para consultar o fabricante: </value></data>
+  <data name="Drv.NaoFoiPossivelConcluir" xml:space="preserve"><value>Não foi possível concluir: </value></data>
+  <data name="Drv.NaoFoiPossivelConsultar" xml:space="preserve"><value>Não foi possível consultar o Windows Update.</value></data>
+  <data name="Drv.NaoPrecisaBotaoBaixar" xml:space="preserve"><value>Não precisa: o botão "Baixar e instalar" do NEXUS já baixa do servidor oficial e instala. Use a página para ver notas de versão ou escolher outra versão.</value></data>
+  <data name="Drv.NaoProcurado" xml:space="preserve"><value>Não procurado</value></data>
+  <data name="Drv.NaoVoltouN" xml:space="preserve"><value>não voltou: {0}</value></data>
+  <data name="Drv.NAtualizacaoOesDriver" xml:space="preserve"><value>{0} atualização(ões) de driver: {1} recomendada(s), {2} opcional(is), {3} de vídeo.</value></data>
+  <data name="Drv.NDesativadoSVoce" xml:space="preserve"><value> {0} desativado(s) por você ou pelo BIOS não entra(m) na conta.</value></data>
+  <data name="Drv.NDispositivos" xml:space="preserve"><value>{0} dispositivos</value></data>
+  <data name="Drv.NDriverS" xml:space="preserve"><value>{0} driver(s)</value></data>
+  <data name="Drv.NDriverSInstalado" xml:space="preserve"><value>{0} driver(s) instalado(s).</value></data>
+  <data name="Drv.NenhumDispositivoSemDriver" xml:space="preserve"><value>Nenhum dispositivo sem driver ({0} conferidos).</value></data>
+  <data name="Drv.NexusConfereAssinaturaDigital" xml:space="preserve"><value>O NEXUS confere a assinatura digital da AMD antes de abrir. A janela do instalador da AMD aparece e você escolhe o que instalar </value></data>
+  <data name="Drv.NNDias" xml:space="preserve"><value>de {0} · {1} dias</value></data>
+  <data name="Drv.NNInstaladoS" xml:space="preserve"><value>{0} de {1} instalado(s); veja o motivo em cada linha.</value></data>
+  <data name="Drv.NNServidorOficial" xml:space="preserve"><value>{0}{1} · servidor oficial {2}</value></data>
+  <data name="Drv.NSemDriverN" xml:space="preserve"><value>{0} sem driver, {1} com driver que não carrega.</value></data>
+  <data name="Drv.Opcionais" xml:space="preserve"><value>opcionais</value></data>
+  <data name="Drv.Opcionais2" xml:space="preserve"><value>Opcionais</value></data>
+  <data name="Drv.Opcional" xml:space="preserve"><value>opcional</value></data>
+  <data name="Drv.PaginaOficialDrivers" xml:space="preserve"><value>Página oficial de drivers</value></data>
+  <data name="Drv.PaginaOficialN" xml:space="preserve"><value>Página oficial da {0}</value></data>
+  <data name="Drv.PausarDownload" xml:space="preserve"><value>Pausar download</value></data>
+  <data name="Drv.PerguntaWindowsUpdateSo" xml:space="preserve"><value>Pergunta ao Windows Update. Só versões testadas para o seu PC.</value></data>
+  <data name="Drv.PlacaVideoPeloWindows" xml:space="preserve"><value>Placa de vídeo (pelo Windows Update)</value></data>
+  <data name="Drv.PodeMudarPaginaBusca" xml:space="preserve"><value> Pode mudar de página: a busca continua.</value></data>
+  <data name="Drv.Procura" xml:space="preserve"><value>Procura</value></data>
+  <data name="Drv.Procurando" xml:space="preserve"><value>Procurando…</value></data>
+  <data name="Drv.ProcurandoVersaoMaisNova" xml:space="preserve"><value>Procurando a versão mais nova no site do fabricante…</value></data>
+  <data name="Drv.ProcurandoWindowsUpdate" xml:space="preserve"><value>Procurando no Windows Update…</value></data>
+  <data name="Drv.ProcurandoWindowsUpdateN" xml:space="preserve"><value>Procurando no Windows Update… {0:0} s (até {1:0} min)</value></data>
+  <data name="Drv.ProcurarVersaoNova" xml:space="preserve"><value>Procurar versão nova</value></data>
+  <data name="Drv.QuandoAtualizar" xml:space="preserve"><value>Quando atualizar?</value></data>
+  <data name="Drv.Recomendada" xml:space="preserve"><value>recomendada</value></data>
+  <data name="Drv.Recomendadas" xml:space="preserve"><value>recomendadas</value></data>
+  <data name="Drv.RecomendadasPeloWindows" xml:space="preserve"><value>Recomendadas pelo Windows</value></data>
+  <data name="Drv.ReiniciePcConcluir" xml:space="preserve"><value> Reinicie o PC para concluir.</value></data>
+  <data name="Drv.SemDesfazerAutomatico" xml:space="preserve"><value>Sem desfazer automático: </value></data>
+  <data name="Drv.SemDesfazerAutomatico2" xml:space="preserve"><value>sem desfazer automático</value></data>
+  <data name="Drv.SoAparelhoEstiverProblema" xml:space="preserve"><value>Só se um aparelho estiver com problema ou o fabricante pedir.</value></data>
+  <data name="Drv.SoFontesOficiaisProprio" xml:space="preserve"><value>Só fontes oficiais: o próprio Windows Update e os servidores da NVIDIA e da AMD (com a assinatura digital conferida). Nada de 'driver booster'. Atualizar driver corrige falhas e compatibilidade; não deixa o PC mais rápido por si só. Se está tudo funcionando, não é obrigatório.</value></data>
+  <data name="Drv.SuaPlacaVideo" xml:space="preserve"><value>Sua placa de vídeo</value></data>
+  <data name="Drv.TemDesfazer" xml:space="preserve"><value>tem desfazer</value></data>
+  <data name="Drv.TestadasPelaMicrosoftSeu" xml:space="preserve"><value>Testadas pela Microsoft para o seu hardware.</value></data>
+  <data name="Drv.TudoDia" xml:space="preserve"><value>Tudo em dia.</value></data>
+  <data name="Drv.UseRestauracaoSistemaPonto" xml:space="preserve"><value> Use a Restauração do Sistema (ponto criado antes de instalar).</value></data>
+  <data name="Drv.Versao" xml:space="preserve"><value>Versão </value></data>
+  <data name="Drv.VersaoMaisNovaVem" xml:space="preserve"><value>A versão mais nova vem da consulta oficial da NVIDIA (a mesma do site nvidia.com/drivers) ou da página oficial de drivers da AMD. O download sai só dos servidores do fabricante (us.download.nvidia.com, drivers.amd.com), com progresso aqui. Antes de executar, o NEXUS confere a assinatura digital (tem que ser da NVIDIA ou da AMD) e, no aplicador com administrador, confere de novo numa cópia protegida. Assinatura inválida: o arquivo é apagado e nunca roda. O driver atual é guardado e há Desfazer; o Windows cria um ponto de restauração. Em notebook com placa NVIDIA + integrada (Optimus), o driver da NVIDIA é suportado; na integrada AMD, a AMD recomenda o driver do fabricante do notebook se algo falhar.</value></data>
+  <data name="Drv.VezesWindowsUpdateOferece" xml:space="preserve"><value>Às vezes o Windows Update oferece um driver de vídeo MAIS ANTIGO que o do site do fabricante. Nesse caso, não instale.</value></data>
+  <data name="Drv.Video" xml:space="preserve"><value>de vídeo</value></data>
+  <data name="Drv.WindowsEstaEsperandoReinicio" xml:space="preserve"><value>O Windows está esperando um reinício (de uma atualização anterior). Reinicie antes de instalar mais drivers: alguns só valem depois disso.</value></data>
+  <data name="Drv.WindowsUpdateNaoOfereceu" xml:space="preserve"><value> O Windows Update não ofereceu driver para {0} dispositivo(s) sem driver: veja o site do fabricante (cartão "Dispositivos sem driver").</value></data>
+  <data name="Drv.WindowsUpdateNaoTem" xml:space="preserve"><value>O Windows Update não tem atualização de driver para este PC agora. Isso é normal: o Windows só oferece versões testadas para o seu hardware.</value></data>
+  <data name="Gpu.AbaixoMonitorAguenta" xml:space="preserve"><value>Abaixo do que o monitor aguenta</value></data>
+  <data name="Gpu.AbraJogo" xml:space="preserve"><value>Abra o jogo</value></data>
+  <data name="Gpu.AbraJogoVolteAqui" xml:space="preserve"><value>Abra um jogo, volte aqui e clique em Gravar. Você tem 10 s para voltar ao jogo; o NEXUS observa 60 s.</value></data>
+  <data name="Gpu.AbrirNavegadorPaginaOficial" xml:space="preserve"><value>Abrir no navegador a página oficial de drivers?
+
+{0}
+
+O NEXUS não baixa nem instala nada: escolha o driver lá, no site do fabricante.</value></data>
+  <data name="Gpu.AbrirSiteOficial" xml:space="preserve"><value>Abrir site oficial</value></data>
+  <data name="Gpu.AceitaNHzNesta" xml:space="preserve"><value>Aceita {0} Hz nesta resolução.</value></data>
+  <data name="Gpu.AconteceDepoisFormatarOu" xml:space="preserve"><value>Acontece depois de formatar ou trocar o cabo. A troca é a mesma de Configurações › Tela › Taxa de atualização.</value></data>
+  <data name="Gpu.AgendamentoHardwareHags" xml:space="preserve"><value>Agendamento por hardware (HAGS)</value></data>
+  <data name="Gpu.AgoraHz" xml:space="preserve"><value>Agora (Hz)</value></data>
+  <data name="Gpu.AgoraNTelaFicou" xml:space="preserve"><value>Agora: {0}. Se a tela ficou preta ou piscando, não faça nada: o modo anterior volta sozinho.</value></data>
+  <data name="Gpu.AjustesJogo" xml:space="preserve"><value>Ajustes por jogo</value></data>
+  <data name="Gpu.AltoDesempenho" xml:space="preserve"><value>alto desempenho</value></data>
+  <data name="Gpu.AltoDesempenhoN" xml:space="preserve"><value>Alto desempenho: {0}</value></data>
+  <data name="Gpu.AlvoMaxNC" xml:space="preserve"><value> · alvo máx. {0:0} °C</value></data>
+  <data name="Gpu.AmdClocksPotenciaMotivos" xml:space="preserve"><value>AMD: os clocks, a potência e os motivos de limitação só saem pela biblioteca ADLX, que exige o SDK da AMD. Sem ela o NEXUS mostra o que o Windows expõe (uso, VRAM, PCIe, driver) e diz o que falta, em vez de inventar.</value></data>
+  <data name="Gpu.AplicadoN" xml:space="preserve"><value>Aplicado: {0}</value></data>
+  <data name="Gpu.AplicarDriver" xml:space="preserve"><value>Aplicar no driver</value></data>
+  <data name="Gpu.AplicarDriverNvidia" xml:space="preserve"><value>Aplicar no driver NVIDIA</value></data>
+  <data name="Gpu.ArquiteturaNaoIdentificada" xml:space="preserve"><value>arquitetura não identificada</value></data>
+  <data name="Gpu.Atencao" xml:space="preserve"><value>Atenção</value></data>
+  <data name="Gpu.Barramento" xml:space="preserve"><value>Barramento</value></data>
+  <data name="Gpu.BarramentoPcie" xml:space="preserve"><value>Barramento PCIe</value></data>
+  <data name="Gpu.BarramentoPcieAgora" xml:space="preserve"><value>Barramento PCIe (agora)</value></data>
+  <data name="Gpu.Bateria" xml:space="preserve"><value>na bateria</value></data>
+  <data name="Gpu.BateriaGpuLimitadaPelo" xml:space="preserve"><value>Na bateria a GPU é limitada pelo notebook.</value></data>
+  <data name="Gpu.CacheCheioFazJogo" xml:space="preserve"><value>Cache cheio faz o jogo voltar a compilar sombreadores durante a partida (travadinhas). Maior evita isso; não aumenta FPS.</value></data>
+  <data name="Gpu.CacheSombreador" xml:space="preserve"><value>Cache de sombreador</value></data>
+  <data name="Gpu.CacheSombreadorNvidia" xml:space="preserve"><value>Cache de sombreador NVIDIA</value></data>
+  <data name="Gpu.CacheSombreadorNvidiaN" xml:space="preserve"><value>cache de sombreador NVIDIA: {0}</value></data>
+  <data name="Gpu.CliqueGravar" xml:space="preserve"><value>Clique em gravar</value></data>
+  <data name="Gpu.Clock" xml:space="preserve"><value>clock</value></data>
+  <data name="Gpu.ClockGrafico" xml:space="preserve"><value>Clock gráfico</value></data>
+  <data name="Gpu.ClockMaxNMhz" xml:space="preserve"><value>clock máx. {0:0} MHz</value></data>
+  <data name="Gpu.ClockMedioNMhz" xml:space="preserve"><value>clock médio {0:0} MHz</value></data>
+  <data name="Gpu.ClockMemoria" xml:space="preserve"><value>Clock da memória</value></data>
+  <data name="Gpu.ClockRelacaoMaximoPlaca" xml:space="preserve"><value>Clock em relação ao máximo da placa; uso de 0 a 100%; temperatura de 0 a 100 °C; potência em relação ao limite. As faixas coloridas ao fundo marcam os segundos em que o driver disse por que segurou a placa.</value></data>
+  <data name="Gpu.ComecaNSVolte" xml:space="preserve"><value>Começa em {0} s: volte para o jogo e jogue normalmente.</value></data>
+  <data name="Gpu.ComoLerGrafico" xml:space="preserve"><value>Como ler o gráfico</value></data>
+  <data name="Gpu.Corrigir" xml:space="preserve"><value>Corrigir</value></data>
+  <data name="Gpu.CounterStrike2Limite" xml:space="preserve"><value>Counter-Strike 2: limite de FPS do jogo</value></data>
+  <data name="Gpu.CounterStrike2Nao" xml:space="preserve"><value>Counter-Strike 2 não encontrado nas bibliotecas da Steam.</value></data>
+  <data name="Gpu.Cs2FpsMaxN" xml:space="preserve"><value>CS2 fps_max {0}</value></data>
+  <data name="Gpu.Cs2LimiteFps" xml:space="preserve"><value>CS2: limite de FPS</value></data>
+  <data name="Gpu.Cs2NFpsMax" xml:space="preserve"><value>CS2 em {0}. fps_max no autoexec.cfg: {1}. </value></data>
+  <data name="Gpu.Dedicada" xml:space="preserve"><value> · dedicada</value></data>
+  <data name="Gpu.DefinidoPelaNvidia" xml:space="preserve"><value> (definido pela NVIDIA)</value></data>
+  <data name="Gpu.DeixeJogoAbertoVolte" xml:space="preserve"><value>Deixe o jogo aberto e volte aqui.</value></data>
+  <data name="Gpu.DepoisTrocarNexusPergunta" xml:space="preserve"><value>Depois de trocar, o NEXUS pergunta se você quer manter. Sem resposta em {0} s (tela preta, cabo antigo), </value></data>
+  <data name="Gpu.DesenhadoPela" xml:space="preserve"><value>desenhado pela </value></data>
+  <data name="Gpu.Desligado" xml:space="preserve"><value>desligado</value></data>
+  <data name="Gpu.DesligadoEsteJogoAlguem" xml:space="preserve"><value>Desligado para este jogo (alguém marcou "não").</value></data>
+  <data name="Gpu.DesligadoRegistro" xml:space="preserve"><value>desligado no registro</value></data>
+  <data name="Gpu.DesligarMpoMaoSo" xml:space="preserve"><value>Desligar o MPO à mão só se recomenda para tela piscando.</value></data>
+  <data name="Gpu.DizSegurou" xml:space="preserve"><value>Diz o que segurou</value></data>
+  <data name="Gpu.DriverConsultadoAntesTeste" xml:space="preserve"><value>O driver é consultado antes (teste) e a resolução não muda.
+
+</value></data>
+  <data name="Gpu.DriverDestaPlacaNao" xml:space="preserve"><value>O driver desta placa não expõe limites de potência/temperatura sem SDK.</value></data>
+  <data name="Gpu.DriverGuardaSombreadoresJa" xml:space="preserve"><value>O driver guarda os sombreadores já compilados dos jogos; quando o cache enche, apaga os antigos e o jogo volta a compilar durante a partida (travadinhas). </value></data>
+  <data name="Gpu.DriverN" xml:space="preserve"><value>driver {0}</value></data>
+  <data name="Gpu.DriverNaoInformado" xml:space="preserve"><value>driver não informado</value></data>
+  <data name="Gpu.DriverNN" xml:space="preserve"><value>driver {0} ({1})</value></data>
+  <data name="Gpu.DriverNvidiaEncontradoAjustes" xml:space="preserve"><value>Driver NVIDIA encontrado. Os ajustes vão para o perfil do jogo no próprio driver, como no Painel de Controle NVIDIA.</value></data>
+  <data name="Gpu.DriverNvidiaJogo" xml:space="preserve"><value>Driver NVIDIA por jogo</value></data>
+  <data name="Gpu.DriverNvidiaNN" xml:space="preserve"><value>driver NVIDIA em {0} ({1} ajuste(s))</value></data>
+  <data name="Gpu.DriverNWindows" xml:space="preserve"><value>driver {0} no Windows</value></data>
+  <data name="Gpu.EconomiaEnergia" xml:space="preserve"><value>economia de energia</value></data>
+  <data name="Gpu.Energia" xml:space="preserve"><value>Energia</value></data>
+  <data name="Gpu.EnergiaPreferirDesempenhoMaximo" xml:space="preserve"><value>• Energia: preferir desempenho máximo (só com este jogo aberto; mais calor e consumo)</value></data>
+  <data name="Gpu.EngenhariaReversaSuaPlaca" xml:space="preserve"><value>Engenharia reversa da sua placa de vídeo: barramento, clocks, limites e monitores.</value></data>
+  <data name="Gpu.EscolhaJogo" xml:space="preserve"><value>Escolha o jogo</value></data>
+  <data name="Gpu.EscolhaLimiteFpsLista" xml:space="preserve"><value>Escolha um limite de FPS da lista.</value></data>
+  <data name="Gpu.EstadoPNP0" xml:space="preserve"><value>estado P{0} (P0 = máximo, P8 = repouso)</value></data>
+  <data name="Gpu.EstaTaxa" xml:space="preserve"><value>esta taxa</value></data>
+  <data name="Gpu.EstePcTemGpu" xml:space="preserve"><value>Este PC tem uma GPU de jogo só: a escolha por app não muda nada aqui.</value></data>
+  <data name="Gpu.ExecutavelNaoEncontrado" xml:space="preserve"><value>executável não encontrado</value></data>
+  <data name="Gpu.ExecutavelProvavel" xml:space="preserve"><value> (executável provável)</value></data>
+  <data name="Gpu.ExigeAdministradorWindowsPede" xml:space="preserve"><value>Exige administrador (o Windows pede permissão e um ponto de restauração é criado). Desfazer devolve o que o perfil tinha.</value></data>
+  <data name="Gpu.ExigeAdministradorWindowsVai" xml:space="preserve"><value>Exige administrador (o Windows vai pedir permissão e um ponto de restauração é criado) e só vale depois de reiniciar.</value></data>
+  <data name="Gpu.FaixaNNW" xml:space="preserve"><value>faixa {0:0}–{1:0} W</value></data>
+  <data name="Gpu.FaltaListaComandosDesta" xml:space="preserve"><value>Falta a lista de comandos desta versão: abra o CS2 com -condebug nas opções de inicialização da Steam, digite cvarlist no console e feche o jogo. Sem ela o NEXUS não grava (é a prova de que fps_max existe na sua versão).</value></data>
+  <data name="Gpu.FicaBancoPerfisDriver" xml:space="preserve"><value>Fica no banco de perfis do driver, o mesmo do Painel de Controle NVIDIA. Vale na próxima vez que o jogo abrir. Se o jogo não tem perfil no driver, o NEXUS cria um chamado "NEXUS - jogo.exe"; Desfazer devolve o que havia e apaga esse perfil se ficar vazio.</value></data>
+  <data name="Gpu.FicaDentroProcessadorNao" xml:space="preserve"><value>Fica dentro do processador: não usa slot PCIe.</value></data>
+  <data name="Gpu.FichaTecnicaLeiturasDriver" xml:space="preserve"><value>Ficha técnica: leituras do driver e GPUs do PC</value></data>
+  <data name="Gpu.FoiMedidoOndeVeio" xml:space="preserve"><value>O que foi medido e de onde veio. Corrigir passa pelo aplicador, com Desfazer.</value></data>
+  <data name="Gpu.Fonte" xml:space="preserve"><value>Fonte: </value></data>
+  <data name="Gpu.FonteClocksLimitesMotivos" xml:space="preserve"><value>Fonte dos clocks, limites e motivos: {0}.</value></data>
+  <data name="Gpu.FonteNvmlDriverNvidia" xml:space="preserve"><value>Fonte: NVML do driver NVIDIA (1 leitura por segundo). Em placas AMD e Intel só o uso aparece: clocks e motivos exigem o SDK do fabricante.</value></data>
+  <data name="Gpu.FontesDxgiIdentidadeVram" xml:space="preserve"><value>Fontes: DXGI (identidade, VRAM, GPU de alto desempenho), gerenciador de dispositivos (driver e PCIe), NVML do driver NVIDIA (clocks, limites e motivos). Nada é instalado: só leitura.</value></data>
+  <data name="Gpu.FontesNvapidriversettingsHNvidia" xml:space="preserve"><value>Fontes: NvApiDriverSettings.h (NVIDIA), notas do driver NVIDIA e testes da Blur Busters (G-SYNC: V-Sync no driver + limite 3 FPS abaixo da taxa).</value></data>
+  <data name="Gpu.FpsMax" xml:space="preserve"><value>fps_max</value></data>
+  <data name="Gpu.GenNXN" xml:space="preserve"><value>Gen {0} x{1}</value></data>
+  <data name="Gpu.GpuAltoDesempenhoWindows" xml:space="preserve"><value>a GPU de alto desempenho do Windows</value></data>
+  <data name="Gpu.GpusNestePc" xml:space="preserve"><value>GPUs neste PC</value></data>
+  <data name="Gpu.GraficoGravacaoClockUso" xml:space="preserve"><value>Gráfico da gravação: clock, uso, temperatura e potência da placa</value></data>
+  <data name="Gpu.GravacaoParouN" xml:space="preserve"><value>A gravação parou: {0}</value></data>
+  <data name="Gpu.GravandoNNS" xml:space="preserve"><value>Gravando {0:0}/{1} s</value></data>
+  <data name="Gpu.Gravar" xml:space="preserve"><value>O que gravar</value></data>
+  <data name="Gpu.GravarAutoexecCfg" xml:space="preserve"><value>Gravar no autoexec.cfg</value></data>
+  <data name="Gpu.GravarEnquantoJogo60" xml:space="preserve"><value>Gravar enquanto jogo (60 s)</value></data>
+  <data name="Gpu.GravarEnquantoVoceJoga" xml:space="preserve"><value>Gravar enquanto você joga</value></data>
+  <data name="Gpu.GravarFpsMaxN" xml:space="preserve"><value>Gravar fps_max {0} no autoexec.cfg do CS2?
+
+{1}
+
+</value></data>
+  <data name="Gpu.GravarPerfilDriverNvidia" xml:space="preserve"><value>Gravar no perfil do driver NVIDIA de {0} ({1}):
+
+{2}
+
+</value></data>
+  <data name="Gpu.GSyncUsePelo" xml:space="preserve"><value>Com G-SYNC, use pelo menos 3 FPS abaixo da taxa do monitor.</value></data>
+  <data name="Gpu.HagsLigadoReinicieValer" xml:space="preserve"><value>HAGS ligado (reinicie para valer)</value></data>
+  <data name="Gpu.HdrDisponivelDesligado" xml:space="preserve"><value>HDR disponível (desligado)</value></data>
+  <data name="Gpu.HdrLigado" xml:space="preserve"><value>HDR ligado</value></data>
+  <data name="Gpu.Ilimitado" xml:space="preserve"><value>Ilimitado</value></data>
+  <data name="Gpu.InformadoPeloDriver" xml:space="preserve"><value>Informado pelo driver.</value></data>
+  <data name="Gpu.Integrada" xml:space="preserve"><value> · integrada</value></data>
+  <data name="Gpu.Integrada2" xml:space="preserve"><value>Integrada</value></data>
+  <data name="Gpu.IntegradaProcessador" xml:space="preserve"><value>integrada ao processador</value></data>
+  <data name="Gpu.IntelClocksPotenciaSo" xml:space="preserve"><value>Intel: clocks e potência só pela biblioteca do driver (IGCL), que exige SDK. O NEXUS mostra o que o Windows expõe (uso, VRAM, PCIe, driver).</value></data>
+  <data name="Gpu.JaLigadoEsteJogo" xml:space="preserve"><value>Já ligado para este jogo.</value></data>
+  <data name="Gpu.JaMaiorTaxaDesta" xml:space="preserve"><value>Já na maior taxa desta resolução.</value></data>
+  <data name="Gpu.JanelaBar1NMb" xml:space="preserve"><value>janela BAR1 {0} MB</value></data>
+  <data name="Gpu.JanelaOtimizadaN" xml:space="preserve"><value>Janela otimizada: {0}</value></data>
+  <data name="Gpu.JogoAjustesDriverNvidia" xml:space="preserve"><value>Jogo para os ajustes do driver NVIDIA</value></data>
+  <data name="Gpu.JogoNaoPassaDesse" xml:space="preserve"><value>O jogo não passa desse FPS. Com G-SYNC/FreeSync, um limite um pouco abaixo da taxa do monitor (ex.: 141 em 144 Hz) mantém o VRR ativo. </value></data>
+  <data name="Gpu.JogoOtimizacoesJanela" xml:space="preserve"><value>Jogo para otimizações em janela</value></data>
+  <data name="Gpu.LendoDriverNvidia" xml:space="preserve"><value>Lendo o driver NVIDIA…</value></data>
+  <data name="Gpu.LendoPlacaVideo" xml:space="preserve"><value>Lendo a placa de vídeo…</value></data>
+  <data name="Gpu.LidoRegistroWindows" xml:space="preserve"><value>Lido do registro do Windows.</value></data>
+  <data name="Gpu.Ligado" xml:space="preserve"><value>ligado</value></data>
+  <data name="Gpu.LigarAgendamentoGpuAcelerado" xml:space="preserve"><value>Ligar o agendamento de GPU acelerado por hardware?
+
+Necessário para a geração de quadros do DLSS (RTX 40/50). </value></data>
+  <data name="Gpu.LigarHags" xml:space="preserve"><value>Ligar HAGS</value></data>
+  <data name="Gpu.LigarModoJogo" xml:space="preserve"><value>Ligar Modo de Jogo</value></data>
+  <data name="Gpu.LigarModoJogoWindows" xml:space="preserve"><value>Ligar o Modo de Jogo do Windows?
+
+Ele dá prioridade ao jogo em primeiro plano e segura atualizações durante a partida.</value></data>
+  <data name="Gpu.LigarNesteJogo" xml:space="preserve"><value>Ligar neste jogo</value></data>
+  <data name="Gpu.LigarOtimizacoesJogosJanela" xml:space="preserve"><value>Ligar "Otimizações para jogos em janela" só para:
+{0}
+
+</value></data>
+  <data name="Gpu.LimitandoAgora" xml:space="preserve"><value>Limitando agora</value></data>
+  <data name="Gpu.LimitarFps" xml:space="preserve"><value>Limitar o FPS em</value></data>
+  <data name="Gpu.LimiteFps" xml:space="preserve"><value>Limite de FPS</value></data>
+  <data name="Gpu.LimiteFpsCs2" xml:space="preserve"><value>Limite de FPS do CS2</value></data>
+  <data name="Gpu.LimiteNPadraoN" xml:space="preserve"><value>limite {0} · padrão {1} · faixa {2}–{3}</value></data>
+  <data name="Gpu.LimitePotencia" xml:space="preserve"><value>Limite de potência</value></data>
+  <data name="Gpu.Limites" xml:space="preserve"><value>Limites</value></data>
+  <data name="Gpu.ListaComandosDestaVersao" xml:space="preserve"><value>Lista de comandos desta versão encontrada ({0} itens, {1}).</value></data>
+  <data name="Gpu.Manter" xml:space="preserve"><value>Manter</value></data>
+  <data name="Gpu.MantidoNVoltarDepois" xml:space="preserve"><value>Mantido: {0}. Para voltar depois, use Desfazer.</value></data>
+  <data name="Gpu.MarcarAltoDesempenhoN" xml:space="preserve"><value>Marcar "alto desempenho" para:
+{0}
+
+O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value></data>
+  <data name="Gpu.MaximaNC" xml:space="preserve"><value>máxima {0:0} °C</value></data>
+  <data name="Gpu.Maximo" xml:space="preserve"><value>no máximo</value></data>
+  <data name="Gpu.MaximoGenNX" xml:space="preserve"><value>máximo Gen {0} x{1}</value></data>
+  <data name="Gpu.MaximoN" xml:space="preserve"><value>máximo {0}</value></data>
+  <data name="Gpu.MaximoNestaResolucaoN" xml:space="preserve"><value>máximo nesta resolução: {0} Hz</value></data>
+  <data name="Gpu.MemoriaReservadaRam" xml:space="preserve"><value>Memória (reservada da RAM)</value></data>
+  <data name="Gpu.MemoriaVideo" xml:space="preserve"><value>Memória de vídeo</value></data>
+  <data name="Gpu.MenosAtrasoJanelaSem" xml:space="preserve"><value>Menos atraso em janela e sem bordas, e G-SYNC/FreeSync em janela. Só jogos DirectX 10/11; em DirectX 12, Vulkan ou tela cheia não muda nada.</value></data>
+  <data name="Gpu.MesmaOpcaoConfiguracoesSistema" xml:space="preserve"><value>É a mesma opção de Configurações &gt; Sistema &gt; Tela &gt; Elementos gráficos, por jogo, e vale na próxima vez que o jogo abrir. Desfazer devolve o que era.</value></data>
+  <data name="Gpu.MesmoAjusteConfiguracoesTela" xml:space="preserve"><value>É o mesmo ajuste de Configurações &gt; Tela &gt; Elementos gráficos e vale a partir da próxima vez que o jogo abrir.</value></data>
+  <data name="Gpu.MesmoBancoPerfisPainel" xml:space="preserve"><value>É o mesmo banco de perfis do Painel de Controle NVIDIA. Vale na próxima vez que o jogo abrir. </value></data>
+  <data name="Gpu.MesmosAjustesPainelControle" xml:space="preserve"><value>Os mesmos ajustes do Painel de Controle NVIDIA, gravados no perfil do jogo. Com Desfazer.</value></data>
+  <data name="Gpu.ModoBaixaLatenciaLigado" xml:space="preserve"><value>Modo de baixa latência: ligado. Menos atraso quando a placa está no limite (DirectX 9/11, jogo sem Reflex).</value></data>
+  <data name="Gpu.ModoBaixaLatenciaLigado2" xml:space="preserve"><value>• Modo de baixa latência: ligado (1 quadro na fila; vale em DirectX 9/11 sem Reflex)</value></data>
+  <data name="Gpu.ModoJogo" xml:space="preserve"><value>Modo de Jogo</value></data>
+  <data name="Gpu.Monitor144HzRodando" xml:space="preserve"><value>Monitor de 144 Hz rodando a 60 Hz é o desperdício mais comum.</value></data>
+  <data name="Gpu.MonitorAguentaHz" xml:space="preserve"><value>O monitor aguenta (Hz)</value></data>
+  <data name="Gpu.Monitores" xml:space="preserve"><value>Monitores</value></data>
+  <data name="Gpu.MonitorPrincipal" xml:space="preserve"><value>Monitor principal</value></data>
+  <data name="Gpu.MonitorPrincipalNHz" xml:space="preserve"><value>Monitor principal a {0} Hz: sugestão {1} FPS (pelo menos 3 abaixo da taxa, para ficar dentro do G-SYNC).</value></data>
+  <data name="Gpu.MonitorTrocadoNVolta" xml:space="preserve"><value>Monitor trocado para {0}. Volta sozinho em {1} s se você não clicar em Manter.</value></data>
+  <data name="Gpu.MonitorVoltouModoAnterior" xml:space="preserve"><value>O monitor voltou ao modo anterior. </value></data>
+  <data name="Gpu.MpoPlanosSobreposicao" xml:space="preserve"><value>MPO (planos de sobreposição)</value></data>
+  <data name="Gpu.MudarTamanhoCacheSombreador" xml:space="preserve"><value>Mudar o tamanho do cache de sombreador do driver NVIDIA para {0} (perfil global)?
+
+</value></data>
+  <data name="Gpu.N0SemLimiteG" xml:space="preserve"><value>0 = sem limite. Com G-SYNC/FreeSync, use um pouco abaixo da taxa do monitor (141 em 144 Hz).</value></data>
+  <data name="Gpu.N0TiraLimiteJogo" xml:space="preserve"><value>0 tira o limite do jogo. </value></data>
+  <data name="Gpu.N100Gb" xml:space="preserve"><value>100 GB</value></data>
+  <data name="Gpu.N60SLendoClock" xml:space="preserve"><value>60 s lendo clock, uso, temperatura e potência. Só leitura.</value></data>
+  <data name="Gpu.Nada" xml:space="preserve"><value>nada</value></data>
+  <data name="Gpu.NadaApontarFoiLido" xml:space="preserve"><value>Nada a apontar com o que foi lido.</value></data>
+  <data name="Gpu.NAgora" xml:space="preserve"><value>{0} agora</value></data>
+  <data name="Gpu.NaoAfirmar" xml:space="preserve"><value>não dá para afirmar</value></data>
+  <data name="Gpu.NaoAumentaFpsPasta" xml:space="preserve"><value>Não aumenta FPS. A pasta do cache (%LOCALAPPDATA%\NVIDIA\DXCache) pode crescer muitos GB. Exige administrador; Desfazer devolve o tamanho anterior.</value></data>
+  <data name="Gpu.NaoDefinidoJogoUsa" xml:space="preserve"><value>não definido (o jogo usa o padrão, 400)</value></data>
+  <data name="Gpu.NaoDeuVoltarModo" xml:space="preserve"><value>Não deu para voltar o modo do monitor sozinho: {0}. Use Desfazer aqui ou na página Aplicar.</value></data>
+  <data name="Gpu.NaoInformado" xml:space="preserve"><value>não informado</value></data>
+  <data name="Gpu.NBitsCor" xml:space="preserve"><value>{0} bits por cor</value></data>
+  <data name="Gpu.NDedicada" xml:space="preserve"><value>{0} dedicada</value></data>
+  <data name="Gpu.NenhumaGpuHardwareEncontrada" xml:space="preserve"><value>Nenhuma GPU de hardware encontrada</value></data>
+  <data name="Gpu.NenhumJogoSteamOu" xml:space="preserve"><value>Nenhum jogo da Steam ou da Epic com executável encontrado.</value></data>
+  <data name="Gpu.NenhumMonitorLido" xml:space="preserve"><value>Nenhum monitor lido.</value></data>
+  <data name="Gpu.NenhumNexusCriaNexus" xml:space="preserve"><value>nenhum (o NEXUS cria "NEXUS - </value></data>
+  <data name="Gpu.NexusObserva" xml:space="preserve"><value>O NEXUS observa</value></data>
+  <data name="Gpu.NFonteN" xml:space="preserve"><value>{0} Fonte: {1}.</value></data>
+  <data name="Gpu.NGpuNMemoria" xml:space="preserve"><value>{0} GPU · {1} memória</value></data>
+  <data name="Gpu.NMhz" xml:space="preserve"><value> · {0:0} MHz</value></data>
+  <data name="Gpu.NNHz" xml:space="preserve"><value>{0} a {1} Hz</value></data>
+  <data name="Gpu.NNProvavel" xml:space="preserve"><value>{0} ({1}, provável)</value></data>
+  <data name="Gpu.NotebookDuasGpusMarque" xml:space="preserve"><value>Notebook com duas GPUs: marque a dedicada nos jogos sem preferência.</value></data>
+  <data name="Gpu.NotebookVentoinhaFabricanteNotebook" xml:space="preserve"><value>Em notebook a ventoinha é do fabricante do notebook, não da placa.</value></data>
+  <data name="Gpu.NSGravadosN" xml:space="preserve"><value>{0} s gravados, {1} com a GPU trabalhando (uso ≥ {2:0}%)</value></data>
+  <data name="Gpu.NvmlDuranteGravacao" xml:space="preserve"><value>NVML durante a gravação</value></data>
+  <data name="Gpu.NvmlIndisponivelN" xml:space="preserve"><value>NVML indisponível: {0}</value></data>
+  <data name="Gpu.OrcamentoWindowsN" xml:space="preserve"><value>orçamento do Windows {0}</value></data>
+  <data name="Gpu.OtimizacoesJogosJanelaNeste" xml:space="preserve"><value>Otimizações para jogos em janela neste jogo</value></data>
+  <data name="Gpu.PadraoDriver" xml:space="preserve"><value>padrão do driver</value></data>
+  <data name="Gpu.PadraoDriverJogoNao" xml:space="preserve"><value>padrão do driver (o jogo não tem perfil no driver)</value></data>
+  <data name="Gpu.PadraoNW" xml:space="preserve"><value>padrão {0:0} W</value></data>
+  <data name="Gpu.PadraoWindows" xml:space="preserve"><value>padrão do Windows</value></data>
+  <data name="Gpu.PararAnalisar" xml:space="preserve"><value>Parar e analisar</value></data>
+  <data name="Gpu.PciePelaPlaca" xml:space="preserve"><value>PCIe (pela placa)</value></data>
+  <data name="Gpu.PciNN" xml:space="preserve"><value>PCI {0:X4}:{1:X4}</value></data>
+  <data name="Gpu.PciNNSubsistema" xml:space="preserve"><value>PCI {0:X4}:{1:X4} · subsistema {2:X8} · LUID {3:X}</value></data>
+  <data name="Gpu.PerfilDriver" xml:space="preserve"><value>Perfil no driver</value></data>
+  <data name="Gpu.PlacaNvidiaMasNvml" xml:space="preserve"><value>Placa NVIDIA, mas a NVML não abriu ({0}). Sem clocks, limites e motivos de limitação.</value></data>
+  <data name="Gpu.PodeEmprestarAteN" xml:space="preserve"><value>pode emprestar até {0} da RAM</value></data>
+  <data name="Gpu.PodeNHz" xml:space="preserve"><value>pode {0} Hz</value></data>
+  <data name="Gpu.PortaPcieNX" xml:space="preserve"><value> · porta: PCIe {0} x{1}</value></data>
+  <data name="Gpu.Potencia" xml:space="preserve"><value>potência</value></data>
+  <data name="Gpu.Potencia2" xml:space="preserve"><value>Potência</value></data>
+  <data name="Gpu.PotenciaCalorOuConfiguracao" xml:space="preserve"><value>Potência, calor ou configuração, com o que fazer.</value></data>
+  <data name="Gpu.PotenciaMediaNW" xml:space="preserve"><value>potência média {0:0} W</value></data>
+  <data name="Gpu.PreferirDesempenhoMaximoPlaca" xml:space="preserve"><value>Preferir desempenho máximo. A placa não baixa o clock com o jogo aberto. Mais calor e consumo.</value></data>
+  <data name="Gpu.PrioridadeJogoPrimeiroPlano" xml:space="preserve"><value>Dá prioridade ao jogo em primeiro plano.</value></data>
+  <data name="Gpu.Problema" xml:space="preserve"><value>Problema</value></data>
+  <data name="Gpu.ProcurandoCounterStrike2" xml:space="preserve"><value>Procurando o Counter-Strike 2 na Steam…</value></data>
+  <data name="Gpu.ProgressoGravacao" xml:space="preserve"><value>Progresso da gravação</value></data>
+  <data name="Gpu.Provavel" xml:space="preserve"><value> (provável)</value></data>
+  <data name="Gpu.QualGpuCadaJogo" xml:space="preserve"><value>Qual GPU cada jogo usa</value></data>
+  <data name="Gpu.RecursosPlaca" xml:space="preserve"><value>Recursos da placa</value></data>
+  <data name="Gpu.ReduzClockNC" xml:space="preserve"><value>reduz clock a {0:0} °C</value></data>
+  <data name="Gpu.ReduzClockNDesliga" xml:space="preserve"><value>reduz clock a {0} · desliga a {1}</value></data>
+  <data name="Gpu.RepousoNormalAparecerOciosa" xml:space="preserve"><value>Em repouso é normal aparecer "ociosa". O que importa é o que aparece com um jogo aberto: use a gravação.</value></data>
+  <data name="Gpu.RepousoPlacaBaixaClock" xml:space="preserve"><value>Em repouso a placa baixa o clock de propósito. O que ela entrega só aparece com um jogo aberto.</value></data>
+  <data name="Gpu.ResizableBar" xml:space="preserve"><value>Resizable BAR</value></data>
+  <data name="Gpu.SegueOpcaoGeralWindows" xml:space="preserve"><value>Segue a opção geral do Windows (sem escolha própria).</value></data>
+  <data name="Gpu.SeguradaCalor" xml:space="preserve"><value>segurada por calor</value></data>
+  <data name="Gpu.SeguradaPotencia" xml:space="preserve"><value>segurada por potência</value></data>
+  <data name="Gpu.SeguraSuaPlaca" xml:space="preserve"><value>O que segura a sua placa</value></data>
+  <data name="Gpu.SemDriverFabricante" xml:space="preserve"><value>Sem driver do fabricante</value></data>
+  <data name="Gpu.SemHdr" xml:space="preserve"><value>sem HDR</value></data>
+  <data name="Gpu.SemLeitura" xml:space="preserve"><value>sem leitura</value></data>
+  <data name="Gpu.SemLeitura2" xml:space="preserve"><value>sem leitura: </value></data>
+  <data name="Gpu.SemMemoriaDedicada" xml:space="preserve"><value>sem memória dedicada</value></data>
+  <data name="Gpu.SemPlacaDriverNvidia" xml:space="preserve"><value>Sem placa/driver NVIDIA utilizável: {0}</value></data>
+  <data name="Gpu.SemRespostaNS" xml:space="preserve"><value>Sem resposta em {0} s: o monitor voltou ao modo anterior. </value></data>
+  <data name="Gpu.SoLinhaFpsMax" xml:space="preserve"><value>Só a linha do fps_max muda; o resto do arquivo fica igual. Vale na próxima vez que o jogo abrir (se o CS2 não ler o autoexec sozinho, adicione +exec autoexec nas opções de inicialização). </value></data>
+  <data name="Gpu.SoValeJogosDirectx" xml:space="preserve"><value>Só vale para jogos DirectX 10/11 em janela ou sem bordas: em DirectX 12, Vulkan ou tela cheia exclusiva não muda nada. </value></data>
+  <data name="Gpu.SteamCloudPodeSobrescrever" xml:space="preserve"><value>A Steam Cloud pode sobrescrever o arquivo. Desfazer devolve a linha que havia.</value></data>
+  <data name="Gpu.TamanhoCacheSombreador" xml:space="preserve"><value>Tamanho do cache de sombreador</value></data>
+  <data name="Gpu.TaxaMaxima" xml:space="preserve"><value>Na taxa máxima</value></data>
+  <data name="Gpu.TaxaMaximaQuadrosN" xml:space="preserve"><value>• Taxa máxima de quadros: {0} FPS</value></data>
+  <data name="Gpu.TelaNotebook" xml:space="preserve"><value>Tela do notebook</value></data>
+  <data name="Gpu.Temperatura" xml:space="preserve"><value>temperatura</value></data>
+  <data name="Gpu.Temperatura2" xml:space="preserve"><value>Temperatura</value></data>
+  <data name="Gpu.TrocarNNMesma" xml:space="preserve"><value>Trocar {0} para {1}?
+
+É a mesma troca de Configurações &gt; Tela &gt; Taxa de atualização, só com um modo que o próprio monitor anuncia. </value></data>
+  <data name="Gpu.TudoCerto" xml:space="preserve"><value>Tudo certo</value></data>
+  <data name="Gpu.UsarDedicada" xml:space="preserve"><value>Usar a dedicada</value></data>
+  <data name="Gpu.UsarGpuDedicada" xml:space="preserve"><value>Usar a GPU dedicada</value></data>
+  <data name="Gpu.Uso" xml:space="preserve"><value>uso</value></data>
+  <data name="Gpu.Uso2" xml:space="preserve"><value>Uso</value></data>
+  <data name="Gpu.UsoN" xml:space="preserve"><value>em uso {0}</value></data>
+  <data name="Gpu.UsoN2" xml:space="preserve"><value> · uso {0:0}%</value></data>
+  <data name="Gpu.Ventoinha" xml:space="preserve"><value>Ventoinha</value></data>
+  <data name="Gpu.VoceTem10S" xml:space="preserve"><value>Você tem 10 s para voltar ao jogo e jogar normalmente.</value></data>
+  <data name="Gpu.VoltarAgora" xml:space="preserve"><value>Voltar agora</value></data>
+  <data name="Gpu.VoltaSozinhoModoAntes" xml:space="preserve"><value>volta sozinho ao modo de antes, como faz o próprio Windows.</value></data>
+  <data name="Gpu.VramUso" xml:space="preserve"><value>da VRAM em uso</value></data>
+  <data name="Gpu.VSyncDriverSo" xml:space="preserve"><value>V-Sync no driver só faz sentido com G-SYNC E limite de FPS abaixo da taxa do monitor. Marque também o limite de FPS.</value></data>
+  <data name="Gpu.VSyncLigadoDriver" xml:space="preserve"><value>V-Sync ligado no driver. Só com monitor G-SYNC e limite de FPS; desligue o V-Sync dentro do jogo.</value></data>
+  <data name="Gpu.VSyncLigadoDriver2" xml:space="preserve"><value>• V-Sync: ligado no driver (para G-SYNC; desligue o V-Sync dentro do jogo)</value></data>
+  <data name="Gpu.WindowsPassaApresentarEste" xml:space="preserve"><value>O Windows passa a apresentar este jogo no modo flip (menos atraso em janela e sem bordas, e permite G-SYNC/FreeSync em janela). </value></data>
+  <data name="Gpu.WindowsProprioJogoJogo" xml:space="preserve"><value>Do Windows e do próprio jogo, para um jogo de cada vez. Com Desfazer.</value></data>
+  <data name="Gpu.WindowsSoMostraAdaptador" xml:space="preserve"><value>O Windows só mostra o adaptador básico (sem driver do fabricante).</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Assistente</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratório</value></data>

@@ -18,7 +18,7 @@ public sealed partial class LocalizationTests
     /// </summary>
     private static readonly HashSet<string> XamlNotYetTranslated = new(StringComparer.Ordinal)
     { "Views/Pages/CpuLab.xaml",
-        "Views/Pages/Disk.xaml", "Views/Pages/DriverUpdates.xaml", "Views/Pages/GpuLab.xaml",
+        "Views/Pages/Disk.xaml",
         "Views/Pages/Measure.xaml", "Views/Pages/MemoryDoctor.xaml", "Views/Pages/MemoryLab.xaml",
         "Views/Pages/Monitor.xaml",
         "Views/Pages/Programs.xaml", "Views/Pages/Scanner.xaml", "Views/Pages/Security.xaml", "Views/Pages/Services.xaml", "Views/Pages/SystemTools.xaml",

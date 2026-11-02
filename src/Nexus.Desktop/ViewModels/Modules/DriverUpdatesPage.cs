@@ -28,7 +28,7 @@ public sealed class DriverUpdateRow : ObservableObject
     public string VersionLine => Offer.VersionLine;
     public string Detail { get; init; } = "";
     public string Badge { get; init; } = "";
-    public string RollbackText => Offer.Rollback.Possible ? "Desfazer: " + Offer.Rollback.Explanation : "Sem desfazer automático: " + Offer.Rollback.Explanation;
+    public string RollbackText => Offer.Rollback.Possible ? Loc.T("Drv.Desfazer") + Offer.Rollback.Explanation : Loc.T("Drv.SemDesfazerAutomatico") + Offer.Rollback.Explanation;
     public bool RollbackPossible => Offer.Rollback.Possible;
     public string? Blocked => Offer.Blocked;
     public bool IsChecked { get => _isChecked; set => Set(ref _isChecked, value); }
@@ -41,7 +41,7 @@ public sealed class DriverUpdateRow : ObservableObject
     /// <summary>Selo do tipo: verde recomendada, âmbar opcional, neutro bloqueada.</summary>
     public UiTone BadgeTone => Blocked is not null ? UiTone.Neutral : Offer.Update.Optional ? UiTone.Warn : UiTone.Good;
     public UiTone RollbackTone => RollbackPossible ? UiTone.Good : UiTone.Warn;
-    public string RollbackChip => RollbackPossible ? "tem desfazer" : "sem desfazer automático";
+    public string RollbackChip => RollbackPossible ? Loc.T("Drv.TemDesfazer") : Loc.T("Drv.SemDesfazerAutomatico2");
     public Guid? RunId { get => _runId; set { if (Set(ref _runId, value)) OnPropertyChanged(nameof(CanRevert)); } }
     public bool Applied
     {
@@ -78,26 +78,26 @@ public sealed class GpuDriverCard : ObservableObject
 
     public required GpuDriverStatus Status { get; init; }
     public string Name => Status.Name;
-    public string Kind => (Status.Integrated ? "integrada" : "dedicada") + " · " + GpuIdentity.VendorName(Status.Vendor);
+    public string Kind => (Status.Integrated ? Loc.T("Drv.Integrada") : Loc.T("Drv.Dedicada")) + " · " + GpuIdentity.VendorName(Status.Vendor);
     public string Version => Status.VendorVersion is { } v ? $"{v}  ({Status.WindowsVersion})"
-        : Status.PackageVersion is { } p ? $"Adrenalin {p}  ({Status.WindowsVersion})"
+        : Status.PackageVersion is { } p ? Loc.F("Drv.AdrenalinNN", p, Status.WindowsVersion)
         : Status.WindowsVersion.Length > 0 ? Status.WindowsVersion : "n/d";
     public string Age => Status.Date is { } d
-        ? $"de {d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)} · {(Status.AgeDays ?? 0).ToString(CultureInfo.CurrentCulture)} dias"
-        : "data não informada";
+        ? Loc.F("Drv.NNDias", d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture), (Status.AgeDays ?? 0).ToString(CultureInfo.CurrentCulture))
+        : Loc.T("Drv.DataNaoInformada");
     public string Verdict => Status.Verdict;
     /// <summary>good, info, warn, bad.</summary>
     public string Level => Status.Level;
     /// <summary>Idade do driver em dias (NaN se o Windows não informa a data): o número do cartão.</summary>
     public double AgeNumber => Status.AgeDays is { } d ? d : double.NaN;
     public UiTone LevelTone => Status.Level switch { "good" => UiTone.Good, "warn" => UiTone.Warn, "bad" => UiTone.Bad, _ => UiTone.Info };
-    public string KindChip => Status.Integrated ? "integrada" : "dedicada";
+    public string KindChip => Status.Integrated ? Loc.T("Drv.Integrada") : Loc.T("Drv.Dedicada");
     public string VendorName => GpuIdentity.VendorName(Status.Vendor);
-    public string DateText => Status.Date is { } d ? "de " + d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture) : "data não informada";
+    public string DateText => Status.Date is { } d ? "de " + d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture) : Loc.T("Drv.DataNaoInformada");
     public bool HasPage => Status.OfficialPage is not null;
-    public string PageLabel => $"Página oficial da {GpuIdentity.VendorName(Status.Vendor)}";
+    public string PageLabel => Loc.F("Drv.PaginaOficialN", GpuIdentity.VendorName(Status.Vendor));
     public bool HasApp => Status.App is not null;
-    public string AppLabel => Status.App is { } a ? $"Abrir {a.Name}" : "";
+    public string AppLabel => Status.App is { } a ? Loc.F("Drv.AbrirN", a.Name) : "";
     /// <summary>NVIDIA e AMD: o NEXUS procura, baixa e instala. Intel: só o link oficial.</summary>
     public bool CanUpdateInApp => Status.Vendor is GpuVendor.Nvidia or GpuVendor.Amd;
 
@@ -129,7 +129,7 @@ public sealed class GpuDriverCard : ObservableObject
     public bool Installed { get => _installed; set { if (Set(ref _installed, value)) { OnPropertyChanged(nameof(CanRevert)); OnPropertyChanged(nameof(CanInstall)); } } }
     public bool CanRevert => _installed && _runId is not null && !_working;
 
-    public string CheckMessage => _checking ? "Procurando a versão mais nova no site do fabricante…" : _check?.Message ?? "";
+    public string CheckMessage => _checking ? Loc.T("Drv.ProcurandoVersaoMaisNova") : _check?.Message ?? "";
     public UiTone CheckTone => _check?.State switch
     {
         GpuUpdateState.UpToDate => UiTone.Good,
@@ -142,9 +142,9 @@ public sealed class GpuDriverCard : ObservableObject
     public bool HasAutoDetect => _check?.State == GpuUpdateState.AutoDetectOnly && _check.AutoDetectUrl is not null;
     public bool CanCheck => CanUpdateInApp && !_checking && !_working;
     public bool CanInstall => HasUpdate && !_working && !_installed;
-    public string InstallLabel => _check is { Offer: { } o, ExactBytes: > 0 } c ? $"Baixar e instalar {o.Version} ({DriverUpdatesReader.FormatSize(c.ExactBytes)})" : "Baixar e instalar";
+    public string InstallLabel => _check is { Offer: { } o, ExactBytes: > 0 } c ? Loc.F("Drv.BaixarInstalarNN", o.Version, DriverUpdatesReader.FormatSize(c.ExactBytes)) : Loc.T("Drv.BaixarInstalar");
     public string ReleaseLine => _check?.Offer is { } o
-        ? $"{o.Label}{(o.ReleaseDate is { } d ? " · de " + d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture) : "")} · servidor oficial {o.DownloadUrl.Host}"
+        ? Loc.F("Drv.NNServidorOficial", o.Label, (o.ReleaseDate is { } d ? Loc.T("Drv.De") + d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture) : ""), o.DownloadUrl.Host)
         : "";
     public string? Note => _check?.Note;
     public bool HasNote => !string.IsNullOrEmpty(_check?.Note);
@@ -165,16 +165,16 @@ public sealed class GpuDriverCard : ObservableObject
 /// </summary>
 public sealed class DriverUpdatesPage : ModulePage
 {
-    public override string Title => "Atualizar drivers";
+    public override string Title => Loc.T("Drv.AtualizarDrivers");
     public override string Group => Loc.T("Nav.Sistema");
-    public override string Subtitle => "Drivers oficiais pelo Windows Update e o driver de vídeo direto da NVIDIA e da AMD.";
+    public override string Subtitle => Loc.T("Drv.DriversOficiaisPeloWindows");
 
     private const string InstallAction = "driverupdates.install@1";
     private const string GpuInstallAction = "driverupdates.gpu.install@1";
     public const int MaxBatch = BrokerService.MaxActionsPerRequest;
 
     private bool _loaded, _searching, _searched;
-    private string _searchStatus = "", _summary = "Clique em Procurar atualizações. A busca usa o próprio Windows Update e pode levar alguns minutos.";
+    private string _searchStatus = "", _summary = Loc.T("Drv.CliqueProcurarAtualizacoesBusca");
     private string _error = "", _reboot = "", _gpuNote = "";
     private Action? _cancel;
     private readonly string _whenGpu = GpuDrivers.WhenToUpdate;
@@ -203,7 +203,7 @@ public sealed class DriverUpdatesPage : ModulePage
     public ICommand SelectRecommendedCommand { get; }
     /// <summary>Instala de uma vez todas as recomendadas pelo Windows (uma confirmação, um aviso do Windows, um Desfazer).</summary>
     public ICommand InstallRecommendedCommand { get; }
-    public string InstallRecommendedLabel => $"Instalar todas ({Recommended.Count(r => r.CanApply)})";
+    public string InstallRecommendedLabel => Loc.F("Drv.InstalarTodasN", Recommended.Count(r => r.CanApply));
 
     public ObservableCollection<DriverUpdateRow> Recommended { get; } = [];
     public ObservableCollection<DriverUpdateRow> Optional { get; } = [];
@@ -228,7 +228,7 @@ public sealed class DriverUpdatesPage : ModulePage
     public string GpuNote { get => _gpuNote; private set => Set(ref _gpuNote, value); }
     public string WhenToUpdateGpu => _whenGpu;
     public bool CanUndo => _lastBatch is not null;
-    public string UndoLabel => _lastBatch is { } b ? $"Desfazer ({b.Label})" : "Desfazer";
+    public string UndoLabel => _lastBatch is { } b ? Loc.F("Drv.DesfazerN", b.Label) : Loc.T("Shell.Desfazer");
     public int RecommendedCount => Recommended.Count;
     public int OptionalCount => Optional.Count;
     public int GraphicsCount => Graphics.Count;
@@ -241,12 +241,12 @@ public sealed class DriverUpdatesPage : ModulePage
     public double OptionalNumber => Optional.Count;
     public double GraphicsNumber => Graphics.Count;
     /// <summary>Texto no lugar do número antes da primeira busca.</summary>
-    public string HeroValueText => Searching ? "Procurando…" : Searched ? "" : "Não procurado";
+    public string HeroValueText => Searching ? Loc.T("Drv.Procurando") : Searched ? "" : Loc.T("Drv.NaoProcurado");
     public string HeroCaption => Searching
-        ? SearchStatus + " Pode mudar de página: a busca continua."
+        ? SearchStatus + Loc.T("Drv.PodeMudarPaginaBusca")
         : Searched
-            ? "Achadas pelo Windows Update agora. Instalar guarda o driver atual para Desfazer."
-            : "A busca usa o próprio Windows Update e leva de 30 s a alguns minutos.";
+            ? Loc.T("Drv.AchadasPeloWindowsUpdate")
+            : Loc.T("Drv.BuscaUsaProprioWindows2");
     public bool HasOffers => Recommended.Count + Optional.Count + Graphics.Count > 0;
     /// <summary>Procurou e não há nada: estado vazio "tudo em dia".</summary>
     public bool ShowNoUpdates => Searched && !Searching && !HasOffers;
@@ -303,9 +303,9 @@ public sealed class DriverUpdatesPage : ModulePage
         var missing = r.NeedingDriver.Count(p => p.Kind == DeviceProblemKind.MissingDriver);
         var failed = r.NeedingDriver.Count - missing;
         MissingSummary = MissingDevices.Count == 0
-            ? (r.ProblemCodesRead ? $"Nenhum dispositivo sem driver ({r.DeviceCount} conferidos)." : "")
-            : $"{missing} sem driver, {failed} com driver que não carrega." +
-              (disabled > 0 ? $" {disabled} desativado(s) por você ou pelo BIOS não entra(m) na conta." : "");
+            ? (r.ProblemCodesRead ? Loc.F("Drv.NenhumDispositivoSemDriver", r.DeviceCount) : "")
+            : Loc.F("Drv.NSemDriverN", missing, failed) +
+              (disabled > 0 ? Loc.F("Drv.NDesativadoSVoce", disabled) : "");
         OnPropertyChanged(nameof(MissingCount));
         OnPropertyChanged(nameof(HasMissing));
     }
@@ -320,7 +320,7 @@ public sealed class DriverUpdatesPage : ModulePage
         ErrorText = "";
         Message = "";
         var started = DateTime.Now;
-        SearchStatus = "Procurando no Windows Update…";
+        SearchStatus = Loc.T("Drv.ProcurandoWindowsUpdate");
         var ticker = Tick(started, tick.Token);
         try
         {
@@ -330,20 +330,20 @@ public sealed class DriverUpdatesPage : ModulePage
             FillProblems(r);
             if (r.Error != WuErrorKind.None)
             {
-                ErrorText = r.ErrorMessage ?? "Não foi possível consultar o Windows Update.";
-                Summary = r.Error == WuErrorKind.Canceled ? "Busca cancelada." : "A busca não terminou.";
+                ErrorText = r.ErrorMessage ?? Loc.T("Drv.NaoFoiPossivelConsultar");
+                Summary = r.Error == WuErrorKind.Canceled ? Loc.T("Drv.BuscaCancelada") : Loc.T("Drv.BuscaNaoTerminou");
                 return;
             }
             FillOffers(r.Offers);
             Searched = true;
             var total = r.Offers.Count;
             Summary = total == 0
-                ? "O Windows Update não tem atualização de driver para este PC agora. Isso é normal: o Windows só oferece versões testadas para o seu hardware."
-                : $"{total} atualização(ões) de driver: {Recommended.Count} recomendada(s), {Optional.Count} opcional(is), {Graphics.Count} de vídeo.";
+                ? Loc.T("Drv.WindowsUpdateNaoTem")
+                : Loc.F("Drv.NAtualizacaoOesDriver", total, Recommended.Count, Optional.Count, Graphics.Count);
             if (r.InventoryNote is not null) Summary += " " + r.InventoryNote;
             if (MissingDevices.Count > 0 && !r.Offers.Any(o => o.InstalledVersion is null))
-                Summary += $" O Windows Update não ofereceu driver para {MissingDevices.Count} dispositivo(s) sem driver: veja o site do fabricante (cartão \"Dispositivos sem driver\").";
-            SearchStatus = $"Busca concluída em {(DateTime.Now - started).TotalSeconds:0} s, às {DateTime.Now:HH:mm}.";
+                Summary += Loc.F("Drv.WindowsUpdateNaoOfereceu", MissingDevices.Count);
+            SearchStatus = Loc.F("Drv.BuscaConcluidaNS", (DateTime.Now - started).TotalSeconds, DateTime.Now);
         }
         finally
         {
@@ -361,7 +361,7 @@ public sealed class DriverUpdatesPage : ModulePage
             while (!token.IsCancellationRequested)
             {
                 await Task.Delay(1000, token);
-                if (Searching) SearchStatus = $"Procurando no Windows Update… {(DateTime.Now - started).TotalSeconds:0} s (até {DriverUpdatesReader.DefaultTimeout.TotalMinutes:0} min)";
+                if (Searching) SearchStatus = Loc.F("Drv.ProcurandoWindowsUpdateN", (DateTime.Now - started).TotalSeconds, DriverUpdatesReader.DefaultTimeout.TotalMinutes);
             }
         }
         catch (OperationCanceledException) { }
@@ -369,7 +369,7 @@ public sealed class DriverUpdatesPage : ModulePage
 
     private void FillReboot(bool? pending) =>
         RebootNotice = pending == true
-            ? "O Windows está esperando um reinício (de uma atualização anterior). Reinicie antes de instalar mais drivers: alguns só valem depois disso."
+            ? Loc.T("Drv.WindowsEstaEsperandoReinicio")
             : "";
 
     private void FillGpus(DriverUpdatesReading r)
@@ -416,12 +416,12 @@ public sealed class DriverUpdatesPage : ModulePage
             if (u.DriverDate is { } d) parts.Add("de " + d.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture));
             parts.Add(DriverUpdatesReader.FormatSize(u.SizeBytes));
             if (u.KbArticles.Count > 0) parts.Add(string.Join(", ", u.KbArticles));
-            if (o.DeviceCount > 1) parts.Add($"{o.DeviceCount} dispositivos");
+            if (o.DeviceCount > 1) parts.Add(Loc.F("Drv.NDispositivos", o.DeviceCount));
             var row = new DriverUpdateRow
             {
                 Offer = o,
                 Detail = string.Join(" · ", parts),
-                Badge = u.Optional ? "opcional" : "recomendada",
+                Badge = u.Optional ? Loc.T("Drv.Opcional") : Loc.T("Drv.Recomendada"),
             };
             row.Tone = o.Blocked is not null ? "muted" : u.Optional ? "trace" : "good";
             row.RevertCommand = new RelayCommand(() => _ = RunAsync(() => RevertRunAsync(row.RunId)), () => !Busy && row.CanRevert);
@@ -441,14 +441,14 @@ public sealed class DriverUpdatesPage : ModulePage
     private async Task InstallAsync(List<DriverUpdateRow> rows)
     {
         if (Host is null || rows.Count == 0) return;
-        if (rows.Count > MaxBatch) { Message = $"Escolha no máximo {MaxBatch} atualizações por vez."; return; }
+        if (rows.Count > MaxBatch) { Message = Loc.F("Drv.EscolhaMaximoNAtualizacoes", MaxBatch); return; }
         var requests = rows.Select(r => new ActionRequest(InstallAction, Arguments: new Dictionary<string, string>
         {
             ["updateId"] = r.UpdateId,
             ["updateRevision"] = r.Revision,
         })).ToList();
-        foreach (var row in rows) { row.Status = "instalando pelo Windows Update…"; row.Tone = "signal"; }
-        var result = await Host.ApplyAsync(rows.Count == 1 ? "Instalar driver" : $"Instalar drivers ({rows.Count})",
+        foreach (var row in rows) { row.Status = Loc.T("Drv.InstalandoPeloWindowsUpdate"); row.Tone = "signal"; }
+        var result = await Host.ApplyAsync(rows.Count == 1 ? Loc.T("Drv.InstalarDriver") : Loc.F("Drv.InstalarDriversN", rows.Count),
             DriverUpdatesReader.ConfirmationText(rows.Select(r => r.Offer).ToList()), requests, BrokerLevel.Admin);
         if (result is null)
         {
@@ -465,7 +465,7 @@ public sealed class DriverUpdatesPage : ModulePage
             {
                 row.RunId = result.Response?.RunId;
                 row.Applied = true;
-                row.Status = "instalada · driver anterior guardado";
+                row.Status = Loc.T("Drv.InstaladaDriverAnteriorGuardado");
                 row.Tone = "good";
                 done++;
             }
@@ -477,14 +477,14 @@ public sealed class DriverUpdatesPage : ModulePage
         }
         if (done > 0 && result.Response?.RunId is { } run)
         {
-            _lastBatch = (run, $"{done} driver(s)");
+            _lastBatch = (run, Loc.F("Drv.NDriverS", done));
             OnPropertyChanged(nameof(CanUndo));
             OnPropertyChanged(nameof(UndoLabel));
         }
         var reboot = await Task.Run(() => { try { return WindowsRebootState.Pending(new WuaAgent()); } catch (Exception ex) when (ex is not OutOfMemoryException) { return null; } });
         FillReboot(reboot);
-        Message = (done == rows.Count ? $"{done} driver(s) instalado(s)." : $"{done} de {rows.Count} instalado(s); veja o motivo em cada linha.") +
-                  (reboot == true ? " Reinicie o PC para concluir." : "");
+        Message = (done == rows.Count ? Loc.F("Drv.NDriverSInstalado", done) : Loc.F("Drv.NNInstaladoS", done, rows.Count)) +
+                  (reboot == true ? Loc.T("Drv.ReiniciePcConcluir") : "");
         OnPropertyChanged(nameof(InstallRecommendedLabel));
     }
 
@@ -509,12 +509,12 @@ public sealed class DriverUpdatesPage : ModulePage
             {
                 row.Applied = false;
                 row.RunId = null;
-                row.Status = "driver anterior reinstalado";
+                row.Status = Loc.T("Drv.DriverAnteriorReinstalado");
                 row.Tone = "signal";
             }
             else
             {
-                row.Status = $"não voltou: {res?.Detail ?? r.Message}";
+                row.Status = Loc.F("Drv.NaoVoltouN", res?.Detail ?? r.Message);
                 row.Tone = "bad";
             }
         }
@@ -524,19 +524,19 @@ public sealed class DriverUpdatesPage : ModulePage
             OnPropertyChanged(nameof(CanUndo));
             OnPropertyChanged(nameof(UndoLabel));
         }
-        Message = all ? "Drivers anteriores reinstalados. Se algo ainda estiver estranho, reinicie o PC."
-                      : "Desfazer não terminou para todos: veja o motivo em cada linha (ou use a Restauração do Sistema).";
+        Message = all ? Loc.T("Drv.DriversAnterioresReinstaladosAlgo")
+                      : Loc.T("Drv.DesfazerNaoTerminouTodos");
     }
 
     private static string Translate(string outcome) => outcome switch
     {
         "Blocked" => "bloqueado",
-        "NotApplicable" => "não se aplica",
-        "FailedAndCompensated" => "falhou (nada mudou)",
+        "NotApplicable" => Loc.T("Drv.NaoAplica"),
+        "FailedAndCompensated" => Loc.T("Drv.FalhouNadaMudou"),
         "Failed" => "falhou",
-        "Interrupted" => "interrompido (veja Aplicar > Recuperar)",
-        "SkippedExternalChange" => "mudou enquanto isso; nada feito",
-        "AlreadyConfigured" => "já estava instalada",
+        "Interrupted" => Loc.T("Drv.InterrompidoVejaAplicarRecuperar"),
+        "SkippedExternalChange" => Loc.T("Drv.MudouEnquantoIssoNada"),
+        "AlreadyConfigured" => Loc.T("Drv.JaEstavaInstalada"),
         _ => outcome,
     };
 
@@ -561,7 +561,7 @@ public sealed class DriverUpdatesPage : ModulePage
         card.Checking = true;
         card.Error = "";
         try { card.Check = await Updater().CheckAsync(card.Status, WindowsBuild, CancellationToken.None); }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { card.Check = new GpuUpdateCheck(GpuUpdateState.Failed, "Não deu para consultar o fabricante: " + ex.Message); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { card.Check = new GpuUpdateCheck(GpuUpdateState.Failed, Loc.T("Drv.NaoDeuConsultarFabricante") + ex.Message); }
         finally { card.Checking = false; }
     }
 
@@ -581,44 +581,44 @@ public sealed class DriverUpdatesPage : ModulePage
         try
         {
             card.Downloading = true;
-            card.Phase = "Baixando do servidor oficial da " + GpuIdentity.VendorName(offer.Vendor) + "…";
+            card.Phase = Loc.T("Drv.BaixandoServidorOficial") + GpuIdentity.VendorName(offer.Vendor) + "…";
             var progress = new Progress<VendorDownloadProgress>(p =>
             {
                 card.Progress = p.Fraction;
                 card.ProgressText = GpuDriverUpdater.ProgressText(p);
             });
-            file = await Updater().DownloadAsync(check, UserProfile, progress, () => card.Phase = "Conferindo assinatura…", FreeSpace, cts.Token);
+            file = await Updater().DownloadAsync(check, UserProfile, progress, () => card.Phase = Loc.T("Drv.ConferindoAssinatura"), FreeSpace, cts.Token);
             card.Downloading = false;
             card.ProgressText = "";
-            card.Phase = $"Assinatura conferida: {file.Signer}. Instalando pelo aplicador…";
+            card.Phase = Loc.F("Drv.AssinaturaConferidaNInstalando", file.Signer);
             var request = new ActionRequest(GpuInstallAction, Arguments: new Dictionary<string, string>
             {
                 ["gpuVendor"] = VendorDriverPolicy.VendorToken(file.Vendor),
                 ["gpuVersion"] = file.Version,
                 ["installerSha256"] = file.Sha256,
             });
-            var result = await Host.ApplyAsync($"Instalar driver {GpuIdentity.VendorName(file.Vendor)} {file.Version}",
+            var result = await Host.ApplyAsync(Loc.F("Drv.InstalarDriverNN", GpuIdentity.VendorName(file.Vendor), file.Version),
                 GpuDriverUpdater.ConfirmationText(card.Status, file, check.Note), [request], BrokerLevel.Admin);
-            if (result is null) { card.Phase = ""; card.Result = "Instalação cancelada. O instalador baixado fica guardado para a próxima vez."; return; }
+            if (result is null) { card.Phase = ""; card.Result = Loc.T("Drv.InstalacaoCanceladaInstaladorBaixado"); return; }
             var res = result.Response?.Results is { Count: > 0 } list ? list[0] : null;
             if (res is { Outcome: "Verified" or "AlreadyConfigured" })
             {
                 card.RunId = result.Response?.RunId;
                 card.Installed = true;
-                card.Result = res.Outcome == "Verified" ? $"Driver {file.Version} instalado. Driver anterior guardado para Desfazer." : $"O driver {file.Version} já estava instalado.";
+                card.Result = res.Outcome == "Verified" ? Loc.F("Drv.DriverNInstaladoDriver", file.Version) : Loc.F("Drv.DriverNJaEstava", file.Version);
                 GpuDriverUpdater.Discard(file);
                 var reboot = await Task.Run(() => { try { return WindowsRebootState.Pending(new WuaAgent()); } catch (Exception ex) when (ex is not OutOfMemoryException) { return null; } });
                 FillReboot(reboot);
-                if (reboot == true) card.Result += " Reinicie o PC para concluir.";
+                if (reboot == true) card.Result += Loc.T("Drv.ReiniciePcConcluir");
             }
             else
             {
                 card.Error = res is null ? result.Message : $"{Translate(res.Outcome)}: {res.Detail}";
             }
         }
-        catch (OperationCanceledException) { card.Error = ""; card.Result = "Download pausado. \"Baixar e instalar\" continua de onde parou."; }
+        catch (OperationCanceledException) { card.Error = ""; card.Result = Loc.T("Drv.DownloadPausadoBaixarInstalar"); }
         catch (VendorDriverException ex) { card.Error = ex.Message; }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { card.Error = "Não foi possível concluir: " + ex.Message; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { card.Error = Loc.T("Drv.NaoFoiPossivelConcluir") + ex.Message; }
         finally
         {
             card.Downloading = false;
@@ -634,9 +634,9 @@ public sealed class DriverUpdatesPage : ModulePage
     private async Task AutoDetectAsync(GpuDriverCard card)
     {
         if (Host is null || card.Check?.AutoDetectUrl is not { } url || card.Working) return;
-        if (!Host.Confirm("Assistente oficial da AMD", "Baixar o \"Auto-Detect and Install\" do servidor oficial da AMD (~50 MB) e abrir?\n\n" +
-                "O NEXUS confere a assinatura digital da AMD antes de abrir. A janela do instalador da AMD aparece e você escolhe o que instalar " +
-                "(é o instalador da AMD, não o NEXUS: o Desfazer do NEXUS não cobre essa instalação; o próprio Windows mantém o driver anterior em Gerenciador de Dispositivos > Reverter driver).")) return;
+        if (!Host.Confirm(Loc.T("Drv.AssistenteOficialAmd"), Loc.T("Drv.BaixarAutoDetectAnd") +
+                Loc.T("Drv.NexusConfereAssinaturaDigital") +
+                Loc.T("Drv.InstaladorAmdNaoNexus"))) return;
         card.Working = true;
         card.Downloading = true;
         card.Error = "";
@@ -644,14 +644,14 @@ public sealed class DriverUpdatesPage : ModulePage
         _gpuCancel = cts;
         try
         {
-            card.Phase = "Baixando o assistente da AMD…";
+            card.Phase = Loc.T("Drv.BaixandoAssistenteAmd");
             var progress = new Progress<VendorDownloadProgress>(p => { card.Progress = p.Fraction; card.ProgressText = GpuDriverUpdater.ProgressText(p); });
             var path = await Updater().DownloadAutoDetectAsync(url, UserProfile, progress, cts.Token);
-            card.Phase = "Conferindo assinatura…";
+            card.Phase = Loc.T("Drv.ConferindoAssinatura");
             await Task.Run(() => AmdAutoDetectTool.Launch(path, new WindowsAuthenticodeVerifier()));
-            card.Result = "Assistente da AMD aberto. Siga a janela dele; depois volte aqui e clique em Procurar versão nova.";
+            card.Result = Loc.T("Drv.AssistenteAmdAbertoSiga");
         }
-        catch (OperationCanceledException) { card.Result = "Download cancelado."; }
+        catch (OperationCanceledException) { card.Result = Loc.T("Drv.DownloadCancelado"); }
         catch (Exception ex) when (ex is VendorDriverException or InvalidOperationException or System.ComponentModel.Win32Exception or IOException) { card.Error = ex.Message; }
         finally
         {
@@ -672,14 +672,14 @@ public sealed class DriverUpdatesPage : ModulePage
         {
             card.Installed = false;
             card.RunId = null;
-            card.Result = "Driver anterior reinstalado. Se a tela ficar estranha, reinicie o PC.";
+            card.Result = Loc.T("Drv.DriverAnteriorReinstaladoTela");
             card.Error = "";
             await LoadLocalAsync();
         }
         else
         {
             var detail = r.Response?.Results is { Count: > 0 } list ? list[0].Detail : null;
-            card.Error = "Desfazer não terminou: " + (detail ?? r.Message) + " Use a Restauração do Sistema (ponto criado antes de instalar).";
+            card.Error = Loc.T("Drv.DesfazerNaoTerminou") + (detail ?? r.Message) + Loc.T("Drv.UseRestauracaoSistemaPonto");
         }
     }
 
@@ -688,26 +688,26 @@ public sealed class DriverUpdatesPage : ModulePage
     private void OpenDetails(DriverUpdateRow row)
     {
         var url = row.Offer.Update.DetailsUrl ?? WindowsUpdateQueries.CatalogUrl(row.UpdateId);
-        if (Host?.Confirm("Detalhes da atualização", $"Abrir no navegador a página oficial da Microsoft sobre \"{row.UpdateTitle}\"?\n\n{url}") != true) return;
+        if (Host?.Confirm(Loc.T("Drv.DetalhesAtualizacao"), Loc.F("Drv.AbrirNavegadorPaginaOficial", row.UpdateTitle, url)) != true) return;
         try { DriverVendorTools.OpenDetails(url); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or ArgumentException) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or ArgumentException) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     private void OpenVendorPage(GpuDriverStatus g)
     {
         if (g.OfficialPage is null) return;
-        if (Host?.Confirm("Página oficial de drivers", $"Abrir no navegador a página oficial de drivers da {GpuIdentity.VendorName(g.Vendor)}?\n\n{g.OfficialPage}\n\n" +
-                "Não precisa: o botão \"Baixar e instalar\" do NEXUS já baixa do servidor oficial e instala. Use a página para ver notas de versão ou escolher outra versão.") != true) return;
+        if (Host?.Confirm(Loc.T("Drv.PaginaOficialDrivers"), Loc.F("Drv.AbrirNavegadorPaginaOficial2", GpuIdentity.VendorName(g.Vendor), g.OfficialPage) +
+                Loc.T("Drv.NaoPrecisaBotaoBaixar")) != true) return;
         try { DriverVendorTools.OpenOfficialDriverPage(g.Vendor); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or ArgumentException) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or ArgumentException) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     private void OpenVendorApp(GpuDriverStatus g)
     {
         if (g.App is not { } app) return;
-        if (Host?.Confirm(app.Name, $"Abrir o {app.Name}? É o app oficial do fabricante, já instalado no PC; nele você vê e instala drivers da placa de vídeo.") != true) return;
+        if (Host?.Confirm(app.Name, Loc.F("Drv.AbrirNAppOficial", app.Name)) != true) return;
         try { DriverVendorTools.OpenVendorApp(app); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     private void OpenWindowsUpdate()
@@ -716,7 +716,7 @@ public sealed class DriverUpdatesPage : ModulePage
         catch (System.ComponentModel.Win32Exception)
         {
             try { DriverVendorTools.OpenWindowsUpdateSettings(optional: false); }
-            catch (System.ComponentModel.Win32Exception ex) { Message = "Não foi possível abrir: " + ex.Message; }
+            catch (System.ComponentModel.Win32Exception ex) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
         }
     }
 }

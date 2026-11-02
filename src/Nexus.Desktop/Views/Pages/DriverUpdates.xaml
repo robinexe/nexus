@@ -15,6 +15,7 @@
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls">
   <DataTemplate DataType="{x:Type vm:DriverUpdatesPage}">
@@ -45,8 +46,8 @@
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Top" Margin="0,2,0,0" ToolTip="Incluir em Instalar selecionadas"
-                      AutomationProperties.Name="{Binding Title, StringFormat='Incluir na instalação: {0}'}"
+            <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Top" Margin="0,2,0,0" ToolTip="{l:T Drv.IncluirInstalarSelecionadas}"
+                      AutomationProperties.Name="{Binding Title, StringFormat={l:T Drv.IncluirInstalacaoN}}"
                       Visibility="{Binding CanApply, Converter={StaticResource BoolToVis}}"/>
             <c:Icon Data="{StaticResource Icon.Lock}" Size="14" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Top" Margin="1,3,0,0"
                     Visibility="{Binding Blocked, Converter={StaticResource NullToCollapsed}}"/>
@@ -72,16 +73,16 @@
               </c:ExplainToggle>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
-              <Button Content="Detalhes" Style="{StaticResource DU.Link}" Command="{Binding DetailsCommand}"
-                      AutomationProperties.Name="{Binding Title, StringFormat='Detalhes: {0}'}"/>
-              <Button Content="Instalar" Style="{StaticResource DU.Small}" Command="{Binding InstallCommand}"
+              <Button Content="{l:T Pg.Detalhes}" Style="{StaticResource DU.Link}" Command="{Binding DetailsCommand}"
+                      AutomationProperties.Name="{Binding Title, StringFormat={l:T Drv.DetalhesN}}"/>
+              <Button Content="{l:T Drv.Instalar}" Style="{StaticResource DU.Small}" Command="{Binding InstallCommand}"
                       Visibility="{Binding CanApply, Converter={StaticResource BoolToVis}}"
-                      AutomationProperties.Name="{Binding Title, StringFormat='Instalar: {0}'}"/>
+                      AutomationProperties.Name="{Binding Title, StringFormat={l:T Drv.InstalarN}}"/>
               <Button Style="{StaticResource DU.Small}" Command="{Binding RevertCommand}"
                       Visibility="{Binding CanRevert, Converter={StaticResource BoolToVis}}">
                 <StackPanel Orientation="Horizontal">
                   <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
-                  <TextBlock Text="Desfazer" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{l:T Shell.Desfazer}" TextWrapping="NoWrap"/>
                 </StackPanel>
               </Button>
             </StackPanel>
@@ -106,7 +107,7 @@
               </WrapPanel>
               <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}" FontSize="18"/>
               <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
-                <Run Text="Versão "/><Run Text="{Binding Version, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}"/>
+                <Run Text="{l:T Drv.Versao}"/><Run Text="{Binding Version, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}" Foreground="{StaticResource Brush.Trace}"/>
               </TextBlock>
               <TextBlock Text="{Binding Verdict}" Style="{StaticResource Text.Small}" Margin="0,8,0,0"
                          Foreground="{Binding LevelTone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"/>
@@ -145,21 +146,21 @@
                       <TextBlock Text="{Binding InstallLabel}" TextWrapping="NoWrap"/>
                     </StackPanel>
                   </Button>
-                  <Button Content="Pausar download" Style="{StaticResource Button.Secondary}" Command="{Binding CancelCommand}" Margin="0,0,8,6"
+                  <Button Content="{l:T Drv.PausarDownload}" Style="{StaticResource Button.Secondary}" Command="{Binding CancelCommand}" Margin="0,0,8,6"
                           Visibility="{Binding Downloading, Converter={StaticResource BoolToVis}}"/>
-                  <Button Content="Baixar e abrir o assistente oficial da AMD" Style="{StaticResource Button.Secondary}" Command="{Binding AutoDetectCommand}" Margin="0,0,8,6"
+                  <Button Content="{l:T Drv.BaixarAbrirAssistenteOficial}" Style="{StaticResource Button.Secondary}" Command="{Binding AutoDetectCommand}" Margin="0,0,8,6"
                           Visibility="{Binding HasAutoDetect, Converter={StaticResource BoolToVis}}"/>
                   <Button Style="{StaticResource Button.Secondary}" Command="{Binding CheckCommand}" Margin="0,0,8,6">
                     <StackPanel Orientation="Horizontal">
                       <c:Icon Data="{StaticResource Icon.Refresh}" Size="14" Margin="0,0,6,0"/>
-                      <TextBlock Text="Procurar versão nova" TextWrapping="NoWrap"/>
+                      <TextBlock Text="{l:T Drv.ProcurarVersaoNova}" TextWrapping="NoWrap"/>
                     </StackPanel>
                   </Button>
                   <Button Style="{StaticResource Button.Secondary}" Command="{Binding RevertCommand}" Margin="0,0,8,6"
                           Visibility="{Binding CanRevert, Converter={StaticResource BoolToVis}}">
                     <StackPanel Orientation="Horizontal">
                       <c:Icon Data="{StaticResource Icon.Undo}" Size="14" Margin="0,0,6,0"/>
-                      <TextBlock Text="Desfazer (voltar ao driver anterior)" TextWrapping="NoWrap"/>
+                      <TextBlock Text="{l:T Drv.DesfazerVoltarDriverAnterior}" TextWrapping="NoWrap"/>
                     </StackPanel>
                   </Button>
                 </WrapPanel>
@@ -179,10 +180,10 @@
               </WrapPanel>
             </StackPanel>
             <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="20,0,0,0" MinWidth="130">
-              <TextBlock Text="Idade do driver" Style="{StaticResource Text.Small}" HorizontalAlignment="Right"/>
+              <TextBlock Text="{l:T Drv.IdadeDriver}" Style="{StaticResource Text.Small}" HorizontalAlignment="Right"/>
               <c:AnimatedNumber Value="{Binding AgeNumber}" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="40" HorizontalAlignment="Right"
                                 Foreground="{Binding LevelTone, Converter={StaticResource ToneBrush}, ConverterParameter=text}"/>
-              <TextBlock Text="dias" Style="{StaticResource Text.Small}" HorizontalAlignment="Right"/>
+              <TextBlock Text="{l:T Drv.Dias}" Style="{StaticResource Text.Small}" HorizontalAlignment="Right"/>
               <TextBlock Text="{Binding DateText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" HorizontalAlignment="Right" Margin="0,4,0,0"/>
             </StackPanel>
           </Grid>
@@ -217,27 +218,27 @@
         </Border>
 
         <!-- ===== 1. Destaque ===== -->
-        <c:HeroPanel Illustration="{StaticResource Illo.Drivers}" Title="Atualizações de driver"
+        <c:HeroPanel Illustration="{StaticResource Illo.Drivers}" Title="{l:T Drv.AtualizacoesDriver}"
                      Number="{Binding UpdatesNumber}" ValueText="{Binding HeroValueText}"
                      Caption="{Binding HeroCaption}"
-                     ActionText="Procurar atualizações" Command="{Binding SearchCommand}"
-                     SecondaryText="Abrir Windows Update" SecondaryCommand="{Binding OpenWindowsUpdateCommand}">
+                     ActionText="{l:T Asst.ProcurarAtualizacoes}" Command="{Binding SearchCommand}"
+                     SecondaryText="{l:T Drv.AbrirWindowsUpdate}" SecondaryCommand="{Binding OpenWindowsUpdateCommand}">
           <StackPanel MinWidth="200">
             <DockPanel Margin="0,0,0,8">
               <c:AnimatedNumber DockPanel.Dock="Right" Value="{Binding RecommendedNumber}" Style="{StaticResource DU.Count}" Foreground="{StaticResource Brush.Good}"/>
-              <c:StatusChip Tone="Good" Text="recomendadas" HorizontalAlignment="Left"/>
+              <c:StatusChip Tone="Good" Text="{l:T Drv.Recomendadas}" HorizontalAlignment="Left"/>
             </DockPanel>
             <DockPanel Margin="0,0,0,8">
               <c:AnimatedNumber DockPanel.Dock="Right" Value="{Binding OptionalNumber}" Style="{StaticResource DU.Count}" Foreground="{StaticResource Brush.Trace}"/>
-              <c:StatusChip Tone="Warn" Text="opcionais" HorizontalAlignment="Left"/>
+              <c:StatusChip Tone="Warn" Text="{l:T Drv.Opcionais}" HorizontalAlignment="Left"/>
             </DockPanel>
             <DockPanel Margin="0,0,0,8">
               <c:AnimatedNumber DockPanel.Dock="Right" Value="{Binding GraphicsNumber}" Style="{StaticResource DU.Count}" Foreground="{StaticResource Brush.Signal}"/>
-              <c:StatusChip Tone="Info" Text="de vídeo" Icon="{StaticResource Icon.Gpu}" HorizontalAlignment="Left"/>
+              <c:StatusChip Tone="Info" Text="{l:T Drv.Video}" Icon="{StaticResource Icon.Gpu}" HorizontalAlignment="Left"/>
             </DockPanel>
             <TextBlock Text="{Binding SearchStatus}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" MaxWidth="220"
                        Visibility="{Binding SearchStatus, Converter={StaticResource NullToCollapsed}}" AutomationProperties.LiveSetting="Polite"/>
-            <Button Content="Cancelar busca" Command="{Binding CancelCommand}" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,4,0,0"
+            <Button Content="{l:T Drv.CancelarBusca}" Command="{Binding CancelCommand}" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,4,0,0"
                     Visibility="{Binding Searching, Converter={StaticResource BoolToVis}}"/>
           </StackPanel>
         </c:HeroPanel>
@@ -251,7 +252,7 @@
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <c:Icon Data="{StaticResource Icon.History}" Size="16" Foreground="{StaticResource Brush.Trace}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-            <TextBlock Grid.Column="1" Text="O driver anterior foi guardado. Algo estranho? Volte para ele." Style="{StaticResource Text.Small}"
+            <TextBlock Grid.Column="1" Text="{l:T Drv.DriverAnteriorFoiGuardado}" Style="{StaticResource Text.Small}"
                        Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
             <Button Grid.Column="2" Command="{Binding UndoCommand}" Style="{StaticResource Button.Secondary}" Margin="12,0,0,0">
               <StackPanel Orientation="Horizontal">
@@ -277,7 +278,7 @@
                 <c:Icon Data="{StaticResource Icon.Warning}" Size="19" Foreground="{StaticResource Brush.Bad}" HorizontalAlignment="Center"/>
               </Grid>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Dispositivos sem driver" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="{l:T Drv.DispositivosSemDriver}" Style="{StaticResource Text.H2}"/>
                 <TextBlock Text="{Binding MissingSummary}" Style="{StaticResource Text.Small}"/>
               </StackPanel>
               <TextBlock Grid.Column="2" Text="{Binding MissingCount}" Style="{StaticResource DU.GroupCount}" Foreground="{StaticResource Brush.Bad}"/>
@@ -295,7 +296,7 @@
                       <TextBlock Text="{Binding Meaning}" Style="{StaticResource Text.Small}" Margin="0,2,0,0"/>
                       <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,0,0"
                                  Visibility="{Binding HardwareId, Converter={StaticResource NullToCollapsed}}">
-                        <Run Text="Hardware ID "/><Run Text="{Binding HardwareId, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}"/>
+                        <Run Text="{l:T Drv.HardwareId}"/><Run Text="{Binding HardwareId, Mode=OneWay}" FontFamily="{StaticResource Font.Numbers}"/>
                       </TextBlock>
                     </StackPanel>
                   </Border>
@@ -307,10 +308,10 @@
               <Button Style="{StaticResource Button.Secondary}" Command="{Binding SearchCommand}" Margin="0,0,8,0">
                 <StackPanel Orientation="Horizontal">
                   <c:Icon Data="{StaticResource Icon.Search}" Size="14" Margin="0,0,6,0"/>
-                  <TextBlock Text="Procurar no Windows Update" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{l:T Asst.ProcurarWindowsUpdate}" TextWrapping="NoWrap"/>
                 </StackPanel>
               </Button>
-              <Button Content="Abrir atualizações opcionais" Style="{StaticResource Button.Ghost}" Command="{Binding OpenWindowsUpdateCommand}"/>
+              <Button Content="{l:T Drv.AbrirAtualizacoesOpcionais}" Style="{StaticResource Button.Ghost}" Command="{Binding OpenWindowsUpdateCommand}"/>
             </WrapPanel>
           </StackPanel>
         </Border>
@@ -319,27 +320,27 @@
 
         <!-- ===== 2. Placa de vídeo em destaque ===== -->
         <DockPanel Margin="0,4,0,12">
-          <c:ExplainToggle DockPanel.Dock="Right" Header="Quando atualizar?" Content="{Binding WhenToUpdateGpu}" VerticalAlignment="Center"/>
-          <TextBlock Text="Sua placa de vídeo" Style="{StaticResource Text.H2}" VerticalAlignment="Center"/>
+          <c:ExplainToggle DockPanel.Dock="Right" Header="{l:T Drv.QuandoAtualizar}" Content="{Binding WhenToUpdateGpu}" VerticalAlignment="Center"/>
+          <TextBlock Text="{l:T Drv.SuaPlacaVideo}" Style="{StaticResource Text.H2}" VerticalAlignment="Center"/>
         </DockPanel>
         <c:SkeletonLoader Shape="Hero" Height="150" Margin="0,0,0,14" Visibility="{Binding LoadingGpus, Converter={StaticResource BoolToVis}}"/>
         <ItemsControl ItemsSource="{Binding Gpus}" ItemTemplate="{StaticResource DU.Gpu}" Focusable="False"/>
         <TextBlock Text="{Binding GpuNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,0,0,6"
                    Visibility="{Binding GpuNote, Converter={StaticResource NullToCollapsed}}"/>
-        <c:ExplainToggle Header="Como o NEXUS baixa e instala o driver de vídeo?" Margin="0,0,0,20"
-                         Content="A versão mais nova vem da consulta oficial da NVIDIA (a mesma do site nvidia.com/drivers) ou da página oficial de drivers da AMD. O download sai só dos servidores do fabricante (us.download.nvidia.com, drivers.amd.com), com progresso aqui. Antes de executar, o NEXUS confere a assinatura digital (tem que ser da NVIDIA ou da AMD) e, no aplicador com administrador, confere de novo numa cópia protegida. Assinatura inválida: o arquivo é apagado e nunca roda. O driver atual é guardado e há Desfazer; o Windows cria um ponto de restauração. Em notebook com placa NVIDIA + integrada (Optimus), o driver da NVIDIA é suportado; na integrada AMD, a AMD recomenda o driver do fabricante do notebook se algo falhar."/>
+        <c:ExplainToggle Header="{l:T Drv.ComoNexusBaixaInstala}" Margin="0,0,0,20"
+                         Content="{l:T Drv.VersaoMaisNovaVem}"/>
 
         <!-- ===== 3. Como funciona ===== -->
         <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,20">
           <StackPanel>
             <c:HowItWorks>
-              <c:StepItem Icon="{StaticResource Icon.Search}" Title="Procura" Text="Pergunta ao Windows Update. Só versões testadas para o seu PC."/>
-              <c:StepItem Icon="{StaticResource Icon.Check}" Title="Escolhe" Text="Marque o que quer. Opcionais só se algo não funciona."/>
-              <c:StepItem Icon="{StaticResource Icon.Drivers}" Title="Instala" Text="Cria um ponto de restauração e guarda o driver atual." Tone="Warn"/>
-              <c:StepItem Icon="{StaticResource Icon.Undo}" Title="Desfaz" Text="Algo estranho? Volte ao driver anterior." Tone="Good"/>
+              <c:StepItem Icon="{StaticResource Icon.Search}" Title="{l:T Drv.Procura}" Text="{l:T Drv.PerguntaWindowsUpdateSo}"/>
+              <c:StepItem Icon="{StaticResource Icon.Check}" Title="{l:T Priv.Escolhe}" Text="{l:T Drv.MarqueQuerOpcionaisSo}"/>
+              <c:StepItem Icon="{StaticResource Icon.Drivers}" Title="{l:T Drv.Instala}" Text="{l:T Drv.CriaPontoRestauracaoGuarda}" Tone="Warn"/>
+              <c:StepItem Icon="{StaticResource Icon.Undo}" Title="{l:T Pg.Desfaz}" Text="{l:T Drv.AlgoEstranhoVolteDriver}" Tone="Good"/>
             </c:HowItWorks>
             <c:ExplainToggle Margin="0,12,0,0"
-                             Content="Só fontes oficiais: o próprio Windows Update e os servidores da NVIDIA e da AMD (com a assinatura digital conferida). Nada de 'driver booster'. Atualizar driver corrige falhas e compatibilidade; não deixa o PC mais rápido por si só. Se está tudo funcionando, não é obrigatório."/>
+                             Content="{l:T Drv.SoFontesOficiaisProprio}"/>
           </StackPanel>
         </Border>
 
@@ -354,12 +355,12 @@
           </DockPanel>
         </Border>
 
-        <c:EmptyState Illustration="{StaticResource Illo.Drivers}" Text="Ainda não procurou."
-                      Detail="A busca usa o próprio Windows Update. Nada é instalado sem você escolher."
-                      ActionText="Procurar atualizações" Command="{Binding SearchCommand}"
+        <c:EmptyState Illustration="{StaticResource Illo.Drivers}" Text="{l:T Shell.AindaNaoProcurou}"
+                      Detail="{l:T Drv.BuscaUsaProprioWindows}"
+                      ActionText="{l:T Asst.ProcurarAtualizacoes}" Command="{Binding SearchCommand}"
                       Visibility="{Binding ShowNotSearched, Converter={StaticResource BoolToVis}}"/>
         <c:SkeletonLoader Shape="Lines" Lines="6" Margin="4,4,4,16" Visibility="{Binding Searching, Converter={StaticResource BoolToVis}}"/>
-        <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="Tudo em dia."
+        <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="{l:T Drv.TudoDia}"
                       Detail="{Binding Summary}"
                       Visibility="{Binding ShowNoUpdates, Converter={StaticResource BoolToVis}}"/>
 
@@ -381,11 +382,11 @@
                 <c:Icon Data="{StaticResource Icon.Check}" Size="19" Foreground="{StaticResource Brush.Good}" HorizontalAlignment="Center"/>
               </Grid>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Recomendadas pelo Windows" Style="{StaticResource Text.H2}"/>
-                <TextBlock Text="Testadas pela Microsoft para o seu hardware." Style="{StaticResource Text.Small}"/>
+                <TextBlock Text="{l:T Drv.RecomendadasPeloWindows}" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="{l:T Drv.TestadasPelaMicrosoftSeu}" Style="{StaticResource Text.Small}"/>
               </StackPanel>
               <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Marcar todas" Style="{StaticResource DU.Link}" Command="{Binding SelectRecommendedCommand}"/>
+                <Button Content="{l:T Drv.MarcarTodas}" Style="{StaticResource DU.Link}" Command="{Binding SelectRecommendedCommand}"/>
                 <Button Style="{StaticResource Button.Primary}" Command="{Binding InstallRecommendedCommand}" Margin="8,0,0,0" Padding="12,6">
                   <StackPanel Orientation="Horizontal">
                     <c:Icon Data="{StaticResource Icon.Drivers}" Size="14" Margin="0,0,6,0"/>
@@ -416,8 +417,8 @@
                 <c:Icon Data="{StaticResource Icon.Plus}" Size="19" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
               </Grid>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Opcionais" Style="{StaticResource Text.H2}"/>
-                <TextBlock Text="Só se um aparelho estiver com problema ou o fabricante pedir." Style="{StaticResource Text.Small}"/>
+                <TextBlock Text="{l:T Drv.Opcionais2}" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="{l:T Drv.SoAparelhoEstiverProblema}" Style="{StaticResource Text.Small}"/>
               </StackPanel>
               <TextBlock Grid.Column="2" Text="{Binding OptionalCount}" Style="{StaticResource DU.GroupCount}" Foreground="{StaticResource Brush.Trace}"/>
             </Grid>
@@ -442,15 +443,15 @@
                 <c:Icon Data="{StaticResource Icon.Gpu}" Size="19" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
               </Grid>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Placa de vídeo (pelo Windows Update)" Style="{StaticResource Text.H2}"/>
-                <TextBlock Text="Compare a versão com a do fabricante antes de instalar." Style="{StaticResource Text.Small}"/>
+                <TextBlock Text="{l:T Drv.PlacaVideoPeloWindows}" Style="{StaticResource Text.H2}"/>
+                <TextBlock Text="{l:T Drv.CompareVersaoFabricanteAntes}" Style="{StaticResource Text.Small}"/>
               </StackPanel>
               <TextBlock Grid.Column="2" Text="{Binding GraphicsCount}" Style="{StaticResource DU.GroupCount}" Foreground="{StaticResource Brush.Signal}"/>
             </Grid>
             <Border Style="{StaticResource Panel.Notice}" Padding="10,6" Margin="0,0,0,6">
               <DockPanel>
                 <c:Icon Data="{StaticResource Icon.Warning}" Size="14" Foreground="{StaticResource Brush.Trace}" Margin="0,1,8,0" VerticalAlignment="Top"/>
-                <TextBlock Text="Às vezes o Windows Update oferece um driver de vídeo MAIS ANTIGO que o do site do fabricante. Nesse caso, não instale."
+                <TextBlock Text="{l:T Drv.VezesWindowsUpdateOferece}"
                            Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
               </DockPanel>
             </Border>
@@ -467,13 +468,13 @@
             </Grid.ColumnDefinitions>
             <StackPanel VerticalAlignment="Center">
               <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"/>
-              <TextBlock Text="Uma confirmação lista tudo antes. Pede administrador. O Windows pode pedir reinício." Style="{StaticResource Text.Small}"
+              <TextBlock Text="{l:T Drv.ConfirmacaoListaTudoAntes}" Style="{StaticResource Text.Small}"
                          Foreground="{StaticResource Brush.TextDim}" Margin="0,2,0,0"/>
             </StackPanel>
             <Button Grid.Column="1" Style="{StaticResource Button.Secondary}" Command="{Binding InstallSelectedCommand}" Margin="12,0,0,0" VerticalAlignment="Center">
               <StackPanel Orientation="Horizontal">
                 <c:Icon Data="{StaticResource Icon.Drivers}" Size="14" Margin="0,0,6,0"/>
-                <TextBlock Text="Instalar selecionadas" TextWrapping="NoWrap"/>
+                <TextBlock Text="{l:T Drv.InstalarSelecionadas}" TextWrapping="NoWrap"/>
               </StackPanel>
             </Button>
           </Grid>
