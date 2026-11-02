@@ -7,6 +7,7 @@
       "id": "cleaning.temp-user",
       "version": 1,
       "title": "Limpar: Arquivos temporários da sua conta",
+      "i18n": { "en": { "title": "Clean: Temporary files of your account" }, "es": { "title": "Limpiar: Archivos temporales de tu cuenta" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -37,6 +38,7 @@
       "id": "cleaning.temp-windows",
       "version": 1,
       "title": "Limpar: Arquivos temporários do Windows",
+      "i18n": { "en": { "title": "Clean: Windows temporary files" }, "es": { "title": "Limpiar: Archivos temporales de Windows" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -66,6 +68,7 @@
       "id": "cleaning.thumbnails",
       "version": 1,
       "title": "Limpar: Cache de miniaturas do Explorador",
+      "i18n": { "en": { "title": "Clean: Explorer thumbnail cache" }, "es": { "title": "Limpiar: Caché de miniaturas del Explorador" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -96,6 +99,7 @@
       "id": "cleaning.wer-user",
       "version": 1,
       "title": "Limpar: Relatórios de erro (sua conta)",
+      "i18n": { "en": { "title": "Clean: Error reports (your account)" }, "es": { "title": "Limpiar: Informes de error (tu cuenta)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -126,6 +130,7 @@
       "id": "cleaning.wer-system",
       "version": 1,
       "title": "Limpar: Relatórios de erro do sistema",
+      "i18n": { "en": { "title": "Clean: System error reports" }, "es": { "title": "Limpiar: Informes de error del sistema" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -155,6 +160,7 @@
       "id": "cleaning.logs-cbs",
       "version": 1,
       "title": "Limpar: Registros antigos de manutenção do Windows (CBS)",
+      "i18n": { "en": { "title": "Clean: Old Windows servicing logs (CBS)" }, "es": { "title": "Limpiar: Registros antiguos de mantenimiento de Windows (CBS)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -184,6 +190,7 @@
       "id": "cleaning.crashdumps-user",
       "version": 1,
       "title": "Limpar: Despejos de travamento de programas (sua conta)",
+      "i18n": { "en": { "title": "Clean: Program crash dumps (your account)" }, "es": { "title": "Limpiar: Volcados de bloqueo de programas (tu cuenta)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -214,6 +221,7 @@
       "id": "cleaning.crashdumps-system",
       "version": 1,
       "title": "Limpar: Despejos de travamento do sistema (tela azul)",
+      "i18n": { "en": { "title": "Clean: System crash dumps (blue screen)" }, "es": { "title": "Limpiar: Volcados de bloqueo del sistema (pantalla azul)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -243,6 +251,7 @@
       "id": "cleaning.chrome-cache",
       "version": 1,
       "title": "Limpar: Google Chrome: cache",
+      "i18n": { "en": { "title": "Clean: Google Chrome: cache" }, "es": { "title": "Limpiar: Google Chrome: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -273,6 +282,7 @@
       "id": "cleaning.edge-cache",
       "version": 1,
       "title": "Limpar: Microsoft Edge: cache",
+      "i18n": { "en": { "title": "Clean: Microsoft Edge: cache" }, "es": { "title": "Limpiar: Microsoft Edge: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -303,6 +313,7 @@
       "id": "cleaning.brave-cache",
       "version": 1,
       "title": "Limpar: Brave: cache",
+      "i18n": { "en": { "title": "Clean: Brave: cache" }, "es": { "title": "Limpiar: Brave: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -333,6 +344,7 @@
       "id": "cleaning.opera-cache",
       "version": 1,
       "title": "Limpar: Opera e Opera GX: cache",
+      "i18n": { "en": { "title": "Clean: Opera and Opera GX: cache" }, "es": { "title": "Limpiar: Opera y Opera GX: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -363,6 +375,7 @@
       "id": "cleaning.firefox-cache",
       "version": 1,
       "title": "Limpar: Firefox: cache",
+      "i18n": { "en": { "title": "Clean: Firefox: cache" }, "es": { "title": "Limpiar: Firefox: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -393,6 +406,7 @@
       "id": "cleaning.chrome-history",
       "version": 1,
       "title": "Limpar: Google Chrome: histórico de navegação",
+      "i18n": { "en": { "title": "Clean: Google Chrome: browsing history" }, "es": { "title": "Limpiar: Google Chrome: historial de navegación" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -423,6 +437,7 @@
       "id": "cleaning.chrome-cookies",
       "version": 1,
       "title": "Limpar: Google Chrome: cookies (desconecta dos sites)",
+      "i18n": { "en": { "title": "Clean: Google Chrome: cookies (signs you out of sites)" }, "es": { "title": "Limpiar: Google Chrome: cookies (cierra la sesión en los sitios)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -453,6 +468,7 @@
       "id": "cleaning.edge-history",
       "version": 1,
       "title": "Limpar: Microsoft Edge: histórico de navegação",
+      "i18n": { "en": { "title": "Clean: Microsoft Edge: browsing history" }, "es": { "title": "Limpiar: Microsoft Edge: historial de navegación" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -483,6 +499,7 @@
       "id": "cleaning.edge-cookies",
       "version": 1,
       "title": "Limpar: Microsoft Edge: cookies (desconecta dos sites)",
+      "i18n": { "en": { "title": "Clean: Microsoft Edge: cookies (signs you out of sites)" }, "es": { "title": "Limpiar: Microsoft Edge: cookies (cierra la sesión en los sitios)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -513,6 +530,7 @@
       "id": "cleaning.brave-history",
       "version": 1,
       "title": "Limpar: Brave: histórico de navegação",
+      "i18n": { "en": { "title": "Clean: Brave: browsing history" }, "es": { "title": "Limpiar: Brave: historial de navegación" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -543,6 +561,7 @@
       "id": "cleaning.brave-cookies",
       "version": 1,
       "title": "Limpar: Brave: cookies (desconecta dos sites)",
+      "i18n": { "en": { "title": "Clean: Brave: cookies (signs you out of sites)" }, "es": { "title": "Limpiar: Brave: cookies (cierra la sesión en los sitios)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -573,6 +592,7 @@
       "id": "cleaning.discord-cache",
       "version": 1,
       "title": "Limpar: Discord: cache",
+      "i18n": { "en": { "title": "Clean: Discord: cache" }, "es": { "title": "Limpiar: Discord: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -603,6 +623,7 @@
       "id": "cleaning.spotify-cache",
       "version": 1,
       "title": "Limpar: Spotify: cache de músicas",
+      "i18n": { "en": { "title": "Clean: Spotify: music cache" }, "es": { "title": "Limpiar: Spotify: caché de música" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -633,6 +654,7 @@
       "id": "cleaning.teams-cache",
       "version": 1,
       "title": "Limpar: Microsoft Teams: cache",
+      "i18n": { "en": { "title": "Clean: Microsoft Teams: cache" }, "es": { "title": "Limpiar: Microsoft Teams: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -663,6 +685,7 @@
       "id": "cleaning.slack-cache",
       "version": 1,
       "title": "Limpar: Slack: cache",
+      "i18n": { "en": { "title": "Clean: Slack: cache" }, "es": { "title": "Limpiar: Slack: caché" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -693,6 +716,7 @@
       "id": "cleaning.shader-nvidia",
       "version": 1,
       "title": "Limpar: Cache de shaders NVIDIA",
+      "i18n": { "en": { "title": "Clean: NVIDIA shader cache" }, "es": { "title": "Limpiar: Caché de shaders NVIDIA" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -723,6 +747,7 @@
       "id": "cleaning.shader-amd",
       "version": 1,
       "title": "Limpar: Cache de shaders AMD",
+      "i18n": { "en": { "title": "Clean: AMD shader cache" }, "es": { "title": "Limpiar: Caché de shaders AMD" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -753,6 +778,7 @@
       "id": "cleaning.shader-intel",
       "version": 1,
       "title": "Limpar: Cache de shaders Intel",
+      "i18n": { "en": { "title": "Clean: Intel shader cache" }, "es": { "title": "Limpiar: Caché de shaders Intel" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -783,6 +809,7 @@
       "id": "cleaning.shader-directx",
       "version": 1,
       "title": "Limpar: Cache de shaders do DirectX",
+      "i18n": { "en": { "title": "Clean: DirectX shader cache" }, "es": { "title": "Limpiar: Caché de shaders de DirectX" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -813,6 +840,7 @@
       "id": "cleaning.steam-htmlcache",
       "version": 1,
       "title": "Limpar: Steam: cache do navegador da loja",
+      "i18n": { "en": { "title": "Clean: Steam: store browser cache" }, "es": { "title": "Limpiar: Steam: caché del navegador de la tienda" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -843,6 +871,7 @@
       "id": "cleaning.steam-logs",
       "version": 1,
       "title": "Limpar: Steam: registros e despejos antigos",
+      "i18n": { "en": { "title": "Clean: Steam: old logs and dumps" }, "es": { "title": "Limpiar: Steam: registros y volcados antiguos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -872,6 +901,7 @@
       "id": "cleaning.steam-shadercache",
       "version": 1,
       "title": "Limpar: Steam: shaders pré-compilados dos jogos",
+      "i18n": { "en": { "title": "Clean: Steam: games' precompiled shaders" }, "es": { "title": "Limpiar: Steam: shaders precompilados de los juegos" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -901,6 +931,7 @@
       "id": "cleaning.epic-webcache",
       "version": 1,
       "title": "Limpar: Epic Games Launcher: cache web",
+      "i18n": { "en": { "title": "Clean: Epic Games Launcher: web cache" }, "es": { "title": "Limpiar: Epic Games Launcher: caché web" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -931,6 +962,7 @@
       "id": "cleaning.epic-logs",
       "version": 1,
       "title": "Limpar: Epic Games Launcher: registros antigos",
+      "i18n": { "en": { "title": "Clean: Epic Games Launcher: old logs" }, "es": { "title": "Limpiar: Epic Games Launcher: registros antiguos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -961,6 +993,7 @@
       "id": "cleaning.battlenet-cache",
       "version": 1,
       "title": "Limpar: Battle.net: cache (sua conta)",
+      "i18n": { "en": { "title": "Clean: Battle.net: cache (your account)" }, "es": { "title": "Limpiar: Battle.net: caché (tu cuenta)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -991,6 +1024,7 @@
       "id": "cleaning.battlenet-programdata",
       "version": 1,
       "title": "Limpar: Battle.net: cache compartilhado",
+      "i18n": { "en": { "title": "Clean: Battle.net: shared cache" }, "es": { "title": "Limpiar: Battle.net: caché compartida" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1020,6 +1054,7 @@
       "id": "cleaning.windows-logs-old",
       "version": 1,
       "title": "Limpar: Registros antigos de instalação do Windows",
+      "i18n": { "en": { "title": "Clean: Old Windows setup logs" }, "es": { "title": "Limpiar: Registros antiguos de instalación de Windows" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1049,6 +1084,7 @@
       "id": "cleaning.store-cache",
       "version": 1,
       "title": "Limpar: Microsoft Store: cache de imagens",
+      "i18n": { "en": { "title": "Clean: Microsoft Store: image cache" }, "es": { "title": "Limpiar: Microsoft Store: caché de imágenes" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1079,6 +1115,7 @@
       "id": "cleaning.nvidia-nvcache",
       "version": 1,
       "title": "Limpar: NVIDIA: cache de shaders global (NV_Cache)",
+      "i18n": { "en": { "title": "Clean: NVIDIA: global shader cache (NV_Cache)" }, "es": { "title": "Limpiar: NVIDIA: caché global de shaders (NV_Cache)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1108,6 +1145,7 @@
       "id": "cleaning.nvidia-installers",
       "version": 1,
       "title": "Limpar: NVIDIA: instaladores de driver extraídos",
+      "i18n": { "en": { "title": "Clean: NVIDIA: extracted driver installers" }, "es": { "title": "Limpiar: NVIDIA: instaladores de driver extraídos" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1137,6 +1175,7 @@
       "id": "cleaning.amd-installers",
       "version": 1,
       "title": "Limpar: AMD: instaladores extraídos (C:\\AMD)",
+      "i18n": { "en": { "title": "Clean: AMD: extracted installers (C:\\AMD)" }, "es": { "title": "Limpiar: AMD: instaladores extraídos (C:\\AMD)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1166,6 +1205,7 @@
       "id": "cleaning.riot-logs",
       "version": 1,
       "title": "Limpar: Riot Client e VALORANT: registros antigos",
+      "i18n": { "en": { "title": "Clean: Riot Client and VALORANT: old logs" }, "es": { "title": "Limpiar: Riot Client y VALORANT: registros antiguos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1196,6 +1236,7 @@
       "id": "cleaning.minecraft-logs",
       "version": 1,
       "title": "Limpar: Minecraft: registros antigos",
+      "i18n": { "en": { "title": "Clean: Minecraft: old logs" }, "es": { "title": "Limpiar: Minecraft: registros antiguos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1226,6 +1267,7 @@
       "id": "cleaning.ea-logs",
       "version": 1,
       "title": "Limpar: EA app: registros antigos",
+      "i18n": { "en": { "title": "Clean: EA app: old logs" }, "es": { "title": "Limpiar: EA app: registros antiguos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1256,6 +1298,7 @@
       "id": "cleaning.ubisoft-logs",
       "version": 1,
       "title": "Limpar: Ubisoft Connect: registros antigos",
+      "i18n": { "en": { "title": "Clean: Ubisoft Connect: old logs" }, "es": { "title": "Limpiar: Ubisoft Connect: registros antiguos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1286,6 +1329,7 @@
       "id": "cleaning.obs-logs",
       "version": 1,
       "title": "Limpar: OBS Studio: registros e relatórios de travamento antigos",
+      "i18n": { "en": { "title": "Clean: OBS Studio: old logs and crash reports" }, "es": { "title": "Limpiar: OBS Studio: registros e informes de bloqueo antiguos" } },
       "classification": "SupportedDocumented",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1316,6 +1360,7 @@
       "id": "cleaning.dev-vscode-cache",
       "version": 1,
       "title": "Limpar: VS Code: caches (desenvolvedor)",
+      "i18n": { "en": { "title": "Clean: VS Code: caches (developer)" }, "es": { "title": "Limpiar: VS Code: cachés (desarrollador)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1346,6 +1391,7 @@
       "id": "cleaning.dev-npm-cache",
       "version": 1,
       "title": "Limpar: npm: cache de pacotes (desenvolvedor)",
+      "i18n": { "en": { "title": "Clean: npm: package cache (developer)" }, "es": { "title": "Limpiar: npm: caché de paquetes (desarrollador)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1376,6 +1422,7 @@
       "id": "cleaning.dev-pip-cache",
       "version": 1,
       "title": "Limpar: pip (Python): cache (desenvolvedor)",
+      "i18n": { "en": { "title": "Clean: pip (Python): cache (developer)" }, "es": { "title": "Limpiar: pip (Python): caché (desarrollador)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1406,6 +1453,7 @@
       "id": "cleaning.dev-nuget-cache",
       "version": 1,
       "title": "Limpar: NuGet: cache HTTP (desenvolvedor)",
+      "i18n": { "en": { "title": "Clean: NuGet: HTTP cache (developer)" }, "es": { "title": "Limpiar: NuGet: caché HTTP (desarrollador)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1436,6 +1484,7 @@
       "id": "cleaning.dev-gradle-cache",
       "version": 1,
       "title": "Limpar: Gradle: caches (desenvolvedor)",
+      "i18n": { "en": { "title": "Clean: Gradle: caches (developer)" }, "es": { "title": "Limpiar: Gradle: cachés (desarrollador)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1466,6 +1515,7 @@
       "id": "cleaning.dev-java-cache",
       "version": 1,
       "title": "Limpar: Java: cache de implantação (desenvolvedor)",
+      "i18n": { "en": { "title": "Clean: Java: deployment cache (developer)" }, "es": { "title": "Limpiar: Java: caché de implementación (desarrollador)" } },
       "classification": "Conditional",
       "handlerKind": "CleaningRule",
       "target": {
@@ -1496,6 +1546,7 @@
       "id": "cleaning.quarantine.purge",
       "version": 1,
       "title": "Esvaziar um lote da quarentena (sua conta, irreversível)",
+      "i18n": { "en": { "title": "Empty a quarantine batch (your account, irreversible)" }, "es": { "title": "Vaciar un lote de la cuarentena (tu cuenta, irreversible)" } },
       "classification": "Conditional",
       "condition": "Só um lote que está na quarentena da sua conta, escolhido e confirmado duas vezes na página Limpeza > Quarentena, com a lista e o tamanho exato.",
       "handlerKind": "CleaningQuarantinePurge",
@@ -1531,6 +1582,7 @@
       "id": "cleaning.quarantine.purge.machine",
       "version": 1,
       "title": "Esvaziar um lote da quarentena (administrador, irreversível)",
+      "i18n": { "en": { "title": "Empty a quarantine batch (administrator, irreversible)" }, "es": { "title": "Vaciar un lote de la cuarentena (administrador, irreversible)" } },
       "classification": "Conditional",
       "condition": "Só um lote da quarentena do administrador (pastas do sistema), escolhido e confirmado duas vezes na página Limpeza > Quarentena.",
       "handlerKind": "CleaningQuarantinePurge",
@@ -1566,6 +1618,7 @@
       "id": "cleaning.quarantine.purge-older",
       "version": 1,
       "title": "Esvaziar lotes da quarentena com mais de N dias (sua conta, irreversível)",
+      "i18n": { "en": { "title": "Empty quarantine batches older than N days (your account, irreversible)" }, "es": { "title": "Vaciar lotes de la cuarentena con más de N días (tu cuenta, irreversible)" } },
       "classification": "Conditional",
       "condition": "N de 1 a 999 dias, escolhido pelo usuário (ou sugerido pela expiração opcional, desligada por padrão). Nunca roda sozinho: sempre com duas confirmações.",
       "handlerKind": "CleaningQuarantinePurge",
@@ -1601,6 +1654,7 @@
       "id": "cleaning.quarantine.purge-older.machine",
       "version": 1,
       "title": "Esvaziar lotes da quarentena com mais de N dias (administrador, irreversível)",
+      "i18n": { "en": { "title": "Empty quarantine batches older than N days (administrator, irreversible)" }, "es": { "title": "Vaciar lotes de la cuarentena con más de N días (administrador, irreversible)" } },
       "classification": "Conditional",
       "condition": "N de 1 a 999 dias, escolhido pelo usuário. Nunca roda sozinho: sempre com duas confirmações.",
       "handlerKind": "CleaningQuarantinePurge",
@@ -1636,6 +1690,7 @@
       "id": "cleaning.recycle-bin.empty",
       "version": 1,
       "title": "Esvaziar a Lixeira (irreversível)",
+      "i18n": { "en": { "title": "Empty the Recycle Bin (irreversible)" }, "es": { "title": "Vaciar la Papelera (irreversible)" } },
       "classification": "Conditional",
       "condition": "Só na sua conta (a Lixeira é de cada usuário). Uma unidade (letra) ou todas. Duas confirmações na página, com o tamanho exato; recusado no aplicador como serviço ou com outra conta.",
       "handlerKind": "CleaningRecycleBin",
@@ -1670,6 +1725,7 @@
       "id": "cleaning.user-rule",
       "version": 1,
       "title": "Limpar: regra do usuário (pasta %AppData%\\NEXUS\\rules)",
+      "i18n": { "en": { "title": "Clean: user rule (%AppData%\\NEXUS\\rules folder)" }, "es": { "title": "Limpiar: regla del usuario (carpeta %AppData%\\NEXUS\\rules)" } },
       "classification": "Conditional",
       "condition": "Só regras escritas pelo próprio usuário, carregadas e válidas (mesma validação da página); só no aplicador da sua conta, sem administrador. Nunca no aplicador elevado nem no serviço.",
       "handlerKind": "CleaningUserRule",

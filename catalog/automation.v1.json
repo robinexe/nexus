@@ -7,6 +7,7 @@
       "id": "automation.scheduled-scan.weekly",
       "version": 1,
       "title": "Verificação semanal agendada (somente leitura, versão antiga)",
+      "i18n": { "en": { "title": "Scheduled weekly check (read-only, old version)" }, "es": { "title": "Verificación semanal programada (solo lectura, versión antigua)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "AutomationScheduledScan",
       "target": {
@@ -38,6 +39,7 @@
       "id": "automation.schedule.scan",
       "version": 1,
       "title": "Verificação agendada (somente leitura)",
+      "i18n": { "en": { "title": "Scheduled check (read-only)" }, "es": { "title": "Verificación programada (solo lectura)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "AutomationScheduledTask",
       "target": {
@@ -74,6 +76,7 @@
       "id": "automation.schedule.clean",
       "version": 1,
       "title": "Limpeza segura agendada (opt-in)",
+      "i18n": { "en": { "title": "Scheduled safe cleanup (opt-in)" }, "es": { "title": "Limpieza segura programada (opcional)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "AutomationScheduledTask",
       "target": {
@@ -114,6 +117,7 @@
       "id": "automation.start-with-windows",
       "version": 1,
       "title": "Iniciar o NEXUS com o Windows (minimizado na bandeja)",
+      "i18n": { "en": { "title": "Start NEXUS with Windows (minimized to the tray)" }, "es": { "title": "Iniciar NEXUS con Windows (minimizado en la bandeja)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "AutomationStartWithWindows",
       "target": {

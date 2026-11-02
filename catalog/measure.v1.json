@@ -7,6 +7,7 @@
       "id": "measure.perflog-group.join",
       "version": 1,
       "title": "Medir sem pedir permissão toda vez (grupo \"Usuários do log de desempenho\")",
+      "i18n": { "en": { "title": "Measure without asking for permission every time (\"Performance Log Users\" group)" }, "es": { "title": "Medir sin pedir permiso cada vez (grupo \"Usuarios del registro de rendimiento\")" } },
       "classification": "SupportedDocumented",
       "handlerKind": "MeasureLocalGroupMember",
       "target": {

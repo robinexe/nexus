@@ -6,6 +6,7 @@
     {
       "id": "cpulab.power.max-state.ac", "version": 1,
       "title": "Estado máximo do processador em 100% (na tomada)",
+      "i18n": { "en": { "title": "Maximum processor state at 100% (plugged in)" }, "es": { "title": "Estado máximo del procesador al 100% (enchufado)" } },
       "classification": "Conditional",
       "condition": "Somente quando a leitura do plano ativo mostrar PROCTHROTTLEMAX abaixo de 100% no valor AC.",
       "handlerKind": "PowerSettingValue",
@@ -21,6 +22,7 @@
     {
       "id": "cpulab.power.boost-mode.ac", "version": 1,
       "title": "Modo de aumento de desempenho (turbo) do processador (na tomada)",
+      "i18n": { "en": { "title": "Processor performance boost mode (turbo) (plugged in)" }, "es": { "title": "Modo de aumento de rendimiento (turbo) del procesador (enchufado)" } },
       "classification": "Conditional",
       "condition": "Somente quando a leitura do plano ativo mostrar PERFBOOSTMODE = 0 (desativado) no valor AC.",
       "handlerKind": "PowerSettingValue",

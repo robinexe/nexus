@@ -7,6 +7,7 @@
       "id": "disk.secure-delete",
       "version": 1,
       "title": "Exclusão segura de um arquivo (irreversível)",
+      "i18n": { "en": { "title": "Secure delete of a file (irreversible)" }, "es": { "title": "Borrado seguro de un archivo (irreversible)" } },
       "classification": "Conditional",
       "condition": "Só um arquivo comum escolhido pelo usuário, fora das pastas do Windows, de programas e da raiz do perfil; não pode estar em uso, ser link, junção, arquivo de nuvem, compactado/esparso ou ter vários links físicos. Em SSD/NVMe a sobrescrita não é garantida (TRIM e nivelamento de desgaste).",
       "handlerKind": "DiskSecureDelete",

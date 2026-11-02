@@ -6,6 +6,7 @@
     {
       "id": "security.hosts.disable-hijack", "version": 1,
       "title": "Desativar linhas do hosts que sequestram domínios de segurança, atualização ou login",
+      "i18n": { "en": { "title": "Disable hosts lines that hijack security, update or sign-in domains" }, "es": { "title": "Desactivar líneas del hosts que secuestran dominios de seguridad, actualización o inicio de sesión" } },
       "classification": "Conditional",
       "condition": "Somente quando a análise do hosts encontrar redirecionamento ou bloqueio de domínios de segurança/atualização/login. Linhas de telemetria e anúncios não são tocadas.",
       "handlerKind": "SecurityHostsFile",
@@ -24,6 +25,7 @@
     {
       "id": "security.persistence.machine.remove", "version": 1,
       "title": "Remover interceptação de programas (IFEO Debugger) escolhida",
+      "i18n": { "en": { "title": "Remove chosen program interception (IFEO Debugger)" }, "es": { "title": "Quitar la intercepción de programas (IFEO Debugger) elegida" } },
       "classification": "Conditional",
       "condition": "Só entradas Debugger encontradas agora em Image File Execution Options e escolhidas pelo usuário.",
       "handlerKind": "SecurityPersistenceValue",
@@ -42,6 +44,7 @@
     {
       "id": "security.persistence.user.remove", "version": 1,
       "title": "Remover Shell personalizado do perfil do usuário",
+      "i18n": { "en": { "title": "Remove custom Shell from the user profile" }, "es": { "title": "Quitar el Shell personalizado del perfil del usuario" } },
       "classification": "Conditional",
       "condition": "Só quando HKCU\\...\\Winlogon\\Shell existir e o usuário escolher.",
       "handlerKind": "SecurityPersistenceValue",
@@ -58,6 +61,7 @@
     {
       "id": "security.appinit.clear", "version": 1,
       "title": "Limpar AppInit_DLLs (64 bits)",
+      "i18n": { "en": { "title": "Clear AppInit_DLLs (64-bit)" }, "es": { "title": "Limpiar AppInit_DLLs (64 bits)" } },
       "classification": "Conditional",
       "condition": "Só quando AppInit_DLLs tiver DLLs listadas.",
       "handlerKind": "RegistryValue",
@@ -75,6 +79,7 @@
     {
       "id": "security.appinit.clear.wow64", "version": 1,
       "title": "Limpar AppInit_DLLs (programas de 32 bits)",
+      "i18n": { "en": { "title": "Clear AppInit_DLLs (32-bit programs)" }, "es": { "title": "Limpiar AppInit_DLLs (programas de 32 bits)" } },
       "classification": "Conditional",
       "condition": "Só quando AppInit_DLLs (visão 32 bits) tiver DLLs listadas.",
       "handlerKind": "RegistryValue",
@@ -89,6 +94,7 @@
     {
       "id": "security.winlogon.shell.reset", "version": 1,
       "title": "Voltar o Shell do Windows para explorer.exe",
+      "i18n": { "en": { "title": "Set the Windows Shell back to explorer.exe" }, "es": { "title": "Volver el Shell de Windows a explorer.exe" } },
       "classification": "Conditional",
       "condition": "Só quando HKLM\\...\\Winlogon\\Shell for diferente de explorer.exe.",
       "handlerKind": "RegistryValue",
@@ -103,6 +109,7 @@
     {
       "id": "security.registry.orphans.machine", "version": 1,
       "title": "Remover sobras de registro escolhidas (todo o PC)",
+      "i18n": { "en": { "title": "Remove chosen registry leftovers (whole PC)" }, "es": { "title": "Quitar los restos del registro elegidos (todo el PC)" } },
       "classification": "Conditional",
       "condition": "Só entradas que o inspetor reconhece AGORA como órfãs (desinstalador/arquivo inexistente, disco presente) e que o usuário escolheu.",
       "handlerKind": "SecurityRegistryOrphan",
@@ -121,6 +128,7 @@
     {
       "id": "security.registry.orphans.user", "version": 1,
       "title": "Remover sobras de registro escolhidas (seu usuário)",
+      "i18n": { "en": { "title": "Remove chosen registry leftovers (your user)" }, "es": { "title": "Quitar los restos del registro elegidos (tu usuario)" } },
       "classification": "Conditional",
       "condition": "Só entradas que o inspetor reconhece AGORA como órfãs no seu perfil e que você escolheu.",
       "handlerKind": "SecurityRegistryOrphan",

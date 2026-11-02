@@ -7,6 +7,7 @@
       "id": "driverupdates.install",
       "version": 1,
       "title": "Instalar atualização de driver do Windows Update (com backup do driver atual)",
+      "i18n": { "en": { "title": "Install a Windows Update driver update (with a backup of the current driver)" }, "es": { "title": "Instalar actualización de driver de Windows Update (con backup del driver actual)" } },
       "classification": "SupportedDocumented",
       "handlerKind": "DriverUpdateInstall",
       "target": {
@@ -52,6 +53,7 @@
       "id": "driverupdates.gpu.install",
       "version": 1,
       "title": "Instalar o driver de vídeo baixado do site oficial (NVIDIA ou AMD), com backup do driver atual",
+      "i18n": { "en": { "title": "Install the graphics driver downloaded from the official site (NVIDIA or AMD), with a backup of the current driver" }, "es": { "title": "Instalar el driver de video descargado del sitio oficial (NVIDIA o AMD), con backup del driver actual" } },
       "classification": "SupportedDocumented",
       "handlerKind": "DriverUpdatesVendorInstall",
       "target": {

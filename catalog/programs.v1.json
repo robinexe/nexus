@@ -25,6 +25,7 @@
         "programs.leftover.user.16@1"
       ],
       "title": "Remover sobra de programa (seu perfil)",
+      "i18n": { "en": { "title": "Remove program leftover (your profile)" }, "es": { "title": "Quitar resto de programa (tu perfil)" } },
       "classification": "Conditional",
       "condition": "Só depois que o desinstalador oficial terminou e o programa sumiu da lista de instalados. Cada instância remove UMA sobra escolhida pelo usuário na página Programas; várias sobras vão num pedido só (lote), cada uma com seu alvo, seu backup e seu desfazer.",
       "handlerKind": "ProgramLeftover",
@@ -83,6 +84,7 @@
         "programs.leftover.machine.16@1"
       ],
       "title": "Remover sobra de programa (todos os usuários)",
+      "i18n": { "en": { "title": "Remove program leftover (all users)" }, "es": { "title": "Quitar resto de programa (todos los usuarios)" } },
       "classification": "Conditional",
       "condition": "Só depois que o desinstalador oficial terminou e o programa sumiu da lista de instalados. Cada instância remove UMA sobra escolhida pelo usuário na página Programas; várias sobras vão num pedido só (lote), cada uma com seu alvo, seu backup e seu desfazer.",
       "handlerKind": "ProgramLeftover",

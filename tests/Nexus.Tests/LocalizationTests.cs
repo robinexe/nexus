@@ -201,12 +201,13 @@ public sealed partial class LocalizationTests
     }
 
     [Fact]
-    public void Catalog_translations_change_only_texts_and_cover_the_visible_catalogs()
+    public void Catalog_translations_change_only_texts_and_cover_every_catalog()
     {
         var dir = Path.Combine(Root(), "catalog");
         var doc = Nexus.Core.CatalogLoader.LoadDirectory(dir);
         var problems = new List<string>();
-        foreach (var file in new[] { "actions.v1.json", "tuning.v1.json", "privacy.v1.json", "nvidia.v1.json" })
+        // Todo catálogo tem título em en e es em cada ação (ação nova sem tradução faz este teste falhar).
+        foreach (var file in Directory.EnumerateFiles(dir, "*.v1.json").Select(f => Path.GetFileName(f)!).Order(StringComparer.Ordinal))
         {
             var ids = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(dir, file))).RootElement.GetProperty("actions")
                 .EnumerateArray().Select(a => a.GetProperty("id").GetString()!).ToList();
