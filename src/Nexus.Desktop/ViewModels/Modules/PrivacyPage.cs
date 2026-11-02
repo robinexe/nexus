@@ -16,9 +16,9 @@ namespace Nexus.Desktop.ViewModels;
 /// </summary>
 public sealed class PrivacyPage : ModulePage
 {
-    public override string Title => "Privacidade";
+    public override string Title => Loc.T("Settings.Privacidade");
     public override string Group => Loc.T("Nav.Proteger");
-    public override string Subtitle => "Controle o que o Windows coleta e mostra sobre você.";
+    public override string Subtitle => Loc.T("Priv.ControleWindowsColetaMostra");
 
     private PrivacyCatalog? _catalog;
     private IReadOnlyList<PrivacyItemState> _states = [];
@@ -29,7 +29,7 @@ public sealed class PrivacyPage : ModulePage
 
     private string _scoreText = "–";
     private double _scoreFraction;
-    private string _scoreCaption = "Lendo o estado do Windows…";
+    private string _scoreCaption = Loc.T("Priv.LendoEstadoWindows");
     private int _recommendedPending;
     private int _strictPending;
     private int _selectedPending;
@@ -71,9 +71,9 @@ public sealed class PrivacyPage : ModulePage
     public int RecommendedPending { get => _recommendedPending; private set { if (Set(ref _recommendedPending, value)) { OnPropertyChanged(nameof(RecommendedText)); OnPropertyChanged(nameof(RecommendedNumber)); } } }
     public int StrictPending { get => _strictPending; private set { if (Set(ref _strictPending, value)) { OnPropertyChanged(nameof(StrictText)); OnPropertyChanged(nameof(StrictNumber)); } } }
     public int SelectedPending { get => _selectedPending; private set { if (Set(ref _selectedPending, value)) { OnPropertyChanged(nameof(SelectedText)); OnPropertyChanged(nameof(SelectedNumber)); } } }
-    public string RecommendedText => RecommendedPending == 0 ? "Recomendado: tudo aplicado" : $"Recomendado: {Plural(RecommendedPending, "item falta", "itens faltam")}";
-    public string StrictText => StrictPending == 0 ? "Rígido: tudo aplicado" : $"Rígido: {Plural(StrictPending, "item falta", "itens faltam")}";
-    public string SelectedText => SelectedPending == 0 ? "Nenhum item marcado" : $"{Plural(SelectedPending, "item marcado", "itens marcados")}";
+    public string RecommendedText => RecommendedPending == 0 ? Loc.T("Priv.RecomendadoTudoAplicado") : Loc.F("Priv.RecomendadoN", Plural(RecommendedPending, Loc.T("Priv.ItemFalta"), Loc.T("Priv.ItensFaltam")));
+    public string StrictText => StrictPending == 0 ? Loc.T("Priv.RigidoTudoAplicado") : Loc.F("Priv.RigidoN", Plural(StrictPending, Loc.T("Priv.ItemFalta"), Loc.T("Priv.ItensFaltam")));
+    public string SelectedText => SelectedPending == 0 ? Loc.T("Priv.NenhumItemMarcado") : $"{Plural(SelectedPending, Loc.T("Priv.ItemMarcado"), Loc.T("Priv.ItensMarcados"))}";
     public string BuildNote { get => _buildNote; private set => Set(ref _buildNote, value); }
     public string LastResult { get => _lastResult; private set { if (Set(ref _lastResult, value)) OnPropertyChanged(nameof(HasLastResult)); } }
     public bool HasLastResult => LastResult.Length > 0;
@@ -92,7 +92,7 @@ public sealed class PrivacyPage : ModulePage
     public double RecommendedNumber => RecommendedPending;
     public double StrictNumber => StrictPending;
     public double SelectedNumber => SelectedPending;
-    public string ProtectedCaption => double.IsNaN(ApplicableNumber) ? "" : $"de {ApplicableNumber.ToString("0", CultureInfo.CurrentCulture)} que valem para este Windows";
+    public string ProtectedCaption => double.IsNaN(ApplicableNumber) ? "" : Loc.F("Priv.NValemEsteWindows", ApplicableNumber.ToString("0", CultureInfo.CurrentCulture));
     public bool CanUndo => _applied.Count > 0;
 
     private static string Plural(int n, string one, string many) => n == 1 ? $"1 {one}" : $"{n.ToString(CultureInfo.CurrentCulture)} {many}";
@@ -132,8 +132,8 @@ public sealed class PrivacyPage : ModulePage
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            ScoreCaption = "Não foi possível ler o estado.";
-            Message = $"Leitura falhou: {ex.Message}";
+            ScoreCaption = Loc.T("Priv.NaoFoiPossivelLer");
+            Message = Loc.F("Priv.LeituraFalhouN", ex.Message);
         }
         finally { _scanning = false; OnPropertyChanged(nameof(IsLoading)); }
     }
@@ -160,12 +160,12 @@ public sealed class PrivacyPage : ModulePage
         ApplicableNumber = score.Applicable;
         ExposedNumber = score.Applicable - score.Protected;
         OnPropertyChanged(nameof(ProtectedCaption));
-        ScoreCaption = score.Applicable == 0 ? "Nenhum item se aplica a este Windows."
-            : $"{Plural(score.Protected, "proteção ativa", "proteções ativas")} de {score.Applicable} que se aplicam a este Windows" +
-              (score.Partial > 0 ? $" ({Plural(score.Partial, "item parcial", "itens parciais")})." : ".");
+        ScoreCaption = score.Applicable == 0 ? Loc.T("Priv.NenhumItemAplicaEste")
+            : Loc.F("Priv.NNAplicamEste", Plural(score.Protected, Loc.T("Priv.ProtecaoAtiva"), Loc.T("Priv.ProtecoesAtivas")), score.Applicable) +
+              (score.Partial > 0 ? $" ({Plural(score.Partial, Loc.T("Priv.ItemParcial"), Loc.T("Priv.ItensParciais"))})." : ".");
         var na = _states.Count(s => s.Status == PrivacyItemStatus.NotApplicable);
-        BuildNote = (_build > 0 ? $"Windows build {_build.ToString(CultureInfo.InvariantCulture)}" : "Build do Windows desconhecido") +
-                    (na > 0 ? $" · {Plural(na, "item não se aplica", "itens não se aplicam")} a esta versão" : "");
+        BuildNote = (_build > 0 ? Loc.F("Priv.WindowsBuildN", _build.ToString(CultureInfo.InvariantCulture)) : Loc.T("Priv.BuildWindowsDesconhecido")) +
+                    (na > 0 ? Loc.F("Priv.NEstaVersao", Plural(na, Loc.T("Priv.ItemNaoAplica"), Loc.T("Priv.ItensNaoAplicam"))) : "");
         RecommendedPending = PrivacyPlanner.MissingFor(_states, PrivacyProfile.Recommended).Count;
         StrictPending = PrivacyPlanner.MissingFor(_states, PrivacyProfile.Strict).Count;
         Recount();
@@ -180,24 +180,24 @@ public sealed class PrivacyPage : ModulePage
     }
 
     private void OnSettingsOpened(bool ok, string title) =>
-        Message = ok ? $"Configurações abertas em \"{title}\". O que você mudar lá aparece aqui ao ler de novo." : "O Windows não abriu as Configurações.";
+        Message = ok ? Loc.F("Priv.ConfiguracoesAbertasNVoce", title) : Loc.T("Priv.WindowsNaoAbriuConfiguracoes");
 
     // ------------------------------------------------------------------ escrita (só pelo aplicador)
 
     private Task ApplyProfileAsync(PrivacyProfile profile) =>
-        ApplyAsync(PrivacyPlanner.MissingFor(_states, profile), profile == PrivacyProfile.Recommended ? "perfil Recomendado" : "perfil Rígido");
+        ApplyAsync(PrivacyPlanner.MissingFor(_states, profile), profile == PrivacyProfile.Recommended ? Loc.T("Priv.PerfilRecomendado") : Loc.T("Priv.PerfilRigido"));
 
     private Task ApplySelectedAsync()
     {
         var chosen = Groups.SelectMany(g => g.Items).Where(i => i.IsSelected && i.CanSelect).Select(i => i.State).ToList();
-        return ApplyAsync(chosen, "seleção personalizada");
+        return ApplyAsync(chosen, Loc.T("Priv.SelecaoPersonalizada"));
     }
 
     private Task ApplyAsync(IReadOnlyList<PrivacyItemState> items, string label) => RunAsync(async () =>
     {
         if (Host is null) return;
         var batches = PrivacyPlanner.Batches(items);
-        if (batches.Count == 0) { Message = "Nada a aplicar: esses itens já estão protegidos."; return; }
+        if (batches.Count == 0) { Message = Loc.T("Priv.NadaAplicarEssesItens"); return; }
 
         var runs = new List<(Guid Run, BrokerLevel Level)>();
         int verified = 0, already = 0, other = 0;
@@ -207,10 +207,10 @@ public sealed class PrivacyPage : ModulePage
             var batch = batches[i];
             var level = PrivacyPlanner.NeedsAdmin(batch) ? BrokerLevel.Admin : BrokerLevel.User;
             var requests = PrivacyPlanner.ActionKeys(batch).Select(k => new ActionRequest(k)).ToList();
-            var r = await Host.ApplyAsync($"Privacidade: {label}", PrivacyPlanner.ConfirmationText(batch, i + 1, batches.Count), requests, level);
+            var r = await Host.ApplyAsync(Loc.F("Priv.PrivacidadeN", label), PrivacyPlanner.ConfirmationText(batch, i + 1, batches.Count), requests, level);
             if (r is null)
             {
-                Message = i == 0 ? "Cancelado. Nada foi alterado." : $"Parte {i + 1} cancelada. As partes anteriores ficaram aplicadas e podem ser desfeitas.";
+                Message = i == 0 ? Loc.T("Shell.CanceladoNadaFoiAlterado") : Loc.F("Priv.ParteNCanceladaPartes", i + 1);
                 break;
             }
             if (r.Response?.RunId is { } run) runs.Add((run, level));
@@ -224,10 +224,10 @@ public sealed class PrivacyPage : ModulePage
         }
         if (runs.Count > 0) { _applied.Push(runs); OnPropertyChanged(nameof(CanUndo)); }
         if (verified + already + other > 0)
-            LastResult = $"{Plural(verified, "ajuste aplicado e conferido", "ajustes aplicados e conferidos")}" +
-                         (already > 0 ? $", {already} já estavam assim" : "") +
-                         (other > 0 ? $", {Plural(other, "não aplicado", "não aplicados")}: {string.Join("; ", problems)}" : ".") +
-                         " Alguns itens só aparecem no Windows depois de sair e entrar na conta.";
+            LastResult = $"{Plural(verified, Loc.T("Priv.AjusteAplicadoConferido"), Loc.T("Priv.AjustesAplicadosConferidos"))}" +
+                         (already > 0 ? Loc.F("Priv.NJaEstavamAssim", already) : "") +
+                         (other > 0 ? $", {Plural(other, Loc.T("Shell.NaoAplicado"), Loc.T("Priv.NaoAplicados"))}: {string.Join("; ", problems)}" : ".") +
+                         Loc.T("Priv.AlgunsItensSoAparecem");
         await ScanAsync();
     });
 
@@ -239,11 +239,11 @@ public sealed class PrivacyPage : ModulePage
         for (var i = runs.Count - 1; i >= 0; i--)
         {
             var r = await Host.RevertAsync(runs[i].Run, runs[i].Level);
-            if (r is null) { allOk = false; Message = "Desfazer cancelado."; break; }
-            if (r.Response?.FullyRestored != true) { allOk = false; Message = $"Desfazer incompleto: {r.Message} Veja a página Aplicar."; break; }
+            if (r is null) { allOk = false; Message = Loc.T("Auto.DesfazerCancelado"); break; }
+            if (r.Response?.FullyRestored != true) { allOk = false; Message = Loc.F("Priv.DesfazerIncompletoNVeja", r.Message); break; }
             runs.RemoveAt(i);
         }
-        if (allOk || runs.Count == 0) { _applied.Pop(); LastResult = "Desfeito: os valores voltaram ao que eram antes."; }
+        if (allOk || runs.Count == 0) { _applied.Pop(); LastResult = Loc.T("Priv.DesfeitoValoresVoltaramEram"); }
         OnPropertyChanged(nameof(CanUndo));
         await ScanAsync();
     });
@@ -260,7 +260,7 @@ public sealed class PrivacyThemeGroup(string theme, IReadOnlyList<PrivacyItemRow
     public int ApplicableCount => Items.Count(i => i.State.Status != PrivacyItemStatus.NotApplicable);
     /// <summary>0 a 100, para a barra do cartão do tema.</summary>
     public double Percent => ApplicableCount == 0 ? 0 : 100.0 * ProtectedCount / ApplicableCount;
-    public string CountText => ApplicableCount == 0 ? "não se aplica a este Windows" : $"{ProtectedCount} de {ApplicableCount} protegidos";
+    public string CountText => ApplicableCount == 0 ? Loc.T("Priv.NaoAplicaEsteWindows") : Loc.F("Priv.NNProtegidos", ProtectedCount, ApplicableCount);
     public UiTone Tone => ApplicableCount == 0 ? UiTone.Neutral : ProtectedCount == ApplicableCount ? UiTone.Good : ProtectedCount == 0 ? UiTone.Bad : UiTone.Warn;
     /// <summary>Ícone do tema (Icons.xaml), escolhido pelo nome do tema do catálogo.</summary>
     public string IconKey => IconFor(Theme);
@@ -328,23 +328,23 @@ public sealed class PrivacyItemRow : ObservableObject
     };
     public string StatusText => State.Status switch
     {
-        PrivacyItemStatus.Protected => "Protegido",
-        PrivacyItemStatus.Partial => "Parcial",
-        PrivacyItemStatus.Exposed => "Exposto",
-        _ => "Não se aplica",
+        PrivacyItemStatus.Protected => Loc.T("Priv.Protegido2"),
+        PrivacyItemStatus.Partial => Loc.T("Priv.Parcial"),
+        PrivacyItemStatus.Exposed => Loc.T("Priv.Exposto"),
+        _ => Loc.T("Pg.NaoAplica"),
     };
 
     public string ProfileText => State.Item.Profile switch
     {
-        PrivacyProfile.Recommended => "Recomendado",
-        PrivacyProfile.Strict => "Rígido",
-        _ => "Opcional",
+        PrivacyProfile.Recommended => Loc.T("Priv.Recomendado"),
+        PrivacyProfile.Strict => Loc.T("Priv.Rigido"),
+        _ => Loc.T("Priv.Opcional"),
     };
 
     public string Meta =>
-        (State.Item.NeedsAdmin ? "Vale para o PC (pede administrador)" : "Só sua conta (sem administrador)") +
-        (State.Item.FullyDocumented ? " · documentado pela Microsoft" : " · parte com fonte da comunidade") +
-        (State.Status == PrivacyItemStatus.Protected ? " · para voltar: Desfazer ou Configurações do Windows" : "");
+        (State.Item.NeedsAdmin ? Loc.T("Priv.ValePcPedeAdministrador") : Loc.T("Priv.SoSuaContaSem")) +
+        (State.Item.FullyDocumented ? Loc.T("Priv.DocumentadoPelaMicrosoft") : Loc.T("Priv.ParteFonteComunidade")) +
+        (State.Status == PrivacyItemStatus.Protected ? Loc.T("Priv.VoltarDesfazerOuConfiguracoes") : "");
 }
 
 /// <summary>Detalhe técnico de uma ação: onde, atual, desejado, fonte.</summary>
@@ -352,18 +352,18 @@ public sealed class PrivacyActionRow(PrivacyActionState state)
 {
     public string Title => state.Entry.Definition.Title;
     public string Where => $@"{state.Entry.TargetTemplate["hive"]}\{state.Entry.TargetTemplate["path"]}\{state.Entry.TargetTemplate["name"]}";
-    public string Values => !state.Applicable ? "Não se aplica a esta versão do Windows."
-        : $"Agora: {state.Current} · Protegido: {state.Desired}" + (state.Error is null ? "" : $" · erro de leitura: {state.Error}");
+    public string Values => !state.Applicable ? Loc.T("Priv.NaoAplicaEstaVersao")
+        : Loc.F("Priv.AgoraNProtegidoN", state.Current, state.Desired) + (state.Error is null ? "" : Loc.F("Priv.ErroLeituraN", state.Error));
     public string Mechanism => state.Entry.Definition.Mechanism;
     public string Evidence => string.Join("\n", state.Entry.Definition.Evidence.Select(e => $"{LevelText(e.Level)}: {e.Source}"));
 
     private static string LevelText(EvidenceLevel l) => l switch
     {
         EvidenceLevel.VendorDocumented => "Microsoft",
-        EvidenceLevel.Community => "Comunidade",
-        EvidenceLevel.Observed => "Observado",
-        EvidenceLevel.Mechanistic => "Mecanismo",
-        _ => "Hipótese",
+        EvidenceLevel.Community => Loc.T("Priv.Comunidade"),
+        EvidenceLevel.Observed => Loc.T("Priv.Observado"),
+        EvidenceLevel.Mechanistic => Loc.T("Priv.Mecanismo"),
+        _ => Loc.T("Auto.Hipotese"),
     };
 }
 
@@ -373,12 +373,12 @@ public sealed class PrivacyInfoRow
     public PrivacyInfoRow(PrivacyInfo info, string? consent, Action<bool, string> opened)
     {
         Info = info;
-        State = info.ConsentStore is null ? "Veja a página Serviços"
+        State = info.ConsentStore is null ? Loc.T("Priv.VejaPaginaServicos")
             : consent switch
             {
-                "Allow" => "Permitido no geral (cada app pode ter sua escolha)",
-                "Deny" => "Bloqueado para todos os apps",
-                _ => "Não lido",
+                "Allow" => Loc.T("Priv.PermitidoGeralCadaApp"),
+                "Deny" => Loc.T("Priv.BloqueadoTodosApps"),
+                _ => Loc.T("Priv.NaoLido"),
             };
         OpenCommand = new RelayCommand(() => opened(info.SettingsUri is not null && SettingsLauncher.Open(info.SettingsUri), info.Title), () => info.SettingsUri is not null);
     }

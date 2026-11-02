@@ -369,6 +369,116 @@ Continue?</value></data>
   <data name="Auto.Windows10" xml:space="preserve"><value>Windows 10</value></data>
   <data name="Auto.Windows11" xml:space="preserve"><value>Windows 11</value></data>
   <data name="Auto.WindowsNumHdd" xml:space="preserve"><value>Windows on an HDD</value></data>
+  <data name="Boot.AbreJuntoWindowsQuanto" xml:space="preserve"><value>What opens with Windows and how heavy it is.</value></data>
+  <data name="Boot.AbreWindows" xml:space="preserve"><value>What opens with Windows</value></data>
+  <data name="Boot.AlgunsSaoComputadorInteiro" xml:space="preserve"><value>
+
+Some belong to the whole computer: Windows will ask for administrator permission.</value></data>
+  <data name="Boot.AltoWindowsMediu3" xml:space="preserve"><value>High = Windows measured 3 s or more for the item at boot; Medium = 1 to 3 s; Low = under 1 s. Unknown = Windows didn't record a delay for this item (it only records what goes past its limit), or the log couldn't be read. Nothing is estimated.</value></data>
+  <data name="Boot.ApontamProgramaNaoExiste" xml:space="preserve"><value>Point to a program that no longer exists.</value></data>
+  <data name="Boot.AreaTrabalhoN" xml:space="preserve"><value>desktop at {0}</value></data>
+  <data name="Boot.AreaTrabalhoNN" xml:space="preserve"><value>Desktop at {0} · {1:dd/MM HH:mm} · measured by Windows</value></data>
+  <data name="Boot.BemAcimaMedia" xml:space="preserve"><value>well above average</value></data>
+  <data name="Boot.BemAcimaMedia2" xml:space="preserve"><value> · well above average</value></data>
+  <data name="Boot.BootNMedidoPelo" xml:space="preserve"><value>Boot on {0:dd/MM HH:mm} · measured by Windows</value></data>
+  <data name="Boot.Buscar" xml:space="preserve"><value>Search…</value></data>
+  <data name="Boot.BuscarInicializacao" xml:space="preserve"><value>Search startup</value></data>
+  <data name="Boot.BuscarNomeEditorOu" xml:space="preserve"><value>Search by name, publisher or path</value></data>
+  <data name="Boot.CliqueVoltaEra" xml:space="preserve"><value>One click restores it.</value></data>
+  <data name="Boot.ComoImpactoMedido" xml:space="preserve"><value>How is the impact measured?</value></data>
+  <data name="Boot.DeixarAbrirNJunto" xml:space="preserve"><value>Stop opening "{0}" with Windows?
+
+The program stays installed and can be opened normally. </value></data>
+  <data name="Boot.DeixarAbrirNPrograma" xml:space="preserve"><value>Stop {0} program(s) from opening with Windows?
+
+{1}
+
+The programs stay installed and open </value></data>
+  <data name="Boot.DesfazerUltimaMudanca" xml:space="preserve"><value>Undo last change</value></data>
+  <data name="Boot.DesligadosNNEfeito" xml:space="preserve"><value>Turned off {0} of {1}: the effect shows up at the next sign-in/boot.</value></data>
+  <data name="Boot.Desligar" xml:space="preserve"><value>turn off</value></data>
+  <data name="Boot.Desligar1Selecionado" xml:space="preserve"><value>Turn off 1 selected</value></data>
+  <data name="Boot.DesligarNInicializacao" xml:space="preserve"><value>Turn off {0} at startup</value></data>
+  <data name="Boot.DesligarNSelecionados" xml:space="preserve"><value>Turn off {0} selected</value></data>
+  <data name="Boot.DesligarSelecionados" xml:space="preserve"><value>Turn off selected</value></data>
+  <data name="Boot.EfeitoApareceProximoLogon" xml:space="preserve"><value> — the effect shows up at the next sign-in/boot.</value></data>
+  <data name="Boot.EsteItemComputadorInteiro" xml:space="preserve"><value>
+
+This item belongs to the whole computer: Windows will ask for administrator permission.</value></data>
+  <data name="Boot.ExigeAdministrador" xml:space="preserve"><value> · requires administrator</value></data>
+  <data name="Boot.ExigeAdministradorServicosEssenciais" xml:space="preserve"><value>Requires administrator. NEXUS refuses essential Windows services.</value></data>
+  <data name="Boot.FonteLogMicrosoftWindows" xml:space="preserve"><value>Source: the Microsoft-Windows-Diagnostics-Performance log (events 100 to 110), the same one Windows uses to measure its own boot. Nothing is estimated.</value></data>
+  <data name="Boot.IgualGerenciadorTarefasPrograma" xml:space="preserve"><value>Same as Task Manager. The program stays.</value></data>
+  <data name="Boot.ImpactoAlto" xml:space="preserve"><value>High impact</value></data>
+  <data name="Boot.ImpactoBoot" xml:space="preserve"><value>Boot impact</value></data>
+  <data name="Boot.ImpactoVemWindowsItem" xml:space="preserve"><value>Impact comes from Windows, item by item.</value></data>
+  <data name="Boot.IssoNaoAceleraNada" xml:space="preserve"><value>This doesn't speed anything up; it only cleans the list. The full value is saved in the journal and Undo recreates it.</value></data>
+  <data name="Boot.LendoHistoricoInicializacaoWindows" xml:space="preserve"><value>Reading the Windows startup history…</value></data>
+  <data name="Boot.Ligado" xml:space="preserve"><value>On</value></data>
+  <data name="Boot.Ligados" xml:space="preserve"><value>On</value></data>
+  <data name="Boot.Ligar" xml:space="preserve"><value>turn on</value></data>
+  <data name="Boot.MaisN" xml:space="preserve"><value>
+• and {0} more</value></data>
+  <data name="Boot.MaisNAteSistema" xml:space="preserve"><value>{0} more until the system settles</value></data>
+  <data name="Boot.Manual" xml:space="preserve"><value>Set to manual</value></data>
+  <data name="Boot.ManualN" xml:space="preserve"><value>Manual: {0}</value></data>
+  <data name="Boot.MarcarTodosLigados" xml:space="preserve"><value>Check all that are on</value></data>
+  <data name="Boot.MarqueProgramasDesligueTodos" xml:space="preserve"><value>Check the programs and turn them all off at once.</value></data>
+  <data name="Boot.Mede" xml:space="preserve"><value>Measures</value></data>
+  <data name="Boot.MediaBoots" xml:space="preserve"><value>Boot average</value></data>
+  <data name="Boot.MedidoPeloProprioWindows" xml:space="preserve"><value>Measured by Windows itself at every boot.</value></data>
+  <data name="Boot.MesmoMetodoGerenciadorTarefas" xml:space="preserve"><value>It's the same method as Task Manager and can be undone here or on the Apply page.</value></data>
+  <data name="Boot.MostrarItensWindows" xml:space="preserve"><value>Show Windows items</value></data>
+  <data name="Boot.MudancasAquiSoAparecem" xml:space="preserve"><value>Changes here only show up at the next boot.</value></data>
+  <data name="Boot.NadaEncontrado" xml:space="preserve"><value>Nothing found.</value></data>
+  <data name="Boot.NaoFoiPossivelConferir" xml:space="preserve"><value>Could not check the file</value></data>
+  <data name="Boot.NenhumItemTerceirosOu" xml:space="preserve"><value>No third-party item (or search result) opens with Windows. Windows items are hidden.</value></data>
+  <data name="Boot.NInicializacao" xml:space="preserve"><value>{0} at startup</value></data>
+  <data name="Boot.NItensTerceirosN" xml:space="preserve"><value>{0} third-party items · {1} on · </value></data>
+  <data name="Boot.NNCliqueN" xml:space="preserve"><value>{0}: {1}. Click to {2} at startup</value></data>
+  <data name="Boot.NOrfaosNWindows" xml:space="preserve"><value>{0} orphaned · {1} from Windows</value></data>
+  <data name="Boot.NormalmenteQuandoVoceQuiser" xml:space="preserve"><value>normally whenever you want. It's the same method as Task Manager; Undo turns them all back on.</value></data>
+  <data name="Boot.ObservacoesLeitura" xml:space="preserve"><value>Reading notes</value></data>
+  <data name="Boot.OcultosPadraoNormalmenteNao" xml:space="preserve"><value>Hidden by default: usually not turned off.</value></data>
+  <data name="Boot.Orfaos" xml:space="preserve"><value>Orphaned</value></data>
+  <data name="Boot.PrincipalAtrasoNN" xml:space="preserve"><value>main delay: {0}, {1} ({2})</value></data>
+  <data name="Boot.ProgramaDeleDependerServico" xml:space="preserve"><value>If its program depends on the service running (e.g. phone sync), it may stop working until you undo.
+
+</value></data>
+  <data name="Boot.ProgramaNaoEncontradoEntrada" xml:space="preserve"><value>Program not found: orphaned entry</value></data>
+  <data name="Boot.ProgramasTerceirosAbremWindows" xml:space="preserve"><value>Third-party programs that open with Windows.</value></data>
+  <data name="Boot.RegistroPastaInicializarTarefas" xml:space="preserve"><value>Registry, Startup folder, tasks and services.</value></data>
+  <data name="Boot.RemoverEntrada" xml:space="preserve"><value>Remove entry</value></data>
+  <data name="Boot.RemoverEntradaNEla" xml:space="preserve"><value>Remove the "{0}" entry?
+
+It points to a program that no longer exists:
+{1}
+
+</value></data>
+  <data name="Boot.RemoverEntradaOrfa" xml:space="preserve"><value>Remove orphaned entry</value></data>
+  <data name="Boot.RemovidaN" xml:space="preserve"><value>Removed: {0}</value></data>
+  <data name="Boot.RodaVezSoSome" xml:space="preserve"><value>Runs only once and goes away by itself.</value></data>
+  <data name="Boot.SelecionarDesligarJuntoOutros" xml:space="preserve"><value>Select to turn off together with others</value></data>
+  <data name="Boot.SelecionarDesligarMassa" xml:space="preserve"><value>Select to turn off in bulk</value></data>
+  <data name="Boot.SemCaminho" xml:space="preserve"><value>(no path)</value></data>
+  <data name="Boot.SemRegistros" xml:space="preserve"><value>no records.</value></data>
+  <data name="Boot.ServicoManual" xml:space="preserve"><value>Service set to Manual</value></data>
+  <data name="Boot.ServicoNManualEle" xml:space="preserve"><value>Set the "{0}" service to Manual?
+
+It stops starting by itself at boot, but still opens when a program asks for it. </value></data>
+  <data name="Boot.TarefaWindowsSoLeitura" xml:space="preserve"><value>Windows task: read-only.</value></data>
+  <data name="Boot.TempoBootIndisponivel" xml:space="preserve"><value>Boot time unavailable: </value></data>
+  <data name="Boot.Ultimo" xml:space="preserve"><value>last</value></data>
+  <data name="Boot.Ultimo2" xml:space="preserve"><value> (last)</value></data>
+  <data name="Boot.UltimoBoot" xml:space="preserve"><value>Last boot</value></data>
+  <data name="Boot.UltimoBootMedia" xml:space="preserve"><value>Last boot × average</value></data>
+  <data name="Boot.UltimoBootN" xml:space="preserve"><value>Last boot ({0:dd/MM HH:mm}): </value></data>
+  <data name="Boot.UltimosBootsSegundos" xml:space="preserve"><value>Recent boots (seconds)</value></data>
+  <data name="Boot.VoltarAbrirNJunto" xml:space="preserve"><value>Open "{0}" with Windows again?</value></data>
+  <data name="Boot.Windows" xml:space="preserve"><value>From Windows</value></data>
+  <data name="Boot.WindowsMediu3S" xml:space="preserve"><value>Windows measured 3 s or more at boot.</value></data>
+  <data name="Boot.WindowsNaoApontouNenhum" xml:space="preserve"><value>Windows didn't point to any specific delay in that boot</value></data>
+  <data name="Boot.WindowsNaoRegistrouTempo" xml:space="preserve"><value>Windows didn't record the boot time on this PC.</value></data>
   <data name="Cap.Acoes" xml:space="preserve"><value>Actions</value></data>
   <data name="Cap.AcoesReaisVmRegistro" xml:space="preserve"><value>Real actions in a VM (registry, power, SysMain, core parking)</value></data>
   <data name="Cap.AdiadoForaCatalogoAtivo" xml:space="preserve"><value>Postponed: out of the active catalog until a handler exists (listed under rejected).</value></data>
@@ -417,6 +527,222 @@ Continue?</value></data>
   <data name="Cap.VmCiServicoLocalsystem" xml:space="preserve"><value>CI VM: LocalSystem service installed; client HKCU applied and reverted; SYSTEM HKCU untouched; pipe owner checked; ACLs of the lock and data.</value></data>
   <data name="Cap.WindowsCpuTopologiaGpu" xml:space="preserve"><value>Windows, CPU/topology, GPU/driver, memory/SMBIOS, disks, network, power, services, startup</value></data>
   <data name="Cap.WindowsSdk100" xml:space="preserve"><value>Windows (SDK 10.0.403) and the CI Windows VM: build with 0 warnings, all unit tests passing.</value></data>
+  <data name="Clean.AbertoNSeraPulado" xml:space="preserve"><value>open: {0} (will be skipped)</value></data>
+  <data name="Clean.AbertosAgora" xml:space="preserve"><value>Open now: </value></data>
+  <data name="Clean.AbrirLimpezaDisco" xml:space="preserve"><value>Open Disk Cleanup</value></data>
+  <data name="Clean.AbrirLimpezaDiscoWindows" xml:space="preserve"><value>Open Windows Disk Cleanup</value></data>
+  <data name="Clean.AbrirLixeira" xml:space="preserve"><value>Open the Recycle Bin</value></data>
+  <data name="Clean.AbrirPastaRegras" xml:space="preserve"><value>Open rules folder</value></data>
+  <data name="Clean.AbrirWindows" xml:space="preserve"><value>Open in Windows</value></data>
+  <data name="Clean.AindaPodeVoltarOcupa" xml:space="preserve"><value>It can still come back. Takes up disk space until you empty it.</value></data>
+  <data name="Clean.Apps" xml:space="preserve"><value>Apps</value></data>
+  <data name="Clean.Arquivos" xml:space="preserve"><value>Files</value></data>
+  <data name="Clean.ArquivosDevolvidosConferidos" xml:space="preserve"><value>Files returned and verified.</value></data>
+  <data name="Clean.ArquivosJsonPastasSeu" xml:space="preserve"><value>.json files with folders from your profile. Everything goes to quarantine and can come back.</value></data>
+  <data name="Clean.ArquivosLimposFicamQuarentena" xml:space="preserve"><value>Cleaned files stay in quarantine, on the same disk: the space only really comes back when it's emptied. </value></data>
+  <data name="Clean.AtencaoDadosPessoais" xml:space="preserve"><value>Warning: personal data</value></data>
+  <data name="Clean.AtualizacoesAntigasWindowsUse" xml:space="preserve"><value>Old Windows updates: use the official tool, you see and choose.</value></data>
+  <data name="Clean.Atualizar" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Clean.CacheDelesSeraPulado" xml:space="preserve"><value>. Their cache will be skipped. Close them (including in the tray) and measure again to include them.</value></data>
+  <data name="Clean.Cancelado" xml:space="preserve"><value>Canceled.</value></data>
+  <data name="Clean.CliqueLimparArquivosSistema" xml:space="preserve"><value>click "Clean up system files" (Windows asks for administrator permission). You choose the items and confirm there.
+
+</value></data>
+  <data name="Clean.ConcluidoAvisos" xml:space="preserve"><value>Done with warnings: </value></data>
+  <data name="Clean.ConfiguracoesArmazenamento" xml:space="preserve"><value>Settings › Storage</value></data>
+  <data name="Clean.ConfirmeNovoApagarVez" xml:space="preserve"><value>Confirm again: permanently delete {0} from the Recycle Bin {1}. There's no way to undo.</value></data>
+  <data name="Clean.ConfirmeNovoApagarVez2" xml:space="preserve"><value>Confirm again: permanently delete {0} ({1} batch(es), {2}). There's no way to undo.</value></data>
+  <data name="Clean.ContaEstaMarcadoEspaco" xml:space="preserve"><value>Counts what is checked. The space comes back when the quarantine is emptied.</value></data>
+  <data name="Clean.Continuar" xml:space="preserve"><value>
+
+Continue?</value></data>
+  <data name="Clean.ContinuarMesmoAssim" xml:space="preserve"><value>
+
+Continue anyway?</value></data>
+  <data name="Clean.CsvCsvCsv" xml:space="preserve"><value>CSV (*.csv)|*.csv</value></data>
+  <data name="Clean.DepoisDissoEstasLimpezas" xml:space="preserve"><value>After this, these cleanups can no longer be undone. The space comes back to the disk.</value></data>
+  <data name="Clean.DepoisEsvaziar" xml:space="preserve"><value>After emptying</value></data>
+  <data name="Clean.DesativadoEnabledFalse" xml:space="preserve"><value>Disabled ("enabled": false)</value></data>
+  <data name="Clean.DesenvolvedorDesmarcadoPadrao" xml:space="preserve"><value>Developer (unchecked by default)</value></data>
+  <data name="Clean.DesfazerUltimaLimpeza" xml:space="preserve"><value>Undo last cleanup</value></data>
+  <data name="Clean.DevolvidoTotalN" xml:space="preserve"><value>Returned in total: {0}</value></data>
+  <data name="Clean.Erro" xml:space="preserve"><value>Error: </value></data>
+  <data name="Clean.EspacoLivreDiscoN" xml:space="preserve"><value>Free space on disk {0}</value></data>
+  <data name="Clean.EspacoVoltouVerdade" xml:space="preserve"><value>Space that really came back.</value></data>
+  <data name="Clean.EsteLote" xml:space="preserve"><value>this batch</value></data>
+  <data name="Clean.Esvazia" xml:space="preserve"><value>Empties</value></data>
+  <data name="Clean.Esvaziar" xml:space="preserve"><value>Empty</value></data>
+  <data name="Clean.EsvaziarApagaVezNao" xml:space="preserve"><value>Emptying deletes for good and can't be undone; that's why it asks for two confirmations, with the list and the exact size.</value></data>
+  <data name="Clean.EsvaziarEstes" xml:space="preserve"><value>Empty these</value></data>
+  <data name="Clean.EsvaziarLixeira" xml:space="preserve"><value>Empty Recycle Bin</value></data>
+  <data name="Clean.EsvaziarLixeiraIrreversivel" xml:space="preserve"><value>Empty the Recycle Bin (irreversible)</value></data>
+  <data name="Clean.EsvaziarLixeiraNaoTem" xml:space="preserve"><value>Empty the Recycle Bin — can't be undone</value></data>
+  <data name="Clean.EsvaziarMaisAntigos" xml:space="preserve"><value>Empty older ones</value></data>
+  <data name="Clean.EsvaziarNaoTemDesfazer" xml:space="preserve"><value>Emptying can't be undone</value></data>
+  <data name="Clean.EsvaziarQuarentena" xml:space="preserve"><value>Empty quarantine</value></data>
+  <data name="Clean.EsvaziarQuarentenaIrreversivel" xml:space="preserve"><value>Empty the quarantine (irreversible)</value></data>
+  <data name="Clean.EsvaziarQuarentenaNaoTem" xml:space="preserve"><value>Empty the quarantine — can't be undone</value></data>
+  <data name="Clean.ExpiracaoQuarentena" xml:space="preserve"><value>Quarantine expiration</value></data>
+  <data name="Clean.ExportarCsv" xml:space="preserve"><value>Export CSV</value></data>
+  <data name="Clean.ExportarHistoricoLimpezas" xml:space="preserve"><value>Export cleanup history</value></data>
+  <data name="Clean.FeitoPeloWindows" xml:space="preserve"><value>done by Windows</value></data>
+  <data name="Clean.FerramentasWindows" xml:space="preserve"><value>Windows tools</value></data>
+  <data name="Clean.Guarda" xml:space="preserve"><value>Keeps</value></data>
+  <data name="Clean.GuiaExemplosDocsModules" xml:space="preserve"><value>Guide with examples: docs/modules/cleaning-rules-guide.md (next to NEXUS). The first time, the folder gets a commented, disabled example.</value></data>
+  <data name="Clean.HistoricoExportado" xml:space="preserve"><value>History exported: </value></data>
+  <data name="Clean.IdadeMinimaLotes" xml:space="preserve"><value>Minimum batch age</value></data>
+  <data name="Clean.IncluiSuasRegras" xml:space="preserve"><value>includes your rules</value></data>
+  <data name="Clean.IrLimpar" xml:space="preserve"><value>Go to Clean</value></data>
+  <data name="Clean.ItensSemMedicao" xml:space="preserve"><value> + unmeasured items</value></data>
+  <data name="Clean.LembrarEsvaziarDepois" xml:space="preserve"><value>Remind me to empty after</value></data>
+  <data name="Clean.Liberar" xml:space="preserve"><value>Can be freed</value></data>
+  <data name="Clean.LibereEspacoSegurancaSai" xml:space="preserve"><value>Free up space safely: what leaves goes to a quarantine and can come back until you empty it.</value></data>
+  <data name="Clean.LimparSelecionados" xml:space="preserve"><value>Clean selected</value></data>
+  <data name="Clean.LimpezaAtualizacoesWindowsPasta" xml:space="preserve"><value>Windows Update cleanup (WinSxS folder): Windows already does this by itself from time to time (task </value></data>
+  <data name="Clean.LimpezaDiscoNaoEsta" xml:space="preserve"><value>Disk Cleanup isn't installed on this Windows. Use Settings &gt; Storage.</value></data>
+  <data name="Clean.LimpezasMaisNDias" xml:space="preserve"><value>the cleanups older than {0} days</value></data>
+  <data name="Clean.LimpezasQuarentena" xml:space="preserve"><value>Cleanups in quarantine</value></data>
+  <data name="Clean.Limpo" xml:space="preserve"><value>cleaned</value></data>
+  <data name="Clean.LimpoNesteMes" xml:space="preserve"><value>Cleaned this month</value></data>
+  <data name="Clean.LivreAgora" xml:space="preserve"><value>Free now</value></data>
+  <data name="Clean.Lixeira" xml:space="preserve"><value>Recycle Bin</value></data>
+  <data name="Clean.LixeiraEsvaziadaConferida0" xml:space="preserve"><value>Recycle Bin emptied and verified (0 items).</value></data>
+  <data name="Clean.LixeiraJaEstaVazia" xml:space="preserve"><value>The Recycle Bin is already empty.</value></data>
+  <data name="Clean.LixeiraVazia" xml:space="preserve"><value>Recycle Bin empty.</value></data>
+  <data name="Clean.MaisNItemNs" xml:space="preserve"><value> (plus {0} item(s) only the administrator can measure)</value></data>
+  <data name="Clean.MaisNLimpezaS" xml:space="preserve"><value>
+• and {0} more cleanup(s)</value></data>
+  <data name="Clean.ManifestosQuarentenaFoiMovido" xml:space="preserve"><value>From the quarantine manifests (what was moved, returned and emptied) and the NEXUS journal, read without changing anything.</value></data>
+  <data name="Clean.MarcadoAgora" xml:space="preserve"><value>Checked now</value></data>
+  <data name="Clean.MarcarTodosN" xml:space="preserve"><value>Check all: {0}</value></data>
+  <data name="Clean.MedeCachesTemporariosMedir" xml:space="preserve"><value>Measures caches and temporary files. Measuring touches nothing.</value></data>
+  <data name="Clean.MedicaoCancelada" xml:space="preserve"><value>Measurement canceled.</value></data>
+  <data name="Clean.MedidoAgoraSemMexer" xml:space="preserve"><value>Measured now, without touching anything. What leaves goes to quarantine and can come back.</value></data>
+  <data name="Clean.MedidoAgoraSemMexer2" xml:space="preserve"><value>. Measured now, without touching anything.</value></data>
+  <data name="Clean.MedindoPodeSerLiberado" xml:space="preserve"><value>Measuring what can be freed…</value></data>
+  <data name="Clean.MudouIdeiaRestaureLote" xml:space="preserve"><value>Changed your mind? Restore the whole batch.</value></data>
+  <data name="Clean.N14Dias" xml:space="preserve"><value>14 days</value></data>
+  <data name="Clean.N1Item" xml:space="preserve"><value>1 item</value></data>
+  <data name="Clean.N30Dias" xml:space="preserve"><value>30 days</value></data>
+  <data name="Clean.N30DiasAtualizacoesInstaladas" xml:space="preserve"><value>30-day wait, and installed updates can no longer be uninstalled.</value></data>
+  <data name="Clean.N60Dias" xml:space="preserve"><value>60 days</value></data>
+  <data name="Clean.N7Dias" xml:space="preserve"><value>7 days</value></data>
+  <data name="Clean.N90Dias" xml:space="preserve"><value>90 days</value></data>
+  <data name="Clean.NadaApagadoVerdadeTudo" xml:space="preserve"><value>
+
+Nothing is really deleted: everything can come back with "Undo last cleanup" or in the Quarantine tab. Files in use and open programs are skipped.</value></data>
+  <data name="Clean.NadaEsvaziarQuarentenaDestes" xml:space="preserve"><value>Nothing to empty: the quarantine for these batches is already empty.</value></data>
+  <data name="Clean.NadaFoiMovido" xml:space="preserve"><value>nothing was moved</value></data>
+  <data name="Clean.NadaFoiMovidoTudo" xml:space="preserve"><value>nothing was moved (everything in use or empty)</value></data>
+  <data name="Clean.NadaLimpar" xml:space="preserve"><value>nothing to clean</value></data>
+  <data name="Clean.NadaSelecionado" xml:space="preserve"><value>Nothing selected.</value></data>
+  <data name="Clean.NaoEncontradosNestePc" xml:space="preserve"><value>Not found on this PC: </value></data>
+  <data name="Clean.NaoFoiPossivelAbrir" xml:space="preserve"><value>Could not open: </value></data>
+  <data name="Clean.NaoFoiPossivelAbrir2" xml:space="preserve"><value>Could not open the folder: </value></data>
+  <data name="Clean.NaoFoiPossivelLer" xml:space="preserve"><value>Could not read the Recycle Bin.</value></data>
+  <data name="Clean.NaoFoiPossivelLer2" xml:space="preserve"><value>Could not read the Recycle Bin. Nothing was changed.</value></data>
+  <data name="Clean.NaoFoiPossivelMedir" xml:space="preserve"><value>Could not measure: {0}</value></data>
+  <data name="Clean.NaoFoiPossivelSalvar" xml:space="preserve"><value>Could not save: </value></data>
+  <data name="Clean.NaoHaQuarentenaNem" xml:space="preserve"><value>There's no quarantine and no undo. If you're not sure, open the Recycle Bin and check first.
+
+Continue?</value></data>
+  <data name="Clean.NaoMedido" xml:space="preserve"><value>not measured</value></data>
+  <data name="Clean.NApagadosVezConferidos" xml:space="preserve"><value>{0} permanently deleted and verified (quarantine of these batches = 0).</value></data>
+  <data name="Clean.NArquivoS" xml:space="preserve"><value>{0} file(s)</value></data>
+  <data name="Clean.NArquivoSErro" xml:space="preserve"><value>; {0} file(s) with errors (they don't apply until fixed).</value></data>
+  <data name="Clean.Navegadores" xml:space="preserve"><value>Browsers</value></data>
+  <data name="Clean.NDevolvidos" xml:space="preserve"><value>{0} returned</value></data>
+  <data name="Clean.NenhumaLimpezaAinda" xml:space="preserve"><value>No cleanup yet.</value></data>
+  <data name="Clean.NenhumaLimpezaMaisN" xml:space="preserve"><value>No cleanup older than {0} days in quarantine.</value></data>
+  <data name="Clean.NenhumArquivoRegrasAinda" xml:space="preserve"><value>No rules file yet. Click "Open rules folder": NEXUS creates the folder with a disabled example.</value></data>
+  <data name="Clean.NexusNaoAcompanhaNem" xml:space="preserve"><value>NEXUS doesn't track or undo what Disk Cleanup deletes. Open it?</value></data>
+  <data name="Clean.NItemNsLimpo" xml:space="preserve"><value>{0} item(s) cleaned and verified.</value></data>
+  <data name="Clean.NItemNsSelecionado" xml:space="preserve"><value>{0} item(s) selected: {1}</value></data>
+  <data name="Clean.NItens" xml:space="preserve"><value>{0} items</value></data>
+  <data name="Clean.NLimpezaSMais" xml:space="preserve"><value>{0} cleanup(s) older than {1} days take up {2} in quarantine. Empty them? (asks for two confirmations)</value></data>
+  <data name="Clean.NLimpoNRecuperado" xml:space="preserve"><value>{0}: cleaned {1} · really recovered {2}</value></data>
+  <data name="Clean.NNItemNs" xml:space="preserve"><value>{0} in {1} item(s).</value></data>
+  <data name="Clean.NRecuperadosVerdade" xml:space="preserve"><value>{0} really recovered</value></data>
+  <data name="Clean.NRegraSAtiva" xml:space="preserve"><value>{0} active rule(s) in {1} file(s)</value></data>
+  <data name="Clean.OndeVemEstesNumeros" xml:space="preserve"><value>Where do these numbers come from?</value></data>
+  <data name="Clean.PararMedicao" xml:space="preserve"><value>Stop measuring</value></data>
+  <data name="Clean.ParteAdministradorWindowsVai" xml:space="preserve"><value>
+
+Part of it belongs to the administrator: Windows will ask for permission.</value></data>
+  <data name="Clean.ParteNCancelada" xml:space="preserve"><value>Part {0}: canceled.</value></data>
+  <data name="Clean.ParteNN" xml:space="preserve"><value>Part {0} of {1}. </value></data>
+  <data name="Clean.ParteNNN" xml:space="preserve"><value>Part {0} of {1} ({2}).
+
+</value></data>
+  <data name="Clean.PastaDadosWindowsAppdata" xml:space="preserve"><value>Windows data folder (%AppData%) unavailable.</value></data>
+  <data name="Clean.PastaDadosWindowsIndisponivel" xml:space="preserve"><value>(Windows data folder unavailable)</value></data>
+  <data name="Clean.PastasSistema" xml:space="preserve"><value>system folders</value></data>
+  <data name="Clean.PedePermissaoAdministradorAviso" xml:space="preserve"><value>
+
+Asks for administrator permission (Windows prompt) and creates a restore point first.</value></data>
+  <data name="Clean.PodeNaoPode" xml:space="preserve"><value>What's allowed and what isn't</value></data>
+  <data name="Clean.Pulados" xml:space="preserve"><value> Skipped: </value></data>
+  <data name="Clean.QuandoVoceLimparCada" xml:space="preserve"><value>When you clean, each session shows up here with its size and what was done.</value></data>
+  <data name="Clean.Quarentena" xml:space="preserve"><value>Quarantine</value></data>
+  <data name="Clean.Quarentena2" xml:space="preserve"><value>In quarantine</value></data>
+  <data name="Clean.QuarentenaEstaVazia" xml:space="preserve"><value>The quarantine is empty.</value></data>
+  <data name="Clean.QuarentenaLixeiraEsvaziadas" xml:space="preserve"><value>Quarantine and Recycle Bin emptied.</value></data>
+  <data name="Clean.QuarentenaNNLimpeza" xml:space="preserve"><value>In quarantine: {0} in {1} cleanup(s).</value></data>
+  <data name="Clean.QuarentenaVazia" xml:space="preserve"><value>Quarantine empty.</value></data>
+  <data name="Clean.Recarregar" xml:space="preserve"><value>Reload</value></data>
+  <data name="Clean.RecuperadoNesteMes" xml:space="preserve"><value>Recovered this month</value></data>
+  <data name="Clean.RecuperadoTotal" xml:space="preserve"><value>Recovered in total</value></data>
+  <data name="Clean.RecuperadoVerdade" xml:space="preserve"><value>really recovered</value></data>
+  <data name="Clean.RecuperaveisSeguranca" xml:space="preserve"><value>safely recoverable</value></data>
+  <data name="Clean.Regras" xml:space="preserve"><value>Rules</value></data>
+  <data name="Clean.RegrasRecarregadas" xml:space="preserve"><value>Rules reloaded. </value></data>
+  <data name="Clean.Restaurar" xml:space="preserve"><value>Restore</value></data>
+  <data name="Clean.SemRegistroDiarioDesfazer" xml:space="preserve"><value> (no journal record to undo)</value></data>
+  <data name="Clean.SemRegras" xml:space="preserve"><value>No rules</value></data>
+  <data name="Clean.SoAquiEspacoVolta" xml:space="preserve"><value>Only here does the space come back. Deletes for good, with double confirmation.</value></data>
+  <data name="Clean.SoAvisaNexusNunca" xml:space="preserve"><value>Only reminds. NEXUS never deletes on its own.</value></data>
+  <data name="Clean.SoMaisNDia" xml:space="preserve"><value>only older than {0:0.#} day(s)</value></data>
+  <data name="Clean.SoPastasSeuPerfil" xml:space="preserve"><value>Only folders from your profile (AppData, Temp, named folders inside the profile), never personal folders, Windows secrets or system folders. They only apply to your account, never as administrator.</value></data>
+  <data name="Clean.StartcomponentcleanupEspera30Dias" xml:space="preserve"><value>StartComponentCleanup, which waits 30 days before removing old versions). To do it now, use Windows Disk Cleanup </value></data>
+  <data name="Clean.SuaRegra" xml:space="preserve"><value>Your rule</value></data>
+  <data name="Clean.SuaRegra2" xml:space="preserve"><value>your rule</value></data>
+  <data name="Clean.SuasRegras" xml:space="preserve"><value>Your rules</value></data>
+  <data name="Clean.SuasRegrasLimpeza" xml:space="preserve"><value>Your cleanup rules</value></data>
+  <data name="Clean.TodaQuarentena" xml:space="preserve"><value>the whole quarantine</value></data>
+  <data name="Clean.TodasLimpezas" xml:space="preserve"><value>All cleanups</value></data>
+  <data name="Clean.TodasUnidades" xml:space="preserve"><value>All drives</value></data>
+  <data name="Clean.TodasUnidades2" xml:space="preserve"><value>on all drives</value></data>
+  <data name="Clean.Todos" xml:space="preserve"><value>All</value></data>
+  <data name="Clean.TotalNNBytes" xml:space="preserve"><value>Total: {0} ({1} bytes) in {2} file(s).
+
+</value></data>
+  <data name="Clean.Ultimos12Meses" xml:space="preserve"><value>Last 12 months</value></data>
+  <data name="Clean.UnidadeLixeira" xml:space="preserve"><value>Recycle Bin drive</value></data>
+  <data name="Clean.UnidadeN" xml:space="preserve"><value>on drive {0}:</value></data>
+  <data name="Clean.VaiAbrirLimpezaDisco" xml:space="preserve"><value>This opens Disk Cleanup (cleanmgr), Windows' own tool. To see "Windows Update Cleanup", </value></data>
+  <data name="Clean.VaiApagarVezConteudo" xml:space="preserve"><value>This will PERMANENTLY delete the contents of the Recycle Bin {0}:
+
+• {1} item(s)
+• {2} ({3} bytes)
+
+</value></data>
+  <data name="Clean.VaiApagarVezN" xml:space="preserve"><value>This will PERMANENTLY delete {0}:
+
+{1}{2}
+
+</value></data>
+  <data name="Clean.VaiQuarentenaNexus" xml:space="preserve"><value>Goes to the NEXUS quarantine:
+</value></data>
+  <data name="Clean.Varre" xml:space="preserve"><value>Scans</value></data>
+  <data name="Clean.Vazia" xml:space="preserve"><value>empty</value></data>
+  <data name="Clean.VerAbaLimpar" xml:space="preserve"><value>See in the Clean tab</value></data>
+  <data name="Clean.VoceLimparApareceAqui" xml:space="preserve"><value>What you clean shows up here and can come back until it's emptied.</value></data>
+  <data name="Clean.VoceLimpaVaiQuarentena" xml:space="preserve"><value>What you clean goes to quarantine, on the same disk.</value></data>
+  <data name="Clean.VoceMarcouItensNao" xml:space="preserve"><value>You checked items that are not cache:
+
+</value></data>
+  <data name="Clean.VoltaEsvaziar" xml:space="preserve"><value>Comes back when emptied.</value></data>
+  <data name="Clean.WindowsVoceVeEscolhe" xml:space="preserve"><value>(you see and choose). NEXUS doesn't run DISM /StartComponentCleanup: it removes old versions right away, without the </value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Assistant</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automatic</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Lab</value></data>
@@ -749,6 +1075,107 @@ Continue?</value></data>
   <data name="Pg.VoltarMeuPc" xml:space="preserve"><value>Back to My PC</value></data>
   <data name="Pg.VoltaValorOriginalQuando" xml:space="preserve"><value>Goes back to the original value whenever you want.</value></data>
   <data name="Pg.WindowsDriversFirmwareInformaram" xml:space="preserve"><value>Reported by Windows, drivers and firmware.</value></data>
+  <data name="Priv.AgoraNProtegidoN" xml:space="preserve"><value>Now: {0} · Protected: {1}</value></data>
+  <data name="Priv.AjusteAplicadoConferido" xml:space="preserve"><value>tweak applied and verified</value></data>
+  <data name="Priv.AjustesAplicadosConferidos" xml:space="preserve"><value>tweaks applied and verified</value></data>
+  <data name="Priv.AlgunsItensSoAparecem" xml:space="preserve"><value> Some items only show up in Windows after signing out and back in.</value></data>
+  <data name="Priv.Aplica" xml:space="preserve"><value>Applies</value></data>
+  <data name="Priv.AplicarRigido" xml:space="preserve"><value>Apply strict</value></data>
+  <data name="Priv.AplicaSoItensInterruptor" xml:space="preserve"><value>Applies only the items with the switch on in the list below.</value></data>
+  <data name="Priv.BloqueadoTodosApps" xml:space="preserve"><value>Blocked for all apps</value></data>
+  <data name="Priv.BuildWindowsDesconhecido" xml:space="preserve"><value>Windows build unknown</value></data>
+  <data name="Priv.CameraMicrofoneNaoSao" xml:space="preserve"><value>Camera and microphone aren't blocked blindly: Discord, voice chat and streams depend on them. NEXUS shows the state and opens the right Windows screen so you decide app by app.</value></data>
+  <data name="Priv.Comunidade" xml:space="preserve"><value>Community</value></data>
+  <data name="Priv.ConfereCadaItemWindows" xml:space="preserve"><value>Checks each item in Windows. Reading changes nothing.</value></data>
+  <data name="Priv.ConfiguracoesAbertasNVoce" xml:space="preserve"><value>Settings opened at "{0}". What you change there shows up here when read again.</value></data>
+  <data name="Priv.ControleWindowsColetaMostra" xml:space="preserve"><value>Control what Windows collects and shows about you.</value></data>
+  <data name="Priv.DesfazerIncompletoNVeja" xml:space="preserve"><value>Undo incomplete: {0} See the Apply page.</value></data>
+  <data name="Priv.DesfazerUltimaAplicacao" xml:space="preserve"><value>Undo last apply</value></data>
+  <data name="Priv.DesfeitoValoresVoltaramEram" xml:space="preserve"><value>Undone: the values went back to what they were.</value></data>
+  <data name="Priv.DesligarTudo" xml:space="preserve"><value>Turn all off</value></data>
+  <data name="Priv.DocumentadoPelaMicrosoft" xml:space="preserve"><value> · documented by Microsoft</value></data>
+  <data name="Priv.ErroLeituraN" xml:space="preserve"><value> · read error: {0}</value></data>
+  <data name="Priv.EscolhaNivel" xml:space="preserve"><value>Choose a level</value></data>
+  <data name="Priv.Escolhe" xml:space="preserve"><value>Choose</value></data>
+  <data name="Priv.Exposto" xml:space="preserve"><value>Exposed</value></data>
+  <data name="Priv.Faltam" xml:space="preserve"><value> left</value></data>
+  <data name="Priv.Fonte" xml:space="preserve"><value>Source</value></data>
+  <data name="Priv.FonteSelecioneCopieAbrir" xml:space="preserve"><value>Source. Select and copy it to open in the browser.</value></data>
+  <data name="Priv.IncluirAplicarMarcadosN" xml:space="preserve"><value>Include in Apply checked: {0}</value></data>
+  <data name="Priv.InterruptorLigadoEntraAplicar" xml:space="preserve"><value>Switch on = included in "Apply checked". Items already protected are locked: to go back, use Undo.</value></data>
+  <data name="Priv.ItemFalta" xml:space="preserve"><value>item left</value></data>
+  <data name="Priv.ItemMarcado" xml:space="preserve"><value>item checked</value></data>
+  <data name="Priv.ItemNaoAplica" xml:space="preserve"><value>item doesn't apply</value></data>
+  <data name="Priv.ItemParcial" xml:space="preserve"><value>partial item</value></data>
+  <data name="Priv.ItensFaltam" xml:space="preserve"><value>items left</value></data>
+  <data name="Priv.ItensMarcados" xml:space="preserve"><value>items checked</value></data>
+  <data name="Priv.ItensNaoAplicam" xml:space="preserve"><value>items don't apply</value></data>
+  <data name="Priv.ItensParciais" xml:space="preserve"><value>partial items</value></data>
+  <data name="Priv.ItensProtegidos" xml:space="preserve"><value>Protected items</value></data>
+  <data name="Priv.LeituraFalhouN" xml:space="preserve"><value>Reading failed: {0}</value></data>
+  <data name="Priv.LendoEstadoWindows" xml:space="preserve"><value>Reading the Windows state…</value></data>
+  <data name="Priv.LigadoEntraAplicarMarcados" xml:space="preserve"><value>On: included in "Apply checked".</value></data>
+  <data name="Priv.LigarRecomendado" xml:space="preserve"><value>Turn on recommended</value></data>
+  <data name="Priv.LigarRigido" xml:space="preserve"><value>Turn on strict</value></data>
+  <data name="Priv.LigueQuerProtegerCada" xml:space="preserve"><value>Turn on what you want to protect. Each item says what you lose.</value></data>
+  <data name="Priv.Marcados" xml:space="preserve"><value> checked</value></data>
+  <data name="Priv.Mecanismo" xml:space="preserve"><value>Mechanism</value></data>
+  <data name="Priv.MostraListaPedeConfirmacao" xml:space="preserve"><value>Shows the list and asks for confirmation before changing anything.</value></data>
+  <data name="Priv.MudouIdeiaValoresVoltam" xml:space="preserve"><value>Changed your mind? The values go back to what they were.</value></data>
+  <data name="Priv.NadaAplicarEssesItens" xml:space="preserve"><value>Nothing to apply: these items are already protected.</value></data>
+  <data name="Priv.NadaAquiAumentaFps" xml:space="preserve"><value>Nothing here raises FPS. The gain is privacy and fewer ads and suggestions. Each item shows what you lose, and everything can be undone here or on the Apply page.</value></data>
+  <data name="Priv.NaoAplicados" xml:space="preserve"><value>not applied</value></data>
+  <data name="Priv.NaoAplicaEstaVersao" xml:space="preserve"><value>Doesn't apply to this Windows version.</value></data>
+  <data name="Priv.NaoAplicaEsteWindows" xml:space="preserve"><value>doesn't apply to this Windows</value></data>
+  <data name="Priv.NaoFoiPossivelLer" xml:space="preserve"><value>Could not read the state.</value></data>
+  <data name="Priv.NaoLido" xml:space="preserve"><value>Not read</value></data>
+  <data name="Priv.NenhumItemAplicaEste" xml:space="preserve"><value>No item applies to this Windows.</value></data>
+  <data name="Priv.NenhumItemMarcado" xml:space="preserve"><value>No item checked</value></data>
+  <data name="Priv.NEstaVersao" xml:space="preserve"><value> · {0} to this version</value></data>
+  <data name="Priv.NexusNaoBloqueia" xml:space="preserve"><value>Why doesn't NEXUS block it?</value></data>
+  <data name="Priv.NJaEstavamAssim" xml:space="preserve"><value>, {0} were already like this</value></data>
+  <data name="Priv.NNAplicamEste" xml:space="preserve"><value>{0} of {1} that apply to this Windows</value></data>
+  <data name="Priv.NNProtegidos" xml:space="preserve"><value>{0} of {1} protected</value></data>
+  <data name="Priv.NValemEsteWindows" xml:space="preserve"><value>of {0} that apply to this Windows</value></data>
+  <data name="Priv.Observado" xml:space="preserve"><value>Observed</value></data>
+  <data name="Priv.OndeFica" xml:space="preserve"><value>Where it is</value></data>
+  <data name="Priv.Opcional" xml:space="preserve"><value>Optional</value></data>
+  <data name="Priv.Parcial" xml:space="preserve"><value>Partial</value></data>
+  <data name="Priv.ParteFonteComunidade" xml:space="preserve"><value> · partly from a community source</value></data>
+  <data name="Priv.ParteNCanceladaPartes" xml:space="preserve"><value>Part {0} canceled. The previous parts stayed applied and can be undone.</value></data>
+  <data name="Priv.PerfilRecomendado" xml:space="preserve"><value>Recommended profile</value></data>
+  <data name="Priv.PerfilRigido" xml:space="preserve"><value>Strict profile</value></data>
+  <data name="Priv.PermissoesApps" xml:space="preserve"><value>App permissions</value></data>
+  <data name="Priv.PermitidoGeralCadaApp" xml:space="preserve"><value>Allowed overall (each app can have its own choice)</value></data>
+  <data name="Priv.Personalizado" xml:space="preserve"><value>Custom</value></data>
+  <data name="Priv.PrivacidadeN" xml:space="preserve"><value>Privacy: {0}</value></data>
+  <data name="Priv.ProtecaoAtiva" xml:space="preserve"><value>protection on</value></data>
+  <data name="Priv.ProtecoesAtivas" xml:space="preserve"><value>protections on</value></data>
+  <data name="Priv.Protegido" xml:space="preserve"><value>protected</value></data>
+  <data name="Priv.Protegido2" xml:space="preserve"><value>Protected</value></data>
+  <data name="Priv.Recomendado" xml:space="preserve"><value>Recommended</value></data>
+  <data name="Priv.RecomendadoCopilotWidgetsSincronizac" xml:space="preserve"><value>Recommended + Copilot, Widgets, sync. You lose features.</value></data>
+  <data name="Priv.RecomendadoItensPerdasReais" xml:space="preserve"><value>Recommended + items with real losses (error reports, Copilot, Widgets, sync...). Each loss shows up in the confirmation.</value></data>
+  <data name="Priv.RecomendadoN" xml:space="preserve"><value>Recommended: {0}</value></data>
+  <data name="Priv.RecomendadoTudoAplicado" xml:space="preserve"><value>Recommended: all applied</value></data>
+  <data name="Priv.Rigido" xml:space="preserve"><value>Strict</value></data>
+  <data name="Priv.RigidoN" xml:space="preserve"><value>Strict: {0}</value></data>
+  <data name="Priv.RigidoTudoAplicado" xml:space="preserve"><value>Strict: all applied</value></data>
+  <data name="Priv.SelecaoPersonalizada" xml:space="preserve"><value>custom selection</value></data>
+  <data name="Priv.SemPerdasRelevantes" xml:space="preserve"><value>no relevant losses</value></data>
+  <data name="Priv.SoInterruptoresVoceLigou" xml:space="preserve"><value>Only the switches you turned on in the list below.</value></data>
+  <data name="Priv.SoLeitura" xml:space="preserve"><value>read-only</value></data>
+  <data name="Priv.SoSuaContaSem" xml:space="preserve"><value>Your account only (no administrator)</value></data>
+  <data name="Priv.Tema" xml:space="preserve"><value>By topic</value></data>
+  <data name="Priv.TemPerdas" xml:space="preserve"><value>has losses</value></data>
+  <data name="Priv.TiraPropagandaColetaSem" xml:space="preserve"><value>Removes ads and data collection without removing anything you use.</value></data>
+  <data name="Priv.ValePcPedeAdministrador" xml:space="preserve"><value>Applies to the PC (needs administrator)</value></data>
+  <data name="Priv.VejaPaginaServicos" xml:space="preserve"><value>See the Services page</value></data>
+  <data name="Priv.VocePerde" xml:space="preserve"><value>You lose:</value></data>
+  <data name="Priv.VocePerde2" xml:space="preserve"><value>What you lose: </value></data>
+  <data name="Priv.VoltarDesfazerOuConfiguracoes" xml:space="preserve"><value> · to go back: Undo or Windows Settings</value></data>
+  <data name="Priv.WindowsBuildN" xml:space="preserve"><value>Windows build {0}</value></data>
+  <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>Windows didn't open Settings.</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Opens minimized in the tray. It is a Run entry on your account (no administrator), with journal and undo; it also shows up in Task Manager and on the Startup page.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Opens with Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>Open NEXUS minimized in the tray every time you sign in to Windows?

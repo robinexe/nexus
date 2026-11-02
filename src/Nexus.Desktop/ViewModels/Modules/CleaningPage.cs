@@ -35,11 +35,11 @@ public sealed class CleaningPage : ModulePage
     private bool _scanned;
     private string _tab = "clean";
     private string _recoverableText = "—";
-    private string _recoverableCaption = "Medindo o que pode ser liberado…";
+    private string _recoverableCaption = Loc.T("Clean.MedindoPodeSerLiberado");
     private string _selectedText = "";
-    private string _quarantineText = "Quarentena vazia.";
+    private string _quarantineText = Loc.T("Clean.QuarentenaVazia");
     private string _openApps = "";
-    private string _historyEmptyText = "Nenhuma limpeza ainda.";
+    private string _historyEmptyText = Loc.T("Clean.NenhumaLimpezaAinda");
     private string _recycleText = "—";
     private string _expirySuggestion = "";
     private string _rulesSummary = "";
@@ -57,8 +57,8 @@ public sealed class CleaningPage : ModulePage
 
     public CleaningPage()
     {
-        PurgeAgeOptions = [new("7 dias", 7), new("14 dias", 14), new("30 dias", 30), new("60 dias", 60), new("90 dias", 90)];
-        ExpiryOptions = [new("Desligado", 0), new("7 dias", 7), new("14 dias", 14), new("30 dias", 30), new("60 dias", 60), new("90 dias", 90)];
+        PurgeAgeOptions = [new(Loc.T("Clean.N7Dias"), 7), new(Loc.T("Clean.N14Dias"), 14), new(Loc.T("Clean.N30Dias"), 30), new(Loc.T("Clean.N60Dias"), 60), new(Loc.T("Clean.N90Dias"), 90)];
+        ExpiryOptions = [new(Loc.T("Shell.Desligado"), 0), new(Loc.T("Clean.N7Dias"), 7), new(Loc.T("Clean.N14Dias"), 14), new(Loc.T("Clean.N30Dias"), 30), new(Loc.T("Clean.N60Dias"), 60), new(Loc.T("Clean.N90Dias"), 90)];
         _purgeAge = PurgeAgeOptions[2];
         _expiry = ExpiryOptions.FirstOrDefault(o => o.Value == _settings.QuarantineExpiryDays) ?? ExpiryOptions[0];
 
@@ -70,7 +70,7 @@ public sealed class CleaningPage : ModulePage
         OpenRecycleBinCommand = new RelayCommand(() => TryOpen("shell:RecycleBinFolder"));
         OpenStorageSettingsCommand = new RelayCommand(() => TryOpen("ms-settings:storagesense"));
         OpenDiskCleanupCommand = new RelayCommand(OpenDiskCleanup, () => Host is not null);
-        PurgeAllCommand = new RelayCommand(() => _ = RunAsync(() => PurgeAsync(Batches.Where(b => b.CanPurge).ToList(), "toda a quarentena")), () => !Busy && Host is not null && Batches.Any(b => b.CanPurge));
+        PurgeAllCommand = new RelayCommand(() => _ = RunAsync(() => PurgeAsync(Batches.Where(b => b.CanPurge).ToList(), Loc.T("Clean.TodaQuarentena"))), () => !Busy && Host is not null && Batches.Any(b => b.CanPurge));
         PurgeOlderCommand = new RelayCommand(() => _ = RunAsync(() => PurgeOlderAsync(_purgeAge.Value)), () => !Busy && Host is not null && Batches.Any(b => b.CanPurge));
         PurgeExpiredCommand = new RelayCommand(() => _ = RunAsync(() => PurgeOlderAsync(_settings.QuarantineExpiryDays)), () => !Busy && Host is not null && HasExpirySuggestion);
         RefreshCommand = new RelayCommand(() => _ = RunAsync(LoadHistoryAsync), () => !Busy);
@@ -80,9 +80,9 @@ public sealed class CleaningPage : ModulePage
         ShowCleanCommand = new RelayCommand(() => Tab = "clean");
     }
 
-    public override string Title => "Limpeza";
+    public override string Title => Loc.T("AsstStep.Limpeza");
     public override string Group => Loc.T("Nav.Limpar");
-    public override string Subtitle => "Libere espaço com segurança: o que sai vai para uma quarentena e pode voltar até você esvaziá-la.";
+    public override string Subtitle => Loc.T("Clean.LibereEspacoSegurancaSai");
 
     public ObservableCollection<CleaningCategoryGroup> Categories { get; } = [];
     public ObservableCollection<QuarantineBatchRow> Batches { get; } = [];
@@ -146,7 +146,7 @@ public sealed class CleaningPage : ModulePage
     public bool HasExpirySuggestion => _expirySuggestion.Length > 0;
     public string RulesSummary { get => _rulesSummary; private set => Set(ref _rulesSummary, value); }
     public string RulesFolderProblem { get => _rulesFolderProblem; private set => Set(ref _rulesFolderProblem, value); }
-    public string RulesFolder { get; } = UserRulesFolder ?? "(pasta de dados do Windows indisponível)";
+    public string RulesFolder { get; } = UserRulesFolder ?? Loc.T("Clean.PastaDadosWindowsIndisponivel");
 
     // Números para a apresentação (design system v2): o HeroPanel conta, o BeforeAfter compara, os StatTiles do histórico.
     /// <summary>Total recuperável medido agora (NaN antes da primeira medição).</summary>
@@ -171,14 +171,14 @@ public sealed class CleaningPage : ModulePage
     public string RestoredTotalText => _report is null ? "—" : Bytes(_report.RestoredTotal);
 
     public string QuarantineNote { get; } =
-        "Os arquivos limpos ficam na quarentena, no mesmo disco: o espaço só volta de verdade quando ela é esvaziada. " +
-        "Esvaziar apaga de vez e não tem desfazer; por isso pede duas confirmações, com a lista e o tamanho exato.";
+        Loc.T("Clean.ArquivosLimposFicamQuarentena") +
+        Loc.T("Clean.EsvaziarApagaVezNao");
 
     public string DiskCleanupNote { get; } =
-        "Limpeza de atualizações do Windows (pasta WinSxS): o próprio Windows já faz isso sozinho, de tempos em tempos (tarefa " +
-        "StartComponentCleanup, que espera 30 dias antes de remover versões antigas). Para fazer agora, use a Limpeza de Disco do " +
-        "Windows (você vê e escolhe). O NEXUS não roda DISM /StartComponentCleanup: remove na hora as versões antigas, sem a espera " +
-        "de 30 dias, e as atualizações instaladas deixam de poder ser desinstaladas.";
+        Loc.T("Clean.LimpezaAtualizacoesWindowsPasta") +
+        Loc.T("Clean.StartcomponentcleanupEspera30Dias") +
+        Loc.T("Clean.WindowsVoceVeEscolhe") +
+        Loc.T("Clean.N30DiasAtualizacoesInstaladas");
 
     public CleaningOption PurgeAge { get => _purgeAge; set { if (value is not null) Set(ref _purgeAge, value); } }
 
@@ -227,8 +227,8 @@ public sealed class CleaningPage : ModulePage
     {
         var selected = SelectedRows().ToList();
         SelectedBytes = selected.Sum(r => r.Bytes);
-        SelectedText = selected.Count == 0 ? "Nada selecionado."
-            : $"{selected.Count} item(ns) selecionado(s): {Bytes(selected.Sum(r => r.Bytes))}" + (selected.Any(r => !r.Measured) ? " + itens sem medição" : "") + ".";
+        SelectedText = selected.Count == 0 ? Loc.T("Clean.NadaSelecionado")
+            : Loc.F("Clean.NItemNsSelecionado", selected.Count, Bytes(selected.Sum(r => r.Bytes))) + (selected.Any(r => !r.Measured) ? Loc.T("Clean.ItensSemMedicao") : "") + ".";
         foreach (var c in Categories) c.Refresh();
     }
 
@@ -240,7 +240,7 @@ public sealed class CleaningPage : ModulePage
         using var cancel = new CancellationTokenSource();
         _scanCancel = cancel;
         Scanning = true;
-        RecoverableCaption = "Medindo o que pode ser liberado…";
+        RecoverableCaption = Loc.T("Clean.MedindoPodeSerLiberado");
         try
         {
             var userRules = await Task.Run(() => UserCleaningRules.Load(UserRulesFolder), cancel.Token);
@@ -258,8 +258,8 @@ public sealed class CleaningPage : ModulePage
             await LoadHistoryAsync();
             await MeasureFreeSpaceAsync();
         }
-        catch (OperationCanceledException) { RecoverableCaption = "Medição cancelada."; }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { RecoverableCaption = $"Não foi possível medir: {ex.Message}"; }
+        catch (OperationCanceledException) { RecoverableCaption = Loc.T("Clean.MedicaoCancelada"); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { RecoverableCaption = Loc.F("Clean.NaoFoiPossivelMedir", ex.Message); }
         finally
         {
             if (ReferenceEquals(_scanCancel, cancel)) _scanCancel = null;
@@ -285,13 +285,13 @@ public sealed class CleaningPage : ModulePage
         if (read is { } r) SystemDrive = r.Item2;
     }
 
-    private static string CategoryName(RuleScanResult r) => r.Rule.IsUserRule ? "Suas regras" : r.Rule.Category switch
+    private static string CategoryName(RuleScanResult r) => r.Rule.IsUserRule ? Loc.T("Clean.SuasRegras") : r.Rule.Category switch
     {
-        CleaningCategory.Sistema => "Sistema",
-        CleaningCategory.Navegadores => "Navegadores",
-        CleaningCategory.Apps => "Apps",
-        CleaningCategory.Jogos => "Jogos",
-        _ => "Desenvolvedor (desmarcado por padrão)",
+        CleaningCategory.Sistema => Loc.T("Nav.Sistema"),
+        CleaningCategory.Navegadores => Loc.T("Clean.Navegadores"),
+        CleaningCategory.Apps => Loc.T("Clean.Apps"),
+        CleaningCategory.Jogos => Loc.T("Cap.Jogos"),
+        _ => Loc.T("Clean.DesenvolvedorDesmarcadoPadrao"),
     };
 
     private static int CategoryOrder(RuleScanResult r) => r.Rule.IsUserRule ? 99 : (int)r.Rule.Category;
@@ -313,7 +313,7 @@ public sealed class CleaningPage : ModulePage
                 row.SetSelected(previous.TryGetValue(r.Rule.QuarantineKey, out var was) ? was : r.Rule.DefaultSelected && row.CanClean && (r.Bytes > 0 || !r.Measured));
                 cat.Rows.Add(row);
             }
-            cat.NotFoundText = missing.Count == 0 ? "" : "Não encontrados neste PC: " + string.Join(", ", missing.Distinct(StringComparer.CurrentCulture)) + ".";
+            cat.NotFoundText = missing.Count == 0 ? "" : Loc.T("Clean.NaoEncontradosNestePc") + string.Join(", ", missing.Distinct(StringComparer.CurrentCulture)) + ".";
             if (cat.Rows.Count > 0 || missing.Count > 0) Categories.Add(cat);
         }
         var cleanable = AllRows().Where(r => r.CanClean).ToList();
@@ -321,12 +321,12 @@ public sealed class CleaningPage : ModulePage
         RecoverableText = Bytes(total);
         RecoverableBytes = total;
         var unmeasured = cleanable.Count(r => !r.Measured);
-        RecoverableCaption = "recuperáveis com segurança" + (unmeasured > 0 ? $" (mais {unmeasured} item(ns) que só o administrador consegue medir)" : "") +
-                             ". Medido agora, sem mexer em nada.";
+        RecoverableCaption = Loc.T("Clean.RecuperaveisSeguranca") + (unmeasured > 0 ? Loc.F("Clean.MaisNItemNs", unmeasured) : "") +
+                             Loc.T("Clean.MedidoAgoraSemMexer2");
         var open = results.SelectMany(r => r.RunningApps.Select(a => (App: a, r.Rule))).Where(x => x.Rule.Mode == CleaningMode.Quarantine).ToList();
         OpenAppsWarning = open.Count == 0 ? "" :
-            "Abertos agora: " + string.Join(", ", open.Select(x => x.App).Distinct(StringComparer.OrdinalIgnoreCase)) +
-            ". O cache deles será pulado. Feche-os (inclusive na bandeja) e meça de novo para incluí-los.";
+            Loc.T("Clean.AbertosAgora") + string.Join(", ", open.Select(x => x.App).Distinct(StringComparer.OrdinalIgnoreCase)) +
+            Loc.T("Clean.CacheDelesSeraPulado");
         SelectionChanged();
     }
 
@@ -342,11 +342,11 @@ public sealed class CleaningPage : ModulePage
         var selected = SelectedRows().ToList();
         if (selected.Count == 0) return;
         var sensitive = selected.Where(r => r.Rule.Sensitive).ToList();
-        if (sensitive.Count > 0 && !host.Confirm("Atenção: dados pessoais",
-                "Você marcou itens que não são cache:\n\n" + string.Join("\n\n", sensitive.Select(r => $"• {r.Rule.Title}\n  {r.Rule.Warning}")) +
-                "\n\nContinuar mesmo assim?"))
+        if (sensitive.Count > 0 && !host.Confirm(Loc.T("Clean.AtencaoDadosPessoais"),
+                Loc.T("Clean.VoceMarcouItensNao") + string.Join("\n\n", sensitive.Select(r => $"• {r.Rule.Title}\n  {r.Rule.Warning}")) +
+                Loc.T("Clean.ContinuarMesmoAssim")))
         {
-            Message = "Cancelado. Nada foi alterado.";
+            Message = Loc.T("Shell.CanceladoNadaFoiAlterado");
             return;
         }
 
@@ -360,12 +360,12 @@ public sealed class CleaningPage : ModulePage
             var part = parts[i].Rows;
             var level = parts[i].Admin ? BrokerLevel.Admin : BrokerLevel.User;
             var requests = part.Select(r => RequestFor(r.Rule, batch)).ToList();
-            var text = (parts.Count > 1 ? $"Parte {i + 1} de {parts.Count} ({(level == BrokerLevel.Admin ? "pastas do sistema" : "sua conta")}).\n\n" : "") +
-                       "Vai para a quarentena do NEXUS:\n" + string.Join("\n", part.Select(r => $"• {r.Rule.Title} — {(r.Measured ? Bytes(r.Bytes) : "não medido")}")) +
-                       "\n\nNada é apagado de verdade: tudo pode voltar em \"Desfazer última limpeza\" ou na aba Quarentena. Arquivos em uso e programas abertos são pulados." +
-                       (level == BrokerLevel.Admin ? "\n\nPede permissão de administrador (aviso do Windows) e cria um ponto de restauração antes." : "");
-            var result = await host.ApplyAsync("Limpar selecionados", text, requests, level);
-            if (result is null) { lines.Add(parts.Count > 1 ? $"Parte {i + 1}: cancelada." : "Cancelado. Nada foi alterado."); break; }
+            var text = (parts.Count > 1 ? Loc.F("Clean.ParteNNN", i + 1, parts.Count, (level == BrokerLevel.Admin ? Loc.T("Clean.PastasSistema") : Loc.T("Auto.SuaConta"))) : "") +
+                       Loc.T("Clean.VaiQuarentenaNexus") + string.Join("\n", part.Select(r => $"• {r.Rule.Title} — {(r.Measured ? Bytes(r.Bytes) : Loc.T("Clean.NaoMedido"))}")) +
+                       Loc.T("Clean.NadaApagadoVerdadeTudo") +
+                       (level == BrokerLevel.Admin ? Loc.T("Clean.PedePermissaoAdministradorAviso") : "");
+            var result = await host.ApplyAsync(Loc.T("Clean.LimparSelecionados"), text, requests, level);
+            if (result is null) { lines.Add(parts.Count > 1 ? Loc.F("Clean.ParteNCancelada", i + 1) : Loc.T("Shell.CanceladoNadaFoiAlterado")); break; }
             lines.Add(Summarize(result, part));
         }
         Message = string.Join(" ", lines);
@@ -378,8 +378,8 @@ public sealed class CleaningPage : ModulePage
         var titles = part.Where(r => !r.Rule.IsUserRule).ToDictionary(r => r.Rule.ActionKey, r => r.Rule.Title, StringComparer.Ordinal);
         var ok = items.Count(x => x.Outcome is "Verified" or "AlreadyConfigured");
         var skipped = items.Where(x => x.Outcome is not ("Verified" or "AlreadyConfigured"))
-            .Select(x => $"{titles.GetValueOrDefault(x.ActionKey, x.ActionKey == UserRuleActionKey ? "Sua regra" : x.ActionKey)}: {x.Detail}").ToList();
-        return $"{ok} item(ns) limpo(s) e verificado(s)." + (skipped.Count > 0 ? " Pulados: " + string.Join("; ", skipped) + "." : "");
+            .Select(x => $"{titles.GetValueOrDefault(x.ActionKey, x.ActionKey == UserRuleActionKey ? Loc.T("Clean.SuaRegra") : x.ActionKey)}: {x.Detail}").ToList();
+        return Loc.F("Clean.NItemNsLimpo", ok) + (skipped.Count > 0 ? Loc.T("Clean.Pulados") + string.Join("; ", skipped) + "." : "");
     }
 
     // ------------------------------------------------------------------ Lixeira (irreversível)
@@ -389,14 +389,14 @@ public sealed class CleaningPage : ModulePage
         var options = await Task.Run(() =>
         {
             var list = new List<RecycleDriveOption>();
-            if (RecycleBinInfo.TryQuery() is { } all) list.Add(new RecycleDriveOption("Todas as unidades", "all", all.Files, all.Bytes));
+            if (RecycleBinInfo.TryQuery() is { } all) list.Add(new RecycleDriveOption(Loc.T("Clean.TodasUnidades"), "all", all.Files, all.Bytes));
             foreach (var d in DriveInfo.GetDrives())
             {
                 try
                 {
                     if (d.DriveType != DriveType.Fixed || !d.IsReady || d.Name.Length < 2 || !char.IsAsciiLetterUpper(char.ToUpperInvariant(d.Name[0]))) continue;
                     if (RecycleBinInfo.TryQuery(d.Name) is { } q)
-                        list.Add(new RecycleDriveOption($"Unidade {char.ToUpperInvariant(d.Name[0])}:", char.ToUpperInvariant(d.Name[0]).ToString(), q.Files, q.Bytes));
+                        list.Add(new RecycleDriveOption(Loc.F("Pg.UnidadeN", char.ToUpperInvariant(d.Name[0])), char.ToUpperInvariant(d.Name[0]).ToString(), q.Files, q.Bytes));
                 }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
             }
@@ -407,7 +407,7 @@ public sealed class CleaningPage : ModulePage
         foreach (var o in options) RecycleDrives.Add(o);
         RecycleDrive = RecycleDrives.FirstOrDefault(o => o.Drive == keep) ?? RecycleDrives.FirstOrDefault();
         var total = options.FirstOrDefault(o => o.Drive == "all");
-        RecycleText = total is null ? "Não foi possível ler a Lixeira." : total.Bytes == 0 ? "Lixeira vazia." : $"{Bytes(total.Bytes)} em {total.Items.ToString("N0", Pt)} item(ns).";
+        RecycleText = total is null ? Loc.T("Clean.NaoFoiPossivelLer") : total.Bytes == 0 ? Loc.T("Clean.LixeiraVazia") : Loc.F("Clean.NNItemNs", Bytes(total.Bytes), total.Items.ToString("N0", Pt));
     }
 
     private async Task EmptyRecycleBinAsync()
@@ -417,20 +417,20 @@ public sealed class CleaningPage : ModulePage
         if (choice is null) return;
         // Tamanho exato agora (não o da última medição).
         var now = await Task.Run(() => RecycleBinInfo.TryQuery(choice.Drive == "all" ? null : choice.Drive + @":\"));
-        if (now is not { } size) { Message = "Não foi possível ler a Lixeira. Nada foi alterado."; return; }
-        if (size.Bytes == 0 && size.Files == 0) { Message = "A Lixeira já está vazia."; await MeasureRecycleBinAsync(); return; }
-        var where = choice.Drive == "all" ? "de todas as unidades" : $"da unidade {choice.Drive}:";
-        if (!host.Confirm("Esvaziar a Lixeira — não tem desfazer",
-                $"Vai apagar DE VEZ o conteúdo da Lixeira {where}:\n\n• {size.Files.ToString("N0", Pt)} item(ns)\n• {Bytes(size.Bytes)} ({size.Bytes.ToString("N0", Pt)} bytes)\n\n" +
-                "Não há quarentena nem desfazer. Se não tem certeza, abra a Lixeira e confira antes.\n\nContinuar?"))
+        if (now is not { } size) { Message = Loc.T("Clean.NaoFoiPossivelLer2"); return; }
+        if (size.Bytes == 0 && size.Files == 0) { Message = Loc.T("Clean.LixeiraJaEstaVazia"); await MeasureRecycleBinAsync(); return; }
+        var where = choice.Drive == "all" ? Loc.T("Clean.TodasUnidades2") : Loc.F("Clean.UnidadeN", choice.Drive);
+        if (!host.Confirm(Loc.T("Clean.EsvaziarLixeiraNaoTem"),
+                Loc.F("Clean.VaiApagarVezConteudo", where, size.Files.ToString("N0", Pt), Bytes(size.Bytes), size.Bytes.ToString("N0", Pt)) +
+                Loc.T("Clean.NaoHaQuarentenaNem")))
         {
-            Message = "Cancelado. Nada foi alterado.";
+            Message = Loc.T("Shell.CanceladoNadaFoiAlterado");
             return;
         }
         var request = new ActionRequest("cleaning.recycle-bin.empty@1", null, new Dictionary<string, string> { ["drive"] = choice.Drive }, ConfirmIrreversible: true);
-        var result = await host.ApplyAsync("Esvaziar a Lixeira (irreversível)",
-            $"Confirme de novo: apagar de vez {Bytes(size.Bytes)} da Lixeira {where}. Não há como desfazer.", [request], BrokerLevel.User);
-        Message = result is null ? "Cancelado. Nada foi alterado." : IrreversibleSummary(result, "Lixeira esvaziada e conferida (0 itens).");
+        var result = await host.ApplyAsync(Loc.T("Clean.EsvaziarLixeiraIrreversivel"),
+            Loc.F("Clean.ConfirmeNovoApagarVez", Bytes(size.Bytes), where), [request], BrokerLevel.User);
+        Message = result is null ? Loc.T("Shell.CanceladoNadaFoiAlterado") : IrreversibleSummary(result, Loc.T("Clean.LixeiraEsvaziadaConferida0"));
         await MeasureRecycleBinAsync();
         await LoadHistoryAsync();
     }
@@ -439,28 +439,28 @@ public sealed class CleaningPage : ModulePage
     {
         if (!result.Ok || result.Response?.Results is not { } items) return result.Message;
         var bad = items.Where(x => x.Outcome is not ("Verified" or "AlreadyConfigured")).Select(x => x.Detail).Where(d => !string.IsNullOrEmpty(d)).ToList();
-        return bad.Count == 0 ? ok : "Concluído com avisos: " + string.Join("; ", bad);
+        return bad.Count == 0 ? ok : Loc.T("Clean.ConcluidoAvisos") + string.Join("; ", bad);
     }
 
     // ------------------------------------------------------------------ ferramentas oficiais do Windows
 
     private void OpenDiskCleanup()
     {
-        if (Host is null || !Host.Confirm("Abrir a Limpeza de Disco do Windows",
-                "Vai abrir a Limpeza de Disco (cleanmgr), a ferramenta do próprio Windows. Para ver \"Limpeza de atualizações do Windows\", " +
-                "clique em \"Limpar arquivos do sistema\" (o Windows pede permissão de administrador). Você escolhe os itens e confirma lá.\n\n" +
-                "O NEXUS não acompanha nem desfaz o que a Limpeza de Disco apagar. Abrir?"))
+        if (Host is null || !Host.Confirm(Loc.T("Clean.AbrirLimpezaDiscoWindows"),
+                Loc.T("Clean.VaiAbrirLimpezaDisco") +
+                Loc.T("Clean.CliqueLimparArquivosSistema") +
+                Loc.T("Clean.NexusNaoAcompanhaNem")))
             return;
         var exe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cleanmgr.exe");
-        if (!File.Exists(exe)) { Message = "A Limpeza de Disco não está instalada neste Windows. Use Configurações > Armazenamento."; return; }
+        if (!File.Exists(exe)) { Message = Loc.T("Clean.LimpezaDiscoNaoEsta"); return; }
         try { using var _ = Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true }); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     private void TryOpen(string tool)
     {
         try { OpenNativeTool(tool); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = "Não foi possível abrir: " + ex.Message; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = Loc.T("Clean.NaoFoiPossivelAbrir") + ex.Message; }
     }
 
     internal static void OpenNativeTool(string tool)
@@ -491,8 +491,8 @@ public sealed class CleaningPage : ModulePage
         foreach (var m in data.Report.Months) Months.Add(new MonthBar(m, max));
 
         var inQuarantine = data.Report.Recoverable;
-        QuarantineText = inQuarantine == 0 ? "Quarentena vazia." : $"Na quarentena: {Bytes(inQuarantine)} em {Batches.Count(r => r.BytesInQuarantine > 0)} limpeza(s).";
-        HistoryEmptyText = data.Report.Sessions.Count == 0 && data.Report.RecycleBin.Count == 0 ? "Nenhuma limpeza ainda." : "";
+        QuarantineText = inQuarantine == 0 ? Loc.T("Clean.QuarentenaVazia") : Loc.F("Clean.QuarentenaNNLimpeza", Bytes(inQuarantine), Batches.Count(r => r.BytesInQuarantine > 0));
+        HistoryEmptyText = data.Report.Sessions.Count == 0 && data.Report.RecycleBin.Count == 0 ? Loc.T("Clean.NenhumaLimpezaAinda") : "";
         OnPropertyChanged(nameof(HasHistory));
         OnPropertyChanged(nameof(HasBatches));
         OnPropertyChanged(nameof(RecoveredMonthBytes));
@@ -548,7 +548,7 @@ public sealed class CleaningPage : ModulePage
     }
 
     internal Task RestoreBatchAsync(QuarantineBatchRow row) => RunAsync(() => RestoreAsync(row));
-    internal Task PurgeBatchAsync(QuarantineBatchRow row) => RunAsync(() => PurgeAsync([row], "este lote"));
+    internal Task PurgeBatchAsync(QuarantineBatchRow row) => RunAsync(() => PurgeAsync([row], Loc.T("Clean.EsteLote")));
 
     private async Task RestoreAsync(QuarantineBatchRow? row)
     {
@@ -557,8 +557,8 @@ public sealed class CleaningPage : ModulePage
         foreach (var (level, run) in row.RevertibleRuns)
         {
             var r = await Host.RevertAsync(run, level);
-            if (r is null) { results.Add("Cancelado."); break; }
-            results.Add(r.Response?.FullyRestored == true ? "Arquivos devolvidos e conferidos." : r.Message);
+            if (r is null) { results.Add(Loc.T("Clean.Cancelado")); break; }
+            results.Add(r.Response?.FullyRestored == true ? Loc.T("Clean.ArquivosDevolvidosConferidos") : r.Message);
         }
         Message = string.Join(" ", results.Distinct(StringComparer.Ordinal));
         await ScanAsync();
@@ -569,8 +569,8 @@ public sealed class CleaningPage : ModulePage
         if (days < 1) return;
         var limit = DateTime.UtcNow.AddDays(-days);
         var old = Batches.Where(b => b.CanPurge && b.When <= limit).ToList();
-        if (old.Count == 0) { Message = $"Nenhuma limpeza com mais de {days} dias na quarentena."; return; }
-        await PurgeAsync(old, $"as limpezas com mais de {days} dias");
+        if (old.Count == 0) { Message = Loc.F("Clean.NenhumaLimpezaMaisN", days); return; }
+        await PurgeAsync(old, Loc.F("Clean.LimpezasMaisNDias", days));
     }
 
     /// <summary>
@@ -582,18 +582,18 @@ public sealed class CleaningPage : ModulePage
         var host = Host!;
         var items = await Task.Run(() => rows.SelectMany(r => r.Parts.Select(p => (Row: r, p.Level, p.Batch.BatchId, Size: QuarantineStore.MeasureOnDisk(DataDirectory(p.Level), p.Batch.BatchId))))
             .Where(x => x.Size.Files > 0 || x.Size.Bytes > 0).ToList());
-        if (items.Count == 0) { Message = "Nada a esvaziar: a quarentena destes lotes já está vazia."; await LoadHistoryAsync(); return; }
+        if (items.Count == 0) { Message = Loc.T("Clean.NadaEsvaziarQuarentenaDestes"); await LoadHistoryAsync(); return; }
         var totalBytes = items.Sum(x => x.Size.Bytes);
         var totalFiles = items.Sum(x => x.Size.Files);
         var list = items.GroupBy(x => x.Row).Take(15).Select(g => $"• {g.Key.WhenText} — {g.Key.RulesText} — {Bytes(g.Sum(x => x.Size.Bytes))}").ToList();
         var more = items.Select(x => x.Row).Distinct().Count() - list.Count;
-        if (!host.Confirm("Esvaziar a quarentena — não tem desfazer",
-                $"Vai apagar DE VEZ {what}:\n\n{string.Join("\n", list)}{(more > 0 ? $"\n• e mais {more} limpeza(s)" : "")}\n\n" +
-                $"Total: {Bytes(totalBytes)} ({totalBytes.ToString("N0", Pt)} bytes) em {totalFiles.ToString("N0", Pt)} arquivo(s).\n\n" +
-                "Depois disso, estas limpezas não podem mais ser desfeitas. O espaço volta para o disco." +
-                (items.Any(x => x.Level == BrokerLevel.Admin) ? "\n\nParte é do administrador: o Windows vai pedir permissão." : "") + "\n\nContinuar?"))
+        if (!host.Confirm(Loc.T("Clean.EsvaziarQuarentenaNaoTem"),
+                Loc.F("Clean.VaiApagarVezN", what, string.Join("\n", list), (more > 0 ? Loc.F("Clean.MaisNLimpezaS", more) : "")) +
+                Loc.F("Clean.TotalNNBytes", Bytes(totalBytes), totalBytes.ToString("N0", Pt), totalFiles.ToString("N0", Pt)) +
+                Loc.T("Clean.DepoisDissoEstasLimpezas") +
+                (items.Any(x => x.Level == BrokerLevel.Admin) ? Loc.T("Clean.ParteAdministradorWindowsVai") : "") + Loc.T("Clean.Continuar")))
         {
-            Message = "Cancelado. Nada foi alterado.";
+            Message = Loc.T("Shell.CanceladoNadaFoiAlterado");
             return;
         }
         var parts = items.GroupBy(x => x.Level).OrderBy(g => g.Key).SelectMany(g => g.Chunk(MaxPerRequest).Select(c => (Level: g.Key, Items: c.ToList()))).ToList();
@@ -603,11 +603,11 @@ public sealed class CleaningPage : ModulePage
             var (level, chunk) = parts[i];
             var id = level == BrokerLevel.Admin ? "cleaning.quarantine.purge.machine@1" : "cleaning.quarantine.purge@1";
             var requests = chunk.Select(x => new ActionRequest(id, null, new Dictionary<string, string> { ["batch"] = x.BatchId }, ConfirmIrreversible: true)).ToList();
-            var text = (parts.Count > 1 ? $"Parte {i + 1} de {parts.Count}. " : "") +
-                       $"Confirme de novo: apagar de vez {Bytes(chunk.Sum(x => x.Size.Bytes))} ({chunk.Count} lote(s), {(level == BrokerLevel.Admin ? "administrador" : "sua conta")}). Não há como desfazer.";
-            var result = await host.ApplyAsync("Esvaziar a quarentena (irreversível)", text, requests, level);
-            if (result is null) { lines.Add(parts.Count > 1 ? $"Parte {i + 1}: cancelada." : "Cancelado. Nada foi alterado."); break; }
-            lines.Add(IrreversibleSummary(result, $"{Bytes(chunk.Sum(x => x.Size.Bytes))} apagados de vez e conferidos (quarentena desses lotes = 0)."));
+            var text = (parts.Count > 1 ? Loc.F("Clean.ParteNN", i + 1, parts.Count) : "") +
+                       Loc.F("Clean.ConfirmeNovoApagarVez2", Bytes(chunk.Sum(x => x.Size.Bytes)), chunk.Count, (level == BrokerLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta")));
+            var result = await host.ApplyAsync(Loc.T("Clean.EsvaziarQuarentenaIrreversivel"), text, requests, level);
+            if (result is null) { lines.Add(parts.Count > 1 ? Loc.F("Clean.ParteNCancelada", i + 1) : Loc.T("Shell.CanceladoNadaFoiAlterado")); break; }
+            lines.Add(IrreversibleSummary(result, Loc.F("Clean.NApagadosVezConferidos", Bytes(chunk.Sum(x => x.Size.Bytes)))));
         }
         Message = string.Join(" ", lines);
         await LoadHistoryAsync();
@@ -620,7 +620,7 @@ public sealed class CleaningPage : ModulePage
         var limit = DateTime.UtcNow.AddDays(-days);
         var old = Batches.Where(b => b.CanPurge && b.When <= limit).ToList();
         ExpirySuggestion = old.Count == 0 ? "" :
-            $"{old.Count} limpeza(s) com mais de {days} dias ocupam {Bytes(old.Sum(b => b.BytesInQuarantine))} na quarentena. Quer esvaziar? (pede duas confirmações)";
+            Loc.F("Clean.NLimpezaSMais", old.Count, days, Bytes(old.Sum(b => b.BytesInQuarantine)));
     }
 
     private void ExportCsv()
@@ -628,9 +628,9 @@ public sealed class CleaningPage : ModulePage
         if (_report is null) return;
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Exportar histórico de limpezas",
+            Title = Loc.T("Clean.ExportarHistoricoLimpezas"),
             FileName = $"nexus-limpezas-{DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}.csv",
-            Filter = "CSV (*.csv)|*.csv",
+            Filter = Loc.T("Clean.CsvCsvCsv"),
             AddExtension = true,
             OverwritePrompt = true,
         };
@@ -638,9 +638,9 @@ public sealed class CleaningPage : ModulePage
         try
         {
             File.WriteAllText(dialog.FileName, CleaningHistory.ToCsv(_report), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
-            Message = "Histórico exportado: " + dialog.FileName;
+            Message = Loc.T("Clean.HistoricoExportado") + dialog.FileName;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException) { Message = "Não foi possível salvar: " + ex.Message; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException) { Message = Loc.T("Clean.NaoFoiPossivelSalvar") + ex.Message; }
     }
 
     // ------------------------------------------------------------------ regras do usuário
@@ -651,23 +651,23 @@ public sealed class CleaningPage : ModulePage
         RuleFiles.Clear();
         foreach (var f in load.Files) RuleFiles.Add(new UserRuleFileRow(f, load.Rules));
         var errors = load.Files.Count(f => f.Error is not null);
-        RulesSummary = load.Files.Count == 0 ? "Nenhum arquivo de regras ainda. Clique em \"Abrir pasta de regras\": o NEXUS cria a pasta com um exemplo desativado."
-            : $"{load.Rules.Rules.Count} regra(s) ativa(s) em {load.Files.Count(f => f.Error is null && f.Enabled)} arquivo(s)" +
-              (errors > 0 ? $"; {errors} arquivo(s) com erro (não valem até corrigir)." : ".");
+        RulesSummary = load.Files.Count == 0 ? Loc.T("Clean.NenhumArquivoRegrasAinda")
+            : Loc.F("Clean.NRegraSAtiva", load.Rules.Rules.Count, load.Files.Count(f => f.Error is null && f.Enabled)) +
+              (errors > 0 ? Loc.F("Clean.NArquivoSErro", errors) : ".");
         RulesFolderProblem = load.FolderProblem ?? "";
     }
 
     private async Task ReloadRulesAsync()
     {
         ApplyUserRules(await Task.Run(() => UserCleaningRules.Load(UserRulesFolder)));
-        Message = "Regras recarregadas. " + RulesSummary;
+        Message = Loc.T("Clean.RegrasRecarregadas") + RulesSummary;
         await ScanAsync();
     }
 
     private void OpenRulesFolder()
     {
         var folder = UserRulesFolder;
-        if (folder is null) { Message = "Pasta de dados do Windows (%AppData%) indisponível."; return; }
+        if (folder is null) { Message = Loc.T("Clean.PastaDadosWindowsAppdata"); return; }
         try
         {
             // Preferências do próprio NEXUS (não é estado do sistema): a pasta e, na primeira vez, um exemplo DESATIVADO.
@@ -683,7 +683,7 @@ public sealed class CleaningPage : ModulePage
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception or InvalidOperationException)
         {
-            Message = "Não foi possível abrir a pasta: " + ex.Message;
+            Message = Loc.T("Clean.NaoFoiPossivelAbrir2") + ex.Message;
         }
         _ = ReloadRulesAsync();
     }
@@ -725,7 +725,7 @@ public sealed record CleaningOption(string Label, int Value)
 /// <summary>Unidade para esvaziar a Lixeira ("all" = todas).</summary>
 public sealed record RecycleDriveOption(string Name, string Drive, long Items, long Bytes)
 {
-    public string Label => $"{Name} — {(Bytes == 0 ? "vazia" : CleaningPage.Bytes(Bytes))}";
+    public string Label => $"{Name} — {(Bytes == 0 ? Loc.T("Clean.Vazia") : CleaningPage.Bytes(Bytes))}";
     public override string ToString() => Label;
 }
 
@@ -755,7 +755,7 @@ public sealed class CleaningCategoryGroup : ObservableObject
         _ => "Icon.Code",
     };
 
-    public string CountText => Rows.Count == 1 ? "1 item" : $"{Rows.Count} itens";
+    public string CountText => Rows.Count == 1 ? Loc.T("Clean.N1Item") : Loc.F("Clean.NItens", Rows.Count);
     public string NotFoundText { get => _notFound; set { if (Set(ref _notFound, value)) OnPropertyChanged(nameof(HasNotFound)); } }
     public bool HasNotFound => _notFound.Length > 0;
     public string TotalText => CleaningPage.Bytes(Rows.Where(r => r.CanClean || r.Rule.Mode == CleaningMode.MeasureOnly).Sum(r => r.Bytes));
@@ -820,24 +820,24 @@ public sealed class CleaningRuleRow : ObservableObject
     public string? Warning => Rule.Warning;
     public bool HasWarning => !string.IsNullOrEmpty(Rule.Warning);
     public string SizeText => Measured ? CleaningPage.Bytes(Bytes) : "—";
-    public string FilesText => !Measured ? Scan.Problem ?? "" : Scan.Files == 0 ? "nada a limpar" : $"{Scan.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"))} arquivo(s)";
+    public string FilesText => !Measured ? Scan.Problem ?? "" : Scan.Files == 0 ? Loc.T("Clean.NadaLimpar") : Loc.F("Clean.NArquivoS", Scan.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR")));
 
     public string Tags
     {
         get
         {
             var t = new List<string>();
-            if (Rule.IsUserRule) t.Add("sua regra");
+            if (Rule.IsUserRule) t.Add(Loc.T("Clean.SuaRegra2"));
             if (Rule.Category == CleaningCategory.Desenvolvedor) t.Add("desenvolvedor");
-            if (Rule.Admin) t.Add("administrador");
-            if (Rule.MinAgeHours >= 24) t.Add($"só com mais de {Rule.MinAgeHours / 24:0.#} dia(s)");
-            if (RunningApps.Count > 0) t.Add($"aberto: {string.Join(", ", RunningApps)} (será pulado)");
-            if (IsMeasureOnly) t.Add("feito pelo Windows");
+            if (Rule.Admin) t.Add(Loc.T("Pg.Administrador"));
+            if (Rule.MinAgeHours >= 24) t.Add(Loc.F("Clean.SoMaisNDia", Rule.MinAgeHours / 24));
+            if (RunningApps.Count > 0) t.Add(Loc.F("Clean.AbertoNSeraPulado", string.Join(", ", RunningApps)));
+            if (IsMeasureOnly) t.Add(Loc.T("Clean.FeitoPeloWindows"));
             return string.Join(" · ", t);
         }
     }
 
-    public string ToolLabel => Rule.Special == "RecycleBin" ? "Abrir a Lixeira" : "Abrir no Windows";
+    public string ToolLabel => Rule.Special == "RecycleBin" ? Loc.T("Clean.AbrirLixeira") : Loc.T("Clean.AbrirWindows");
 
     public bool IsSelected
     {
@@ -885,16 +885,16 @@ public sealed class QuarantineBatchRow
 
     public bool CanRestore => RevertibleRuns.Count > 0;
     public string WhenText => When.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("pt-BR"));
-    public string RulesText => string.Join(", ", Parts.SelectMany(p => p.Session.Rules).Distinct(StringComparer.Ordinal).DefaultIfEmpty("nada foi movido (tudo em uso ou vazio)"));
+    public string RulesText => string.Join(", ", Parts.SelectMany(p => p.Session.Rules).Distinct(StringComparer.Ordinal).DefaultIfEmpty(Loc.T("Clean.NadaFoiMovidoTudo")));
     public string SizeText => CleaningPage.Bytes(BytesInQuarantine);
-    public string LevelText => string.Join(" + ", Parts.Select(p => p.Level == BrokerLevel.Admin ? "administrador" : "sua conta").Distinct(StringComparer.Ordinal));
+    public string LevelText => string.Join(" + ", Parts.Select(p => p.Level == BrokerLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta")).Distinct(StringComparer.Ordinal));
     public string StatusText
     {
         get
         {
             var statuses = Parts.Select(p => p.Session.Status).Distinct(StringComparer.Ordinal).ToList();
             var s = string.Join("; ", statuses);
-            if (BytesInQuarantine > 0 && !CanRestore) s += " (sem registro no diário para desfazer)";
+            if (BytesInQuarantine > 0 && !CanRestore) s += Loc.T("Clean.SemRegistroDiarioDesfazer");
             return s + " · " + LevelText;
         }
     }
@@ -906,15 +906,15 @@ public sealed class HistorySessionRow(CleaningSession session)
     public CleaningSession Session { get; } = session;
     public string WhenText => Session.StartedUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("pt-BR"));
     public string SizeText => CleaningPage.Bytes(Session.Bytes);
-    public string RulesText => Session.Rules.Count == 0 ? "nada foi movido" : string.Join(", ", Session.Rules);
+    public string RulesText => Session.Rules.Count == 0 ? Loc.T("Clean.NadaFoiMovido") : string.Join(", ", Session.Rules);
     public string DetailText
     {
         get
         {
-            var parts = new List<string> { $"{Session.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"))} arquivo(s)", Session.Level == CleaningLevel.Admin ? "administrador" : "sua conta", Session.Status };
-            if (Session.BytesPurged > 0) parts.Add($"{CleaningPage.Bytes(Session.BytesPurged)} recuperados de verdade");
-            if (Session.BytesRestored > 0) parts.Add($"{CleaningPage.Bytes(Session.BytesRestored)} devolvidos");
-            if (Session.UserRules) parts.Add("inclui suas regras");
+            var parts = new List<string> { Loc.F("Clean.NArquivoS", Session.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"))), Session.Level == CleaningLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta"), Session.Status };
+            if (Session.BytesPurged > 0) parts.Add(Loc.F("Clean.NRecuperadosVerdade", CleaningPage.Bytes(Session.BytesPurged)));
+            if (Session.BytesRestored > 0) parts.Add(Loc.F("Clean.NDevolvidos", CleaningPage.Bytes(Session.BytesRestored)));
+            if (Session.UserRules) parts.Add(Loc.T("Clean.IncluiSuasRegras"));
             return string.Join(" · ", parts);
         }
     }
@@ -927,7 +927,7 @@ public sealed class MonthBar(CleaningMonth month, long max)
     public string Label => month.Label;
     public double CleanedHeight => Math.Max(month.Cleaned > 0 ? 2 : 0, Height * month.Cleaned / max);
     public double RecoveredHeight => Math.Max(month.Recovered > 0 ? 2 : 0, Height * month.Recovered / max);
-    public string Tooltip => $"{month.Label}: limpo {CleaningPage.Bytes(month.Cleaned)} · recuperado de verdade {CleaningPage.Bytes(month.Recovered)}";
+    public string Tooltip => Loc.F("Clean.NLimpoNRecuperado", month.Label, CleaningPage.Bytes(month.Cleaned), CleaningPage.Bytes(month.Recovered));
 }
 
 /// <summary>Um arquivo de regras do usuário (com erro, desativado ou com as regras que valem).</summary>
@@ -935,8 +935,8 @@ public sealed class UserRuleFileRow(UserRuleFile file, CleaningRuleSet loaded)
 {
     public string Name => file.Name;
     public bool HasError => file.Error is not null;
-    public string StatusText => file.Error is not null ? "Erro: " + file.Error
-        : !file.Enabled ? "Desativado (\"enabled\": false)"
-        : file.RuleIds.Count == 0 ? "Sem regras"
+    public string StatusText => file.Error is not null ? Loc.T("Clean.Erro") + file.Error
+        : !file.Enabled ? Loc.T("Clean.DesativadoEnabledFalse")
+        : file.RuleIds.Count == 0 ? Loc.T("Clean.SemRegras")
         : string.Join(", ", file.RuleIds.Select(id => loaded.Find(id)?.Title ?? id));
 }

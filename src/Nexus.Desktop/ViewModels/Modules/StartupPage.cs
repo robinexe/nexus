@@ -16,7 +16,7 @@ public sealed class StartupPage : ModulePage
 {
     private bool _loaded;
     private string _heroValue = "…";
-    private string _heroDetail = "Lendo o histórico de inicialização do Windows…";
+    private string _heroDetail = Loc.T("Boot.LendoHistoricoInicializacaoWindows");
     private string _summary = "";
     private string _search = "";
     private bool _showWindows;
@@ -28,7 +28,7 @@ public sealed class StartupPage : ModulePage
     private IReadOnlyList<StartupRow> _visible = [];
     private bool _isLoading = true;
     private double _bootSeconds = double.NaN, _bootAverageSeconds = double.NaN, _desktopSeconds = double.NaN;
-    private string _bootCaption = "Medido pelo próprio Windows a cada boot.";
+    private string _bootCaption = Loc.T("Boot.MedidoPeloProprioWindows");
 
     public StartupPage()
     {
@@ -46,7 +46,7 @@ public sealed class StartupPage : ModulePage
     public RelayCommand ClearSelectionCommand { get; }
     public int SelectedCount => _all.Count(r => r.Selected);
     public bool HasSelection => SelectedCount > 0;
-    public string DisableSelectedText => SelectedCount == 1 ? "Desligar 1 selecionado" : $"Desligar {SelectedCount} selecionados";
+    public string DisableSelectedText => SelectedCount == 1 ? Loc.T("Boot.Desligar1Selecionado") : Loc.F("Boot.DesligarNSelecionados", SelectedCount);
 
     internal void SelectionChanged()
     {
@@ -77,24 +77,24 @@ public sealed class StartupPage : ModulePage
         var chosen = _all.Where(r => r.Selected && r.CanSelect).ToList();
         if (chosen.Count == 0) return;
         var (level, requests) = BulkRequests(chosen.Select(r => r.Item));
-        var names = string.Join("\n", chosen.Take(15).Select(r => "• " + r.Name)) + (chosen.Count > 15 ? $"\n• e mais {chosen.Count - 15}" : "");
-        var text = $"Deixar de abrir {chosen.Count} programa(s) junto com o Windows?\n\n{names}\n\nOs programas continuam instalados e abrem " +
-                   "normalmente quando você quiser. É o mesmo método do Gerenciador de Tarefas; Desfazer liga todos de novo." +
-                   (level == BrokerLevel.Admin ? "\n\nAlguns são do computador inteiro: o Windows vai pedir permissão de administrador." : "");
-        var r = await Host.ApplyAsync($"Desligar {chosen.Count} na inicialização", text, requests, level);
+        var names = string.Join("\n", chosen.Take(15).Select(r => "• " + r.Name)) + (chosen.Count > 15 ? Loc.F("Boot.MaisN", chosen.Count - 15) : "");
+        var text = Loc.F("Boot.DeixarAbrirNPrograma", chosen.Count, names) +
+                   Loc.T("Boot.NormalmenteQuandoVoceQuiser") +
+                   (level == BrokerLevel.Admin ? Loc.T("Boot.AlgunsSaoComputadorInteiro") : "");
+        var r = await Host.ApplyAsync(Loc.F("Boot.DesligarNInicializacao", chosen.Count), text, requests, level);
         if (r is null) return; // cancelado
         _bulkRuns.Clear();
         foreach (var run in r.AllRunIds) _bulkRuns.Add((run, level));
         if (_bulkRuns.Count > 0) { _lastRun = _bulkRuns[^1].Run; _lastLevel = level; }
         var done = r.Response?.Results?.Count(x => x.Outcome is "Verified" or "AlreadyDesired" or "Applied") ?? 0;
-        LastChange = $"Desligados {done} de {chosen.Count}: o efeito aparece no próximo logon/boot.";
+        LastChange = Loc.F("Boot.DesligadosNNEfeito", done, chosen.Count);
         Message = r.Ok ? LastChange : LastChange + " " + ApplySummary.Human(r);
         await LoadAsync();
     }
 
-    public override string Title => "Inicialização";
+    public override string Title => Loc.T("AsstStep.Inicializacao");
     public override string Group => Loc.T("Nav.Sistema");
-    public override string Subtitle => "O que abre junto com o Windows e quanto pesa.";
+    public override string Subtitle => Loc.T("Boot.AbreJuntoWindowsQuanto");
 
     public string HeroValue { get => _heroValue; private set => Set(ref _heroValue, value); }
     public string HeroDetail { get => _heroDetail; private set => Set(ref _heroDetail, value); }
@@ -176,8 +176,8 @@ public sealed class StartupPage : ModulePage
         Notes.Clear();
         foreach (var n in inventory.Notes) Notes.Add(n);
         var visible = _all.Where(r => !r.Item.IsMicrosoft).ToList();
-        Summary = $"{visible.Count} itens de terceiros · {visible.Count(r => r.Item.Enabled)} ligados · " +
-                  $"{_all.Count(r => r.Item.IsOrphan)} órfãos · {_all.Count(r => r.Item.IsMicrosoft)} do Windows";
+        Summary = Loc.F("Boot.NItensTerceirosN", visible.Count, visible.Count(r => r.Item.Enabled)) +
+                  Loc.F("Boot.NOrfaosNWindows", _all.Count(r => r.Item.IsOrphan), _all.Count(r => r.Item.IsMicrosoft));
         foreach (var name in new[] { nameof(ThirdPartyCount), nameof(EnabledCount), nameof(HighImpactCount), nameof(OrphanCount), nameof(WindowsCount),
                      nameof(HighImpactTone), nameof(HasNotes) })
             OnPropertyChanged(name);
@@ -191,28 +191,28 @@ public sealed class StartupPage : ModulePage
         {
             HasBootData = false;
             HeroValue = "—";
-            HeroDetail = "Tempo de boot indisponível: " + (report.Unavailable ?? "sem registros.");
+            HeroDetail = Loc.T("Boot.TempoBootIndisponivel") + (report.Unavailable ?? Loc.T("Boot.SemRegistros"));
             BootSeconds = double.NaN;
             BootAverageSeconds = double.NaN;
             DesktopSeconds = double.NaN;
-            BootCaption = "O Windows não registrou o tempo de boot neste PC.";
+            BootCaption = Loc.T("Boot.WindowsNaoRegistrouTempo");
             return;
         }
         HasBootData = true;
         HeroValue = BootReport.Seconds(last.TotalMs);
         var parts = new List<string>();
-        if (last.MainPathMs is { } main) parts.Add($"área de trabalho em {BootReport.Seconds(main)}");
-        if (last.PostBootMs is { } post) parts.Add($"mais {BootReport.Seconds(post)} até o sistema assentar");
+        if (last.MainPathMs is { } main) parts.Add(Loc.F("Boot.AreaTrabalhoN", BootReport.Seconds(main)));
+        if (last.PostBootMs is { } post) parts.Add(Loc.F("Boot.MaisNAteSistema", BootReport.Seconds(post)));
         var delay = report.MainDelayOfLastBoot;
         parts.Add(delay is null
-            ? "o Windows não apontou nenhum atraso específico nesse boot"
-            : $"principal atraso: {delay.Label}, {BootEvents.KindLabel(delay.Kind)} ({BootReport.Seconds(delay.TotalMs)})");
-        HeroDetail = $"Último boot ({last.TimeUtc.ToLocalTime():dd/MM HH:mm}): " + string.Join("; ", parts) + ".";
+            ? Loc.T("Boot.WindowsNaoApontouNenhum")
+            : Loc.F("Boot.PrincipalAtrasoNN", delay.Label, BootEvents.KindLabel(delay.Kind), BootReport.Seconds(delay.TotalMs)));
+        HeroDetail = Loc.F("Boot.UltimoBootN", last.TimeUtc.ToLocalTime()) + string.Join("; ", parts) + ".";
         BootSeconds = Math.Round(last.TotalMs / 1000.0, 1);
         DesktopSeconds = last.MainPathMs is { } m ? Math.Round(m / 1000.0, 1) : double.NaN;
         BootCaption = last.MainPathMs is { } mp
-            ? $"Área de trabalho em {BootReport.Seconds(mp)} · {last.TimeUtc.ToLocalTime():dd/MM HH:mm} · medido pelo Windows"
-            : $"Boot de {last.TimeUtc.ToLocalTime():dd/MM HH:mm} · medido pelo Windows";
+            ? Loc.F("Boot.AreaTrabalhoNN", BootReport.Seconds(mp), last.TimeUtc.ToLocalTime())
+            : Loc.F("Boot.BootNMedidoPelo", last.TimeUtc.ToLocalTime());
 
         var recent = report.Boots.TakeLast(12).ToList();
         var max = Math.Max(1, recent.Max(b => b.TotalMs));
@@ -262,33 +262,33 @@ public sealed class StartupPage : ModulePage
     {
         if (Host is null || ToggleRequest(row.Item) is not { } req) return;
         var enable = !row.Item.Enabled;
-        var verb = enable ? "Ligar" : "Desligar";
+        var verb = enable ? Loc.T("Settings.Ligar") : Loc.T("Settings.Desligar");
         var text = enable
-            ? $"Voltar a abrir \"{row.Name}\" junto com o Windows?"
-            : $"Deixar de abrir \"{row.Name}\" junto com o Windows?\n\nO programa continua instalado e pode ser aberto normalmente. " +
-              "É o mesmo método do Gerenciador de Tarefas e pode ser desfeito aqui ou na página Aplicar." +
-              (req.Level == BrokerLevel.Admin ? "\n\nEste item é do computador inteiro: o Windows vai pedir permissão de administrador." : "");
-        await ApplyAsync($"{verb} na inicialização", text, new ActionRequest(req.Key, enable ? "enabled" : "disabled", req.Args), req.Level,
+            ? Loc.F("Boot.VoltarAbrirNJunto", row.Name)
+            : Loc.F("Boot.DeixarAbrirNJunto", row.Name) +
+              Loc.T("Boot.MesmoMetodoGerenciadorTarefas") +
+              (req.Level == BrokerLevel.Admin ? Loc.T("Boot.EsteItemComputadorInteiro") : "");
+        await ApplyAsync(Loc.F("Boot.NInicializacao", verb), text, new ActionRequest(req.Key, enable ? "enabled" : "disabled", req.Args), req.Level,
             $"{verb}: {row.Name}");
     });
 
     internal Task RemoveOrphanAsync(StartupRow row) => RunAsync(async () =>
     {
         if (Host is null || !row.Item.CanRemoveOrphan || OrphanRequest(row.Item) is not { } req) return;
-        var text = $"Remover a entrada \"{row.Name}\"?\n\nEla aponta para um programa que não existe mais:\n{row.Path}\n\n" +
-                   "Isso não acelera nada; só limpa a lista. O valor completo fica guardado no diário e Desfazer o recria.";
-        await ApplyAsync("Remover entrada órfã", text, new ActionRequest(req.Key, null, new Dictionary<string, string> { ["entryName"] = row.Item.EntryName }),
-            req.Level, $"Removida: {row.Name}");
+        var text = Loc.F("Boot.RemoverEntradaNEla", row.Name, row.Path) +
+                   Loc.T("Boot.IssoNaoAceleraNada");
+        await ApplyAsync(Loc.T("Boot.RemoverEntradaOrfa"), text, new ActionRequest(req.Key, null, new Dictionary<string, string> { ["entryName"] = row.Item.EntryName }),
+            req.Level, Loc.F("Boot.RemovidaN", row.Name));
     });
 
     internal Task ServiceManualAsync(StartupRow row) => RunAsync(async () =>
     {
         if (Host is null || row.Item.Source != StartupSource.Service) return;
-        var text = $"Pôr o serviço \"{row.Name}\" em Manual?\n\nEle deixa de iniciar sozinho no boot, mas ainda abre quando um programa pedir. " +
-                   "Se o programa dele depender do serviço rodando (ex.: sincronização de celular), pode parar de funcionar até desfazer.\n\n" +
-                   "Exige administrador. Serviços essenciais do Windows são recusados pelo NEXUS.";
-        await ApplyAsync("Serviço em Manual", text, new ActionRequest(Nexus.Boot.ServicePresets.IndividualActionKey, "Manual",
-            new Dictionary<string, string> { ["service"] = row.Item.EntryName }), BrokerLevel.Admin, $"Manual: {row.Name}");
+        var text = Loc.F("Boot.ServicoNManualEle", row.Name) +
+                   Loc.T("Boot.ProgramaDeleDependerServico") +
+                   Loc.T("Boot.ExigeAdministradorServicosEssenciais");
+        await ApplyAsync(Loc.T("Boot.ServicoManual"), text, new ActionRequest(Nexus.Boot.ServicePresets.IndividualActionKey, Loc.T("Shell.Manual"),
+            new Dictionary<string, string> { ["service"] = row.Item.EntryName }), BrokerLevel.Admin, Loc.F("Boot.ManualN", row.Name));
     });
 
     private async Task ApplyAsync(string title, string text, ActionRequest request, BrokerLevel level, string change)
@@ -299,7 +299,7 @@ public sealed class StartupPage : ModulePage
         {
             _lastRun = run;
             _lastLevel = level;
-            LastChange = change + " — o efeito aparece no próximo logon/boot.";
+            LastChange = change + Loc.T("Boot.EfeitoApareceProximoLogon");
         }
         Message = Describe(r);
         await LoadAsync();
@@ -334,7 +334,7 @@ public sealed record BootBar(double Height, string Label, string Value, bool IsL
 {
     /// <summary>Bem acima da média dos boots do gráfico (barra vermelha).</summary>
     public bool IsSlow { get; init; }
-    public string Tooltip => $"{Label}: {Value}" + (IsLast ? " (último)" : "") + (IsSlow ? " · bem acima da média" : "");
+    public string Tooltip => $"{Label}: {Value}" + (IsLast ? Loc.T("Boot.Ultimo2") : "") + (IsSlow ? Loc.T("Boot.BemAcimaMedia2") : "");
 }
 
 /// <summary>Linha da lista de inicialização.</summary>
@@ -353,10 +353,10 @@ public sealed class StartupRow : ObservableObject
     public StartupItem Item { get; }
     public string Name => Item.Name;
     public string Publisher => Item.Publisher.Describe();
-    public string Path => Item.ExecutablePath ?? Item.Command ?? "(sem caminho)";
-    public string Origin => Item.SourceLabel + (Item.NeedsAdmin ? " · exige administrador" : "");
+    public string Path => Item.ExecutablePath ?? Item.Command ?? Loc.T("Boot.SemCaminho");
+    public string Origin => Item.SourceLabel + (Item.NeedsAdmin ? Loc.T("Boot.ExigeAdministrador") : "");
     public bool IsOn => Item.Enabled;
-    public string StateText => Item.Enabled ? "Ligado" : "Desligado";
+    public string StateText => Item.Enabled ? Loc.T("Boot.Ligado") : Loc.T("Shell.Desligado");
     public bool CanToggle => Item.CanToggle && StartupPage.ToggleRequest(Item) is not null;
     public bool CanRemove => Item.CanRemoveOrphan;
     public bool IsService => Item.Source == StartupSource.Service;
@@ -372,15 +372,15 @@ public sealed class StartupRow : ObservableObject
     public bool ReadOnly => !CanToggle && !IsService;
     public string ReadOnlyReason => Item.Source switch
     {
-        StartupSource.RunOnceUser or StartupSource.RunOnceMachine or StartupSource.RunOnceMachine32 => "Roda uma vez só e some sozinho.",
-        StartupSource.ScheduledTask when Item.IsMicrosoft => "Tarefa do Windows: só leitura.",
+        StartupSource.RunOnceUser or StartupSource.RunOnceMachine or StartupSource.RunOnceMachine32 => Loc.T("Boot.RodaVezSoSome"),
+        StartupSource.ScheduledTask when Item.IsMicrosoft => Loc.T("Boot.TarefaWindowsSoLeitura"),
         _ => "",
     };
     public string FileText => Item.FileExists switch
     {
         true => "",
-        false => "Programa não encontrado: entrada órfã",
-        null => "Não foi possível conferir o arquivo",
+        false => Loc.T("Boot.ProgramaNaoEncontradoEntrada"),
+        null => Loc.T("Boot.NaoFoiPossivelConferir"),
     };
     public string ImpactLabel => Item.Impact.Label;
     public string ImpactReason => Item.Impact.Reason;
@@ -409,7 +409,7 @@ public sealed class StartupRow : ObservableObject
         _ => Item.IsOrphan ? "Icon.Warning" : "Icon.Startup",
     };
     public string SubLine => $"{Publisher} · {Origin}";
-    public string SwitchName => $"{Name}: {StateText}. Clique para {(IsOn ? "desligar" : "ligar")} na inicialização";
+    public string SwitchName => Loc.F("Boot.NNCliqueN", Name, StateText, (IsOn ? Loc.T("Boot.Desligar") : Loc.T("Boot.Ligar")));
 
     public RelayCommand ToggleCommand { get; }
     public RelayCommand RemoveCommand { get; }

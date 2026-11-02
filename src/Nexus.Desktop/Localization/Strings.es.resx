@@ -369,6 +369,116 @@ NEXUS no descarga ni instala nada.</value></data>
   <data name="Auto.Windows10" xml:space="preserve"><value>Windows 10</value></data>
   <data name="Auto.Windows11" xml:space="preserve"><value>Windows 11</value></data>
   <data name="Auto.WindowsNumHdd" xml:space="preserve"><value>Windows en un HDD</value></data>
+  <data name="Boot.AbreJuntoWindowsQuanto" xml:space="preserve"><value>Lo que se abre junto con Windows y cuánto pesa.</value></data>
+  <data name="Boot.AbreWindows" xml:space="preserve"><value>Lo que se abre con Windows</value></data>
+  <data name="Boot.AlgunsSaoComputadorInteiro" xml:space="preserve"><value>
+
+Algunos son de todo el equipo: Windows pedirá permiso de administrador.</value></data>
+  <data name="Boot.AltoWindowsMediu3" xml:space="preserve"><value>Alto = Windows midió 3 s o más para el elemento en el arranque; Medio = de 1 a 3 s; Bajo = menos de 1 s. Desconocido = Windows no registró retraso de ese elemento (solo registra lo que pasa de su límite), o no se pudo leer el registro. No se estima nada.</value></data>
+  <data name="Boot.ApontamProgramaNaoExiste" xml:space="preserve"><value>Apuntan a un programa que ya no existe.</value></data>
+  <data name="Boot.AreaTrabalhoN" xml:space="preserve"><value>escritorio en {0}</value></data>
+  <data name="Boot.AreaTrabalhoNN" xml:space="preserve"><value>Escritorio en {0} · {1:dd/MM HH:mm} · medido por Windows</value></data>
+  <data name="Boot.BemAcimaMedia" xml:space="preserve"><value>muy por encima de la media</value></data>
+  <data name="Boot.BemAcimaMedia2" xml:space="preserve"><value> · muy por encima de la media</value></data>
+  <data name="Boot.BootNMedidoPelo" xml:space="preserve"><value>Arranque del {0:dd/MM HH:mm} · medido por Windows</value></data>
+  <data name="Boot.Buscar" xml:space="preserve"><value>Buscar…</value></data>
+  <data name="Boot.BuscarInicializacao" xml:space="preserve"><value>Buscar en el inicio</value></data>
+  <data name="Boot.BuscarNomeEditorOu" xml:space="preserve"><value>Buscar por nombre, editor o ruta</value></data>
+  <data name="Boot.CliqueVoltaEra" xml:space="preserve"><value>Un clic lo devuelve a como estaba.</value></data>
+  <data name="Boot.ComoImpactoMedido" xml:space="preserve"><value>¿Cómo se mide el impacto?</value></data>
+  <data name="Boot.DeixarAbrirNJunto" xml:space="preserve"><value>¿Dejar de abrir "{0}" junto con Windows?
+
+El programa sigue instalado y se puede abrir normalmente.</value></data>
+  <data name="Boot.DeixarAbrirNPrograma" xml:space="preserve"><value>¿Dejar de abrir {0} programa(s) junto con Windows?
+
+{1}
+
+Los programas siguen instalados y se abren</value></data>
+  <data name="Boot.DesfazerUltimaMudanca" xml:space="preserve"><value>Deshacer el último cambio</value></data>
+  <data name="Boot.DesligadosNNEfeito" xml:space="preserve"><value>Desactivados {0} de {1}: el efecto aparece en el próximo inicio de sesión/arranque.</value></data>
+  <data name="Boot.Desligar" xml:space="preserve"><value>desactivar</value></data>
+  <data name="Boot.Desligar1Selecionado" xml:space="preserve"><value>Desactivar 1 seleccionado</value></data>
+  <data name="Boot.DesligarNInicializacao" xml:space="preserve"><value>Desactivar {0} en el inicio</value></data>
+  <data name="Boot.DesligarNSelecionados" xml:space="preserve"><value>Desactivar {0} seleccionados</value></data>
+  <data name="Boot.DesligarSelecionados" xml:space="preserve"><value>Desactivar seleccionados</value></data>
+  <data name="Boot.EfeitoApareceProximoLogon" xml:space="preserve"><value> — el efecto aparece en el próximo inicio de sesión/arranque.</value></data>
+  <data name="Boot.EsteItemComputadorInteiro" xml:space="preserve"><value>
+
+Este elemento es de todo el equipo: Windows pedirá permiso de administrador.</value></data>
+  <data name="Boot.ExigeAdministrador" xml:space="preserve"><value> · requiere administrador</value></data>
+  <data name="Boot.ExigeAdministradorServicosEssenciais" xml:space="preserve"><value>Requiere administrador. NEXUS rechaza los servicios esenciales de Windows.</value></data>
+  <data name="Boot.FonteLogMicrosoftWindows" xml:space="preserve"><value>Fuente: el registro Microsoft-Windows-Diagnostics-Performance (eventos 100 a 110), el mismo que usa Windows para medir su propio arranque. No se estima nada.</value></data>
+  <data name="Boot.IgualGerenciadorTarefasPrograma" xml:space="preserve"><value>Igual que el Administrador de tareas. El programa se queda.</value></data>
+  <data name="Boot.ImpactoAlto" xml:space="preserve"><value>Impacto alto</value></data>
+  <data name="Boot.ImpactoBoot" xml:space="preserve"><value>Impacto en el arranque</value></data>
+  <data name="Boot.ImpactoVemWindowsItem" xml:space="preserve"><value>El impacto viene de Windows, elemento por elemento.</value></data>
+  <data name="Boot.IssoNaoAceleraNada" xml:space="preserve"><value>Esto no acelera nada; solo limpia la lista. El valor completo queda guardado en el diario y Deshacer lo recrea.</value></data>
+  <data name="Boot.LendoHistoricoInicializacaoWindows" xml:space="preserve"><value>Leyendo el historial de inicio de Windows…</value></data>
+  <data name="Boot.Ligado" xml:space="preserve"><value>Activado</value></data>
+  <data name="Boot.Ligados" xml:space="preserve"><value>Activados</value></data>
+  <data name="Boot.Ligar" xml:space="preserve"><value>activar</value></data>
+  <data name="Boot.MaisN" xml:space="preserve"><value>
+• y {0} más</value></data>
+  <data name="Boot.MaisNAteSistema" xml:space="preserve"><value>{0} más hasta que el sistema se asienta</value></data>
+  <data name="Boot.Manual" xml:space="preserve"><value>Poner en manual</value></data>
+  <data name="Boot.ManualN" xml:space="preserve"><value>Manual: {0}</value></data>
+  <data name="Boot.MarcarTodosLigados" xml:space="preserve"><value>Marcar todos los activados</value></data>
+  <data name="Boot.MarqueProgramasDesligueTodos" xml:space="preserve"><value>Marca los programas y desactívalos todos de una vez.</value></data>
+  <data name="Boot.Mede" xml:space="preserve"><value>Mide</value></data>
+  <data name="Boot.MediaBoots" xml:space="preserve"><value>Media de los arranques</value></data>
+  <data name="Boot.MedidoPeloProprioWindows" xml:space="preserve"><value>Medido por el propio Windows en cada arranque.</value></data>
+  <data name="Boot.MesmoMetodoGerenciadorTarefas" xml:space="preserve"><value>Es el mismo método del Administrador de tareas y se puede deshacer aquí o en la página Aplicar.</value></data>
+  <data name="Boot.MostrarItensWindows" xml:space="preserve"><value>Mostrar elementos de Windows</value></data>
+  <data name="Boot.MudancasAquiSoAparecem" xml:space="preserve"><value>Los cambios aquí solo aparecen en el próximo arranque.</value></data>
+  <data name="Boot.NadaEncontrado" xml:space="preserve"><value>No se encontró nada.</value></data>
+  <data name="Boot.NaoFoiPossivelConferir" xml:space="preserve"><value>No se pudo verificar el archivo</value></data>
+  <data name="Boot.NenhumItemTerceirosOu" xml:space="preserve"><value>Ningún elemento de terceros (o de la búsqueda) se abre con Windows. Los de Windows están ocultos.</value></data>
+  <data name="Boot.NInicializacao" xml:space="preserve"><value>{0} en el inicio</value></data>
+  <data name="Boot.NItensTerceirosN" xml:space="preserve"><value>{0} elementos de terceros · {1} activados ·</value></data>
+  <data name="Boot.NNCliqueN" xml:space="preserve"><value>{0}: {1}. Haz clic para {2} en el inicio</value></data>
+  <data name="Boot.NOrfaosNWindows" xml:space="preserve"><value>{0} huérfanos · {1} de Windows</value></data>
+  <data name="Boot.NormalmenteQuandoVoceQuiser" xml:space="preserve"><value>normalmente cuando quieras. Es el mismo método del Administrador de tareas; Deshacer los vuelve a activar todos.</value></data>
+  <data name="Boot.ObservacoesLeitura" xml:space="preserve"><value>Observaciones de la lectura</value></data>
+  <data name="Boot.OcultosPadraoNormalmenteNao" xml:space="preserve"><value>Ocultos por defecto: normalmente no se desactivan.</value></data>
+  <data name="Boot.Orfaos" xml:space="preserve"><value>Huérfanos</value></data>
+  <data name="Boot.PrincipalAtrasoNN" xml:space="preserve"><value>retraso principal: {0}, {1} ({2})</value></data>
+  <data name="Boot.ProgramaDeleDependerServico" xml:space="preserve"><value>Si su programa depende de que el servicio esté en ejecución (p. ej., sincronización del móvil), puede dejar de funcionar hasta que lo deshagas.
+
+</value></data>
+  <data name="Boot.ProgramaNaoEncontradoEntrada" xml:space="preserve"><value>Programa no encontrado: entrada huérfana</value></data>
+  <data name="Boot.ProgramasTerceirosAbremWindows" xml:space="preserve"><value>Programas de terceros que se abren con Windows.</value></data>
+  <data name="Boot.RegistroPastaInicializarTarefas" xml:space="preserve"><value>Registro, carpeta Inicio, tareas y servicios.</value></data>
+  <data name="Boot.RemoverEntrada" xml:space="preserve"><value>Quitar entrada</value></data>
+  <data name="Boot.RemoverEntradaNEla" xml:space="preserve"><value>¿Quitar la entrada "{0}"?
+
+Apunta a un programa que ya no existe:
+{1}
+
+</value></data>
+  <data name="Boot.RemoverEntradaOrfa" xml:space="preserve"><value>Quitar entrada huérfana</value></data>
+  <data name="Boot.RemovidaN" xml:space="preserve"><value>Quitada: {0}</value></data>
+  <data name="Boot.RodaVezSoSome" xml:space="preserve"><value>Se ejecuta una sola vez y desaparece solo.</value></data>
+  <data name="Boot.SelecionarDesligarJuntoOutros" xml:space="preserve"><value>Seleccionar para desactivar junto con otros</value></data>
+  <data name="Boot.SelecionarDesligarMassa" xml:space="preserve"><value>Seleccionar para desactivar en bloque</value></data>
+  <data name="Boot.SemCaminho" xml:space="preserve"><value>(sin ruta)</value></data>
+  <data name="Boot.SemRegistros" xml:space="preserve"><value>sin registros.</value></data>
+  <data name="Boot.ServicoManual" xml:space="preserve"><value>Servicio en Manual</value></data>
+  <data name="Boot.ServicoNManualEle" xml:space="preserve"><value>¿Poner el servicio "{0}" en Manual?
+
+Deja de iniciarse solo en el arranque, pero se abre cuando un programa lo pide.</value></data>
+  <data name="Boot.TarefaWindowsSoLeitura" xml:space="preserve"><value>Tarea de Windows: solo lectura.</value></data>
+  <data name="Boot.TempoBootIndisponivel" xml:space="preserve"><value>Tiempo de arranque no disponible:</value></data>
+  <data name="Boot.Ultimo" xml:space="preserve"><value>último</value></data>
+  <data name="Boot.Ultimo2" xml:space="preserve"><value> (último)</value></data>
+  <data name="Boot.UltimoBoot" xml:space="preserve"><value>Último arranque</value></data>
+  <data name="Boot.UltimoBootMedia" xml:space="preserve"><value>Último arranque × media</value></data>
+  <data name="Boot.UltimoBootN" xml:space="preserve"><value>Último arranque ({0:dd/MM HH:mm}):</value></data>
+  <data name="Boot.UltimosBootsSegundos" xml:space="preserve"><value>Últimos arranques (segundos)</value></data>
+  <data name="Boot.VoltarAbrirNJunto" xml:space="preserve"><value>¿Volver a abrir "{0}" junto con Windows?</value></data>
+  <data name="Boot.Windows" xml:space="preserve"><value>De Windows</value></data>
+  <data name="Boot.WindowsMediu3S" xml:space="preserve"><value>Windows midió 3 s o más en el arranque.</value></data>
+  <data name="Boot.WindowsNaoApontouNenhum" xml:space="preserve"><value>Windows no señaló ningún retraso específico en ese arranque</value></data>
+  <data name="Boot.WindowsNaoRegistrouTempo" xml:space="preserve"><value>Windows no registró el tiempo de arranque en este PC.</value></data>
   <data name="Cap.Acoes" xml:space="preserve"><value>Acciones</value></data>
   <data name="Cap.AcoesReaisVmRegistro" xml:space="preserve"><value>Acciones reales en VM (registro, energía, SysMain, core parking)</value></data>
   <data name="Cap.AdiadoForaCatalogoAtivo" xml:space="preserve"><value>Aplazado: fuera del catálogo activo hasta que exista un handler (listado en rechazadas).</value></data>
@@ -417,6 +527,222 @@ NEXUS no descarga ni instala nada.</value></data>
   <data name="Cap.VmCiServicoLocalsystem" xml:space="preserve"><value>VM del CI: servicio LocalSystem instalado; HKCU del cliente aplicado y revertido; HKCU de SYSTEM intacto; propietario del pipe verificado; ACL del bloqueo y de los datos.</value></data>
   <data name="Cap.WindowsCpuTopologiaGpu" xml:space="preserve"><value>Windows, CPU/topología, GPU/driver, memoria/SMBIOS, discos, red, energía, servicios, inicio</value></data>
   <data name="Cap.WindowsSdk100" xml:space="preserve"><value>Windows (SDK 10.0.403) y VM Windows del CI: compilación con 0 advertencias, todas las pruebas unitarias aprobadas.</value></data>
+  <data name="Clean.AbertoNSeraPulado" xml:space="preserve"><value>abierto: {0} (se omitirá)</value></data>
+  <data name="Clean.AbertosAgora" xml:space="preserve"><value>Abiertos ahora:</value></data>
+  <data name="Clean.AbrirLimpezaDisco" xml:space="preserve"><value>Abrir el Liberador de espacio</value></data>
+  <data name="Clean.AbrirLimpezaDiscoWindows" xml:space="preserve"><value>Abrir el Liberador de espacio de Windows</value></data>
+  <data name="Clean.AbrirLixeira" xml:space="preserve"><value>Abrir la Papelera</value></data>
+  <data name="Clean.AbrirPastaRegras" xml:space="preserve"><value>Abrir la carpeta de reglas</value></data>
+  <data name="Clean.AbrirWindows" xml:space="preserve"><value>Abrir en Windows</value></data>
+  <data name="Clean.AindaPodeVoltarOcupa" xml:space="preserve"><value>Todavía puede volver. Ocupa el disco hasta que lo vacíes.</value></data>
+  <data name="Clean.Apps" xml:space="preserve"><value>Apps</value></data>
+  <data name="Clean.Arquivos" xml:space="preserve"><value>Archivos</value></data>
+  <data name="Clean.ArquivosDevolvidosConferidos" xml:space="preserve"><value>Archivos devueltos y verificados.</value></data>
+  <data name="Clean.ArquivosJsonPastasSeu" xml:space="preserve"><value>Archivos .json con carpetas de tu perfil. Todo va a la cuarentena y puede volver.</value></data>
+  <data name="Clean.ArquivosLimposFicamQuarentena" xml:space="preserve"><value>Los archivos limpiados quedan en la cuarentena, en el mismo disco: el espacio solo vuelve de verdad cuando se vacía.</value></data>
+  <data name="Clean.AtencaoDadosPessoais" xml:space="preserve"><value>Atención: datos personales</value></data>
+  <data name="Clean.AtualizacoesAntigasWindowsUse" xml:space="preserve"><value>Actualizaciones antiguas de Windows: usa la herramienta oficial, tú ves y eliges.</value></data>
+  <data name="Clean.Atualizar" xml:space="preserve"><value>Actualizar</value></data>
+  <data name="Clean.CacheDelesSeraPulado" xml:space="preserve"><value>. Su caché se omitirá. Ciérralos (también en la bandeja) y vuelve a medir para incluirlos.</value></data>
+  <data name="Clean.Cancelado" xml:space="preserve"><value>Cancelado.</value></data>
+  <data name="Clean.CliqueLimparArquivosSistema" xml:space="preserve"><value>haz clic en "Limpiar archivos del sistema" (Windows pide permiso de administrador). Tú eliges los elementos y confirmas allí.
+
+</value></data>
+  <data name="Clean.ConcluidoAvisos" xml:space="preserve"><value>Terminado con avisos:</value></data>
+  <data name="Clean.ConfiguracoesArmazenamento" xml:space="preserve"><value>Configuración › Almacenamiento</value></data>
+  <data name="Clean.ConfirmeNovoApagarVez" xml:space="preserve"><value>Confirma de nuevo: borrar definitivamente {0} de la Papelera {1}. No hay forma de deshacer.</value></data>
+  <data name="Clean.ConfirmeNovoApagarVez2" xml:space="preserve"><value>Confirma de nuevo: borrar definitivamente {0} ({1} lote(s), {2}). No hay forma de deshacer.</value></data>
+  <data name="Clean.ContaEstaMarcadoEspaco" xml:space="preserve"><value>Cuenta lo que está marcado. El espacio vuelve cuando se vacía la cuarentena.</value></data>
+  <data name="Clean.Continuar" xml:space="preserve"><value>
+
+¿Continuar?</value></data>
+  <data name="Clean.ContinuarMesmoAssim" xml:space="preserve"><value>
+
+¿Continuar de todos modos?</value></data>
+  <data name="Clean.CsvCsvCsv" xml:space="preserve"><value>CSV (*.csv)|*.csv</value></data>
+  <data name="Clean.DepoisDissoEstasLimpezas" xml:space="preserve"><value>Después de esto, estas limpiezas ya no se pueden deshacer. El espacio vuelve al disco.</value></data>
+  <data name="Clean.DepoisEsvaziar" xml:space="preserve"><value>Después de vaciar</value></data>
+  <data name="Clean.DesativadoEnabledFalse" xml:space="preserve"><value>Desactivado ("enabled": false)</value></data>
+  <data name="Clean.DesenvolvedorDesmarcadoPadrao" xml:space="preserve"><value>Desarrollador (desmarcado por defecto)</value></data>
+  <data name="Clean.DesfazerUltimaLimpeza" xml:space="preserve"><value>Deshacer la última limpieza</value></data>
+  <data name="Clean.DevolvidoTotalN" xml:space="preserve"><value>Devuelto en total: {0}</value></data>
+  <data name="Clean.Erro" xml:space="preserve"><value>Error:</value></data>
+  <data name="Clean.EspacoLivreDiscoN" xml:space="preserve"><value>Espacio libre en el disco {0}</value></data>
+  <data name="Clean.EspacoVoltouVerdade" xml:space="preserve"><value>Espacio que volvió de verdad.</value></data>
+  <data name="Clean.EsteLote" xml:space="preserve"><value>este lote</value></data>
+  <data name="Clean.Esvazia" xml:space="preserve"><value>Vacía</value></data>
+  <data name="Clean.Esvaziar" xml:space="preserve"><value>Vaciar</value></data>
+  <data name="Clean.EsvaziarApagaVezNao" xml:space="preserve"><value>Vaciar borra definitivamente y no se puede deshacer; por eso pide dos confirmaciones, con la lista y el tamaño exacto.</value></data>
+  <data name="Clean.EsvaziarEstes" xml:space="preserve"><value>Vaciar estos</value></data>
+  <data name="Clean.EsvaziarLixeira" xml:space="preserve"><value>Vaciar la Papelera</value></data>
+  <data name="Clean.EsvaziarLixeiraIrreversivel" xml:space="preserve"><value>Vaciar la Papelera (irreversible)</value></data>
+  <data name="Clean.EsvaziarLixeiraNaoTem" xml:space="preserve"><value>Vaciar la Papelera — no se puede deshacer</value></data>
+  <data name="Clean.EsvaziarMaisAntigos" xml:space="preserve"><value>Vaciar los más antiguos</value></data>
+  <data name="Clean.EsvaziarNaoTemDesfazer" xml:space="preserve"><value>Vaciar no se puede deshacer</value></data>
+  <data name="Clean.EsvaziarQuarentena" xml:space="preserve"><value>Vaciar la cuarentena</value></data>
+  <data name="Clean.EsvaziarQuarentenaIrreversivel" xml:space="preserve"><value>Vaciar la cuarentena (irreversible)</value></data>
+  <data name="Clean.EsvaziarQuarentenaNaoTem" xml:space="preserve"><value>Vaciar la cuarentena — no se puede deshacer</value></data>
+  <data name="Clean.ExpiracaoQuarentena" xml:space="preserve"><value>Caducidad de la cuarentena</value></data>
+  <data name="Clean.ExportarCsv" xml:space="preserve"><value>Exportar CSV</value></data>
+  <data name="Clean.ExportarHistoricoLimpezas" xml:space="preserve"><value>Exportar historial de limpiezas</value></data>
+  <data name="Clean.FeitoPeloWindows" xml:space="preserve"><value>hecho por Windows</value></data>
+  <data name="Clean.FerramentasWindows" xml:space="preserve"><value>Herramientas de Windows</value></data>
+  <data name="Clean.Guarda" xml:space="preserve"><value>Guarda</value></data>
+  <data name="Clean.GuiaExemplosDocsModules" xml:space="preserve"><value>Guía con ejemplos: docs/modules/cleaning-rules-guide.md (junto a NEXUS). La primera vez, la carpeta recibe un ejemplo comentado y desactivado.</value></data>
+  <data name="Clean.HistoricoExportado" xml:space="preserve"><value>Historial exportado:</value></data>
+  <data name="Clean.IdadeMinimaLotes" xml:space="preserve"><value>Antigüedad mínima de los lotes</value></data>
+  <data name="Clean.IncluiSuasRegras" xml:space="preserve"><value>incluye tus reglas</value></data>
+  <data name="Clean.IrLimpar" xml:space="preserve"><value>Ir a Limpiar</value></data>
+  <data name="Clean.ItensSemMedicao" xml:space="preserve"><value> + elementos sin medición</value></data>
+  <data name="Clean.LembrarEsvaziarDepois" xml:space="preserve"><value>Recordar vaciar después de</value></data>
+  <data name="Clean.Liberar" xml:space="preserve"><value>Se puede liberar</value></data>
+  <data name="Clean.LibereEspacoSegurancaSai" xml:space="preserve"><value>Libera espacio con seguridad: lo que sale va a una cuarentena y puede volver hasta que la vacíes.</value></data>
+  <data name="Clean.LimparSelecionados" xml:space="preserve"><value>Limpiar seleccionados</value></data>
+  <data name="Clean.LimpezaAtualizacoesWindowsPasta" xml:space="preserve"><value>Limpieza de actualizaciones de Windows (carpeta WinSxS): el propio Windows ya lo hace solo de vez en cuando (tarea</value></data>
+  <data name="Clean.LimpezaDiscoNaoEsta" xml:space="preserve"><value>El Liberador de espacio no está instalado en este Windows. Usa Configuración &gt; Almacenamiento.</value></data>
+  <data name="Clean.LimpezasMaisNDias" xml:space="preserve"><value>las limpiezas con más de {0} días</value></data>
+  <data name="Clean.LimpezasQuarentena" xml:space="preserve"><value>Limpiezas en la cuarentena</value></data>
+  <data name="Clean.Limpo" xml:space="preserve"><value>limpiado</value></data>
+  <data name="Clean.LimpoNesteMes" xml:space="preserve"><value>Limpiado este mes</value></data>
+  <data name="Clean.LivreAgora" xml:space="preserve"><value>Libre ahora</value></data>
+  <data name="Clean.Lixeira" xml:space="preserve"><value>Papelera</value></data>
+  <data name="Clean.LixeiraEsvaziadaConferida0" xml:space="preserve"><value>Papelera vaciada y verificada (0 elementos).</value></data>
+  <data name="Clean.LixeiraJaEstaVazia" xml:space="preserve"><value>La Papelera ya está vacía.</value></data>
+  <data name="Clean.LixeiraVazia" xml:space="preserve"><value>Papelera vacía.</value></data>
+  <data name="Clean.MaisNItemNs" xml:space="preserve"><value> (y {0} elemento(s) más que solo el administrador puede medir)</value></data>
+  <data name="Clean.MaisNLimpezaS" xml:space="preserve"><value>
+• y {0} limpieza(s) más</value></data>
+  <data name="Clean.ManifestosQuarentenaFoiMovido" xml:space="preserve"><value>De los manifiestos de la cuarentena (lo que se movió, devolvió y vació) y del diario de NEXUS, leídos sin cambiar nada.</value></data>
+  <data name="Clean.MarcadoAgora" xml:space="preserve"><value>Marcado ahora</value></data>
+  <data name="Clean.MarcarTodosN" xml:space="preserve"><value>Marcar todos: {0}</value></data>
+  <data name="Clean.MedeCachesTemporariosMedir" xml:space="preserve"><value>Mide cachés y temporales. Medir no toca nada.</value></data>
+  <data name="Clean.MedicaoCancelada" xml:space="preserve"><value>Medición cancelada.</value></data>
+  <data name="Clean.MedidoAgoraSemMexer" xml:space="preserve"><value>Medido ahora, sin tocar nada. Lo que sale va a la cuarentena y puede volver.</value></data>
+  <data name="Clean.MedidoAgoraSemMexer2" xml:space="preserve"><value>. Medido ahora, sin tocar nada.</value></data>
+  <data name="Clean.MedindoPodeSerLiberado" xml:space="preserve"><value>Midiendo lo que se puede liberar…</value></data>
+  <data name="Clean.MudouIdeiaRestaureLote" xml:space="preserve"><value>¿Cambiaste de idea? Restaura el lote entero.</value></data>
+  <data name="Clean.N14Dias" xml:space="preserve"><value>14 días</value></data>
+  <data name="Clean.N1Item" xml:space="preserve"><value>1 elemento</value></data>
+  <data name="Clean.N30Dias" xml:space="preserve"><value>30 días</value></data>
+  <data name="Clean.N30DiasAtualizacoesInstaladas" xml:space="preserve"><value>de 30 días, y las actualizaciones instaladas ya no se pueden desinstalar.</value></data>
+  <data name="Clean.N60Dias" xml:space="preserve"><value>60 días</value></data>
+  <data name="Clean.N7Dias" xml:space="preserve"><value>7 días</value></data>
+  <data name="Clean.N90Dias" xml:space="preserve"><value>90 días</value></data>
+  <data name="Clean.NadaApagadoVerdadeTudo" xml:space="preserve"><value>
+
+No se borra nada de verdad: todo puede volver con "Deshacer la última limpieza" o en la pestaña Cuarentena. Los archivos en uso y los programas abiertos se omiten.</value></data>
+  <data name="Clean.NadaEsvaziarQuarentenaDestes" xml:space="preserve"><value>Nada que vaciar: la cuarentena de estos lotes ya está vacía.</value></data>
+  <data name="Clean.NadaFoiMovido" xml:space="preserve"><value>no se movió nada</value></data>
+  <data name="Clean.NadaFoiMovidoTudo" xml:space="preserve"><value>no se movió nada (todo en uso o vacío)</value></data>
+  <data name="Clean.NadaLimpar" xml:space="preserve"><value>nada que limpiar</value></data>
+  <data name="Clean.NadaSelecionado" xml:space="preserve"><value>Nada seleccionado.</value></data>
+  <data name="Clean.NaoEncontradosNestePc" xml:space="preserve"><value>No encontrados en este PC:</value></data>
+  <data name="Clean.NaoFoiPossivelAbrir" xml:space="preserve"><value>No se pudo abrir:</value></data>
+  <data name="Clean.NaoFoiPossivelAbrir2" xml:space="preserve"><value>No se pudo abrir la carpeta:</value></data>
+  <data name="Clean.NaoFoiPossivelLer" xml:space="preserve"><value>No se pudo leer la Papelera.</value></data>
+  <data name="Clean.NaoFoiPossivelLer2" xml:space="preserve"><value>No se pudo leer la Papelera. No se cambió nada.</value></data>
+  <data name="Clean.NaoFoiPossivelMedir" xml:space="preserve"><value>No se pudo medir: {0}</value></data>
+  <data name="Clean.NaoFoiPossivelSalvar" xml:space="preserve"><value>No se pudo guardar:</value></data>
+  <data name="Clean.NaoHaQuarentenaNem" xml:space="preserve"><value>No hay cuarentena ni deshacer. Si no estás seguro, abre la Papelera y revisa antes.
+
+¿Continuar?</value></data>
+  <data name="Clean.NaoMedido" xml:space="preserve"><value>no medido</value></data>
+  <data name="Clean.NApagadosVezConferidos" xml:space="preserve"><value>{0} borrados definitivamente y verificados (cuarentena de esos lotes = 0).</value></data>
+  <data name="Clean.NArquivoS" xml:space="preserve"><value>{0} archivo(s)</value></data>
+  <data name="Clean.NArquivoSErro" xml:space="preserve"><value>; {0} archivo(s) con errores (no valen hasta corregirlos).</value></data>
+  <data name="Clean.Navegadores" xml:space="preserve"><value>Navegadores</value></data>
+  <data name="Clean.NDevolvidos" xml:space="preserve"><value>{0} devueltos</value></data>
+  <data name="Clean.NenhumaLimpezaAinda" xml:space="preserve"><value>Ninguna limpieza todavía.</value></data>
+  <data name="Clean.NenhumaLimpezaMaisN" xml:space="preserve"><value>Ninguna limpieza con más de {0} días en la cuarentena.</value></data>
+  <data name="Clean.NenhumArquivoRegrasAinda" xml:space="preserve"><value>Todavía no hay archivo de reglas. Haz clic en "Abrir la carpeta de reglas": NEXUS crea la carpeta con un ejemplo desactivado.</value></data>
+  <data name="Clean.NexusNaoAcompanhaNem" xml:space="preserve"><value>NEXUS no sigue ni deshace lo que borre el Liberador de espacio. ¿Abrirlo?</value></data>
+  <data name="Clean.NItemNsLimpo" xml:space="preserve"><value>{0} elemento(s) limpiado(s) y verificado(s).</value></data>
+  <data name="Clean.NItemNsSelecionado" xml:space="preserve"><value>{0} elemento(s) seleccionado(s): {1}</value></data>
+  <data name="Clean.NItens" xml:space="preserve"><value>{0} elementos</value></data>
+  <data name="Clean.NLimpezaSMais" xml:space="preserve"><value>{0} limpieza(s) con más de {1} días ocupan {2} en la cuarentena. ¿Vaciarlas? (pide dos confirmaciones)</value></data>
+  <data name="Clean.NLimpoNRecuperado" xml:space="preserve"><value>{0}: limpiado {1} · recuperado de verdad {2}</value></data>
+  <data name="Clean.NNItemNs" xml:space="preserve"><value>{0} en {1} elemento(s).</value></data>
+  <data name="Clean.NRecuperadosVerdade" xml:space="preserve"><value>{0} recuperados de verdad</value></data>
+  <data name="Clean.NRegraSAtiva" xml:space="preserve"><value>{0} regla(s) activa(s) en {1} archivo(s)</value></data>
+  <data name="Clean.OndeVemEstesNumeros" xml:space="preserve"><value>¿De dónde vienen estos números?</value></data>
+  <data name="Clean.PararMedicao" xml:space="preserve"><value>Detener la medición</value></data>
+  <data name="Clean.ParteAdministradorWindowsVai" xml:space="preserve"><value>
+
+Una parte es del administrador: Windows pedirá permiso.</value></data>
+  <data name="Clean.ParteNCancelada" xml:space="preserve"><value>Parte {0}: cancelada.</value></data>
+  <data name="Clean.ParteNN" xml:space="preserve"><value>Parte {0} de {1}.</value></data>
+  <data name="Clean.ParteNNN" xml:space="preserve"><value>Parte {0} de {1} ({2}).
+
+</value></data>
+  <data name="Clean.PastaDadosWindowsAppdata" xml:space="preserve"><value>Carpeta de datos de Windows (%AppData%) no disponible.</value></data>
+  <data name="Clean.PastaDadosWindowsIndisponivel" xml:space="preserve"><value>(carpeta de datos de Windows no disponible)</value></data>
+  <data name="Clean.PastasSistema" xml:space="preserve"><value>carpetas del sistema</value></data>
+  <data name="Clean.PedePermissaoAdministradorAviso" xml:space="preserve"><value>
+
+Pide permiso de administrador (aviso de Windows) y crea antes un punto de restauración.</value></data>
+  <data name="Clean.PodeNaoPode" xml:space="preserve"><value>Qué se puede y qué no</value></data>
+  <data name="Clean.Pulados" xml:space="preserve"><value> Omitidos:</value></data>
+  <data name="Clean.QuandoVoceLimparCada" xml:space="preserve"><value>Cuando limpies, cada sesión aparece aquí con el tamaño y lo que se hizo.</value></data>
+  <data name="Clean.Quarentena" xml:space="preserve"><value>Cuarentena</value></data>
+  <data name="Clean.Quarentena2" xml:space="preserve"><value>En la cuarentena</value></data>
+  <data name="Clean.QuarentenaEstaVazia" xml:space="preserve"><value>La cuarentena está vacía.</value></data>
+  <data name="Clean.QuarentenaLixeiraEsvaziadas" xml:space="preserve"><value>Cuarentena y Papelera vaciadas.</value></data>
+  <data name="Clean.QuarentenaNNLimpeza" xml:space="preserve"><value>En la cuarentena: {0} en {1} limpieza(s).</value></data>
+  <data name="Clean.QuarentenaVazia" xml:space="preserve"><value>Cuarentena vacía.</value></data>
+  <data name="Clean.Recarregar" xml:space="preserve"><value>Recargar</value></data>
+  <data name="Clean.RecuperadoNesteMes" xml:space="preserve"><value>Recuperado este mes</value></data>
+  <data name="Clean.RecuperadoTotal" xml:space="preserve"><value>Recuperado en total</value></data>
+  <data name="Clean.RecuperadoVerdade" xml:space="preserve"><value>recuperado de verdad</value></data>
+  <data name="Clean.RecuperaveisSeguranca" xml:space="preserve"><value>recuperables con seguridad</value></data>
+  <data name="Clean.Regras" xml:space="preserve"><value>Reglas</value></data>
+  <data name="Clean.RegrasRecarregadas" xml:space="preserve"><value>Reglas recargadas.</value></data>
+  <data name="Clean.Restaurar" xml:space="preserve"><value>Restaurar</value></data>
+  <data name="Clean.SemRegistroDiarioDesfazer" xml:space="preserve"><value> (sin registro en el diario para deshacer)</value></data>
+  <data name="Clean.SemRegras" xml:space="preserve"><value>Sin reglas</value></data>
+  <data name="Clean.SoAquiEspacoVolta" xml:space="preserve"><value>Solo aquí vuelve el espacio. Borra definitivamente, con doble confirmación.</value></data>
+  <data name="Clean.SoAvisaNexusNunca" xml:space="preserve"><value>Solo avisa. NEXUS nunca borra por su cuenta.</value></data>
+  <data name="Clean.SoMaisNDia" xml:space="preserve"><value>solo con más de {0:0.#} día(s)</value></data>
+  <data name="Clean.SoPastasSeuPerfil" xml:space="preserve"><value>Solo carpetas de tu perfil (AppData, Temp, carpetas con nombre dentro del perfil), nunca carpetas personales, de secretos de Windows ni del sistema. Valen solo en tu cuenta, nunca como administrador.</value></data>
+  <data name="Clean.StartcomponentcleanupEspera30Dias" xml:space="preserve"><value>StartComponentCleanup, que espera 30 días antes de quitar versiones antiguas). Para hacerlo ahora, usa el Liberador de espacio de</value></data>
+  <data name="Clean.SuaRegra" xml:space="preserve"><value>Tu regla</value></data>
+  <data name="Clean.SuaRegra2" xml:space="preserve"><value>tu regla</value></data>
+  <data name="Clean.SuasRegras" xml:space="preserve"><value>Tus reglas</value></data>
+  <data name="Clean.SuasRegrasLimpeza" xml:space="preserve"><value>Tus reglas de limpieza</value></data>
+  <data name="Clean.TodaQuarentena" xml:space="preserve"><value>toda la cuarentena</value></data>
+  <data name="Clean.TodasLimpezas" xml:space="preserve"><value>Todas las limpiezas</value></data>
+  <data name="Clean.TodasUnidades" xml:space="preserve"><value>Todas las unidades</value></data>
+  <data name="Clean.TodasUnidades2" xml:space="preserve"><value>de todas las unidades</value></data>
+  <data name="Clean.Todos" xml:space="preserve"><value>Todos</value></data>
+  <data name="Clean.TotalNNBytes" xml:space="preserve"><value>Total: {0} ({1} bytes) en {2} archivo(s).
+
+</value></data>
+  <data name="Clean.Ultimos12Meses" xml:space="preserve"><value>Últimos 12 meses</value></data>
+  <data name="Clean.UnidadeLixeira" xml:space="preserve"><value>Unidad de la Papelera</value></data>
+  <data name="Clean.UnidadeN" xml:space="preserve"><value>de la unidad {0}:</value></data>
+  <data name="Clean.VaiAbrirLimpezaDisco" xml:space="preserve"><value>Se abrirá el Liberador de espacio (cleanmgr), la herramienta del propio Windows. Para ver "Limpieza de actualizaciones de Windows",</value></data>
+  <data name="Clean.VaiApagarVezConteudo" xml:space="preserve"><value>Se borrará DEFINITIVAMENTE el contenido de la Papelera {0}:
+
+• {1} elemento(s)
+• {2} ({3} bytes)
+
+</value></data>
+  <data name="Clean.VaiApagarVezN" xml:space="preserve"><value>Se borrará DEFINITIVAMENTE {0}:
+
+{1}{2}
+
+</value></data>
+  <data name="Clean.VaiQuarentenaNexus" xml:space="preserve"><value>Va a la cuarentena de NEXUS:
+</value></data>
+  <data name="Clean.Varre" xml:space="preserve"><value>Escanea</value></data>
+  <data name="Clean.Vazia" xml:space="preserve"><value>vacía</value></data>
+  <data name="Clean.VerAbaLimpar" xml:space="preserve"><value>Ver en la pestaña Limpiar</value></data>
+  <data name="Clean.VoceLimparApareceAqui" xml:space="preserve"><value>Lo que limpies aparece aquí y puede volver hasta que se vacíe.</value></data>
+  <data name="Clean.VoceLimpaVaiQuarentena" xml:space="preserve"><value>Lo que limpias va a la cuarentena, en el mismo disco.</value></data>
+  <data name="Clean.VoceMarcouItensNao" xml:space="preserve"><value>Marcaste elementos que no son caché:
+
+</value></data>
+  <data name="Clean.VoltaEsvaziar" xml:space="preserve"><value>Vuelve al vaciar.</value></data>
+  <data name="Clean.WindowsVoceVeEscolhe" xml:space="preserve"><value>Windows (tú ves y eliges). NEXUS no ejecuta DISM /StartComponentCleanup: quita al instante las versiones antiguas, sin la espera</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Asistente</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratorio</value></data>
@@ -749,6 +1075,107 @@ NEXUS no descarga ni instala nada.</value></data>
   <data name="Pg.VoltarMeuPc" xml:space="preserve"><value>Volver a Mi PC</value></data>
   <data name="Pg.VoltaValorOriginalQuando" xml:space="preserve"><value>Vuelve al valor original cuando quieras.</value></data>
   <data name="Pg.WindowsDriversFirmwareInformaram" xml:space="preserve"><value>Informados por Windows, drivers y firmware.</value></data>
+  <data name="Priv.AgoraNProtegidoN" xml:space="preserve"><value>Ahora: {0} · Protegido: {1}</value></data>
+  <data name="Priv.AjusteAplicadoConferido" xml:space="preserve"><value>ajuste aplicado y verificado</value></data>
+  <data name="Priv.AjustesAplicadosConferidos" xml:space="preserve"><value>ajustes aplicados y verificados</value></data>
+  <data name="Priv.AlgunsItensSoAparecem" xml:space="preserve"><value> Algunos elementos solo aparecen en Windows después de cerrar sesión y volver a entrar.</value></data>
+  <data name="Priv.Aplica" xml:space="preserve"><value>Aplica</value></data>
+  <data name="Priv.AplicarRigido" xml:space="preserve"><value>Aplicar estricto</value></data>
+  <data name="Priv.AplicaSoItensInterruptor" xml:space="preserve"><value>Aplica solo los elementos con el interruptor activado en la lista de abajo.</value></data>
+  <data name="Priv.BloqueadoTodosApps" xml:space="preserve"><value>Bloqueado para todas las apps</value></data>
+  <data name="Priv.BuildWindowsDesconhecido" xml:space="preserve"><value>Compilación de Windows desconocida</value></data>
+  <data name="Priv.CameraMicrofoneNaoSao" xml:space="preserve"><value>La cámara y el micrófono no se bloquean a ciegas: Discord, el chat de voz y las transmisiones dependen de ellos. NEXUS muestra el estado y abre la pantalla correcta de Windows para que decidas app por app.</value></data>
+  <data name="Priv.Comunidade" xml:space="preserve"><value>Comunidad</value></data>
+  <data name="Priv.ConfereCadaItemWindows" xml:space="preserve"><value>Verifica cada elemento en Windows. Leer no cambia nada.</value></data>
+  <data name="Priv.ConfiguracoesAbertasNVoce" xml:space="preserve"><value>Configuración abierta en "{0}". Lo que cambies allí aparece aquí al volver a leer.</value></data>
+  <data name="Priv.ControleWindowsColetaMostra" xml:space="preserve"><value>Controla lo que Windows recopila y muestra sobre ti.</value></data>
+  <data name="Priv.DesfazerIncompletoNVeja" xml:space="preserve"><value>Deshacer incompleto: {0} Mira la página Aplicar.</value></data>
+  <data name="Priv.DesfazerUltimaAplicacao" xml:space="preserve"><value>Deshacer la última aplicación</value></data>
+  <data name="Priv.DesfeitoValoresVoltaramEram" xml:space="preserve"><value>Deshecho: los valores volvieron a como estaban.</value></data>
+  <data name="Priv.DesligarTudo" xml:space="preserve"><value>Desactivar todo</value></data>
+  <data name="Priv.DocumentadoPelaMicrosoft" xml:space="preserve"><value> · documentado por Microsoft</value></data>
+  <data name="Priv.ErroLeituraN" xml:space="preserve"><value> · error de lectura: {0}</value></data>
+  <data name="Priv.EscolhaNivel" xml:space="preserve"><value>Elige un nivel</value></data>
+  <data name="Priv.Escolhe" xml:space="preserve"><value>Eliges</value></data>
+  <data name="Priv.Exposto" xml:space="preserve"><value>Expuesto</value></data>
+  <data name="Priv.Faltam" xml:space="preserve"><value> faltan</value></data>
+  <data name="Priv.Fonte" xml:space="preserve"><value>Fuente</value></data>
+  <data name="Priv.FonteSelecioneCopieAbrir" xml:space="preserve"><value>Fuente. Selecciona y copia para abrir en el navegador.</value></data>
+  <data name="Priv.IncluirAplicarMarcadosN" xml:space="preserve"><value>Incluir en Aplicar marcados: {0}</value></data>
+  <data name="Priv.InterruptorLigadoEntraAplicar" xml:space="preserve"><value>Interruptor activado = entra en "Aplicar marcados". Los elementos ya protegidos quedan bloqueados: para volver, usa Deshacer.</value></data>
+  <data name="Priv.ItemFalta" xml:space="preserve"><value>elemento falta</value></data>
+  <data name="Priv.ItemMarcado" xml:space="preserve"><value>elemento marcado</value></data>
+  <data name="Priv.ItemNaoAplica" xml:space="preserve"><value>elemento no aplica</value></data>
+  <data name="Priv.ItemParcial" xml:space="preserve"><value>elemento parcial</value></data>
+  <data name="Priv.ItensFaltam" xml:space="preserve"><value>elementos faltan</value></data>
+  <data name="Priv.ItensMarcados" xml:space="preserve"><value>elementos marcados</value></data>
+  <data name="Priv.ItensNaoAplicam" xml:space="preserve"><value>elementos no aplican</value></data>
+  <data name="Priv.ItensParciais" xml:space="preserve"><value>elementos parciales</value></data>
+  <data name="Priv.ItensProtegidos" xml:space="preserve"><value>Elementos protegidos</value></data>
+  <data name="Priv.LeituraFalhouN" xml:space="preserve"><value>La lectura falló: {0}</value></data>
+  <data name="Priv.LendoEstadoWindows" xml:space="preserve"><value>Leyendo el estado de Windows…</value></data>
+  <data name="Priv.LigadoEntraAplicarMarcados" xml:space="preserve"><value>Activado: entra en "Aplicar marcados".</value></data>
+  <data name="Priv.LigarRecomendado" xml:space="preserve"><value>Activar recomendado</value></data>
+  <data name="Priv.LigarRigido" xml:space="preserve"><value>Activar estricto</value></data>
+  <data name="Priv.LigueQuerProtegerCada" xml:space="preserve"><value>Activa lo que quieres proteger. Cada elemento dice lo que pierdes.</value></data>
+  <data name="Priv.Marcados" xml:space="preserve"><value> marcados</value></data>
+  <data name="Priv.Mecanismo" xml:space="preserve"><value>Mecanismo</value></data>
+  <data name="Priv.MostraListaPedeConfirmacao" xml:space="preserve"><value>Muestra la lista y pide confirmación antes de tocar nada.</value></data>
+  <data name="Priv.MudouIdeiaValoresVoltam" xml:space="preserve"><value>¿Cambiaste de idea? Los valores vuelven a como estaban.</value></data>
+  <data name="Priv.NadaAplicarEssesItens" xml:space="preserve"><value>Nada que aplicar: esos elementos ya están protegidos.</value></data>
+  <data name="Priv.NadaAquiAumentaFps" xml:space="preserve"><value>Nada aquí aumenta los FPS. La ganancia es privacidad y menos publicidad y sugerencias. Cada elemento muestra lo que pierdes, y todo se puede deshacer aquí o en la página Aplicar.</value></data>
+  <data name="Priv.NaoAplicados" xml:space="preserve"><value>no aplicados</value></data>
+  <data name="Priv.NaoAplicaEstaVersao" xml:space="preserve"><value>No aplica a esta versión de Windows.</value></data>
+  <data name="Priv.NaoAplicaEsteWindows" xml:space="preserve"><value>no aplica a este Windows</value></data>
+  <data name="Priv.NaoFoiPossivelLer" xml:space="preserve"><value>No se pudo leer el estado.</value></data>
+  <data name="Priv.NaoLido" xml:space="preserve"><value>No leído</value></data>
+  <data name="Priv.NenhumItemAplicaEste" xml:space="preserve"><value>Ningún elemento aplica a este Windows.</value></data>
+  <data name="Priv.NenhumItemMarcado" xml:space="preserve"><value>Ningún elemento marcado</value></data>
+  <data name="Priv.NEstaVersao" xml:space="preserve"><value> · {0} a esta versión</value></data>
+  <data name="Priv.NexusNaoBloqueia" xml:space="preserve"><value>¿Por qué NEXUS no lo bloquea?</value></data>
+  <data name="Priv.NJaEstavamAssim" xml:space="preserve"><value>, {0} ya estaban así</value></data>
+  <data name="Priv.NNAplicamEste" xml:space="preserve"><value>{0} de {1} que aplican a este Windows</value></data>
+  <data name="Priv.NNProtegidos" xml:space="preserve"><value>{0} de {1} protegidos</value></data>
+  <data name="Priv.NValemEsteWindows" xml:space="preserve"><value>de {0} que valen para este Windows</value></data>
+  <data name="Priv.Observado" xml:space="preserve"><value>Observado</value></data>
+  <data name="Priv.OndeFica" xml:space="preserve"><value>Dónde está</value></data>
+  <data name="Priv.Opcional" xml:space="preserve"><value>Opcional</value></data>
+  <data name="Priv.Parcial" xml:space="preserve"><value>Parcial</value></data>
+  <data name="Priv.ParteFonteComunidade" xml:space="preserve"><value> · en parte con fuente de la comunidad</value></data>
+  <data name="Priv.ParteNCanceladaPartes" xml:space="preserve"><value>Parte {0} cancelada. Las partes anteriores quedaron aplicadas y se pueden deshacer.</value></data>
+  <data name="Priv.PerfilRecomendado" xml:space="preserve"><value>perfil Recomendado</value></data>
+  <data name="Priv.PerfilRigido" xml:space="preserve"><value>perfil Estricto</value></data>
+  <data name="Priv.PermissoesApps" xml:space="preserve"><value>Permisos de las apps</value></data>
+  <data name="Priv.PermitidoGeralCadaApp" xml:space="preserve"><value>Permitido en general (cada app puede tener su elección)</value></data>
+  <data name="Priv.Personalizado" xml:space="preserve"><value>Personalizado</value></data>
+  <data name="Priv.PrivacidadeN" xml:space="preserve"><value>Privacidad: {0}</value></data>
+  <data name="Priv.ProtecaoAtiva" xml:space="preserve"><value>protección activa</value></data>
+  <data name="Priv.ProtecoesAtivas" xml:space="preserve"><value>protecciones activas</value></data>
+  <data name="Priv.Protegido" xml:space="preserve"><value>protegido</value></data>
+  <data name="Priv.Protegido2" xml:space="preserve"><value>Protegido</value></data>
+  <data name="Priv.Recomendado" xml:space="preserve"><value>Recomendado</value></data>
+  <data name="Priv.RecomendadoCopilotWidgetsSincronizac" xml:space="preserve"><value>Recomendado + Copilot, Widgets, sincronización. Pierdes funciones.</value></data>
+  <data name="Priv.RecomendadoItensPerdasReais" xml:space="preserve"><value>Recomendado + elementos con pérdidas reales (informes de error, Copilot, Widgets, sincronización...). Cada pérdida aparece en la confirmación.</value></data>
+  <data name="Priv.RecomendadoN" xml:space="preserve"><value>Recomendado: {0}</value></data>
+  <data name="Priv.RecomendadoTudoAplicado" xml:space="preserve"><value>Recomendado: todo aplicado</value></data>
+  <data name="Priv.Rigido" xml:space="preserve"><value>Estricto</value></data>
+  <data name="Priv.RigidoN" xml:space="preserve"><value>Estricto: {0}</value></data>
+  <data name="Priv.RigidoTudoAplicado" xml:space="preserve"><value>Estricto: todo aplicado</value></data>
+  <data name="Priv.SelecaoPersonalizada" xml:space="preserve"><value>selección personalizada</value></data>
+  <data name="Priv.SemPerdasRelevantes" xml:space="preserve"><value>sin pérdidas relevantes</value></data>
+  <data name="Priv.SoInterruptoresVoceLigou" xml:space="preserve"><value>Solo los interruptores que activaste en la lista de abajo.</value></data>
+  <data name="Priv.SoLeitura" xml:space="preserve"><value>solo lectura</value></data>
+  <data name="Priv.SoSuaContaSem" xml:space="preserve"><value>Solo tu cuenta (sin administrador)</value></data>
+  <data name="Priv.Tema" xml:space="preserve"><value>Por tema</value></data>
+  <data name="Priv.TemPerdas" xml:space="preserve"><value>tiene pérdidas</value></data>
+  <data name="Priv.TiraPropagandaColetaSem" xml:space="preserve"><value>Quita publicidad y recolección sin quitar nada que uses.</value></data>
+  <data name="Priv.ValePcPedeAdministrador" xml:space="preserve"><value>Vale para el PC (pide administrador)</value></data>
+  <data name="Priv.VejaPaginaServicos" xml:space="preserve"><value>Mira la página Servicios</value></data>
+  <data name="Priv.VocePerde" xml:space="preserve"><value>Pierdes:</value></data>
+  <data name="Priv.VocePerde2" xml:space="preserve"><value>Lo que pierdes:</value></data>
+  <data name="Priv.VoltarDesfazerOuConfiguracoes" xml:space="preserve"><value> · para volver: Deshacer o Configuración de Windows</value></data>
+  <data name="Priv.WindowsBuildN" xml:space="preserve"><value>Windows compilación {0}</value></data>
+  <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>Windows no abrió la Configuración.</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Se abre minimizado en la bandeja. Es una entrada en Run de tu cuenta (sin administrador), con diario y deshacer; también aparece en el Administrador de tareas y en la página Inicio.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Se abre con Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>¿Abrir NEXUS minimizado en la bandeja cada vez que inicies sesión en Windows?
