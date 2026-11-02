@@ -52,7 +52,8 @@ public partial class App : Application
             return;
         }
 
-        var window = new MainWindow { StartInTray = StartupArguments.Minimized(e.Args) };
+        MainWindow window;
+        using (UiWatchdog.Phase("criando a janela (XAML + páginas)")) window = new MainWindow { StartInTray = StartupArguments.Minimized(e.Args) };
         _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, ShowEventName);
         _showWait = ThreadPool.RegisterWaitForSingleObject(_showSignal,
             (_, _) => Dispatcher.BeginInvoke(new Action(window.RestoreFromTray)), null, Timeout.Infinite, executeOnlyOnce: false);
@@ -62,9 +63,9 @@ public partial class App : Application
             window.WindowState = WindowState.Minimized;
             window.ShowActivated = false;
         }
-        window.Show();
+        using (UiWatchdog.Phase("mostrando a janela (estilos, layout)")) window.Show();
         // Atualização do programa: procura 30 s depois de abrir e a cada 6 h (se ligada em Ajustes); docs/11-atualizacao.md.
-        ViewModels.AppUpdates.Instance.Start(e.Args, selfTest: false);
+        using (UiWatchdog.Phase("atualização: agendar procura", logAboveMs: 30)) ViewModels.AppUpdates.Instance.Start(e.Args, selfTest: false);
     }
 
     protected override void OnExit(ExitEventArgs e)

@@ -23,8 +23,8 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent();
-        _vm = new MainViewModel();
+        using (UiWatchdog.Phase("janela: InitializeComponent", logAboveMs: 30)) InitializeComponent();
+        using (UiWatchdog.Phase("janela: MainViewModel (27 páginas)")) _vm = new MainViewModel();
 
         // Navegação agrupada por PageViewModel.Group. A lista vai antes do DataContext para o SelectedItem já achar a página.
         var ordered = _vm.Pages
@@ -38,9 +38,11 @@ public partial class MainWindow : Window
         DataContext = _vm;
         _vm.PropertyChanged += OnViewModelChanged;
         SourceInitialized += (_, _) => DarkTitleBar.Apply(this);
+        ContentRendered += (_, _) => UiWatchdog.Step("janela desenhada pela primeira vez");
         Loaded += async (_, _) =>
         {
-            ApplyTray();
+            UiWatchdog.Step("janela carregada");
+            using (UiWatchdog.Phase("ícone da bandeja", logAboveMs: 30)) ApplyTray();
             if (StartInTray && _tray?.Visible == true) Hide();
             ShellMotion.SweepOnce(SweepBeam, SweepLayer.ActualWidth);
             await _vm.LoadAsync();

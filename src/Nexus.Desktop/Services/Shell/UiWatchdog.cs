@@ -28,6 +28,9 @@ public static class UiWatchdog
         Write($"etapa: {step} (+{SinceStart.ElapsedMilliseconds} ms desde o início)");
     }
 
+    /// <summary>Anota uma observação (ex.: módulo que prendeu a interface) sem mudar a etapa atual.</summary>
+    public static void Note(string text) => Write($"nota: {text}");
+
     /// <summary>
     /// Cronometra uma fase da abertura (na thread da interface): anota "fase: X levou N ms" quando passa de
     /// <paramref name="logAboveMs"/> (0 = sempre). Use com <c>using</c>.
