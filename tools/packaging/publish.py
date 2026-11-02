@@ -41,7 +41,8 @@ import sys
 import zipfile
 from pathlib import Path
 
-import legal_docs  # mesma pasta (tools/packaging)
+sys.dont_write_bytecode = True  # não deixa __pycache__ no repositório ao importar o módulo vizinho
+import legal_docs  # noqa: E402  (mesma pasta: tools/packaging)
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECTS = [  # ordem de publicação; a junção exige arquivos comuns idênticos, então a ordem não muda o resultado
