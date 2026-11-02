@@ -33,9 +33,9 @@ public interface IModuleHost
         ApplyAsync(title, confirmation, requests, level);
 
     /// <summary>
-    /// Aplica pelo aplicador SEM outra caixa de confirmação. Só para o modo automático do Assistente ("Otimizar meu PC com
-    /// segurança"), que já mostrou ao usuário, numa confirmação única no começo, tudo o que vai fazer (e só leva mudanças de risco
-    /// baixo que podem ser desfeitas). Mesmo caminho de <see cref="ApplyAsync(string, string, IReadOnlyList{ActionRequest}, BrokerLevel)"/>:
+    /// Aplica pelo aplicador SEM outra caixa de confirmação: quem chama já confirmou com o usuário em palavras simples. Usado pelo
+    /// modo automático do Assistente ("Otimizar meu PC com segurança", uma confirmação no começo, só risco baixo desfazível) e pelo
+    /// "um clique" da interface simples (QuickApplier: uma frase de confirmação antes). Mesmo caminho de <see cref="ApplyAsync(string, string, IReadOnlyList{ActionRequest}, BrokerLevel)"/>:
     /// diário, releitura, aviso do Windows e ponto de restauração para mudanças de sistema.
     /// </summary>
     Task<BrokerCallResult?> ApplyConfirmedAsync(string title, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages);

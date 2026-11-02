@@ -276,6 +276,7 @@ public sealed class QuickTweaksPanel : ObservableObject
             row.Busy = false;
             row.Refresh();
             _notes[row.Data.Key] = row.Note;
+            Rebuild(); // a releitura depois de aplicar já remontou as linhas: o resultado aparece nas novas
         }
     }
 }
