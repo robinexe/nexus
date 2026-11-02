@@ -2084,8 +2084,150 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>O Windows não abriu as Configurações.</value></data>
   <data name="Prog.NavSubtitle" xml:space="preserve"><value>Desinstale o que não usa, limpe o que sobrou e mantenha o resto atualizado.</value></data>
   <data name="Prog.NavTitle" xml:space="preserve"><value>Programas e atualizações</value></data>
+  <data name="Scan.AbreCadaArquivoSo" xml:space="preserve"><value>Abre cada arquivo só para ler. Nada é alterado.</value></data>
+  <data name="Scan.AchadosRevisar" xml:space="preserve"><value>Achados para revisar</value></data>
+  <data name="Scan.AmostrasTesteComoEicar" xml:space="preserve"><value>Amostras de teste (como o EICAR). Não são ameaça; servem para conferir que a verificação funciona.</value></data>
+  <data name="Scan.Apareceu" xml:space="preserve"><value>Por que apareceu?</value></data>
+  <data name="Scan.ArquivoGrandeDemais" xml:space="preserve"><value>Arquivo grande demais.</value></data>
+  <data name="Scan.ArquivoNaoEstaMais" xml:space="preserve"><value>O arquivo não está mais nesse lugar.</value></data>
+  <data name="Scan.ArquivoNovoDownloadsSinais" xml:space="preserve"><value>Arquivo novo em Downloads com sinais para revisar: {0}</value></data>
+  <data name="Scan.Arquivos" xml:space="preserve"><value>Arquivos…</value></data>
+  <data name="Scan.ArquivoSaiLugarAtalhos" xml:space="preserve"><value>
+
+O arquivo sai do lugar (atalhos e inicialização param de achá-lo), mas NÃO é apagado: fica guardado com manifesto e SHA-256 e volta com Desfazer.</value></data>
+  <data name="Scan.ArquivosIsoladosQuarentenaNexus" xml:space="preserve"><value>Arquivos isolados na quarentena do NEXUS. Nada foi apagado: dá para devolver ao lugar.</value></data>
+  <data name="Scan.ArquivosS" xml:space="preserve"><value> arquivos/s</value></data>
+  <data name="Scan.ArquivosTeste" xml:space="preserve"><value>Arquivos de teste</value></data>
+  <data name="Scan.ArquivosVerificados" xml:space="preserve"><value>Arquivos verificados</value></data>
+  <data name="Scan.ArquivosVoceMandouIgnorar" xml:space="preserve"><value>Arquivos que você mandou ignorar (por conteúdo exato).</value></data>
+  <data name="Scan.AssinaturaDigitalValida" xml:space="preserve"><value>assinatura digital válida</value></data>
+  <data name="Scan.AssinaturaNaoConferida" xml:space="preserve"><value>assinatura não conferida</value></data>
+  <data name="Scan.BaixouAlgoFicouDuvida" xml:space="preserve"><value>Baixou algo e ficou na dúvida? Verifique só ele.</value></data>
+  <data name="Scan.CarregandoRegras" xml:space="preserve"><value>Carregando regras…</value></data>
+  <data name="Scan.ComecePelaRapidaOlha" xml:space="preserve"><value>Comece pela rápida: olha onde arquivos baixados e programas de inicialização costumam ficar.</value></data>
+  <data name="Scan.Completa" xml:space="preserve"><value>Completa</value></data>
+  <data name="Scan.Defender" xml:space="preserve"><value>Defender: </value></data>
+  <data name="Scan.DefenderNaoFoiPossivel" xml:space="preserve"><value>Defender: não foi possível verificar ({0}).</value></data>
+  <data name="Scan.DefenderVerificando" xml:space="preserve"><value>Defender verificando…</value></data>
+  <data name="Scan.DetalhesMotor" xml:space="preserve"><value>Detalhes do motor</value></data>
+  <data name="Scan.DevolvidoLugar" xml:space="preserve"><value>Devolvido ao lugar.</value></data>
+  <data name="Scan.EscolhaArquivoVerificar" xml:space="preserve"><value>Escolha o arquivo para verificar</value></data>
+  <data name="Scan.EscolhaPastaVerificar" xml:space="preserve"><value>Escolha a pasta para verificar</value></data>
+  <data name="Scan.Excecoes" xml:space="preserve"><value>Exceções</value></data>
+  <data name="Scan.Hash" xml:space="preserve"><value>hash</value></data>
+  <data name="Scan.HashesImportados" xml:space="preserve"><value>Hashes importados</value></data>
+  <data name="Scan.Heuristica" xml:space="preserve"><value>Heurística</value></data>
+  <data name="Scan.Ignorar" xml:space="preserve"><value>Ignorar</value></data>
+  <data name="Scan.IgnorarEsteAchado" xml:space="preserve"><value>Ignorar este achado</value></data>
+  <data name="Scan.ImportadoN" xml:space="preserve"><value>Importado: {0}.</value></data>
+  <data name="Scan.Importar" xml:space="preserve"><value>Importar</value></data>
+  <data name="Scan.ImportarListaHashes" xml:space="preserve"><value>Importar lista de hashes…</value></data>
+  <data name="Scan.ImportarListaHashesSha" xml:space="preserve"><value>Importar lista de hashes SHA-256</value></data>
+  <data name="Scan.ImportarNNCopia" xml:space="preserve"><value>Importar {0} de "{1}"?
+
+Uma cópia vai para {2}. Confira a origem da lista: um hash na lista faz o arquivo aparecer como "na sua lista". Nada é baixado da internet.</value></data>
+  <data name="Scan.ImportarRegras" xml:space="preserve"><value>Importar regras…</value></data>
+  <data name="Scan.ImportarRegrasPadraoNexus" xml:space="preserve"><value>Importar regras de padrão (nexus.scanrules/1)</value></data>
+  <data name="Scan.Isola" xml:space="preserve"><value>Isola</value></data>
+  <data name="Scan.IsoladoQuarentenaNexusDesfazivel" xml:space="preserve"><value>Isolado na quarentena do NEXUS (desfazível).</value></data>
+  <data name="Scan.Isolar" xml:space="preserve"><value>Isolar</value></data>
+  <data name="Scan.IsolarGuardarNaoApagar" xml:space="preserve"><value>Isolar é guardar, não apagar. Volta com Desfazer.</value></data>
+  <data name="Scan.IsolarNArquivoS" xml:space="preserve"><value>Isolar {0} arquivo(s) na quarentena do NEXUS?
+
+</value></data>
+  <data name="Scan.IsolarQuarentenaNexus" xml:space="preserve"><value>Isolar na quarentena do NEXUS</value></data>
+  <data name="Scan.IsolarSelecionados" xml:space="preserve"><value>Isolar selecionados</value></data>
+  <data name="Scan.LimiteNVezDemais" xml:space="preserve"><value>
+
+Limite de {0} por vez: os demais ficam para a próxima.</value></data>
+  <data name="Scan.LimparLista" xml:space="preserve"><value>Limpar lista</value></data>
+  <data name="Scan.ListaHashes" xml:space="preserve"><value>Lista de hashes</value></data>
+  <data name="Scan.ListaHashesNIlegivel" xml:space="preserve"><value>Lista de hashes "{0}" ilegível: {1}</value></data>
+  <data name="Scan.ListaHashesTxtCsv" xml:space="preserve"><value>Lista de hashes (*.txt;*.csv)|*.txt;*.csv</value></data>
+  <data name="Scan.ListasVoceTrouxeNada" xml:space="preserve"><value>Listas que você trouxe. Nada é baixado da internet.</value></data>
+  <data name="Scan.MarcarIsolarN" xml:space="preserve"><value>Marcar para isolar: {0}</value></data>
+  <data name="Scan.MarcarIsolarQuarentenaNexus" xml:space="preserve"><value>Marcar para isolar na quarentena do NEXUS</value></data>
+  <data name="Scan.MicrosoftDefenderSuaProtecao" xml:space="preserve"><value>O Microsoft Defender é sua proteção principal. Esta verificação procura sinais suspeitos (técnicas comuns de malware, disfarces no nome, executáveis empacotados) e pede a opinião dele. Suspeito não quer dizer malware: confira antes de isolar. Nada é apagado; isolar é desfazível.</value></data>
+  <data name="Scan.MuitoSuspeitos" xml:space="preserve"><value>Muito suspeitos</value></data>
+  <data name="Scan.N0Arquivos" xml:space="preserve"><value>0 arquivos</value></data>
+  <data name="Scan.NAndamentoSoLeitura" xml:space="preserve"><value>{0} em andamento… Só leitura: nada é alterado.</value></data>
+  <data name="Scan.NaoFoiPossivelAbrir" xml:space="preserve"><value>Não foi possível abrir as propriedades.</value></data>
+  <data name="Scan.NaoFoiPossivelSalvar" xml:space="preserve"><value>Não foi possível salvar a exceção: {0}</value></data>
+  <data name="Scan.NaoFoiPossivelVigiar" xml:space="preserve"><value>Não foi possível vigiar Downloads: {0}</value></data>
+  <data name="Scan.NaoImportadoN" xml:space="preserve"><value>Não importado: {0}</value></data>
+  <data name="Scan.NaoIsolado" xml:space="preserve"><value>Não isolado.</value></data>
+  <data name="Scan.NaoIsoladoN" xml:space="preserve"><value>Não isolado: {0}</value></data>
+  <data name="Scan.NaoIsolarPeloNexus" xml:space="preserve"><value>Não dá para isolar pelo NEXUS (caminho fora do formato aceito: muito longo ou fundo demais). Use o Defender.</value></data>
+  <data name="Scan.NaoMostrarMaisN" xml:space="preserve"><value>Não mostrar mais "{0}" nas verificações?
+
+Vale só para este arquivo com este conteúdo exato (SHA-256): se ele mudar, volta a ser verificado. A lista fica em {1}.</value></data>
+  <data name="Scan.NArquivosNLidos" xml:space="preserve"><value>{0:N0} arquivos · {1} lidos</value></data>
+  <data name="Scan.NArquivosNS" xml:space="preserve"><value>{0:N0} arquivos em {1:N0} s; </value></data>
+  <data name="Scan.NArquivoSSinais" xml:space="preserve"><value>{0} arquivo(s) com sinais para revisar.</value></data>
   <data name="Scan.NavSubtitle" xml:space="preserve"><value>Procure sinais suspeitos em arquivos e peça a opinião do Microsoft Defender.</value></data>
   <data name="Scan.NavTitle" xml:space="preserve"><value>Verificar arquivos</value></data>
+  <data name="Scan.NCancelada" xml:space="preserve"><value>{0} cancelada. </value></data>
+  <data name="Scan.NConcluida" xml:space="preserve"><value>{0} concluída. </value></data>
+  <data name="Scan.NenhumAchadoAindaAchados" xml:space="preserve"><value>Nenhum achado ainda. Achados aparecem aqui agrupados por gravidade, com o porquê de cada um.</value></data>
+  <data name="Scan.NenhumaListaImportadaSo" xml:space="preserve"><value> (nenhuma lista importada; só o conjunto de teste)</value></data>
+  <data name="Scan.NenhumaVerificacaoAinda" xml:space="preserve"><value>Nenhuma verificação ainda.</value></data>
+  <data name="Scan.NenhumSinalSuspeito" xml:space="preserve"><value>Nenhum sinal suspeito.</value></data>
+  <data name="Scan.NenhumSinalSuspeito2" xml:space="preserve"><value>nenhum sinal suspeito.</value></data>
+  <data name="Scan.NExcecoes" xml:space="preserve"><value> · {0} exceções</value></data>
+  <data name="Scan.NHashEs" xml:space="preserve"><value>{0:N0} hash(es)</value></data>
+  <data name="Scan.NLinhasIgnoradas" xml:space="preserve"><value> ({0:N0} linhas ignoradas)</value></data>
+  <data name="Scan.NPulados" xml:space="preserve"><value> · {0:N0} pulados</value></data>
+  <data name="Scan.NPuladosLinksArquivos" xml:space="preserve"><value> {0:N0} pulados (links, arquivos só na nuvem, em uso ou sem permissão).</value></data>
+  <data name="Scan.NRegraS" xml:space="preserve"><value>{0} regra(s)</value></data>
+  <data name="Scan.NRegrasPadraoN" xml:space="preserve"><value>{0} regras de padrão · {1:N0} hashes importados</value></data>
+  <data name="Scan.NSeraIgnoradoNas" xml:space="preserve"><value>"{0}" será ignorado nas próximas verificações.</value></data>
+  <data name="Scan.OutrasFormasVerificar" xml:space="preserve"><value>Outras formas de verificar</value></data>
+  <data name="Scan.PararVerificacao" xml:space="preserve"><value>Parar verificação</value></data>
+  <data name="Scan.Pasta" xml:space="preserve"><value>Uma pasta…</value></data>
+  <data name="Scan.PastaDownloadsNaoEncontrada" xml:space="preserve"><value>Pasta Downloads não encontrada.</value></data>
+  <data name="Scan.PastaOuArquivos" xml:space="preserve"><value>Pasta ou arquivos</value></data>
+  <data name="Scan.PecaOpiniaoMicrosoftDefender" xml:space="preserve"><value>Peça a opinião do Microsoft Defender antes de agir.</value></data>
+  <data name="Scan.PedidoEnviado" xml:space="preserve"><value>Pedido enviado.</value></data>
+  <data name="Scan.PedirMicrosoftDefenderVerificar" xml:space="preserve"><value>Pedir ao Microsoft Defender para verificar "{0}"?
+
+Usa a ferramenta oficial MpCmdRun (-Scan -ScanType 3 -File). Se ele encontrar ameaça, a remoção ou quarentena é feita pelo próprio Defender (Segurança do Windows).</value></data>
+  <data name="Scan.PontosSuspeitaN" xml:space="preserve"><value>Pontos de suspeita: {0}</value></data>
+  <data name="Scan.Pontua" xml:space="preserve"><value>Pontua</value></data>
+  <data name="Scan.PropriedadesAssinatura" xml:space="preserve"><value>Propriedades e assinatura</value></data>
+  <data name="Scan.RapidaDownloadsAreaTrabalho" xml:space="preserve"><value>Rápida: Downloads, Área de Trabalho, Temp, AppData, pastas Inicializar e programas que iniciam com o Windows. Completa: as unidades marcadas. Arquivos só na nuvem (OneDrive) e links não são lidos.</value></data>
+  <data name="Scan.RegraPadrao" xml:space="preserve"><value>Regra de padrão</value></data>
+  <data name="Scan.RegrasJsonJson" xml:space="preserve"><value>Regras (*.json)|*.json</value></data>
+  <data name="Scan.RegrasNNaoCarregadas" xml:space="preserve"><value>Regras "{0}" não carregadas: {1}</value></data>
+  <data name="Scan.RegrasPadrao" xml:space="preserve"><value>Regras de padrão</value></data>
+  <data name="Scan.Resultados" xml:space="preserve"><value>Resultados</value></data>
+  <data name="Scan.Revisar" xml:space="preserve"><value>Para revisar</value></data>
+  <data name="Scan.SemAssinaturaValida" xml:space="preserve"><value>sem assinatura válida</value></data>
+  <data name="Scan.Sha256BateLista" xml:space="preserve"><value>O SHA-256 bate com uma lista que você importou. Peça a opinião do Defender e, se ele confirmar, trate pela Segurança do Windows.</value></data>
+  <data name="Scan.Sha256N" xml:space="preserve"><value> · SHA-256 {0}…</value></data>
+  <data name="Scan.SinaisFracosMaioriaVezes" xml:space="preserve"><value>Sinais fracos. Na maioria das vezes é um programa comum; confira se você reconhece o arquivo.</value></data>
+  <data name="Scan.SinaisMerecemAtencaoProgramas" xml:space="preserve"><value>Sinais que merecem atenção. Programas legítimos às vezes têm alguns deles.</value></data>
+  <data name="Scan.SinaisSuspeitosSomamPontos" xml:space="preserve"><value>Sinais suspeitos somam pontos. Você vê o porquê.</value></data>
+  <data name="Scan.SoLeSuspeitoNao" xml:space="preserve"><value>Só lê. Suspeito não é vírus: o Defender dá a palavra final.</value></data>
+  <data name="Scan.SuaListaHashes" xml:space="preserve"><value>Na sua lista de hashes</value></data>
+  <data name="Scan.SuspeitoNaoMesmoMalware" xml:space="preserve"><value>
+
+Suspeito não é o mesmo que malware. Se ainda não pediu, considere verificar com o Microsoft Defender antes.</value></data>
+  <data name="Scan.Suspeitos" xml:space="preserve"><value>Suspeitos</value></data>
+  <data name="Scan.TecnicasComunsMalwareConferidas" xml:space="preserve"><value>Técnicas comuns de malware, conferidas em cada arquivo.</value></data>
+  <data name="Scan.UltimaVerificacaoNaoAchou" xml:space="preserve"><value>A última verificação não achou nada para revisar. O Defender continua protegendo o PC.</value></data>
+  <data name="Scan.UnidadesMarcadasPodeLevar" xml:space="preserve"><value>As unidades marcadas. Pode levar mais de uma hora.</value></data>
+  <data name="Scan.VariosSinaisFortesJuntos" xml:space="preserve"><value>Vários sinais fortes juntos. Suspeito não é o mesmo que malware: verifique com o Defender antes de isolar.</value></data>
+  <data name="Scan.Velocidade" xml:space="preserve"><value>Velocidade</value></data>
+  <data name="Scan.VerificaCadaArquivoNovo" xml:space="preserve"><value>Verifica cada arquivo novo enquanto esta página estiver aberta.</value></data>
+  <data name="Scan.VerificacaoN" xml:space="preserve"><value>Verificação de "{0}"</value></data>
+  <data name="Scan.VerificacaoNArquivos" xml:space="preserve"><value>Verificação de {0} arquivos</value></data>
+  <data name="Scan.VerificacaoRapidaOlha" xml:space="preserve"><value>O que a verificação rápida olha?</value></data>
+  <data name="Scan.VerificarDefender" xml:space="preserve"><value>Verificar com o Defender</value></data>
+  <data name="Scan.VerificarNPodeLevar" xml:space="preserve"><value>Verificar {0}? Pode levar de minutos a mais de uma hora e usa o disco enquanto roda. Só lê: nada é alterado. Você pode cancelar a qualquer momento.</value></data>
+  <data name="Scan.VigiandoNEnquantoEsta" xml:space="preserve"><value>Vigiando {0} enquanto esta página estiver aberta. Arquivos novos são verificados alguns segundos depois de terminarem de baixar.</value></data>
+  <data name="Scan.VigiarDownloads" xml:space="preserve"><value>Vigiar Downloads</value></data>
+  <data name="Scan.VivoDownloads" xml:space="preserve"><value>Ao vivo em Downloads</value></data>
+  <data name="Scan.VivoNVerificouN" xml:space="preserve"><value>Ao vivo: {0:HH:mm:ss} verificou "{1}" — {2}.</value></data>
   <data name="Sec.AbrirSegurancaWindows" xml:space="preserve"><value>Abrir Segurança do Windows</value></data>
   <data name="Sec.AbrirWindowsN" xml:space="preserve"><value>Abrir no Windows: {0}</value></data>
   <data name="Sec.Alta" xml:space="preserve"><value>Alta</value></data>

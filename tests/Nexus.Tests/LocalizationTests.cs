@@ -18,7 +18,7 @@ public sealed partial class LocalizationTests
     /// </summary>
     private static readonly HashSet<string> XamlNotYetTranslated = new(StringComparer.Ordinal)
     { "Views/Pages/CpuLab.xaml", "Views/Pages/MemoryDoctor.xaml", "Views/Pages/MemoryLab.xaml",
-        "Views/Pages/Programs.xaml", "Views/Pages/Scanner.xaml", "Views/Pages/SystemTools.xaml",
+        "Views/Pages/Programs.xaml", "Views/Pages/SystemTools.xaml",
     };
 
     /// <summary>Textos fixos permitidos em XAML traduzido: marcas e nomes próprios iguais em todo idioma.</summary>

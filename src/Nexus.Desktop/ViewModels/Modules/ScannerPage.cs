@@ -15,7 +15,7 @@ namespace Nexus.Desktop.ViewModels;
 /// <summary>Um sinal de um arquivo (camada, título, por que é suspeito, pontos).</summary>
 public sealed class ScanHitRow(ScanHit h)
 {
-    public string Layer => h.Layer switch { ScanLayer.Hash => "Lista de hashes", ScanLayer.Pattern => "Regra de padrão", _ => "Heurística" };
+    public string Layer => h.Layer switch { ScanLayer.Hash => Loc.T("Scan.ListaHashes"), ScanLayer.Pattern => Loc.T("Scan.RegraPadrao"), _ => Loc.T("Scan.Heuristica") };
     public string Title => h.Title;
     public string Why => h.Why;
     public string PointsText => h.Points > 0 ? $"+{h.Points}" : h.Points == 0 ? "0" : h.Points.ToString(CultureInfo.InvariantCulture);
@@ -34,7 +34,7 @@ public sealed class ScanFindingRow : ObservableObject
     public string FileName => System.IO.Path.GetFileName(Verdict.Path);
     public string Folder => System.IO.Path.GetDirectoryName(Verdict.Path) ?? "";
     public string VerdictText => Verdict.VerdictText;
-    public string ScoreText => Verdict.Verdict == Nexus.Security.Scanner.Verdict.KnownBad ? "hash" : $"{Math.Min(Verdict.Score, 100)} pts";
+    public string ScoreText => Verdict.Verdict == Nexus.Security.Scanner.Verdict.KnownBad ? Loc.T("Scan.Hash") : $"{Math.Min(Verdict.Score, 100)} pts";
     public string ToneKey => Verdict.IsTestSample ? "Info" : Verdict.Verdict switch
     {
         Nexus.Security.Scanner.Verdict.KnownBad or Nexus.Security.Scanner.Verdict.HighlySuspicious => "Bad",
@@ -49,10 +49,10 @@ public sealed class ScanFindingRow : ObservableObject
     public bool HasStatus => Status.Length > 0;
     public string Meta => $"{SizeText(Verdict.Size)} · " + (Verdict.ValidSignature switch
     {
-        true => "assinatura digital válida",
-        false => "sem assinatura válida",
-        _ => "assinatura não conferida",
-    }) + (Verdict.Sha256 is { } s ? $" · SHA-256 {s[..16]}…" : "");
+        true => Loc.T("Scan.AssinaturaDigitalValida"),
+        false => Loc.T("Scan.SemAssinaturaValida"),
+        _ => Loc.T("Scan.AssinaturaNaoConferida"),
+    }) + (Verdict.Sha256 is { } s ? Loc.F("Scan.Sha256N", s[..16]) : "");
     public IReadOnlyList<ScanHitRow> Hits { get; init; } = [];
     public bool CanQuarantine => Verdict.Sha256 is not null;
     public bool IsSelected { get => _selected; set => Set(ref _selected, value && CanQuarantine); }
@@ -122,7 +122,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
     private string _filesText = "";
     private string _rateText = "";
     private string _elapsedText = "";
-    private string _databaseText = "Carregando regras…";
+    private string _databaseText = Loc.T("Scan.CarregandoRegras");
     private string _liveText = "";
     private double _scannedFiles, _filesPerSecond = double.NaN;
     private double _ruleCount = double.NaN, _hashCount = double.NaN, _ignoreCount = double.NaN;
@@ -132,7 +132,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
 
     public ScannerPage()
     {
-        QuickScanCommand = new RelayCommand(() => _ = ScanAsync("Verificação rápida", () => ScanTargets.Quick(), quick: true), CanStart);
+        QuickScanCommand = new RelayCommand(() => _ = ScanAsync(Loc.T("Sec.VerificacaoRapida"), () => ScanTargets.Quick(), quick: true), CanStart);
         FullScanCommand = new RelayCommand(() => _ = FullScanAsync(), () => CanStart() && Drives.Any(d => d.IsSelected));
         FolderScanCommand = new RelayCommand(() => _ = FolderScanAsync(), CanStart);
         FileScanCommand = new RelayCommand(() => _ = FileScanAsync(), CanStart);
@@ -203,7 +203,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
 
     public int FindingCount => Groups.Sum(g => g.Count);
     public string ResultSummary => FindingCount == 0
-        ? "Nenhum achado ainda. Achados aparecem aqui agrupados por gravidade, com o porquê de cada um."
+        ? Loc.T("Scan.NenhumAchadoAindaAchados")
         : string.Join(" · ", Groups.Where(g => g.Count > 0).Select(g => $"{g.Count} {g.Title.ToLower(CultureInfo.CurrentCulture)}"));
 
     /// <summary>Vigiar a pasta Downloads enquanto esta página estiver aberta (desliga ao sair da página).</summary>
@@ -252,18 +252,18 @@ public sealed class ScannerPage : ModulePage, IDisposable
             foreach (var file in SafeFiles(HashesFolder, "*.txt").Concat(SafeFiles(HashesFolder, "*.csv")))
             {
                 try { hashes.AddFile(file, out _, out _); }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { notes.Add($"Lista de hashes \"{Path.GetFileName(file)}\" ilegível: {ex.Message}"); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { notes.Add(Loc.F("Scan.ListaHashesNIlegivel", Path.GetFileName(file), ex.Message)); }
             }
             foreach (var file in SafeFiles(RulesFolder, "*.json"))
             {
                 try { rules.AddFile(file); }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or FormatException) { notes.Add($"Regras \"{Path.GetFileName(file)}\" não carregadas: {ex.Message}"); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or FormatException) { notes.Add(Loc.F("Scan.RegrasNNaoCarregadas", Path.GetFileName(file), ex.Message)); }
             }
             var ign = IgnoreList.Load(IgnoreList.DefaultPath);
             var opts = new ScanOptions { ExcludedDirectories = ScanTargets.DefaultExclusions() };
-            var desc = $"{rules.Rules.Count} regras de padrão · {hashes.RealCount:N0} hashes importados" +
-                       (hashes.RealCount == 0 ? " (nenhuma lista importada; só o conjunto de teste)" : $" ({string.Join(", ", hashes.Sources.Where(s => s != "teste embutido"))})") +
-                       $" · {ign.Count} exceções";
+            var desc = Loc.F("Scan.NRegrasPadraoN", rules.Rules.Count, hashes.RealCount) +
+                       (hashes.RealCount == 0 ? Loc.T("Scan.NenhumaListaImportadaSo") : $" ({string.Join(", ", hashes.Sources.Where(s => s != "teste embutido"))})") +
+                       Loc.F("Scan.NExcecoes", ign.Count);
             return (new ScanEngine(hashes, rules, new AuthenticodeSignatureChecker(), opts, ign), ign, desc);
         });
         _engine = engine;
@@ -291,25 +291,25 @@ public sealed class ScannerPage : ModulePage, IDisposable
     {
         var roots = Drives.Where(d => d.IsSelected).Select(d => d.Root).ToList();
         if (Host is null || roots.Count == 0) return Task.CompletedTask;
-        if (!Host.Confirm("Verificação completa", $"Verificar {string.Join(", ", roots)}? Pode levar de minutos a mais de uma hora e usa o disco enquanto roda. Só lê: nada é alterado. Você pode cancelar a qualquer momento."))
+        if (!Host.Confirm(Loc.T("Sec.VerificacaoCompleta"), Loc.F("Scan.VerificarNPodeLevar", string.Join(", ", roots))))
             return Task.CompletedTask;
-        return ScanAsync("Verificação completa", () => roots, quick: false);
+        return ScanAsync(Loc.T("Sec.VerificacaoCompleta"), () => roots, quick: false);
     }
 
     private Task FolderScanAsync()
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Escolha a pasta para verificar" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.T("Scan.EscolhaPastaVerificar") };
         if (dlg.ShowDialog() != true) return Task.CompletedTask;
         var path = dlg.FolderName;
-        return ScanAsync($"Verificação de \"{path}\"", () => [path], quick: false, custom: true);
+        return ScanAsync(Loc.F("Scan.VerificacaoN", path), () => [path], quick: false, custom: true);
     }
 
     private Task FileScanAsync()
     {
-        var dlg = new Microsoft.Win32.OpenFileDialog { Title = "Escolha o arquivo para verificar", Multiselect = true };
+        var dlg = new Microsoft.Win32.OpenFileDialog { Title = Loc.T("Scan.EscolhaArquivoVerificar"), Multiselect = true };
         if (dlg.ShowDialog() != true) return Task.CompletedTask;
         var files = dlg.FileNames.ToList();
-        return ScanAsync(files.Count == 1 ? $"Verificação de \"{Path.GetFileName(files[0])}\"" : $"Verificação de {files.Count} arquivos", () => files, quick: false, custom: true);
+        return ScanAsync(files.Count == 1 ? Loc.F("Scan.VerificacaoN", Path.GetFileName(files[0])) : Loc.F("Scan.VerificacaoNArquivos", files.Count), () => files, quick: false, custom: true);
     }
 
     private async Task ScanAsync(string label, Func<IReadOnlyList<string>> roots, bool quick, bool custom = false)
@@ -328,9 +328,9 @@ public sealed class ScannerPage : ModulePage, IDisposable
         NotifyResults();
         ScannedFiles = 0;
         FilesPerSecond = double.NaN;
-        ScanStatus = $"{label} em andamento… Só leitura: nada é alterado.";
+        ScanStatus = Loc.F("Scan.NAndamentoSoLeitura", label);
         CurrentFile = "";
-        FilesText = "0 arquivos";
+        FilesText = Loc.T("Scan.N0Arquivos");
         RateText = "";
         ElapsedText = "00:00";
         var cts = new CancellationTokenSource();
@@ -339,7 +339,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
         var dispatcher = Application.Current?.Dispatcher;
         var progress = new Progress<ScanProgress>(p =>
         {
-            FilesText = $"{p.Files:N0} arquivos · {ScanFindingRow.SizeText(p.Bytes)} lidos" + (p.Skipped > 0 ? $" · {p.Skipped:N0} pulados" : "");
+            FilesText = Loc.F("Scan.NArquivosNLidos", p.Files, ScanFindingRow.SizeText(p.Bytes)) + (p.Skipped > 0 ? Loc.F("Scan.NPulados", p.Skipped) : "");
             RateText = p.FilesPerSecond > 0 ? $"{p.FilesPerSecond:N0} arquivos/s" : "";
             ElapsedText = p.Elapsed.ToString(p.Elapsed.TotalHours >= 1 ? @"h\:mm\:ss" : @"mm\:ss", CultureInfo.InvariantCulture);
             CurrentFile = p.Current ?? "";
@@ -352,15 +352,15 @@ public sealed class ScannerPage : ModulePage, IDisposable
             CurrentFile = "";
             ScannedFiles = summary.Files;
             var found = summary.Findings.Count;
-            ScanStatus = (summary.Cancelled ? $"{label} cancelada. " : $"{label} concluída. ") +
-                         $"{summary.Files:N0} arquivos em {summary.Elapsed.TotalSeconds:N0} s; " +
-                         (found == 0 ? "nenhum sinal suspeito." : $"{found} arquivo(s) com sinais para revisar.") +
-                         (summary.Skipped > 0 ? $" {summary.Skipped:N0} pulados (links, arquivos só na nuvem, em uso ou sem permissão)." : "");
+            ScanStatus = (summary.Cancelled ? Loc.F("Scan.NCancelada", label) : Loc.F("Scan.NConcluida", label)) +
+                         Loc.F("Scan.NArquivosNS", summary.Files, summary.Elapsed.TotalSeconds) +
+                         (found == 0 ? Loc.T("Scan.NenhumSinalSuspeito2") : Loc.F("Scan.NArquivoSSinais", found)) +
+                         (summary.Skipped > 0 ? Loc.F("Scan.NPuladosLinksArquivos", summary.Skipped) : "");
             Host?.Notify(ScanStatus);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            ScanStatus = $"{label}: não foi possível concluir ({ex.Message}).";
+            ScanStatus = Loc.F("Sec.NNaoFoiPossivel", label, ex.Message);
         }
         finally
         {
@@ -374,13 +374,13 @@ public sealed class ScannerPage : ModulePage, IDisposable
     // ------------------------------------------------------------------ resultados
 
     private static (string Key, string Title, string Tone, string Note) GroupOf(FileVerdict v) =>
-        v.IsTestSample ? ("test", "Arquivos de teste", "Info", "Amostras de teste (como o EICAR). Não são ameaça; servem para conferir que a verificação funciona.")
+        v.IsTestSample ? ("test", Loc.T("Scan.ArquivosTeste"), "Info", Loc.T("Scan.AmostrasTesteComoEicar"))
         : v.Verdict switch
         {
-            Nexus.Security.Scanner.Verdict.KnownBad => ("hash", "Na sua lista de hashes", "Bad", "O SHA-256 bate com uma lista que você importou. Peça a opinião do Defender e, se ele confirmar, trate pela Segurança do Windows."),
-            Nexus.Security.Scanner.Verdict.HighlySuspicious => ("high", "Muito suspeitos", "Bad", "Vários sinais fortes juntos. Suspeito não é o mesmo que malware: verifique com o Defender antes de isolar."),
-            Nexus.Security.Scanner.Verdict.Suspicious => ("mid", "Suspeitos", "Warn", "Sinais que merecem atenção. Programas legítimos às vezes têm alguns deles."),
-            _ => ("low", "Para revisar", "Unknown", "Sinais fracos. Na maioria das vezes é um programa comum; confira se você reconhece o arquivo."),
+            Nexus.Security.Scanner.Verdict.KnownBad => ("hash", Loc.T("Scan.SuaListaHashes"), "Bad", Loc.T("Scan.Sha256BateLista")),
+            Nexus.Security.Scanner.Verdict.HighlySuspicious => ("high", Loc.T("Scan.MuitoSuspeitos"), "Bad", Loc.T("Scan.VariosSinaisFortesJuntos")),
+            Nexus.Security.Scanner.Verdict.Suspicious => ("mid", Loc.T("Scan.Suspeitos"), "Warn", Loc.T("Scan.SinaisMerecemAtencaoProgramas")),
+            _ => ("low", Loc.T("Scan.Revisar"), "Unknown", Loc.T("Scan.SinaisFracosMaioriaVezes")),
         };
 
     private static readonly string[] GroupOrder = ["test", "hash", "high", "mid", "low"];
@@ -402,8 +402,8 @@ public sealed class ScannerPage : ModulePage, IDisposable
         {
             Hits = v.Hits.Where(h => h.Points > 0 || h.RuleId == "pe.signed").OrderByDescending(h => h.Points).Select(h => new ScanHitRow(h)).ToList(),
             DefenderCommand = new RelayCommand(() => _ = DefenderAsync(row!), () => !_scanning && !Busy),
-            ExplorerCommand = new RelayCommand(() => { if (!ShellViews.ShowInExplorer(v.Path)) row!.Status = "O arquivo não está mais nesse lugar."; }),
-            PropertiesCommand = new RelayCommand(() => { if (!ShellViews.ShowProperties(v.Path)) row!.Status = "Não foi possível abrir as propriedades."; }),
+            ExplorerCommand = new RelayCommand(() => { if (!ShellViews.ShowInExplorer(v.Path)) row!.Status = Loc.T("Scan.ArquivoNaoEstaMais"); }),
+            PropertiesCommand = new RelayCommand(() => { if (!ShellViews.ShowProperties(v.Path)) row!.Status = Loc.T("Scan.NaoFoiPossivelAbrir"); }),
             IgnoreCommand = new RelayCommand(() => Ignore(row!), () => v.Sha256 is not null),
             QuarantineCommand = new RelayCommand(() => _ = QuarantineAsync([row!]), () => !Busy && !_scanning && v.Sha256 is not null),
         };
@@ -431,16 +431,16 @@ public sealed class ScannerPage : ModulePage, IDisposable
     private void Ignore(ScanFindingRow row)
     {
         if (row.Verdict.Sha256 is not { } sha || Host is null) return;
-        if (!Host.Confirm("Ignorar este achado", $"Não mostrar mais \"{row.FileName}\" nas verificações?\n\nVale só para este arquivo com este conteúdo exato (SHA-256): se ele mudar, volta a ser verificado. A lista fica em {IgnoreList.DefaultPath}."))
+        if (!Host.Confirm(Loc.T("Scan.IgnorarEsteAchado"), Loc.F("Scan.NaoMostrarMaisN", row.FileName, IgnoreList.DefaultPath)))
             return;
         try
         {
             _ignore.Add(row.Path, sha, DateTimeOffset.UtcNow);
             _ignore.Save(IgnoreList.DefaultPath);
             RemoveRow(row);
-            Message = $"\"{row.FileName}\" será ignorado nas próximas verificações.";
+            Message = Loc.F("Scan.NSeraIgnoradoNas", row.FileName);
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Message = $"Não foi possível salvar a exceção: {ex.Message}"; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Message = Loc.F("Scan.NaoFoiPossivelSalvar", ex.Message); }
     }
 
     // ------------------------------------------------------------------ Defender (exceção controlada do brief)
@@ -448,19 +448,19 @@ public sealed class ScannerPage : ModulePage, IDisposable
     private async Task DefenderAsync(ScanFindingRow row)
     {
         if (Host is null) return;
-        if (!Host.Confirm("Verificar com o Microsoft Defender",
-                $"Pedir ao Microsoft Defender para verificar \"{row.Path}\"?\n\nUsa a ferramenta oficial MpCmdRun (-Scan -ScanType 3 -File). Se ele encontrar ameaça, a remoção ou quarentena é feita pelo próprio Defender (Segurança do Windows)."))
+        if (!Host.Confirm(Loc.T("Sec.VerificarMicrosoftDefender"),
+                Loc.F("Scan.PedirMicrosoftDefenderVerificar", row.Path)))
             return;
         Scanning = true;
-        row.Status = "Defender verificando…";
+        row.Status = Loc.T("Scan.DefenderVerificando");
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
             var result = await DefenderScanner.ScanAsync(ScanKind.Custom, row.Path, (_, _) => { }, cts.Token);
-            row.Status = "Defender: " + result.Summary;
+            row.Status = Loc.T("Scan.Defender") + result.Summary;
             Host.Notify(row.Status);
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { row.Status = $"Defender: não foi possível verificar ({ex.Message})."; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { row.Status = Loc.F("Scan.DefenderNaoFoiPossivel", ex.Message); }
         finally { Scanning = false; }
     }
 
@@ -502,7 +502,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
                     var entry = Catalog().Actions.FirstOrDefault(a => a.Definition.Id == id);
                     if (entry?.ValidateUserArguments(args, out var why) is null)
                     {
-                        row.Status = "Não dá para isolar pelo NEXUS (caminho fora do formato aceito: muito longo ou fundo demais). Use o Defender.";
+                        row.Status = Loc.T("Scan.NaoIsolarPeloNexus");
                         continue;
                     }
                     requests.Add(new ActionRequest(id + "@1", null, args));
@@ -510,13 +510,13 @@ public sealed class ScannerPage : ModulePage, IDisposable
                 }
                 if (requests.Count == 0) continue;
                 var level = machine ? BrokerLevel.Admin : BrokerLevel.User;
-                var text = $"Isolar {accepted.Count} arquivo(s) na quarentena do NEXUS?\n\n" +
-                           string.Join("\n", accepted.Take(8).Select(r => $"• {r.FileName} ({r.VerdictText})")) + (accepted.Count > 8 ? $"\n• … e mais {accepted.Count - 8}" : "") +
-                           "\n\nO arquivo sai do lugar (atalhos e inicialização param de achá-lo), mas NÃO é apagado: fica guardado com manifesto e SHA-256 e volta com Desfazer." +
-                           "\n\nSuspeito não é o mesmo que malware. Se ainda não pediu, considere verificar com o Microsoft Defender antes." +
-                           (group.Count() > slots ? $"\n\nLimite de {slots} por vez: os demais ficam para a próxima." : "") +
-                           (machine ? "\n\nVai pedir permissão de administrador (UAC) e criar um ponto de restauração." : "");
-                var r = await Host.ApplyAsync("Isolar na quarentena do NEXUS", text, requests, level);
+                var text = Loc.F("Scan.IsolarNArquivoS", accepted.Count) +
+                           string.Join("\n", accepted.Take(8).Select(r => $"• {r.FileName} ({r.VerdictText})")) + (accepted.Count > 8 ? Loc.F("Sec.MaisN", accepted.Count - 8) : "") +
+                           Loc.T("Scan.ArquivoSaiLugarAtalhos") +
+                           Loc.T("Scan.SuspeitoNaoMesmoMalware") +
+                           (group.Count() > slots ? Loc.F("Scan.LimiteNVezDemais", slots) : "") +
+                           (machine ? Loc.T("Sec.VaiPedirPermissaoAdministrador") : "");
+                var r = await Host.ApplyAsync(Loc.T("Scan.IsolarQuarentenaNexus"), text, requests, level);
                 if (r is null) continue;
                 Message = r.Message;
                 if (r.Response is { Ok: true, RunId: { } run })
@@ -530,9 +530,9 @@ public sealed class ScannerPage : ModulePage, IDisposable
                 {
                     var key = requests[i].ActionId;
                     var res = outcomes.FirstOrDefault(o => o.ActionKey == key);
-                    accepted[i].Status = res is null ? (r.Ok ? "Pedido enviado." : "Não isolado.")
-                        : res.Outcome is "Verified" or "AlreadyConfigured" ? "Isolado na quarentena do NEXUS (desfazível)."
-                        : $"Não isolado: {res.Detail ?? res.Outcome}";
+                    accepted[i].Status = res is null ? (r.Ok ? Loc.T("Scan.PedidoEnviado") : Loc.T("Scan.NaoIsolado"))
+                        : res.Outcome is "Verified" or "AlreadyConfigured" ? Loc.T("Scan.IsoladoQuarentenaNexusDesfazivel")
+                        : Loc.F("Scan.NaoIsoladoN", res.Detail ?? res.Outcome);
                     accepted[i].IsSelected = false;
                 }
             }
@@ -551,7 +551,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
             {
                 _lastRun = null;
                 OnPropertyChanged(nameof(CanUndo));
-                foreach (var row in AllRows().Where(x => x.Status.StartsWith("Isolado", StringComparison.Ordinal))) row.Status = "Devolvido ao lugar.";
+                foreach (var row in AllRows().Where(x => x.Status.StartsWith("Isolado", StringComparison.Ordinal))) row.Status = Loc.T("Scan.DevolvidoLugar");
             }
         });
     }
@@ -563,15 +563,15 @@ public sealed class ScannerPage : ModulePage, IDisposable
         if (Host is null) return;
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = rules ? "Importar regras de padrão (nexus.scanrules/1)" : "Importar lista de hashes SHA-256",
-            Filter = rules ? "Regras (*.json)|*.json" : "Lista de hashes (*.txt;*.csv)|*.txt;*.csv",
+            Title = rules ? Loc.T("Scan.ImportarRegrasPadraoNexus") : Loc.T("Scan.ImportarListaHashesSha"),
+            Filter = rules ? Loc.T("Scan.RegrasJsonJson") : Loc.T("Scan.ListaHashesTxtCsv"),
         };
         if (dlg.ShowDialog() != true) return;
         var source = dlg.FileName;
         await RunAsync(async () =>
         {
             var info = new FileInfo(source);
-            if (info.Length > (rules ? RuleSet.MaxRuleFileBytes : 200L * 1024 * 1024)) { Message = "Arquivo grande demais."; return; }
+            if (info.Length > (rules ? RuleSet.MaxRuleFileBytes : 200L * 1024 * 1024)) { Message = Loc.T("Scan.ArquivoGrandeDemais"); return; }
             string summary;
             try
             {
@@ -583,16 +583,16 @@ public sealed class ScannerPage : ModulePage, IDisposable
                         test.AddFile(source); // valida antes de copiar
                         var clash = test.Rules.Select(x => x.Id).Intersect(_engine!.Rules.Rules.Select(x => x.Id)).FirstOrDefault();
                         if (clash is not null) throw new FormatException($"a regra '{clash}' já existe");
-                        return $"{test.Rules.Count} regra(s)";
+                        return Loc.F("Scan.NRegraS", test.Rules.Count);
                     }
                     var db = new HashDatabase();
                     db.AddFile(source, out var added, out var skipped);
                     if (added == 0) throw new FormatException("nenhum SHA-256 encontrado no arquivo");
-                    return $"{added:N0} hash(es)" + (skipped > 0 ? $" ({skipped:N0} linhas ignoradas)" : "");
+                    return Loc.F("Scan.NHashEs", added) + (skipped > 0 ? Loc.F("Scan.NLinhasIgnoradas", skipped) : "");
                 });
             }
-            catch (FormatException ex) { Message = $"Não importado: {ex.Message}"; return; }
-            if (!Host.Confirm("Importar", $"Importar {summary} de \"{Path.GetFileName(source)}\"?\n\nUma cópia vai para {(rules ? RulesFolder : HashesFolder)}. Confira a origem da lista: um hash na lista faz o arquivo aparecer como \"na sua lista\". Nada é baixado da internet."))
+            catch (FormatException ex) { Message = Loc.F("Scan.NaoImportadoN", ex.Message); return; }
+            if (!Host.Confirm(Loc.T("Scan.Importar"), Loc.F("Scan.ImportarNNCopia", summary, Path.GetFileName(source), (rules ? RulesFolder : HashesFolder))))
                 return;
             var folder = rules ? RulesFolder : HashesFolder;
             Directory.CreateDirectory(folder);
@@ -601,7 +601,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
             _loaded = false;
             await LoadEngineAsync();
             _loaded = true;
-            Message = $"Importado: {summary}.";
+            Message = Loc.F("Scan.ImportadoN", summary);
         });
     }
 
@@ -612,7 +612,7 @@ public sealed class ScannerPage : ModulePage, IDisposable
         var folder = OperatingSystem.IsWindows() ? ScanTargets.DownloadsFolder() : null;
         if (_engine is null || folder is null || !Directory.Exists(folder))
         {
-            LiveText = "Pasta Downloads não encontrada.";
+            LiveText = Loc.T("Scan.PastaDownloadsNaoEncontrada");
             _liveWatch = false;
             OnPropertyChanged(nameof(LiveWatch));
             return;
@@ -622,18 +622,18 @@ public sealed class ScannerPage : ModulePage, IDisposable
         {
             _watcher = new FolderWatcher(folder, _engine, v => dispatcher?.BeginInvoke(() =>
             {
-                LiveText = $"Ao vivo: {DateTime.Now:HH:mm:ss} verificou \"{Path.GetFileName(v.Path)}\" — {v.VerdictText}.";
+                LiveText = Loc.F("Scan.VivoNVerificouN", DateTime.Now, Path.GetFileName(v.Path), v.VerdictText);
                 if (ScanEngine.IsFinding(v) && !_ignore.Contains(v.Path, v.Sha256))
                 {
                     AddFinding(v);
-                    Host?.Notify($"Arquivo novo em Downloads com sinais para revisar: {Path.GetFileName(v.Path)}");
+                    Host?.Notify(Loc.F("Scan.ArquivoNovoDownloadsSinais", Path.GetFileName(v.Path)));
                 }
             }));
-            LiveText = $"Vigiando {folder} enquanto esta página estiver aberta. Arquivos novos são verificados alguns segundos depois de terminarem de baixar.";
+            LiveText = Loc.F("Scan.VigiandoNEnquantoEsta", folder);
         }
         catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException)
         {
-            LiveText = $"Não foi possível vigiar Downloads: {ex.Message}";
+            LiveText = Loc.F("Scan.NaoFoiPossivelVigiar", ex.Message);
             _liveWatch = false;
             OnPropertyChanged(nameof(LiveWatch));
         }
