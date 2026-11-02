@@ -886,10 +886,11 @@ public sealed class OverviewPage : PageViewModel
             return new OverviewCard("Disco", "indisponível", FactStatus.Unavailable, $"Unidade {letter}:")
             { Kind = OverviewCardKind.Hardware, Target = "DiskPage", IllustrationKey = "Illo.Disk", Note = $"Unidade {letter}:" };
         var used = 100.0 * (total - free) / total;
-        return new OverviewCard("Disco", Units.Bytes(free) + " livres", FactStatus.Detected, $"Unidade {letter}: de {Units.Bytes(total)}")
+        var media = f.SystemDiskMedia == DiskMedia.Unknown ? "" : $" ({StorageClassifier.Describe(f.SystemDiskMedia, f.SystemDiskBus)})";
+        return new OverviewCard("Disco", Units.Bytes(free) + " livres", FactStatus.Detected, $"Unidade {letter}:{media} de {Units.Bytes(total)}")
         {
             Kind = OverviewCardKind.Hardware, Number = free, Target = "DiskPage", IllustrationKey = "Illo.Disk",
-            Note = $"livres na unidade {letter}: de {Units.Bytes(total)}",
+            Note = $"livres na unidade {letter}:{media} de {Units.Bytes(total)}",
             Trend = $"{used.ToString("0", CultureInfo.GetCultureInfo("pt-BR"))}% usado", TrendWarns = used >= 85,
         };
     }

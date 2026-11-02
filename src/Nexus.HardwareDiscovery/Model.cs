@@ -35,7 +35,8 @@ public sealed record GpuInfo(string Name, string? Vendor, string? DriverVersion,
 public sealed record MemoryModule(string? Locator, ulong? SizeBytes, string? Type, uint? MaxSpeedMts, uint? ConfiguredSpeedMts,
     string? Manufacturer, string? PartNumber);
 
-public sealed record DriveFacts(string Name, string? Format, ulong? TotalBytes, ulong? FreeBytes);
+/// <param name="Media">Tipo do disco físico onde a unidade está (Unknown = não deu para saber).</param>
+public sealed record DriveFacts(string Name, string? Format, ulong? TotalBytes, ulong? FreeBytes, DiskMedia Media = DiskMedia.Unknown);
 
 public sealed record StartupItem(string Name, string Location, string Command, bool? Enabled);
 
@@ -62,6 +63,12 @@ public sealed class SystemFacts
     public string? SystemModel { get; init; }
     public IReadOnlyList<DriveFacts> Drives { get; init; } = [];
     public string? SystemDrive { get; init; }
+    /// <summary>Discos físicos (SSD/HDD pelo próprio disco; ver <see cref="StorageClassifier"/>).</summary>
+    public IReadOnlyList<PhysicalDiskFacts> PhysicalDisks { get; init; } = [];
+    /// <summary>Tipo do disco onde está o Windows (Unknown = não lido ou volume em discos de tipos diferentes).</summary>
+    public DiskMedia SystemDiskMedia { get; init; }
+    /// <summary>Barramento do disco do sistema ("NVMe", "SATA"...; null = não lido).</summary>
+    public string? SystemDiskBus { get; init; }
     public IReadOnlyList<StartupItem> StartupItems { get; init; } = [];
     public IReadOnlyList<ServiceFacts> Services { get; init; } = [];
     /// <summary>Valores brutos de registro relevantes ao diagnóstico (chave → valor; ausente = não está no dicionário).</summary>

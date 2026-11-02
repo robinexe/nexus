@@ -41,7 +41,7 @@ public static class CapabilityCatalog
             new("Recuperação", "nexus-recover recover com alteração real", CapabilityLabel.ImplementedValidated,
                 "Validado na VM do CI: escrita real no registro, crash simulado, CLI real restaurou e removeu a chave criada."),
             new("Descoberta", "Windows, CPU/topologia, GPU/driver, memória/SMBIOS, discos, rede, energia, serviços, inicialização", win,
-                "Conferida em 31/10 contra uma coleta do próprio Windows: igual, exceto modelo do disco truncado e SSD/HDD (limitação conhecida)."),
+                "Conferida em 31/10 contra uma coleta do próprio Windows: igual, exceto modelo do disco truncado (limitação conhecida). SSD/HDD pelo próprio disco (IOCTL, sem administrador) desde 02/11: conferir no Windows."),
             new("Interface", "Diagnóstico, catálogo com estado real, simulação local, histórico", win,
                 "Somente leitura (handlers em SimulationOnlyHandler, diário aberto só para leitura)."),
             new("Interface", "Aplicar/reverter pela página Broker", CapabilityLabel.ImplementedNotValidated,

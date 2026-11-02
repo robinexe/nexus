@@ -124,6 +124,9 @@ public static class DiagnosticRules
             list.Add(new("disk.system-free", "Espaço livre no disco do sistema", DiagnosticSeverity.Info, FactStatus.Unavailable, "Unidade do sistema não lida."));
         }
 
+        // Tipo do disco do sistema (SSD/HDD pelo próprio disco)
+        list.Add(SystemDiskFinding(f));
+
         // Inicialização
         if (f.StartupItems.Count > 0)
         {
@@ -136,8 +139,38 @@ public static class DiagnosticRules
         var sysmain = f.Services.FirstOrDefault(s => s.Name.Equals("SysMain", StringComparison.OrdinalIgnoreCase));
         if (sysmain is not null)
             list.Add(new("svc.sysmain", $"SysMain: {sysmain.State} ({sysmain.StartType})", DiagnosticSeverity.Info, FactStatus.Detected,
-                "Hipótese de laboratório apenas: exige I/O concorrente observado durante stutters.", "svc.sysmain.manual.lab"));
+                SysMainAdvice(f.SystemDiskMedia), "svc.sysmain.manual.lab"));
 
         return list;
     }
+
+    /// <summary>
+    /// Windows num HD é o gargalo de carregamento mais perceptível (abrir programas, carregar jogos); em SSD, nada a fazer.
+    /// Não promete FPS: o disco quase não muda o FPS depois que o jogo carregou.
+    /// </summary>
+    public static DiagnosticFinding SystemDiskFinding(SystemFacts f)
+    {
+        ArgumentNullException.ThrowIfNull(f);
+        var what = StorageClassifier.Describe(f.SystemDiskMedia, f.SystemDiskBus);
+        return f.SystemDiskMedia switch
+        {
+            DiskMedia.Hdd => new("disk.system-media", "Windows instalado num HD (disco rígido)", DiagnosticSeverity.Attention, FactStatus.Detected,
+                $"Disco do sistema: {what}. Um HD lê arquivos espalhados dezenas de vezes mais devagar que um SSD: é o que mais pesa para ligar o PC, " +
+                "abrir programas e carregar jogos. Trocar por um SSD é a melhoria mais perceptível; nenhum ajuste de software compensa. O FPS depois de carregar quase não muda."),
+            DiskMedia.Ssd or DiskMedia.Scm => new("disk.system-media", $"Windows num {what}", DiagnosticSeverity.Ok, FactStatus.Detected,
+                "O disco do sistema não tem cabeça mecânica: carregamentos rápidos. Nada a fazer aqui (\"desfragmentar\" SSD não ajuda; o Windows já faz TRIM sozinho)."),
+            _ => new("disk.system-media", "Tipo do disco do sistema", DiagnosticSeverity.Info, FactStatus.Unavailable,
+                "O disco não informou se é SSD ou HD (sem penalidade de busca nem barramento NVMe na resposta)."),
+        };
+    }
+
+    /// <summary>O SysMain (pré-carregamento) ajuda mais em HD; em SSD o efeito é pequeno nos dois sentidos.</summary>
+    public static string SysMainAdvice(DiskMedia systemDisk) => systemDisk switch
+    {
+        DiskMedia.Hdd => "Windows num HD: o SysMain pré-carrega na memória o que você mais abre e costuma deixar os programas abrirem mais rápido. " +
+                         "Não desligue sem medir; travadinhas por disco são hipótese de laboratório (exige I/O concorrente observado durante stutters).",
+        DiskMedia.Ssd or DiskMedia.Scm => "Windows num SSD: o ganho do SysMain é pequeno, e desligá-lo também não aumenta FPS. " +
+                         "Hipótese de laboratório apenas: exige I/O concorrente observado durante stutters.",
+        _ => "Hipótese de laboratório apenas: exige I/O concorrente observado durante stutters.",
+    };
 }
