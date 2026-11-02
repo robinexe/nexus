@@ -361,6 +361,134 @@
       "revert": "Restaurar o índice anterior do mesmo esquema."
     },
     {
+      "id": "net.wifi.power-saving.dc-max-perf",
+      "version": 1,
+      "title": "Wi-Fi sem economia de energia (na bateria)",
+      "classification": "Conditional",
+      "condition": "Notebook jogando na bateria por Wi-Fi com ping oscilando. Na tomada o Windows já usa desempenho máximo.",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "19cbb8fa-5279-450e-9fac-8a3d5fedd0c1",
+        "setting": "12bbebe6-58d6-4636-95bb-3217ef867c1a",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Põe 'Configurações do adaptador sem fio > Modo de economia de energia' em 'Desempenho máximo' na bateria (o padrão na bateria é economia média). Em economia, a placa dorme entre pacotes e o ping oscila; em desempenho máximo ela fica acordada.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.intel.com/content/www/us/en/support/articles/000046272/wireless/legacy-intel-wireless-products.html"
+        },
+        {
+          "level": "Community",
+          "source": "https://www.elevenforum.com/t/change-power-saving-mode-of-wireless-adapters-in-windows-11.43628/"
+        }
+      ],
+      "risks": "Bateria acaba mais rápido. Alguns drivers ignoram a opção. Não muda nada com cabo de rede.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC (bateria) no esquema ativo.",
+      "revert": "Restaurar o índice DC anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.dx.windowed-optimizations.global",
+      "version": 1,
+      "title": "Otimizações para jogos em janela (padrão para todos os jogos)",
+      "classification": "SupportedDocumented",
+      "condition": "Vale para jogos DirectX 10/11 em janela ou janela sem bordas. DX12, Vulkan e tela cheia exclusiva não mudam.",
+      "handlerKind": "DirectXUserGpuPreference",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\DirectX\\UserGpuPreferences",
+        "name": "DirectXUserGlobalSettings",
+        "token": "SwapEffectUpgradeEnable"
+      },
+      "desiredValue": "1",
+      "compatibility": {
+        "minBuild": 22621
+      },
+      "mechanism": "Liga o mesmo botão de Configurações > Sistema > Tela > Elementos gráficos > 'Otimizações para jogos em janela': o Windows troca a apresentação antiga (blt) pela moderna (flip) nos jogos DX10/DX11 compatíveis. Resultado: menos atraso de quadro em janela/sem bordas e libera VRR e Auto HDR nesses jogos. Não aumenta FPS médio; o ganho é na latência.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/en-us/topic/3f006843-2c7e-4ed0-9a5e-f9389e535952"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://devblogs.microsoft.com/directx/updates-in-graphics-and-gaming/"
+        }
+      ],
+      "risks": "Jogos raros podem se comportar diferente em janela; dá para desligar por jogo em Configurações. Com Auto HDR ligado, o Windows já mantém esta opção ligada. Precisa reabrir o jogo.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do token SwapEffectUpgradeEnable em DirectXUserGlobalSettings.",
+      "revert": "Devolve só esse token ao estado anterior (remove se não existia), sem mexer nos outros padrões nem nas preferências por jogo."
+    },
+    {
+      "id": "fps.dx.vrr.global",
+      "version": 1,
+      "title": "Taxa de atualização variável para jogos DX11 em tela cheia",
+      "classification": "Conditional",
+      "condition": "Só com monitor G-SYNC, FreeSync ou Adaptive-Sync e driver WDDM 2.6+. Sem isso o Windows nem mostra a opção e não há efeito.",
+      "handlerKind": "DirectXUserGpuPreference",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\DirectX\\UserGpuPreferences",
+        "name": "DirectXUserGlobalSettings",
+        "token": "VRROptimizeEnable"
+      },
+      "desiredValue": "1",
+      "compatibility": {
+        "minBuild": 18362
+      },
+      "mechanism": "Liga o botão 'Taxa de atualização variável' de Elementos gráficos: jogos DX11 em tela cheia que não suportam VRR sozinhos passam a usar o G-SYNC/FreeSync do monitor. Menos tearing e travadinhas quando o FPS fica abaixo da taxa do monitor. Não muda o painel da NVIDIA/AMD.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://devblogs.microsoft.com/directx/os-variable-refresh-rate/"
+        }
+      ],
+      "risks": "Em monitor sem VRR não faz nada. Raramente algum jogo pisca com VRR; aí desfaça.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do token VRROptimizeEnable em DirectXUserGlobalSettings.",
+      "revert": "Devolve só esse token ao estado anterior (remove se não existia), preservando os demais."
+    },
+    {
+      "id": "fps.dx.autohdr.off",
+      "version": 1,
+      "title": "Desligar o Auto HDR",
+      "classification": "Conditional",
+      "condition": "Só faz diferença em tela HDR com o HDR do Windows ligado e se você não gosta das cores do Auto HDR.",
+      "handlerKind": "DirectXUserGpuPreference",
+      "target": {
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\DirectX\\UserGpuPreferences",
+        "name": "DirectXUserGlobalSettings",
+        "token": "AutoHDREnable"
+      },
+      "desiredValue": "0",
+      "compatibility": {
+        "minBuild": 22000
+      },
+      "mechanism": "Desliga o Auto HDR, que converte jogos SDR em HDR em tempo real. O custo de desempenho é pequeno (o processamento roda na GPU); o motivo real para desligar é cor/brilho exagerados ou conflito com o HDR do próprio jogo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://support.microsoft.com/en-us/topic/3f006843-2c7e-4ed0-9a5e-f9389e535952"
+        }
+      ],
+      "risks": "Jogos SDR voltam a aparecer em SDR numa tela HDR. Ganho de FPS pequeno ou nenhum.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do token AutoHDREnable em DirectXUserGlobalSettings.",
+      "revert": "Devolve só esse token ao estado anterior (remove se não existia), preservando os demais."
+    },
+    {
       "id": "fps.gamedvr.policy.off",
       "version": 1,
       "title": "Política: sem gravação de jogos em segundo plano",
