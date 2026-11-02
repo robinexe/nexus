@@ -6,7 +6,7 @@
     4. Monitores: antes → depois (Hz de agora × o máximo que o monitor aguenta) com "Usar 144 Hz".
     5. Gravar enquanto joga: como funciona em 4 passos, gráfico com legenda (entra da esquerda para a direita), veredito.
     6. O que segura a placa: cartões com selo e Corrigir; recursos (HAGS, Resizable BAR, MPO, Modo de Jogo) como selos;
-       jogos e a GPU de cada um (notebook híbrido). 6b. Driver NVIDIA por jogo (perfis DRS) e cache de sombreador. 7. Ficha técnica recolhida (leituras do driver, GPUs, notas).
+       jogos e a GPU de cada um (notebook híbrido). 6b. Driver NVIDIA por jogo (perfis DRS) e cache de sombreador. 6c. Ajustes por jogo: janela (DX10/11) e fps_max do CS2. 7. Ficha técnica recolhida (leituras do driver, GPUs, notas).
   Toda correção vai pelo aplicador (Host.ApplyAsync) com diário e Desfazer; a gravação só lê sensores.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -317,6 +317,56 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <!-- ===== 6c. Por jogo, sem driver: janela (DX10/11) e fps_max do CS2 (pelo aplicador) ===== -->
+        <ContentControl Content="Ajustes por jogo" Tag="{StaticResource Icon.Games}" ContentTemplate="{StaticResource G.SectionHeader}" Focusable="False" Margin="0,8,0,2"/>
+        <TextBlock Text="Do Windows e do próprio jogo, para um jogo de cada vez. Com Desfazer." Style="{StaticResource Text.Small}" Margin="0,0,0,12"/>
+        <Grid Margin="0,0,0,14">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="14"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <!-- Otimizações para jogos em janela -->
+          <Border Style="{StaticResource Panel.Card}" VerticalAlignment="Top">
+            <StackPanel>
+              <DockPanel Margin="0,0,0,8">
+                <c:Icon Data="{StaticResource Icon.Monitor}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
+                <TextBlock Text="Otimizações para jogos em janela neste jogo" Style="{StaticResource Text.H2}" FontSize="15.5" TextWrapping="Wrap"/>
+              </DockPanel>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,0,0,8"
+                         Text="Menos atraso em janela e sem bordas, e G-SYNC/FreeSync em janela. Só jogos DirectX 10/11; em DirectX 12, Vulkan ou tela cheia não muda nada."/>
+              <TextBlock Style="{StaticResource Text.Small}" Visibility="{Binding HasWindowedGames, Converter={StaticResource FalseToVisible}}"
+                         Text="Nenhum jogo da Steam ou da Epic com executável encontrado."/>
+              <ComboBox ItemsSource="{Binding WindowedGames}" SelectedItem="{Binding SelectedWindowedGame}" DisplayMemberPath="Label" MinWidth="240" HorizontalAlignment="Left"
+                        AutomationProperties.Name="Jogo para otimizações em janela" Visibility="{Binding HasWindowedGames, Converter={StaticResource BoolToVis}}"/>
+              <TextBlock Text="{Binding WindowedState}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,6,0,0"
+                         TextTrimming="CharacterEllipsis" ToolTip="{Binding WindowedState}"/>
+              <Button Style="{StaticResource Button.Secondary}" Content="Ligar neste jogo" Command="{Binding ApplyWindowedCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"
+                      Visibility="{Binding HasWindowedGames, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
+          </Border>
+          <!-- CS2: fps_max -->
+          <Border Grid.Column="2" Style="{StaticResource Panel.Card}" VerticalAlignment="Top">
+            <StackPanel>
+              <DockPanel Margin="0,0,0,8">
+                <c:Icon Data="{StaticResource Icon.Games}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
+                <TextBlock Text="Counter-Strike 2: limite de FPS do jogo" Style="{StaticResource Text.H2}" FontSize="15.5" TextWrapping="Wrap"/>
+              </DockPanel>
+              <TextBlock Text="{Binding Cs2Status}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap"/>
+              <StackPanel Visibility="{Binding Cs2Found, Converter={StaticResource BoolToVis}}">
+                <DockPanel Margin="0,10,0,0">
+                  <TextBlock Text="fps_max" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+                  <ComboBox ItemsSource="{Binding Cs2FpsOptions}" SelectedItem="{Binding SelectedCs2Fps}" MinWidth="80" Margin="10,0,0,0" HorizontalAlignment="Left"
+                            AutomationProperties.Name="Limite de FPS do CS2"/>
+                </DockPanel>
+                <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,6,0,0"
+                           Text="0 = sem limite. Com G-SYNC/FreeSync, use um pouco abaixo da taxa do monitor (141 em 144 Hz)."/>
+                <Button Style="{StaticResource Button.Secondary}" Content="Gravar no autoexec.cfg" Command="{Binding ApplyCs2FpsCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+              </StackPanel>
             </StackPanel>
           </Border>
         </Grid>
