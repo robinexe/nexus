@@ -395,3 +395,38 @@ O build e os testes conferem tipos, propriedades, bindings de mão dupla e chave
 6. Janela em 980 px de largura (mínimo) e maximizada: nada cortado no hero; textos longos com "…" e dica.
 7. Narrador (Win+Ctrl+Enter): cartões anunciam "Processador: 6 núcleos. AMD Ryzen…", anel anuncia "em ordem: 83%",
    esqueleto anuncia "Carregando"; Tab percorre cartões clicáveis e "Por que isso?".
+
+---
+
+## 9. Modo simples (02/11/2026)
+
+Pedido do responsável: *"nosso aplicativo ficou com muita informação e ficou confuso, vamos facilitar a vida do usuário
+leigo"*. A interface tem dois modos (`NexusSettings.UiMode`: `"simple"`/`"full"`; null = ainda não escolheu):
+
+| | Simples (padrão) | Completo |
+|---|---|---|
+| Navegação | 6 itens, ícone grande, uma palavra, sem grupos: Início, Otimizar, Limpar, Jogos, Problemas, Histórico | as 27 páginas de antes, agrupadas |
+| Cabeçalho | só "Ler de novo" (ícone) e o selo de segurança | igual a antes |
+| Rodapé | status (sem a legenda das cores) | igual a antes |
+| Pé da navegação | Ajustes + "Mostrar todas as ferramentas" | "Voltar ao modo simples" |
+
+- Primeira abertura (sem escolha gravada e sem uso anterior): boas-vindas em 3 telas (o que faz; nada muda sem você e tudo
+  se desfaz; Simples ou Completo). Quem já usava abre no simples com um aviso único ("Deixamos o NEXUS mais simples…").
+  Trocar: Ajustes › Modo do NEXUS, ou o link no pé da navegação. Regra pura em `UiModeStartup.Decide`.
+- As telas simples (`ViewModels/Simple/SimplePages.cs`, `Views/Pages/Simple.xaml`) são vitrines sobre as páginas completas
+  (Assistente, Limpeza, Placa de vídeo, Medir, diagnóstico, diário): nenhuma tem caminho de escrita próprio.
+- **Início**: anel (`ProcessRing`, o único elemento marcante) com a palavra da saúde (`SimpleHealth.Compute`: pontos de
+  atenção, lixo recuperável, ajustes recomendados ainda não feitos, driver de vídeo antigo, memória num canal só), um botão
+  "Otimizar meu PC com segurança" e no máximo 3 cartões (`ImproveCards.Top`).
+- **Otimizar**: o Assistente completo no modo automático (`AssistantPage.RunAutomaticAsync`): uma confirmação no começo
+  (inclui o aviso único do Windows), depois cada etapa de `AutoPilot.Steps` lê, confere no aplicador e aplica só o que
+  `AutoPilot.IsAutomatic` aceita (risco baixo recomendado, desfazível ou o ponto de restauração; nunca experimental,
+  opcional/avançado, irreversível, instalar driver ou trocar o modo do monitor), por `IModuleHost.ApplyConfirmedAsync`.
+  Termina com "Pronto! Liberamos X e ajustamos Y coisas.", "Ver detalhes" (relatório) e "Desfazer tudo".
+- **Limpar**: só as regras marcadas por padrão, embutidas, sem dados pessoais (`CleaningPage.CleanSafeCommand`), para a
+  quarentena ("lixeira do NEXUS") como sempre.
+- **Jogos**: por jogo, "Medir FPS" e só as opções que valem (driver NVIDIA por jogo, jogos em janela), em palavras simples.
+- **Problemas**: achados em palavras simples (`PlainFindings`), "O que fazer" em 1–2 frases; o que está bem fica recolhido.
+- **Histórico**: os dois diários, "Hoje 14:30 — Limpeza: 12 itens limpos — Desfazer" (`SimpleHistoryText`), "Desfazer tudo".
+- Testes: `SimpleModeTests` (modos, escolha inicial, nota, cartões, achados, histórico, seleção do automático). O autoteste da
+  interface abre o modo simples (6 telas + boas-vindas + Otimizar de demonstração) e depois o completo.

@@ -129,7 +129,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         _mode = mode;
         foreach (var n in new[] { nameof(Mode), nameof(IsSimpleMode), nameof(IsFullMode), nameof(NavPages), nameof(ToggleModeText) }) OnPropertyChanged(n);
         Settings.ModeChanged();
-        if (!ShellModes.IsInNavigation(mode, SelectedPage.GetType().Name) && PageByName(ShellModes.StartPage(mode)) is { } start) SelectedPage = start;
+        // Quem troca o modo em Ajustes continua em Ajustes (no modo simples ele fica no pé da navegação).
+        if (SelectedPage is not SettingsPage && !ShellModes.IsInNavigation(mode, SelectedPage.GetType().Name) && PageByName(ShellModes.StartPage(mode)) is { } start)
+            SelectedPage = start;
         if (mode == UiMode.Simple) StartBackgroundMeasurements();
     }
 

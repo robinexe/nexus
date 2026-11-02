@@ -3890,4 +3890,6 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Modo simple: Optimizar (trabajando, demostración)</value></data>
   <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Modo simple: Optimizar (listo, demostración)</value></data>
   <data name="Simple.SelfTest.DemoPrefix" xml:space="preserve"><value>[Demostración] </value></data>
+  <data name="Simple.Games.Failed" xml:space="preserve"><value>No se pudo aplicar. Los detalles están en el modo completo, en Aplicar.</value></data>
+  <data name="Simple.Hist.UndoFailed" xml:space="preserve"><value>No se pudo deshacer todo. Mira en Ver todo en detalle.</value></data>
 </root>

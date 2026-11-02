@@ -168,7 +168,7 @@ public sealed class SimpleCleanPage : ModulePage
         ToggleListCommand = new RelayCommand(() => ShowList = !ShowList);
         Cleaning.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName is nameof(CleaningPage.Scanning)) { OnPropertyChanged(nameof(Scanning)); OnPropertyChanged(nameof(IsLoading)); }
+            if (e.PropertyName is nameof(CleaningPage.Scanning)) { OnPropertyChanged(nameof(Scanning)); OnPropertyChanged(nameof(IsLoading)); OnPropertyChanged(nameof(ScanFailed)); }
             if (e.PropertyName is nameof(CleaningPage.SafeBytes)) { OnPropertyChanged(nameof(IsLoading)); OnPropertyChanged(nameof(NothingToClean)); OnPropertyChanged(nameof(HasSomething)); }
         };
     }
@@ -180,8 +180,12 @@ public sealed class SimpleCleanPage : ModulePage
     /// <summary>A página completa (SafeBytes, SafeItems, CleanSafeCommand, PurgeAllCommand, UndoLastCommand).</summary>
     public CleaningPage Cleaning { get; }
     public bool Scanning => Cleaning.Scanning;
-    public bool IsLoading => Cleaning.Scanning || double.IsNaN(Cleaning.SafeBytes);
+    /// <summary>Medindo agora (o número mostra "—" se a medição não deu certo; a mensagem da Limpeza explica).</summary>
+    public bool IsLoading => Cleaning.Scanning;
     public bool HasSomething => Cleaning.SafeBytes > 0;
+    /// <summary>A medição terminou sem número (erro de leitura): mostra o motivo que a Limpeza escreveu.</summary>
+    public bool ScanFailed => !Cleaning.Scanning && double.IsNaN(Cleaning.SafeBytes) && Cleaning.RecoverableCaption.Length > 0 && !IsFirstScanPending;
+    private bool IsFirstScanPending => Cleaning.RecoverableCaption == Loc.T("Clean.MedindoPodeSerLiberado");
     public bool NothingToClean => !Cleaning.Scanning && Cleaning.SafeBytes is 0;
     public bool ShowList { get => _showList; private set => Set(ref _showList, value); }
     public RelayCommand ToggleListCommand { get; }
@@ -334,7 +338,7 @@ public sealed class SimpleGamesPage : ModulePage
             var text = Loc.F("Simple.Games.ConfirmNv", row.Name, string.Join("\n", lines.Select(l => "• " + l)));
             var r = await Host.ApplyAsync(Loc.F("Simple.Games.ApplyTitle", row.Name), text, nv, BrokerLevel.Admin);
             if (r is null) { Message = Loc.T("Shell.CanceladoNadaFoiAlterado"); return; }
-            done.Add(r.Ok ? Loc.T("Simple.Games.DoneNv") : r.Message);
+            done.Add(r.Ok ? Loc.T("Simple.Games.DoneNv") : Loc.T("Simple.Games.Failed"));
         }
         if (row.CanWindowed && row.Windowed && row.ExePath is { } path)
         {
@@ -342,7 +346,7 @@ public sealed class SimpleGamesPage : ModulePage
             var r = await Host.ApplyAsync(Loc.F("Simple.Games.ApplyTitle", row.Name),
                 text, [new ActionRequest(GpuLabPage.WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = path })], BrokerLevel.User);
             if (r is null) { Message = Loc.T("Shell.CanceladoNadaFoiAlterado"); return; }
-            done.Add(r.Ok ? Loc.T("Simple.Games.DoneWindowed") : r.Message);
+            done.Add(r.Ok ? Loc.T("Simple.Games.DoneWindowed") : Loc.T("Simple.Games.Failed"));
         }
         row.LowLatency = row.MaxPower = row.FpsCap = row.Windowed = false;
         Message = string.Join(" ", done) + " " + Loc.T("Simple.Games.UndoHint");
@@ -485,7 +489,7 @@ public sealed class SimpleHistoryPage : ModulePage
                 list.Add(new SimpleHistoryRow(run.RunId, level, run.StartedAt, "", SimpleHistoryText.Describe(keys), active));
             }
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or Microsoft.Data.Sqlite.SqliteException) { }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { } // diário ilegível: a tela só fica sem as linhas dele
         return list;
     }
 
@@ -493,7 +497,7 @@ public sealed class SimpleHistoryPage : ModulePage
     {
         if (Host is null) return;
         var r = await Host.RevertAsync(row.RunId, row.Level);
-        if (r is not null) Message = r.Ok ? Loc.T("Simple.Hist.Undone") : r.Message;
+        if (r is not null) Message = r.Ok ? Loc.T("Simple.Hist.Undone") : Loc.T("Simple.Hist.UndoFailed");
         await LoadAsync();
     }
 

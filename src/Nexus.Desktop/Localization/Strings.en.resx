@@ -3890,4 +3890,6 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Simple mode: Optimize (working, demo)</value></data>
   <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Simple mode: Optimize (done, demo)</value></data>
   <data name="Simple.SelfTest.DemoPrefix" xml:space="preserve"><value>[Demo] </value></data>
+  <data name="Simple.Games.Failed" xml:space="preserve"><value>Couldn't apply it. Details are in full mode, under Apply.</value></data>
+  <data name="Simple.Hist.UndoFailed" xml:space="preserve"><value>Couldn't undo everything. Check See everything in detail.</value></data>
 </root>

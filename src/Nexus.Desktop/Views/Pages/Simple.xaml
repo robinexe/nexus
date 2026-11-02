@@ -248,6 +248,8 @@
               <c:AnimatedNumber Value="{Binding Cleaning.SafeBytes}" Kind="Bytes" FontFamily="{StaticResource Font.Numbers}" FontSize="64" Foreground="{StaticResource Brush.Trace}"/>
               <TextBlock Text="{l:T Simple.Clean.CanFree}" Style="{StaticResource S.Title}" FontSize="28" Margin="0,-4,0,0"/>
             </StackPanel>
+            <TextBlock Text="{Binding Cleaning.RecoverableCaption}" Style="{StaticResource S.Lead}" Foreground="{StaticResource Brush.Trace}" Margin="0,12,0,0"
+                       Visibility="{Binding ScanFailed, Converter={StaticResource BoolToVis}}"/>
             <TextBlock Text="{l:T Simple.Clean.Lead}" Style="{StaticResource S.Lead}" Margin="0,12,0,26"/>
             <Button Style="{StaticResource S.Big}" Command="{Binding Cleaning.CleanSafeCommand}" MinWidth="200">
               <StackPanel Orientation="Horizontal">
