@@ -74,7 +74,8 @@ public partial class MainWindow : Window
             view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PageViewModel.Group)));
             Nav.ItemsSource = view;
         }
-        Nav.SelectedItem = pages.Contains(_vm.SelectedPage) ? _vm.SelectedPage : null;
+        // SetCurrentValue (e não atribuição): atribuir apagaria a ligação SelectedItem ← SelectedPage do XAML.
+        Nav.SetCurrentValue(System.Windows.Controls.Primitives.Selector.SelectedItemProperty, pages.Contains(_vm.SelectedPage) ? _vm.SelectedPage : null);
     }
 
     // ------------------------------------------------------------------ navegação pelas páginas (ShellCommands.Navigate)
@@ -111,7 +112,8 @@ public partial class MainWindow : Window
             if (!ReferenceEquals(page, _vm.SelectedPage)) _vm.SelectedPage = page;
             return;
         }
-        if (e.RemovedItems.Count > 0 && _vm.NavPages.Contains(_vm.SelectedPage)) Nav.SelectedItem = _vm.SelectedPage;
+        if (e.RemovedItems.Count > 0 && _vm.NavPages.Contains(_vm.SelectedPage))
+            Nav.SetCurrentValue(System.Windows.Controls.Primitives.Selector.SelectedItemProperty, _vm.SelectedPage);
     }
 
     // ------------------------------------------------------------------ bandeja
