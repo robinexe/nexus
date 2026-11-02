@@ -163,7 +163,8 @@ jobs:
           }
           $exe = Resolve-Path 'src/Nexus.Desktop/bin/Release/net10.0-windows/Nexus.Desktop.exe'
           $out = Join-Path $PWD 'saida/ui/ui.json'
-          $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"') -PassThru
+          # O Windows do runner é em inglês; sem --lang a interface seguiria o Windows e o pt-BR nunca seria aberto aqui.
+          $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"'), '--lang', 'pt-BR' -PassThru
           $null = $p.Handle   # sem isto o ExitCode do Start-Process pode vir vazio
           if (-not $p.WaitForExit(1200000)) { $p.Kill(); 'tempo' | Out-File saida/ui/ui.exitcode -Encoding ascii; Write-Warning 'A interface não terminou em 20 min.'; exit 0 }
           $p.WaitForExit()

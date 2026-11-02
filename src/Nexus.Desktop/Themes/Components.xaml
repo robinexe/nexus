@@ -18,6 +18,9 @@
 
   <!-- ===== Conversores ===== -->
   <c:ResourceKeyConverter x:Key="ResourceByKey"/>
+  <!-- Barras do BeforeAfter: ScaleTransform dentro de RenderTransform não acha o TemplatedParent (binding quebrado visto no
+       autoteste do CI); a escala vira um transform pronto, ligado direto ao RenderTransform. -->
+  <shell:FractionScaleConverter x:Key="BarFractionScale"/>
   <c:ToneBrushConverter x:Key="ToneBrush"/>
   <shell:PageIconConverter x:Key="PageIcon"/>
   <c:InvertBoolConverter x:Key="InvertBool"/>
@@ -158,11 +161,8 @@
             <TextBlock Text="{TemplateBinding BeforeLabel}" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,12,0"/>
             <Grid Grid.Column="1" Height="10" VerticalAlignment="Center">
               <Border Background="{StaticResource Brush.SurfaceHi}" CornerRadius="5"/>
-              <Border Background="{StaticResource Brush.Signal}" CornerRadius="5" RenderTransformOrigin="0,0.5">
-                <Border.RenderTransform>
-                  <ScaleTransform ScaleX="{Binding BeforeScale, RelativeSource={RelativeSource TemplatedParent}}"/>
-                </Border.RenderTransform>
-              </Border>
+              <Border Background="{StaticResource Brush.Signal}" CornerRadius="5" RenderTransformOrigin="0,0.5"
+                      RenderTransform="{Binding BeforeScale, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BarFractionScale}}"/>
             </Grid>
             <TextBlock Grid.Column="2" Text="{TemplateBinding BeforeText}" FontFamily="{StaticResource Font.Numbers}" FontSize="16"
                        Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="NoWrap"/>
@@ -171,11 +171,8 @@
                        VerticalAlignment="Center" Margin="0,0,12,0"/>
             <Grid Grid.Row="2" Grid.Column="1" Height="10" VerticalAlignment="Center">
               <Border Background="{StaticResource Brush.SurfaceHi}" CornerRadius="5"/>
-              <Border Background="{StaticResource Brush.Trace}" CornerRadius="5" RenderTransformOrigin="0,0.5">
-                <Border.RenderTransform>
-                  <ScaleTransform ScaleX="{Binding AfterScale, RelativeSource={RelativeSource TemplatedParent}}"/>
-                </Border.RenderTransform>
-              </Border>
+              <Border Background="{StaticResource Brush.Trace}" CornerRadius="5" RenderTransformOrigin="0,0.5"
+                      RenderTransform="{Binding AfterScale, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BarFractionScale}}"/>
             </Grid>
             <TextBlock Grid.Row="2" Grid.Column="2" Text="{TemplateBinding AfterText}" FontFamily="{StaticResource Font.Numbers}" FontSize="16"
                        Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="NoWrap"/>
