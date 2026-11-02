@@ -84,6 +84,9 @@ public class HandlerTests
         public IReadOnlyList<Guid> EnumerateSchemes() => Schemes;
         public uint ReadAcValue(Guid s, Guid g, Guid k) => Values.TryGetValue((s, g, k), out var v) ? v : 0;
         public void WriteAcValue(Guid s, Guid g, Guid k, uint v) => Values[(s, g, k)] = v;
+        public readonly Dictionary<(Guid, Guid, Guid), uint> DcValues = [];
+        public uint ReadDcValue(Guid s, Guid g, Guid k) => DcValues.TryGetValue((s, g, k), out var v) ? v : 0;
+        public void WriteDcValue(Guid s, Guid g, Guid k, uint v) => DcValues[(s, g, k)] = v;
     }
 
     [Fact]
