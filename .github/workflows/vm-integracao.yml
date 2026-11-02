@@ -188,7 +188,7 @@ jobs:
             $out = Join-Path $PWD "saida/ui-$lang/ui.json"
             $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"'), '--lang', $lang -PassThru
             $null = $p.Handle
-            if (-not $p.WaitForExit(900000)) { $p.Kill(); $codes += "$lang:tempo"; continue }
+            if (-not $p.WaitForExit(900000)) { $p.Kill(); $codes += "$($lang):tempo"; continue }
             $p.WaitForExit()
             $codes += "$($lang):$($p.ExitCode)"
             if (Test-Path $out) {
