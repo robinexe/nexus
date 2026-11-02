@@ -225,7 +225,11 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     Inicialização Rápida, PcaSvc/TrkWks, IPv4 preferido) + 10 mitos com fonte (docs/modules/tuning.md); aplicados e desfeitos
     na VM 2022/2025. Assistente mostra o resto do catálogo como "Avançado" desmarcado. Conferência no PC real (script só
     leitura): 79 de 89 ajustes no valor aplicado; limpeza real (23 mil arquivos na quarentena).
-17. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+17. **01/11 noite:** driver NVIDIA (DRS via nvapi64, handler NvidiaDrsSetting, catalog/nvidia.v1.json, docs/modules/nvidia.md):
+    cache de sombreador global; por jogo: baixa latência On, desempenho máximo, limite de FPS, V-Sync para G-SYNC. Página
+    Placa de vídeo › "Driver NVIDIA por jogo". Layouts conferidos com gcc contra nvapi.h; falta testar num driver real
+    (GTX 1650 / 512.74 do usuário). VM sem NVIDIA: NotApplicable sem escrever. 1957 testes.
+18. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
