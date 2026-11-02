@@ -389,7 +389,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             _ = RefreshPerfLogAsync();
             _pollTimer.Start();
             RegisterHotkey();
-            CleanOldTempFiles();
+            _ = Task.Run(CleanOldTempFiles); // varre %TEMP% (pode ter dezenas de milhares de arquivos): fora da interface
             _ = ReadLibraryAsync(force: false);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
