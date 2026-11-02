@@ -523,7 +523,8 @@ public sealed class GpuLabTests
         Assert.Equal(all.Actions.Count, all.Actions.Select(a => a.Definition.Key).Distinct(StringComparer.Ordinal).Count());
         var env = new HandlerEnvironment(new InMemoryRegistryBackend(), Path.GetTempPath(), false, false);
         var handlers = GpuLabHandlers.Create(env).ToList();
-        Assert.All(handlers, h => Assert.StartsWith("GpuLab", h.HandlerKind, StringComparison.Ordinal));
+        // NvidiaDrsSetting (catalog/nvidia.v1.json) também vem deste módulo; os testes dele ficam em NvidiaDrsTests.
+        Assert.All(handlers.Where(h => h.HandlerKind != NvidiaDrsHandler.Kind), h => Assert.StartsWith("GpuLab", h.HandlerKind, StringComparison.Ordinal));
         var kinds = handlers.Select(h => h.HandlerKind).ToHashSet(StringComparer.Ordinal);
         kinds.Add(DirectXUserGpuPreferenceHandler.Kind); // reaproveitado (registrado pelo broker)
         foreach (var a in mine)

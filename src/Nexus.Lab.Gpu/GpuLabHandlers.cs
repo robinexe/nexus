@@ -6,6 +6,7 @@ namespace Nexus.Lab.Gpu;
 
 /// <summary>
 /// Handlers deste módulo registrados no aplicador (broker). Cada handler precisa de ação correspondente no catálogo.
+/// NvidiaDrsSetting grava a lista fechada de ajustes do driver NVIDIA (catalog/nvidia.v1.json; NVAPI carregada só no primeiro uso).
 /// A preferência de GPU por app reaproveita o handler do núcleo (DirectXUserGpuPreference), registrado pelo broker.
 /// </summary>
 public static class GpuLabHandlers
@@ -14,6 +15,7 @@ public static class GpuLabHandlers
     {
         ArgumentNullException.ThrowIfNull(environment);
         IDisplayModeBackend backend = OperatingSystem.IsWindows() ? new WindowsDisplayModeBackend() : new NoDisplayModeBackend();
-        return [new DisplayModeHandler(backend, environment.OtherAccount)];
+        INvidiaDrs drs = OperatingSystem.IsWindows() ? new WindowsNvidiaDrs() : new NoNvidiaDrs();
+        return [new DisplayModeHandler(backend, environment.OtherAccount), new NvidiaDrsHandler(drs)];
     }
 }
