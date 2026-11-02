@@ -13,7 +13,16 @@ using Nexus.HardwareDiscovery;
 using Nexus.Measurement;
 using Nexus.Persistence;
 
+#if NEXUS_WINDOWLESS
+// nexus-task.exe (src/Nexus.Cli.Task): este mesmo código compilado sem console, rodado pelas tarefas agendadas para não piscar uma
+// janela preta. Sem console não há como perguntar nem mostrar nada: só as linhas de comando fixas das tarefas são aceitas
+// (WindowlessTask); a saída vai para os relatórios e o diário, como no nexus.exe com --quiet.
+if (!WindowlessTask.IsAllowed(args)) return CliExit.Usage;
+Console.SetOut(TextWriter.Null);
+Console.SetError(TextWriter.Null);
+#else
 Console.OutputEncoding = Encoding.UTF8;
+#endif
 // Autoteste no PC real (somente leitura): opções próprias, interpretadas em Nexus.SelfTest.
 if (args.Length > 0 && args[0] == "selftest") return await Nexus.Cli.SelfTestCommand.RunAsync(args[1..]);
 // Atualização do programa (procurar / conferir manifesto assinado); docs/11-atualizacao.md.

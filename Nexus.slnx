@@ -24,6 +24,7 @@
     <Project Path="src/Nexus.Assistant/Nexus.Assistant.csproj" />
     <Project Path="src/Nexus.Updates/Nexus.Updates.csproj" />
     <Project Path="src/Nexus.Cli/Nexus.Cli.csproj" />
+    <Project Path="src/Nexus.Cli.Task/Nexus.Cli.Task.csproj" />
     <Project Path="src/Nexus.Lab.Cpu/Nexus.Lab.Cpu.csproj" />
     <Project Path="src/Nexus.Lab.Gpu/Nexus.Lab.Gpu.csproj" />
     <Project Path="src/Nexus.Lab.Memory/Nexus.Lab.Memory.csproj" />

@@ -163,6 +163,6 @@ public sealed record NexusTaskStatus(NexusTaskKind Kind, string State, TaskSched
         AutomationScheduledTaskHandler.Foreign => $"Existe uma tarefa \"{Kind.TaskName}\" que não é do NEXUS; ela não será tocada.",
         _ => $"Ligada: {Schedule?.Describe() ?? "horário que o NEXUS não reconhece"}"
              + (Conditions is null ? "" : $" ({Conditions.Describe()})")
-             + (PointsHere ? "." : ". Aponta para outra pasta do NEXUS: salve de novo para atualizar."),
+             + (PointsHere ? "." : ". Aponta para outra pasta ou versão do NEXUS: salve de novo para atualizar."),
     };
 }

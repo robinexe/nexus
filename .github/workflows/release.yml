@@ -135,7 +135,7 @@ jobs:
           "SIGNTOOL=$($signtool.FullName)" >> $env:GITHUB_ENV
           "SIGN_PFX=$pfx" >> $env:GITHUB_ENV
           # Só os binários do NEXUS; os do runtime .NET já vêm assinados pela Microsoft.
-          $files = Get-ChildItem artifacts\win-*\NEXUS -Include 'Nexus.*.dll','Nexus.Desktop.exe','nexus.exe','nexus.dll','nexus-broker.exe','nexus-broker.dll','nexus-recover.exe','nexus-recover.dll' -Recurse
+          $files = Get-ChildItem artifacts\win-*\NEXUS -Include 'Nexus.*.dll','Nexus.Desktop.exe','nexus.exe','nexus.dll','nexus-task.exe','nexus-task.dll','nexus-broker.exe','nexus-broker.dll','nexus-recover.exe','nexus-recover.dll' -Recurse
           & $signtool.FullName sign /f $pfx /p $env:PFX_PASSWORD /fd sha256 /tr http://timestamp.digicert.com /td sha256 $files.FullName
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -189,7 +189,7 @@ jobs:
           $p = Start-Process $setup.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/LOG=saida\instalacao.log' -Wait -PassThru
           if ($p.ExitCode -ne 0) { Get-Content saida\instalacao.log -Tail 40; Write-Error "Instalador saiu com $($p.ExitCode)"; exit 1 }
           $app = Join-Path $env:ProgramFiles 'NEXUS'
-          foreach ($f in 'Nexus.Desktop.exe','nexus-broker.exe','nexus.exe','nexus-recover.exe','catalog\actions.v1.json','unins000.exe','tools\Remove-NexusTasks.ps1','tools\service\Uninstall-Broker.ps1') {
+          foreach ($f in 'Nexus.Desktop.exe','nexus-broker.exe','nexus.exe','nexus-task.exe','nexus-recover.exe','catalog\actions.v1.json','unins000.exe','tools\Remove-NexusTasks.ps1','tools\service\Uninstall-Broker.ps1') {
             if (-not (Test-Path (Join-Path $app $f))) { Write-Error "Falta $f em $app"; exit 1 }
           }
           "Atalho no Menu Iniciar: $(Test-Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\NEXUS.lnk")"
@@ -211,6 +211,17 @@ jobs:
           & "$app\nexus.exe" plan win.gamemode.enable
           "nexus plan: $LASTEXITCODE"
           if ($LASTEXITCODE -notin 0, 1) { Write-Error 'O nexus não conseguiu simular pelo aplicador da pasta instalada.'; exit 1 }
+
+          # ---- nexus-task.exe (o que as tarefas agendadas rodam): sem console e só com as linhas de comando das tarefas.
+          $t = Start-Process "$app\nexus-task.exe" -ArgumentList 'version' -Wait -PassThru
+          "nexus-task version: $($t.ExitCode) (2 esperado: fora da lista das tarefas)"
+          if ($t.ExitCode -ne 2) { Write-Error 'nexus-task.exe deveria recusar comandos que não são das tarefas agendadas.'; exit 1 }
+          $reports = Join-Path $env:LOCALAPPDATA 'NEXUS\reports'
+          $before = @(Get-ChildItem $reports -Filter *.html -ErrorAction SilentlyContinue).Count
+          $t = Start-Process "$app\nexus-task.exe" -ArgumentList 'scan','--report','--quiet','--scheduled' -Wait -PassThru
+          $after = @(Get-ChildItem $reports -Filter *.html -ErrorAction SilentlyContinue).Count
+          "nexus-task scan (linha da tarefa): código $($t.ExitCode); relatórios $before -> $after"
+          if ($t.ExitCode -notin 0, 1 -or $after -le $before) { Write-Error 'nexus-task.exe não gerou o relatório da verificação agendada.'; exit 1 }
 
           # ---- PresentMon embutido: presente, intacto, assinado pela Intel, avisos de terceiros junto.
           $pm = Join-Path $app 'tools\PresentMon\PresentMon.exe'

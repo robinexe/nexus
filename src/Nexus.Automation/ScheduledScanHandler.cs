@@ -113,11 +113,22 @@ public sealed class AutomationScheduledScanHandler : IActionHandler, IRestoreVal
 
     public string HandlerKind => Kind;
 
-    /// <summary>nexus.exe ao lado do aplicador (o broker é copiado junto da interface e da linha de comando).</summary>
-    public static string? DefaultExecutable()
+    /// <summary>
+    /// O que a tarefa roda: <c>nexus-task.exe</c> ao lado do aplicador (sem janela; vem na pasta publicada) ou, se ele não
+    /// existir (cópia de desenvolvimento antiga), o <c>nexus.exe</c> da mesma pasta.
+    /// </summary>
+    public static string? DefaultExecutable() => ExecutableIn(AppContext.BaseDirectory);
+
+    /// <summary>Mesma escolha numa pasta dada (testes).</summary>
+    public static string? ExecutableIn(string directory)
     {
-        var path = Path.Combine(AppContext.BaseDirectory, ScheduledScanTask.ExecutableName);
-        return File.Exists(path) ? Path.GetFullPath(path) : null;
+        ArgumentNullException.ThrowIfNull(directory);
+        foreach (var name in (string[])[ScheduledScanTask.WindowlessExecutableName, ScheduledScanTask.ExecutableName])
+        {
+            var path = Path.Combine(directory, name);
+            if (File.Exists(path)) return Path.GetFullPath(path);
+        }
+        return null;
     }
 
     private static string? TargetProblem(ActionInstance a) =>

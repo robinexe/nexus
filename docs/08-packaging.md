@@ -18,7 +18,8 @@ não sai por padrão.
 
 - **Self-contained** (não precisa do .NET instalado), **ReadyToRun** (menos compilação na hora de abrir: a interface WPF
   abre mais rápido), **sem trimming** (WPF e reflexão não suportam; `PublishTrimmed=false` explícito no csproj da interface).
-- Publica `nexus-broker` (aplicador), `nexus` (linha de comando), `nexus-recover` e `Nexus.Desktop` e junta tudo em
+- Publica `nexus-broker` (aplicador), `nexus` (linha de comando), `nexus-task` (a mesma linha de comando sem console, para as
+  tarefas agendadas não abrirem janela), `nexus-recover` e `Nexus.Desktop` e junta tudo em
   `artifacts/<rid>/NEXUS/`, com `catalog\`, `tools\service\` (serviço opcional), os scripts do instalador,
   `tools\PresentMon\PresentMon.exe` + `LICENSE.txt` (PresentMon 2.6.0 oficial da Intel, copiado pelo build da interface e da CLI;
   a publicação confere o SHA-256) e `THIRD-PARTY-NOTICES.txt`. O PresentMon é x64; no win-arm64 roda pela emulação do Windows
@@ -28,10 +29,11 @@ não sai por padrão.
   Casos reais hoje: `WindowsBase.dll` (fachada 4.0 do runtime base × WindowsBase 10.0 do WPF: fica a do WPF),
   `System.Diagnostics.EventLog.dll` e `SQLitePCLRaw.provider.e_sqlite3.dll` (variantes net6.0 e net6.0-windows7.0 do mesmo
   pacote e versão; a mesma que o layout de desenvolvimento já usa). Qualquer outro conflito interrompe a publicação.
-- **Estrutura conferida:** os quatro `.exe` lado a lado com a arquitetura PE certa; catálogo idêntico ao do repositório;
+- **Estrutura conferida:** os cinco `.exe` lado a lado com a arquitetura PE certa e o subsistema certo (`nexus-task.exe` e
+  `Nexus.Desktop.exe` = janela; `nexus.exe` e `nexus-recover.exe` = console); catálogo idêntico ao do repositório;
   todo `*.runtimeconfig.json` self-contained; runtime, WPF, SQLite nativo e ServiceController presentes.
   A interface e o `nexus` iniciam o aplicador por `LocalBroker.Executable(AppContext.BaseDirectory)` → `nexus-broker.exe` da
-  mesma pasta; a tarefa semanal roda o `nexus.exe` da mesma pasta (`ScheduledScanHandler`); o catálogo é lido de
+  mesma pasta; as tarefas agendadas rodam o `nexus-task.exe` da mesma pasta (`ScheduledScanHandler`, sem janela); o catálogo é lido de
   `<pasta>\catalog`.
 - **Versão única:** `<VersionPrefix>` em `Directory.Build.props` (1.0.0) para todos os executáveis; a publicação passa o hash
   do commit (`InformationalVersion` = `1.0.0+<hash>`) e grava `VERSAO.txt` na pasta. Como sai cada tipo de build: seção 8.
@@ -53,8 +55,8 @@ Extrair o ZIP inteiro e abrir `Nexus.Desktop.exe`. Nada é instalado; os dados f
 | Diário e quarentena das ações de administrador | `%ProgramData%\NEXUS` (só administradores alteram) |
 
 - **Apagar a pasta do ZIP não apaga os dados nem desfaz alterações.** Use "Desfazer" antes.
-- **Verificação semanal agendada:** a tarefa do Windows guarda o caminho completo do `nexus.exe`. Se a pasta mudar de lugar
-  ou de nome, a tarefa para de funcionar (o NEXUS mostra "aponta para outro nexus.exe"); basta ligar o agendamento de novo
+- **Tarefas agendadas:** a tarefa do Windows guarda o caminho completo do `nexus-task.exe`. Se a pasta mudar de lugar
+  ou de nome, a tarefa para de funcionar (o NEXUS mostra "aponta para outra pasta ou versão"); basta ligar o agendamento de novo
   (ou `nexus schedule on`). O instalador não tem esse problema (pasta fixa).
 
 ### Por que o portátil é menos protegido no modo administrador
@@ -182,7 +184,7 @@ imagens pequenas do instalador. Os arquivos gerados são versionados; o build n�
 ## 7. Por que não há "EXE portátil único"
 
 O Kudu oferece um `.exe` portátil. No NEXUS, a interface **não escreve no sistema**: quem escreve é o aplicador, um processo
-separado (`nexus-broker.exe`) iniciado da mesma pasta, e a tarefa semanal precisa de um `nexus.exe` com caminho fixo. Um
+separado (`nexus-broker.exe`) iniciado da mesma pasta, e as tarefas agendadas precisam de um `nexus-task.exe` com caminho fixo. Um
 executável único teria de se extrair numa pasta do usuário a cada execução, o que recria exatamente o problema da seção 2
 (binários elevados em pasta gravável pelo usuário) e quebra o agendamento. O ZIP portátil cobre o caso de uso sem esconder
 isso. Se for necessário no futuro: extrair para `%ProgramData%\NEXUS\app\<versão>` com ACL só de administradores exige

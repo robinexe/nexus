@@ -95,14 +95,24 @@ continua em `rejected` no catálogo, com o motivo atualizado.
 - Valor: `ON`/`OFF` (`allowedValues`). Horário e condições são `userParameters` validados pelo broker por regex fechada
   (`schedule`: `DAILY HH:MM`, `WEEKLY DIA HH:MM`, `MONTHLY 1..28 HH:MM`; `conditions`: `none|battery|game|battery-game`) e de novo
   pelo handler. Dia do mês até 28 para existir em todo mês.
-- **Detect**: `OFF` (não existe), `ON` (tarefa do NEXUS com o marcador DESTE tipo, uma única ação, este `nexus.exe`, argumentos
+- **Detect**: `OFF` (não existe), `ON` (tarefa do NEXUS com o marcador DESTE tipo, uma única ação, este `nexus-task.exe` (ou `nexus.exe`, ver abaixo), argumentos
   fixos, horário, condições e `DisallowStartIfOnBatteries` iguais ao alvo), `DIFFERENT` (do NEXUS, outro horário/condição/pasta)
   ou `FOREIGN` (outra tarefa com o mesmo nome: bloqueada, nunca tocada). O XML vai para `Detail["xml"]` (até 32 KB).
 - **Apply**: XML esquema 1.2 gerado com `XmlWriter` (`CalendarTrigger` com `ScheduleByDay`/`ScheduleByWeek`/`ScheduleByMonth`
   com os 12 meses, `InteractiveToken`, `LeastPrivilege`, prioridade 7, `StartWhenAvailable`, limite 15 min (verificação) / 30 min
   (limpeza), `DisallowStartIfOnBatteries`/`StopIfGoingOnBatteries` = condição de bateria) e `schtasks /create /xml` (UTF-16,
   argumentos em lista, sem shell). Caminho do executável validado como antes (`ValidateExecutable`: local, sem UNC, aspas, `%`,
-  controle, `.`/`..`; termina em `nexus.exe`). Os argumentos NUNCA vêm do cliente: são `NexusTaskKind.ArgumentsFor(condições)`.
+  controle, `.`/`..`; termina em `nexus-task.exe` ou `nexus.exe`). Os argumentos NUNCA vêm do cliente: são
+  `NexusTaskKind.ArgumentsFor(condições)`.
+- **Sem janela preta (1.0):** a tarefa roda `nexus-task.exe` (`src/Nexus.Cli.Task`): o MESMO código do `nexus` compilado como
+  aplicativo de janela (WinExe, constante `NEXUS_WINDOWLESS`), então o Agendador não cria console. Sem console não há como
+  perguntar nem mostrar erro, por isso ele só aceita as linhas de comando exatas que o NEXUS grava nas tarefas
+  (`WindowlessTask.AllowedCommandLines`: verificação e limpeza × 4 condições, mais a verificação semanal antiga); qualquer outra
+  sai com código 2 sem fazer nada. `AutomationScheduledScanHandler.DefaultExecutable` prefere o `nexus-task.exe` da pasta do
+  aplicador e cai para o `nexus.exe` se ele não existir (cópia de desenvolvimento). Tarefa criada antes (apontando para o
+  `nexus.exe`) aparece como `DIFFERENT` ("aponta para outra pasta ou versão"): salvar de novo troca para o `nexus-task.exe`, e
+  desfazer recria o XML antigo exato. `publish.py` confere o subsistema PE (2 = janela) e o `release.yml` roda o
+  `nexus-task.exe` instalado com a linha da tarefa (relatório gerado) e com outro comando (recusado).
 - **Restore**: `OFF` → remove; `ON`/`DIFFERENT` → recria o XML exato do diário depois de validar (`IRestoreValidator`: marcador
   do tipo, executável válido, argumentos que o NEXUS gera, horário reconhecido).
 - `OtherAccount=true` → recusado (a tarefa seria de outra conta).
@@ -121,7 +131,8 @@ Battle.net em ProgramData (administrador), histórico e cookies (sensíveis), sh
 (condicional) e Lixeira/Windows Update/Otimização de Entrega (só medição).
 
 `nexus clean --safe --scheduled` (o que a tarefa roda):
-1. Solta o console que o Agendador abriu (`FreeConsole`, só se o console é só dele) — pode piscar uma janela por um instante.
+1. Pelo `nexus-task.exe`, não há console (nada pisca). Pelo `nexus.exe` (tarefa antiga ou cópia de desenvolvimento), solta o
+   console que o Agendador abriu (`FreeConsole`, só se o console é só dele), o que pode piscar uma janela por um instante.
 2. Condições: bateria (`GetSystemPowerStatus`, ACLineStatus 0) e jogo (`SHQueryUserNotificationState` = Direct3D em tela cheia,
    app em tela cheia ou modo apresentação; ou um processo de uma lista curta de jogos conhecidos). Se valer, **pula** (código 0),
    grava `clean-*.json/html` com o motivo e uma linha em `reports\agendamentos.log`.
@@ -192,7 +203,9 @@ diário e desfazer): `optimize`, `clean [--safe] [--rules id,…] [--dry-run] [-
   por padrão. A quarentena cresce até ser esvaziada (o esvaziamento é do módulo Limpeza, com o contrato de irreversíveis).
 - Detecção de jogo: tela cheia exclusiva e sem borda (pelo sinal do Windows) e uma lista curta de processos; um jogo em janela
   que não está na lista não é detectado. Na dúvida, prefira um horário em que você não joga.
-- A tarefa agendada roda um app de console: o Windows pode mostrar uma janela por um instante antes de o NEXUS soltá-la.
+- Tarefas criadas antes da 1.0 rodam o `nexus.exe` (console) e podem piscar uma janela até serem salvas de novo (passam para o
+  `nexus-task.exe`). Na cópia de desenvolvimento (`bin\Release`) não há `nexus-task.exe` ao lado do aplicador; ela continua
+  usando o `nexus.exe`.
 - O balão aparece com o nome/ícone do executável (sem AppUserModelID) e não tem botões; clicar abre o relatório.
 - Mover a pasta do NEXUS deixa tarefas e "iniciar com o Windows" apontando para a pasta antiga (aparecem como desatualizadas;
   salvar de novo atualiza).

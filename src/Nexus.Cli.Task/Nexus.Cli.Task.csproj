@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- nexus-task: a MESMA linha de comando do nexus (código de src/Nexus.Cli), compilada como aplicativo de janela (WinExe) para
+       as tarefas agendadas (verificação e limpeza segura) rodarem sem abrir uma janela preta de console. Sem console, ela só
+       aceita as linhas de comando fixas das tarefas (Nexus.Automation.WindowlessTask); qualquer outra sai com código 2.
+       Publicada ao lado do nexus.exe (tools/packaging/publish.py); a tarefa aponta para ela (AutomationScheduledScanHandler). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>nexus-task</AssemblyName>
+    <RootNamespace>Nexus.Cli</RootNamespace>
+    <DefineConstants>$(DefineConstants);NEXUS_WINDOWLESS</DefineConstants>
+    <ApplicationIcon>..\Nexus.Desktop\Assets\nexus.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Nexus.Cli\**\*.cs" Exclude="..\Nexus.Cli\bin\**;..\Nexus.Cli\obj\**" Link="Cli\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- As mesmas referências do nexus (src/Nexus.Cli/Nexus.Cli.csproj): na pasta publicada as dlls são as mesmas. -->
+    <ProjectReference Include="..\Nexus.Automation\Nexus.Automation.csproj" />
+    <ProjectReference Include="..\Nexus.Broker\Nexus.Broker.csproj" />
+    <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
+    <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
+    <ProjectReference Include="..\Nexus.Persistence\Nexus.Persistence.csproj" />
+    <ProjectReference Include="..\Nexus.Updates\Nexus.Updates.csproj" />
+    <ProjectReference Include="..\Nexus.SelfTest\Nexus.SelfTest.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\catalog\*.json" Link="catalog\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

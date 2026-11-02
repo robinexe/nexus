@@ -295,7 +295,7 @@ var
   Code: Integer;
 begin
   { Processos do NEXUS na sessão do usuário (o serviço roda na sessão 0 e é parado pelo Uninstall-Broker.ps1). }
-  Result := Exec(PowerShell(), '-NoProfile -ExecutionPolicy Bypass -Command "if (Get-Process -Name ''Nexus.Desktop'',''nexus-broker'',''nexus'',''nexus-recover'' -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -ne 0 }) { exit 1 } else { exit 0 }"',
+  Result := Exec(PowerShell(), '-NoProfile -ExecutionPolicy Bypass -Command "if (Get-Process -Name ''Nexus.Desktop'',''nexus-broker'',''nexus'',''nexus-task'',''nexus-recover'' -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -ne 0 }) { exit 1 } else { exit 0 }"',
                  '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 1);
 end;
 

@@ -7,11 +7,12 @@
 
 O que faz, por RID:
   1. dotnet publish self-contained (sem precisar do .NET instalado no PC), ReadyToRun (inicia mais rápido), SEM trimming
-     (WPF e reflexão não suportam), de: nexus-broker (aplicador), nexus (linha de comando), nexus-recover e Nexus.Desktop.
-  2. Junta as quatro publicações em artifacts/<rid>/NEXUS/. Arquivos com o mesmo nome precisam ser idênticos byte a byte
+     (WPF e reflexão não suportam), de: nexus-broker (aplicador), nexus (linha de comando), nexus-task (a mesma linha de
+     comando sem console, para as tarefas agendadas não abrirem janela), nexus-recover e Nexus.Desktop.
+  2. Junta as cinco publicações em artifacts/<rid>/NEXUS/. Arquivos com o mesmo nome precisam ser idênticos byte a byte
      (o runtime é o mesmo); qualquer diferença interrompe a publicação em vez de escolher um ao acaso.
-  3. Confere a estrutura: os quatro executáveis lado a lado (a interface e o nexus iniciam o nexus-broker.exe da própria pasta;
-     a tarefa semanal roda o nexus.exe da pasta), o catálogo completo em catalog\\, nenhum executável dependente de .NET
+  3. Confere a estrutura: os cinco executáveis lado a lado (a interface e o nexus iniciam o nexus-broker.exe da própria pasta;
+     as tarefas agendadas rodam o nexus-task.exe da pasta, que tem de ser aplicativo de janela, sem console), o catálogo completo em catalog\\, nenhum executável dependente de .NET
      instalado, arquitetura PE certa.
   4. Copia tools\\service (serviço opcional do aplicador) e os scripts de tools\\packaging usados pelo instalador; confere o
      PresentMon embutido (tools\\PresentMon\\PresentMon.exe, SHA-256 conhecido), a licença dele e THIRD-PARTY-NOTICES.txt.
@@ -43,10 +44,14 @@ ROOT = Path(__file__).resolve().parents[2]
 PROJECTS = [  # ordem de publicação; a junção exige arquivos comuns idênticos, então a ordem não muda o resultado
     ("src/Nexus.Broker.Host/Nexus.Broker.Host.csproj", "nexus-broker.exe"),
     ("src/Nexus.Cli/Nexus.Cli.csproj", "nexus.exe"),
+    ("src/Nexus.Cli.Task/Nexus.Cli.Task.csproj", "nexus-task.exe"),
     ("src/Nexus.Recovery.Cli/Nexus.Recovery.Cli.csproj", "nexus-recover.exe"),
     ("src/Nexus.Desktop/Nexus.Desktop.csproj", "Nexus.Desktop.exe"),
 ]
 PE_MACHINE = {"win-x64": 0x8664, "win-arm64": 0xAA64}
+# Subsistema PE: 2 = janela (sem console), 3 = console. A tarefa agendada roda nexus-task.exe; se ele virasse console, o
+# Agendador voltaria a abrir uma janela preta a cada execução.
+PE_SUBSYSTEM = {"nexus-task.exe": 2, "nexus.exe": 3, "nexus-recover.exe": 3, "Nexus.Desktop.exe": 2}
 EXTRA_FILES = [  # (origem relativa à raiz, destino relativo à pasta publicada)
     ("tools/service/Install-Broker.ps1", "tools/service/Install-Broker.ps1"),
     ("tools/selftest/Rodar-Autoteste.cmd", "Rodar-Autoteste.cmd"),
@@ -112,15 +117,22 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def pe_machine(path: Path) -> int:
+def pe_header(path: Path) -> tuple[int, int]:
+    """(máquina, subsistema) do cabeçalho PE; (-1, -1) se não for PE."""
     with path.open("rb") as f:
         head = f.read(4096)
     if head[:2] != b"MZ":
-        return -1
+        return -1, -1
     off = struct.unpack_from("<I", head, 0x3C)[0]
     if head[off:off + 4] != b"PE\0\0":
-        return -1
-    return struct.unpack_from("<H", head, off + 4)[0]
+        return -1, -1
+    machine = struct.unpack_from("<H", head, off + 4)[0]
+    subsystem = struct.unpack_from("<H", head, off + 24 + 68)[0]  # cabeçalho opcional começa em +24; Subsystem em +68 (PE32 e PE32+)
+    return machine, subsystem
+
+
+def pe_machine(path: Path) -> int:
+    return pe_header(path)[0]
 
 
 def copy_sources(dest: Path) -> None:
@@ -270,10 +282,12 @@ def verify(target: Path, rid: str) -> list[str]:
         p = target / exe
         if not p.is_file():
             fail(f"falta {exe} na pasta publicada")
-        machine = pe_machine(p)
+        machine, subsystem = pe_header(p)
         if machine != PE_MACHINE[rid]:
             fail(f"{exe}: arquitetura PE 0x{machine:X}, esperado 0x{PE_MACHINE[rid]:X} ({rid})")
-        report.append(f"{exe}: ok ({rid})")
+        if exe in PE_SUBSYSTEM and subsystem != PE_SUBSYSTEM[exe]:
+            fail(f"{exe}: subsistema PE {subsystem}, esperado {PE_SUBSYSTEM[exe]} (2 = janela, 3 = console)")
+        report.append(f"{exe}: ok ({rid}, {'janela' if subsystem == 2 else 'console' if subsystem == 3 else subsystem})")
 
     expected = sorted(p.name for p in (ROOT / "catalog").glob("*.json"))
     got = sorted(p.name for p in (target / "catalog").glob("*.json"))
@@ -316,15 +330,15 @@ def write_texts(target: Path, rid: str, full_version: str, commit: str) -> None:
         "NEXUS (versão portátil)\r\n"
         "\r\n"
         "Para abrir: extraia o ZIP inteiro numa pasta e dê duplo clique em Nexus.Desktop.exe. Não precisa instalar nem do .NET.\r\n"
-        "Os quatro executáveis precisam ficar juntos nesta pasta: a interface (Nexus.Desktop.exe) e a linha de comando (nexus.exe)\r\n"
+        "Os executáveis precisam ficar juntos nesta pasta: a interface (Nexus.Desktop.exe) e a linha de comando (nexus.exe)\r\n"
         "iniciam o aplicador (nexus-broker.exe) desta mesma pasta, e o catálogo de ações fica em catalog\\.\r\n"
         "\r\n"
         "Dados: %LocalAppData%\\NEXUS (configurações, relatórios, diário e quarentena das ações de usuário) e %ProgramData%\\NEXUS\r\n"
         "(diário e quarentena das ações de administrador). Apagar esta pasta NÃO apaga esses dados nem desfaz alterações:\r\n"
         "use \"Desfazer\" no NEXUS antes.\r\n"
         "\r\n"
-        "Verificação semanal agendada: a tarefa do Windows guarda o caminho deste nexus.exe. Se mover ou renomear a pasta, a\r\n"
-        "tarefa deixa de funcionar; abra o NEXUS e ligue o agendamento de novo (ou rode: nexus schedule on).\r\n"
+        "Tarefas agendadas: a tarefa do Windows guarda o caminho do nexus-task.exe desta pasta (a versão sem janela do nexus.exe).\r\n"
+        "Se mover ou renomear a pasta, a tarefa deixa de funcionar; abra o NEXUS e ligue o agendamento de novo.\r\n"
         "\r\n"
         "Segurança no modo administrador: ações de administrador iniciam nexus-broker.exe elevado (aviso do Windows). Numa pasta\r\n"
         "do seu usuário (Downloads, Área de Trabalho) qualquer programa rodando com a sua conta pode trocar esses arquivos antes\r\n"

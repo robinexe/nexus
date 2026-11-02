@@ -51,6 +51,11 @@ public static partial class ScheduledScanTask
     public const string Arguments = "scan --report --quiet";
     public const string Marker = "nexus.automation.scheduled-scan/1";
     public const string ExecutableName = "nexus.exe";
+    /// <summary>
+    /// A mesma linha de comando compilada como aplicativo de janela (WinExe, sem console): é o que as tarefas agendadas rodam,
+    /// para o Agendador não abrir uma janela preta. Só aceita os argumentos fixos das tarefas (<see cref="WindowlessTask"/>).
+    /// </summary>
+    public const string WindowlessExecutableName = "nexus-task.exe";
     public const int MaxXmlChars = 32 * 1024;
     private const string Ns = "http://schemas.microsoft.com/windows/2004/02/mit/task";
 
@@ -59,10 +64,12 @@ public static partial class ScheduledScanTask
 
     /// <summary>
     /// Valida o executável que a tarefa vai rodar: caminho local absoluto (letra de unidade; sem rede/UNC), sem aspas, sem
-    /// <c>%</c> (o Agendador expandiria variáveis), sem caracteres de controle, sem "." ou ".." como pasta, terminando em nexus.exe.
-    /// Null = válido; senão, o motivo.
+    /// <c>%</c> (o Agendador expandiria variáveis), sem caracteres de controle, sem "." ou ".." como pasta, terminando em nexus.exe
+    /// ou nexus-task.exe (a variante sem janela). Null = válido; senão, o motivo.
     /// </summary>
-    public static string? ValidateExecutable(string? path) => ValidateExecutable(path, ExecutableName);
+    public static string? ValidateExecutable(string? path) =>
+        ValidateExecutable(path, path is not null && path.EndsWith('\\' + WindowlessExecutableName, StringComparison.OrdinalIgnoreCase)
+            ? WindowlessExecutableName : ExecutableName);
 
     /// <summary>Mesma validação para outro executável do NEXUS (ex.: Nexus.Desktop.exe ao iniciar com o Windows).</summary>
     public static string? ValidateExecutable(string? path, string expectedName)
