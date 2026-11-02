@@ -93,6 +93,13 @@ public sealed class UpdatesTests : IDisposable
     [InlineData("0.9.9", "0.10.0")]
     [InlineData("1.9.9", "2.0.0")]
     [InlineData("0.9.0-ci.7", "0.9.1-ci.1")]
+    // Linha 1.0 (docs/08-packaging.md): CI 1.0.0-ci.N < estável 1.0.0 < próximas CI 1.0.1-ci.N; 0.9.x recebe a 1.0.
+    [InlineData("1.0.0-ci.9", "1.0.0-ci.10")]
+    [InlineData("1.0.0-ci.42", "1.0.0")]
+    [InlineData("1.0.0-rc.1", "1.0.0")]
+    [InlineData("1.0.0", "1.0.1-ci.1")]
+    [InlineData("0.9.0", "1.0.0-ci.1")]
+    [InlineData("0.9.0-ci.5", "1.0.0")]
     public void SemVer_orders_per_spec(string lower, string higher)
     {
         Assert.True(SemVersion.Parse(lower) < SemVersion.Parse(higher));

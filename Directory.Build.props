@@ -10,11 +10,13 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
-  <!-- Versão única de todos os executáveis (interface, aplicador, nexus, nexus-recover). A publicação
-       (tools/packaging/publish.py) passa SourceRevisionId com o hash do commit: InformationalVersion = 0.9.0+<hash>.
-       Pré-lançamento: -p:VersionSuffix=rc.1 (ou a tag v0.9.0-rc.1 no release.yml). -->
+  <!-- Versão única de todos os executáveis (interface, aplicador, nexus, nexus-task, nexus-recover). A publicação
+       (tools/packaging/publish.py) passa SourceRevisionId com o hash do commit: InformationalVersion = 1.0.0+<hash>.
+       CI (release.yml manual): 1.0.0-ci.<execução>. Estável: tag v1.0.0 ou Run workflow com stable=true (sem sufixo).
+       Pré-lançamento: -p:VersionSuffix=rc.1 (ou a tag v1.0.0-rc.1). Depois de publicar a estável, suba para 1.0.1
+       (docs/08-packaging.md, "Lançar uma versão"). -->
   <PropertyGroup>
-    <VersionPrefix>0.9.0</VersionPrefix>
+    <VersionPrefix>1.0.0</VersionPrefix>
     <Product>NEXUS</Product>
     <Company>NEXUS</Company>
     <Authors>robinexe</Authors>

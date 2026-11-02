@@ -363,7 +363,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--rid", action="append", choices=sorted(PE_MACHINE), help="win-x64 (padrão) e/ou win-arm64")
     ap.add_argument("--out", default=str(ROOT / "artifacts"))
-    ap.add_argument("--version-suffix", default="", help="ex.: rc.1 (vira 0.9.0-rc.1)")
+    ap.add_argument("--version-suffix", default="", help="ex.: rc.1 (vira 1.0.0-rc.1)")
     ap.add_argument("--no-r2r", action="store_true", help="sem ReadyToRun (publicação mais rápida, início mais lento)")
     ap.add_argument("--no-restore-check", action="store_true", help="pula o restore --locked-mode da solução")
     ap.add_argument("--skip-publish", action="store_true", help="reaproveita artifacts/stage (só junta, confere e zipa)")

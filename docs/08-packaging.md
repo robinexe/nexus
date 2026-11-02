@@ -33,8 +33,8 @@ não sai por padrão.
   A interface e o `nexus` iniciam o aplicador por `LocalBroker.Executable(AppContext.BaseDirectory)` → `nexus-broker.exe` da
   mesma pasta; a tarefa semanal roda o `nexus.exe` da mesma pasta (`ScheduledScanHandler`); o catálogo é lido de
   `<pasta>\catalog`.
-- **Versão única:** `<VersionPrefix>` em `Directory.Build.props` (0.9.0) para todos os executáveis; a publicação passa o hash
-  do commit (`InformationalVersion` = `0.9.0+<hash>`) e grava `VERSAO.txt` na pasta.
+- **Versão única:** `<VersionPrefix>` em `Directory.Build.props` (1.0.0) para todos os executáveis; a publicação passa o hash
+  do commit (`InformationalVersion` = `1.0.0+<hash>`) e grava `VERSAO.txt` na pasta. Como sai cada tipo de build: seção 8.
 - **Lock files:** a solução é restaurada com `--locked-mode` antes; publicar com `-r <RID>` acrescentaria seções por RID em
   todos os `packages.lock.json`, então a publicação roda numa cópia (`artifacts/src`) e confere que nos lock files da cópia
   só foram **acrescentadas** seções `<tfm>/<rid>` (os pacotes, versões e hashes são os mesmos já conferidos).
@@ -124,15 +124,16 @@ Compilar à mão (Windows, Inno Setup 6 instalado):
 
 ```powershell
 python tools\packaging\publish.py
-& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=0.9.0 /DNumericVersion=0.9.0.0 /DRid=win-x64 `
+& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=1.0.0 /DNumericVersion=1.0.0.0 /DRid=win-x64 `
     /DSourceDir="$PWD\artifacts\win-x64\NEXUS" /DOutputDir="$PWD\artifacts" tools\packaging\nexus.iss
 ```
 
 ## 4. Workflow `release.yml`
 
-Dispara em tag `v*` (ex.: `git tag v0.9.0 && git push origin v0.9.0`) e manualmente (Actions → release → Run workflow).
+Dispara em tag `v*` (ex.: `git tag v1.0.0 && git push origin v1.0.0`) e manualmente (Actions → release → Run workflow).
 
-1. Versão: na tag, `v<X.Y.Z>[-sufixo]` precisa bater com `<VersionPrefix>`; manual = `<prefixo>-ci.<execução>`.
+1. Versão: na tag, `v<X.Y.Z>[-sufixo]` precisa bater com `<VersionPrefix>`; manual = `<prefixo>-ci.<execução>`; manual com
+   **stable** marcado = `<prefixo>` sem sufixo (seção 8).
 2. `restore --locked-mode`, build Release, testes unitários.
 3. `publish.py --no-zip` → (assinatura, se ligada) → `publish.py --zip-only`.
 4. Inno Setup: usa o do runner se existir; senão `choco install innosetup` (o passo registra qual caminho usou e a versão).
@@ -146,8 +147,9 @@ Dispara em tag `v*` (ex.: `git tag v0.9.0 && git push origin v0.9.0`) e manualme
    **grupo**: a conta do runner virou membro (opção marcada) e a marca `installer` existe; abre a interface por 20 s,
    desinstala e confere que os dados ficaram, que não sobrou tarefa do NEXUS e que a conta saiu do grupo (se a marca era do
    instalador) ou continuou (se já era membro antes). Extrai o ZIP e roda o `nexus` de lá.
-6. `SHA256SUMS.txt` de todos os `.zip`/`.exe`; upload como artifact; em tag, **GitHub Release em rascunho** (o responsável
-   revisa e publica; sufixo `-rc` vira pré-lançamento).
+6. `SHA256SUMS.txt` de todos os `.zip`/`.exe`; upload como artifact; em tag (ou stable=true), **GitHub Release em rascunho**
+   (o responsável revisa e publica; sufixo `-rc` vira pré-lançamento). O texto do Release é a seção da versão no
+   `CHANGELOG.md` + downloads + aviso do SmartScreen + SHA-256 (`tools/packaging/release_notes.py --full`).
 7. **Atualização automática** (docs/11-atualizacao.md): com o segredo `NEXUS_UPDATE_SIGNING_KEY`, gera e assina
    `nexus-update.json` e confere com `nexus update --verify-manifest` (chave embutida); com `NEXUS_RELEASES_TOKEN` e (tag ou
    publish=true), publica instalador, ZIP, manifesto e assinatura em `robinexe/nexus-releases` (público, *latest*). A VM
@@ -185,3 +187,32 @@ executável único teria de se extrair numa pasta do usuário a cada execução,
 (binários elevados em pasta gravável pelo usuário) e quebra o agendamento. O ZIP portátil cobre o caso de uso sem esconder
 isso. Se for necessário no futuro: extrair para `%ProgramData%\NEXUS\app\<versão>` com ACL só de administradores exige
 elevação na primeira execução, ou seja, vira um instalador.
+
+## 8. Versões e como lançar uma
+
+| Build | Versão | Como sai |
+|---|---|---|
+| Desenvolvimento (compilado no PC, `Abrir NEXUS.cmd dev`) | `1.0.0` sem marca de publicado | não se atualiza (docs/11-atualizacao.md) |
+| CI (Actions → release → Run workflow) | `1.0.0-ci.<execução>` | artifacts da execução; com **publish**, vai para `nexus-releases` |
+| Estável | `1.0.0` | tag `v1.0.0` **ou** Run workflow com **stable** marcado |
+| Pré-lançamento | `1.0.0-rc.1` | tag `v1.0.0-rc.1` (Release marcado como pré-lançamento) |
+
+A atualização automática compara por SemVer (`src/Nexus.Updates/SemVersion.cs`, testes em `UpdatesTests`):
+`0.9.x < 1.0.0-ci.N < 1.0.0-rc.N < 1.0.0 < 1.0.1-ci.N < 1.0.1`. Um PC com uma `-ci` recebe a estável da mesma linha.
+
+### Lançar a 1.0.0 (passo a passo)
+
+1. Em `main`, com o CI verde: confira `<VersionPrefix>1.0.0</VersionPrefix>` em `Directory.Build.props` e a seção
+   `## 1.0.0` do `CHANGELOG.md`. A linha que começa com `>` é o aviso de atualização dentro do NEXUS (curta); o resto da
+   seção vai para a página do Release.
+2. Dispare o build estável, de um destes jeitos:
+   - `git tag v1.0.0 && git push origin v1.0.0` (publica em `nexus-releases` automaticamente, se os segredos existirem); ou
+   - Actions → release → Run workflow → marque **stable** (e **publish**, para os NEXUS instalados receberem).
+3. O workflow testa instalador e ZIP numa VM, gera `SHA256SUMS.txt`, cria o **rascunho** do Release `v1.0.0` em
+   `robinexe/nexus` e (com publish/tag e os segredos de docs/11-atualizacao.md) publica em `robinexe/nexus-releases`.
+4. Revise o rascunho (texto, arquivos, SHA-256) e clique em **Publish release**.
+5. **Logo depois**, suba `<VersionPrefix>` para `1.0.1` e abra a seção `## 1.0.1` no `CHANGELOG.md`. Sem isso, os builds de CI
+   seguintes sairiam `1.0.0-ci.N`, "mais velhos" que a estável, e ninguém os receberia.
+
+Uma versão estável não pode ser refeita com o mesmo número (o PC que instalou a primeira não recebe a segunda). Corrigiu algo
+depois de publicar? Lance `1.0.1`.

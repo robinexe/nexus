@@ -98,9 +98,10 @@ O `release.yml` faz tudo quando os dois segredos existem (Settings → Secrets a
 3. Sem `NEXUS_UPDATE_SIGNING_KEY`: o manifesto não é gerado (aviso). Sem `NEXUS_RELEASES_TOKEN` ou sem `publish`: nada é
    publicado (aviso). Os pacotes continuam nos artifacts da execução.
 
-Versões: a manual sai como `0.9.0-ci.<execução>`; a tag sai como a própria versão. Depois de publicar a `0.9.0` estável, suba
-`VersionPrefix` (Directory.Build.props) para `0.9.1`, senão as `0.9.0-ci.N` seguintes ficam "mais velhas" que a estável e
-ninguém as recebe (e o *latest* passa a apontar para uma versão que os PCs já superaram, o que é inofensivo).
+Versões: a manual sai como `1.0.0-ci.<execução>`; a tag `v1.0.0` (ou Run workflow com **stable**) sai como `1.0.0`. Depois de
+publicar a `1.0.0` estável, suba `VersionPrefix` (Directory.Build.props) para `1.0.1`, senão as `1.0.0-ci.N` seguintes ficam
+"mais velhas" que a estável e ninguém as recebe. Passo a passo: `docs/08-packaging.md`, seção 8. O texto do aviso (`notes` do
+manifesto) é o campo **notas** do Run workflow ou, vazio, a linha `>` da seção da versão no `CHANGELOG.md`.
 
 Para conferir um manifesto à mão: `nexus update --verify-manifest nexus-update.json` (procura `nexus-update.json.sig` ao lado).
 

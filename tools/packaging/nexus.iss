@@ -1,6 +1,6 @@
 ﻿; NEXUS — instalador (Inno Setup 6). Compilado pelo .github/workflows/release.yml; à mão, no Windows:
 ;   python tools\packaging\publish.py
-;   "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" /DAppVersion=0.9.0 /DNumericVersion=0.9.0.0 /DRid=win-x64 ^
+;   "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" /DAppVersion=1.0.0 /DNumericVersion=1.0.0.0 /DRid=win-x64 ^
 ;       /DSourceDir=..\..\artifacts\win-x64\NEXUS /DOutputDir=..\..\artifacts tools\packaging\nexus.iss
 ;
 ; Decisões (detalhes em docs/08-packaging.md):
@@ -21,10 +21,10 @@
 ;  - Assinatura Authenticode: preparada e desligada (defina SignToolName; ver docs/08-packaging.md).
 
 #ifndef AppVersion
-  #define AppVersion "0.9.0"
+  #define AppVersion "1.0.0"
 #endif
 #ifndef NumericVersion
-  #define NumericVersion "0.9.0.0"
+  #define NumericVersion "1.0.0.0"
 #endif
 #ifndef Rid
   #define Rid "win-x64"

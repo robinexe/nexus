@@ -1,10 +1,13 @@
 # NEXUS — gera os pacotes para Windows: ZIP portátil e instalador (Inno Setup), com SHA-256 de tudo.
 #
 # Quando roda:
-#   - tag v* (ex.: v0.9.0 ou v0.9.0-rc.1): a versão da tag precisa bater com <VersionPrefix> de Directory.Build.props;
+#   - tag v* (ex.: v1.0.0 ou v1.0.0-rc.1): a versão da tag precisa bater com <VersionPrefix> de Directory.Build.props;
 #     cria um GitHub Release em RASCUNHO (o responsável revisa e publica à mão).
-#   - manual (Actions → release → Run workflow): mesma coisa, versão 0.9.0-ci.<número da execução>, sem Release; os
-#     pacotes ficam nos artifacts da execução.
+#   - manual (Actions → release → Run workflow): mesma coisa, versão 1.0.0-ci.<número da execução>, sem Release; os
+#     pacotes ficam nos artifacts da execução. Com stable=true: versão <VersionPrefix> sem sufixo (1.0.0) e Release em
+#     rascunho com a tag v<versão> no commit da execução (como se a tag tivesse sido enviada).
+#   Notas: a seção "## <X.Y.Z>" do CHANGELOG.md vai para o Release; a linha ">" dela é o aviso de atualização
+#   (tools/packaging/release_notes.py). Passo a passo: docs/08-packaging.md, "Lançar uma versão".
 #
 # O que confere antes de entregar (numa VM descartável do GitHub; nada roda no PC de ninguém):
 #   build Release e testes unitários; estrutura da pasta publicada (tools/packaging/publish.py); instala o instalador em
@@ -28,6 +31,10 @@ on:
     tags: ['v*']
   workflow_dispatch:
     inputs:
+      stable:
+        description: 'Versão estável: sem sufixo -ci (ex.: 1.0.0) e Release em rascunho com a tag v<versão>'
+        type: boolean
+        default: false
       arm64:
         description: 'Também gerar win-arm64 (experimental: compila, mas não foi testado num PC ARM)'
         type: boolean
@@ -37,7 +44,7 @@ on:
         type: boolean
         default: false
       notas:
-        description: 'Novidades (português, curto) para o aviso de atualização'
+        description: 'Novidades (português, curto) para o aviso de atualização; vazio = linha ">" do CHANGELOG.md'
         type: string
         default: ''
 
@@ -58,6 +65,7 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: '1'
       ARM64: ${{ github.event_name == 'workflow_dispatch' && inputs.arm64 }}
+      STABLE: ${{ github.event_name == 'workflow_dispatch' && inputs.stable }}
     steps:
       - uses: actions/checkout@v5
 
@@ -79,6 +87,8 @@ jobs:
             if ($tag -notmatch '^v(\d+\.\d+\.\d+)(?:-([0-9A-Za-z]+(?:\.[0-9A-Za-z]+)*))?$') { Write-Error "Tag inválida: $tag (use v1.2.3 ou v1.2.3-rc.1)"; exit 1 }
             if ($Matches[1] -ne $prefix) { Write-Error "Tag $tag não bate com VersionPrefix $prefix de Directory.Build.props"; exit 1 }
             $suffix = "$($Matches[2])"
+          } elseif ($env:STABLE -eq 'true') {
+            $suffix = ''   # estável pedida no Run workflow: 1.0.0, sem -ci
           } else {
             $suffix = "ci.$env:GITHUB_RUN_NUMBER"
           }
@@ -90,6 +100,9 @@ jobs:
           "full=$full" >> $env:GITHUB_OUTPUT
           "numeric=$numeric" >> $env:GITHUB_OUTPUT
           "rids=$($rids -join ' ')" >> $env:GITHUB_OUTPUT
+          $release = ($env:GITHUB_REF_TYPE -eq 'tag') -or ($env:STABLE -eq 'true')
+          "release=$($release.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+          "tag=v$full" >> $env:GITHUB_OUTPUT
           "NEXUS $full (arquivo $numeric) para $($rids -join ', ')"
 
       - name: Build e testes unitários
@@ -328,7 +341,10 @@ jobs:
           }
           $v = "${{ steps.versao.outputs.full }}"
           $setup = Get-ChildItem artifacts -Filter 'NEXUS-*-win-x64-instalador.exe' | Select-Object -First 1
-          $notes = if ($env:NOTAS) { $env:NOTAS } else { "NEXUS ${v}: correções e melhorias." }
+          # Aviso de atualização: o que foi digitado no Run workflow; senão a linha ">" da seção da versão no CHANGELOG.md.
+          python tools/packaging/release_notes.py --version $v --short --out notas-curtas.txt
+          $notes = if ($env:NOTAS) { $env:NOTAS } elseif ($LASTEXITCODE -eq 0) { (Get-Content notas-curtas.txt -Raw -Encoding UTF8).Trim() } else { "NEXUS ${v}: correções e melhorias." }
+          "Notas do aviso: $notes"
           python tools/packaging/sign-update.py --installer $setup.FullName --version $v --out artifacts/update --notes $notes
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           # Confere com o código e a chave pública EMBUTIDOS no aplicativo publicado: prova que o segredo é a chave certa.
@@ -350,17 +366,26 @@ jobs:
             saida/
           if-no-files-found: warn
 
-      - name: GitHub Release (rascunho, só em tag)
-        if: github.ref_type == 'tag'
+      - name: GitHub Release (rascunho; tag ou stable=true)
+        if: steps.versao.outputs.release == 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          python tools/packaging/release_notes.py --version "${{ steps.versao.outputs.full }}" --full --out changelog-secao.md
+          $changelog = if ($LASTEXITCODE -eq 0) { (Get-Content changelog-secao.md -Raw -Encoding UTF8).Trim() } else { '' }
           $notes = @(
             "NEXUS ${{ steps.versao.outputs.full }} (commit $($env:GITHUB_SHA.Substring(0,10)))",
             '',
+            $changelog,
+            '',
+            '## Download',
+            '',
             '- NEXUS-*-instalador.exe: instala em Arquivos de Programas (pede administrador). Recomendado.',
             '- NEXUS-*-portatil.zip: extraia e abra Nexus.Desktop.exe. Leia LEIA-ME-PORTATIL.txt.',
+            '',
+            'Sem certificado de assinatura de código, o Windows pode mostrar "O Windows protegeu o computador" (SmartScreen) e',
+            '"Editor desconhecido". Confira o arquivo baixado: `Get-FileHash .\arquivo -Algorithm SHA256` tem de dar o valor abaixo.',
             '',
             'SHA-256:',
             '```',
@@ -369,7 +394,10 @@ jobs:
           ) -join "`n"
           $notes | Out-File notas.md -Encoding utf8
           $files = @(Get-ChildItem artifacts -File | Where-Object { $_.Extension -in '.zip','.exe' -or $_.Name -eq 'SHA256SUMS.txt' } | ForEach-Object FullName)
-          $ghArgs = @('release', 'create', $env:GITHUB_REF_NAME) + $files + @('--draft', '--title', "NEXUS ${{ steps.versao.outputs.full }}", '--notes-file', 'notas.md')
+          # Na tag, o Release usa a própria tag; com stable=true (manual), a tag v<versão> nasce no commit desta execução
+          # quando o rascunho for publicado.
+          $tag = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { "${{ steps.versao.outputs.tag }}" }
+          $ghArgs = @('release', 'create', $tag) + $files + @('--draft', '--target', $env:GITHUB_SHA, '--title', "NEXUS ${{ steps.versao.outputs.full }}", '--notes-file', 'notas.md')
           if ("${{ steps.versao.outputs.suffix }}") { $ghArgs += '--prerelease' }
           gh @ghArgs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -386,8 +414,12 @@ jobs:
           $v = "${{ steps.versao.outputs.full }}"
           $files = @(Get-ChildItem artifacts -File | Where-Object { $_.Name -like 'NEXUS-*-win-x64-instalador.exe' -or $_.Name -like 'NEXUS-*-win-x64-portatil.zip' -or $_.Name -eq 'SHA256SUMS.txt' } | ForEach-Object FullName)
           $files += (Resolve-Path artifacts\update\nexus-update.json).Path, (Resolve-Path artifacts\update\nexus-update.json.sig).Path
+          python tools/packaging/release_notes.py --version $v --full --out changelog-publico.md
+          $changelog = if ($LASTEXITCODE -eq 0) { (Get-Content changelog-publico.md -Raw -Encoding UTF8).Trim() } else { '' }
           @(
             "NEXUS $v",
+            '',
+            $changelog,
             '',
             '- NEXUS-*-instalador.exe: instala em Arquivos de Programas. Quem já tem o NEXUS instalado recebe esta versão sozinho.',
             '- NEXUS-*-portatil.zip: extraia e abra Nexus.Desktop.exe.',
