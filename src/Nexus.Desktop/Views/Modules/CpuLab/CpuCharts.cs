@@ -125,7 +125,7 @@ public sealed class LatencyCurveChart : CpuChartBase
         ArgumentNullException.ThrowIfNull(dc);
         dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
         var pts = Points;
-        if (pts is not { Count: > 1 }) { Empty(dc, "Meça para ver a curva de latência."); return; }
+        if (pts is not { Count: > 1 }) { Empty(dc, Loc.T("Cpu.MecaVerCurvaLatencia")); return; }
         double w = ActualWidth - L - R, h = ActualHeight - T - B;
         if (w < 40 || h < 40) return;
 
@@ -166,8 +166,8 @@ public sealed class LatencyCurveChart : CpuChartBase
         {
             var y = Y(s.Ns);
             var t = Fmt(s.CapacityBytes is { } cap
-                ? $"{s.Level} · {s.Ns.ToString(s.Ns < 10 ? "0.0" : "0", Pt)} ns · até ~{CacheStepDetector.Bytes(cap)}"
-                : $"{s.Level} · {s.Ns.ToString("0", Pt)} ns", Text, 11);
+                ? Loc.F("Cpu.NNNsAte", s.Level, s.Ns.ToString(s.Ns < 10 ? "0.0" : "0", Pt), CacheStepDetector.Bytes(cap))
+                : Loc.F("Cpu.NNNs", s.Level, s.Ns.ToString("0", Pt)), Text, 11);
             var x = s.CapacityBytes is { } c ? X(c) : L + w;
             dc.DrawEllipse(Trace, null, new Point(Math.Min(x, L + w - 3), y), 3.5, 3.5);
             var tx = Math.Clamp(x - t.Width - 6, L + 2, L + w - t.Width);
@@ -209,13 +209,13 @@ public sealed class CoreMatrixHeatmap : CpuChartBase
     {
         ArgumentNullException.ThrowIfNull(dc);
         var m = Matrix;
-        if (m is null || m.Cores.Count < 2) { Empty(dc, "Precisa de 2+ núcleos medidos."); return; }
+        if (m is null || m.Cores.Count < 2) { Empty(dc, Loc.T("Cpu.Precisa2NucleosMedidos")); return; }
         var n = m.Cores.Count;
         const double gutter = 28;
         var cell = Math.Max(8, (Math.Min(ActualWidth, ActualHeight) - gutter) / n);
         var values = new List<double>();
         for (var i = 0; i < n; i++) for (var j = 0; j < n; j++) if (m.At(i, j) is { } v) values.Add(v);
-        if (values.Count == 0) { Empty(dc, "Sem pares medidos."); return; }
+        if (values.Count == 0) { Empty(dc, Loc.T("Cpu.SemParesMedidos")); return; }
         double lo = values.Min(), hi = Math.Max(values.Max(), lo * 1.01);
         var good = (Good as SolidColorBrush)?.Color ?? Color.FromRgb(0x5F, 0xD0, 0x8A);
         var warm = (Trace as SolidColorBrush)?.Color ?? Color.FromRgb(0xFF, 0xB5, 0x47);
@@ -274,7 +274,7 @@ public sealed class FrequencyTimeChart : CpuChartBase
     {
         ArgumentNullException.ThrowIfNull(dc);
         var s = Series;
-        if (s is not { Count: > 1 }) { Empty(dc, "Rode o teste sustentado para ver a frequência no tempo."); return; }
+        if (s is not { Count: > 1 }) { Empty(dc, Loc.T("Cpu.RodeTesteSustentadoVer")); return; }
         double w = ActualWidth - L - R, h = ActualHeight - T - B;
         if (w < 40 || h < 30) return;
         var all = s.Concat(Previous ?? []).ToList();

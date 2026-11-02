@@ -747,8 +747,191 @@ Asks for administrator permission (Windows prompt) and creates a restore point f
   <data name="Conv.Detectado" xml:space="preserve"><value>detected</value></data>
   <data name="Conv.Inferido" xml:space="preserve"><value>inferred</value></data>
   <data name="Conv.Informativo" xml:space="preserve"><value>informational</value></data>
+  <data name="Cpu.AindaNaoMedido" xml:space="preserve"><value>Not measured yet.</value></data>
+  <data name="Cpu.AmdNaoPublicaTurbo" xml:space="preserve"><value>AMD doesn't publish the max turbo via CPUID: the measurement shows the real one</value></data>
+  <data name="Cpu.ApertaTodos" xml:space="preserve"><value>Loads them all</value></data>
+  <data name="Cpu.Assinatura" xml:space="preserve"><value>Signature</value></data>
+  <data name="Cpu.Associatividade" xml:space="preserve"><value>Associativity</value></data>
+  <data name="Cpu.Ausente" xml:space="preserve"><value>Absent. </value></data>
+  <data name="Cpu.BaseFabrica" xml:space="preserve"><value>factory base</value></data>
+  <data name="Cpu.BaseFabricaGhz" xml:space="preserve"><value>Factory base (GHz)</value></data>
+  <data name="Cpu.BaseNGhzRegistro" xml:space="preserve"><value>base {0:0.00} GHz (registry ~MHz)</value></data>
+  <data name="Cpu.CacheL3" xml:space="preserve"><value>L3 cache</value></data>
+  <data name="Cpu.Caches" xml:space="preserve"><value>Caches</value></data>
+  <data name="Cpu.CadaDegrauAndarMemoria" xml:space="preserve"><value>Each step is a memory level: L1, L2, L3 and, at the top, RAM.</value></data>
+  <data name="Cpu.CadaNucleoSozinhoThread" xml:space="preserve"><value>Each core alone, with the thread pinned to it: real GHz.</value></data>
+  <data name="Cpu.CancelarMedicao" xml:space="preserve"><value>Cancel measurement</value></data>
+  <data name="Cpu.CarregadorEstaDesligadoBateria" xml:space="preserve"><value>The charger is unplugged. On battery the processor is limited and the measurement doesn't represent plugged-in performance.
+
+Measure anyway?</value></data>
+  <data name="Cpu.CliqueMedirCronometrarCada" xml:space="preserve"><value>Click Measure to time each core.</value></data>
+  <data name="Cpu.ClockAguentaTodosTrabalhando" xml:space="preserve"><value>Does the clock hold with all working?</value></data>
+  <data name="Cpu.ComoCadaMedicaoFunciona" xml:space="preserve"><value>How each measurement works</value></data>
+  <data name="Cpu.ComparadoMedicaoAnterior" xml:space="preserve"><value>Compared with the previous measurement</value></data>
+  <data name="Cpu.Compartilhada" xml:space="preserve"><value>Shared by</value></data>
+  <data name="Cpu.ConversaEntreNucleos" xml:space="preserve"><value>Talk between cores</value></data>
+  <data name="Cpu.Corrige" xml:space="preserve"><value>Fixes</value></data>
+  <data name="Cpu.CpuidFolha0" xml:space="preserve"><value>CPUID leaf 0</value></data>
+  <data name="Cpu.CpuidFolha1" xml:space="preserve"><value>CPUID leaf 1</value></data>
+  <data name="Cpu.CpuidFolha1Ecx" xml:space="preserve"><value>CPUID leaf 1, ECX bit 31</value></data>
+  <data name="Cpu.CpuidLNN" xml:space="preserve"><value>CPUID L{0} {1}</value></data>
+  <data name="Cpu.Cronometra" xml:space="preserve"><value>Times</value></data>
+  <data name="Cpu.CurvaCurtaBateriaRapida" xml:space="preserve"><value>Short curve from the quick run (a few seconds). Run the sustained test to see the behavior over 30–60 s.</value></data>
+  <data name="Cpu.CurvaLatenciaCacheMemoria" xml:space="preserve"><value>Cache and memory latency curve</value></data>
+  <data name="Cpu.CurvaNaoMostrouDegraus" xml:space="preserve"><value>The curve showed no clear steps (something heavy running during the measurement?).</value></data>
+  <data name="Cpu.DadosCadaVezMaiores" xml:space="preserve"><value>Ever larger data shows L1, L2, L3 and RAM.</value></data>
+  <data name="Cpu.DegrausSaoAchadosCurva" xml:space="preserve"><value>The steps are found on the curve, without looking at CPUID, and then compared with it. Above a few MB the cost of </value></data>
+  <data name="Cpu.DepoisCliqueMedirNovo" xml:space="preserve"><value>Then click Measure again to compare before and after.</value></data>
+  <data name="Cpu.DesfazerUltimaCorrecao" xml:space="preserve"><value>Undo the last fix</value></data>
+  <data name="Cpu.DiferencasAbaixo2Sao" xml:space="preserve"><value>Differences below 2% are measurement noise.</value></data>
+  <data name="Cpu.DispersaoNEntreNucleos" xml:space="preserve"><value>{0:0.#}% spread between performance cores</value></data>
+  <data name="Cpu.DividemMesmaL3Ccx" xml:space="preserve"><value>share the same L3 (CCX on AMD) or the same E-core cluster (Intel).
+
+</value></data>
+  <data name="Cpu.DuracaoTesteSustentadoSegundos" xml:space="preserve"><value>Sustained test duration, in seconds</value></data>
+  <data name="Cpu.EscalaLogaritmicaNosDois" xml:space="preserve"><value>Logarithmic scale on both axes. Above a few MB the cost of page translation (TLB) also comes in, as in any real program.</value></data>
+  <data name="Cpu.EscalaMultiThreadN" xml:space="preserve"><value>Multi-thread scaling: {0:0.0}× a single core, with {1} threads ({2:0}% of ideal). With this load each SMT thread also runs at 1 operation per cycle; real games scale less.</value></data>
+  <data name="Cpu.EscalaVariasThreads" xml:space="preserve"><value>And scaling with several threads?</value></data>
+  <data name="Cpu.Fabricante" xml:space="preserve"><value>Manufacturer</value></data>
+  <data name="Cpu.FichaTecnicaCpuidCaches" xml:space="preserve"><value>Spec sheet: CPUID, caches and features</value></data>
+  <data name="Cpu.FoiLidoOuMedido" xml:space="preserve"><value>What was read or measured and what to do. After fixing, measure again.</value></data>
+  <data name="Cpu.FrequenciaCadeiaSomasXor" xml:space="preserve"><value>Frequency: a chain of additions and XORs where each operation waits for the previous one. Each takes exactly 1 cycle, so </value></data>
+  <data name="Cpu.FrequenciaMediaNucleosLongo" xml:space="preserve"><value>Average core frequency over the test</value></data>
+  <data name="Cpu.FrequenciasAnunciadasIndisponiveis" xml:space="preserve"><value>Advertised frequencies unavailable.</value></data>
+  <data name="Cpu.GhzCadaNucleo" xml:space="preserve"><value>GHz of each core</value></data>
+  <data name="Cpu.GruposWindows" xml:space="preserve"><value>Windows groups</value></data>
+  <data name="Cpu.GuardadoNMedicaoN" xml:space="preserve"><value>Saved in {0}. Measurement of {1:0} s.</value></data>
+  <data name="Cpu.Hipervisor" xml:space="preserve"><value>Hypervisor</value></data>
+  <data name="Cpu.IdaAteRam" xml:space="preserve"><value>Trip to RAM</value></data>
+  <data name="Cpu.InterlockedCompareexchangeMetadeTemp" xml:space="preserve"><value>(Interlocked.CompareExchange). Half the round-trip time is the communication cost. Groups with low latency between them </value></data>
+  <data name="Cpu.IssoQuerDizer" xml:space="preserve"><value>What does this mean?</value></data>
+  <data name="Cpu.L3CompartilhadaTodos" xml:space="preserve"><value>; one L3 shared by all</value></data>
+  <data name="Cpu.LatenciaListaLigadaEmbaralhada" xml:space="preserve"><value>Latency: a shuffled linked list (each position holds the address of the next, in random order) walked from 4 KB to </value></data>
+  <data name="Cpu.LendoProcessador" xml:space="preserve"><value>Reading the processor…</value></data>
+  <data name="Cpu.Linha" xml:space="preserve"><value>Line</value></data>
+  <data name="Cpu.LongeLento" xml:space="preserve"><value>far (slow)</value></data>
+  <data name="Cpu.MaisRapido" xml:space="preserve"><value>the fastest</value></data>
+  <data name="Cpu.MaisRapidoNucleoN" xml:space="preserve"><value>Fastest: core {0} at {1:0.00} GHz (the "preferred" one)</value></data>
+  <data name="Cpu.MapaCalorLatenciaEntre" xml:space="preserve"><value>Heat map of latency between cores, in nanoseconds</value></data>
+  <data name="Cpu.MaximaInformadaWindowsN" xml:space="preserve"><value>max reported to Windows {0:0.00} GHz (CallNtPowerInformation)</value></data>
+  <data name="Cpu.MecaVerCurvaLatencia" xml:space="preserve"><value>Measure to see the latency curve.</value></data>
+  <data name="Cpu.MedeCache" xml:space="preserve"><value>Measures the cache</value></data>
+  <data name="Cpu.MediaTodosNucleosJuntos" xml:space="preserve"><value>Average of all cores together. Measure to see.</value></data>
+  <data name="Cpu.MedicaoAnterior" xml:space="preserve"><value>previous measurement</value></data>
+  <data name="Cpu.MedicaoCanceladaNadaFoi" xml:space="preserve"><value>Measurement canceled. Nothing was saved.</value></data>
+  <data name="Cpu.MedicaoConcluida" xml:space="preserve"><value>Measurement finished.</value></data>
+  <data name="Cpu.MedicaoFalhouN" xml:space="preserve"><value>The measurement failed: {0}</value></data>
+  <data name="Cpu.MedicaoMostrou" xml:space="preserve"><value>What the measurement showed</value></data>
+  <data name="Cpu.MedidoMasNaoFoi" xml:space="preserve"><value>Measured, but the result couldn't be saved: {0}</value></data>
+  <data name="Cpu.MedidoTurboGhz" xml:space="preserve"><value>Measured at turbo (GHz)</value></data>
+  <data name="Cpu.Medio" xml:space="preserve"><value>medium</value></data>
+  <data name="Cpu.Medir20S" xml:space="preserve"><value>Measure (≈ 20 s)</value></data>
+  <data name="Cpu.MedirNaoMudaNada" xml:space="preserve"><value>Measuring changes nothing on the PC. No kernel driver: just the CPUID instruction, Windows APIs and a stopwatch.</value></data>
+  <data name="Cpu.MemoriaRapidissimaDentroChip" xml:space="preserve"><value>Very fast memory inside the chip.</value></data>
+  <data name="Cpu.Microarquitetura" xml:space="preserve"><value>Microarchitecture</value></data>
+  <data name="Cpu.ModeloForaTabelaNao" xml:space="preserve"><value>Model not in the table (we don't guess)</value></data>
+  <data name="Cpu.N1Thread" xml:space="preserve"><value>1 thread</value></data>
+  <data name="Cpu.N1ThreadNucleo" xml:space="preserve"><value>1 thread per core</value></data>
+  <data name="Cpu.N2ThreadsNucleo" xml:space="preserve"><value> (2 threads per core)</value></data>
+  <data name="Cpu.N2ThreadsNucleoSmt" xml:space="preserve"><value>2 threads per core (SMT)</value></data>
+  <data name="Cpu.N512MbPreBuscador" xml:space="preserve"><value>512 MB. The prefetcher can't guess, so the time per hop is that of whoever holds that size: L1, L2, L3 or RAM. </value></data>
+  <data name="Cpu.NadaDissoUsaDriver" xml:space="preserve"><value>None of this uses a kernel driver or reads processor registers (MSR): only the CPUID instruction, Windows power and </value></data>
+  <data name="Cpu.Nao" xml:space="preserve"><value>No</value></data>
   <data name="Cpu.NavSubtitle" xml:space="preserve"><value>Reverse engineering of your processor: what it is, how it behaves and what holds it back.</value></data>
   <data name="Cpu.NavTitle" xml:space="preserve"><value>Processor</value></data>
+  <data name="Cpu.NBlocosL3N" xml:space="preserve"><value>; {0} L3 blocks ({1})</value></data>
+  <data name="Cpu.NBytes" xml:space="preserve"><value>{0} bytes</value></data>
+  <data name="Cpu.NCodinomeNN" xml:space="preserve"><value>{0} · codename {1} · {2}</value></data>
+  <data name="Cpu.NDesempenhoNEconomia" xml:space="preserve"><value>{0} performance + {1} efficiency</value></data>
+  <data name="Cpu.NenhumaMedicaoGuardadaAinda" xml:space="preserve"><value>No measurement saved yet.</value></data>
+  <data name="Cpu.NFoiVistoN" xml:space="preserve"><value>{0}
+
+What was seen: {1}
+
+What NEXUS changes: {2}. The previous value goes to the journal and can be undone here or on the Apply page.
+
+</value></data>
+  <data name="Cpu.Nivel" xml:space="preserve"><value>Level</value></data>
+  <data name="Cpu.NMedicoesGuardadasN" xml:space="preserve"><value>{0} measurements saved in {1}. The last: {2:dd/MM HH:mm}.</value></data>
+  <data name="Cpu.NNNs" xml:space="preserve"><value>{0} · {1} ns</value></data>
+  <data name="Cpu.NNNsAte" xml:space="preserve"><value>{0} · {1} ns · up to ~{2}</value></data>
+  <data name="Cpu.NNNsN" xml:space="preserve"><value>{0} ~{1:0.#} ns ({2:0} cycles) up to ~{3}</value></data>
+  <data name="Cpu.NNNsN2" xml:space="preserve"><value>{0} ~{1:0} ns ({2:0} cycles)</value></data>
+  <data name="Cpu.NNucleosNProcessadores" xml:space="preserve"><value>{0} cores, {1} logical processors{2}</value></data>
+  <data name="Cpu.NNucleosPN" xml:space="preserve"><value>{0} P cores and {1} E cores, {2} logical processors</value></data>
+  <data name="Cpu.NotebookBateria" xml:space="preserve"><value>Laptop on battery</value></data>
+  <data name="Cpu.NotebookEstaBateriaLigue" xml:space="preserve"><value>The laptop is on battery. Plug in the charger before measuring: on battery the processor is limited.</value></data>
+  <data name="Cpu.NotebookMecaSempreTomada" xml:space="preserve"><value>Laptop: always measure plugged in, with the same manufacturer profile, to compare before and after.</value></data>
+  <data name="Cpu.NPNNucleos" xml:space="preserve"><value>{0} P + {1} E cores / {2} threads</value></data>
+  <data name="Cpu.NSobreBase" xml:space="preserve"><value>{0:+0;-0}% over base</value></data>
+  <data name="Cpu.NucleoMaisRapido" xml:space="preserve"><value>Fastest core</value></data>
+  <data name="Cpu.NucleoN" xml:space="preserve"><value>core {0}</value></data>
+  <data name="Cpu.NucleoNN" xml:space="preserve"><value>Core {0}{1}</value></data>
+  <data name="Cpu.NucleoNucleoDuasThreads" xml:space="preserve"><value>Core to core: two threads pinned to different cores pass a value back and forth in a single cache line </value></data>
+  <data name="Cpu.NucleosEconomia" xml:space="preserve"><value>efficiency cores (E)</value></data>
+  <data name="Cpu.NucleosNN" xml:space="preserve"><value>cores {0}–{1}</value></data>
+  <data name="Cpu.NucleosThreads" xml:space="preserve"><value>Cores / threads</value></data>
+  <data name="Cpu.NumerosCadaDegrau" xml:space="preserve"><value>The numbers of each step</value></data>
+  <data name="Cpu.NumerosNanossegundosTempoDado" xml:space="preserve"><value>Numbers in nanoseconds: the time for data to go from one core to another.</value></data>
+  <data name="Cpu.NVias" xml:space="preserve"><value>{0} ways</value></data>
+  <data name="Cpu.OperacoesSegundoCiclosSegundo" xml:space="preserve"><value>operations per second = cycles per second = real GHz, with turbo. The thread is pinned to one core at a time (Windows </value></data>
+  <data name="Cpu.Outros" xml:space="preserve"><value>the others</value></data>
+  <data name="Cpu.PertoRapido" xml:space="preserve"><value>near (fast)</value></data>
+  <data name="Cpu.Precisa2NucleosMedidos" xml:space="preserve"><value>Needs 2+ measured cores.</value></data>
+  <data name="Cpu.Presente" xml:space="preserve"><value>Present. </value></data>
+  <data name="Cpu.ProcessadorLogicoNN" xml:space="preserve"><value>Logical processor {0}{1}</value></data>
+  <data name="Cpu.ProgressoMedicao" xml:space="preserve"><value>Measurement progress</value></data>
+  <data name="Cpu.QuantoMaisLongeDado" xml:space="preserve"><value>The farther the data, the longer it takes</value></data>
+  <data name="Cpu.QuantoProcessadorEsperaMemoria" xml:space="preserve"><value>How long the processor waits for memory. Lower is better.</value></data>
+  <data name="Cpu.QuedaDepoisInicioLimite" xml:space="preserve"><value>A drop after the start is a heat or power limit.</value></data>
+  <data name="Cpu.RapidaNNN" xml:space="preserve"><value>Quick ({0:dd/MM HH:mm} → {1:dd/MM HH:mm}): {2}</value></data>
+  <data name="Cpu.ReaisEscalamMenos" xml:space="preserve"><value>real games scale less.
+
+</value></data>
+  <data name="Cpu.RecursosPasseMouseVer" xml:space="preserve"><value>Features (hover to see what each one does)</value></data>
+  <data name="Cpu.RodeTesteSustentadoVer" xml:space="preserve"><value>Run the sustained test to see frequency over time.</value></data>
+  <data name="Cpu.SegundoQuedaDepoisPrimeiros" xml:space="preserve"><value>second. The drop after the first seconds shows the power or temperature limit. Multi-thread scaling compares </value></data>
+  <data name="Cpu.SegurandoProcessador" xml:space="preserve"><value>Holding the processor back</value></data>
+  <data name="Cpu.SeguraProcessador" xml:space="preserve"><value>What holds the processor back</value></data>
+  <data name="Cpu.SemFixacaoNucleo" xml:space="preserve"><value>, no core pinning</value></data>
+  <data name="Cpu.SemParesMedidos" xml:space="preserve"><value>No measured pairs.</value></data>
+  <data name="Cpu.SeuProcessador" xml:space="preserve"><value>Your processor</value></data>
+  <data name="Cpu.SimWindowsRodaSobre" xml:space="preserve"><value>Yes: Windows runs on Hyper-V (VBS, WSL2 or a virtual machine)</value></data>
+  <data name="Cpu.So1PenteMemoria" xml:space="preserve"><value>Only 1 memory stick: the processor gets half the possible bandwidth.</value></data>
+  <data name="Cpu.So1PenteMemoria2" xml:space="preserve"><value>Only 1 memory stick: single channel. That doesn't change the latency above, but halves the bandwidth (see the Memory lab).</value></data>
+  <data name="Cpu.SobreChip" xml:space="preserve"><value>About the chip</value></data>
+  <data name="Cpu.SoPlanoEnergiaSua" xml:space="preserve"><value>Only the power plan, with your confirmation and undo.</value></data>
+  <data name="Cpu.SustentadaN" xml:space="preserve"><value>Sustained: {0}</value></data>
+  <data name="Cpu.SustentadoMesmaCadeiaTodos" xml:space="preserve"><value>Sustained: the same chain on all logical processors at once, for 30 to 60 s, recording the average frequency every </value></data>
+  <data name="Cpu.TabelaNexus" xml:space="preserve"><value>NEXUS table</value></data>
+  <data name="Cpu.TabelaNexusSdmIntel" xml:space="preserve"><value>NEXUS table (Intel SDM, AMD PPR)</value></data>
+  <data name="Cpu.TamanhoChipDeclara" xml:space="preserve"><value>size the chip declares</value></data>
+  <data name="Cpu.TesteAnterior" xml:space="preserve"><value>previous test</value></data>
+  <data name="Cpu.TesteSustentado" xml:space="preserve"><value>Sustained test</value></data>
+  <data name="Cpu.TesteSustentado2" xml:space="preserve"><value>Sustained test of</value></data>
+  <data name="Cpu.TesteSustentadoConcluido" xml:space="preserve"><value>Sustained test finished.</value></data>
+  <data name="Cpu.ThreadFixadaNucleo" xml:space="preserve"><value>, thread pinned to the core</value></data>
+  <data name="Cpu.TodosCarregadosNGhz" xml:space="preserve"><value>with all loaded: {0:0.00} GHz</value></data>
+  <data name="Cpu.TodosJuntosNucleoSozinho" xml:space="preserve"><value>all together with a single core; with this ideal load, each SMT thread also runs at 1 operation per cycle, so </value></data>
+  <data name="Cpu.TodosNucleosJuntosClock" xml:space="preserve"><value>All cores together: does the clock drop with heat or power?</value></data>
+  <data name="Cpu.TodosNucleosVaoTrabalhar" xml:space="preserve"><value>All cores will work at maximum for {0} s. The fan will speed up and the PC may be slow during that time. You can cancel at any time.
+
+Start?</value></data>
+  <data name="Cpu.TodosTrabalhando" xml:space="preserve"><value>With all working</value></data>
+  <data name="Cpu.Topologia" xml:space="preserve"><value>Topology</value></data>
+  <data name="Cpu.TopologiaWindowsCronometroAlta" xml:space="preserve"><value>topology APIs and the high-resolution stopwatch.</value></data>
+  <data name="Cpu.Total" xml:space="preserve"><value>total</value></data>
+  <data name="Cpu.TraducaoPaginasTlbComo" xml:space="preserve"><value>page translation (TLB) also comes in, as in any real program.
+
+</value></data>
+  <data name="Cpu.TurboAnunciadoNGhz" xml:space="preserve"><value>advertised turbo {0:0.00} GHz (CPUID 0x16)</value></data>
+  <data name="Cpu.Uns20SegundosGhz" xml:space="preserve"><value>In about 20 seconds: GHz of each core, cache, memory and core to core. Close games first.</value></data>
+  <data name="Cpu.WindowsDeclaraNBlocos" xml:space="preserve"><value> Windows declares {0} L3 blocks.</value></data>
+  <data name="Cpu.WindowsLNN" xml:space="preserve"><value>Windows L{0} {1}</value></data>
+  <data name="Cpu.WindowsMandaTarefasMais" xml:space="preserve"><value>Windows sends the heaviest tasks to the fastest core (the "preferred" one). A small difference between cores is normal.</value></data>
+  <data name="Cpu.WindowsValeMelhorVarias" xml:space="preserve"><value>affinity) and the best of several samples counts.
+
+</value></data>
   <data name="Disk.AbraExplorerOuUse" xml:space="preserve"><value>Open in Explorer or use Cleanup. Nothing disappears by itself.</value></data>
   <data name="Disk.AindaSemMapaDesta" xml:space="preserve"><value>No map of this drive yet.</value></data>
   <data name="Disk.Analisado" xml:space="preserve"><value>Analyzed</value></data>

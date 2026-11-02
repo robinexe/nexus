@@ -747,8 +747,191 @@ Pede permissão de administrador (aviso do Windows) e cria um ponto de restaura�
   <data name="Conv.Detectado" xml:space="preserve"><value>detectado</value></data>
   <data name="Conv.Inferido" xml:space="preserve"><value>inferido</value></data>
   <data name="Conv.Informativo" xml:space="preserve"><value>informativo</value></data>
+  <data name="Cpu.AindaNaoMedido" xml:space="preserve"><value>Ainda não medido.</value></data>
+  <data name="Cpu.AmdNaoPublicaTurbo" xml:space="preserve"><value>a AMD não publica o turbo máximo pelo CPUID: a medição mostra o real</value></data>
+  <data name="Cpu.ApertaTodos" xml:space="preserve"><value>Aperta todos</value></data>
+  <data name="Cpu.Assinatura" xml:space="preserve"><value>Assinatura</value></data>
+  <data name="Cpu.Associatividade" xml:space="preserve"><value>Associatividade</value></data>
+  <data name="Cpu.Ausente" xml:space="preserve"><value>Ausente. </value></data>
+  <data name="Cpu.BaseFabrica" xml:space="preserve"><value>base de fábrica</value></data>
+  <data name="Cpu.BaseFabricaGhz" xml:space="preserve"><value>Base de fábrica (GHz)</value></data>
+  <data name="Cpu.BaseNGhzRegistro" xml:space="preserve"><value>base {0:0.00} GHz (registro ~MHz)</value></data>
+  <data name="Cpu.CacheL3" xml:space="preserve"><value>Cache L3</value></data>
+  <data name="Cpu.Caches" xml:space="preserve"><value>Caches</value></data>
+  <data name="Cpu.CadaDegrauAndarMemoria" xml:space="preserve"><value>Cada degrau é um andar da memória: L1, L2, L3 e, no alto, a RAM.</value></data>
+  <data name="Cpu.CadaNucleoSozinhoThread" xml:space="preserve"><value>Cada núcleo sozinho, com a thread presa nele: GHz reais.</value></data>
+  <data name="Cpu.CancelarMedicao" xml:space="preserve"><value>Cancelar medição</value></data>
+  <data name="Cpu.CarregadorEstaDesligadoBateria" xml:space="preserve"><value>O carregador está desligado. Na bateria o processador é limitado e a medição não representa o desempenho na tomada.
+
+Medir assim mesmo?</value></data>
+  <data name="Cpu.CliqueMedirCronometrarCada" xml:space="preserve"><value>Clique em Medir para cronometrar cada núcleo.</value></data>
+  <data name="Cpu.ClockAguentaTodosTrabalhando" xml:space="preserve"><value>O clock aguenta com todos trabalhando?</value></data>
+  <data name="Cpu.ComoCadaMedicaoFunciona" xml:space="preserve"><value>Como cada medição funciona</value></data>
+  <data name="Cpu.ComparadoMedicaoAnterior" xml:space="preserve"><value>Comparado com a medição anterior</value></data>
+  <data name="Cpu.Compartilhada" xml:space="preserve"><value>Compartilhada por</value></data>
+  <data name="Cpu.ConversaEntreNucleos" xml:space="preserve"><value>Conversa entre núcleos</value></data>
+  <data name="Cpu.Corrige" xml:space="preserve"><value>Corrige</value></data>
+  <data name="Cpu.CpuidFolha0" xml:space="preserve"><value>CPUID folha 0</value></data>
+  <data name="Cpu.CpuidFolha1" xml:space="preserve"><value>CPUID folha 1</value></data>
+  <data name="Cpu.CpuidFolha1Ecx" xml:space="preserve"><value>CPUID folha 1, ECX bit 31</value></data>
+  <data name="Cpu.CpuidLNN" xml:space="preserve"><value>CPUID L{0} {1}</value></data>
+  <data name="Cpu.Cronometra" xml:space="preserve"><value>Cronometra</value></data>
+  <data name="Cpu.CurvaCurtaBateriaRapida" xml:space="preserve"><value>Curva curta da bateria rápida (alguns segundos). Rode o teste sustentado para ver o comportamento em 30–60 s.</value></data>
+  <data name="Cpu.CurvaLatenciaCacheMemoria" xml:space="preserve"><value>Curva de latência do cache e da memória</value></data>
+  <data name="Cpu.CurvaNaoMostrouDegraus" xml:space="preserve"><value>A curva não mostrou degraus claros (algo pesado rodando durante a medição?).</value></data>
+  <data name="Cpu.DadosCadaVezMaiores" xml:space="preserve"><value>Dados cada vez maiores mostram L1, L2, L3 e a RAM.</value></data>
+  <data name="Cpu.DegrausSaoAchadosCurva" xml:space="preserve"><value>Os degraus são achados na curva, sem olhar o CPUID, e depois comparados com ele. Acima de alguns MB entra também o custo de </value></data>
+  <data name="Cpu.DepoisCliqueMedirNovo" xml:space="preserve"><value>Depois, clique em Medir de novo para comparar antes e depois.</value></data>
+  <data name="Cpu.DesfazerUltimaCorrecao" xml:space="preserve"><value>Desfazer a última correção</value></data>
+  <data name="Cpu.DiferencasAbaixo2Sao" xml:space="preserve"><value>Diferenças abaixo de 2% são ruído de medição.</value></data>
+  <data name="Cpu.DispersaoNEntreNucleos" xml:space="preserve"><value>dispersão de {0:0.#}% entre os núcleos de desempenho</value></data>
+  <data name="Cpu.DividemMesmaL3Ccx" xml:space="preserve"><value>dividem a mesma L3 (CCX na AMD) ou o mesmo bloco de núcleos E (Intel).
+
+</value></data>
+  <data name="Cpu.DuracaoTesteSustentadoSegundos" xml:space="preserve"><value>Duração do teste sustentado, em segundos</value></data>
+  <data name="Cpu.EscalaLogaritmicaNosDois" xml:space="preserve"><value>Escala logarítmica nos dois eixos. Acima de alguns MB entra também o custo de tradução de páginas (TLB), como em qualquer programa real.</value></data>
+  <data name="Cpu.EscalaMultiThreadN" xml:space="preserve"><value>Escala multi-thread: {0:0.0}× um núcleo sozinho, com {1} threads ({2:0}% do ideal). Com esta carga cada thread SMT também roda a 1 operação por ciclo; jogos reais escalam menos.</value></data>
+  <data name="Cpu.EscalaVariasThreads" xml:space="preserve"><value>E a escala com várias threads?</value></data>
+  <data name="Cpu.Fabricante" xml:space="preserve"><value>Fabricante</value></data>
+  <data name="Cpu.FichaTecnicaCpuidCaches" xml:space="preserve"><value>Ficha técnica: CPUID, caches e recursos</value></data>
+  <data name="Cpu.FoiLidoOuMedido" xml:space="preserve"><value>O que foi lido ou medido e o que fazer. Depois de corrigir, meça de novo.</value></data>
+  <data name="Cpu.FrequenciaCadeiaSomasXor" xml:space="preserve"><value>Frequência: uma cadeia de somas e XOR em que cada operação espera a anterior. Cada uma leva exatamente 1 ciclo, então </value></data>
+  <data name="Cpu.FrequenciaMediaNucleosLongo" xml:space="preserve"><value>Frequência média dos núcleos ao longo do teste</value></data>
+  <data name="Cpu.FrequenciasAnunciadasIndisponiveis" xml:space="preserve"><value>Frequências anunciadas indisponíveis.</value></data>
+  <data name="Cpu.GhzCadaNucleo" xml:space="preserve"><value>GHz de cada núcleo</value></data>
+  <data name="Cpu.GruposWindows" xml:space="preserve"><value>Grupos do Windows</value></data>
+  <data name="Cpu.GuardadoNMedicaoN" xml:space="preserve"><value>Guardado em {0}. Medição de {1:0} s.</value></data>
+  <data name="Cpu.Hipervisor" xml:space="preserve"><value>Hipervisor</value></data>
+  <data name="Cpu.IdaAteRam" xml:space="preserve"><value>Ida até a RAM</value></data>
+  <data name="Cpu.InterlockedCompareexchangeMetadeTemp" xml:space="preserve"><value>(Interlocked.CompareExchange). Metade do tempo de ida e volta é o custo de comunicação. Grupos com latência baixa entre si </value></data>
+  <data name="Cpu.IssoQuerDizer" xml:space="preserve"><value>O que isso quer dizer?</value></data>
+  <data name="Cpu.L3CompartilhadaTodos" xml:space="preserve"><value>; uma L3 compartilhada por todos</value></data>
+  <data name="Cpu.LatenciaListaLigadaEmbaralhada" xml:space="preserve"><value>Latência: uma lista ligada embaralhada (cada posição guarda o endereço da próxima, em ordem aleatória) percorrida de 4 KB a </value></data>
+  <data name="Cpu.LendoProcessador" xml:space="preserve"><value>Lendo o processador…</value></data>
+  <data name="Cpu.Linha" xml:space="preserve"><value>Linha</value></data>
+  <data name="Cpu.LongeLento" xml:space="preserve"><value>longe (lento)</value></data>
+  <data name="Cpu.MaisRapido" xml:space="preserve"><value>o mais rápido</value></data>
+  <data name="Cpu.MaisRapidoNucleoN" xml:space="preserve"><value>Mais rápido: núcleo {0} com {1:0.00} GHz (o "preferido")</value></data>
+  <data name="Cpu.MapaCalorLatenciaEntre" xml:space="preserve"><value>Mapa de calor da latência entre núcleos, em nanossegundos</value></data>
+  <data name="Cpu.MaximaInformadaWindowsN" xml:space="preserve"><value>máxima informada ao Windows {0:0.00} GHz (CallNtPowerInformation)</value></data>
+  <data name="Cpu.MecaVerCurvaLatencia" xml:space="preserve"><value>Meça para ver a curva de latência.</value></data>
+  <data name="Cpu.MedeCache" xml:space="preserve"><value>Mede o cache</value></data>
+  <data name="Cpu.MediaTodosNucleosJuntos" xml:space="preserve"><value>Média de todos os núcleos juntos. Meça para ver.</value></data>
+  <data name="Cpu.MedicaoAnterior" xml:space="preserve"><value>medição anterior</value></data>
+  <data name="Cpu.MedicaoCanceladaNadaFoi" xml:space="preserve"><value>Medição cancelada. Nada foi guardado.</value></data>
+  <data name="Cpu.MedicaoConcluida" xml:space="preserve"><value>Medição concluída.</value></data>
+  <data name="Cpu.MedicaoFalhouN" xml:space="preserve"><value>A medição falhou: {0}</value></data>
+  <data name="Cpu.MedicaoMostrou" xml:space="preserve"><value>O que a medição mostrou</value></data>
+  <data name="Cpu.MedidoMasNaoFoi" xml:space="preserve"><value>Medido, mas não foi possível guardar o resultado: {0}</value></data>
+  <data name="Cpu.MedidoTurboGhz" xml:space="preserve"><value>Medido no turbo (GHz)</value></data>
+  <data name="Cpu.Medio" xml:space="preserve"><value>médio</value></data>
+  <data name="Cpu.Medir20S" xml:space="preserve"><value>Medir (≈ 20 s)</value></data>
+  <data name="Cpu.MedirNaoMudaNada" xml:space="preserve"><value>Medir não muda nada no PC. Sem driver de kernel: só a instrução CPUID, APIs do Windows e cronômetro.</value></data>
+  <data name="Cpu.MemoriaRapidissimaDentroChip" xml:space="preserve"><value>Memória rapidíssima dentro do chip.</value></data>
+  <data name="Cpu.Microarquitetura" xml:space="preserve"><value>Microarquitetura</value></data>
+  <data name="Cpu.ModeloForaTabelaNao" xml:space="preserve"><value>Modelo fora da tabela (não chutamos)</value></data>
+  <data name="Cpu.N1Thread" xml:space="preserve"><value>1 thread</value></data>
+  <data name="Cpu.N1ThreadNucleo" xml:space="preserve"><value>1 thread por núcleo</value></data>
+  <data name="Cpu.N2ThreadsNucleo" xml:space="preserve"><value> (2 threads por núcleo)</value></data>
+  <data name="Cpu.N2ThreadsNucleoSmt" xml:space="preserve"><value>2 threads por núcleo (SMT)</value></data>
+  <data name="Cpu.N512MbPreBuscador" xml:space="preserve"><value>512 MB. O pré-buscador não consegue adivinhar, então o tempo por salto é o de quem guarda aquele tamanho: L1, L2, L3 ou RAM. </value></data>
+  <data name="Cpu.NadaDissoUsaDriver" xml:space="preserve"><value>Nada disso usa driver de kernel nem lê registradores do processador (MSR): só a instrução CPUID, as APIs de energia e </value></data>
+  <data name="Cpu.Nao" xml:space="preserve"><value>Não</value></data>
   <data name="Cpu.NavSubtitle" xml:space="preserve"><value>Engenharia reversa do seu processador: o que ele é, como se comporta e o que o segura.</value></data>
   <data name="Cpu.NavTitle" xml:space="preserve"><value>Processador</value></data>
+  <data name="Cpu.NBlocosL3N" xml:space="preserve"><value>; {0} blocos de L3 ({1})</value></data>
+  <data name="Cpu.NBytes" xml:space="preserve"><value>{0} bytes</value></data>
+  <data name="Cpu.NCodinomeNN" xml:space="preserve"><value>{0} · codinome {1} · {2}</value></data>
+  <data name="Cpu.NDesempenhoNEconomia" xml:space="preserve"><value>{0} de desempenho + {1} de economia</value></data>
+  <data name="Cpu.NenhumaMedicaoGuardadaAinda" xml:space="preserve"><value>Nenhuma medição guardada ainda.</value></data>
+  <data name="Cpu.NFoiVistoN" xml:space="preserve"><value>{0}
+
+O que foi visto: {1}
+
+O que o NEXUS muda: {2}. O valor anterior fica no diário e pode ser desfeito aqui ou na página Aplicar.
+
+</value></data>
+  <data name="Cpu.Nivel" xml:space="preserve"><value>Nível</value></data>
+  <data name="Cpu.NMedicoesGuardadasN" xml:space="preserve"><value>{0} medições guardadas em {1}. A última: {2:dd/MM HH:mm}.</value></data>
+  <data name="Cpu.NNNs" xml:space="preserve"><value>{0} · {1} ns</value></data>
+  <data name="Cpu.NNNsAte" xml:space="preserve"><value>{0} · {1} ns · até ~{2}</value></data>
+  <data name="Cpu.NNNsN" xml:space="preserve"><value>{0} ~{1:0.#} ns ({2:0} ciclos) até ~{3}</value></data>
+  <data name="Cpu.NNNsN2" xml:space="preserve"><value>{0} ~{1:0} ns ({2:0} ciclos)</value></data>
+  <data name="Cpu.NNucleosNProcessadores" xml:space="preserve"><value>{0} núcleos, {1} processadores lógicos{2}</value></data>
+  <data name="Cpu.NNucleosPN" xml:space="preserve"><value>{0} núcleos P e {1} núcleos E, {2} processadores lógicos</value></data>
+  <data name="Cpu.NotebookBateria" xml:space="preserve"><value>Notebook na bateria</value></data>
+  <data name="Cpu.NotebookEstaBateriaLigue" xml:space="preserve"><value>O notebook está na bateria. Ligue o carregador antes de medir: na bateria o processador é limitado.</value></data>
+  <data name="Cpu.NotebookMecaSempreTomada" xml:space="preserve"><value>Notebook: meça sempre na tomada, com o mesmo perfil do fabricante, para comparar antes e depois.</value></data>
+  <data name="Cpu.NPNNucleos" xml:space="preserve"><value>{0} P + {1} E núcleos / {2} threads</value></data>
+  <data name="Cpu.NSobreBase" xml:space="preserve"><value>{0:+0;-0}% sobre a base</value></data>
+  <data name="Cpu.NucleoMaisRapido" xml:space="preserve"><value>Núcleo mais rápido</value></data>
+  <data name="Cpu.NucleoN" xml:space="preserve"><value>núcleo {0}</value></data>
+  <data name="Cpu.NucleoNN" xml:space="preserve"><value>Núcleo {0}{1}</value></data>
+  <data name="Cpu.NucleoNucleoDuasThreads" xml:space="preserve"><value>Núcleo a núcleo: duas threads presas em núcleos diferentes passam um valor de um lado para o outro numa única linha de cache </value></data>
+  <data name="Cpu.NucleosEconomia" xml:space="preserve"><value>núcleos de economia (E)</value></data>
+  <data name="Cpu.NucleosNN" xml:space="preserve"><value>núcleos {0}–{1}</value></data>
+  <data name="Cpu.NucleosThreads" xml:space="preserve"><value>Núcleos / threads</value></data>
+  <data name="Cpu.NumerosCadaDegrau" xml:space="preserve"><value>Os números de cada degrau</value></data>
+  <data name="Cpu.NumerosNanossegundosTempoDado" xml:space="preserve"><value>Números em nanossegundos: o tempo de um dado ir de um núcleo a outro.</value></data>
+  <data name="Cpu.NVias" xml:space="preserve"><value>{0} vias</value></data>
+  <data name="Cpu.OperacoesSegundoCiclosSegundo" xml:space="preserve"><value>operações por segundo = ciclos por segundo = GHz reais, com turbo. A thread fica presa em um núcleo por vez (afinidade do </value></data>
+  <data name="Cpu.Outros" xml:space="preserve"><value>os outros</value></data>
+  <data name="Cpu.PertoRapido" xml:space="preserve"><value>perto (rápido)</value></data>
+  <data name="Cpu.Precisa2NucleosMedidos" xml:space="preserve"><value>Precisa de 2+ núcleos medidos.</value></data>
+  <data name="Cpu.Presente" xml:space="preserve"><value>Presente. </value></data>
+  <data name="Cpu.ProcessadorLogicoNN" xml:space="preserve"><value>Processador lógico {0}{1}</value></data>
+  <data name="Cpu.ProgressoMedicao" xml:space="preserve"><value>Progresso da medição</value></data>
+  <data name="Cpu.QuantoMaisLongeDado" xml:space="preserve"><value>Quanto mais longe o dado, mais demora</value></data>
+  <data name="Cpu.QuantoProcessadorEsperaMemoria" xml:space="preserve"><value>Quanto o processador espera a memória. Menor é melhor.</value></data>
+  <data name="Cpu.QuedaDepoisInicioLimite" xml:space="preserve"><value>Uma queda depois do início é limite de calor ou de potência.</value></data>
+  <data name="Cpu.RapidaNNN" xml:space="preserve"><value>Rápida ({0:dd/MM HH:mm} → {1:dd/MM HH:mm}): {2}</value></data>
+  <data name="Cpu.ReaisEscalamMenos" xml:space="preserve"><value>reais escalam menos.
+
+</value></data>
+  <data name="Cpu.RecursosPasseMouseVer" xml:space="preserve"><value>Recursos (passe o mouse para ver o que cada um faz)</value></data>
+  <data name="Cpu.RodeTesteSustentadoVer" xml:space="preserve"><value>Rode o teste sustentado para ver a frequência no tempo.</value></data>
+  <data name="Cpu.SegundoQuedaDepoisPrimeiros" xml:space="preserve"><value>segundo. A queda depois dos primeiros segundos mostra o limite de potência ou de temperatura. A escala multi-thread compara </value></data>
+  <data name="Cpu.SegurandoProcessador" xml:space="preserve"><value>Segurando o processador</value></data>
+  <data name="Cpu.SeguraProcessador" xml:space="preserve"><value>O que segura o processador</value></data>
+  <data name="Cpu.SemFixacaoNucleo" xml:space="preserve"><value>, sem fixação de núcleo</value></data>
+  <data name="Cpu.SemParesMedidos" xml:space="preserve"><value>Sem pares medidos.</value></data>
+  <data name="Cpu.SeuProcessador" xml:space="preserve"><value>Seu processador</value></data>
+  <data name="Cpu.SimWindowsRodaSobre" xml:space="preserve"><value>Sim: o Windows roda sobre o Hyper-V (VBS, WSL2 ou máquina virtual)</value></data>
+  <data name="Cpu.So1PenteMemoria" xml:space="preserve"><value>Só 1 pente de memória: o processador recebe metade da largura de banda possível.</value></data>
+  <data name="Cpu.So1PenteMemoria2" xml:space="preserve"><value>Só 1 pente de memória: canal único. Isso não muda a latência acima, mas corta pela metade a largura de banda (veja o Laboratório de memória).</value></data>
+  <data name="Cpu.SobreChip" xml:space="preserve"><value>Sobre o chip</value></data>
+  <data name="Cpu.SoPlanoEnergiaSua" xml:space="preserve"><value>Só o plano de energia, com sua confirmação e desfazer.</value></data>
+  <data name="Cpu.SustentadaN" xml:space="preserve"><value>Sustentada: {0}</value></data>
+  <data name="Cpu.SustentadoMesmaCadeiaTodos" xml:space="preserve"><value>Sustentado: a mesma cadeia em todos os processadores lógicos ao mesmo tempo, por 30 a 60 s, anotando a frequência média a cada </value></data>
+  <data name="Cpu.TabelaNexus" xml:space="preserve"><value>Tabela NEXUS</value></data>
+  <data name="Cpu.TabelaNexusSdmIntel" xml:space="preserve"><value>Tabela NEXUS (SDM Intel, PPR AMD)</value></data>
+  <data name="Cpu.TamanhoChipDeclara" xml:space="preserve"><value>tamanho que o chip declara</value></data>
+  <data name="Cpu.TesteAnterior" xml:space="preserve"><value>teste anterior</value></data>
+  <data name="Cpu.TesteSustentado" xml:space="preserve"><value>Teste sustentado</value></data>
+  <data name="Cpu.TesteSustentado2" xml:space="preserve"><value>Teste sustentado de</value></data>
+  <data name="Cpu.TesteSustentadoConcluido" xml:space="preserve"><value>Teste sustentado concluído.</value></data>
+  <data name="Cpu.ThreadFixadaNucleo" xml:space="preserve"><value>, thread fixada no núcleo</value></data>
+  <data name="Cpu.TodosCarregadosNGhz" xml:space="preserve"><value>com todos carregados: {0:0.00} GHz</value></data>
+  <data name="Cpu.TodosJuntosNucleoSozinho" xml:space="preserve"><value>todos juntos com um núcleo sozinho; com esta carga ideal, cada thread SMT também roda a 1 operação por ciclo, então jogos </value></data>
+  <data name="Cpu.TodosNucleosJuntosClock" xml:space="preserve"><value>Todos os núcleos juntos: o clock cai com calor ou potência?</value></data>
+  <data name="Cpu.TodosNucleosVaoTrabalhar" xml:space="preserve"><value>Todos os núcleos vão trabalhar no máximo por {0} s. A ventoinha vai acelerar e o PC pode ficar lento nesse tempo. Pode cancelar a qualquer momento.
+
+Começar?</value></data>
+  <data name="Cpu.TodosTrabalhando" xml:space="preserve"><value>Com todos trabalhando</value></data>
+  <data name="Cpu.Topologia" xml:space="preserve"><value>Topologia</value></data>
+  <data name="Cpu.TopologiaWindowsCronometroAlta" xml:space="preserve"><value>topologia do Windows e o cronômetro de alta resolução.</value></data>
+  <data name="Cpu.Total" xml:space="preserve"><value>total</value></data>
+  <data name="Cpu.TraducaoPaginasTlbComo" xml:space="preserve"><value>tradução de páginas (TLB), como em qualquer programa real.
+
+</value></data>
+  <data name="Cpu.TurboAnunciadoNGhz" xml:space="preserve"><value>turbo anunciado {0:0.00} GHz (CPUID 0x16)</value></data>
+  <data name="Cpu.Uns20SegundosGhz" xml:space="preserve"><value>Em uns 20 segundos: GHz de cada núcleo, cache, memória e núcleo a núcleo. Feche jogos antes.</value></data>
+  <data name="Cpu.WindowsDeclaraNBlocos" xml:space="preserve"><value> O Windows declara {0} blocos de L3.</value></data>
+  <data name="Cpu.WindowsLNN" xml:space="preserve"><value>Windows L{0} {1}</value></data>
+  <data name="Cpu.WindowsMandaTarefasMais" xml:space="preserve"><value>O Windows manda as tarefas mais pesadas para o núcleo mais rápido (o "preferido"). Diferença pequena entre núcleos é normal.</value></data>
+  <data name="Cpu.WindowsValeMelhorVarias" xml:space="preserve"><value>Windows) e vale a melhor de várias amostras.
+
+</value></data>
   <data name="Disk.AbraExplorerOuUse" xml:space="preserve"><value>Abra no Explorer ou use a Limpeza. Nada some sozinho.</value></data>
   <data name="Disk.AindaSemMapaDesta" xml:space="preserve"><value>Ainda sem mapa desta unidade.</value></data>
   <data name="Disk.Analisado" xml:space="preserve"><value>Analisado</value></data>
