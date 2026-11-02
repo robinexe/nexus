@@ -234,7 +234,13 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     Resizable BAR (NVML BAR1 / D3D12 GPUUploadHeap), XMP/EXPO, MUX de notebook, link PCIe honesto (GTX 1650 = 3.0 x16);
     ajustes por jogo na página Placa de vídeo (janela por jogo, fps_max do CS2 via console.log -condebug);
     startup.run-entry.disable aposentada (redundante). 2005 testes; VM 2022/2025 verde.
-19. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+19. **02/11 madrugada (rumo à 1.0):** versão 1.0.0 (CI = 1.0.0-ci.N; tag v1.0.0 ou stable=true = estável), CHANGELOG.md,
+    termos de uso e privacidade (docs/legal, no instalador e em Ajustes › Sobre), "Abrir NEXUS.cmd" abre a cópia instalada
+    (dev: argumento "dev"), tarefas agendadas sem janela preta (nexus-task.exe, comandos fixos), README 1.0; taxa do monitor
+    volta sozinha em 15 s; vigia da interface ignora suspensão (os "travamentos" de 1038 s/9629 s eram o notebook dormindo);
+    abertura sem leituras bloqueantes na thread da interface + cronômetro no desktop-diag.log; SSD/HD por IOCTL sem admin.
+    2091 testes. Depois de publicar 1.0.0: subir VersionPrefix para 1.0.1.
+20. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
