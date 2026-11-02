@@ -2082,8 +2082,271 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Priv.VoltarDesfazerOuConfiguracoes" xml:space="preserve"><value> · para voltar: Desfazer ou Configurações do Windows</value></data>
   <data name="Priv.WindowsBuildN" xml:space="preserve"><value>Windows build {0}</value></data>
   <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>O Windows não abriu as Configurações.</value></data>
+  <data name="Prog.AbreJanelaGerenciadorVoce" xml:space="preserve"><value>Abre a janela do gerenciador. Você vê tudo. Sem desfazer.</value></data>
+  <data name="Prog.AbrirConfiguracoesAplicativos" xml:space="preserve"><value>Abrir Configurações › Aplicativos</value></data>
+  <data name="Prog.AbrirDesinstaladorOficialN" xml:space="preserve"><value>Abrir o desinstalador oficial de {0}?
+
+</value></data>
+  <data name="Prog.AgoraProcurarSobrasTodos" xml:space="preserve"><value> Agora dá para procurar as sobras de todos de uma vez.</value></data>
+  <data name="Prog.AindaInstalado" xml:space="preserve"><value>Ainda instalado</value></data>
+  <data name="Prog.AindaNaoVerificado" xml:space="preserve"><value>Ainda não verificado.</value></data>
+  <data name="Prog.AindaNaoVerificado2" xml:space="preserve"><value>Ainda não verificado</value></data>
+  <data name="Prog.AltaJaVemMarcada" xml:space="preserve"><value>Alta já vem marcada. Baixa: confira antes.</value></data>
+  <data name="Prog.AltaN" xml:space="preserve"><value>Alta · {0}</value></data>
+  <data name="Prog.AndamentoN" xml:space="preserve"><value>Andamento: {0}</value></data>
+  <data name="Prog.AntesComecarCriarPonto" xml:space="preserve"><value>Antes de começar: criar um ponto de restauração (pede administrador).
+
+</value></data>
+  <data name="Prog.ApagueBuscaOuLeia" xml:space="preserve"><value>Apague a busca ou leia a lista de novo.</value></data>
+  <data name="Prog.App" xml:space="preserve"><value>App</value></data>
+  <data name="Prog.AppsMicrosoftStore" xml:space="preserve"><value>Apps da Microsoft Store</value></data>
+  <data name="Prog.Atencao" xml:space="preserve"><value> · ATENÇÃO</value></data>
+  <data name="Prog.AtencaoBibliotecasDriversFila" xml:space="preserve"><value>Atenção: bibliotecas e drivers na fila</value></data>
+  <data name="Prog.Atualiza" xml:space="preserve"><value>Atualiza</value></data>
+  <data name="Prog.AtualizacaoDisponivel" xml:space="preserve"><value>atualização disponível</value></data>
+  <data name="Prog.AtualizacoesDisponiveis" xml:space="preserve"><value>Atualizações disponíveis</value></data>
+  <data name="Prog.AtualizacoesDisponiveis2" xml:space="preserve"><value>atualizações disponíveis</value></data>
+  <data name="Prog.AtualizacoesN" xml:space="preserve"><value>Atualizações · {0}</value></data>
+  <data name="Prog.AtualizarAbreJanelaProprio" xml:space="preserve"><value>Atualizar abre a janela do próprio gerenciador (winget, Chocolatey, Scoop ou npm), que você acompanha. Chocolatey pede administrador com o aviso do Windows; Scoop e npm nunca são elevados. Atualizar programas corrige falhas de segurança; não deixa o PC mais rápido.</value></data>
+  <data name="Prog.AtualizarN" xml:space="preserve"><value>Atualizar {0}</value></data>
+  <data name="Prog.AtualizarNPacoteS" xml:space="preserve"><value>Atualizar {0} pacote(s)?
+
+</value></data>
+  <data name="Prog.AtualizarSelecionados" xml:space="preserve"><value>Atualizar selecionados</value></data>
+  <data name="Prog.AtualizarTudo" xml:space="preserve"><value>Atualizar tudo</value></data>
+  <data name="Prog.BaixaN" xml:space="preserve"><value>Baixa · {0}</value></data>
+  <data name="Prog.BuscarNomeOuEditor" xml:space="preserve"><value>Buscar por nome ou editor</value></data>
+  <data name="Prog.BuscarProgramas" xml:space="preserve"><value>Buscar programas</value></data>
+  <data name="Prog.CadaDesinstaladorOficialFornecedor" xml:space="preserve"><value>
+Cada desinstalador é o oficial do fornecedor: é ele quem remove, e o NEXUS NÃO consegue desfazer uma desinstalação </value></data>
+  <data name="Prog.CadaGerenciadorAbreNuma" xml:space="preserve"><value>
+Cada gerenciador abre numa janela visível do PowerShell, e é ele quem baixa e instala. </value></data>
+  <data name="Prog.CadaGerenciadorDizTem" xml:space="preserve"><value>Cada gerenciador diz o que tem versão nova. Só lê.</value></data>
+  <data name="Prog.CanceladoNadaFoiDesinstalado" xml:space="preserve"><value>Cancelado. Nada foi desinstalado.</value></data>
+  <data name="Prog.ChocolateyPedeAdministradorWindows" xml:space="preserve"><value> O Chocolatey pede administrador: o Windows vai mostrar o aviso antes de abrir a janela dele.</value></data>
+  <data name="Prog.Classifica" xml:space="preserve"><value>Classifica</value></data>
+  <data name="Prog.CliqueProcurarAtualizacoesNexus" xml:space="preserve"><value>Clique em "Procurar atualizações". O NEXUS só lê: pergunta a cada gerenciador o que tem versão nova.</value></data>
+  <data name="Prog.ComoNexusDecide" xml:space="preserve"><value>Como o NEXUS decide</value></data>
+  <data name="Prog.ConfiraListaConfiancaAlta" xml:space="preserve"><value>Confira a lista. As de confiança alta já vêm marcadas; as baixas, não. Nada sai do lugar sem você confirmar.</value></data>
+  <data name="Prog.CorrigeFalhasSegurancaNao" xml:space="preserve"><value>Corrige falhas de segurança. Não deixa o PC mais rápido.</value></data>
+  <data name="Prog.CriaPontoRestauracaoAntes" xml:space="preserve"><value>Cria um ponto de restauração antes do lote.</value></data>
+  <data name="Prog.CriarPontoRestauracaoAgora" xml:space="preserve"><value>Criar um ponto de restauração agora, antes de desinstalar {0} programa(s)?
+
+</value></data>
+  <data name="Prog.CriarPontoRestauracaoAntes" xml:space="preserve"><value>Criar ponto de restauração antes</value></data>
+  <data name="Prog.DadosTecnicos" xml:space="preserve"><value>Dados técnicos</value></data>
+  <data name="Prog.DeclaradoPeloFornecedorUsado" xml:space="preserve"><value>declarado pelo fornecedor: usado só na desinstalação em massa com o modo silencioso ligado</value></data>
+  <data name="Prog.DeixaDesinstaladorAtualTerminar" xml:space="preserve"><value>Deixa o desinstalador atual terminar e não abre os próximos. O NEXUS nunca fecha um desinstalador.</value></data>
+  <data name="Prog.DepoisAtual" xml:space="preserve"><value> · para depois do atual</value></data>
+  <data name="Prog.DesfazerNaoTerminouN" xml:space="preserve"><value>Desfazer não terminou: {0}</value></data>
+  <data name="Prog.DesfeitoSobrasVoltaramOnde" xml:space="preserve"><value>Desfeito: as sobras voltaram para onde estavam.</value></data>
+  <data name="Prog.Desinstala" xml:space="preserve"><value>Desinstala</value></data>
+  <data name="Prog.DesinstalacaoMassa" xml:space="preserve"><value>Desinstalação em massa</value></data>
+  <data name="Prog.Desinstalador" xml:space="preserve"><value>Desinstalador: </value></data>
+  <data name="Prog.DesinstaladorFechouMasN" xml:space="preserve"><value>O desinstalador fechou, mas {0} ainda aparece na lista. Alguns desinstaladores continuam em outra janela: termine por lá e clique em "Procurar sobras".</value></data>
+  <data name="Prog.DesinstaladorInvalido" xml:space="preserve"><value>Desinstalador inválido.</value></data>
+  <data name="Prog.DesinstaladorNAbertoSiga" xml:space="preserve"><value>Desinstalador de {0} aberto. Siga as instruções dele; quando terminar, o NEXUS confere a lista e procura as sobras.</value></data>
+  <data name="Prog.DesinstaladorNaoAbriuN" xml:space="preserve"><value>O desinstalador não abriu: {0}</value></data>
+  <data name="Prog.DesinstaladorOficialVezNao" xml:space="preserve"><value>Desinstalador oficial, um por vez. Não tem desfazer.</value></data>
+  <data name="Prog.DesinstalandoFilaAcompanheAbaixo" xml:space="preserve"><value>Desinstalando em fila. Acompanhe abaixo; nos de janela, conclua os passos do fornecedor.</value></data>
+  <data name="Prog.DesinstalarN" xml:space="preserve"><value>Desinstalar {0}</value></data>
+  <data name="Prog.DesinstalarNProgramaS" xml:space="preserve"><value>Desinstalar {0} programa(s)</value></data>
+  <data name="Prog.DesinstalarNProgramaS2" xml:space="preserve"><value>Desinstalar {0} programa(s), um de cada vez, nesta ordem?
+
+</value></data>
+  <data name="Prog.DesinstalarOficial" xml:space="preserve"><value>Desinstalar (oficial)</value></data>
+  <data name="Prog.DesinstalarSelecionados" xml:space="preserve"><value>Desinstalar selecionados</value></data>
+  <data name="Prog.DesinstaleProgramaOuEscolha" xml:space="preserve"><value>Desinstale um programa (ou escolha um na lista) e o NEXUS procura o que ficou para trás.</value></data>
+  <data name="Prog.Dia" xml:space="preserve"><value>Em dia</value></data>
+  <data name="Prog.Editor" xml:space="preserve"><value>Editor</value></data>
+  <data name="Prog.EditorNaoInformado" xml:space="preserve"><value>editor não informado</value></data>
+  <data name="Prog.ElesVaoUltimoFila" xml:space="preserve"><value>Eles vão por último na fila.</value></data>
+  <data name="Prog.EscolhaOuVariosBibliotecas" xml:space="preserve"><value>Escolha um ou vários. Bibliotecas e drivers só um a um.</value></data>
+  <data name="Prog.EscolhaProgramaLista" xml:space="preserve"><value>Escolha um programa na lista.</value></data>
+  <data name="Prog.ExigePedidoExplicitoNexus" xml:space="preserve"><value>Exige pedido explícito (o NEXUS pede por ID)</value></data>
+  <data name="Prog.Falharam" xml:space="preserve"><value>falharam</value></data>
+  <data name="Prog.FecharResumo" xml:space="preserve"><value>Fechar resumo</value></data>
+  <data name="Prog.Feito" xml:space="preserve"><value>feito</value></data>
+  <data name="Prog.FicamFora" xml:space="preserve"><value>
+Ficam de fora:
+</value></data>
+  <data name="Prog.FicouVaiQuarentenaPode" xml:space="preserve"><value>O que ficou vai para a quarentena e pode voltar.</value></data>
+  <data name="Prog.Fila" xml:space="preserve"><value>Na fila</value></data>
+  <data name="Prog.FilaDepoisDesinstaladorAtual" xml:space="preserve"><value>A fila para depois do desinstalador atual. Nenhum desinstalador é fechado pelo NEXUS.</value></data>
+  <data name="Prog.FilaNRemovidosN" xml:space="preserve"><value>Na fila {0} · Removidos {1} · Falhas {2} · Pulados {3}</value></data>
+  <data name="Prog.FimNexusLeLista" xml:space="preserve"><value>No fim, o NEXUS lê a lista de novo, mostra o resumo e oferece procurar as sobras de todos os removidos de uma vez.</value></data>
+  <data name="Prog.FixadoPinnedGerenciadorNao" xml:space="preserve"><value>Fixado (pinned): o gerenciador não atualiza sem você liberar</value></data>
+  <data name="Prog.Fora" xml:space="preserve"><value>fora</value></data>
+  <data name="Prog.ForaDesinstalacaoMassaN" xml:space="preserve"><value>Fora da desinstalação em massa ({0}): {1}</value></data>
+  <data name="Prog.IdCortadoPeloWinget" xml:space="preserve"><value>ID cortado pelo winget: atualize pelo próprio winget</value></data>
+  <data name="Prog.Instalado" xml:space="preserve"><value>Instalado em</value></data>
+  <data name="Prog.Instalado2" xml:space="preserve"><value>Instalado em: </value></data>
+  <data name="Prog.InstaladorProprioFornecedor" xml:space="preserve"><value>Instalador próprio do fornecedor</value></data>
+  <data name="Prog.InstaladosUltimo" xml:space="preserve"><value>Instalados por último</value></data>
+  <data name="Prog.IrProgramas" xml:space="preserve"><value>Ir para Programas</value></data>
+  <data name="Prog.JanelaAbertaNQuando" xml:space="preserve"><value>Janela aberta: {0}. Quando terminar, clique em "Procurar atualizações" para conferir.</value></data>
+  <data name="Prog.JanelaVoceConcluiFila" xml:space="preserve"><value>Os de janela você conclui; a fila espera cada um terminar (inclusive quando ele continua em outra janela) e nunca fecha um desinstalador. </value></data>
+  <data name="Prog.LendoAppsStore" xml:space="preserve"><value>Lendo os apps da Store…</value></data>
+  <data name="Prog.LimpaSobras" xml:space="preserve"><value>Limpa sobras</value></data>
+  <data name="Prog.ListaCriticosNexusConservadora" xml:space="preserve"><value>
+A lista de "críticos" do NEXUS é conservadora, mas não sabe quais programas seus dependem de cada um. </value></data>
+  <data name="Prog.Lote" xml:space="preserve"><value>Lote</value></data>
+  <data name="Prog.Lote2" xml:space="preserve"><value>Lote: </value></data>
+  <data name="Prog.MaiorPrimeiro" xml:space="preserve"><value>Maior primeiro</value></data>
+  <data name="Prog.MaisN" xml:space="preserve"><value>• … e mais {0}
+</value></data>
+  <data name="Prog.Marca" xml:space="preserve"><value>Marca</value></data>
+  <data name="Prog.MarcadoDesinstalar" xml:space="preserve"><value>Marcado para desinstalar</value></data>
+  <data name="Prog.MarcaProgramasBuscaAtual" xml:space="preserve"><value>Marca os programas da busca atual que podem entrar no lote. Bibliotecas e drivers só se marcam um a um.</value></data>
+  <data name="Prog.MarcarN" xml:space="preserve"><value>Marcar {0}</value></data>
+  <data name="Prog.MediaN" xml:space="preserve"><value>Média · {0}</value></data>
+  <data name="Prog.MesmasAplicativosInstaladosSem" xml:space="preserve"><value>(as mesmas de "Aplicativos instalados"), sem componentes do sistema e sem atualizações.</value></data>
+  <data name="Prog.ModoSilencioso" xml:space="preserve"><value>Modo silencioso: </value></data>
+  <data name="Prog.ModoSilenciosoDesligadoTodos" xml:space="preserve"><value>Modo silencioso desligado: todos abrem a janela do fornecedor. </value></data>
+  <data name="Prog.ModoSilenciosoQuandoFornecedor" xml:space="preserve"><value>Modo silencioso quando o fornecedor declarar</value></data>
+  <data name="Prog.Mostra" xml:space="preserve"><value>Mostra</value></data>
+  <data name="Prog.MostrarTambemAppsMicrosoft" xml:space="preserve"><value>Mostrar também os apps da Microsoft Store deste usuário (só leitura)</value></data>
+  <data name="Prog.MoverEscolhidasQuarentena" xml:space="preserve"><value>Mover escolhidas para a quarentena</value></data>
+  <data name="Prog.MoverNSobraS" xml:space="preserve"><value>Mover {0} sobra(s) {1}{2} para a quarentena do NEXUS?
+
+</value></data>
+  <data name="Prog.MudancasSistemaFeitasPelo" xml:space="preserve"><value>As mudanças de sistema feitas pelo próprio NEXUS criam um ponto de restauração automático. Aqui quem age é o fornecedor; </value></data>
+  <data name="Prog.N1Nova" xml:space="preserve"><value>1 nova</value></data>
+  <data name="Prog.NadaApagadoPastasVao" xml:space="preserve"><value>
+Nada é apagado: pastas vão para a quarentena com a lista de arquivos conferida, e chaves do registro são guardadas com todos os valores. </value></data>
+  <data name="Prog.NadaSobrou" xml:space="preserve"><value>Nada sobrou</value></data>
+  <data name="Prog.NAindaEstaInstalado" xml:space="preserve"><value>{0} ainda está instalado. Desinstale primeiro: o NEXUS só procura sobras de programas que já saíram da lista.</value></data>
+  <data name="Prog.NAindaInstaladoS" xml:space="preserve"><value> {0} ainda instalado(s), sem busca: {1}.</value></data>
+  <data name="Prog.NaoDeclaradoPeloFornecedor" xml:space="preserve"><value>não declarado pelo fornecedor (na desinstalação em massa, abre a janela dele)</value></data>
+  <data name="Prog.NaoFoiPossivelAbrir" xml:space="preserve"><value>Não foi possível abrir Configurações: {0}</value></data>
+  <data name="Prog.NaoFoiPossivelLer" xml:space="preserve"><value>Não foi possível ler os apps da Store: {0}</value></data>
+  <data name="Prog.NaoInformadoPeloInstalador" xml:space="preserve"><value>não informado pelo instalador</value></data>
+  <data name="Prog.NaoInstalado" xml:space="preserve"><value>Não instalado</value></data>
+  <data name="Prog.NaoInstaladoNestePc" xml:space="preserve"><value>Não instalado neste PC.</value></data>
+  <data name="Prog.NaoTemDesfazer" xml:space="preserve"><value>Não tem desfazer</value></data>
+  <data name="Prog.NAppsMicrosoftStore" xml:space="preserve"><value>{0} apps da Microsoft Store deste usuário (lidos com Get-AppxPackage, sem frameworks nem apps do sistema). Para remover, use Configurações &gt; Aplicativos.</value></data>
   <data name="Prog.NavSubtitle" xml:space="preserve"><value>Desinstale o que não usa, limpe o que sobrou e mantenha o resto atualizado.</value></data>
   <data name="Prog.NavTitle" xml:space="preserve"><value>Programas e atualizações</value></data>
+  <data name="Prog.NContinuarDesinstalacaoSem" xml:space="preserve"><value>{0}
+
+Continuar a desinstalação sem um ponto novo?</value></data>
+  <data name="Prog.NDeclaradosPelosInstaladores" xml:space="preserve"><value>{0} declarados pelos instaladores · {1} só deste usuário · {2} sem tamanho informado. Fonte: chaves Uninstall do registro </value></data>
+  <data name="Prog.NenhumaSobraEncontradaNas" xml:space="preserve"><value>Nenhuma sobra encontrada nas pastas e chaves que o NEXUS confere.</value></data>
+  <data name="Prog.NenhumaSobraMostrar" xml:space="preserve"><value>Nenhuma sobra para mostrar.</value></data>
+  <data name="Prog.NenhumaSobraNEncontrada" xml:space="preserve"><value>Nenhuma sobra de {0} encontrada nas pastas e chaves que o NEXUS confere.</value></data>
+  <data name="Prog.NenhumGerenciadorEncontradoRelatou" xml:space="preserve"><value>Nenhum gerenciador encontrado relatou versão nova.</value></data>
+  <data name="Prog.NenhumProgramaEscolhidoAinda" xml:space="preserve"><value>Nenhum programa escolhido ainda</value></data>
+  <data name="Prog.NenhumProgramaEssaBusca" xml:space="preserve"><value>Nenhum programa com essa busca.</value></data>
+  <data name="Prog.NenhumProgramaSelecionadoContinua" xml:space="preserve"><value>Nenhum programa selecionado continua instalado.</value></data>
+  <data name="Prog.NenhumSelecionado" xml:space="preserve"><value>Nenhum selecionado</value></data>
+  <data name="Prog.NenhumSelecionadosPodeSer" xml:space="preserve"><value>Nenhum dos selecionados pode ser desinstalado em lote: </value></data>
+  <data name="Prog.NexusNaoConsegueDesfazer" xml:space="preserve"><value>O NEXUS não consegue desfazer uma desinstalação: para voltar, será preciso instalar o programa de novo.
+
+</value></data>
+  <data name="Prog.NexusNaoConsegueDesfazer2" xml:space="preserve"><value>O NEXUS não consegue desfazer uma atualização.</value></data>
+  <data name="Prog.NexusPerguntaWingetChocolatey" xml:space="preserve"><value>O NEXUS pergunta a winget, Chocolatey, Scoop e npm o que tem versão nova. Só lê.</value></data>
+  <data name="Prog.NItemNsFila" xml:space="preserve"><value>{0} item(ns) da fila são usados por outros programas ou pelo hardware:
+
+</value></data>
+  <data name="Prog.NJanelaNaoAbriu" xml:space="preserve"><value>{0}: a janela não abriu ({1}).</value></data>
+  <data name="Prog.NNaoCriarPonto" xml:space="preserve"><value>{0} Não dá para criar um ponto antes do lote.
+
+Você pode ligá-la na página Ferramentas do sistema (Proteção do Sistema) e voltar aqui.
+
+Continuar SEM ponto de restauração?</value></data>
+  <data name="Prog.NNArq" xml:space="preserve"><value>{0} · {1} arq.</value></data>
+  <data name="Prog.NNMarqueSo" xml:space="preserve"><value>{0}: {1} Marque só se tiver certeza; pede uma confirmação a mais.</value></data>
+  <data name="Prog.NNN" xml:space="preserve"><value>{0} de {1}: {2}</value></data>
+  <data name="Prog.NNovas" xml:space="preserve"><value>{0} novas</value></data>
+  <data name="Prog.NomeZ" xml:space="preserve"><value>Nome (A–Z)</value></data>
+  <data name="Prog.NPedeMAtencao" xml:space="preserve"><value> · {0} pede(m) atenção</value></data>
+  <data name="Prog.NPodemSerPedidas" xml:space="preserve"><value>{0} podem ser pedidas daqui. A atualização abre a janela do próprio gerenciador; o NEXUS não consegue desfazê-la.</value></data>
+  <data name="Prog.NProgramasInstalados" xml:space="preserve"><value>{0} programas instalados</value></data>
+  <data name="Prog.NQuarentenaNNao" xml:space="preserve"><value>{0} na quarentena; {1} não: {2}</value></data>
+  <data name="Prog.NRegistrouComoNao" xml:space="preserve"><value>{0} se registrou como "não removível" pelo próprio instalador. Use Configurações &gt; Aplicativos.</value></data>
+  <data name="Prog.NSelecionadoSN" xml:space="preserve"><value>{0} selecionado(s) · {1}</value></data>
+  <data name="Prog.NSemTamanhoInformado" xml:space="preserve"><value> ({0} sem tamanho informado)</value></data>
+  <data name="Prog.NSobraSQuarentena" xml:space="preserve"><value>{0} sobra(s) na quarentena. Se algo fizer falta, use Desfazer.</value></data>
+  <data name="Prog.NuncaEntramPastasWindows" xml:space="preserve"><value>Nunca entram: pastas do Windows e da Microsoft, Common Files, drivers (NVIDIA, AMD, Intel), a pasta de um editor que ainda tem outro programa instalado, nada que contenha ou esteja dentro da pasta de um programa instalado, e links/junções. O aplicador confere tudo de novo antes de mover.</value></data>
+  <data name="Prog.NVersaoNova" xml:space="preserve"><value>{0} com versão nova.</value></data>
+  <data name="Prog.NVisivelIsNao" xml:space="preserve"><value>{0} visível(is) não foram marcados: bibliotecas e drivers (marque um a um, se tiver certeza) ou itens fora do lote (o motivo aparece ao passar o mouse).</value></data>
+  <data name="Prog.OcupamDeclarado" xml:space="preserve"><value>Ocupam (declarado)</value></data>
+  <data name="Prog.OrdemLista" xml:space="preserve"><value>Ordem da lista</value></data>
+  <data name="Prog.PararDepoisAtual" xml:space="preserve"><value>Parar depois do atual</value></data>
+  <data name="Prog.ParteNN" xml:space="preserve"><value> (parte {0} de {1})</value></data>
+  <data name="Prog.Pasta" xml:space="preserve"><value>Pasta: </value></data>
+  <data name="Prog.PastasChavesNomePrograma" xml:space="preserve"><value>Pastas e chaves com o nome do programa. Só lê.</value></data>
+  <data name="Prog.PastasSomam" xml:space="preserve"><value>Pastas somam</value></data>
+  <data name="Prog.Pergunta" xml:space="preserve"><value>Pergunta</value></data>
+  <data name="Prog.PerguntandoCadaGerenciadorPode" xml:space="preserve"><value>Perguntando a cada gerenciador (pode levar até alguns minutos na primeira vez).</value></data>
+  <data name="Prog.PodeEntrarDesinstalacaoMassa" xml:space="preserve"><value>Pode entrar na desinstalação em massa.</value></data>
+  <data name="Prog.PontoRestauracaoAntesLote" xml:space="preserve"><value>Ponto de restauração antes do lote</value></data>
+  <data name="Prog.PontoRestauracaoNaoCriado" xml:space="preserve"><value>Ponto de restauração não criado</value></data>
+  <data name="Prog.ProcurarSobrasDeste" xml:space="preserve"><value>Procurar sobras deste</value></data>
+  <data name="Prog.ProcurarSobrasNRemovido" xml:space="preserve"><value>Procurar as sobras dos {0} removido(s)</value></data>
+  <data name="Prog.ProcuraSoLendoPastas" xml:space="preserve"><value>Procura, só lendo, pastas com o nome do programa ou do editor em Program Files, ProgramData e AppData, e chaves Software\Editor\Programa no registro. Alta (75+): a pasta que o próprio instalador registrou ou o nome exato. Média: chave com o nome do programa. Baixa: nome parecido — confira antes de marcar.</value></data>
+  <data name="Prog.ProgramasInstalados" xml:space="preserve"><value>Programas instalados</value></data>
+  <data name="Prog.ProgramasN" xml:space="preserve"><value>Programas · {0}</value></data>
+  <data name="Prog.ProtecaoSistemaEstaDesligada" xml:space="preserve"><value>A Proteção do Sistema está desligada em todas as unidades.</value></data>
+  <data name="Prog.Protege" xml:space="preserve"><value>Protege</value></data>
+  <data name="Prog.Pulados" xml:space="preserve"><value>pulados</value></data>
+  <data name="Prog.PularEste" xml:space="preserve"><value>Pular este</value></data>
+  <data name="Prog.QuandoDesinstaladorTerminarNexus" xml:space="preserve"><value>Quando o desinstalador terminar, o NEXUS procura as sobras (pastas e chaves que ficaram para trás).</value></data>
+  <data name="Prog.QuemRemoveDesinstaladorFornecedor" xml:space="preserve"><value>Quem remove é o desinstalador do fornecedor, numa janela que você vê. O NEXUS não desfaz uma desinstalação; depois, ele procura o que sobrou e só move para a quarentena o que você escolher.</value></data>
+  <data name="Prog.QuemRemoveDesinstaladorOficial" xml:space="preserve"><value>Quem remove é o desinstalador oficial. Depois, o NEXUS acha o que sobrou.</value></data>
+  <data name="Prog.QuemRemoveProgramaDesinstalador" xml:space="preserve"><value>Quem remove o programa é o desinstalador do próprio fornecedor, numa janela que você vê e controla:
+</value></data>
+  <data name="Prog.QuiserGarantiaExtraCrie" xml:space="preserve"><value>se quiser uma garantia extra, crie um ponto antes (menu Iniciar &gt; "Criar um ponto de restauração").
+
+</value></data>
+  <data name="Prog.ReiniciePcConcluir" xml:space="preserve"><value>. Reinicie o PC para concluir.</value></data>
+  <data name="Prog.ReiniciePcConcluirDesinstalador" xml:space="preserve"><value>Reinicie o PC para concluir: um desinstalador pediu ou o Windows marcou arquivos para trocar no reinício.</value></data>
+  <data name="Prog.RemoverSobras" xml:space="preserve"><value>Remover sobras</value></data>
+  <data name="Prog.RemoverSobrasLiberaEspaco" xml:space="preserve"><value>Remover sobras libera espaço e organiza; não deixa o PC mais rápido. Nada é apagado: vai para a quarentena do NEXUS e volta com Desfazer.</value></data>
+  <data name="Prog.Removidos" xml:space="preserve"><value>removidos</value></data>
+  <data name="Prog.RestauracaoSistemaEstaDesligada" xml:space="preserve"><value>A Restauração do Sistema está desligada por política (organização).</value></data>
+  <data name="Prog.SegueProximoSemFechar" xml:space="preserve"><value>Segue para o próximo sem fechar o desinstalador atual. Se ele ainda estiver aberto, termine por lá.</value></data>
+  <data name="Prog.SelecionarVisiveis" xml:space="preserve"><value>Selecionar visíveis</value></data>
+  <data name="Prog.SemOrigemConhecida" xml:space="preserve"><value>Sem origem conhecida</value></data>
+  <data name="Prog.SemPontoRestauracao" xml:space="preserve"><value>Sem ponto de restauração</value></data>
+  <data name="Prog.SemPontoRestauracaoAntes" xml:space="preserve"><value>Sem ponto de restauração antes do lote.
+
+</value></data>
+  <data name="Prog.SeuPerfil" xml:space="preserve"><value>do seu perfil</value></data>
+  <data name="Prog.SilenciosoComandoSemPerguntas" xml:space="preserve"><value>Silencioso = o comando sem perguntas que o próprio fornecedor declarou; MSI = Windows Installer só com a barra de progresso. </value></data>
+  <data name="Prog.Sobras" xml:space="preserve"><value> sobras</value></data>
+  <data name="Prog.Sobras2" xml:space="preserve"><value>Sobras</value></data>
+  <data name="Prog.SobrasN" xml:space="preserve"><value>Sobras · {0}</value></data>
+  <data name="Prog.SobrasN2" xml:space="preserve"><value>Sobras de {0}</value></data>
+  <data name="Prog.SobrasNProgramasRemovidos" xml:space="preserve"><value>Sobras de {0} programas removidos</value></data>
+  <data name="Prog.SobrasQuarentenaAlgoFizer" xml:space="preserve"><value>Sobras na quarentena. Se algo fizer falta, volte tudo com um clique.</value></data>
+  <data name="Prog.SoContinueVoceSabe" xml:space="preserve"><value>Só continue se você sabe que não precisa deles (por exemplo, o driver de uma placa de vídeo que você já tirou). </value></data>
+  <data name="Prog.Tamanho" xml:space="preserve"><value>Tamanho</value></data>
+  <data name="Prog.TamanhoNaoInformado" xml:space="preserve"><value>tamanho não informado</value></data>
+  <data name="Prog.TodosAindaAparecemComo" xml:space="preserve"><value>Todos ainda aparecem como instalados. O NEXUS só procura sobras de programas que já saíram da lista.</value></data>
+  <data name="Prog.TodosUsuariosPedeAdministrador" xml:space="preserve"><value>de todos os usuários (pede administrador e cria um ponto de restauração)</value></data>
+  <data name="Prog.TotalDeclaradoNN" xml:space="preserve"><value>
+Total declarado: {0}{1}.
+</value></data>
+  <data name="Prog.TudoDia" xml:space="preserve"><value>Tudo em dia</value></data>
+  <data name="Prog.UsaAcaoCriarPonto" xml:space="preserve"><value>Usa a ação 'Criar ponto de restauração' das Ferramentas do sistema (pede administrador). Exige a Proteção do Sistema ligada.</value></data>
+  <data name="Prog.UsaComandoSemPerguntas" xml:space="preserve"><value>Usa o comando sem perguntas que o próprio fornecedor gravou no registro, ou o Windows Installer só com a barra de progresso. Desligado: todos abrem a janela do fornecedor.</value></data>
+  <data name="Prog.VaiQuarentenaTudoAnotado" xml:space="preserve"><value>Vai para a quarentena, com tudo anotado.</value></data>
+  <data name="Prog.Verificando" xml:space="preserve"><value>Verificando…</value></data>
+  <data name="Prog.VerResumoCompleto" xml:space="preserve"><value>Ver o resumo completo</value></data>
+  <data name="Prog.Versao" xml:space="preserve"><value>Versão</value></data>
+  <data name="Prog.VersaoAtualNovaSeparado" xml:space="preserve"><value>Versão atual → nova, separado por gerenciador.</value></data>
+  <data name="Prog.VersaoN" xml:space="preserve"><value>versão {0}</value></data>
+  <data name="Prog.VezWindowsInstallerSo" xml:space="preserve"><value>Um por vez: o Windows Installer só aceita uma instalação de cada vez.
+
+</value></data>
+  <data name="Prog.VocePodeDesfazerAqui" xml:space="preserve"><value>Você pode desfazer aqui (botão Desfazer) ou na página Aplicar. Liberar espaço não deixa o PC mais rápido.</value></data>
+  <data name="Prog.VoceVeTamanhoQuem" xml:space="preserve"><value>Você vê o tamanho, quem fez e pode desinstalar.</value></data>
+  <data name="Prog.VoltaCadaSobraOnde" xml:space="preserve"><value>Volta cada sobra para onde estava.</value></data>
+  <data name="Prog.VoltarReinstalePrograma" xml:space="preserve"><value>(para voltar, reinstale o programa). </value></data>
+  <data name="Prog.WindowsInstallerDesinstalacaoMassa" xml:space="preserve"><value>Windows Installer: na desinstalação em massa com modo silencioso, só a barra de progresso (/qb- /norestart)</value></data>
+  <data name="Prog.WindowsInstallerMsi" xml:space="preserve"><value>Windows Installer (MSI)</value></data>
+  <data name="Prog.WindowsVaiPedirPermissao" xml:space="preserve"><value>O Windows vai pedir permissão de administrador. Se ele já criou um ponto nas últimas 24 horas, esse ponto vale.</value></data>
   <data name="Scan.AbreCadaArquivoSo" xml:space="preserve"><value>Abre cada arquivo só para ler. Nada é alterado.</value></data>
   <data name="Scan.AchadosRevisar" xml:space="preserve"><value>Achados para revisar</value></data>
   <data name="Scan.AmostrasTesteComoEicar" xml:space="preserve"><value>Amostras de teste (como o EICAR). Não são ameaça; servem para conferir que a verificação funciona.</value></data>

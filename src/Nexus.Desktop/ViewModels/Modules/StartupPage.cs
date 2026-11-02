@@ -287,7 +287,7 @@ public sealed class StartupPage : ModulePage
         var text = Loc.F("Boot.ServicoNManualEle", row.Name) +
                    Loc.T("Boot.ProgramaDeleDependerServico") +
                    Loc.T("Boot.ExigeAdministradorServicosEssenciais");
-        await ApplyAsync(Loc.T("Boot.ServicoManual"), text, new ActionRequest(Nexus.Boot.ServicePresets.IndividualActionKey, Loc.T("Shell.Manual"),
+        await ApplyAsync(Loc.T("Boot.ServicoManual"), text, new ActionRequest(Nexus.Boot.ServicePresets.IndividualActionKey, "Manual",
             new Dictionary<string, string> { ["service"] = row.Item.EntryName }), BrokerLevel.Admin, Loc.F("Boot.ManualN", row.Name));
     });
 

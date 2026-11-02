@@ -2082,8 +2082,271 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Priv.VoltarDesfazerOuConfiguracoes" xml:space="preserve"><value> · to go back: Undo or Windows Settings</value></data>
   <data name="Priv.WindowsBuildN" xml:space="preserve"><value>Windows build {0}</value></data>
   <data name="Priv.WindowsNaoAbriuConfiguracoes" xml:space="preserve"><value>Windows didn't open Settings.</value></data>
+  <data name="Prog.AbreJanelaGerenciadorVoce" xml:space="preserve"><value>Opens the manager's window. You see everything. No undo.</value></data>
+  <data name="Prog.AbrirConfiguracoesAplicativos" xml:space="preserve"><value>Open Settings › Apps</value></data>
+  <data name="Prog.AbrirDesinstaladorOficialN" xml:space="preserve"><value>Open the official uninstaller of {0}?
+
+</value></data>
+  <data name="Prog.AgoraProcurarSobrasTodos" xml:space="preserve"><value> Now you can look for leftovers of all of them at once.</value></data>
+  <data name="Prog.AindaInstalado" xml:space="preserve"><value>Still installed</value></data>
+  <data name="Prog.AindaNaoVerificado" xml:space="preserve"><value>Not checked yet.</value></data>
+  <data name="Prog.AindaNaoVerificado2" xml:space="preserve"><value>Not checked yet</value></data>
+  <data name="Prog.AltaJaVemMarcada" xml:space="preserve"><value>High comes checked. Low: check first.</value></data>
+  <data name="Prog.AltaN" xml:space="preserve"><value>High · {0}</value></data>
+  <data name="Prog.AndamentoN" xml:space="preserve"><value>Progress: {0}</value></data>
+  <data name="Prog.AntesComecarCriarPonto" xml:space="preserve"><value>Before starting: create a restore point (needs administrator).
+
+</value></data>
+  <data name="Prog.ApagueBuscaOuLeia" xml:space="preserve"><value>Clear the search or read the list again.</value></data>
+  <data name="Prog.App" xml:space="preserve"><value>App</value></data>
+  <data name="Prog.AppsMicrosoftStore" xml:space="preserve"><value>Microsoft Store apps</value></data>
+  <data name="Prog.Atencao" xml:space="preserve"><value> · WARNING</value></data>
+  <data name="Prog.AtencaoBibliotecasDriversFila" xml:space="preserve"><value>Warning: libraries and drivers in the queue</value></data>
+  <data name="Prog.Atualiza" xml:space="preserve"><value>Updates</value></data>
+  <data name="Prog.AtualizacaoDisponivel" xml:space="preserve"><value>update available</value></data>
+  <data name="Prog.AtualizacoesDisponiveis" xml:space="preserve"><value>Available updates</value></data>
+  <data name="Prog.AtualizacoesDisponiveis2" xml:space="preserve"><value>updates available</value></data>
+  <data name="Prog.AtualizacoesN" xml:space="preserve"><value>Updates · {0}</value></data>
+  <data name="Prog.AtualizarAbreJanelaProprio" xml:space="preserve"><value>Updating opens the manager's own window (winget, Chocolatey, Scoop or npm), which you follow. Chocolatey asks for administrator with the Windows prompt; Scoop and npm are never elevated. Updating programs fixes security flaws; it doesn't make the PC faster.</value></data>
+  <data name="Prog.AtualizarN" xml:space="preserve"><value>Update {0}</value></data>
+  <data name="Prog.AtualizarNPacoteS" xml:space="preserve"><value>Update {0} package(s)?
+
+</value></data>
+  <data name="Prog.AtualizarSelecionados" xml:space="preserve"><value>Update selected</value></data>
+  <data name="Prog.AtualizarTudo" xml:space="preserve"><value>Update all</value></data>
+  <data name="Prog.BaixaN" xml:space="preserve"><value>Low · {0}</value></data>
+  <data name="Prog.BuscarNomeOuEditor" xml:space="preserve"><value>Search by name or publisher</value></data>
+  <data name="Prog.BuscarProgramas" xml:space="preserve"><value>Search programs</value></data>
+  <data name="Prog.CadaDesinstaladorOficialFornecedor" xml:space="preserve"><value>
+Each uninstaller is the vendor's official one: it does the removing, and NEXUS CAN'T undo an uninstall </value></data>
+  <data name="Prog.CadaGerenciadorAbreNuma" xml:space="preserve"><value>
+Each manager opens in a visible PowerShell window, and it's the one that downloads and installs. </value></data>
+  <data name="Prog.CadaGerenciadorDizTem" xml:space="preserve"><value>Each manager says what has a new version. Read-only.</value></data>
+  <data name="Prog.CanceladoNadaFoiDesinstalado" xml:space="preserve"><value>Canceled. Nothing was uninstalled.</value></data>
+  <data name="Prog.ChocolateyPedeAdministradorWindows" xml:space="preserve"><value> Chocolatey needs administrator: Windows will show the prompt before opening its window.</value></data>
+  <data name="Prog.Classifica" xml:space="preserve"><value>Ranks</value></data>
+  <data name="Prog.CliqueProcurarAtualizacoesNexus" xml:space="preserve"><value>Click "Look for updates". NEXUS only reads: it asks each manager what has a new version.</value></data>
+  <data name="Prog.ComoNexusDecide" xml:space="preserve"><value>How NEXUS decides</value></data>
+  <data name="Prog.ConfiraListaConfiancaAlta" xml:space="preserve"><value>Check the list. High-confidence ones come checked; low ones don't. Nothing moves without your confirmation.</value></data>
+  <data name="Prog.CorrigeFalhasSegurancaNao" xml:space="preserve"><value>Fixes security flaws. Doesn't make the PC faster.</value></data>
+  <data name="Prog.CriaPontoRestauracaoAntes" xml:space="preserve"><value>Creates a restore point before the batch.</value></data>
+  <data name="Prog.CriarPontoRestauracaoAgora" xml:space="preserve"><value>Create a restore point now, before uninstalling {0} program(s)?
+
+</value></data>
+  <data name="Prog.CriarPontoRestauracaoAntes" xml:space="preserve"><value>Create a restore point first</value></data>
+  <data name="Prog.DadosTecnicos" xml:space="preserve"><value>Technical data</value></data>
+  <data name="Prog.DeclaradoPeloFornecedorUsado" xml:space="preserve"><value>declared by the vendor: used only in bulk uninstall with silent mode on</value></data>
+  <data name="Prog.DeixaDesinstaladorAtualTerminar" xml:space="preserve"><value>Lets the current uninstaller finish and doesn't open the next ones. NEXUS never closes an uninstaller.</value></data>
+  <data name="Prog.DepoisAtual" xml:space="preserve"><value> · stopping after the current one</value></data>
+  <data name="Prog.DesfazerNaoTerminouN" xml:space="preserve"><value>Undo didn't finish: {0}</value></data>
+  <data name="Prog.DesfeitoSobrasVoltaramOnde" xml:space="preserve"><value>Undone: the leftovers went back to where they were.</value></data>
+  <data name="Prog.Desinstala" xml:space="preserve"><value>Uninstalls</value></data>
+  <data name="Prog.DesinstalacaoMassa" xml:space="preserve"><value>Bulk uninstall</value></data>
+  <data name="Prog.Desinstalador" xml:space="preserve"><value>Uninstaller: </value></data>
+  <data name="Prog.DesinstaladorFechouMasN" xml:space="preserve"><value>The uninstaller closed, but {0} still shows in the list. Some uninstallers continue in another window: finish there and click "Look for leftovers".</value></data>
+  <data name="Prog.DesinstaladorInvalido" xml:space="preserve"><value>Invalid uninstaller.</value></data>
+  <data name="Prog.DesinstaladorNAbertoSiga" xml:space="preserve"><value>{0} uninstaller open. Follow its instructions; when it finishes, NEXUS checks the list and looks for leftovers.</value></data>
+  <data name="Prog.DesinstaladorNaoAbriuN" xml:space="preserve"><value>The uninstaller didn't open: {0}</value></data>
+  <data name="Prog.DesinstaladorOficialVezNao" xml:space="preserve"><value>Official uninstaller, one at a time. No undo.</value></data>
+  <data name="Prog.DesinstalandoFilaAcompanheAbaixo" xml:space="preserve"><value>Uninstalling in a queue. Follow below; in the windowed ones, complete the vendor's steps.</value></data>
+  <data name="Prog.DesinstalarN" xml:space="preserve"><value>Uninstall {0}</value></data>
+  <data name="Prog.DesinstalarNProgramaS" xml:space="preserve"><value>Uninstall {0} program(s)</value></data>
+  <data name="Prog.DesinstalarNProgramaS2" xml:space="preserve"><value>Uninstall {0} program(s), one at a time, in this order?
+
+</value></data>
+  <data name="Prog.DesinstalarOficial" xml:space="preserve"><value>Uninstall (official)</value></data>
+  <data name="Prog.DesinstalarSelecionados" xml:space="preserve"><value>Uninstall selected</value></data>
+  <data name="Prog.DesinstaleProgramaOuEscolha" xml:space="preserve"><value>Uninstall a program (or pick one from the list) and NEXUS looks for what was left behind.</value></data>
+  <data name="Prog.Dia" xml:space="preserve"><value>Up to date</value></data>
+  <data name="Prog.Editor" xml:space="preserve"><value>Publisher</value></data>
+  <data name="Prog.EditorNaoInformado" xml:space="preserve"><value>publisher not provided</value></data>
+  <data name="Prog.ElesVaoUltimoFila" xml:space="preserve"><value>They go last in the queue.</value></data>
+  <data name="Prog.EscolhaOuVariosBibliotecas" xml:space="preserve"><value>Pick one or several. Libraries and drivers only one at a time.</value></data>
+  <data name="Prog.EscolhaProgramaLista" xml:space="preserve"><value>Pick a program from the list.</value></data>
+  <data name="Prog.ExigePedidoExplicitoNexus" xml:space="preserve"><value>Requires an explicit request (NEXUS asks by ID)</value></data>
+  <data name="Prog.Falharam" xml:space="preserve"><value>failed</value></data>
+  <data name="Prog.FecharResumo" xml:space="preserve"><value>Close summary</value></data>
+  <data name="Prog.Feito" xml:space="preserve"><value>done</value></data>
+  <data name="Prog.FicamFora" xml:space="preserve"><value>
+Left out:
+</value></data>
+  <data name="Prog.FicouVaiQuarentenaPode" xml:space="preserve"><value>What was left goes to quarantine and can come back.</value></data>
+  <data name="Prog.Fila" xml:space="preserve"><value>Queued</value></data>
+  <data name="Prog.FilaDepoisDesinstaladorAtual" xml:space="preserve"><value>The queue stops after the current uninstaller. NEXUS doesn't close any uninstaller.</value></data>
+  <data name="Prog.FilaNRemovidosN" xml:space="preserve"><value>Queued {0} · Removed {1} · Failed {2} · Skipped {3}</value></data>
+  <data name="Prog.FimNexusLeLista" xml:space="preserve"><value>At the end, NEXUS reads the list again, shows the summary and offers to look for leftovers of everything removed at once.</value></data>
+  <data name="Prog.FixadoPinnedGerenciadorNao" xml:space="preserve"><value>Pinned: the manager doesn't update it unless you release it</value></data>
+  <data name="Prog.Fora" xml:space="preserve"><value>out</value></data>
+  <data name="Prog.ForaDesinstalacaoMassaN" xml:space="preserve"><value>Out of bulk uninstall ({0}): {1}</value></data>
+  <data name="Prog.IdCortadoPeloWinget" xml:space="preserve"><value>ID truncated by winget: update through winget itself</value></data>
+  <data name="Prog.Instalado" xml:space="preserve"><value>Installed on</value></data>
+  <data name="Prog.Instalado2" xml:space="preserve"><value>Installed on: </value></data>
+  <data name="Prog.InstaladorProprioFornecedor" xml:space="preserve"><value>Vendor's own installer</value></data>
+  <data name="Prog.InstaladosUltimo" xml:space="preserve"><value>Recently installed</value></data>
+  <data name="Prog.IrProgramas" xml:space="preserve"><value>Go to Programs</value></data>
+  <data name="Prog.JanelaAbertaNQuando" xml:space="preserve"><value>Window open: {0}. When it finishes, click "Look for updates" to check.</value></data>
+  <data name="Prog.JanelaVoceConcluiFila" xml:space="preserve"><value>You complete the windowed ones; the queue waits for each to finish (even when it continues in another window) and never closes an uninstaller. </value></data>
+  <data name="Prog.LendoAppsStore" xml:space="preserve"><value>Reading Store apps…</value></data>
+  <data name="Prog.LimpaSobras" xml:space="preserve"><value>Cleans leftovers</value></data>
+  <data name="Prog.ListaCriticosNexusConservadora" xml:space="preserve"><value>
+NEXUS's "critical" list is conservative, but it doesn't know which of your programs depend on each one. </value></data>
+  <data name="Prog.Lote" xml:space="preserve"><value>Batch</value></data>
+  <data name="Prog.Lote2" xml:space="preserve"><value>Batch: </value></data>
+  <data name="Prog.MaiorPrimeiro" xml:space="preserve"><value>Largest first</value></data>
+  <data name="Prog.MaisN" xml:space="preserve"><value>• … and {0} more
+</value></data>
+  <data name="Prog.Marca" xml:space="preserve"><value>Check</value></data>
+  <data name="Prog.MarcadoDesinstalar" xml:space="preserve"><value>Checked to uninstall</value></data>
+  <data name="Prog.MarcaProgramasBuscaAtual" xml:space="preserve"><value>Checks the programs in the current search that can go into the batch. Libraries and drivers are only checked one at a time.</value></data>
+  <data name="Prog.MarcarN" xml:space="preserve"><value>Check {0}</value></data>
+  <data name="Prog.MediaN" xml:space="preserve"><value>Medium · {0}</value></data>
+  <data name="Prog.MesmasAplicativosInstaladosSem" xml:space="preserve"><value>(the same as "Installed apps"), without system components or updates.</value></data>
+  <data name="Prog.ModoSilencioso" xml:space="preserve"><value>Silent mode: </value></data>
+  <data name="Prog.ModoSilenciosoDesligadoTodos" xml:space="preserve"><value>Silent mode off: all of them open the vendor's window. </value></data>
+  <data name="Prog.ModoSilenciosoQuandoFornecedor" xml:space="preserve"><value>Silent mode when the vendor declares it</value></data>
+  <data name="Prog.Mostra" xml:space="preserve"><value>Shows</value></data>
+  <data name="Prog.MostrarTambemAppsMicrosoft" xml:space="preserve"><value>Also show this user's Microsoft Store apps (read-only)</value></data>
+  <data name="Prog.MoverEscolhidasQuarentena" xml:space="preserve"><value>Move chosen ones to quarantine</value></data>
+  <data name="Prog.MoverNSobraS" xml:space="preserve"><value>Move {0} leftover(s) {1}{2} to the NEXUS quarantine?
+
+</value></data>
+  <data name="Prog.MudancasSistemaFeitasPelo" xml:space="preserve"><value>System changes made by NEXUS itself create an automatic restore point. Here the vendor acts; </value></data>
+  <data name="Prog.N1Nova" xml:space="preserve"><value>1 new</value></data>
+  <data name="Prog.NadaApagadoPastasVao" xml:space="preserve"><value>
+Nothing is deleted: folders go to quarantine with a verified file list, and registry keys are saved with all their values. </value></data>
+  <data name="Prog.NadaSobrou" xml:space="preserve"><value>Nothing was left</value></data>
+  <data name="Prog.NAindaEstaInstalado" xml:space="preserve"><value>{0} is still installed. Uninstall it first: NEXUS only looks for leftovers of programs that have already left the list.</value></data>
+  <data name="Prog.NAindaInstaladoS" xml:space="preserve"><value> {0} still installed, not searched: {1}.</value></data>
+  <data name="Prog.NaoDeclaradoPeloFornecedor" xml:space="preserve"><value>not declared by the vendor (in bulk uninstall, its window opens)</value></data>
+  <data name="Prog.NaoFoiPossivelAbrir" xml:space="preserve"><value>Could not open Settings: {0}</value></data>
+  <data name="Prog.NaoFoiPossivelLer" xml:space="preserve"><value>Could not read Store apps: {0}</value></data>
+  <data name="Prog.NaoInformadoPeloInstalador" xml:space="preserve"><value>not provided by the installer</value></data>
+  <data name="Prog.NaoInstalado" xml:space="preserve"><value>Not installed</value></data>
+  <data name="Prog.NaoInstaladoNestePc" xml:space="preserve"><value>Not installed on this PC.</value></data>
+  <data name="Prog.NaoTemDesfazer" xml:space="preserve"><value>Can't be undone</value></data>
+  <data name="Prog.NAppsMicrosoftStore" xml:space="preserve"><value>{0} Microsoft Store apps for this user (read with Get-AppxPackage, no frameworks or system apps). To remove, use Settings &gt; Apps.</value></data>
   <data name="Prog.NavSubtitle" xml:space="preserve"><value>Uninstall what you don't use, clean up what's left and keep the rest up to date.</value></data>
   <data name="Prog.NavTitle" xml:space="preserve"><value>Programs and updates</value></data>
+  <data name="Prog.NContinuarDesinstalacaoSem" xml:space="preserve"><value>{0}
+
+Continue the uninstall without a new point?</value></data>
+  <data name="Prog.NDeclaradosPelosInstaladores" xml:space="preserve"><value>{0} declared by the installers · {1} for this user only · {2} without a declared size. Source: the registry Uninstall keys </value></data>
+  <data name="Prog.NenhumaSobraEncontradaNas" xml:space="preserve"><value>No leftover found in the folders and keys NEXUS checks.</value></data>
+  <data name="Prog.NenhumaSobraMostrar" xml:space="preserve"><value>No leftovers to show.</value></data>
+  <data name="Prog.NenhumaSobraNEncontrada" xml:space="preserve"><value>No leftover of {0} found in the folders and keys NEXUS checks.</value></data>
+  <data name="Prog.NenhumGerenciadorEncontradoRelatou" xml:space="preserve"><value>No manager found reported a new version.</value></data>
+  <data name="Prog.NenhumProgramaEscolhidoAinda" xml:space="preserve"><value>No program chosen yet</value></data>
+  <data name="Prog.NenhumProgramaEssaBusca" xml:space="preserve"><value>No program for this search.</value></data>
+  <data name="Prog.NenhumProgramaSelecionadoContinua" xml:space="preserve"><value>No selected program is still installed.</value></data>
+  <data name="Prog.NenhumSelecionado" xml:space="preserve"><value>None selected</value></data>
+  <data name="Prog.NenhumSelecionadosPodeSer" xml:space="preserve"><value>None of the selected can be uninstalled in a batch: </value></data>
+  <data name="Prog.NexusNaoConsegueDesfazer" xml:space="preserve"><value>NEXUS can't undo an uninstall: to go back, you'll need to install the program again.
+
+</value></data>
+  <data name="Prog.NexusNaoConsegueDesfazer2" xml:space="preserve"><value>NEXUS can't undo an update.</value></data>
+  <data name="Prog.NexusPerguntaWingetChocolatey" xml:space="preserve"><value>NEXUS asks winget, Chocolatey, Scoop and npm what has a new version. Read-only.</value></data>
+  <data name="Prog.NItemNsFila" xml:space="preserve"><value>{0} queued item(s) are used by other programs or by the hardware:
+
+</value></data>
+  <data name="Prog.NJanelaNaoAbriu" xml:space="preserve"><value>{0}: the window didn't open ({1}).</value></data>
+  <data name="Prog.NNaoCriarPonto" xml:space="preserve"><value>{0} Can't create a point before the batch.
+
+You can turn it on in the System tools page (System Protection) and come back here.
+
+Continue WITHOUT a restore point?</value></data>
+  <data name="Prog.NNArq" xml:space="preserve"><value>{0} · {1} files</value></data>
+  <data name="Prog.NNMarqueSo" xml:space="preserve"><value>{0}: {1} Check only if you're sure; it asks for one more confirmation.</value></data>
+  <data name="Prog.NNN" xml:space="preserve"><value>{0} of {1}: {2}</value></data>
+  <data name="Prog.NNovas" xml:space="preserve"><value>{0} new</value></data>
+  <data name="Prog.NomeZ" xml:space="preserve"><value>Name (A–Z)</value></data>
+  <data name="Prog.NPedeMAtencao" xml:space="preserve"><value> · {0} need attention</value></data>
+  <data name="Prog.NPodemSerPedidas" xml:space="preserve"><value>{0} can be requested from here. The update opens the manager's own window; NEXUS can't undo it.</value></data>
+  <data name="Prog.NProgramasInstalados" xml:space="preserve"><value>{0} installed programs</value></data>
+  <data name="Prog.NQuarentenaNNao" xml:space="preserve"><value>{0} in quarantine; {1} not: {2}</value></data>
+  <data name="Prog.NRegistrouComoNao" xml:space="preserve"><value>{0} registered itself as "not removable" through its own installer. Use Settings &gt; Apps.</value></data>
+  <data name="Prog.NSelecionadoSN" xml:space="preserve"><value>{0} selected · {1}</value></data>
+  <data name="Prog.NSemTamanhoInformado" xml:space="preserve"><value> ({0} without a declared size)</value></data>
+  <data name="Prog.NSobraSQuarentena" xml:space="preserve"><value>{0} leftover(s) in quarantine. If you miss something, use Undo.</value></data>
+  <data name="Prog.NuncaEntramPastasWindows" xml:space="preserve"><value>Never included: Windows and Microsoft folders, Common Files, drivers (NVIDIA, AMD, Intel), a publisher's folder that still has another program installed, anything that contains or is inside an installed program's folder, and links/junctions. The applier checks everything again before moving.</value></data>
+  <data name="Prog.NVersaoNova" xml:space="preserve"><value>{0} with a new version.</value></data>
+  <data name="Prog.NVisivelIsNao" xml:space="preserve"><value>{0} visible weren't checked: libraries and drivers (check one at a time, if you're sure) or items out of the batch (the reason shows on hover).</value></data>
+  <data name="Prog.OcupamDeclarado" xml:space="preserve"><value>Take up (declared)</value></data>
+  <data name="Prog.OrdemLista" xml:space="preserve"><value>List order</value></data>
+  <data name="Prog.PararDepoisAtual" xml:space="preserve"><value>Stop after the current one</value></data>
+  <data name="Prog.ParteNN" xml:space="preserve"><value> (part {0} of {1})</value></data>
+  <data name="Prog.Pasta" xml:space="preserve"><value>Folder: </value></data>
+  <data name="Prog.PastasChavesNomePrograma" xml:space="preserve"><value>Folders and keys with the program's name. Read-only.</value></data>
+  <data name="Prog.PastasSomam" xml:space="preserve"><value>Folders add up to</value></data>
+  <data name="Prog.Pergunta" xml:space="preserve"><value>Asks</value></data>
+  <data name="Prog.PerguntandoCadaGerenciadorPode" xml:space="preserve"><value>Asking each manager (may take up to a few minutes the first time).</value></data>
+  <data name="Prog.PodeEntrarDesinstalacaoMassa" xml:space="preserve"><value>Can go into bulk uninstall.</value></data>
+  <data name="Prog.PontoRestauracaoAntesLote" xml:space="preserve"><value>Restore point before the batch</value></data>
+  <data name="Prog.PontoRestauracaoNaoCriado" xml:space="preserve"><value>Restore point not created</value></data>
+  <data name="Prog.ProcurarSobrasDeste" xml:space="preserve"><value>Look for its leftovers</value></data>
+  <data name="Prog.ProcurarSobrasNRemovido" xml:space="preserve"><value>Look for leftovers of the {0} removed</value></data>
+  <data name="Prog.ProcuraSoLendoPastas" xml:space="preserve"><value>It searches, only reading, for folders with the program's or publisher's name in Program Files, ProgramData and AppData, and Software\Publisher\Program keys in the registry. High (75+): the folder the installer itself registered or the exact name. Medium: key with the program's name. Low: similar name — check before checking it.</value></data>
+  <data name="Prog.ProgramasInstalados" xml:space="preserve"><value>Installed programs</value></data>
+  <data name="Prog.ProgramasN" xml:space="preserve"><value>Programs · {0}</value></data>
+  <data name="Prog.ProtecaoSistemaEstaDesligada" xml:space="preserve"><value>System Protection is off on all drives.</value></data>
+  <data name="Prog.Protege" xml:space="preserve"><value>Protects</value></data>
+  <data name="Prog.Pulados" xml:space="preserve"><value>skipped</value></data>
+  <data name="Prog.PularEste" xml:space="preserve"><value>Skip this one</value></data>
+  <data name="Prog.QuandoDesinstaladorTerminarNexus" xml:space="preserve"><value>When the uninstaller finishes, NEXUS looks for leftovers (folders and keys left behind).</value></data>
+  <data name="Prog.QuemRemoveDesinstaladorFornecedor" xml:space="preserve"><value>The vendor's uninstaller does the removing, in a window you see. NEXUS doesn't undo an uninstall; afterwards, it looks for what was left and only moves to quarantine what you choose.</value></data>
+  <data name="Prog.QuemRemoveDesinstaladorOficial" xml:space="preserve"><value>The official uninstaller does the removing. Afterwards, NEXUS finds what was left.</value></data>
+  <data name="Prog.QuemRemoveProgramaDesinstalador" xml:space="preserve"><value>The vendor's own uninstaller removes the program, in a window you see and control:
+</value></data>
+  <data name="Prog.QuiserGarantiaExtraCrie" xml:space="preserve"><value>if you want extra assurance, create a point first (Start menu &gt; "Create a restore point").
+
+</value></data>
+  <data name="Prog.ReiniciePcConcluir" xml:space="preserve"><value>. Restart the PC to finish.</value></data>
+  <data name="Prog.ReiniciePcConcluirDesinstalador" xml:space="preserve"><value>Restart the PC to finish: an uninstaller asked for it or Windows marked files to replace on restart.</value></data>
+  <data name="Prog.RemoverSobras" xml:space="preserve"><value>Remove leftovers</value></data>
+  <data name="Prog.RemoverSobrasLiberaEspaco" xml:space="preserve"><value>Removing leftovers frees space and tidies up; it doesn't make the PC faster. Nothing is deleted: it goes to the NEXUS quarantine and comes back with Undo.</value></data>
+  <data name="Prog.Removidos" xml:space="preserve"><value>removed</value></data>
+  <data name="Prog.RestauracaoSistemaEstaDesligada" xml:space="preserve"><value>System Restore is turned off by policy (organization).</value></data>
+  <data name="Prog.SegueProximoSemFechar" xml:space="preserve"><value>Moves to the next one without closing the current uninstaller. If it's still open, finish it there.</value></data>
+  <data name="Prog.SelecionarVisiveis" xml:space="preserve"><value>Select visible</value></data>
+  <data name="Prog.SemOrigemConhecida" xml:space="preserve"><value>No known source</value></data>
+  <data name="Prog.SemPontoRestauracao" xml:space="preserve"><value>No restore point</value></data>
+  <data name="Prog.SemPontoRestauracaoAntes" xml:space="preserve"><value>No restore point before the batch.
+
+</value></data>
+  <data name="Prog.SeuPerfil" xml:space="preserve"><value>from your profile</value></data>
+  <data name="Prog.SilenciosoComandoSemPerguntas" xml:space="preserve"><value>Silent = the no-questions command the vendor itself declared; MSI = Windows Installer with just the progress bar. </value></data>
+  <data name="Prog.Sobras" xml:space="preserve"><value> leftovers</value></data>
+  <data name="Prog.Sobras2" xml:space="preserve"><value>Leftovers</value></data>
+  <data name="Prog.SobrasN" xml:space="preserve"><value>Leftovers · {0}</value></data>
+  <data name="Prog.SobrasN2" xml:space="preserve"><value>Leftovers of {0}</value></data>
+  <data name="Prog.SobrasNProgramasRemovidos" xml:space="preserve"><value>Leftovers of {0} removed programs</value></data>
+  <data name="Prog.SobrasQuarentenaAlgoFizer" xml:space="preserve"><value>Leftovers in quarantine. If you miss something, bring everything back with one click.</value></data>
+  <data name="Prog.SoContinueVoceSabe" xml:space="preserve"><value>Only continue if you know you don't need them (for example, the driver of a graphics card you already removed). </value></data>
+  <data name="Prog.Tamanho" xml:space="preserve"><value>Size</value></data>
+  <data name="Prog.TamanhoNaoInformado" xml:space="preserve"><value>size not provided</value></data>
+  <data name="Prog.TodosAindaAparecemComo" xml:space="preserve"><value>All of them still show as installed. NEXUS only looks for leftovers of programs that have already left the list.</value></data>
+  <data name="Prog.TodosUsuariosPedeAdministrador" xml:space="preserve"><value>for all users (needs administrator and creates a restore point)</value></data>
+  <data name="Prog.TotalDeclaradoNN" xml:space="preserve"><value>
+Declared total: {0}{1}.
+</value></data>
+  <data name="Prog.TudoDia" xml:space="preserve"><value>All up to date</value></data>
+  <data name="Prog.UsaAcaoCriarPonto" xml:space="preserve"><value>Uses the 'Create restore point' action from System tools (needs administrator). Requires System Protection turned on.</value></data>
+  <data name="Prog.UsaComandoSemPerguntas" xml:space="preserve"><value>Uses the no-questions command the vendor itself stored in the registry, or Windows Installer with just the progress bar. Off: all of them open the vendor's window.</value></data>
+  <data name="Prog.VaiQuarentenaTudoAnotado" xml:space="preserve"><value>Goes to quarantine, with everything recorded.</value></data>
+  <data name="Prog.Verificando" xml:space="preserve"><value>Checking…</value></data>
+  <data name="Prog.VerResumoCompleto" xml:space="preserve"><value>See the full summary</value></data>
+  <data name="Prog.Versao" xml:space="preserve"><value>Version</value></data>
+  <data name="Prog.VersaoAtualNovaSeparado" xml:space="preserve"><value>Current → new version, grouped by manager.</value></data>
+  <data name="Prog.VersaoN" xml:space="preserve"><value>version {0}</value></data>
+  <data name="Prog.VezWindowsInstallerSo" xml:space="preserve"><value>One at a time: Windows Installer only accepts one install at a time.
+
+</value></data>
+  <data name="Prog.VocePodeDesfazerAqui" xml:space="preserve"><value>You can undo here (Undo button) or on the Apply page. Freeing space doesn't make the PC faster.</value></data>
+  <data name="Prog.VoceVeTamanhoQuem" xml:space="preserve"><value>You see the size, who made it and can uninstall.</value></data>
+  <data name="Prog.VoltaCadaSobraOnde" xml:space="preserve"><value>Returns each leftover to where it was.</value></data>
+  <data name="Prog.VoltarReinstalePrograma" xml:space="preserve"><value>(to go back, reinstall the program). </value></data>
+  <data name="Prog.WindowsInstallerDesinstalacaoMassa" xml:space="preserve"><value>Windows Installer: in bulk uninstall with silent mode, only the progress bar (/qb- /norestart)</value></data>
+  <data name="Prog.WindowsInstallerMsi" xml:space="preserve"><value>Windows Installer (MSI)</value></data>
+  <data name="Prog.WindowsVaiPedirPermissao" xml:space="preserve"><value>Windows will ask for administrator permission. If it already created a point in the last 24 hours, that point applies.</value></data>
   <data name="Scan.AbreCadaArquivoSo" xml:space="preserve"><value>Opens each file only to read. Nothing is changed.</value></data>
   <data name="Scan.AchadosRevisar" xml:space="preserve"><value>Findings to review</value></data>
   <data name="Scan.AmostrasTesteComoEicar" xml:space="preserve"><value>Test samples (like EICAR). They aren't a threat; they're for checking that scanning works.</value></data>

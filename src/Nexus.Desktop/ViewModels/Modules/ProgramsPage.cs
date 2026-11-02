@@ -24,14 +24,14 @@ public sealed class ProgramRow(InstalledProgram program, BulkEligibility? eligib
     public string Size => ProgramInventory.FormatSize(Program.SizeBytes);
     public string Installed => Program.InstallDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "—";
     public string Scope => Program.ScopeText;
-    public string Location => Program.InstallLocation ?? "não informado pelo instalador";
-    public string Kind => Program.IsMsi ? "Windows Installer (MSI)" : "Instalador próprio do fornecedor";
+    public string Location => Program.InstallLocation ?? Loc.T("Prog.NaoInformadoPeloInstalador");
+    public string Kind => Program.IsMsi ? Loc.T("Prog.WindowsInstallerMsi") : Loc.T("Prog.InstaladorProprioFornecedor");
     public string Uninstaller => Program.UninstallString ?? "—";
     public string Quiet => Program.IsMsi
-        ? "Windows Installer: na desinstalação em massa com modo silencioso, só a barra de progresso (/qb- /norestart)"
+        ? Loc.T("Prog.WindowsInstallerDesinstalacaoMassa")
         : Program.QuietUninstallString is null
-            ? "não declarado pelo fornecedor (na desinstalação em massa, abre a janela dele)"
-            : "declarado pelo fornecedor: usado só na desinstalação em massa com o modo silencioso ligado";
+            ? Loc.T("Prog.NaoDeclaradoPeloFornecedor")
+            : Loc.T("Prog.DeclaradoPeloFornecedorUsado");
     public string Initial => Name.Length > 0 ? Name[..1].ToUpperInvariant() : "?";
 
     public bool CanCheck => Eligibility.Selectable;
@@ -45,20 +45,20 @@ public sealed class ProgramRow(InstalledProgram program, BulkEligibility? eligib
     public string ScopeAndKind => $"{Scope} · {Kind}";
 
     /// <summary>Marca curta da coluna "Lote".</summary>
-    public string Flag => IsBlocked ? "fora" : IsCritical ? "atenção" : "";
+    public string Flag => IsBlocked ? Loc.T("Prog.Fora") : IsCritical ? Loc.T("Conv.Atencao") : "";
 
     public string BulkNote => Eligibility.Kind switch
     {
-        BulkEligibilityKind.Blocked => $"Fora da desinstalação em massa ({Eligibility.Category}): {Eligibility.Reason}",
-        BulkEligibilityKind.NeedsExtraConfirmation => $"{Eligibility.Category}: {Eligibility.Reason} Marque só se tiver certeza; pede uma confirmação a mais.",
-        _ => "Pode entrar na desinstalação em massa.",
+        BulkEligibilityKind.Blocked => Loc.F("Prog.ForaDesinstalacaoMassaN", Eligibility.Category, Eligibility.Reason),
+        BulkEligibilityKind.NeedsExtraConfirmation => Loc.F("Prog.NNMarqueSo", Eligibility.Category, Eligibility.Reason),
+        _ => Loc.T("Prog.PodeEntrarDesinstalacaoMassa"),
     };
 }
 
 /// <summary>Linha da fila de desinstalação (atualizada a cada mudança do executor).</summary>
 public sealed class BulkItemRow(BulkQueueItem item) : ObservableObject
 {
-    private string _state = "Na fila", _detail = "";
+    private string _state = Loc.T("Prog.Fila"), _detail = "";
     private bool _active, _good, _bad, _skipped;
     private double _progress;
     public string Name => item.Program.Name;
@@ -109,13 +109,13 @@ public sealed class LeftoverRow(LeftoverCandidate candidate, string programName 
     public string Confidence => $"{Candidate.Confidence} · {Candidate.Score}";
     public string Kind => Candidate.KindText;
     public string Path => Candidate.DisplayPath;
-    public string Size => Candidate.Kind == LeftoverKind.Folder ? $"{ProgramInventory.FormatSize(Candidate.SizeBytes)} · {Candidate.FileCount ?? 0} arq." : "—";
+    public string Size => Candidate.Kind == LeftoverKind.Folder ? Loc.F("Prog.NNArq", ProgramInventory.FormatSize(Candidate.SizeBytes), Candidate.FileCount ?? 0) : "—";
     public string Reason => Candidate.Reason;
     public bool High => Candidate.Score >= 75;
     public bool Low => Candidate.Score < 50;
     /// <summary>Selo de confiança: verde = alta, ciano = média, âmbar = baixa (confira antes de marcar).</summary>
     public Tone Tone => High ? Tone.Good : Low ? Tone.Warn : Tone.Info;
-    public string ConfidenceLabel => High ? $"Alta · {Candidate.Score}" : Low ? $"Baixa · {Candidate.Score}" : $"Média · {Candidate.Score}";
+    public string ConfidenceLabel => High ? Loc.F("Prog.AltaN", Candidate.Score) : Low ? Loc.F("Prog.BaixaN", Candidate.Score) : Loc.F("Prog.MediaN", Candidate.Score);
     public string IconKey => Candidate.Kind == LeftoverKind.Folder ? "Icon.Catalog" : "Icon.Code";
     public double SizeBytes => Candidate.Kind == LeftoverKind.Folder ? Candidate.SizeBytes ?? 0 : 0;
     public string SubLine => string.IsNullOrEmpty(programName) ? Kind : $"{programName} · {Kind}";
@@ -134,7 +134,7 @@ public sealed class ManagerRow(PackageManagerStatus status) : ObservableObject
     public ObservableCollection<UpdateRow> Updates { get; } = [];
     public bool HasUpdates => Updates.Count > 0;
     public Tone Tone => !Installed ? Tone.Neutral : Updates.Count > 0 ? Tone.Warn : Tone.Good;
-    public string CountText => !Installed ? "Não instalado" : Updates.Count == 0 ? "Em dia" : Updates.Count == 1 ? "1 nova" : $"{Updates.Count} novas";
+    public string CountText => !Installed ? Loc.T("Prog.NaoInstalado") : Updates.Count == 0 ? Loc.T("Prog.Dia") : Updates.Count == 1 ? Loc.T("Prog.N1Nova") : Loc.F("Prog.NNovas", Updates.Count);
     public string IconKey => Status.Kind switch
     {
         PackageManagerKind.Winget => "Icon.Windows",
@@ -162,10 +162,10 @@ public sealed class UpdateRow(PackageUpdate update) : ObservableObject
     public string Current => Update.Current;
     public string Available => Update.Available;
     public string Manager => PackageManagerInfo.DisplayName(Update.Manager) + (Update.Source is { } s && Update.Manager == PackageManagerKind.Winget ? $" · {s}" : "");
-    public string Note => Update.IdTruncated ? "ID cortado pelo winget: atualize pelo próprio winget"
-        : Update.Pinned ? "Fixado (pinned): o gerenciador não atualiza sem você liberar"
-        : Update.Manager == PackageManagerKind.Winget && string.IsNullOrWhiteSpace(Update.Source) ? "Sem origem conhecida"
-        : Update.RequiresExplicit ? "Exige pedido explícito (o NEXUS pede por ID)"
+    public string Note => Update.IdTruncated ? Loc.T("Prog.IdCortadoPeloWinget")
+        : Update.Pinned ? Loc.T("Prog.FixadoPinnedGerenciadorNao")
+        : Update.Manager == PackageManagerKind.Winget && string.IsNullOrWhiteSpace(Update.Source) ? Loc.T("Prog.SemOrigemConhecida")
+        : Update.RequiresExplicit ? Loc.T("Prog.ExigePedidoExplicitoNexus")
         : "";
     public bool HasNote => Note.Length > 0;
 }
@@ -197,16 +197,16 @@ public sealed class ProgramsPage : ModulePage
     private List<InstalledProgram> _leftoverTargets = [];
     private bool _useQuietMode = true;
     private bool _createRestorePoint = true;
-    private string _selectionText = "Nenhum selecionado";
+    private string _selectionText = Loc.T("Prog.NenhumSelecionado");
     private BulkUninstaller? _queue;
     private bool _bulkRunning, _showBulkPanel, _bulkReboot;
     private double _bulkPercent;
     private string _bulkHeadline = "", _bulkCounts = "", _bulkCurrent = "", _bulkSummary = "", _bulkFreed = "";
     private List<InstalledProgram> _batchRemoved = [];
-    private string _leftoversTitle = "Nenhum programa escolhido ainda";
+    private string _leftoversTitle = Loc.T("Prog.NenhumProgramaEscolhidoAinda");
     private string _leftoversHeadline = "—";
-    private string _updatesHeadline = "Ainda não verificado";
-    private string _updatesDetail = "Clique em \"Procurar atualizações\". O NEXUS só lê: pergunta a cada gerenciador o que tem versão nova.";
+    private string _updatesHeadline = Loc.T("Prog.AindaNaoVerificado2");
+    private string _updatesDetail = Loc.T("Prog.CliqueProcurarAtualizacoesNexus");
     private string _programsHeadline = "—";
     private string _programsDetail = "";
     private readonly List<(Guid Run, BrokerLevel Level)> _lastRuns = [];
@@ -224,7 +224,7 @@ public sealed class ProgramsPage : ModulePage
         SelectVisibleCommand = new RelayCommand(SelectVisible, () => !Busy && Programs.Any(r => r.Eligibility.Kind == BulkEligibilityKind.Allowed && !r.IsChecked));
         ClearSelectionCommand = new RelayCommand(ClearSelection, () => !Busy && _rows.Values.Any(r => r.IsChecked));
         BulkUninstallCommand = new RelayCommand(() => _ = RunAsync(BulkUninstallAsync), () => !Busy && _rows.Values.Any(r => r.IsChecked));
-        StopAfterCurrentCommand = new RelayCommand(() => { _queue?.RequestStopAfterCurrent(); Say("A fila para depois do desinstalador atual. Nenhum desinstalador é fechado pelo NEXUS."); },
+        StopAfterCurrentCommand = new RelayCommand(() => { _queue?.RequestStopAfterCurrent(); Say(Loc.T("Prog.FilaDepoisDesinstaladorAtual")); },
             () => _queue is not null && !_queue.Snapshot().StopRequested);
         SkipCurrentCommand = new RelayCommand(() => _queue?.SkipCurrent(), () => _queue?.Snapshot().Current is { Finished: false });
         BulkLeftoversCommand = new RelayCommand(() => { _leftoverTargets = [.. _batchRemoved]; IsLeftoversTab = true; _ = RunAsync(ScanLeftoversAsync); },
@@ -233,9 +233,9 @@ public sealed class ProgramsPage : ModulePage
         RemoveLeftoversCommand = new RelayCommand(() => _ = RunAsync(RemoveLeftoversAsync), () => !Busy && Leftovers.Any(l => l.IsChecked));
         UndoLeftoversCommand = new RelayCommand(() => _ = RunAsync(UndoLeftoversAsync), () => !Busy && _lastRuns.Count > 0);
         CheckUpdatesCommand = new RelayCommand(() => _ = RunAsync(CheckUpdatesAsync), () => !Busy);
-        UpdateSelectedCommand = new RelayCommand(() => StartUpdates(Updates.Where(u => u.IsChecked && u.CanUpgrade).ToList(), "Atualizar selecionados"),
+        UpdateSelectedCommand = new RelayCommand(() => StartUpdates(Updates.Where(u => u.IsChecked && u.CanUpgrade).ToList(), Loc.T("Prog.AtualizarSelecionados")),
             () => !Busy && Updates.Any(u => u.IsChecked && u.CanUpgrade));
-        UpdateAllCommand = new RelayCommand(() => StartUpdates(Updates.Where(u => u.CanUpgrade).ToList(), "Atualizar tudo"), () => !Busy && Updates.Any(u => u.CanUpgrade));
+        UpdateAllCommand = new RelayCommand(() => StartUpdates(Updates.Where(u => u.CanUpgrade).ToList(), Loc.T("Prog.AtualizarTudo")), () => !Busy && Updates.Any(u => u.CanUpgrade));
         ShowProgramsCommand = new RelayCommand(() => IsProgramsTab = true);
         PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Message)) OnPropertyChanged(nameof(HasMessage)); };
     }
@@ -259,9 +259,9 @@ public sealed class ProgramsPage : ModulePage
         OnPropertyChanged(nameof(IsLeftoversTab));
     }
 
-    public string ProgramsTabLabel => _loaded ? $"Programas · {_all.Count}" : "Programas";
-    public string UpdatesTabLabel => Updates.Count > 0 ? $"Atualizações · {Updates.Count}" : "Atualizações";
-    public string LeftoversTabLabel => Leftovers.Count > 0 ? $"Sobras · {Leftovers.Count}" : "Sobras";
+    public string ProgramsTabLabel => _loaded ? Loc.F("Prog.ProgramasN", _all.Count) : Loc.T("AsstStep.Programas");
+    public string UpdatesTabLabel => Updates.Count > 0 ? Loc.F("Prog.AtualizacoesN", Updates.Count) : Loc.T("Settings.Atualizacoes");
+    public string LeftoversTabLabel => Leftovers.Count > 0 ? Loc.F("Prog.SobrasN", Leftovers.Count) : Loc.T("Prog.Sobras2");
 
     public bool HasMessage => Message.Length > 0;
 
@@ -298,7 +298,7 @@ public sealed class ProgramsPage : ModulePage
 
     public ObservableCollection<ProgramRow> Programs { get; } = [];
     public ObservableCollection<StoreAppRow> StoreApps { get; } = [];
-    public IReadOnlyList<string> SortOptions { get; } = ["Nome (A–Z)", "Maior primeiro", "Instalados por último", "Editor"];
+    public IReadOnlyList<string> SortOptions { get; } = [Loc.T("Prog.NomeZ"), Loc.T("Prog.MaiorPrimeiro"), Loc.T("Prog.InstaladosUltimo"), Loc.T("Prog.Editor")];
 
     public string Search { get => _search; set { if (Set(ref _search, value ?? "")) ApplyFilter(); } }
     public int SortIndex { get => _sortIndex; set { if (Set(ref _sortIndex, value)) ApplyFilter(); } }
@@ -364,10 +364,10 @@ public sealed class ProgramsPage : ModulePage
         }
         _loaded = true;
         var total = _all.Sum(p => p.SizeBytes ?? 0);
-        ProgramsHeadline = string.Create(PtBr, $"{_all.Count} programas instalados");
+        ProgramsHeadline = Loc.F("Prog.NProgramasInstalados", _all.Count);
         ProgramsDetail = string.Format(PtBr,
-            "{0} declarados pelos instaladores · {1} só deste usuário · {2} sem tamanho informado. Fonte: chaves Uninstall do registro " +
-            "(as mesmas de \"Aplicativos instalados\"), sem componentes do sistema e sem atualizações.",
+            Loc.T("Prog.NDeclaradosPelosInstaladores") +
+            Loc.T("Prog.MesmasAplicativosInstaladosSem"),
             ProgramInventory.FormatSize(total), _all.Count(p => p.Scope == InstallScope.User), _all.Count(p => p.SizeBytes is null));
         ApplyFilter();
         UpdateSelection();
@@ -391,55 +391,55 @@ public sealed class ProgramsPage : ModulePage
 
     private async Task LoadStoreAsync()
     {
-        StoreHeadline = "Lendo os apps da Store…";
+        StoreHeadline = Loc.T("Prog.LendoAppsStore");
         try
         {
             var apps = await Task.Run(() => Nexus.Programs.Inventory.StoreApps.ReadAsync(_runner, PackageManagers.PowerShellPath));
             StoreApps.Clear();
             foreach (var a in apps) StoreApps.Add(new StoreAppRow(a));
-            StoreHeadline = string.Create(PtBr, $"{apps.Count} apps da Microsoft Store deste usuário (lidos com Get-AppxPackage, sem frameworks nem apps do sistema). Para remover, use Configurações > Aplicativos.");
+            StoreHeadline = Loc.F("Prog.NAppsMicrosoftStore", apps.Count);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            StoreHeadline = $"Não foi possível ler os apps da Store: {ex.Message}";
+            StoreHeadline = Loc.F("Prog.NaoFoiPossivelLer", ex.Message);
         }
     }
 
     private void OpenSettings()
     {
         try { UninstallLauncher.OpenWindowsAppsSettings(); }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Say($"Não foi possível abrir Configurações: {ex.Message}"); }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Say(Loc.F("Prog.NaoFoiPossivelAbrir", ex.Message)); }
     }
 
     private async Task UninstallAsync()
     {
         if (Host is null || Selected is not { } row) return;
         var p = row.Program;
-        if (p.NoRemove) { Say($"{p.Name} se registrou como \"não removível\" pelo próprio instalador. Use Configurações > Aplicativos."); return; }
+        if (p.NoRemove) { Say(Loc.F("Prog.NRegistrouComoNao", p.Name)); return; }
         var cmd = UninstallLauncher.Prepare(p.UninstallString, out var error);
-        if (cmd is null) { Say(error ?? "Desinstalador inválido."); return; }
+        if (cmd is null) { Say(error ?? Loc.T("Prog.DesinstaladorInvalido")); return; }
 
         var text = new StringBuilder()
-            .Append(CultureInfo.InvariantCulture, $"Abrir o desinstalador oficial de {p.Name}?\n\n")
-            .Append("Quem remove o programa é o desinstalador do próprio fornecedor, numa janela que você vê e controla:\n")
+            .Append(Loc.F("Prog.AbrirDesinstaladorOficialN", p.Name))
+            .Append(Loc.T("Prog.QuemRemoveProgramaDesinstalador"))
             .Append(CultureInfo.InvariantCulture, $"{cmd.Display}\n\n")
-            .Append("O NEXUS não consegue desfazer uma desinstalação: para voltar, será preciso instalar o programa de novo.\n\n")
-            .Append("As mudanças de sistema feitas pelo próprio NEXUS criam um ponto de restauração automático. Aqui quem age é o fornecedor; ")
-            .Append("se quiser uma garantia extra, crie um ponto antes (menu Iniciar > \"Criar um ponto de restauração\").\n\n")
-            .Append("Quando o desinstalador terminar, o NEXUS procura as sobras (pastas e chaves que ficaram para trás).")
+            .Append(Loc.T("Prog.NexusNaoConsegueDesfazer"))
+            .Append(Loc.T("Prog.MudancasSistemaFeitasPelo"))
+            .Append(Loc.T("Prog.QuiserGarantiaExtraCrie"))
+            .Append(Loc.T("Prog.QuandoDesinstaladorTerminarNexus"))
             .ToString();
-        if (!Host.Confirm($"Desinstalar {p.Name}", text)) { Say("Cancelado. Nada foi alterado."); return; }
+        if (!Host.Confirm(Loc.F("Prog.DesinstalarN", p.Name), text)) { Say(Loc.T("Shell.CanceladoNadaFoiAlterado")); return; }
 
         System.Diagnostics.Process? process;
         try { process = UninstallLauncher.Start(cmd); }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or System.IO.FileNotFoundException or InvalidOperationException)
         {
-            Say($"O desinstalador não abriu: {ex.Message}");
+            Say(Loc.F("Prog.DesinstaladorNaoAbriuN", ex.Message));
             return;
         }
         _leftoverTargets = [p];
-        LeftoversTitle = $"Sobras de {p.Name}";
-        Say($"Desinstalador de {p.Name} aberto. Siga as instruções dele; quando terminar, o NEXUS confere a lista e procura as sobras.");
+        LeftoversTitle = Loc.F("Prog.SobrasN2", p.Name);
+        Say(Loc.F("Prog.DesinstaladorNAbertoSiga", p.Name));
         if (process is not null) _ = WatchUninstallerAsync(process, p);
         await Task.CompletedTask;
     }
@@ -455,7 +455,7 @@ public sealed class ProgramsPage : ModulePage
                 await LoadProgramsAsync();
                 if (StillInstalled(p))
                 {
-                    Say($"O desinstalador fechou, mas {p.Name} ainda aparece na lista. Alguns desinstaladores continuam em outra janela: termine por lá e clique em \"Procurar sobras\".");
+                    Say(Loc.F("Prog.DesinstaladorFechouMasN", p.Name));
                     return;
                 }
                 IsLeftoversTab = true;
@@ -493,7 +493,7 @@ public sealed class ProgramsPage : ModulePage
     public bool BulkReboot { get => _bulkReboot; private set => Set(ref _bulkReboot, value); }
     public bool HasBulkSummary => !BulkRunning && BulkSummary.Length > 0;
     public bool HasBatchRemoved => _batchRemoved.Count > 0;
-    public string BulkLeftoversLabel => $"Procurar as sobras dos {_batchRemoved.Count} removido(s)";
+    public string BulkLeftoversLabel => Loc.F("Prog.ProcurarSobrasNRemovido", _batchRemoved.Count);
 
     private void UpdateSelection()
     {
@@ -502,9 +502,9 @@ public sealed class ProgramsPage : ModulePage
         var critical = chosen.Count(r => r.IsCritical);
         SelectedBytes = bytes;
         SelectedCount = chosen.Count;
-        SelectionText = chosen.Count == 0 ? "Nenhum selecionado"
-            : string.Create(PtBr, $"{chosen.Count} selecionado(s) · {(bytes > 0 ? ProgramInventory.FormatSize(bytes) : "tamanho não informado")}") +
-              (critical > 0 ? string.Create(PtBr, $" · {critical} pede(m) atenção") : "");
+        SelectionText = chosen.Count == 0 ? Loc.T("Prog.NenhumSelecionado")
+            : Loc.F("Prog.NSelecionadoSN", chosen.Count, (bytes > 0 ? ProgramInventory.FormatSize(bytes) : Loc.T("Prog.TamanhoNaoInformado"))) +
+              (critical > 0 ? Loc.F("Prog.NPedeMAtencao", critical) : "");
         OnPropertyChanged(nameof(HasChecked));
     }
 
@@ -514,7 +514,7 @@ public sealed class ProgramsPage : ModulePage
         foreach (var r in Programs.Where(r => r.Eligibility.Kind == BulkEligibilityKind.Allowed)) r.IsChecked = true;
         var skipped = Programs.Count(r => r.Eligibility.Kind != BulkEligibilityKind.Allowed);
         if (skipped > 0)
-            Say(string.Create(PtBr, $"{skipped} visível(is) não foram marcados: bibliotecas e drivers (marque um a um, se tiver certeza) ou itens fora do lote (o motivo aparece ao passar o mouse)."));
+            Say(Loc.F("Prog.NVisivelIsNao", skipped));
     }
 
     private void ClearSelection()
@@ -527,25 +527,25 @@ public sealed class ProgramsPage : ModulePage
         if (Host is null) return;
         await LoadProgramsAsync(); // nunca roda um desinstalador lido há muito tempo
         var chosen = _rows.Values.Where(r => r.IsChecked).Select(r => r.Program).ToList();
-        if (chosen.Count == 0) { Say("Nenhum programa selecionado continua instalado."); return; }
+        if (chosen.Count == 0) { Say(Loc.T("Prog.NenhumProgramaSelecionadoContinua")); return; }
         var preferQuiet = UseQuietMode;
         var plan = await Task.Run(() => BulkQueueBuilder.Build(chosen, UninstallEnv(), preferQuiet));
         if (plan.Items.Count == 0)
         {
-            Say("Nenhum dos selecionados pode ser desinstalado em lote: " + string.Join(" | ", plan.Refused.Take(3).Select(r => $"{r.Program.Name}: {r.Reason}")));
+            Say(Loc.T("Prog.NenhumSelecionadosPodeSer") + string.Join(" | ", plan.Refused.Take(3).Select(r => $"{r.Program.Name}: {r.Reason}")));
             return;
         }
 
         // 1) Confirmação extra para bibliotecas e drivers dos quais outros programas dependem.
         if (plan.CriticalItems.Count > 0)
         {
-            var warn = new StringBuilder().Append(CultureInfo.InvariantCulture, $"{plan.CriticalItems.Count} item(ns) da fila são usados por outros programas ou pelo hardware:\n\n");
+            var warn = new StringBuilder().Append(Loc.F("Prog.NItemNsFila", plan.CriticalItems.Count));
             foreach (var c in plan.CriticalItems)
                 warn.Append(CultureInfo.InvariantCulture, $"• {c.Program.Name}\n   {c.Eligibility.Category}: {c.Eligibility.Reason}\n");
-            warn.Append("\nA lista de \"críticos\" do NEXUS é conservadora, mas não sabe quais programas seus dependem de cada um. ")
-                .Append("Só continue se você sabe que não precisa deles (por exemplo, o driver de uma placa de vídeo que você já tirou). ")
-                .Append("Eles vão por último na fila.");
-            if (!Host.Confirm("Atenção: bibliotecas e drivers na fila", warn.ToString())) { Say("Cancelado. Nada foi desinstalado."); return; }
+            warn.Append(Loc.T("Prog.ListaCriticosNexusConservadora"))
+                .Append(Loc.T("Prog.SoContinueVoceSabe"))
+                .Append(Loc.T("Prog.ElesVaoUltimoFila"));
+            if (!Host.Confirm(Loc.T("Prog.AtencaoBibliotecasDriversFila"), warn.ToString())) { Say(Loc.T("Prog.CanceladoNadaFoiDesinstalado")); return; }
         }
 
         // 2) Ponto de restauração: só se a Proteção do Sistema estiver ligada (ou não deu para saber).
@@ -555,29 +555,29 @@ public sealed class ProgramsPage : ModulePage
             var (drives, policy) = await Task.Run(() => (WindowsRestorePointBackend.ProtectedDrives(), WindowsRestorePointBackend.DisabledByPolicy()));
             if (policy || drives is { Count: 0 })
             {
-                var why = policy ? "A Restauração do Sistema está desligada por política (organização)." : "A Proteção do Sistema está desligada em todas as unidades.";
-                if (!Host.Confirm("Sem ponto de restauração",
-                        $"{why} Não dá para criar um ponto antes do lote.\n\nVocê pode ligá-la na página Ferramentas do sistema (Proteção do Sistema) e voltar aqui.\n\nContinuar SEM ponto de restauração?"))
-                { Say("Cancelado. Nada foi desinstalado."); return; }
+                var why = policy ? Loc.T("Prog.RestauracaoSistemaEstaDesligada") : Loc.T("Prog.ProtecaoSistemaEstaDesligada");
+                if (!Host.Confirm(Loc.T("Prog.SemPontoRestauracao"),
+                        Loc.F("Prog.NNaoCriarPonto", why)))
+                { Say(Loc.T("Prog.CanceladoNadaFoiDesinstalado")); return; }
                 restore = false;
             }
         }
 
         // 3) A confirmação do lote, com tudo listado.
-        if (!Host.Confirm($"Desinstalar {plan.Items.Count} programa(s)", BulkConfirmation(plan, restore, preferQuiet))) { Say("Cancelado. Nada foi desinstalado."); return; }
+        if (!Host.Confirm(Loc.F("Prog.DesinstalarNProgramaS", plan.Items.Count), BulkConfirmation(plan, restore, preferQuiet))) { Say(Loc.T("Prog.CanceladoNadaFoiDesinstalado")); return; }
 
         if (restore)
         {
-            var r = await Host.ApplyAsync("Ponto de restauração antes do lote",
-                string.Create(PtBr, $"Criar um ponto de restauração agora, antes de desinstalar {plan.Items.Count} programa(s)?\n\n") +
-                "O Windows vai pedir permissão de administrador. Se ele já criou um ponto nas últimas 24 horas, esse ponto vale.",
+            var r = await Host.ApplyAsync(Loc.T("Prog.PontoRestauracaoAntesLote"),
+                Loc.F("Prog.CriarPontoRestauracaoAgora", plan.Items.Count) +
+                Loc.T("Prog.WindowsVaiPedirPermissao"),
                 [new ActionRequest(RestorePointAction)], BrokerLevel.Admin);
-            if (r is null) { Say("Cancelado. Nada foi desinstalado."); return; }
+            if (r is null) { Say(Loc.T("Prog.CanceladoNadaFoiDesinstalado")); return; }
             var result = r.Response?.Results is { Count: > 0 } rs ? rs[0] : null;
             if (!r.Ok || result?.Outcome != "Verified")
             {
                 var detail = result?.Detail ?? r.Message;
-                if (!Host.Confirm("Ponto de restauração não criado", $"{detail}\n\nContinuar a desinstalação sem um ponto novo?")) { Say("Cancelado. Nada foi desinstalado."); return; }
+                if (!Host.Confirm(Loc.T("Prog.PontoRestauracaoNaoCriado"), Loc.F("Prog.NContinuarDesinstalacaoSem", detail))) { Say(Loc.T("Prog.CanceladoNadaFoiDesinstalado")); return; }
             }
         }
 
@@ -587,28 +587,28 @@ public sealed class ProgramsPage : ModulePage
     private static string BulkConfirmation(BulkQueuePlan plan, bool restore, bool preferQuiet)
     {
         const int maxLines = 25;
-        var text = new StringBuilder().Append(CultureInfo.InvariantCulture, $"Desinstalar {plan.Items.Count} programa(s), um de cada vez, nesta ordem?\n\n");
+        var text = new StringBuilder().Append(Loc.F("Prog.DesinstalarNProgramaS2", plan.Items.Count));
         foreach (var i in plan.Items.Take(maxLines))
         {
             var size = ProgramInventory.FormatSize(i.Program.SizeBytes);
-            text.Append(CultureInfo.InvariantCulture, $"• {i.Program.Name} — {size} · {i.Program.Publisher ?? "editor não informado"} · {i.KindText} · {i.ModeText}{(i.Critical ? " · ATENÇÃO" : "")}\n");
+            text.Append(CultureInfo.InvariantCulture, $"• {i.Program.Name} — {size} · {i.Program.Publisher ?? Loc.T("Prog.EditorNaoInformado")} · {i.KindText} · {i.ModeText}{(i.Critical ? Loc.T("Prog.Atencao") : "")}\n");
         }
-        if (plan.Items.Count > maxLines) text.Append(CultureInfo.InvariantCulture, $"• … e mais {plan.Items.Count - maxLines}\n");
-        text.Append(PtBr, $"\nTotal declarado: {ProgramInventory.FormatSize(plan.KnownBytes)}{(plan.UnknownSize > 0 ? $" ({plan.UnknownSize} sem tamanho informado)" : "")}.\n");
+        if (plan.Items.Count > maxLines) text.Append(Loc.F("Prog.MaisN", plan.Items.Count - maxLines));
+        text.Append(Loc.F("Prog.TotalDeclaradoNN", ProgramInventory.FormatSize(plan.KnownBytes), (plan.UnknownSize > 0 ? Loc.F("Prog.NSemTamanhoInformado", plan.UnknownSize) : "")));
         if (plan.Refused.Count > 0)
         {
-            text.Append("\nFicam de fora:\n");
+            text.Append(Loc.T("Prog.FicamFora"));
             foreach (var (p, reason) in plan.Refused.Take(8)) text.Append(CultureInfo.InvariantCulture, $"• {p.Name}: {reason}\n");
         }
-        text.Append("\nCada desinstalador é o oficial do fornecedor: é ele quem remove, e o NEXUS NÃO consegue desfazer uma desinstalação ")
-            .Append("(para voltar, reinstale o programa). ")
+        text.Append(Loc.T("Prog.CadaDesinstaladorOficialFornecedor"))
+            .Append(Loc.T("Prog.VoltarReinstalePrograma"))
             .Append(preferQuiet
-                ? "Silencioso = o comando sem perguntas que o próprio fornecedor declarou; MSI = Windows Installer só com a barra de progresso. "
-                : "Modo silencioso desligado: todos abrem a janela do fornecedor. ")
-            .Append("Os de janela você conclui; a fila espera cada um terminar (inclusive quando ele continua em outra janela) e nunca fecha um desinstalador. ")
-            .Append("Um por vez: o Windows Installer só aceita uma instalação de cada vez.\n\n")
-            .Append(restore ? "Antes de começar: criar um ponto de restauração (pede administrador).\n\n" : "Sem ponto de restauração antes do lote.\n\n")
-            .Append("No fim, o NEXUS lê a lista de novo, mostra o resumo e oferece procurar as sobras de todos os removidos de uma vez.");
+                ? Loc.T("Prog.SilenciosoComandoSemPerguntas")
+                : Loc.T("Prog.ModoSilenciosoDesligadoTodos"))
+            .Append(Loc.T("Prog.JanelaVoceConcluiFila"))
+            .Append(Loc.T("Prog.VezWindowsInstallerSo"))
+            .Append(restore ? Loc.T("Prog.AntesComecarCriarPonto") : Loc.T("Prog.SemPontoRestauracaoAntes"))
+            .Append(Loc.T("Prog.FimNexusLeLista"));
         return text.ToString();
     }
 
@@ -623,7 +623,7 @@ public sealed class ProgramsPage : ModulePage
         OnPropertyChanged(nameof(HasBatchRemoved));
         ShowBulkPanel = true;
         BulkRunning = true;
-        Say("Desinstalando em fila. Acompanhe abaixo; nos de janela, conclua os passos do fornecedor.");
+        Say(Loc.T("Prog.DesinstalandoFilaAcompanheAbaixo"));
         var progress = new Progress<BulkQueueSnapshot>(ApplySnapshot);
         var queue = new BulkUninstaller(plan.Items, new WindowsUninstallRunner(), WindowsInstalledCheck.StillInstalled, new WindowsRebootPendingProbe(), null, progress);
         _queue = queue;
@@ -648,8 +648,8 @@ public sealed class ProgramsPage : ModulePage
         BulkReboot = summary.RebootRequired;
         BulkCurrent = "";
         BulkSummary = summary.Text();
-        Say(summary.Headline + (summary.RebootRequired ? ". Reinicie o PC para concluir." : ".") +
-            (_batchRemoved.Count > 0 ? " Agora dá para procurar as sobras de todos de uma vez." : ""));
+        Say(summary.Headline + (summary.RebootRequired ? Loc.T("Prog.ReiniciePcConcluir") : ".") +
+            (_batchRemoved.Count > 0 ? Loc.T("Prog.AgoraProcurarSobrasTodos") : ""));
     }
 
     private void ApplySnapshot(BulkQueueSnapshot s)
@@ -660,11 +660,11 @@ public sealed class ProgramsPage : ModulePage
         BulkRemoved = s.Removed;
         BulkFailed = s.Failed;
         BulkSkipped = s.Skipped;
-        BulkCounts = string.Create(PtBr, $"Na fila {s.Pending} · Removidos {s.Removed} · Falhas {s.Failed} · Pulados {s.Skipped}") +
-                     (s.StopRequested && BulkRunning ? " · para depois do atual" : "");
+        BulkCounts = Loc.F("Prog.FilaNRemovidosN", s.Pending, s.Removed, s.Failed, s.Skipped) +
+                     (s.StopRequested && BulkRunning ? Loc.T("Prog.DepoisAtual") : "");
         if (s.Current is { Finished: false } c)
         {
-            BulkHeadline = string.Create(PtBr, $"{s.Done + 1} de {s.Total}: {c.Item.Program.Name}");
+            BulkHeadline = Loc.F("Prog.NNN", s.Done + 1, s.Total, c.Item.Program.Name);
             BulkCurrent = $"{c.StateText}. {c.Detail}";
         }
         System.Windows.Input.CommandManager.InvalidateRequerySuggested();
@@ -685,18 +685,18 @@ public sealed class ProgramsPage : ModulePage
     {
         if (_leftoverTargets.Count == 0) return;
         var targets = _leftoverTargets.ToList();
-        LeftoversTitle = targets.Count == 1 ? $"Sobras de {targets[0].Name}" : string.Create(PtBr, $"Sobras de {targets.Count} programas removidos");
+        LeftoversTitle = targets.Count == 1 ? Loc.F("Prog.SobrasN2", targets[0].Name) : Loc.F("Prog.SobrasNProgramasRemovidos", targets.Count);
         await LoadProgramsAsync();
         Leftovers.Clear();
         var still = targets.Where(StillInstalled).ToList();
         var gone = targets.Except(still).ToList();
         if (gone.Count == 0)
         {
-            LeftoversHeadline = "Ainda instalado";
+            LeftoversHeadline = Loc.T("Prog.AindaInstalado");
             NotifyLeftovers();
             Say(targets.Count == 1
-                ? $"{targets[0].Name} ainda está instalado. Desinstale primeiro: o NEXUS só procura sobras de programas que já saíram da lista."
-                : "Todos ainda aparecem como instalados. O NEXUS só procura sobras de programas que já saíram da lista.");
+                ? Loc.F("Prog.NAindaEstaInstalado", targets[0].Name)
+                : Loc.T("Prog.TodosAindaAparecemComo"));
             OnPropertyChanged(nameof(LeftoversTabLabel));
             return;
         }
@@ -715,11 +715,11 @@ public sealed class ProgramsPage : ModulePage
         foreach (var (program, candidate) in found) Leftovers.Add(new LeftoverRow(candidate, program.Name));
         LeftoversScanned = true;
         NotifyLeftovers();
-        LeftoversHeadline = found.Count == 0 ? "Nada sobrou" : LeftoverScanner.Summary(found.Select(f => f.Candidate).ToList());
-        var stillNote = still.Count == 0 ? "" : string.Create(PtBr, $" {still.Count} ainda instalado(s), sem busca: {string.Join(", ", still.Take(3).Select(p => p.Name))}.");
+        LeftoversHeadline = found.Count == 0 ? Loc.T("Prog.NadaSobrou") : LeftoverScanner.Summary(found.Select(f => f.Candidate).ToList());
+        var stillNote = still.Count == 0 ? "" : Loc.F("Prog.NAindaInstaladoS", still.Count, string.Join(", ", still.Take(3).Select(p => p.Name)));
         Say((found.Count == 0
-                ? (gone.Count == 1 ? $"Nenhuma sobra de {gone[0].Name} encontrada nas pastas e chaves que o NEXUS confere." : "Nenhuma sobra encontrada nas pastas e chaves que o NEXUS confere.")
-                : "Confira a lista. As de confiança alta já vêm marcadas; as baixas, não. Nada sai do lugar sem você confirmar.") + stillNote);
+                ? (gone.Count == 1 ? Loc.F("Prog.NenhumaSobraNEncontrada", gone[0].Name) : Loc.T("Prog.NenhumaSobraEncontradaNas"))
+                : Loc.T("Prog.ConfiraListaConfiancaAlta")) + stillNote);
         OnPropertyChanged(nameof(LeftoversTabLabel));
     }
 
@@ -742,8 +742,8 @@ public sealed class ProgramsPage : ModulePage
         var failed = new List<string>();
         foreach (var (group, level, actionId, label) in new[]
                  {
-                     (user, BrokerLevel.User, UserAction, "do seu perfil"),
-                     (machine, BrokerLevel.Admin, MachineAction, "de todos os usuários (pede administrador e cria um ponto de restauração)"),
+                     (user, BrokerLevel.User, UserAction, Loc.T("Prog.SeuPerfil")),
+                     (machine, BrokerLevel.Admin, MachineAction, Loc.T("Prog.TodosUsuariosPedeAdministrador")),
                  })
         {
             if (group.Count == 0) continue;
@@ -755,13 +755,13 @@ public sealed class ProgramsPage : ModulePage
                 var part = parts[n];
                 var requests = part.Select(c => new ActionRequest(actionId, null,
                     new Dictionary<string, string> { ["kind"] = c.Kind == LeftoverKind.Folder ? "file" : "registry", ["path"] = c.Path })).ToList();
-                var partLabel = parts.Count > 1 ? string.Create(PtBr, $" (parte {n + 1} de {parts.Count})") : "";
-                var text = new StringBuilder().Append(CultureInfo.InvariantCulture, $"Mover {part.Length} sobra(s) {label}{partLabel} para a quarentena do NEXUS?\n\n");
+                var partLabel = parts.Count > 1 ? Loc.F("Prog.ParteNN", n + 1, parts.Count) : "";
+                var text = new StringBuilder().Append(Loc.F("Prog.MoverNSobraS", part.Length, label, partLabel));
                 foreach (var c in part.Take(12)) text.Append(CultureInfo.InvariantCulture, $"• {c.DisplayPath}\n");
-                if (part.Length > 12) text.Append(CultureInfo.InvariantCulture, $"• … e mais {part.Length - 12}\n");
-                text.Append("\nNada é apagado: pastas vão para a quarentena com a lista de arquivos conferida, e chaves do registro são guardadas com todos os valores. ")
-                    .Append("Você pode desfazer aqui (botão Desfazer) ou na página Aplicar. Liberar espaço não deixa o PC mais rápido.");
-                var r = await Host.ApplyAsync("Remover sobras", text.ToString(), requests, level);
+                if (part.Length > 12) text.Append(Loc.F("Prog.MaisN", part.Length - 12));
+                text.Append(Loc.T("Prog.NadaApagadoPastasVao"))
+                    .Append(Loc.T("Prog.VocePodeDesfazerAqui"));
+                var r = await Host.ApplyAsync(Loc.T("Prog.RemoverSobras"), text.ToString(), requests, level);
                 if (r is null) break;
                 if (r.Response is { Ok: true, RunId: { } run })
                 {
@@ -776,8 +776,8 @@ public sealed class ProgramsPage : ModulePage
         OnPropertyChanged(nameof(CanUndo));
         await ScanLeftoversAsync();
         Say(failed.Count == 0
-            ? string.Create(PtBr, $"{moved} sobra(s) na quarentena. Se algo fizer falta, use Desfazer.")
-            : string.Create(PtBr, $"{moved} na quarentena; {failed.Count} não: {string.Join(" | ", failed.Take(3))}"));
+            ? Loc.F("Prog.NSobraSQuarentena", moved)
+            : Loc.F("Prog.NQuarentenaNNao", moved, failed.Count, string.Join(" | ", failed.Take(3))));
     }
 
     private async Task UndoLeftoversAsync()
@@ -788,11 +788,11 @@ public sealed class ProgramsPage : ModulePage
             var r = await Host.RevertAsync(run, level);
             if (r is null) return; // cancelado: mantém para tentar de novo
             if (r.Response?.FullyRestored == true) _lastRuns.Remove((run, level));
-            else { Say($"Desfazer não terminou: {r.Message}"); break; }
+            else { Say(Loc.F("Prog.DesfazerNaoTerminouN", r.Message)); break; }
         }
         OnPropertyChanged(nameof(CanUndo));
         if (_leftoverTargets.Count > 0) await ScanLeftoversAsync();
-        if (_lastRuns.Count == 0) Say("Desfeito: as sobras voltaram para onde estavam.");
+        if (_lastRuns.Count == 0) Say(Loc.T("Prog.DesfeitoSobrasVoltaramOnde"));
     }
 
     // ------------------------------------------------------------------ atualizações
@@ -825,8 +825,8 @@ public sealed class ProgramsPage : ModulePage
 
     private async Task ReadUpdatesAsync()
     {
-        UpdatesHeadline = "Verificando…";
-        UpdatesDetail = "Perguntando a cada gerenciador (pode levar até alguns minutos na primeira vez).";
+        UpdatesHeadline = Loc.T("Prog.Verificando");
+        UpdatesDetail = Loc.T("Prog.PerguntandoCadaGerenciadorPode");
         Managers.Clear();
         Updates.Clear();
         var statuses = await Task.WhenAll(PackageManagers.All.Select(k => Task.Run(() => PackageManagers.DetectAsync(k, _runner))));
@@ -835,19 +835,19 @@ public sealed class ProgramsPage : ModulePage
         var lists = await Task.WhenAll(statuses.Select(s => Task.Run(() => PackageManagers.ListUpdatesAsync(s, _runner))));
         foreach (var (row, list) in rows.Zip(lists))
         {
-            row.Detail = !row.Installed ? "Não instalado neste PC."
+            row.Detail = !row.Installed ? Loc.T("Prog.NaoInstaladoNestePc")
                 : list.Problem is { } problem ? problem
-                : list.Updates.Count == 0 ? "Tudo em dia."
-                : string.Create(PtBr, $"{list.Updates.Count} com versão nova.");
+                : list.Updates.Count == 0 ? Loc.T("Drv.TudoDia")
+                : Loc.F("Prog.NVersaoNova", list.Updates.Count);
             var mine = list.Updates.Select(u => new UpdateRow(u)).ToList();
             foreach (var u in mine) Updates.Add(u);
             row.AddUpdates(mine);
         }
         var n = Updates.Count;
-        UpdatesHeadline = n == 0 ? "Tudo em dia" : string.Create(PtBr, $"{n} {(n == 1 ? "atualização disponível" : "atualizações disponíveis")}");
+        UpdatesHeadline = n == 0 ? Loc.T("Prog.TudoDia") : string.Create(PtBr, $"{n} {(n == 1 ? Loc.T("Prog.AtualizacaoDisponivel") : Loc.T("Prog.AtualizacoesDisponiveis2"))}");
         UpdatesDetail = n == 0
-            ? "Nenhum gerenciador encontrado relatou versão nova."
-            : string.Create(PtBr, $"{Updates.Count(u => u.CanUpgrade)} podem ser pedidas daqui. A atualização abre a janela do próprio gerenciador; o NEXUS não consegue desfazê-la.");
+            ? Loc.T("Prog.NenhumGerenciadorEncontradoRelatou")
+            : Loc.F("Prog.NPodemSerPedidas", Updates.Count(u => u.CanUpgrade));
         OnPropertyChanged(nameof(UpdatesTabLabel));
     }
 
@@ -855,18 +855,18 @@ public sealed class ProgramsPage : ModulePage
     {
         if (Host is null || rows.Count == 0) return;
         var groups = rows.GroupBy(r => r.Update.Manager).ToList();
-        var text = new StringBuilder().Append(CultureInfo.InvariantCulture, $"Atualizar {rows.Count} pacote(s)?\n\n");
+        var text = new StringBuilder().Append(Loc.F("Prog.AtualizarNPacoteS", rows.Count));
         foreach (var g in groups)
         {
             text.Append(CultureInfo.InvariantCulture, $"{PackageManagerInfo.DisplayName(g.Key)}:\n");
             foreach (var r in g.Take(15)) text.Append(CultureInfo.InvariantCulture, $"• {r.Name}  {r.Current} → {r.Available}\n");
-            if (g.Count() > 15) text.Append(CultureInfo.InvariantCulture, $"• … e mais {g.Count() - 15}\n");
+            if (g.Count() > 15) text.Append(Loc.F("Prog.MaisN", g.Count() - 15));
         }
-        text.Append("\nCada gerenciador abre numa janela visível do PowerShell, e é ele quem baixa e instala. ")
-            .Append("O NEXUS não consegue desfazer uma atualização.");
+        text.Append(Loc.T("Prog.CadaGerenciadorAbreNuma"))
+            .Append(Loc.T("Prog.NexusNaoConsegueDesfazer2"));
         if (groups.Any(g => g.Key == PackageManagerKind.Chocolatey))
-            text.Append(" O Chocolatey pede administrador: o Windows vai mostrar o aviso antes de abrir a janela dele.");
-        if (!Host.Confirm(title, text.ToString())) { Say("Cancelado. Nada foi alterado."); return; }
+            text.Append(Loc.T("Prog.ChocolateyPedeAdministradorWindows"));
+        if (!Host.Confirm(title, text.ToString())) { Say(Loc.T("Shell.CanceladoNadaFoiAlterado")); return; }
 
         var opened = new List<string>();
         foreach (var g in groups)
@@ -880,10 +880,10 @@ public sealed class ProgramsPage : ModulePage
             }
             catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException)
             {
-                Say($"{status.DisplayName}: a janela não abriu ({ex.Message}).");
+                Say(Loc.F("Prog.NJanelaNaoAbriu", status.DisplayName, ex.Message));
             }
         }
         if (opened.Count > 0)
-            Say($"Janela aberta: {string.Join(", ", opened)}. Quando terminar, clique em \"Procurar atualizações\" para conferir.");
+            Say(Loc.F("Prog.JanelaAbertaNQuando", string.Join(", ", opened)));
     }
 }
