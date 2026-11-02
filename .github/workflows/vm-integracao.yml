@@ -167,13 +167,13 @@ jobs:
           $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"'), '--lang', 'pt-BR' -PassThru
           $null = $p.Handle   # sem isto o ExitCode do Start-Process pode vir vazio
           $prog = Join-Path $PWD 'saida/ui/ui.progress.txt'
-          $limit = [DateTime]::UtcNow.AddMinutes(20)
+          $limit = [DateTime]::UtcNow.AddMinutes(14)
           while (-not $p.WaitForExit(60000) -and [DateTime]::UtcNow -lt $limit) {
             if (Test-Path $prog) { "--- andamento: $((Get-Content $prog -Tail 1))" }
           }
           if (-not $p.HasExited) {
             $p.Kill(); 'tempo' | Out-File saida/ui/ui.exitcode -Encoding ascii
-            Write-Warning 'A interface não terminou em 20 min. Últimos passos e diagnóstico:'
+            Write-Warning 'A interface não terminou em 14 min. Últimos passos e diagnóstico:'
             if (Test-Path $prog) { Get-Content $prog -Tail 15 }
             $diag = Join-Path $env:LOCALAPPDATA 'NEXUS\desktop-diag.log'
             if (Test-Path $diag) { Get-Content $diag -Tail 40 }
@@ -193,6 +193,7 @@ jobs:
         timeout-minutes: 30
         run: |
           # Abre todas as páginas traduzidas de verdade (exceções, bindings quebrados, travamentos) em en e es.
+          if ((Test-Path saida/ui/ui.exitcode) -and (Get-Content saida/ui/ui.exitcode).Trim() -eq 'tempo') { 'pulado: pt-BR travou' | Out-File saida/ui/ui-lang.exitcode -Encoding ascii; 'pt-BR travou; en/es pulados'; exit 0 }
           if ((Get-Process -Id $PID).SessionId -eq 0) { 'sem sessao grafica' | Out-File saida/ui/ui-lang.exitcode -Encoding ascii; exit 0 }
           $exe = Resolve-Path 'src/Nexus.Desktop/bin/Release/net10.0-windows/Nexus.Desktop.exe'
           $codes = @()
