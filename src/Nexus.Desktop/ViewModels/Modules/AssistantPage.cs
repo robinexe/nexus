@@ -1136,6 +1136,31 @@ public sealed class AssistantPage : ModulePage
 
     internal void HideProcessDemo() => ProcessView.Close();
 
+    /// <summary>Autoteste: a tela Otimizar do modo simples no meio de uma rodada (DEMONSTRAÇÃO: nada é lido nem aplicado).</summary>
+    internal void ShowAutoDemo()
+    {
+        ShowProcessDemo();
+        _autoIndex = 2; // limpeza
+        _autoApplying = true;
+        AutoRunning = true;
+    }
+
+    /// <summary>Autoteste: o resumo do fim da rodada automática (DEMONSTRAÇÃO, rotulado assim).</summary>
+    internal void ShowAutoDoneDemo()
+    {
+        AutoRunning = false;
+        AutoSummary = Loc.T("Simple.SelfTest.DemoPrefix") + SimpleOptimizeText.Summary(9.3 * 1024 * 1024 * 1024, 12);
+    }
+
+    internal void HideAutoDemo()
+    {
+        HideProcessDemo();
+        _autoIndex = 0;
+        _autoApplying = false;
+        AutoRunning = false;
+        AutoSummary = "";
+    }
+
     // ------------------------------------------------------------------ leitura do diário (somente leitura)
 
     /// <summary>Alterações que ficaram pela metade nos dois diários (mesma leitura da janela principal, sem travar nem escrever).</summary>

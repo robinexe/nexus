@@ -3885,4 +3885,9 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.Welcome.Skip" xml:space="preserve"><value>Skip</value></data>
   <data name="Simple.Welcome.Back" xml:space="preserve"><value>Back</value></data>
   <data name="Simple.Welcome.Next" xml:space="preserve"><value>Next</value></data>
+  <data name="Simple.SelfTest.Label" xml:space="preserve"><value>Simple mode: {0}</value></data>
+  <data name="Simple.SelfTest.Welcome" xml:space="preserve"><value>Welcome ({0} of {1})</value></data>
+  <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Simple mode: Optimize (working, demo)</value></data>
+  <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Simple mode: Optimize (done, demo)</value></data>
+  <data name="Simple.SelfTest.DemoPrefix" xml:space="preserve"><value>[Demo] </value></data>
 </root>
