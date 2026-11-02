@@ -229,7 +229,12 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     cache de sombreador global; por jogo: baixa latência On, desempenho máximo, limite de FPS, V-Sync para G-SYNC. Página
     Placa de vídeo › "Driver NVIDIA por jogo". Layouts conferidos com gcc contra nvapi.h; falta testar num driver real
     (GTX 1650 / 512.74 do usuário). VM sem NVIDIA: NotApplicable sem escrever. 1957 testes.
-18. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
+18. **01/11 noite (2):** padrões globais do DirectX (janela/flip model, VRR, Auto HDR) por merge de token; PowerSettingValue
+    escreve valor DC (Wi-Fi sem economia na bateria, GUIDs confirmados aplicando na VM 2025); "O que só você pode fazer":
+    Resizable BAR (NVML BAR1 / D3D12 GPUUploadHeap), XMP/EXPO, MUX de notebook, link PCIe honesto (GTX 1650 = 3.0 x16);
+    ajustes por jogo na página Placa de vídeo (janela por jogo, fps_max do CS2 via console.log -condebug);
+    startup.run-entry.disable aposentada (redundante). 2005 testes; VM 2022/2025 verde.
+19. **Próximos:** NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
 
 ## 8. Limitações conhecidas
