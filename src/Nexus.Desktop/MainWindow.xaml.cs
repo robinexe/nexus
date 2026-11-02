@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using Nexus.Desktop.Services.Shell;
 using Nexus.Desktop.ViewModels;
@@ -26,8 +25,7 @@ public partial class MainWindow : Window
         using (UiWatchdog.Phase("janela: InitializeComponent", logAboveMs: 30)) InitializeComponent();
         using (UiWatchdog.Phase("janela: MainViewModel (27 páginas)")) _vm = new MainViewModel();
 
-        // Navegação do modo (simples: 6 itens sem grupos; completo: agrupada por PageViewModel.Group). A lista vai antes do
-        // DataContext para o SelectedItem já achar a página.
+        // Navegação: as 6 telas simples. A lista vai antes do DataContext para o SelectedItem já achar a página.
         BuildNavigation();
         Nav.SelectionChanged += KeepSelection;
 
@@ -60,20 +58,11 @@ public partial class MainWindow : Window
         if (e.PropertyName == nameof(MainViewModel.NavPages)) BuildNavigation();
     }
 
-    /// <summary>Monta a lista lateral do modo atual. Só o modo completo tem cabeçalhos de grupo.</summary>
+    /// <summary>Monta a lista lateral: as 6 telas simples, sem grupos (as outras ficam em Ferramentas avançadas).</summary>
     private void BuildNavigation()
     {
         var pages = _vm.NavPages;
-        if (_vm.IsSimpleMode)
-        {
-            Nav.ItemsSource = pages.ToList();
-        }
-        else
-        {
-            var view = new ListCollectionView(pages.OrderBy(p => ShellMap.GroupRank(p.Group)).ToList());
-            view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PageViewModel.Group)));
-            Nav.ItemsSource = view;
-        }
+        Nav.ItemsSource = pages.ToList();
         // SetCurrentValue (e não atribuição): atribuir apagaria a ligação SelectedItem ← SelectedPage do XAML.
         Nav.SetCurrentValue(System.Windows.Controls.Primitives.Selector.SelectedItemProperty, pages.Contains(_vm.SelectedPage) ? _vm.SelectedPage : null);
     }

@@ -3369,7 +3369,6 @@ It will ask for administrator permission (UAC) and create a restore point.</valu
   <data name="Shell.ProcurandoVersaoNova" xml:space="preserve"><value>Looking for a new version…</value></data>
   <data name="Shell.ProntoLeituraN" xml:space="preserve"><value>Ready · read at {0:HH:mm:ss}</value></data>
   <data name="Shell.Recuperar" xml:space="preserve"><value>Recover</value></data>
-  <data name="Shell.Referencia" xml:space="preserve"><value>reference</value></data>
   <data name="Shell.ReiniciarAtualizar" xml:space="preserve"><value>Restart and update</value></data>
   <data name="Shell.RelatorioExportadoN" xml:space="preserve"><value>Report exported to {0}</value></data>
   <data name="Shell.RespondaJanelaConfirmacaoOu" xml:space="preserve"><value>Answer the confirmation window (or the Windows prompt) to continue. The time left resumes counting afterwards.</value></data>
@@ -3768,14 +3767,14 @@ Requires administrator.</value></data>
 Only low-risk changes that can be undone in History are included. Windows will ask for administrator permission once, and NEXUS creates a restore point first.
 
 Start now?</value></data>
-  <data name="Simple.Opt.SkippedAuto" xml:space="preserve"><value>Left for the step-by-step mode (full mode).</value></data>
+  <data name="Simple.Opt.SkippedAuto" xml:space="preserve"><value>Left for the step-by-step Assistant, in Advanced tools.</value></data>
   <data name="Simple.Nav.Home" xml:space="preserve"><value>Home</value></data>
   <data name="Simple.Nav.Optimize" xml:space="preserve"><value>Optimize</value></data>
   <data name="Simple.Nav.Clean" xml:space="preserve"><value>Clean</value></data>
   <data name="Simple.Nav.Games" xml:space="preserve"><value>Games</value></data>
   <data name="Simple.Nav.Problems" xml:space="preserve"><value>Problems</value></data>
   <data name="Simple.Nav.History" xml:space="preserve"><value>History</value></data>
-  <data name="Simple.Nav.Group" xml:space="preserve"><value>Simple mode</value></data>
+  <data name="Simple.Nav.Group" xml:space="preserve"><value>Essentials</value></data>
   <data name="Simple.Home.Subtitle" xml:space="preserve"><value>How your PC is doing and what can be improved.</value></data>
   <data name="Simple.Home.Reading" xml:space="preserve"><value>Looking at your PC…</value></data>
   <data name="Simple.Home.Caption" xml:space="preserve"><value>Checked just now, without changing anything.</value></data>
@@ -3861,35 +3860,24 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.Hist.UndoneAll" xml:space="preserve"><value>Everything undone. It's back to how it was.</value></data>
   <data name="Simple.Hist.UndoneSome" xml:space="preserve"><value>{0} of {1} undone. The rest is in See everything in detail.</value></data>
   <data name="Simple.Hist.UndoneChip" xml:space="preserve"><value>Undone</value></data>
-  <data name="Simple.Notice.Text" xml:space="preserve"><value>We made NEXUS simpler. Want everything as before? Settings › Full mode.</value></data>
-  <data name="Simple.Notice.Ok" xml:space="preserve"><value>Got it</value></data>
-  <data name="Simple.Notice.Full" xml:space="preserve"><value>Use full mode</value></data>
-  <data name="Simple.Shell.ShowAll" xml:space="preserve"><value>Show all tools</value></data>
-  <data name="Simple.Shell.BackToSimple" xml:space="preserve"><value>Back to simple mode</value></data>
-  <data name="Simple.Shell.ModeTip" xml:space="preserve"><value>Switches between simple mode (the essentials) and full mode (all tools). Also in Settings.</value></data>
-  <data name="Simple.Settings.Title" xml:space="preserve"><value>NEXUS mode</value></data>
-  <data name="Simple.Settings.Detail" xml:space="preserve"><value>Simple shows only the essentials, in plain words. Full shows every tool.</value></data>
-  <data name="Simple.Settings.Simple" xml:space="preserve"><value>Simple (recommended)</value></data>
-  <data name="Simple.Settings.Full" xml:space="preserve"><value>Full</value></data>
   <data name="Simple.Welcome.Name" xml:space="preserve"><value>Welcome to NEXUS</value></data>
   <data name="Simple.Welcome.T1" xml:space="preserve"><value>NEXUS makes your PC faster and cleaner</value></data>
   <data name="Simple.Welcome.S1" xml:space="preserve"><value>It checks your PC, shows what can be improved and does it for you.</value></data>
   <data name="Simple.Welcome.T2" xml:space="preserve"><value>Nothing changes without your OK, and everything can be undone</value></data>
   <data name="Simple.Welcome.S2" xml:space="preserve"><value>Every change is kept in History. One click puts it back.</value></data>
-  <data name="Simple.Welcome.T3" xml:space="preserve"><value>How do you prefer it?</value></data>
-  <data name="Simple.Welcome.Simple" xml:space="preserve"><value>Simple (recommended)</value></data>
-  <data name="Simple.Welcome.SimpleDetail" xml:space="preserve"><value>Six screens, just the essentials.</value></data>
-  <data name="Simple.Welcome.Full" xml:space="preserve"><value>Full</value></data>
-  <data name="Simple.Welcome.FullDetail" xml:space="preserve"><value>Every tool, for people who like details.</value></data>
-  <data name="Simple.Welcome.ChangeLater" xml:space="preserve"><value>You can switch anytime in Settings.</value></data>
   <data name="Simple.Welcome.Skip" xml:space="preserve"><value>Skip</value></data>
-  <data name="Simple.Welcome.Back" xml:space="preserve"><value>Back</value></data>
   <data name="Simple.Welcome.Next" xml:space="preserve"><value>Next</value></data>
-  <data name="Simple.SelfTest.Label" xml:space="preserve"><value>Simple mode: {0}</value></data>
   <data name="Simple.SelfTest.Welcome" xml:space="preserve"><value>Welcome ({0} of {1})</value></data>
-  <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Simple mode: Optimize (working, demo)</value></data>
-  <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Simple mode: Optimize (done, demo)</value></data>
+  <data name="Simple.SelfTest.OptimizeRunning" xml:space="preserve"><value>Optimize (working, demo)</value></data>
+  <data name="Simple.SelfTest.OptimizeDone" xml:space="preserve"><value>Optimize (done, demo)</value></data>
   <data name="Simple.SelfTest.DemoPrefix" xml:space="preserve"><value>[Demo] </value></data>
-  <data name="Simple.Games.Failed" xml:space="preserve"><value>Couldn't apply it. Details are in full mode, under Apply.</value></data>
+  <data name="Simple.Games.Failed" xml:space="preserve"><value>Couldn't apply it. Details are in Advanced tools › Apply.</value></data>
   <data name="Simple.Hist.UndoFailed" xml:space="preserve"><value>Couldn't undo everything. Check See everything in detail.</value></data>
+  <data name="Simple.Welcome.Start" xml:space="preserve"><value>Get started</value></data>
+  <data name="Simple.Adv.Title" xml:space="preserve"><value>Advanced tools</value></data>
+  <data name="Simple.Adv.Subtitle" xml:space="preserve"><value>All NEXUS tools, for people who like details.</value></data>
+  <data name="Simple.Adv.Lead" xml:space="preserve"><value>For people who like details. Everyday use is in the screens on the left.</value></data>
+  <data name="Simple.Adv.Link" xml:space="preserve"><value>Advanced tools</value></data>
+  <data name="Simple.Adv.Tip" xml:space="preserve"><value>All the other tools: hardware, labs, programs, services, Settings…</value></data>
+  <data name="Simple.Adv.Back" xml:space="preserve"><value>Back to home</value></data>
 </root>

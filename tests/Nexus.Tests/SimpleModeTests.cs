@@ -24,80 +24,66 @@ public sealed class SimpleModeTests
         "SettingsPage", "CapabilitiesPage",
     ];
 
-    private static IEnumerable<string> AllPages => FullPages.Concat(ShellModes.SimplePages);
+    private static IEnumerable<string> AllPages => FullPages.Concat(ShellNavigation.SimplePages);
 
     public SimpleModeTests() => Loc.Use("pt-BR");
 
-    // ------------------------------------------------------------------ modos
+    // ------------------------------------------------------------------ navegação (interface simples para todos)
 
     [Fact]
-    public void Simple_mode_shows_at_most_six_pages_in_a_fixed_order()
+    public void Sidebar_always_has_the_six_simple_screens_in_a_fixed_order()
     {
-        var nav = ShellModes.Navigation(UiMode.Simple, AllPages.Reverse(), p => p);
-        Assert.True(nav.Count <= 6);
+        var nav = ShellNavigation.Navigation(AllPages.Reverse().Append(ShellNavigation.AdvancedPage), p => p);
         Assert.Equal(["HomePage", "SimpleOptimizePage", "SimpleCleanPage", "SimpleGamesPage", "SimpleProblemsPage", "SimpleHistoryPage"], nav);
-        Assert.Equal("HomePage", ShellModes.StartPage(UiMode.Simple));
+        Assert.Equal("HomePage", ShellNavigation.StartPage);
     }
 
     [Fact]
-    public void Full_mode_keeps_every_existing_page_and_hides_the_simple_screens()
+    public void Advanced_tools_list_every_other_page_and_never_reach_the_sidebar()
     {
-        var nav = ShellModes.Navigation(UiMode.Full, AllPages, p => p);
-        Assert.Equal(FullPages, nav);
-        Assert.All(ShellModes.SimplePages, p => Assert.DoesNotContain(p, nav));
-        Assert.Equal("OverviewPage", ShellModes.StartPage(UiMode.Full));
-        Assert.All(FullPages, p => Assert.False(ShellModes.IsInNavigation(UiMode.Simple, p)));
-    }
-
-    [Theory]
-    [InlineData("simple", UiMode.Simple)]
-    [InlineData("FULL", UiMode.Full)]
-    [InlineData(" full ", UiMode.Full)]
-    public void Stored_mode_round_trips(string stored, UiMode expected)
-    {
-        Assert.Equal(expected, ShellModes.Parse(stored));
-        Assert.Equal(expected, ShellModes.Parse(ShellModes.Store(expected)));
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("advanced")]
-    public void Unknown_stored_mode_means_not_chosen(string? stored) => Assert.Null(ShellModes.Parse(stored));
-
-    [Fact]
-    public void New_install_gets_the_welcome_and_simple_mode()
-    {
-        Assert.Equal(new UiStartup(UiMode.Simple, true, false), UiModeStartup.Decide(null, hadPriorUse: false));
+        var advanced = ShellNavigation.Advanced(AllPages.Append(ShellNavigation.AdvancedPage), p => p);
+        Assert.Equal(FullPages, advanced);
+        Assert.All(FullPages, p => Assert.False(ShellNavigation.IsInNavigation(p)));
+        Assert.False(ShellNavigation.IsInNavigation(ShellNavigation.AdvancedPage));
     }
 
     [Fact]
-    public void Existing_user_after_the_update_gets_simple_mode_with_a_one_time_notice()
+    public void New_install_gets_the_welcome()
     {
-        Assert.Equal(new UiStartup(UiMode.Simple, false, true), UiModeStartup.Decide(null, hadPriorUse: true));
+        Assert.Equal(new UiStartup(ShowWelcome: true, SaveSimple: false), UiModeStartup.Decide(null, hadPriorUse: false));
+    }
+
+    [Fact]
+    public void Existing_user_gets_the_simple_interface_without_welcome_or_notice()
+    {
+        Assert.Equal(new UiStartup(ShowWelcome: false, SaveSimple: true), UiModeStartup.Decide(null, hadPriorUse: true));
     }
 
     [Theory]
-    [InlineData("full", true)]
-    [InlineData("full", false)]
+    [InlineData("full")]
+    [InlineData("FULL")]
+    [InlineData("completo")]
+    public void Saved_full_mode_is_migrated_to_simple(string stored)
+    {
+        Assert.Equal(new UiStartup(false, true), UiModeStartup.Decide(stored, hadPriorUse: true));
+        Assert.Equal(new UiStartup(false, true), UiModeStartup.Decide(stored, hadPriorUse: false));
+    }
+
+    [Theory]
     [InlineData("simple", true)]
-    public void A_stored_choice_is_respected_without_welcome_or_notice(string stored, bool prior)
-    {
-        var s = UiModeStartup.Decide(stored, prior);
-        Assert.Equal(ShellModes.Parse(stored), s.Mode);
-        Assert.False(s.ShowWelcome);
-        Assert.False(s.ShowSimpleNotice);
-    }
+    [InlineData(" Simple ", false)]
+    public void Already_simple_needs_nothing(string stored, bool prior) =>
+        Assert.Equal(new UiStartup(false, false), UiModeStartup.Decide(stored, prior));
 
     [Fact]
-    public void Settings_keep_the_mode_and_default_to_not_chosen()
+    public void Settings_keep_the_marker_and_default_to_unset()
     {
         Assert.Null(NexusSettings.Defaults.UiMode);
         var path = Path.Combine(Path.GetTempPath(), "nexus-simple-" + Guid.NewGuid().ToString("N") + ".json");
         try
         {
-            Assert.Null((NexusSettings.Defaults with { UiMode = "full" }).Save(path));
-            Assert.Equal("full", NexusSettings.Load(path).UiMode);
+            Assert.Null((NexusSettings.Defaults with { UiMode = ShellNavigation.StoredSimple }).Save(path));
+            Assert.Equal("simple", NexusSettings.Load(path).UiMode);
         }
         finally { File.Delete(path); }
     }

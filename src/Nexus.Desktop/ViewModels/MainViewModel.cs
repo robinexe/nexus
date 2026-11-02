@@ -51,7 +51,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         SimpleOptimize = new SimpleOptimizePage(Assistant, Home);
         SimpleClean = new SimpleCleanPage(Cleaning);
         SimpleGames = new SimpleGamesPage(GpuLab, Measure);
-        Pages = [Home, SimpleOptimize, SimpleClean, SimpleGames, SimpleProblems, SimpleHistory,
+        Pages = [Home, SimpleOptimize, SimpleClean, SimpleGames, SimpleProblems, SimpleHistory, Advanced,
             Overview, Hardware, Diagnostics, CpuLab, GpuLab, MemoryLab, MemoryDoctor, Assistant, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
             Privacy, Security, Scanner, SystemTools, DriverUpdates, Measure, Monitor, History, Settings, Capabilities];
         Broker.Candidates = Plan.Candidates;
@@ -75,19 +75,13 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         ShowHardwareCommand = new RelayCommand(() => SelectedPage = Hardware);
         foreach (var module in Pages.OfType<ModulePage>()) module.Attach(this);
 
-        // Modo da interface: escolha gravada; sem escolha, simples (boas-vindas para quem nunca usou, aviso para quem já usava).
-        Welcome = new WelcomeFlow(m => { SetMode(m); ShowSimpleNotice = false; });
-        ToggleModeCommand = new RelayCommand(() => SetMode(IsSimpleMode ? UiMode.Full : UiMode.Simple));
-        DismissNoticeCommand = new RelayCommand(() => { ShowSimpleNotice = false; SetMode(UiMode.Simple); });
-        NoticeFullCommand = new RelayCommand(() => { ShowSimpleNotice = false; SetMode(UiMode.Full); });
-        var startup = SelfTestMode ? new UiStartup(UiMode.Simple, false, false) : UiModeStartup.Decide(UiSettings.Current.UiMode, HadPriorUse());
-        _mode = startup.Mode;
-        _showSimpleNotice = startup.ShowSimpleNotice;
+        // Interface simples para todos. Quem nunca usou vê a boas-vindas; o antigo "modo completo" gravado é migrado.
+        Welcome = new WelcomeFlow(SaveSimple);
+        Advanced.Setup(ShellNavigation.Advanced(Pages, p => p.GetType().Name), ExportCommand, RelaunchAsAdminCommand, CanRelaunchAsAdmin);
+        var startup = SelfTestMode ? new UiStartup(false, false) : UiModeStartup.Decide(UiSettings.Current.UiMode, HadPriorUse());
         Welcome.IsVisible = startup.ShowWelcome;
-        _selectedPage = PageByName(ShellModes.StartPage(_mode)) ?? Overview;
-        UiSettings.Changed += (_, _) => { if (ShellModes.Parse(UiSettings.Current.UiMode) is { } m && m != _mode) SetMode(m, persist: false); };
-        Settings.GetMode = () => _mode;
-        Settings.ChangeMode = m => SetMode(m);
+        if (startup.SaveSimple) SaveSimple();
+        _selectedPage = Home;
 
         // A nota da tela Início acompanha o que muda: limpeza medida, recomendações do Automático, rodada do Assistente.
         Cleaning.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(CleaningPage.SafeBytes)) RefreshSimple(); };
@@ -95,10 +89,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         Assistant.AutoFinished += (_, _) => _ = AfterAutomaticAsync();
     }
 
-    // ------------------------------------------------------------------ modo simples / completo
-
-    private UiMode _mode;
-    private bool _showSimpleNotice;
+    // ------------------------------------------------------------------ interface simples (a única) e ferramentas avançadas
 
     public HomePage Home { get; } = Make<HomePage>();
     public SimpleOptimizePage SimpleOptimize { get; }
@@ -106,33 +97,20 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     public SimpleGamesPage SimpleGames { get; }
     public SimpleProblemsPage SimpleProblems { get; } = Make<SimpleProblemsPage>();
     public SimpleHistoryPage SimpleHistory { get; } = Make<SimpleHistoryPage>();
+    /// <summary>Todas as outras ferramentas, em ladrilhos (aberta pelo link discreto no pé da navegação).</summary>
+    public AdvancedToolsPage Advanced { get; } = Make<AdvancedToolsPage>();
     public WelcomeFlow Welcome { get; }
 
-    public UiMode Mode => _mode;
-    public bool IsSimpleMode => _mode == UiMode.Simple;
-    public bool IsFullMode => _mode == UiMode.Full;
-    /// <summary>Páginas da navegação lateral no modo atual (simples: 6, sem grupos; completo: todas as de antes).</summary>
-    public IReadOnlyList<PageViewModel> NavPages => ShellModes.Navigation(_mode, Pages, p => p.GetType().Name);
-    /// <summary>Link no pé da navegação: "Mostrar todas as ferramentas" / "Voltar ao modo simples".</summary>
-    public string ToggleModeText => IsSimpleMode ? Loc.T("Simple.Shell.ShowAll") : Loc.T("Simple.Shell.BackToSimple");
-    public RelayCommand ToggleModeCommand { get; }
-    /// <summary>Aviso único para quem já usava: "Deixamos o NEXUS mais simples. Quer tudo como antes? Ajustes › Modo completo".</summary>
-    public bool ShowSimpleNotice { get => _showSimpleNotice; private set => Set(ref _showSimpleNotice, value); }
-    public RelayCommand DismissNoticeCommand { get; }
-    public RelayCommand NoticeFullCommand { get; }
+    /// <summary>A lista lateral: sempre as 6 telas simples.</summary>
+    public IReadOnlyList<PageViewModel> NavPages => ShellNavigation.Navigation(Pages, p => p.GetType().Name);
+    /// <summary>Uma página fora da lista lateral está aberta: mostra "Voltar ao início" (e o caminho para as ferramentas avançadas).</summary>
+    public bool ShowBackBar => !ShellNavigation.IsInNavigation(SelectedPage.GetType().Name);
+    public bool ShowAdvancedCrumb => ShowBackBar && SelectedPage is not AdvancedToolsPage;
 
-    /// <summary>Troca o modo (e grava, fora do autoteste). A página aberta continua se existir no novo modo; senão, a tela inicial dele.</summary>
-    public void SetMode(UiMode mode, bool persist = true)
+    /// <summary>Grava "simple" (a boas-vindas terminou, ou migração do antigo modo completo). Fora do autoteste.</summary>
+    private void SaveSimple()
     {
-        if (persist && !SelfTestMode) UiSettings.Update(st => st with { UiMode = ShellModes.Store(mode) });
-        if (mode == _mode && persist) { OnPropertyChanged(nameof(NavPages)); return; }
-        _mode = mode;
-        foreach (var n in new[] { nameof(Mode), nameof(IsSimpleMode), nameof(IsFullMode), nameof(NavPages), nameof(ToggleModeText) }) OnPropertyChanged(n);
-        Settings.ModeChanged();
-        // Quem troca o modo em Ajustes continua em Ajustes (no modo simples ele fica no pé da navegação).
-        if (SelectedPage is not SettingsPage && !ShellModes.IsInNavigation(mode, SelectedPage.GetType().Name) && PageByName(ShellModes.StartPage(mode)) is { } start)
-            SelectedPage = start;
-        if (mode == UiMode.Simple) StartBackgroundMeasurements();
+        if (!SelfTestMode) UiSettings.Update(st => st with { UiMode = ShellNavigation.StoredSimple });
     }
 
     private PageViewModel? PageByName(string name) => Pages.FirstOrDefault(p => p.GetType().Name == name);
@@ -390,6 +368,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             if (!Set(ref _selectedPage, value)) return;
             Nexus.Desktop.Services.Shell.UiWatchdog.Step($"abrindo página {value?.Title}");
+            OnPropertyChanged(nameof(ShowBackBar));
+            OnPropertyChanged(nameof(ShowAdvancedCrumb));
             LastShownTask = value is ModulePage m ? m.OnShownAsync() : null;
         }
     }
@@ -476,7 +456,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             }
             await LoadOwnerChecksAsync(snapshot);
             RefreshSimple();
-            if (IsSimpleMode) StartBackgroundMeasurements();
+            StartBackgroundMeasurements();
         }
         catch (Exception ex)
         {

@@ -519,24 +519,22 @@ public sealed class SimpleHistoryPage : ModulePage
 }
 
 /// <summary>
-/// Boas-vindas da primeira abertura (uma vez): 3 telas curtas — o que o NEXUS faz, nada muda sem você e tudo se desfaz, e a
-/// escolha Simples (recomendado) / Completo. Pular = Simples. A janela grava a escolha (settings.json).
+/// Boas-vindas da primeira abertura (uma vez, só para quem nunca usou o NEXUS): 2 telas curtas — o que o NEXUS faz, e que é
+/// seguro (nada muda sem você) e tudo se desfaz. Dá para pular. Ao fechar, a janela grava que já passou por aqui.
 /// </summary>
 public sealed class WelcomeFlow : ObservableObject
 {
-    public const int Steps = 3;
+    public const int Steps = 2;
     private int _step;
     private bool _isVisible;
-    private readonly Action<UiMode> _choose;
+    private readonly Action _done;
 
-    public WelcomeFlow(Action<UiMode> choose)
+    public WelcomeFlow(Action done)
     {
-        _choose = choose ?? throw new ArgumentNullException(nameof(choose));
+        _done = done ?? throw new ArgumentNullException(nameof(done));
         NextCommand = new RelayCommand(() => Step++, () => _step < Steps - 1);
-        BackCommand = new RelayCommand(() => Step--, () => _step > 0);
-        SkipCommand = new RelayCommand(() => Choose(UiMode.Simple));
-        ChooseSimpleCommand = new RelayCommand(() => Choose(UiMode.Simple));
-        ChooseFullCommand = new RelayCommand(() => Choose(UiMode.Full));
+        SkipCommand = new RelayCommand(Finish);
+        StartCommand = new RelayCommand(Finish);
     }
 
     public bool IsVisible { get => _isVisible; set => Set(ref _isVisible, value); }
@@ -546,22 +544,20 @@ public sealed class WelcomeFlow : ObservableObject
         private set
         {
             if (!Set(ref _step, Math.Clamp(value, 0, Steps - 1))) return;
-            foreach (var n in new[] { nameof(IsFirst), nameof(IsSecond), nameof(IsChoice), nameof(NotChoice), nameof(Dots) }) OnPropertyChanged(n);
+            foreach (var n in new[] { nameof(IsFirst), nameof(IsLast), nameof(NotLast), nameof(Dots) }) OnPropertyChanged(n);
         }
     }
     public bool IsFirst => _step == 0;
-    public bool IsSecond => _step == 1;
-    public bool IsChoice => _step == Steps - 1;
-    public bool NotChoice => !IsChoice;
-    /// <summary>Os três pontos de "onde estou" (true = a tela atual).</summary>
+    public bool IsLast => _step == Steps - 1;
+    public bool NotLast => !IsLast;
+    /// <summary>Os pontos de "onde estou" (true = a tela atual).</summary>
     public IReadOnlyList<bool> Dots => Enumerable.Range(0, Steps).Select(i => i == _step).ToList();
     public RelayCommand NextCommand { get; }
-    public RelayCommand BackCommand { get; }
     public RelayCommand SkipCommand { get; }
-    public RelayCommand ChooseSimpleCommand { get; }
-    public RelayCommand ChooseFullCommand { get; }
+    /// <summary>"Começar" na última tela.</summary>
+    public RelayCommand StartCommand { get; }
 
-    /// <summary>Volta à primeira tela (o autoteste fotografa as três).</summary>
+    /// <summary>Mostra a partir de uma tela (o autoteste fotografa as duas).</summary>
     internal void Show(int step = 0)
     {
         _step = -1;
@@ -569,9 +565,43 @@ public sealed class WelcomeFlow : ObservableObject
         IsVisible = true;
     }
 
-    private void Choose(UiMode mode)
+    private void Finish()
     {
         IsVisible = false;
-        _choose(mode);
+        _done();
+    }
+}
+
+/// <summary>Um ladrilho de "Ferramentas avançadas": ícone, uma palavra (o nome da página) e uma linha do que ela faz.</summary>
+public sealed record AdvancedTile(string Title, string Description, string IconKey, string Target);
+
+/// <summary>
+/// Ferramentas avançadas: todas as páginas completas de antes (Meu PC, Hardware, Diagnóstico, laboratórios, Programas, Serviços,
+/// Ajustes…) como ladrilhos grandes. É o único caminho para elas (um link discreto no pé da navegação), para a lista lateral
+/// continuar com 6 itens. Também guarda as ações de leitura que saíram do cabeçalho (exportar a leitura, ver tudo como administrador).
+/// </summary>
+public sealed class AdvancedToolsPage : ModulePage
+{
+    private IReadOnlyList<AdvancedTile> _tiles = [];
+
+    public override string Title => Loc.T("Simple.Adv.Title");
+    public override string Group => Loc.T("Simple.Nav.Group");
+    public override string Subtitle => Loc.T("Simple.Adv.Subtitle");
+
+    public IReadOnlyList<AdvancedTile> Tiles { get => _tiles; private set => Set(ref _tiles, value); }
+    public RelayCommand? ExportCommand { get; private set; }
+    public RelayCommand? RelaunchAsAdminCommand { get; private set; }
+    public bool CanRelaunchAsAdmin { get; private set; }
+
+    /// <summary>A janela informa as páginas e os comandos dela (uma vez, ao montar).</summary>
+    internal void Setup(IReadOnlyList<PageViewModel> pages, RelayCommand export, RelayCommand relaunch, bool canRelaunch)
+    {
+        ArgumentNullException.ThrowIfNull(pages);
+        // Ajustes primeiro (é o que mais se procura aqui); depois a ordem de antes (Meu PC, laboratórios, otimizar, limpar…).
+        Tiles = [.. pages.OrderBy(p => p is SettingsPage ? -1 : ShellMap.GroupRank(p.Group))
+            .Select(p => new AdvancedTile(p.Title, p.Subtitle, ShellMap.IconFor(p.GetType().Name), p.GetType().Name))];
+        ExportCommand = export;
+        RelaunchAsAdminCommand = relaunch;
+        CanRelaunchAsAdmin = canRelaunch;
     }
 }

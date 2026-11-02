@@ -208,37 +208,12 @@
             </Popup>
           </StackPanel>
 
-          <!-- Modo simples: só o botão de reler (ícone) e o selo de segurança. Modo completo: as ações de leitura de antes. -->
+          <!-- Cabeçalho enxuto: o selo de segurança e o botão de reler (ícone). Exportar e "ver tudo como administrador" ficam em
+               Ferramentas avançadas. -->
           <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-            <Button Command="{Binding RelaunchAsAdminCommand}" ToolTip="{l:T Shell.AlgumasLeiturasSoAparecem}">
-              <Button.Style>
-                <Style TargetType="Button" BasedOn="{StaticResource Header.Button}">
-                  <Setter Property="Visibility" Value="{Binding CanRelaunchAsAdmin, Converter={StaticResource BoolToVis}}"/>
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsSimpleMode}" Value="True">
-                      <Setter Property="Visibility" Value="Collapsed"/>
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </Button.Style>
-              <StackPanel Orientation="Horizontal">
-                <c:Icon Data="{StaticResource Icon.Security}" Size="15" Foreground="{StaticResource Brush.Trace}" Margin="0,0,7,0"/>
-                <TextBlock Text="{l:T Shell.VerTudoAdministrador}" TextWrapping="NoWrap"/>
-              </StackPanel>
-            </Button>
-            <Button Style="{StaticResource Header.Button}" Command="{Binding RefreshCommand}"
+            <Button Style="{StaticResource Header.Button}" Command="{Binding RefreshCommand}" Margin="0"
                     ToolTip="{l:T Shell.LeHardwareWindowsNovo}" AutomationProperties.Name="{l:T Shell.LerNovo}">
-              <StackPanel Orientation="Horizontal">
-                <c:Icon Data="{StaticResource Icon.Refresh}" Size="15" Foreground="{StaticResource Brush.TextMuted}"/>
-                <TextBlock Text="{l:T Shell.LerNovo}" TextWrapping="NoWrap" Margin="7,0,0,0" Visibility="{Binding IsFullMode, Converter={StaticResource BoolToVis}}"/>
-              </StackPanel>
-            </Button>
-            <Button Style="{StaticResource Header.Button}" Command="{Binding ExportCommand}" Margin="0"
-                    ToolTip="{l:T Shell.SalvaTudoFoiLido}" Visibility="{Binding IsFullMode, Converter={StaticResource BoolToVis}}">
-              <StackPanel Orientation="Horizontal">
-                <c:Icon Data="{StaticResource Icon.Export}" Size="15" Foreground="{StaticResource Brush.TextMuted}" Margin="0,0,7,0"/>
-                <TextBlock Text="{l:T Shell.ExportarLeitura}" TextWrapping="NoWrap"/>
-              </StackPanel>
+              <c:Icon Data="{StaticResource Icon.Refresh}" Size="16" Foreground="{StaticResource Brush.TextMuted}"/>
             </Button>
           </StackPanel>
         </Grid>
@@ -261,22 +236,15 @@
     <!-- ============ Navegação lateral agrupada, com ícone por página ============ -->
     <Border Grid.Row="1" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,1,0">
       <DockPanel>
-      <!-- Pé da navegação: Ajustes (no modo simples) e a troca de modo ("Mostrar todas as ferramentas" / "Voltar ao modo simples"). -->
-      <StackPanel DockPanel.Dock="Bottom" Margin="14,6,14,14">
-        <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SettingsPage"
-                Visibility="{Binding IsSimpleMode, Converter={StaticResource BoolToVis}}">
-          <StackPanel Orientation="Horizontal">
-            <c:Icon Data="{StaticResource Icon.Settings}" Size="16" Margin="0,0,8,0"/>
-            <TextBlock Text="{l:T Settings.Ajustes}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-          </StackPanel>
-        </Button>
-        <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Command="{Binding ToggleModeCommand}" ToolTip="{l:T Simple.Shell.ModeTip}">
-          <StackPanel Orientation="Horizontal">
-            <c:Icon Data="{StaticResource Icon.Apps}" Size="16" Margin="0,0,8,0"/>
-            <TextBlock Text="{Binding ToggleModeText}" TextWrapping="Wrap" MaxWidth="170" VerticalAlignment="Center"/>
-          </StackPanel>
-        </Button>
-      </StackPanel>
+      <!-- Pé da navegação: um link discreto para todas as outras ferramentas (a lista lateral fica sempre com 6 itens). -->
+      <Button DockPanel.Dock="Bottom" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="14,6,14,14"
+              Foreground="{StaticResource Brush.TextMuted}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="AdvancedToolsPage"
+              ToolTip="{l:T Simple.Adv.Tip}">
+        <StackPanel Orientation="Horizontal">
+          <c:Icon Data="{StaticResource Icon.Apps}" Size="15" Margin="0,0,8,0"/>
+          <TextBlock Text="{l:T Simple.Adv.Link}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+        </StackPanel>
+      </Button>
       <ListBox x:Name="Nav" Margin="0,6,0,8" ItemContainerStyle="{StaticResource Nav.Item}"
                SelectedItem="{Binding SelectedPage, Mode=OneWay}" IsSynchronizedWithCurrentItem="False"
                Background="Transparent" BorderThickness="0" KeyboardNavigation.TabNavigation="Once"
@@ -299,16 +267,10 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
               </Grid.ColumnDefinitions>
-              <c:Icon x:Name="Ico" Data="{Binding Converter={StaticResource PageIcon}}" Size="18" Margin="0,0,11,0"/>
-              <TextBlock x:Name="Name" Grid.Column="1" Text="{Binding Title}" FontSize="14" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+              <c:Icon x:Name="Ico" Data="{Binding Converter={StaticResource PageIcon}}" Size="24" Margin="0,10,14,10"/>
+              <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="17" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
             </Grid>
             <DataTemplate.Triggers>
-              <!-- Modo simples: ícone grande, uma palavra maior, mais altura por item. -->
-              <DataTrigger Binding="{Binding DataContext.IsSimpleMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
-                <Setter TargetName="Ico" Property="Size" Value="24"/>
-                <Setter TargetName="Ico" Property="Margin" Value="0,10,14,10"/>
-                <Setter TargetName="Name" Property="FontSize" Value="17"/>
-              </DataTrigger>
               <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                 <Setter TargetName="Ico" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
               </DataTrigger>
@@ -320,25 +282,28 @@
     </Border>
 
     <!-- ============ Conteúdo: a página escolhida (com a transição de entrada) ============ -->
-    <ContentControl x:Name="PageHost" Grid.Row="1" Grid.Column="1" Content="{Binding SelectedPage}" Focusable="False" IsTabStop="False"/>
-
-    <!-- ============ Aviso único da mudança (quem já usava): o NEXUS ficou mais simples; como voltar ao completo ============ -->
-    <Border Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="24,14,24,0" MaxWidth="820" Panel.ZIndex="5"
-            Background="{StaticResource Brush.SurfaceHi}" BorderBrush="{StaticResource Brush.SignalSoft}" BorderThickness="1"
-            CornerRadius="{StaticResource Radius.Card}" Padding="18,12"
-            Visibility="{Binding ShowSimpleNotice, Converter={StaticResource BoolToVis}}" AutomationProperties.LiveSetting="Polite">
-      <Border.Effect>
-        <DropShadowEffect BlurRadius="18" ShadowDepth="4" Opacity="0.45" Color="#000000"/>
-      </Border.Effect>
-      <DockPanel>
-        <c:Icon DockPanel.Dock="Left" Data="{StaticResource Icon.Sparkle}" Size="20" Foreground="{StaticResource Brush.Signal}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
-          <Button Content="{l:T Simple.Notice.Ok}" Style="{StaticResource Button.Primary}" Command="{Binding DismissNoticeCommand}"/>
-          <Button Content="{l:T Simple.Notice.Full}" Style="{StaticResource Button.Ghost}" Command="{Binding NoticeFullCommand}"/>
+    <DockPanel Grid.Row="1" Grid.Column="1">
+      <!-- Página fora da lista lateral (ferramentas avançadas ou aberta por um botão): o caminho de volta, sempre à vista. -->
+      <Border DockPanel.Dock="Top" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1"
+              Padding="20,6" Visibility="{Binding ShowBackBar, Converter={StaticResource BoolToVis}}">
+        <StackPanel Orientation="Horizontal">
+          <Button Style="{StaticResource Button.Ghost}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HomePage">
+            <StackPanel Orientation="Horizontal">
+              <c:Icon Data="{StaticResource Icon.ArrowRight}" Size="15" Margin="0,0,8,0" RenderTransformOrigin="0.5,0.5">
+                <c:Icon.RenderTransform>
+                  <ScaleTransform ScaleX="-1"/>
+                </c:Icon.RenderTransform>
+              </c:Icon>
+              <TextBlock Text="{l:T Simple.Adv.Back}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Adv.Link}" Margin="8,0,0,0"
+                  Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="AdvancedToolsPage"
+                  Visibility="{Binding ShowAdvancedCrumb, Converter={StaticResource BoolToVis}}"/>
         </StackPanel>
-        <TextBlock Text="{l:T Simple.Notice.Text}" Style="{StaticResource Text.Body}" FontSize="14.5" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
-      </DockPanel>
-    </Border>
+      </Border>
+      <ContentControl x:Name="PageHost" Content="{Binding SelectedPage}" Focusable="False" IsTabStop="False"/>
+    </DockPanel>
 
     <!-- ============ Boas-vindas (primeira abertura, uma vez): 3 telas curtas, dá para pular ============ -->
     <Grid Grid.RowSpan="3" Grid.ColumnSpan="2" Panel.ZIndex="30" DataContext="{Binding Welcome}"
@@ -357,35 +322,11 @@
             <TextBlock Text="{l:T Simple.Welcome.S1}" Style="{StaticResource Text.Body}" FontSize="16" Foreground="{StaticResource Brush.TextMuted}" Margin="0,12,0,0"/>
           </StackPanel>
           <!-- 2. Segurança -->
-          <StackPanel Visibility="{Binding IsSecond, Converter={StaticResource BoolToVis}}">
+          <StackPanel Visibility="{Binding IsLast, Converter={StaticResource BoolToVis}}">
             <Image Source="{StaticResource Illo.Security}" Width="220" HorizontalAlignment="Left" Margin="-12,0,0,18"/>
             <TextBlock Text="{l:T Simple.Welcome.T2}" Style="{StaticResource Text.Display}" FontSize="32"/>
             <TextBlock Text="{l:T Simple.Welcome.S2}" Style="{StaticResource Text.Body}" FontSize="16" Foreground="{StaticResource Brush.TextMuted}" Margin="0,12,0,0"/>
           </StackPanel>
-          <!-- 3. Escolha -->
-          <StackPanel Visibility="{Binding IsChoice, Converter={StaticResource BoolToVis}}">
-            <TextBlock Text="{l:T Simple.Welcome.T3}" Style="{StaticResource Text.Display}" FontSize="32" Margin="0,0,0,22"/>
-            <UniformGrid Columns="2" Margin="-8,0">
-              <Button Margin="8,0" Padding="22,20" HorizontalContentAlignment="Left" Command="{Binding ChooseSimpleCommand}" BorderBrush="{StaticResource Brush.Trace}"
-                      AutomationProperties.Name="{l:T Simple.Welcome.Simple}">
-                <StackPanel>
-                  <c:Icon Data="{StaticResource Icon.Home}" Size="28" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Left"/>
-                  <TextBlock Text="{l:T Simple.Welcome.Simple}" FontFamily="{StaticResource Font.Display}" FontSize="20" Margin="0,12,0,4"/>
-                  <TextBlock Text="{l:T Simple.Welcome.SimpleDetail}" Style="{StaticResource Text.Small}" FontSize="14"/>
-                </StackPanel>
-              </Button>
-              <Button Margin="8,0" Padding="22,20" HorizontalContentAlignment="Left" Command="{Binding ChooseFullCommand}"
-                      AutomationProperties.Name="{l:T Simple.Welcome.Full}">
-                <StackPanel>
-                  <c:Icon Data="{StaticResource Icon.Apps}" Size="28" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Left"/>
-                  <TextBlock Text="{l:T Simple.Welcome.Full}" FontFamily="{StaticResource Font.Display}" FontSize="20" Margin="0,12,0,4"/>
-                  <TextBlock Text="{l:T Simple.Welcome.FullDetail}" Style="{StaticResource Text.Small}" FontSize="14"/>
-                </StackPanel>
-              </Button>
-            </UniformGrid>
-            <TextBlock Text="{l:T Simple.Welcome.ChangeLater}" Style="{StaticResource Text.Small}" Margin="0,16,0,0"/>
-          </StackPanel>
-
           <!-- Pontos e botões -->
           <DockPanel Margin="0,32,0,0">
             <ItemsControl DockPanel.Dock="Left" ItemsSource="{Binding Dots}" Focusable="False" VerticalAlignment="Center">
@@ -407,11 +348,11 @@
             </ItemsControl>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
               <Button Content="{l:T Simple.Welcome.Skip}" Style="{StaticResource Button.Ghost}" Command="{Binding SkipCommand}" Margin="0,0,8,0"
-                      Visibility="{Binding NotChoice, Converter={StaticResource BoolToVis}}"/>
-              <Button Content="{l:T Simple.Welcome.Back}" Style="{StaticResource Button.Secondary}" Command="{Binding BackCommand}"
-                      Visibility="{Binding IsChoice, Converter={StaticResource BoolToVis}}"/>
+                      Visibility="{Binding NotLast, Converter={StaticResource BoolToVis}}"/>
               <Button Content="{l:T Simple.Welcome.Next}" Style="{StaticResource Button.Primary}" Command="{Binding NextCommand}" Padding="22,10"
-                      Visibility="{Binding NotChoice, Converter={StaticResource BoolToVis}}"/>
+                      Visibility="{Binding NotLast, Converter={StaticResource BoolToVis}}"/>
+              <Button Content="{l:T Simple.Welcome.Start}" Style="{StaticResource Button.Primary}" Command="{Binding StartCommand}" Padding="22,10"
+                      Visibility="{Binding IsLast, Converter={StaticResource BoolToVis}}"/>
             </StackPanel>
           </DockPanel>
         </StackPanel>
@@ -595,13 +536,6 @@
             <TextBlock Text="{l:T Shell.Lendo}" Style="{StaticResource Text.Small}" Margin="0,0,10,0" VerticalAlignment="Center"/>
             <ProgressBar Width="110" Height="3" IsIndeterminate="{Binding Busy, Mode=OneWay}" VerticalAlignment="Center"
                          AutomationProperties.Name="{l:T Shell.LendoPc}"/>
-          </StackPanel>
-          <!-- Legenda das duas cores de medição, para ler os gráficos (só no modo completo, onde há gráficos). -->
-          <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding IsFullMode, Converter={StaticResource BoolToVis}}">
-            <Border Width="12" Height="2" Background="{StaticResource Brush.Trace}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-            <TextBlock Text="{l:T Shell.MedidoAgora}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center" Margin="0,0,14,0"/>
-            <Border Width="12" Height="2" Background="{StaticResource Brush.Signal}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-            <TextBlock Text="{l:T Shell.Referencia}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center"/>
           </StackPanel>
         </StackPanel>
         <Ellipse x:Name="StatusDot" Width="7" Height="7" Margin="0,0,9,0" VerticalAlignment="Center">

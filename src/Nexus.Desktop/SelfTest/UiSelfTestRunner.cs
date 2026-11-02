@@ -15,8 +15,8 @@ namespace Nexus.Desktop.SelfTest;
 
 /// <summary>
 /// Autoteste da interface no PC real (<c>Nexus.Desktop.exe --selftest-ui relatorio.json</c>): abre a janela, espera a
-/// leitura do PC, abre CADA página da navegação dos dois modos (simples, com a boas-vindas e a tela Otimizar de demonstração,
-/// e depois completo: <see cref="MainViewModel.NavPages"/>, inclusive as que vierem depois), espera ela
+/// leitura do PC, abre CADA página (as 6 telas da lista lateral, a boas-vindas, a tela Otimizar de demonstração, Ferramentas
+/// avançadas e cada ferramenta dela, inclusive as que vierem depois), espera ela
 /// ficar ociosa e registra exceções, erros de binding, interface parada, tempo de carga e uma imagem da tela.
 /// Nada é aplicado: o <see cref="MainViewModel.SelfTestMode"/> recusa os pedidos ao aplicador e responde "não" às perguntas.
 /// Grava só o JSON pedido e as imagens na pasta "telas" ao lado dele.
@@ -179,15 +179,13 @@ internal sealed class UiSelfTestRunner
             await IdleAsync();
             startup = Swap();
 
-            // 2) Modo simples: as telas da navegação dele, as 3 telas da boas-vindas e a tela Otimizar trabalhando e no fim
-            //    (dados de demonstração). Depois o modo completo: cada página da navegação dele (qualquer página nova entra sozinha).
+            // 2) As 6 telas da lista lateral, as 2 telas da boas-vindas e a tela Otimizar trabalhando e no fim (dados de
+            //    demonstração). Depois "Ferramentas avançadas" e cada ferramenta dela (qualquer página nova entra sozinha).
             var index = 0;
-            vm.SetMode(UiMode.Simple, persist: false);
-            await IdleAsync();
             foreach (var page in vm.NavPages.ToList())
             {
                 if (watchdog.IsCancellationRequested) { abort = $"tempo total de {TotalTimeout.TotalMinutes:0} min excedido"; break; }
-                pages.Add(await VisitAsync(vm, page, ++index, Loc.F("Simple.SelfTest.Label", page.Title)));
+                pages.Add(await VisitAsync(vm, page, ++index));
             }
             for (var step = 0; step < WelcomeFlow.Steps && !watchdog.IsCancellationRequested; step++)
             {
@@ -199,10 +197,7 @@ internal sealed class UiSelfTestRunner
                 pages.Add(await VisitAsync(vm, vm.SimpleOptimize, ++index, Loc.T("Simple.SelfTest.OptimizeRunning"), vm.Assistant.ShowAutoDemo, vm.Assistant.HideAutoDemo));
             if (!watchdog.IsCancellationRequested)
                 pages.Add(await VisitAsync(vm, vm.SimpleOptimize, ++index, Loc.T("Simple.SelfTest.OptimizeDone"), vm.Assistant.ShowAutoDoneDemo, vm.Assistant.HideAutoDemo));
-
-            vm.SetMode(UiMode.Full, persist: false);
-            await IdleAsync();
-            foreach (var page in vm.NavPages.ToList())
+            foreach (var page in new PageViewModel[] { vm.Advanced }.Concat(ShellNavigation.Advanced(vm.Pages, p => p.GetType().Name)).ToList())
             {
                 if (watchdog.IsCancellationRequested) { abort = $"tempo total de {TotalTimeout.TotalMinutes:0} min excedido"; break; }
                 index++;

@@ -46,13 +46,14 @@ public static class ShellMap
         ["HistoryPage"] = ("Icon.History", "Illo.History"),
         ["SettingsPage"] = ("Icon.Settings", "Illo.Settings"),
         ["CapabilitiesPage"] = ("Icon.Capabilities", "Illo.Diagnostics"),
-        // Modo simples (uma palavra, ícone grande): Início, Otimizar, Limpar, Jogos, Problemas, Histórico.
+        // Interface simples (uma palavra, ícone grande): Início, Otimizar, Limpar, Jogos, Problemas, Histórico + Ferramentas avançadas.
         ["HomePage"] = ("Icon.Home", "Illo.Pc"),
         ["SimpleOptimizePage"] = ("Icon.Bolt", "Illo.Assistant"),
         ["SimpleCleanPage"] = ("Icon.Clean", "Illo.Cleaning"),
         ["SimpleGamesPage"] = ("Icon.Games", "Illo.Measure"),
         ["SimpleProblemsPage"] = ("Icon.Warning", "Illo.Diagnostics"),
         ["SimpleHistoryPage"] = ("Icon.History", "Illo.History"),
+        ["AdvancedToolsPage"] = ("Icon.Apps", "Illo.Settings"),
     };
 
     /// <summary>Todas as páginas com mapa próprio (os testes conferem que cada chave existe nos dicionários XAML).</summary>

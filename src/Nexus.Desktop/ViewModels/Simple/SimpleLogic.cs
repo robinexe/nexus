@@ -4,43 +4,39 @@ using Nexus.HardwareDiscovery;
 
 namespace Nexus.Desktop.ViewModels.Simple;
 
-/// <summary>Como a interface se apresenta: poucas telas em palavras simples, ou tudo (a interface de antes).</summary>
-public enum UiMode
-{
-    /// <summary>Seis telas, uma palavra cada, sem jargão (padrão).</summary>
-    Simple,
-    /// <summary>Todas as ferramentas, agrupadas (a interface completa).</summary>
-    Full,
-}
-
 /// <summary>
-/// Quais páginas aparecem na navegação em cada modo (lógica pura, testada em SimpleModeTests). As páginas continuam todas
-/// existindo nos dois modos: um botão do modo simples pode abrir uma página completa; só a lista lateral muda.
+/// Navegação da interface (lógica pura, testada em SimpleModeTests). Por decisão do responsável ("quero que o modo simples seja
+/// para todos"), a interface é uma só: 6 telas simples na lista lateral. As outras páginas continuam existindo e abrem pela
+/// página "Ferramentas avançadas" (um link discreto no pé da navegação) ou por um botão de uma tela simples.
 /// </summary>
-public static class ShellModes
+public static class ShellNavigation
 {
-    /// <summary>Navegação do modo simples, nesta ordem (no máximo 6 itens).</summary>
+    /// <summary>Lista lateral, nesta ordem (no máximo 6 itens).</summary>
     public static readonly IReadOnlyList<string> SimplePages =
         ["HomePage", "SimpleOptimizePage", "SimpleCleanPage", "SimpleGamesPage", "SimpleProblemsPage", "SimpleHistoryPage"];
 
-    /// <summary>Página aberta ao entrar em cada modo.</summary>
-    public static string StartPage(UiMode mode) => mode == UiMode.Simple ? "HomePage" : "OverviewPage";
+    /// <summary>A página que lista as ferramentas avançadas (fora da lista lateral).</summary>
+    public const string AdvancedPage = "AdvancedToolsPage";
 
-    /// <summary>A página aparece na lista lateral deste modo? Modo completo = tudo menos as telas do modo simples.</summary>
-    public static bool IsInNavigation(UiMode mode, string pageTypeName)
-    {
-        var simple = SimplePages.Contains(pageTypeName, StringComparer.Ordinal);
-        return mode == UiMode.Simple ? simple : !simple;
-    }
+    /// <summary>Página aberta ao iniciar.</summary>
+    public const string StartPage = "HomePage";
 
-    /// <summary>Filtra e ordena uma lista de páginas (pelo nome do tipo) para o modo.</summary>
-    public static IReadOnlyList<T> Navigation<T>(UiMode mode, IEnumerable<T> pages, Func<T, string> typeName)
+    public static bool IsInNavigation(string pageTypeName) => SimplePages.Contains(pageTypeName, StringComparer.Ordinal);
+
+    /// <summary>As páginas da lista lateral, na ordem de <see cref="SimplePages"/>.</summary>
+    public static IReadOnlyList<T> Navigation<T>(IEnumerable<T> pages, Func<T, string> typeName)
     {
         ArgumentNullException.ThrowIfNull(pages);
         ArgumentNullException.ThrowIfNull(typeName);
-        var list = pages.Where(p => IsInNavigation(mode, typeName(p))).ToList();
-        if (mode == UiMode.Simple) list = [.. list.OrderBy(p => IndexOf(typeName(p)))];
-        return list;
+        return [.. pages.Where(p => IsInNavigation(typeName(p))).OrderBy(p => IndexOf(typeName(p)))];
+    }
+
+    /// <summary>As ferramentas avançadas: todas as outras páginas, menos a própria página que as lista.</summary>
+    public static IReadOnlyList<T> Advanced<T>(IEnumerable<T> pages, Func<T, string> typeName)
+    {
+        ArgumentNullException.ThrowIfNull(pages);
+        ArgumentNullException.ThrowIfNull(typeName);
+        return [.. pages.Where(p => !IsInNavigation(typeName(p)) && typeName(p) != AdvancedPage)];
     }
 
     private static int IndexOf(string name)
@@ -49,32 +45,26 @@ public static class ShellModes
         return SimplePages.Count;
     }
 
-    /// <summary>Valor gravado em settings.json ("simple"/"full"); null = o usuário ainda não escolheu.</summary>
-    public static UiMode? Parse(string? stored) => stored?.Trim().ToLowerInvariant() switch
-    {
-        "simple" => UiMode.Simple,
-        "full" => UiMode.Full,
-        _ => null,
-    };
-
-    public static string Store(UiMode mode) => mode == UiMode.Simple ? "simple" : "full";
+    /// <summary>Valor gravado em settings.json depois da primeira abertura desta versão.</summary>
+    public const string StoredSimple = "simple";
 }
 
-/// <summary>O que mostrar ao abrir: em que modo, se a boas-vindas aparece (instalação nova) ou o aviso da mudança (quem já usava).</summary>
-public sealed record UiStartup(UiMode Mode, bool ShowWelcome, bool ShowSimpleNotice);
+/// <summary>O que fazer ao abrir: mostrar a boas-vindas (só quem nunca usou) e gravar "simple" (marca que já passou por aqui).</summary>
+public sealed record UiStartup(bool ShowWelcome, bool SaveSimple);
 
 public static class UiModeStartup
 {
     /// <summary>
-    /// Escolha gravada vale sempre. Sem escolha: quem nunca usou o NEXUS vê a boas-vindas (padrão simples); quem já usava abre
-    /// no modo simples com um aviso único de como voltar ao completo.
+    /// Todos usam a interface simples. "simple" gravado: nada a fazer. Nada gravado: quem nunca usou o NEXUS vê a boas-vindas;
+    /// quem já usava não (e grava). Qualquer outro valor (o antigo "full" do modo completo) é migrado para "simple".
     /// </summary>
-    public static UiStartup Decide(string? storedMode, bool hadPriorUse) => ShellModes.Parse(storedMode) switch
+    public static UiStartup Decide(string? storedMode, bool hadPriorUse)
     {
-        { } chosen => new UiStartup(chosen, false, false),
-        null when hadPriorUse => new UiStartup(UiMode.Simple, false, true),
-        _ => new UiStartup(UiMode.Simple, true, false),
-    };
+        var stored = storedMode?.Trim().ToLowerInvariant();
+        if (stored == ShellNavigation.StoredSimple) return new UiStartup(false, false);
+        if (string.IsNullOrEmpty(stored) && !hadPriorUse) return new UiStartup(true, false); // grava ao fechar a boas-vindas
+        return new UiStartup(false, true);
+    }
 }
 
 // ================================================================== saúde do PC (anel da tela Início)

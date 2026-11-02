@@ -32,8 +32,8 @@ public sealed record NexusSettings
     public string? UpdateExitAttempted { get; init; }
     /// <summary>Idioma da interface: null = igual ao Windows; "pt-BR", "en" ou "es" = fixo. Vale a partir do próximo início.</summary>
     public string? Language { get; init; }
-    /// <summary>Modo da interface: "simple" (poucas telas, palavras simples) ou "full" (todas as ferramentas). Null = ainda não
-    /// escolheu: abre no simples (boas-vindas para quem nunca usou; um aviso único para quem já usava).</summary>
+    /// <summary>"simple" depois da primeira abertura da interface simples (que é a única). Null = ainda não abriu esta versão
+    /// (quem nunca usou vê a boas-vindas). O antigo "full" do modo completo é migrado para "simple" ao abrir.</summary>
     public string? UiMode { get; init; }
 
     public static NexusSettings Defaults { get; } = new();

@@ -467,4 +467,54 @@
       </StackPanel>
     </ScrollViewer>
   </DataTemplate>
+  <!-- ================================================================== FERRAMENTAS AVANÇADAS -->
+  <DataTemplate DataType="{x:Type sv:AdvancedToolsPage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1100" HorizontalAlignment="Stretch">
+        <TextBlock Text="{l:T Simple.Adv.Title}" Style="{StaticResource S.Title}"/>
+        <TextBlock Text="{l:T Simple.Adv.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,24"/>
+        <ItemsControl ItemsSource="{Binding Tiles}" Focusable="False" Margin="-7,0">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="3"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type sv:AdvancedTile}">
+              <Button Margin="7" Padding="18,16" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top"
+                      Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Target}"
+                      AutomationProperties.Name="{Binding Title}" AutomationProperties.HelpText="{Binding Description}" ToolTip="{Binding Description}">
+                <DockPanel>
+                  <Grid Width="44" Height="44" DockPanel.Dock="Left" Margin="0,0,14,0" VerticalAlignment="Top">
+                    <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+                    <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="22" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+                  </Grid>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" FontFamily="{StaticResource Font.Display}" FontSize="17" Foreground="{StaticResource Brush.Text}"
+                               TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    <TextBlock Text="{Binding Description}" Style="{StaticResource Text.Small}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                  </StackPanel>
+                </DockPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <WrapPanel Margin="-8,22,0,0">
+          <Button Style="{StaticResource Button.Ghost}" Command="{Binding ExportCommand}" ToolTip="{l:T Shell.SalvaTudoFoiLido}" Margin="0,0,12,0">
+            <StackPanel Orientation="Horizontal">
+              <c:Icon Data="{StaticResource Icon.Export}" Size="15" Margin="0,0,7,0"/>
+              <TextBlock Text="{l:T Shell.ExportarLeitura}" TextWrapping="NoWrap"/>
+            </StackPanel>
+          </Button>
+          <Button Style="{StaticResource Button.Ghost}" Command="{Binding RelaunchAsAdminCommand}" ToolTip="{l:T Shell.AlgumasLeiturasSoAparecem}"
+                  Visibility="{Binding CanRelaunchAsAdmin, Converter={StaticResource BoolToVis}}">
+            <StackPanel Orientation="Horizontal">
+              <c:Icon Data="{StaticResource Icon.Security}" Size="15" Margin="0,0,7,0"/>
+              <TextBlock Text="{l:T Shell.VerTudoAdministrador}" TextWrapping="NoWrap"/>
+            </StackPanel>
+          </Button>
+        </WrapPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
 </ResourceDictionary>

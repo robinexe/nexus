@@ -165,31 +165,6 @@ public sealed class SettingsPage : ModulePage
         ];
     }
 
-    // ----- modo da interface (simples / completo; vale na hora)
-
-    /// <summary>Quem sabe e troca o modo: a janela (MainViewModel), que também grava em settings.json.</summary>
-    internal Func<Simple.UiMode>? GetMode { get; set; }
-    internal Action<Simple.UiMode>? ChangeMode { get; set; }
-
-    public bool IsSimpleModeChoice
-    {
-        get => GetMode?.Invoke() != Simple.UiMode.Full;
-        set { if (value) ChangeMode?.Invoke(Simple.UiMode.Simple); }
-    }
-
-    public bool IsFullModeChoice
-    {
-        get => GetMode?.Invoke() == Simple.UiMode.Full;
-        set { if (value) ChangeMode?.Invoke(Simple.UiMode.Full); }
-    }
-
-    /// <summary>A janela avisa quando o modo mudou (pelo link da navegação, pelo aviso ou por aqui).</summary>
-    internal void ModeChanged()
-    {
-        OnPropertyChanged(nameof(IsSimpleModeChoice));
-        OnPropertyChanged(nameof(IsFullModeChoice));
-    }
-
     // ----- idioma (settings.json; vale a partir do próximo início: os textos são carregados uma vez, ao abrir)
 
     /// <summary>Opção da lista de idiomas: código gravado (null = igual ao Windows), nome mostrado e idioma que resulta.</summary>
