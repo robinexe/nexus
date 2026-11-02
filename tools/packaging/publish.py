@@ -202,7 +202,7 @@ def publish(rid: str, args: argparse.Namespace, version: str, suffix: str, commi
                    "-p:EnableSourceControlManagerQueries=false", "-p:EnableSourceLink=false",
                    f"-p:PublishReadyToRun={'false' if args.no_r2r else 'true'}",
                    "-p:PublishTrimmed=false", "-p:PublishSingleFile=false",
-                   "-p:SatelliteResourceLanguages=pt-BR;en;es",  # idiomas da interface (docs/12-idiomas.md): en\ e es\ com os satélites
+                   "-p:SatelliteResourceLanguages=pt-BR%3Ben%3Bes",  # en\ e es\ com os satélites (docs/12-idiomas.md); %3B = ";" (o ; cru separa propriedades no MSBuild)
                    "-p:DebugType=none", "-p:GenerateDocumentationFile=false",
                    f"-p:SourceRevisionId={commit}", f"-p:VersionPrefix={version}",
                    "-p:NexusPackaged=true"]  # marca de cópia publicada: liga a atualização automática (docs/11-atualizacao.md)

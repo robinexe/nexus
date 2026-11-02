@@ -174,6 +174,32 @@ jobs:
             & src/Nexus.Cli/bin/Release/net10.0/nexus.exe selftest --only Ajustes --quiet --ui $out --html saida/ui/relatorio.html | Out-Null
           } else { Write-Warning "ui.json não foi gravado (código $($p.ExitCode))." }
 
+      - name: Autoteste da interface em inglês e espanhol (--lang)
+        if: always()
+        shell: pwsh
+        timeout-minutes: 30
+        run: |
+          # Abre todas as páginas traduzidas de verdade (exceções, bindings quebrados, travamentos) em en e es.
+          if ((Get-Process -Id $PID).SessionId -eq 0) { 'sem sessao grafica' | Out-File saida/ui/ui-lang.exitcode -Encoding ascii; exit 0 }
+          $exe = Resolve-Path 'src/Nexus.Desktop/bin/Release/net10.0-windows/Nexus.Desktop.exe'
+          $codes = @()
+          foreach ($lang in 'en', 'es') {
+            New-Item -ItemType Directory -Force -Path "saida/ui-$lang" | Out-Null
+            $out = Join-Path $PWD "saida/ui-$lang/ui.json"
+            $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"'), '--lang', $lang -PassThru
+            $null = $p.Handle
+            if (-not $p.WaitForExit(900000)) { $p.Kill(); $codes += "$lang:tempo"; continue }
+            $p.WaitForExit()
+            $codes += "$($lang):$($p.ExitCode)"
+            if (Test-Path $out) {
+              $ui = Get-Content $out -Raw -Encoding utf8 | ConvertFrom-Json
+              foreach ($pg in $ui.pages) { "[{0}] {1,-9} {2,-28} exceções={3} binding={4}" -f $lang, $pg.statusText, $pg.title, $pg.exceptions.Count, $pg.bindingErrors }
+            }
+          }
+          $bad = $codes | Where-Object { $_ -notmatch ':0$' }
+          ($(if ($bad) { $codes -join ' ' } else { '0' })) | Out-File saida/ui/ui-lang.exitcode -Encoding ascii
+          "idiomas: $($codes -join ' ')"
+
       - name: Veredito dos autotestes
         if: always()
         shell: pwsh
@@ -181,11 +207,13 @@ jobs:
           $cli = if (Test-Path saida/selftest.exitcode) { (Get-Content saida/selftest.exitcode).Trim() } else { 'ausente' }
           $ui = if (Test-Path saida/ui/ui.exitcode) { (Get-Content saida/ui/ui.exitcode).Trim() } else { 'ausente' }
           $e2e = if (Test-Path saida/e2e.exitcode) { (Get-Content saida/e2e.exitcode).Trim() } else { 'ausente' }
+          $lang = if (Test-Path saida/ui/ui-lang.exitcode) { (Get-Content saida/ui/ui-lang.exitcode).Trim() } else { 'ausente' }
           "nexus selftest: $cli · interface: $ui · ponta a ponta: $e2e"
           $bad = @()
           if ($e2e -ne '0') { $bad += "testes de ponta a ponta com FALHA ou sem resultado ($e2e); veja saida/e2e/*.log e saida/e2e.trx" }
           if ($cli -ne '0') { $bad += "nexus selftest com FALHA ou sem resultado ($cli); veja saida/selftest.html" }
           if ($ui -notin @('0', 'sem sessao grafica')) { $bad += "autoteste da interface com FALHA ou sem resultado ($ui); veja saida/ui/relatorio.html" }
+          if ($lang -notin @('0', 'sem sessao grafica')) { $bad += "autoteste da interface em en/es com FALHA ($lang); veja saida/ui-en e saida/ui-es" }
           if ($bad.Count -gt 0) { $bad | ForEach-Object { Write-Error $_ }; exit 1 }
 
       - name: Resultados

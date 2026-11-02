@@ -191,7 +191,9 @@ public sealed partial class LocalizationTests
         var publish = File.ReadAllText(Path.Combine(Root(), "tools", "packaging", "publish.py"));
         var m = SatelliteRegex().Match(publish);
         Assert.True(m.Success, "publish.py: SatelliteResourceLanguages não encontrado");
-        var langs = m.Groups[1].Value.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        // Na linha de comando do MSBuild o ";" precisa ir escapado (%3B): cru, ele separa propriedades (falhou no CI: MSB1006).
+        Assert.DoesNotContain(";", m.Groups[1].Value, StringComparison.Ordinal);
+        var langs = m.Groups[1].Value.Split("%3B", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         foreach (var l in LanguageOption.Supported) Assert.Contains(l, langs);
         // O instalador copia a pasta inteira (com en\ e es\).
         var iss = File.ReadAllText(Path.Combine(Root(), "tools", "packaging", "nexus.iss"));
@@ -341,7 +343,7 @@ public sealed partial class LocalizationTests
     [GeneratedRegex(@"\{[^}]*\}")]
     private static partial Regex BracesRegex();
 
-    [GeneratedRegex(@"SatelliteResourceLanguages=([\w;-]+)")]
+    [GeneratedRegex(@"SatelliteResourceLanguages=([\w;%-]+)")]
     private static partial Regex SatelliteRegex();
 }
 
