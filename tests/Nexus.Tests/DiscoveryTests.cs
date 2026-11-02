@@ -407,6 +407,9 @@ public sealed class ReadOnlyGuaranteeTests
             var import = m.GetImport();
             if (import.Module.IsNil) continue;
             var entry = md.GetString(import.Name);
+            // Exceção única e conferida em Storage_ioctls_are_read_only_queries: a consulta SSD/HDD abre o disco com acesso 0 e só
+            // usa IOCTLs de consulta FILE_ANY_ACCESS (lista fechada).
+            if (entry == "DeviceIoControl" && md.GetString(md.GetTypeDefinition(m.GetDeclaringType()).Name) == StorageQueryType) continue;
             if (ForbiddenNative.Any(f => entry.StartsWith(f, StringComparison.OrdinalIgnoreCase)))
                 violations.Add($"P/Invoke {entry}");
         }
@@ -430,6 +433,32 @@ public sealed class ReadOnlyGuaranteeTests
         }
 
         Assert.True(violations.Count == 0, "APIs de escrita encontradas: " + string.Join(", ", violations));
+    }
+
+    private const string StorageQueryType = "WindowsStorageQuery";
+
+    /// <summary>IOCTLs permitidos na descoberta: só consultas (FILE_ANY_ACCESS), nada que grave no disco.</summary>
+    private static readonly HashSet<uint> AllowedIoctls =
+    [
+        0x002D1400, // IOCTL_STORAGE_QUERY_PROPERTY
+        0x000700A0, // IOCTL_DISK_GET_DRIVE_GEOMETRY_EX
+        0x00560000, // IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
+    ];
+
+    [Fact]
+    public void Storage_ioctls_are_read_only_queries()
+    {
+        var type = typeof(Discovery).Assembly.GetType("Nexus.HardwareDiscovery." + StorageQueryType);
+        Assert.NotNull(type);
+        var codes = type!.GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+            .Where(f => f.IsLiteral && f.Name.StartsWith("Ioctl", StringComparison.Ordinal))
+            .Select(f => (f.Name, Code: (uint)f.GetRawConstantValue()!)).ToList();
+        Assert.Equal(3, codes.Count);
+        foreach (var (name, code) in codes)
+        {
+            Assert.True(AllowedIoctls.Contains(code), $"{name} = 0x{code:X8} fora da lista de consultas permitidas");
+            Assert.Equal(0u, (code >> 14) & 3); // FILE_ANY_ACCESS: funciona com o disco aberto sem direito de leitura/escrita
+        }
     }
 
     [Fact]

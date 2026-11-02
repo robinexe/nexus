@@ -20,7 +20,10 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         Converters = { new JsonStringEnumConverter() },
     };
 
-    private readonly NexusServices _services = new();
+    // Handlers de leitura de todos os módulos: montados na primeira leitura do catálogo, já fora da thread da interface
+    // (antes eram criados no construtor, na abertura, antes da janela aparecer).
+    private readonly Lazy<NexusServices> _servicesLazy = new(() => new NexusServices(), LazyThreadSafetyMode.ExecutionAndPublication);
+    private NexusServices ReadOnlyServices => _servicesLazy.Value;
     private static readonly string CurrentUserSid = System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value;
     private BrokerLevel _lastLevel = BrokerLevel.User;
 
@@ -192,12 +195,16 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         }
     }
 
-    public async Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level)
+    public Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level) =>
+        RevertCoreAsync(runId, level, () => Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança."));
+
+    public Task<BrokerCallResult?> RevertWithoutConfirmationAsync(Guid runId, BrokerLevel level) => RevertCoreAsync(runId, level, () => true);
+
+    private async Task<BrokerCallResult?> RevertCoreAsync(Guid runId, BrokerLevel level, Func<bool> confirm)
     {
         if (RefuseInSelfTest()) return null;
         var own = ApplyView.Begin("Desfazer alteração", [], level, revert: true, name: ActionName);
-        var r = await ExecuteWithProgressAsync(() => Confirm("Desfazer", "Desfazer esta alteração? O NEXUS volta ao estado registrado no diário antes da mudança."),
-            level, b => b.RevertRun(runId), null, own, revert: true);
+        var r = await ExecuteWithProgressAsync(confirm, level, b => b.RevertRun(runId), null, own, revert: true);
         if (r?.Response?.FullyRestored == true && Broker.LastRun == runId) Broker.SessionOpen = false;
         return r;
     }
@@ -212,36 +219,43 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     public PageViewModel? FindPage(Type pageType) => Pages.FirstOrDefault(p => p.GetType() == pageType);
 
-    public OverviewPage Overview { get; } = new();
-    public HardwarePage Hardware { get; } = new();
-    public DiagnosticsPage Diagnostics { get; } = new();
-    public CatalogPage Catalog { get; } = new();
-    public PlanPage Plan { get; } = new();
-    public BrokerPage Broker { get; } = new();
-    public MeasurePage Measure { get; } = new();
-    public HistoryPage History { get; } = new();
-    public CapabilitiesPage Capabilities { get; } = new();
+    public OverviewPage Overview { get; } = Make<OverviewPage>();
+    public HardwarePage Hardware { get; } = Make<HardwarePage>();
+    public DiagnosticsPage Diagnostics { get; } = Make<DiagnosticsPage>();
+    public CatalogPage Catalog { get; } = Make<CatalogPage>();
+    public PlanPage Plan { get; } = Make<PlanPage>();
+    public BrokerPage Broker { get; } = Make<BrokerPage>();
+    public MeasurePage Measure { get; } = Make<MeasurePage>();
+    public HistoryPage History { get; } = Make<HistoryPage>();
+    public CapabilitiesPage Capabilities { get; } = Make<CapabilitiesPage>();
     public IReadOnlyList<PageViewModel> Pages { get; }
 
+    /// <summary>Cria uma página anotando no desktop-diag.log as que demoram (o construtor roda na thread da interface, na abertura).</summary>
+    private static T Make<T>() where T : new()
+    {
+        using var _ = Nexus.Desktop.Services.Shell.UiWatchdog.Phase($"criando a página {typeof(T).Name}", logAboveMs: 30);
+        return new T();
+    }
+
     // Módulos
-    public AssistantPage Assistant { get; } = new();
-    public AutomationPage Automation { get; } = new();
-    public StartupPage Startup { get; } = new();
-    public ServicesPage Services { get; } = new();
-    public CleaningPage Cleaning { get; } = new();
-    public DiskPage Disk { get; } = new();
-    public ProgramsPage Programs { get; } = new();
-    public PrivacyPage Privacy { get; } = new();
-    public SecurityPage Security { get; } = new();
-    public ScannerPage Scanner { get; } = new();
-    public SystemToolsPage SystemTools { get; } = new();
-    public DriverUpdatesPage DriverUpdates { get; } = new();
-    public MonitorPage Monitor { get; } = new();
-    public CpuLabPage CpuLab { get; } = new();
-    public GpuLabPage GpuLab { get; } = new();
-    public MemoryLabPage MemoryLab { get; } = new();
-    public MemoryDoctorPage MemoryDoctor { get; } = new();
-    public SettingsPage Settings { get; } = new();
+    public AssistantPage Assistant { get; } = Make<AssistantPage>();
+    public AutomationPage Automation { get; } = Make<AutomationPage>();
+    public StartupPage Startup { get; } = Make<StartupPage>();
+    public ServicesPage Services { get; } = Make<ServicesPage>();
+    public CleaningPage Cleaning { get; } = Make<CleaningPage>();
+    public DiskPage Disk { get; } = Make<DiskPage>();
+    public ProgramsPage Programs { get; } = Make<ProgramsPage>();
+    public PrivacyPage Privacy { get; } = Make<PrivacyPage>();
+    public SecurityPage Security { get; } = Make<SecurityPage>();
+    public ScannerPage Scanner { get; } = Make<ScannerPage>();
+    public SystemToolsPage SystemTools { get; } = Make<SystemToolsPage>();
+    public DriverUpdatesPage DriverUpdates { get; } = Make<DriverUpdatesPage>();
+    public MonitorPage Monitor { get; } = Make<MonitorPage>();
+    public CpuLabPage CpuLab { get; } = Make<CpuLabPage>();
+    public GpuLabPage GpuLab { get; } = Make<GpuLabPage>();
+    public MemoryLabPage MemoryLab { get; } = Make<MemoryLabPage>();
+    public MemoryDoctorPage MemoryDoctor { get; } = Make<MemoryDoctorPage>();
+    public SettingsPage Settings { get; } = Make<SettingsPage>();
     /// <summary>Atualização do programa (faixa "pronto — Reiniciar e atualizar" na janela; ver AppUpdates).</summary>
     public AppUpdates Updates { get; } = AppUpdates.Instance;
 
@@ -303,6 +317,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             Status = "Lendo hardware e configuração do Windows…";
             var snapshot = await Task.Run(Discovery.Capture);
+            Nexus.Desktop.Services.Shell.UiWatchdog.Step($"leitura do PC pronta em {snapshot.Elapsed.TotalSeconds:0.0} s (fora da interface)");
             _snapshot = snapshot;
             _findings = DiagnosticRules.Evaluate(snapshot.Facts);
             Hardware.Sections = snapshot.Sections.Select(s => new SectionViewModel(s)).ToList();
@@ -313,17 +328,25 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             await LoadCatalogAsync(snapshot.Facts);
 
             Status = "Lendo o histórico…";
-            LoadHistory();
+            await LoadHistoryAsync();
 
             var unavailable = snapshot.Sections.SelectMany(s => s.Facts).Count(f => f.Status == FactStatus.Unavailable);
             Overview.Footer = $"Leitura concluída em {snapshot.Elapsed.TotalSeconds:0.0} s · {unavailable} valor(es) indisponível(is), cada um com o motivo.";
             Status = $"Pronto · leitura de {snapshot.TakenAt:HH:mm:ss}";
             Nexus.Desktop.Services.Shell.UiWatchdog.Step("leitura do PC concluída");
-            CheckPendingRecovery();
+            await CheckPendingRecoveryAsync();
             foreach (var module in Pages.OfType<ModulePage>())
             {
                 Nexus.Desktop.Services.Shell.UiWatchdog.Step($"leitura do PC → {module.Title}");
-                try { await module.OnFactsReadyAsync(snapshot.Facts); }
+                try
+                {
+                    // Só a parte síncrona (até o primeiro await) prende a interface: anotada quando passa de 50 ms.
+                    var started = System.Diagnostics.Stopwatch.GetTimestamp();
+                    var task = module.OnFactsReadyAsync(snapshot.Facts);
+                    var blocked = (long)System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+                    if (blocked >= 50) Nexus.Desktop.Services.Shell.UiWatchdog.Note($"{module.Title}: {blocked} ms na thread da interface ao receber a leitura do PC");
+                    await task;
+                }
                 catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"{module.Title}: {ex.Message}"; }
             }
             await LoadOwnerChecksAsync(snapshot);
@@ -363,12 +386,34 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     private async Task LoadCatalogAsync(SystemFacts facts)
     {
+        // Ler e validar o catálogo (vários JSON), montar os handlers de leitura e instanciar cada ação: tudo fora da thread da
+        // interface (antes era síncrono aqui e contava para a parada "interface iniciada" da abertura).
+        var parameters = NexusServices.ParametersFrom(facts);
+        var windows = OperatingSystem.IsWindows();
         CatalogDocument doc;
+        List<CatalogRow> rows;
+        Dictionary<string, string> titles;
         try
         {
-            doc = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
-            var titles = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (var e in doc.Actions) titles[e.Definition.Key] = e.Definition.Title;
+            (doc, rows, titles) = await Task.Run(() =>
+            {
+                var d = CatalogLoader.LoadDirectory(NexusServices.CatalogDirectory);
+                var t = new Dictionary<string, string>(StringComparer.Ordinal);
+                foreach (var e in d.Actions) t[e.Definition.Key] = e.Definition.Title;
+                var handlers = ReadOnlyServices.Handlers;
+                var r = d.Actions.Select(e =>
+                {
+                    var instance = e.TryInstantiate(parameters, out var reason);
+                    var implemented = handlers.Contains(e.Definition.HandlerKind);
+                    if (!implemented)
+                    {
+                        instance = null;
+                        reason = $"handler '{e.Definition.HandlerKind}' pendente";
+                    }
+                    return new CatalogRow(e, instance, reason, CapabilityCatalog.ForHandler(implemented, windows));
+                }).ToList();
+                return (d, r, t);
+            });
             _actionTitles = titles;
         }
         catch (Exception ex) when (ex is IOException or JsonException or InvalidDataException or ArgumentException or UnauthorizedAccessException)
@@ -377,19 +422,6 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             Catalog.Rows = [];
             return;
         }
-
-        var parameters = NexusServices.ParametersFrom(facts);
-        var rows = doc.Actions.Select(e =>
-        {
-            var instance = e.TryInstantiate(parameters, out var reason);
-            var implemented = _services.Handlers.Contains(e.Definition.HandlerKind);
-            if (!implemented)
-            {
-                instance = null;
-                reason = $"handler '{e.Definition.HandlerKind}' pendente";
-            }
-            return new CatalogRow(e, instance, reason, CapabilityCatalog.ForHandler(implemented, OperatingSystem.IsWindows()));
-        }).ToList();
 
         Catalog.Version = $"{doc.CatalogVersion} ({doc.Schema}) · {doc.Actions.Count} ações · {doc.Rejected.Count} rejeitadas";
         Catalog.Rows = rows;
@@ -402,7 +434,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             try
             {
-                var s = _services.Handlers.Get(r.Instance!.Definition.HandlerKind).Detect(r.Instance);
+                var s = ReadOnlyServices.Handlers.Get(r.Instance!.Definition.HandlerKind).Detect(r.Instance);
                 var origin = s.Origin is ValueOrigin.PolicyEnforced or ValueOrigin.ThirdPartyManaged ? $"  (gerenciado: {s.Origin})" : "";
                 return (Row: r, Text: s.Describe() + origin, Error: (string?)null);
             }
@@ -434,7 +466,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             // Simulação: a interface não roda elevada, mas aplicar eleva sozinho (aviso do Windows). Então simula como administrador
             // e marca o que vai pedir permissão, em vez de dizer "bloqueada" para tudo que é de sistema.
             var context = NexusServices.ContextFrom(_snapshot.Facts) with { IsElevated = true };
-            var plan = await Task.Run(() => new DesiredStateResolver(_services.Handlers).Resolve(chosen, context));
+            var plan = await Task.Run(() => new DesiredStateResolver(ReadOnlyServices.Handlers).Resolve(chosen, context));
             Plan.Rows = plan.Items.Select(i => new PlanRow(
                 $"{i.Action.Definition.Title} ({i.Action.Definition.Key})",
                 i.Status switch
@@ -599,9 +631,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     }
 
     /// <summary>Ao abrir: avisa se alguma alteração ficou pela metade (ex.: PC desligou no meio).</summary>
-    private void CheckPendingRecovery()
+    private async Task CheckPendingRecoveryAsync()
     {
-        var (user, machine) = PendingRecovery();
+        var (user, machine) = await Task.Run(PendingRecovery); // dois diários SQLite: fora da thread da interface
         if (user + machine == 0) return;
         Broker.LastMessage = $"{user + machine} alteração(ões) ficaram pela metade da última vez. Use \"Recuperar interrompidas\" para desfazer.";
         Status = $"Atenção: {user + machine} alteração(ões) pela metade. Abra Aplicar → Recuperar interrompidas.";
@@ -611,17 +643,28 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
     private async Task LoadAfterWriteAsync()
     {
         if (_snapshot is not null) await LoadCatalogAsync(_snapshot.Facts);
-        LoadHistory();
+        await LoadHistoryAsync();
         await BrokerStatusAsync();
     }
 
-    private void LoadHistory()
+    /// <summary>Diário (SQLite) e sondagem da trava lidos fora da thread da interface; o resultado entra na página igual a antes.</summary>
+    private async Task LoadHistoryAsync()
     {
         var path = History.JournalPath;
+        var (coordination, status, runs, noJournal) = await Task.Run(() => ReadHistory(path));
+        History.Coordination = coordination;
+        History.Status = status;
+        History.Runs = runs;
+        if (noJournal) History.Entries = [];
+    }
+
+    private static (string Coordination, string Status, IReadOnlyList<HistoryRun> Runs, bool NoJournal) ReadHistory(string path)
+    {
+        string coordination;
         try
         {
             var probe = NexusServices.ProbeExecutors(path);
-            History.Coordination = probe.State switch
+            coordination = probe.State switch
             {
                 CoordinationState.Active => $"Executor ativo: {probe.Holder?.Describe() ?? "dono não identificado"}.",
                 CoordinationState.Idle when probe.AbandonedByCrash => $"Nenhum executor ativo. Trava abandonada por: {probe.Holder!.Describe()}.",
@@ -631,27 +674,21 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            History.Coordination = $"Coordenação não verificada: {ex.Message}";
+            coordination = $"Coordenação não verificada: {ex.Message}";
         }
 
         if (!File.Exists(path))
-        {
-            History.Status = $"Nenhum diário em {path}: nenhuma execução do NEXUS foi registrada neste PC.";
-            History.Runs = [];
-            History.Entries = [];
-            return;
-        }
+            return (coordination, $"Nenhum diário em {path}: nenhuma execução do NEXUS foi registrada neste PC.", [], true);
         try
         {
             using var journal = SqliteJournal.OpenReadOnly(path);
-            History.Runs = journal.Runs().OrderByDescending(r => r.StartedAt).Select(r => new HistoryRun(r.RunId, $"{r.StartedAt.ToLocalTime():dd/MM/yyyy HH:mm}",
+            var runs = journal.Runs().OrderByDescending(r => r.StartedAt).Select(r => new HistoryRun(r.RunId, $"{r.StartedAt.ToLocalTime():dd/MM/yyyy HH:mm}",
                 r.EndedAt is null ? "não encerrada" : $"encerrada {r.EndedAt.Value.ToLocalTime():dd/MM HH:mm}", r.Profile, r.CatalogVersion)).ToList();
-            History.Status = $"Diário {path} (somente leitura) · {History.Runs.Count} execução(ões).";
+            return (coordination, $"Diário {path} (somente leitura) · {runs.Count} execução(ões).", runs, false);
         }
         catch (Exception ex)
         {
-            History.Status = $"Diário encontrado mas não pôde ser lido: {ex.GetType().Name}: {ex.Message}";
-            History.Runs = [];
+            return (coordination, $"Diário encontrado mas não pôde ser lido: {ex.GetType().Name}: {ex.Message}", [], false);
         }
     }
 

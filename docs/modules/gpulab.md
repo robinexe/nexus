@@ -124,8 +124,11 @@ anunciado igual ao em uso, `owner.xmp` não acusa nada.
 ## Riscos
 
 - Taxa alta com cabo antigo (HDMI 1.4, adaptador passivo): tela piscando/preta. Mitigação: só modos que o monitor anuncia,
-  teste do driver antes, texto de confirmação explica e Desfazer volta. **Não há reversão automática por tempo** (o host pede
-  confirmação para desfazer; ver pedido no relatório). Se ficar preto: aguardar, desconectar/reconectar o cabo, ou desfazer com outro monitor.
+  teste do driver antes, texto de confirmação explica e Desfazer volta. **Reversão automática em 15 s** (desde 02/11), como a
+  janela do próprio Windows: depois de trocar, um cartão por cima da página pergunta "Manter esta taxa? Volta sozinho em 15 s"
+  (Manter / Voltar agora); sem resposta, a página desfaz pelo aplicador com `IModuleHost.RevertWithoutConfirmationAsync`
+  (mesmo diário e releitura do Desfazer, só sem a segunda caixa de confirmação, já aceita ao trocar). Lógica pura e testada em
+  `KeepChangeCountdown` (a primeira resposta vence). Desfazer manual durante a contagem cancela a reversão automática.
 - Preferência de GPU por app: mais consumo de bateria; jogos OpenGL/Vulkan antigos podem seguir o painel do driver.
 - HAGS: exige reinício; efeito varia por driver (por isso só é oferecido onde é requisito).
 - PCIe de placas AMD RX 6000/7000: o chip tem um switch PCIe interno; o link lido pode ser o interno (sempre x16). Documentado

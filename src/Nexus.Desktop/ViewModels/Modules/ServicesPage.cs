@@ -5,6 +5,7 @@ using Nexus.Boot.Inventory;
 using Nexus.Boot.Windows;
 using Nexus.Broker;
 using Nexus.Desktop.Views.Controls;
+using Nexus.HardwareDiscovery;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -265,6 +266,7 @@ public sealed class PresetRow : ObservableObject
     public PresetRow(ServicePreset preset, IReadOnlyDictionary<string, ServiceRow> services, ServicesPage page, PresetRow? previous)
     {
         Preset = preset;
+        DiskWarning = StorageAdvice.PresetWarning(preset.Id, page.Host?.Facts?.SystemDiskMedia ?? DiskMedia.Unknown);
         Items = preset.Items.Select(i => new PresetItemRow(i, services.TryGetValue(i.Service, out var s) ? s : null)).ToList();
         _runId = previous?._runId;
         ApplyCommand = new RelayCommand(() => _ = page.ApplyPresetAsync(this), () => !page.Busy && Items.Any(i => i.Pending));
@@ -278,7 +280,9 @@ public sealed class PresetRow : ObservableObject
     public string Title => Preset.Title;
     public string Summary => Preset.Summary;
     public string ForWho => "Para quem: " + Preset.ForWho;
-    public string Honesty => Preset.Honesty;
+    /// <summary>Aviso pelo tipo do disco do sistema (ex.: preset "só para SSD" num PC com o Windows num HD). Null = nada.</summary>
+    public string? DiskWarning { get; }
+    public string Honesty => DiskWarning is null ? Preset.Honesty : DiskWarning + " " + Preset.Honesty;
     public IReadOnlyList<PresetItemRow> Items { get; }
     public Guid? RunId => _runId;
     public bool CanUndo => _runId is not null;

@@ -79,6 +79,7 @@ public static class ShellMap
         if (id is "owner.rebar" or "owner.mux" or "owner.pcie") return "GpuLabPage";
         if (id.StartsWith("startup.", StringComparison.Ordinal)) return "StartupPage";
         if (id.StartsWith("gpu.", StringComparison.Ordinal)) return "GpuLabPage";
+        if (id == "disk.system-media") return "DiagnosticsPage"; // Windows num HD: a solução é hardware (SSD), não limpeza
         if (id.StartsWith("disk.", StringComparison.Ordinal)) return "CleaningPage";
         if (id.StartsWith("sec.", StringComparison.Ordinal)) return "SecurityPage";
         if (id.StartsWith("power.", StringComparison.Ordinal) || id.StartsWith("cpu.", StringComparison.Ordinal)) return "CpuLabPage";

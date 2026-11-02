@@ -44,7 +44,7 @@ public static partial class WindowsDiscovery
         sections.Add(memSection);
         var (boardSection, sysMan, sysModel, isVm) = Guard("Placa e firmware", () => BoardSection(smbios, smbiosError));
         sections.Add(boardSection);
-        var (diskSection, drives, systemDrive) = Guard("Discos", DiskSection);
+        var (diskSection, drives, systemDrive, physicalDisks) = Guard("Discos", DiskSection);
         sections.Add(diskSection);
         sections.Add(Guard("Rede", NetworkSection));
         var (powerSection, scheme, schemeName) = Guard("Plano de energia", PowerSection);
@@ -78,6 +78,9 @@ public static partial class WindowsDiscovery
             SystemModel = sysModel,
             Drives = drives ?? [],
             SystemDrive = systemDrive,
+            PhysicalDisks = physicalDisks ?? [],
+            SystemDiskMedia = drives?.FirstOrDefault(d => string.Equals(d.Name, systemDrive, StringComparison.OrdinalIgnoreCase))?.Media ?? DiskMedia.Unknown,
+            SystemDiskBus = SystemDiskBus(physicalDisks, systemDrive),
             StartupItems = startup ?? [],
             Services = services ?? [],
             RegistrySignals = signals,
@@ -415,43 +418,82 @@ public static partial class WindowsDiscovery
 
     // ------------------------------------------------------------------ Discos
 
-    private static (DiscoverySection, IReadOnlyList<DriveFacts>, string?) DiskSection()
+    private static (DiscoverySection, IReadOnlyList<DriveFacts>, string?, IReadOnlyList<PhysicalDiskFacts>) DiskSection()
     {
-        var drives = new List<DriveFacts>();
+        var ready = new List<DriveInfo>();
         var rows = new List<IReadOnlyList<string?>>();
         foreach (var d in DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.Fixed))
         {
-            try
-            {
-                if (!d.IsReady) { rows.Add([d.Name, "não pronto", null, null, null]); continue; }
-                drives.Add(new DriveFacts(d.Name, d.DriveFormat, (ulong)d.TotalSize, (ulong)d.TotalFreeSpace));
-                var pct = d.TotalSize > 0 ? 100.0 * d.TotalFreeSpace / d.TotalSize : 0;
-                rows.Add([d.Name, d.VolumeLabel, d.DriveFormat, Units.Bytes((ulong)d.TotalSize),
-                    $"{Units.Bytes((ulong)d.TotalFreeSpace)} ({pct.ToString("0", CultureInfo.InvariantCulture)}%)"]);
-            }
-            catch (Exception ex) when (IsReadFailure(ex)) { rows.Add([d.Name, $"indisponível: {ex.Message}", null, null, null]); }
+            try { if (d.IsReady) ready.Add(d); else rows.Add([d.Name, "não pronto", null, null, null, null]); }
+            catch (Exception ex) when (IsReadFailure(ex)) { rows.Add([d.Name, $"indisponível: {ex.Message}", null, null, null, null]); }
         }
 
-        var physical = new List<IReadOnlyList<string?>>();
-        using (var k = Open(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Services\disk\Enum"))
+        // SSD/HDD pelo próprio disco (IOCTL, sem administrador). Falha aqui só deixa o tipo como desconhecido.
+        IReadOnlyList<PhysicalDiskFacts> physicalDisks = [];
+        IReadOnlyDictionary<string, DiskMedia> volumeMedia = new Dictionary<string, DiskMedia>();
+        string? storageError = null;
+        try { (physicalDisks, volumeMedia) = StorageClassifier.Read(WindowsStorageQuery.Instance, ready.Select(d => d.Name)); }
+        catch (Exception ex) when (IsReadFailure(ex)) { storageError = $"{ex.GetType().Name}: {ex.Message}"; }
+
+        var drives = new List<DriveFacts>();
+        foreach (var d in ready)
         {
-            var count = k?.GetValue("Count") is int c ? c : 0;
-            for (var i = 0; i < count && i < 64; i++)
-                if (k!.GetValue(i.ToString(CultureInfo.InvariantCulture)) is string id)
-                    physical.Add([ModelFromInstanceId(id), BusFromInstanceId(id), id]);
+            try
+            {
+                var media = volumeMedia.GetValueOrDefault(d.Name, DiskMedia.Unknown);
+                drives.Add(new DriveFacts(d.Name, d.DriveFormat, (ulong)d.TotalSize, (ulong)d.TotalFreeSpace, media));
+                var pct = d.TotalSize > 0 ? 100.0 * d.TotalFreeSpace / d.TotalSize : 0;
+                var disk = physicalDisks.FirstOrDefault(p => p.Volumes.Contains(d.Name, StringComparer.OrdinalIgnoreCase));
+                rows.Add([d.Name, d.VolumeLabel, d.DriveFormat, Units.Bytes((ulong)d.TotalSize),
+                    $"{Units.Bytes((ulong)d.TotalFreeSpace)} ({pct.ToString("0", CultureInfo.InvariantCulture)}%)",
+                    media == DiskMedia.Unknown ? "desconhecido" : StorageClassifier.Describe(media, disk?.Bus)]);
+            }
+            catch (Exception ex) when (IsReadFailure(ex)) { rows.Add([d.Name, $"indisponível: {ex.Message}", null, null, null, null]); }
         }
 
         var systemDrive = Path.GetPathRoot(Environment.SystemDirectory);
         var tables = new List<DiscoveryTable>
         {
-            new("Volumes (unidades fixas)", ["Unidade", "Rótulo", "Sistema de arquivos", "Tamanho", "Livre"], rows, FactStatus.Detected, "System.IO.DriveInfo"),
-            new("Discos físicos", ["Modelo (inferido)", "Barramento (inferido)", "ID de instância"], physical, FactStatus.Inferred,
-                @"registro HKLM\SYSTEM\CurrentControlSet\Services\disk\Enum",
-                "Modelo e barramento extraídos do ID de instância do dispositivo. Tipo de mídia (SSD/HDD) indisponível sem consulta IOCTL/WMI."),
+            new("Volumes (unidades fixas)", ["Unidade", "Rótulo", "Sistema de arquivos", "Tamanho", "Livre", "Tipo de disco"], rows, FactStatus.Detected,
+                "System.IO.DriveInfo + IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS"),
         };
+        if (physicalDisks.Count > 0)
+        {
+            tables.Add(new("Discos físicos", ["Disco", "Modelo", "Tipo", "Barramento", "Tamanho", "Unidades"],
+                physicalDisks.Select(p => (IReadOnlyList<string?>)[p.Number.ToString(CultureInfo.InvariantCulture), p.Model, p.MediaText, p.Bus,
+                    p.SizeBytes is { } sz ? Units.Bytes(sz) : null, string.Join(" ", p.Volumes)]).ToList(),
+                FactStatus.Detected, @"\\.\PhysicalDriveN: IOCTL_STORAGE_QUERY_PROPERTY (penalidade de busca, barramento), IOCTL_DISK_GET_DRIVE_GEOMETRY_EX",
+                "Tipo pelo próprio disco, sem administrador: sem penalidade de busca = SSD (mesmo critério do Otimizar unidades do Windows); sem resposta, barramento NVMe = SSD."));
+        }
+        else
+        {
+            // Sem resposta do IOCTL: lista do registro, como antes (modelo e barramento inferidos do ID de instância).
+            var physical = new List<IReadOnlyList<string?>>();
+            using (var k = Open(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Services\disk\Enum"))
+            {
+                var count = k?.GetValue("Count") is int c ? c : 0;
+                for (var i = 0; i < count && i < 64; i++)
+                    if (k!.GetValue(i.ToString(CultureInfo.InvariantCulture)) is string id)
+                        physical.Add([ModelFromInstanceId(id), BusFromInstanceId(id), id]);
+            }
+            tables.Add(new("Discos físicos", ["Modelo (inferido)", "Barramento (inferido)", "ID de instância"], physical, FactStatus.Inferred,
+                @"registro HKLM\SYSTEM\CurrentControlSet\Services\disk\Enum",
+                "Modelo e barramento extraídos do ID de instância do dispositivo. Tipo de mídia (SSD/HDD) indisponível: " +
+                (storageError ?? "nenhum disco respondeu à consulta IOCTL.")));
+        }
         var facts = new List<Fact> { Fact.FromOptional("Unidade do sistema", systemDrive, "Environment.SystemDirectory", "Indisponível.") };
-        return (new DiscoverySection("Discos", facts, tables), drives, systemDrive);
+        var sysDisk = physicalDisks.FirstOrDefault(p => p.Volumes.Contains(systemDrive ?? "", StringComparer.OrdinalIgnoreCase));
+        var sysMedia = systemDrive is null ? DiskMedia.Unknown : volumeMedia.GetValueOrDefault(systemDrive, DiskMedia.Unknown);
+        facts.Add(sysMedia != DiskMedia.Unknown && sysDisk is not null
+            ? Fact.Detected("Tipo do disco do sistema", StorageClassifier.Describe(sysMedia, sysDisk.Bus), "IOCTL_STORAGE_QUERY_PROPERTY",
+                $"Disco {sysDisk.Number}{(sysDisk.Model is null ? "" : $" ({sysDisk.Model})")}: {sysDisk.MediaSource}.")
+            : Fact.Unavailable("Tipo do disco do sistema", "IOCTL_STORAGE_QUERY_PROPERTY",
+                storageError ?? (sysDisk is null ? "Não deu para ligar a unidade do sistema a um disco físico." : $"Disco {sysDisk.Number}: {sysDisk.MediaSource}.")));
+        return (new DiscoverySection("Discos", facts, tables), drives, systemDrive, physicalDisks);
     }
+
+    private static string? SystemDiskBus(IReadOnlyList<PhysicalDiskFacts>? disks, string? systemDrive) =>
+        systemDrive is null ? null : disks?.FirstOrDefault(p => p.Volumes.Contains(systemDrive, StringComparer.OrdinalIgnoreCase))?.Bus;
 
     internal static string? ModelFromInstanceId(string id)
     {

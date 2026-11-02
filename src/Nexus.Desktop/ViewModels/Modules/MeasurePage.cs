@@ -72,7 +72,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
     {
         _prefs = MeasurePreferences.Load(_prefsPath);
         if (_prefs.PresentMonPath is null && LegacyPresentMonPath() is { } legacy) _prefs = _prefs with { PresentMonPath = legacy };
-        RelocatePresentMon(_prefs.PresentMonPath);
+        // Conferir o PresentMon (SHA-256/assinatura) e ler as sessões salvas vão para fora da thread da interface (InitialLoadAsync):
+        // na abertura do NEXUS esta página é criada antes da janela aparecer.
         _hotkeyText = _prefs.OverlayHotkey;
         _overlay.SetCorner(_prefs.OverlayCorner);
         _overlay.ShowSystem = _prefs.OverlayShowSystem;
@@ -109,7 +110,39 @@ public sealed class MeasurePage : ModulePage, IDisposable
         OpenFolderCommand = new RelayCommand(OpenFolder);
         JoinPerfLogCommand = new RelayCommand(() => _ = JoinPerfLogAsync(), () => ShowPerfLogOffer && !Busy);
         UndoPerfLogCommand = new RelayCommand(() => _ = UndoPerfLogAsync(), () => _perfLogRun is not null && !Busy);
-        Reload();
+        _ = InitialLoadAsync();
+    }
+
+    /// <summary>
+    /// O que o construtor fazia na thread da interface: localizar e conferir o PresentMon (hash de um executável de vários MB e,
+    /// se não for o embutido, a assinatura) e ler todas as sessões salvas. Agora em Task.Run; o resultado entra na interface igual.
+    /// </summary>
+    private async Task InitialLoadAsync()
+    {
+        var configured = _prefs.PresentMonPath;
+        try
+        {
+            var (located, error, sessions) = await Task.Run(() =>
+            {
+                PresentMonLocation? pm = null;
+                string? err = null;
+                try { pm = PresentMonLocator.Locate(configured, AppContext.BaseDirectory, _trust); }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { err = ex.Message; }
+                return (pm, err, _store.List());
+            });
+            // Se o usuário escolheu outro PresentMon enquanto isso (Procurar/Procurar de novo), vale a escolha dele.
+            if (_pm is null && string.Equals(_prefs.PresentMonPath, configured, StringComparison.OrdinalIgnoreCase))
+            {
+                _pm = located;
+                if (error is not null) Status = "Não deu para conferir o PresentMon: " + error;
+                _prefs = _prefs with { PresentMonPath = _pm?.Path ?? configured };
+                foreach (var p in new[] { nameof(PresentMonPath), nameof(HasPresentMon), nameof(PresentMonText), nameof(PresentMonTrustText), nameof(ShowIntro) })
+                    OnPropertyChanged(p);
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+            }
+            Reload(sessions);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"Não deu para ler as sessões salvas: {ex.Message}"; }
     }
 
     public override string Title => "Medir";
@@ -356,7 +389,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             _ = RefreshPerfLogAsync();
             _pollTimer.Start();
             RegisterHotkey();
-            CleanOldTempFiles();
+            _ = Task.Run(CleanOldTempFiles); // varre %TEMP% (pode ter dezenas de milhares de arquivos): fora da interface
             _ = ReadLibraryAsync(force: false);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
@@ -686,9 +719,11 @@ public sealed class MeasurePage : ModulePage, IDisposable
 
     // ------------------------------------------------------------------ dados: sessões, diário, bibliotecas
 
-    private void Reload(string? selectGame = null)
+    private void Reload(string? selectGame = null) => Reload(_store.List(), selectGame);
+
+    private void Reload((IReadOnlyList<MeasuredSession> Sessions, int Unreadable) stored, string? selectGame = null)
     {
-        var (list, bad) = _store.List();
+        var (list, bad) = stored;
         _all = list;
         var keepGame = selectGame ?? SelectedGame?.Key;
         Games.Clear();

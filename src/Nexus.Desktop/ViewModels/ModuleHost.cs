@@ -35,6 +35,13 @@ public interface IModuleHost
     /// <summary>Reverte uma execução (com confirmação).</summary>
     Task<BrokerCallResult?> RevertAsync(Guid runId, BrokerLevel level);
 
+    /// <summary>
+    /// Reverte pelo aplicador SEM perguntar de novo. Só para o desfazer automático que o usuário já aceitou ao confirmar a
+    /// mudança (ex.: troca do modo do monitor: "Volta sozinho em 15 s", porque a tela pode ter ficado preta e ele não vê o
+    /// botão). Mesmo caminho de <see cref="RevertAsync"/> (diário, releitura, tela de progresso), só sem a caixa de confirmação.
+    /// </summary>
+    Task<BrokerCallResult?> RevertWithoutConfirmationAsync(Guid runId, BrokerLevel level);
+
     /// <summary>Mostra uma mensagem na barra de status.</summary>
     void Notify(string message);
 

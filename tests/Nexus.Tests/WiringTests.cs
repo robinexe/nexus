@@ -63,6 +63,7 @@ public sealed partial class WiringTests
     private static readonly HashSet<string> NotActionIds = new(StringComparer.Ordinal)
     {
         "disk.system-free", // achado do diagnóstico (HardwareDiscovery), não ação
+        "disk.system-media", // achado do diagnóstico (SSD/HDD do disco do sistema), não ação
         "privacy.v1.json", // nome do arquivo do catálogo de privacidade
     };
 
