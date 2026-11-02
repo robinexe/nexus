@@ -15,7 +15,7 @@ namespace Nexus.Desktop.Views.Modules.GpuLab;
 /// </summary>
 public sealed class GpuTelemetryChart : FrameworkElement
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
     public static readonly DependencyProperty SamplesProperty = DependencyProperty.Register(nameof(Samples), typeof(IReadOnlyList<GpuTelemetrySample>), typeof(GpuTelemetryChart),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));

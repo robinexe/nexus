@@ -3331,6 +3331,7 @@ Pedirá permiso de administrador (UAC) y creará un punto de restauración.</val
   <data name="Shell.NaoDeuCerto" xml:space="preserve"><value>No funcionó</value></data>
   <data name="Shell.NaoDeuProcurarN" xml:space="preserve"><value>No se pudo buscar: {0}</value></data>
   <data name="Shell.NaoEncerrada" xml:space="preserve"><value>no finalizada</value></data>
+  <data name="Shell.NaoFoiPossivelConcluir" xml:space="preserve"><value>No se pudo terminar: {0}</value></data>
   <data name="Shell.NaoFoiPossivelCriar" xml:space="preserve"><value>No se pudo crear el icono de la bandeja: {0}</value></data>
   <data name="Shell.NaoFoiPossivelIniciar" xml:space="preserve"><value>No se pudo iniciar el instalador: {0}</value></data>
   <data name="Shell.NaoFoiPossivelVerificar" xml:space="preserve"><value>No se pudo verificar si hay ejecutores activos: {0}</value></data>

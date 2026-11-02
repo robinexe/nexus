@@ -99,7 +99,7 @@ public sealed record MemRunRow(string When, string Configuration, string Read, s
 /// </summary>
 public sealed class MemoryLabPage : ModulePage
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private const ulong GiB = 1024UL * 1024 * 1024;
 
     private readonly MemoryLabStore _store = new();

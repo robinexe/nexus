@@ -251,7 +251,7 @@ public sealed class DiskPage : ModulePage, IDisposable
         }
     }
 
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
     private void Show(DirNode folder)
     {
@@ -396,7 +396,7 @@ public sealed class DiskVolumeRow(VolumeInfo volume)
     public string Name => Volume.DisplayName;
     public string MediaText => $"{Volume.Media.Describe()} · {Volume.FileSystem}";
     public double UsedFraction => Volume.UsedFraction;
-    public string UsedPercent => Volume.UsedFraction.ToString("P0", CultureInfo.GetCultureInfo("pt-BR"));
+    public string UsedPercent => Volume.UsedFraction.ToString("P0", Loc.Culture);
     public string UsedText => Format.Bytes(Volume.UsedBytes);
     public string TotalText => Format.Bytes(Volume.TotalBytes);
     public string FreeText => Loc.F("Disk.NLivresN", Format.Bytes(Volume.FreeBytes), Format.Bytes(Volume.TotalBytes));
@@ -431,7 +431,7 @@ public sealed class DiskFileRow(FileItem file, double fraction)
     public double Fraction { get; } = fraction;
     public double SizeBytes => File.Size;
     public string KindText => FileCategories.Label(File.Category);
-    public string DateText => File.LastWriteUtc.ToLocalTime().ToString("dd/MM/yyyy", CultureInfo.GetCultureInfo("pt-BR"));
+    public string DateText => File.LastWriteUtc.ToLocalTime().ToString("dd/MM/yyyy", Loc.Culture);
     public string IconKey => DiskPalette.IconKey(File.Category);
     public string ColorHex => DiskPalette.Hex(File.Category);
 }
@@ -441,9 +441,9 @@ public sealed class DiskCategoryRow(CategoryTotal total, double fraction)
     public string Label => total.Label;
     public string IconKey => DiskPalette.IconKey(total.Category);
     public string ColorHex => DiskPalette.Hex(total.Category);
-    public string PercentText => Fraction.ToString("P0", CultureInfo.GetCultureInfo("pt-BR"));
+    public string PercentText => Fraction.ToString("P0", Loc.Culture);
     public string SizeText => Format.Bytes(total.Bytes);
-    public string FilesText => Loc.F("Disk.NArquivos", total.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR")));
+    public string FilesText => Loc.F("Disk.NArquivos", total.Files.ToString("N0", Loc.Culture));
     public double Fraction { get; } = fraction;
 }
 

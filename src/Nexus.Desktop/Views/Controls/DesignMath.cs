@@ -15,7 +15,7 @@ public enum Tone
 /// <summary>Como um número é escrito na tela.</summary>
 public enum NumberKind
 {
-    /// <summary>Número comum em pt-BR (casas decimais conforme <c>Decimals</c>).</summary>
+    /// <summary>Número comum no formato do idioma da interface (casas decimais conforme <c>Decimals</c>).</summary>
     Number,
     /// <summary>Bytes em base 1024 com a unidade (B, KB, MB, GB, TB), como o resto do NEXUS.</summary>
     Bytes,
@@ -29,7 +29,7 @@ public enum NumberKind
 /// </summary>
 public static class DesignMath
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private static readonly string[] ByteUnits = ["B", "KB", "MB", "GB", "TB"];
 
     /// <summary>Escreve <paramref name="value"/> no formato pedido. <paramref name="decimals"/> &lt; 0 = automático.</summary>

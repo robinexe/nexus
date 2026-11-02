@@ -183,7 +183,7 @@ public sealed class ProgramsPage : ModulePage
     /// <summary>Ação do módulo Ferramentas do sistema (catalog/system.v1.json) usada antes do lote.</summary>
     public const string RestorePointAction = "system.restore.create-point@1";
 
-    private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo PtBr => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private readonly IProcessRunner _runner = new HiddenProcessRunner();
     private List<InstalledProgram> _all = [];
     private Dictionary<string, ProgramRow> _rows = new(StringComparer.Ordinal);

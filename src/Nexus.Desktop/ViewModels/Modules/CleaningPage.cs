@@ -26,7 +26,7 @@ namespace Nexus.Desktop.ViewModels;
 /// </summary>
 public sealed class CleaningPage : ModulePage
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private const string UserRuleActionKey = CleaningUserRuleHandler.ActionId + "@1";
     private const int MaxPerRequest = 64;
 
@@ -820,7 +820,7 @@ public sealed class CleaningRuleRow : ObservableObject
     public string? Warning => Rule.Warning;
     public bool HasWarning => !string.IsNullOrEmpty(Rule.Warning);
     public string SizeText => Measured ? CleaningPage.Bytes(Bytes) : "—";
-    public string FilesText => !Measured ? Scan.Problem ?? "" : Scan.Files == 0 ? Loc.T("Clean.NadaLimpar") : Loc.F("Clean.NArquivoS", Scan.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR")));
+    public string FilesText => !Measured ? Scan.Problem ?? "" : Scan.Files == 0 ? Loc.T("Clean.NadaLimpar") : Loc.F("Clean.NArquivoS", Scan.Files.ToString("N0", Loc.Culture));
 
     public string Tags
     {
@@ -884,7 +884,7 @@ public sealed class QuarantineBatchRow
         Parts.Where(p => p.Batch.BytesInQuarantine > 0 && !p.Batch.AnyPurged && p.Session.RunId is not null).Select(p => (p.Level, p.Session.RunId!.Value)).ToList();
 
     public bool CanRestore => RevertibleRuns.Count > 0;
-    public string WhenText => When.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("pt-BR"));
+    public string WhenText => When.ToLocalTime().ToString("dd/MM/yyyy HH:mm", Loc.Culture);
     public string RulesText => string.Join(", ", Parts.SelectMany(p => p.Session.Rules).Distinct(StringComparer.Ordinal).DefaultIfEmpty(Loc.T("Clean.NadaFoiMovidoTudo")));
     public string SizeText => CleaningPage.Bytes(BytesInQuarantine);
     public string LevelText => string.Join(" + ", Parts.Select(p => p.Level == BrokerLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta")).Distinct(StringComparer.Ordinal));
@@ -904,14 +904,14 @@ public sealed class QuarantineBatchRow
 public sealed class HistorySessionRow(CleaningSession session)
 {
     public CleaningSession Session { get; } = session;
-    public string WhenText => Session.StartedUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("pt-BR"));
+    public string WhenText => Session.StartedUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm", Loc.Culture);
     public string SizeText => CleaningPage.Bytes(Session.Bytes);
     public string RulesText => Session.Rules.Count == 0 ? Loc.T("Clean.NadaFoiMovido") : string.Join(", ", Session.Rules);
     public string DetailText
     {
         get
         {
-            var parts = new List<string> { Loc.F("Clean.NArquivoS", Session.Files.ToString("N0", CultureInfo.GetCultureInfo("pt-BR"))), Session.Level == CleaningLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta"), Session.Status };
+            var parts = new List<string> { Loc.F("Clean.NArquivoS", Session.Files.ToString("N0", Loc.Culture)), Session.Level == CleaningLevel.Admin ? Loc.T("Pg.Administrador") : Loc.T("Auto.SuaConta"), Session.Status };
             if (Session.BytesPurged > 0) parts.Add(Loc.F("Clean.NRecuperadosVerdade", CleaningPage.Bytes(Session.BytesPurged)));
             if (Session.BytesRestored > 0) parts.Add(Loc.F("Clean.NDevolvidos", CleaningPage.Bytes(Session.BytesRestored)));
             if (Session.UserRules) parts.Add(Loc.T("Clean.IncluiSuasRegras"));

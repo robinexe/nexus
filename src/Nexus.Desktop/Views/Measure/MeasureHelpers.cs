@@ -13,7 +13,7 @@ namespace Nexus.Desktop.Views.Measure;
 /// </summary>
 public static class CountUp
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private static readonly Duration Length = new(TimeSpan.FromMilliseconds(520));
 
     public static readonly DependencyProperty ValueProperty = DependencyProperty.RegisterAttached("Value", typeof(double), typeof(CountUp),
@@ -105,7 +105,7 @@ public sealed class IntEqualsConverter : IValueConverter
 /// <summary>Relógio da captura: (Progress 0..1, Seconds) vira "23 s de 60 s".</summary>
 public sealed class CaptureClockConverter : IMultiValueConverter
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
     public object Convert(object?[] values, Type targetType, object? parameter, CultureInfo culture)
     {

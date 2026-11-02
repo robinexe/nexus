@@ -95,7 +95,7 @@ public sealed class AppUpdates : ObservableObject
     public bool IsEnabled => !Disabled;
 
     public string LastCheckText => UiSettings.Current.LastUpdateCheck is { } t
-        ? Loc.T("Shell.UltimaProcura") + t.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.GetCultureInfo("pt-BR"))
+        ? Loc.T("Shell.UltimaProcura") + t.ToLocalTime().ToString("dd/MM/yyyy HH:mm", Loc.Culture)
         : Disabled ? "" : Loc.T("Shell.AindaNaoProcurou");
 
     public string Status { get => _status; private set => Set(ref _status, value); }

@@ -3331,6 +3331,7 @@ It will ask for administrator permission (UAC) and create a restore point.</valu
   <data name="Shell.NaoDeuCerto" xml:space="preserve"><value>It didn't work</value></data>
   <data name="Shell.NaoDeuProcurarN" xml:space="preserve"><value>Could not check: {0}</value></data>
   <data name="Shell.NaoEncerrada" xml:space="preserve"><value>not finished</value></data>
+  <data name="Shell.NaoFoiPossivelConcluir" xml:space="preserve"><value>Could not finish: {0}</value></data>
   <data name="Shell.NaoFoiPossivelCriar" xml:space="preserve"><value>Could not create the tray icon: {0}</value></data>
   <data name="Shell.NaoFoiPossivelIniciar" xml:space="preserve"><value>Could not start the installer: {0}</value></data>
   <data name="Shell.NaoFoiPossivelVerificar" xml:space="preserve"><value>Could not check for active executors: {0}</value></data>

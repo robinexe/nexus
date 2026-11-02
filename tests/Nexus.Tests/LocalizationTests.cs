@@ -10,6 +10,7 @@ namespace Nexus.Tests;
 /// ResourceManager acha as traduções (satélites) e a escolha do idioma segue a regra (--lang &gt; Ajustes &gt; Windows &gt; pt-BR).
 /// </summary>
 [Trait("Category", "Unit")]
+[Collection(LocalizationState.Name)] // Loc é estado global: quem formata texto da tela não roda junto com quem troca o idioma
 public sealed partial class LocalizationTests
 {
     /// <summary>
@@ -138,6 +139,21 @@ public sealed partial class LocalizationTests
             Assert.Equal("pt-BR", Loc.Language);
             // Menos argumentos que marcadores: devolve o texto cru em vez de lançar.
             Assert.Contains("{0}", Loc.F("Shell.CoordenacaoN"), StringComparison.Ordinal);
+        }
+        finally { Loc.Use("pt-BR"); }
+    }
+
+    [Fact]
+    public void Numbers_on_screen_follow_the_interface_language()
+    {
+        try
+        {
+            Assert.Equal("3,4 GB", Nexus.Desktop.Views.Controls.DesignMath.Bytes(3.4 * 1024 * 1024 * 1024));
+            Loc.Use("en");
+            Assert.Equal("3.4 GB", Nexus.Desktop.Views.Controls.DesignMath.Bytes(3.4 * 1024 * 1024 * 1024));
+            Assert.Equal("1,234", Nexus.Desktop.Views.Controls.DesignMath.Format(1234, Nexus.Desktop.Views.Controls.NumberKind.Number, 0));
+            Loc.Use("es");
+            Assert.Equal("3,4 GB", Nexus.Desktop.Views.Controls.DesignMath.Bytes(3.4 * 1024 * 1024 * 1024));
         }
         finally { Loc.Use("pt-BR"); }
     }
@@ -326,4 +342,11 @@ public sealed partial class LocalizationTests
 
     [GeneratedRegex(@"SatelliteResourceLanguages=([\w;-]+)")]
     private static partial Regex SatelliteRegex();
+}
+
+/// <summary>Coleção que serializa os testes que dependem do idioma global de <see cref="Loc"/>.</summary>
+[CollectionDefinition(Name)]
+public sealed class LocalizationState
+{
+    public const string Name = "Idioma da interface (Loc)";
 }

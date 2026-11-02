@@ -19,7 +19,7 @@ namespace Nexus.Desktop.ViewModels;
 /// </summary>
 public sealed class GpuLabPage : ModulePage
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     public const int RecordSeconds = 60;
     public const int RecordDelaySeconds = 10;
 

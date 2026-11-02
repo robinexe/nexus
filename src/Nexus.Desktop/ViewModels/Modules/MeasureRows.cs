@@ -8,7 +8,7 @@ namespace Nexus.Desktop.ViewModels;
 /// <summary>Uma sessão na lista, com os números já formatados para a tela.</summary>
 public sealed class SessionRow : ObservableObject
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private MeasuredSession _session;
 
     public SessionRow(MeasuredSession session) => _session = session;
@@ -79,7 +79,7 @@ public sealed class SessionRow : ObservableObject
 /// <summary>Uma métrica comparada, pronta para a tela.</summary>
 public sealed class ComparisonRow(MetricComparison m)
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     public MetricComparison Model { get; } = m;
     public string Name => Model.Metric.Name;
     public string Explanation => Model.Metric.Explanation;
@@ -127,7 +127,7 @@ public sealed class ComparisonRow(MetricComparison m)
 /// <summary>Um jogo na lista, com a tendência das sessões.</summary>
 public sealed class GameRow(GameHistory h)
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     public GameHistory Model { get; } = h;
     public string Key => Model.Key;
     public string Name => Model.Name;

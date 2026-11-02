@@ -23,7 +23,7 @@ namespace Nexus.Desktop.ViewModels;
 /// </summary>
 public sealed class MeasurePage : ModulePage, IDisposable
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private readonly SessionStore _store = new(SessionStore.DefaultFolder);
     private readonly string _prefsPath = MeasurePreferences.DefaultPath;
     private readonly object _engineGate = new();

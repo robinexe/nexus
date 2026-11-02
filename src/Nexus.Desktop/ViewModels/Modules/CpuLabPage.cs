@@ -16,7 +16,7 @@ namespace Nexus.Desktop.ViewModels;
 /// </summary>
 public sealed class CpuLabPage : ModulePage
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
     private readonly CpuLabStore _store = new(CpuLabStore.DefaultDirectory);
     private CpuIdentity? _identity;

@@ -16,7 +16,7 @@ namespace Nexus.Desktop.Views.Measure;
 public sealed class FrametimeChart : FrameworkElement
 {
     private const double LeftGutter = 46, RightGutter = 8, TopGutter = 10, BottomGutter = 22;
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private static readonly Duration RevealDuration = new(TimeSpan.FromMilliseconds(600));
 
     public static readonly DependencyProperty PointsProperty = DependencyProperty.Register(nameof(Points), typeof(IReadOnlyList<TracePoint>),

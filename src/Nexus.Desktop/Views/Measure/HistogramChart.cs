@@ -12,7 +12,7 @@ namespace Nexus.Desktop.Views.Measure;
 public sealed class HistogramChart : FrameworkElement
 {
     private const double BottomGutter = 16, OverflowGap = 6;
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
     public static readonly DependencyProperty BinsProperty = DependencyProperty.Register(nameof(Bins), typeof(IReadOnlyList<HistogramBin>),
         typeof(HistogramChart), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));

@@ -891,7 +891,7 @@ public sealed class OverviewPage : PageViewModel
         {
             Kind = OverviewCardKind.Hardware, Number = free, Target = "DiskPage", IllustrationKey = "Illo.Disk",
             Note = Loc.F("Pg.LivresUnidadeNN", letter, media, Units.Bytes(total)),
-            Trend = Loc.F("Pg.NUsado", used.ToString("0", CultureInfo.GetCultureInfo("pt-BR"))), TrendWarns = used >= 85,
+            Trend = Loc.F("Pg.NUsado", used.ToString("0", Loc.Culture)), TrendWarns = used >= 85,
         };
     }
 

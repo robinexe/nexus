@@ -5,6 +5,7 @@ namespace Nexus.Tests;
 
 /// <summary>Lógica pura da casca: vigia da interface (suspensão não é travamento) e a contagem "Manter esta taxa?".</summary>
 [Trait("Category", "Unit")]
+[Collection(LocalizationState.Name)] // Loc é estado global: quem formata texto da tela não roda junto com quem troca o idioma
 public sealed class ShellLogicTests
 {
     // ------------------------------------------------------------------ StallDetector

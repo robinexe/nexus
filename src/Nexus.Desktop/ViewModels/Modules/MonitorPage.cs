@@ -17,7 +17,7 @@ namespace Nexus.Desktop.ViewModels
     /// </summary>
     public sealed class MonitorPage : ModulePage
     {
-        private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+        private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
         private const int VisibleProcesses = 8;
 
         private readonly DispatcherTimer _timer;
@@ -525,7 +525,7 @@ namespace Nexus.Desktop.ViewModels
 
     public sealed record DiskHealthRow(string Name, string Kind, string LevelText, string Tone, string Readings, string Reasons)
     {
-        private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+        private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
         /// <summary>Tom do selo (verde ok, âmbar atenção, vermelho crítico, ciano sem leitura).</summary>
         public Views.Controls.Tone ToneValue => Tone switch

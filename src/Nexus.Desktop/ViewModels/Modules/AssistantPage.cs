@@ -98,6 +98,7 @@ public static class AssistantVisuals
         _ => "Illo.Assistant",
     };
 
+    // Fica pt-BR de propósito: lê números que as bibliotecas escrevem em pt-BR ("9,6 GB"), não formata texto da tela.
     private static readonly System.Globalization.CultureInfo Pt = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
 
     /// <summary>

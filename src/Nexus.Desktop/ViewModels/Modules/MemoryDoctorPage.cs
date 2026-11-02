@@ -98,7 +98,7 @@ public sealed class DoctorSuspectRow
 /// </summary>
 public sealed class MemoryDoctorPage : ModulePage
 {
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     private readonly MemoryHistory _history = new(480);
     private readonly DispatcherTimer _timer;
     private readonly Dictionary<string, DoctorFixRow> _applied = new(StringComparer.Ordinal);

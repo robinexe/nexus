@@ -13,6 +13,7 @@ namespace Nexus.Tests;
 /// execução, no Windows).
 /// </summary>
 [Trait("Category", "Unit")]
+[Collection(LocalizationState.Name)] // Loc é estado global: quem formata texto da tela não roda junto com quem troca o idioma
 public sealed partial class DesignSystemTests
 {
     // ------------------------------------------------------------------ formatação

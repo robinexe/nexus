@@ -14,7 +14,7 @@ namespace Nexus.Desktop.Views.Modules.CpuLab;
 /// </summary>
 public abstract class CpuChartBase : FrameworkElement
 {
-    protected static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    protected static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
     /// <summary>Fração já revelada (0..1), animada por <see cref="PlayReveal"/>.</summary>
     public static readonly DependencyProperty RevealProperty = DependencyProperty.Register(nameof(Reveal), typeof(double), typeof(CpuChartBase),

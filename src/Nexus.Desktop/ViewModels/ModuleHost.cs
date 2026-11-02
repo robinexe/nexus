@@ -79,7 +79,7 @@ public abstract class ModulePage : PageViewModel
         if (Busy) return;
         Busy = true;
         try { await work(); }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = $"Não foi possível concluir: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = Loc.F("Shell.NaoFoiPossivelConcluir", ex.Message); }
         finally { Busy = false; }
     }
 }

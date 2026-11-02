@@ -19,7 +19,7 @@ namespace Nexus.Desktop.Views.Modules.Disk;
 public sealed class TreemapView : FrameworkElement
 {
     private const double Gap = 2;
-    private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-BR");
+    private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
 
     public static readonly DependencyProperty TilesProperty = DependencyProperty.Register(nameof(Tiles), typeof(IReadOnlyList<DiskTile>), typeof(TreemapView),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, (d, _) => ((TreemapView)d).OnTilesChanged()));
