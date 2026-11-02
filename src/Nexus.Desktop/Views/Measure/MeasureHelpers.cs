@@ -111,7 +111,7 @@ public sealed class CaptureClockConverter : IMultiValueConverter
     {
         if (values is not [double progress, int seconds]) return "";
         var elapsed = Math.Clamp(progress, 0, 1) * seconds;
-        return string.Create(Pt, $"{elapsed:0} s de {seconds} s");
+        return Loc.F("Meas.NSNS", elapsed, seconds);
     }
 
     public object[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) => [];

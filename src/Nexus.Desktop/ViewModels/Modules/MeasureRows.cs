@@ -31,9 +31,9 @@ public sealed class SessionRow : ObservableObject
     public SessionTag Tag => Session.Tag;
     public bool IsBefore => Session.Tag == SessionTag.Before;
     public bool IsAfter => Session.Tag == SessionTag.After;
-    public string TagText => Session.Tag switch { SessionTag.Before => "Antes", SessionTag.After => "Depois", _ => "" };
+    public string TagText => Session.Tag switch { SessionTag.Before => Loc.T("Shell.Antes"), SessionTag.After => Loc.T("Shell.Depois"), _ => "" };
     public bool Excluded => Session.Excluded;
-    public string ExcludedText => Session.Excluded ? "Fora das comparações" : "";
+    public string ExcludedText => Session.Excluded ? Loc.T("Meas.ForaComparacoes") : "";
     public bool Automatic => Session.Automatic;
     public double AverageFps => Session.Summary.AverageFps;
     public double Low1Fps => Session.Summary.OnePercentLowAverageFps;
@@ -57,7 +57,7 @@ public sealed class SessionRow : ObservableObject
             if (c is null) return "";
             var parts = new List<string>();
             if (c.Resolution is { } r) parts.Add(r);
-            if (c.OnBattery is { } b) parts.Add(b ? "na bateria" : "na tomada");
+            if (c.OnBattery is { } b) parts.Add(b ? Loc.T("Gpu.Bateria") : Loc.T("Meas.Tomada"));
             if (c.PresentMode is { } m) parts.Add(AutoCompare.ModeText(m));
             if (c.GpuDriver is { } d) parts.Add("driver " + d);
             return string.Join(" · ", parts);
@@ -70,8 +70,8 @@ public sealed class SessionRow : ObservableObject
         get
         {
             var active = Session.Applied.Where(a => a.Active).ToList();
-            return active.Count == 0 ? "Nenhuma mudança do NEXUS ativa nesta partida." :
-                $"Ativas nesta partida: {string.Join(", ", active.Take(6).Select(a => a.Title))}{(active.Count > 6 ? $" e mais {active.Count - 6}" : "")}.";
+            return active.Count == 0 ? Loc.T("Meas.NenhumaMudancaNexusAtiva") :
+                Loc.F("Meas.AtivasNestaPartidaN", string.Join(", ", active.Take(6).Select(a => a.Title)), (active.Count > 6 ? Loc.F("Meas.MaisN", active.Count - 6) : ""));
         }
     }
 }
@@ -94,16 +94,16 @@ public sealed class ComparisonRow(MetricComparison m)
     public bool Proven => Model.Verdict is Verdict.Improved or Verdict.Regressed;
     public string Sentence => Model.Sentence;
     /// <summary>Rótulos das barras do antes/depois com a unidade ("Antes · ms").</summary>
-    public string BeforeLabel => Model.Metric.Unit == "FPS" ? "Antes" : $"Antes · {Model.Metric.Unit.TrimStart('/')}";
-    public string AfterLabel => Model.Metric.Unit == "FPS" ? "Depois" : $"Depois · {Model.Metric.Unit.TrimStart('/')}";
+    public string BeforeLabel => Model.Metric.Unit == "FPS" ? Loc.T("Shell.Antes") : Loc.F("Meas.AntesN", Model.Metric.Unit.TrimStart('/'));
+    public string AfterLabel => Model.Metric.Unit == "FPS" ? Loc.T("Shell.Depois") : Loc.F("Meas.DepoisN", Model.Metric.Unit.TrimStart('/'));
     /// <summary>Selo honesto: só "Melhorou"/"Piorou" quando o teste comprova; o resto fica neutro.</summary>
     public string VerdictText => Model.Verdict switch
     {
-        Verdict.Improved => "Melhorou",
-        Verdict.Regressed => "Piorou",
-        Verdict.NoMeaningfulChange => "Igual na prática",
-        Verdict.Inconclusive => "Dentro da variação",
-        _ => Model.Better switch { true => "A favor do depois, sem prova", false => "A favor do antes, sem prova", _ => "Diferença pequena" },
+        Verdict.Improved => Loc.T("Meas.Melhorou"),
+        Verdict.Regressed => Loc.T("Meas.Piorou"),
+        Verdict.NoMeaningfulChange => Loc.T("Meas.IgualPratica"),
+        Verdict.Inconclusive => Loc.T("Meas.DentroVariacao"),
+        _ => Model.Better switch { true => Loc.T("Meas.FavorDepoisSemProva"), false => Loc.T("Meas.FavorAntesSemProva"), _ => Loc.T("Meas.DiferencaPequena") },
     };
     public Tone VerdictTone => Model.Verdict switch
     {
@@ -131,8 +131,8 @@ public sealed class GameRow(GameHistory h)
     public GameHistory Model { get; } = h;
     public string Key => Model.Key;
     public string Name => Model.Name;
-    public string SessionsText => Model.Sessions == 1 ? "1 partida" : $"{Model.Sessions} partidas";
-    public string LastPlayedText => "última " + Model.LastPlayed.ToLocalTime().ToString("dd/MM HH:mm", Pt);
+    public string SessionsText => Model.Sessions == 1 ? Loc.T("Meas.N1Partida") : Loc.F("Meas.NPartidas", Model.Sessions);
+    public string LastPlayedText => Loc.T("Meas.Ultima") + Model.LastPlayed.ToLocalTime().ToString("dd/MM HH:mm", Pt);
     public IReadOnlyList<double> FpsTrend => Model.AverageFpsTrend;
     public IReadOnlyList<double> Low1Trend => Model.Low1Trend;
     public string LastFpsText => Model.LastAverageFps.ToString("0", Pt);
@@ -141,7 +141,7 @@ public sealed class GameRow(GameHistory h)
     public Tone TrendTone => Model.Low1ChangePercent switch { >= 3 => Tone.Good, <= -3 => Tone.Warn, null => Tone.Neutral, _ => Tone.Info };
     public string LastLow1Text => Model.LastLow1Fps.ToString("0", Pt);
     /// <summary>"1% low +8% na tendência" (descritivo: tendência, não prova).</summary>
-    public string TrendText => Model.Low1ChangePercent is { } c ? $"1% low {c.ToString("+0;-0;0", Pt)}% na tendência" : "uma partida só";
+    public string TrendText => Model.Low1ChangePercent is { } c ? Loc.F("Meas.N1LowNTendencia", c.ToString("+0;-0;0", Pt)) : Loc.T("Meas.PartidaSo");
 }
 
 /// <summary>Comando com parâmetro de texto (ex.: remover um item da lista de jogos pelo nome do executável).</summary>

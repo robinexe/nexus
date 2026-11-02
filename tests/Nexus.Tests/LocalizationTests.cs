@@ -18,8 +18,7 @@ public sealed partial class LocalizationTests
     /// </summary>
     private static readonly HashSet<string> XamlNotYetTranslated = new(StringComparer.Ordinal)
     { "Views/Pages/CpuLab.xaml",
-        "Views/Pages/Disk.xaml",
-        "Views/Pages/Measure.xaml", "Views/Pages/MemoryDoctor.xaml", "Views/Pages/MemoryLab.xaml",
+        "Views/Pages/Disk.xaml", "Views/Pages/MemoryDoctor.xaml", "Views/Pages/MemoryLab.xaml",
         "Views/Pages/Monitor.xaml",
         "Views/Pages/Programs.xaml", "Views/Pages/Scanner.xaml", "Views/Pages/Security.xaml", "Views/Pages/Services.xaml", "Views/Pages/SystemTools.xaml",
     };
@@ -28,6 +27,8 @@ public sealed partial class LocalizationTests
     private static readonly HashSet<string> XamlLiteralExemptions = new(StringComparer.Ordinal)
     {
         "NEXUS Performance Lab", "NEXUS", "NVIDIA", "AMD", "Intel", "PresentMon", "Microsoft Defender", "Windows Update",
+        // Unidades e siglas iguais em todo idioma.
+        "FPS", "GPU", "CPU", "RAM", "VRAM", "Hz", "MHz", "GHz", "ms", "ns", "GB", "MB", "GB/s", "W", "°C",
     };
 
     /// <summary>Atributos que mostram texto ao usuário (mesma lista da ferramenta de conversão).</summary>

@@ -62,7 +62,7 @@ internal sealed class OverlayWindow : Window
         IsHitTestVisible = false;
         ResizeMode = ResizeMode.NoResize;
         SizeToContent = SizeToContent.WidthAndHeight;
-        Title = "NEXUS · mostrador de FPS";
+        Title = Loc.T("Meas.NexusMostradorFps");
         var stack = new StackPanel();
         stack.Children.Add(_fps);
         stack.Children.Add(_low);
@@ -94,7 +94,7 @@ internal sealed class OverlayWindow : Window
 
     public void Render(OverlayContent c)
     {
-        _fps.Text = c.Waiting ? "aguardando quadros…" : c.Fps;
+        _fps.Text = c.Waiting ? Loc.T("Meas.AguardandoQuadros") : c.Fps;
         _low.Text = c.Low1;
         _ft.Text = c.Frametime;
         _sys.Text = c.System ?? "";

@@ -1173,6 +1173,281 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Gpu.WindowsPassaApresentarEste" xml:space="preserve"><value>O Windows passa a apresentar este jogo no modo flip (menos atraso em janela e sem bordas, e permite G-SYNC/FreeSync em janela). </value></data>
   <data name="Gpu.WindowsProprioJogoJogo" xml:space="preserve"><value>Do Windows e do próprio jogo, para um jogo de cada vez. Com Desfazer.</value></data>
   <data name="Gpu.WindowsSoMostraAdaptador" xml:space="preserve"><value>O Windows só mostra o adaptador básico (sem driver do fabricante).</value></data>
+  <data name="Meas.AbertoAgora" xml:space="preserve"><value>Aberto agora</value></data>
+  <data name="Meas.AbertoAgoraNN" xml:space="preserve"><value>Aberto agora: {0}, {1}{2}.</value></data>
+  <data name="Meas.AbraJogoNexusComeca" xml:space="preserve"><value>Abra um jogo: o NEXUS começa a medir sozinho.</value></data>
+  <data name="Meas.AbraJogoNexusMede" xml:space="preserve"><value>Abra um jogo: o NEXUS mede sozinho.</value></data>
+  <data name="Meas.AbraJogoVerFps" xml:space="preserve"><value>Abra um jogo para ver o FPS aqui</value></data>
+  <data name="Meas.AbrirAjustes" xml:space="preserve"><value>Abrir os ajustes</value></data>
+  <data name="Meas.AbrirPastaSessoes" xml:space="preserve"><value>Abrir a pasta de sessões</value></data>
+  <data name="Meas.Adicionar" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="Meas.AguardandoQuadros" xml:space="preserve"><value>aguardando quadros…</value></data>
+  <data name="Meas.AjustesMedicao" xml:space="preserve"><value>Ajustes da medição</value></data>
+  <data name="Meas.AlemBibliotecasListasTrata" xml:space="preserve"><value>Além das bibliotecas e das listas, trata como jogo qualquer programa em tela cheia (exceto navegadores e players conhecidos).</value></data>
+  <data name="Meas.AmbarAgora" xml:space="preserve"><value>Âmbar: agora.</value></data>
+  <data name="Meas.AmbarDepois" xml:space="preserve"><value>Âmbar: depois.</value></data>
+  <data name="Meas.AntesAcreditarResultado" xml:space="preserve"><value>Antes de acreditar no resultado</value></data>
+  <data name="Meas.AntesN" xml:space="preserve"><value>Antes · {0}</value></data>
+  <data name="Meas.AntesXDepois" xml:space="preserve"><value>Antes x depois</value></data>
+  <data name="Meas.AntesXDepoisAparece" xml:space="preserve"><value>O antes x depois aparece aqui</value></data>
+  <data name="Meas.AnticheatsVanguardEasyAnti" xml:space="preserve"><value>anticheats (Vanguard, Easy Anti-Cheat, BattlEye). Ele aparece em janela sem bordas, que é o padrão no Windows 11 com as otimizações </value></data>
+  <data name="Meas.Apagar" xml:space="preserve"><value>Apagar</value></data>
+  <data name="Meas.ApagarAteNSessao" xml:space="preserve"><value>Apagar até {0} sessão(ões) com mais de {1} dias? A última partida de cada jogo e as marcadas como antes/depois ficam.</value></data>
+  <data name="Meas.ApagarPartidasMais" xml:space="preserve"><value>Apagar partidas com mais de</value></data>
+  <data name="Meas.ApagarSessao" xml:space="preserve"><value>Apagar sessão</value></data>
+  <data name="Meas.ApagarSessaoNArquivo" xml:space="preserve"><value>Apagar a sessão "{0}"? O arquivo dela na pasta de sessões do NEXUS será removido.</value></data>
+  <data name="Meas.AtalhoDesligado" xml:space="preserve"><value>Atalho desligado.</value></data>
+  <data name="Meas.AtalhoGlobalValeWindows" xml:space="preserve"><value>Um atalho global vale no Windows inteiro enquanto o NEXUS estiver aberto (inclusive na bandeja). Escolha uma combinação que nenhum outro programa use.</value></data>
+  <data name="Meas.AtalhoMostrador" xml:space="preserve"><value>Atalho do mostrador</value></data>
+  <data name="Meas.AtalhoTecladoLigarDesligar" xml:space="preserve"><value>Atalho de teclado para ligar e desligar</value></data>
+  <data name="Meas.AtivasNestaPartidaN" xml:space="preserve"><value>Ativas nesta partida: {0}{1}.</value></data>
+  <data name="Meas.Automatico" xml:space="preserve"><value>automático</value></data>
+  <data name="Meas.AvisoWindowsAgoraDepois" xml:space="preserve"><value>Um aviso do Windows agora, e depois nunca mais a cada partida (vale depois de sair e entrar de novo na conta).</value></data>
+  <data name="Meas.Baixe" xml:space="preserve"><value>Baixe</value></data>
+  <data name="Meas.CadaJogoMedidoAparece" xml:space="preserve"><value>Cada jogo medido aparece aqui com o FPS e a tendência das partidas.</value></data>
+  <data name="Meas.CadaQuadroVivo" xml:space="preserve"><value>Cada quadro, ao vivo</value></data>
+  <data name="Meas.CantoTela" xml:space="preserve"><value>Canto da tela</value></data>
+  <data name="Meas.CianoAntes" xml:space="preserve"><value>Ciano: antes.</value></data>
+  <data name="Meas.ColocaEsteExecutavelSua" xml:space="preserve"><value>Coloca este executável na sua lista de jogos.</value></data>
+  <data name="Meas.ColocaSuaContaGrupo" xml:space="preserve"><value>Coloca a sua conta no grupo do Windows "Usuários do log de desempenho" (um aviso do Windows agora). Dá para desfazer.</value></data>
+  <data name="Meas.ComecaMedirAgoraJogo" xml:space="preserve"><value>Começa a medir agora o jogo aberto (ou o executável indicado).</value></data>
+  <data name="Meas.ComoFoiCalculado" xml:space="preserve"><value>Como foi calculado?</value></data>
+  <data name="Meas.ComparandoPartidasInteiras" xml:space="preserve"><value>Comparando partidas inteiras</value></data>
+  <data name="Meas.ComparandoTrechosEquivalentesDuas" xml:space="preserve"><value>Comparando trechos equivalentes de duas partidas</value></data>
+  <data name="Meas.CompararAnterior" xml:space="preserve"><value>Comparar com a anterior</value></data>
+  <data name="Meas.ContaIniciaremRastreamentosEventos" xml:space="preserve"><value>conta iniciarem rastreamentos de eventos do Windows; não dá privilégio de administrador.</value></data>
+  <data name="Meas.CsvPresentmonOuCapframex" xml:space="preserve"><value>CSV do PresentMon ou do CapFrameX.</value></data>
+  <data name="Meas.DdMmHhMm" xml:space="preserve"><value>dd/MM 'às' HH:mm</value></data>
+  <data name="Meas.DeixarPresentmonPedirPermissao" xml:space="preserve"><value>Deixar o PresentMon pedir permissão ao Windows</value></data>
+  <data name="Meas.DentroVariacao" xml:space="preserve"><value>Dentro da variação</value></data>
+  <data name="Meas.DepoisDissoPresentmonMede" xml:space="preserve"><value>Depois disso o PresentMon mede sem o aviso do Windows a cada partida. Vale depois que você sair e entrar de novo na conta.
+
+</value></data>
+  <data name="Meas.DepoisN" xml:space="preserve"><value>Depois · {0}</value></data>
+  <data name="Meas.DesfeitaDepois" xml:space="preserve"><value> · desfeita depois</value></data>
+  <data name="Meas.DesfeitoSuaContaSaiu" xml:space="preserve"><value>Desfeito: sua conta saiu do grupo (vale depois de sair e entrar de novo).</value></data>
+  <data name="Meas.DetalhesDestaPartida" xml:space="preserve"><value>Detalhes desta partida</value></data>
+  <data name="Meas.Detecta" xml:space="preserve"><value>Detecta</value></data>
+  <data name="Meas.DiasGuardarPartidas" xml:space="preserve"><value>Dias para guardar as partidas</value></data>
+  <data name="Meas.DiferencaApareceDepois30" xml:space="preserve"><value>A diferença aparece depois de 30 s de jogo.</value></data>
+  <data name="Meas.DiferencaPequena" xml:space="preserve"><value>Diferença pequena</value></data>
+  <data name="Meas.DiferencaQuandoHouverIntervalo" xml:space="preserve"><value>Diferença e, quando houver, o intervalo de 95%.</value></data>
+  <data name="Meas.DuracaoMinimaPartidaSegundos" xml:space="preserve"><value>Duração mínima da partida, em segundos</value></data>
+  <data name="Meas.EleNaoExecutadoCopia" xml:space="preserve"><value>ele não é executado. Se a cópia embutida faltar, o NEXUS procura o app PresentMon da Intel, o CapFrameX, Downloads, ou o arquivo que você indicar.</value></data>
+  <data name="Meas.Engasgos" xml:space="preserve"><value>Engasgos</value></data>
+  <data name="Meas.Entendi" xml:space="preserve"><value>Entendi</value></data>
+  <data name="Meas.EsconderPrevia" xml:space="preserve"><value>Esconder a prévia</value></data>
+  <data name="Meas.EstaPartidaNaoEntra" xml:space="preserve"><value>Esta partida não entra mais nas comparações.</value></data>
+  <data name="Meas.EstaPartidaVoltouEntrar" xml:space="preserve"><value>Esta partida voltou a entrar nas comparações.</value></data>
+  <data name="Meas.ExCs2ExeComo" xml:space="preserve"><value>Ex.: cs2.exe (como aparece no Gerenciador de Tarefas, aba Detalhes).</value></data>
+  <data name="Meas.ExCtrlShiftF" xml:space="preserve"><value>Ex.: Ctrl+Shift+F, Alt+F10, Ctrl+Alt+O.</value></data>
+  <data name="Meas.ExecutavelJogoMedirMao" xml:space="preserve"><value>Executável do jogo para medir à mão</value></data>
+  <data name="Meas.ExecutavelSuaListaJogos" xml:space="preserve"><value>Executável para a sua lista de jogos</value></data>
+  <data name="Meas.ExportarRelatorio" xml:space="preserve"><value>Exportar relatório</value></data>
+  <data name="Meas.ExportarRelatorioAntesX" xml:space="preserve"><value>Exportar relatório do antes x depois</value></data>
+  <data name="Meas.ExportarSessoesCsv" xml:space="preserve"><value>Exportar sessões (CSV)</value></data>
+  <data name="Meas.ExportarTodasCsv" xml:space="preserve"><value>Exportar todas (CSV)</value></data>
+  <data name="Meas.FalhaAcompanharJogoN" xml:space="preserve"><value>Falha ao acompanhar o jogo: {0}</value></data>
+  <data name="Meas.FaltaPresentmon" xml:space="preserve"><value>Falta o PresentMon</value></data>
+  <data name="Meas.FavorAntesSemProva" xml:space="preserve"><value>A favor do antes, sem prova</value></data>
+  <data name="Meas.FavorDepoisSemProva" xml:space="preserve"><value>A favor do depois, sem prova</value></data>
+  <data name="Meas.ForaComparacoes" xml:space="preserve"><value>Fora das comparações</value></data>
+  <data name="Meas.FpsAgora" xml:space="preserve"><value>FPS agora</value></data>
+  <data name="Meas.FpsCantoTelaCima" xml:space="preserve"><value>FPS no canto da tela, por cima do jogo.</value></data>
+  <data name="Meas.FpsMedio" xml:space="preserve"><value>FPS médio</value></data>
+  <data name="Meas.FpsMedioDesdeComeco" xml:space="preserve"><value>FPS médio desde o começo da partida.</value></data>
+  <data name="Meas.FpsMedioUltimaPartida" xml:space="preserve"><value>FPS médio na última partida deste jogo</value></data>
+  <data name="Meas.FpsMedioUltimaPartida2" xml:space="preserve"><value>FPS médio na última partida</value></data>
+  <data name="Meas.FrametimeMs" xml:space="preserve"><value>Frametime (ms)</value></data>
+  <data name="Meas.FrametimeP99" xml:space="preserve"><value>Frametime P99</value></data>
+  <data name="Meas.FuncionaAnticheat" xml:space="preserve"><value>Funciona com anticheat?</value></data>
+  <data name="Meas.GravaTempoCadaQuadro" xml:space="preserve"><value>Grava o tempo de cada quadro, sem entrar no jogo.</value></data>
+  <data name="Meas.GuardarPartidasPeloMenos" xml:space="preserve"><value>Guardar partidas com pelo menos</value></data>
+  <data name="Meas.IgualPratica" xml:space="preserve"><value>Igual na prática</value></data>
+  <data name="Meas.ImportarCapturaCsvPresentmon" xml:space="preserve"><value>Importar captura (CSV do PresentMon ou CapFrameX)</value></data>
+  <data name="Meas.ImportarCsv" xml:space="preserve"><value>Importar CSV</value></data>
+  <data name="Meas.InferiorDireito" xml:space="preserve"><value>Inferior direito</value></data>
+  <data name="Meas.InferiorEsquerdo" xml:space="preserve"><value>Inferior esquerdo</value></data>
+  <data name="Meas.JanelaPequenaCimaJogo" xml:space="preserve"><value>Janela pequena por cima do jogo com FPS, 1% low e frametime. Não entra no jogo.</value></data>
+  <data name="Meas.JaVemNexusPasta" xml:space="preserve"><value> já vem com o NEXUS, na pasta tools\PresentMon. Antes de cada uso </value></data>
+  <data name="Meas.JogoLembrar" xml:space="preserve"><value>É um jogo: lembrar</value></data>
+  <data name="Meas.JogosJanelaTelaCheia" xml:space="preserve"><value>para jogos em janela. Em tela cheia exclusiva o jogo é dono da tela e nenhuma janela aparece por cima: troque para sem bordas.</value></data>
+  <data name="Meas.JogosMedidos" xml:space="preserve"><value>Jogos medidos</value></data>
+  <data name="Meas.JogueMaisPartidaDeste" xml:space="preserve"><value>Jogue mais uma partida deste jogo (2 minutos ou mais) e o NEXUS compara com a anterior.</value></data>
+  <data name="Meas.JoguePartida2Minutos" xml:space="preserve"><value>Jogue uma partida (2 minutos ou mais) para medirmos o antes e depois.</value></data>
+  <data name="Meas.JoguePartidaMedirAntes" xml:space="preserve"><value>Jogue uma partida para medir o antes e depois</value></data>
+  <data name="Meas.LendoBibliotecasJogos" xml:space="preserve"><value>Lendo as bibliotecas de jogos…</value></data>
+  <data name="Meas.LerBibliotecasNovo" xml:space="preserve"><value>Ler as bibliotecas de novo</value></data>
+  <data name="Meas.LigarSozinhoQuandoJogo" xml:space="preserve"><value>Ligar sozinho quando um jogo abrir</value></data>
+  <data name="Meas.LigueMedicaoAutomaticaJogue" xml:space="preserve"><value>Ligue a medição automática e jogue uma partida. Na próxima partida do mesmo jogo, o antes x depois aparece aqui sozinho.</value></data>
+  <data name="Meas.LigueMedicaoAutomaticaNao" xml:space="preserve"><value> Ligue a medição automática para não precisar lembrar.</value></data>
+  <data name="Meas.LigueMedirAutomaticamenteAbra" xml:space="preserve"><value>Ligue "Medir automaticamente" e abra um jogo.</value></data>
+  <data name="Meas.LimparAgora" xml:space="preserve"><value>Limpar agora</value></data>
+  <data name="Meas.LimparSessoesAntigas" xml:space="preserve"><value>Limpar sessões antigas</value></data>
+  <data name="Meas.LinhaCianoPartidaN" xml:space="preserve"><value>Linha ciano: partida de {0} ({1} FPS médio, 1% low {2}).</value></data>
+  <data name="Meas.LocalappdataNexusPresentmonOu" xml:space="preserve"><value>Em %LocalAppData%\NEXUS\PresentMon, ou indique onde salvou.</value></data>
+  <data name="Meas.LocalizarPresentmon" xml:space="preserve"><value>Localizar PresentMon</value></data>
+  <data name="Meas.MaisBaixoMaisReto" xml:space="preserve"><value> Mais baixo e mais reto é melhor. </value></data>
+  <data name="Meas.MaisBaixoMaisReto2" xml:space="preserve"><value> Mais baixo e mais reto é melhor.</value></data>
+  <data name="Meas.MaisN" xml:space="preserve"><value> e mais {0}</value></data>
+  <data name="Meas.Mao" xml:space="preserve"><value>à mão</value></data>
+  <data name="Meas.MarcarComoAntes" xml:space="preserve"><value>Marcar como antes</value></data>
+  <data name="Meas.MarcarComoDepois" xml:space="preserve"><value>Marcar como depois</value></data>
+  <data name="Meas.Meca" xml:space="preserve"><value>Meça</value></data>
+  <data name="Meas.MedeCadaPartidaSozinho" xml:space="preserve"><value>Mede cada partida sozinho.</value></data>
+  <data name="Meas.Media1QuadrosMais" xml:space="preserve"><value>Média do 1% de quadros mais lentos dos últimos 10 s: a travadinha que você sente agora.</value></data>
+  <data name="Meas.MedicaoAutomatica" xml:space="preserve"><value>Medição automática</value></data>
+  <data name="Meas.MedicaoAutomaticaDesligada" xml:space="preserve"><value>Medição automática desligada.</value></data>
+  <data name="Meas.MedicaoAutomaticaDesligada2" xml:space="preserve"><value> · medição automática desligada</value></data>
+  <data name="Meas.MedicaoAutomaticaLigadaProxima" xml:space="preserve"><value>Medição automática ligada: a próxima partida será medida sozinha.</value></data>
+  <data name="Meas.MedicaoGuardaPartidaJogo" xml:space="preserve"><value>Para a medição e guarda a partida (o jogo continua aberto).</value></data>
+  <data name="Meas.MedindoAgora" xml:space="preserve"><value>Medindo agora</value></data>
+  <data name="Meas.MedindoAgoraN" xml:space="preserve"><value>Medindo agora · {0}</value></data>
+  <data name="Meas.MedindoHaN" xml:space="preserve"><value> · medindo há {0}</value></data>
+  <data name="Meas.MedindoN" xml:space="preserve"><value>Medindo {0}…</value></data>
+  <data name="Meas.MedindoNIniciadoMao" xml:space="preserve"><value>Medindo {0} (iniciado à mão).</value></data>
+  <data name="Meas.MedirAgora" xml:space="preserve"><value>Medir agora</value></data>
+  <data name="Meas.MedirAutomaticamente" xml:space="preserve"><value>Medir automaticamente</value></data>
+  <data name="Meas.MedirFaltaPecaGratuita" xml:space="preserve"><value>Para medir, falta uma peça gratuita</value></data>
+  <data name="Meas.MedirNaoMudaNada" xml:space="preserve"><value>Medir não muda nada no PC</value></data>
+  <data name="Meas.MedirSemPedirPermissao" xml:space="preserve"><value>Medir sem pedir permissão toda vez</value></data>
+  <data name="Meas.MedirSemPedirPermissao2" xml:space="preserve"><value>Com "Medir sem pedir permissão toda vez", o NEXUS coloca a sua conta no grupo do Windows "Usuários do log de desempenho" </value></data>
+  <data name="Meas.MedirSozinhoQuandoJogo" xml:space="preserve"><value>Medir sozinho quando um jogo abrir</value></data>
+  <data name="Meas.Melhorou" xml:space="preserve"><value>Melhorou</value></data>
+  <data name="Meas.MenorMaisEstavel" xml:space="preserve"><value>Menor é mais estável.</value></data>
+  <data name="Meas.MostraAntesXDepois" xml:space="preserve"><value>Mostra no Antes x depois esta partida contra a referência escolhida pelo NEXUS.</value></data>
+  <data name="Meas.MostradorAtalhoQuaisProgramas" xml:space="preserve"><value>Mostrador, atalho, quais programas são jogos, PresentMon e partidas guardadas.</value></data>
+  <data name="Meas.MostradorFps" xml:space="preserve"><value>Mostrador de FPS</value></data>
+  <data name="Meas.MostradorFpsDesligado" xml:space="preserve"><value>Mostrador de FPS desligado.</value></data>
+  <data name="Meas.MostradorFpsJogo" xml:space="preserve"><value>Mostrador de FPS no jogo</value></data>
+  <data name="Meas.MostradorFpsLigado" xml:space="preserve"><value>Mostrador de FPS ligado.</value></data>
+  <data name="Meas.MostradorJanelaProprioNexus" xml:space="preserve"><value>O mostrador é uma janela do próprio NEXUS por cima do jogo: não entra no jogo, não usa ganchos nem injeção, por isso é seguro com </value></data>
+  <data name="Meas.MostrarUsoCpuGpu" xml:space="preserve"><value>Mostrar uso de CPU, GPU e temperatura da GPU</value></data>
+  <data name="Meas.MudaProgramasSuaConta" xml:space="preserve"><value>O que muda: programas da sua conta passam a poder iniciar rastreamentos de eventos do Windows (é o que o PresentMon usa). </value></data>
+  <data name="Meas.N0GuardarSempre" xml:space="preserve"><value>0 = guardar para sempre.</value></data>
+  <data name="Meas.N1Low" xml:space="preserve"><value>1% low</value></data>
+  <data name="Meas.N1Low2" xml:space="preserve"><value>1% low </value></data>
+  <data name="Meas.N1LowCadaPartida" xml:space="preserve"><value>1% low de cada partida, da mais antiga para a mais nova.</value></data>
+  <data name="Meas.N1LowNTendencia" xml:space="preserve"><value>1% low {0}% na tendência</value></data>
+  <data name="Meas.N1Partida" xml:space="preserve"><value>1 partida</value></data>
+  <data name="Meas.NaoDeuAbrirPasta" xml:space="preserve"><value>Não deu para abrir a pasta: {0}</value></data>
+  <data name="Meas.NaoDeuCompararN" xml:space="preserve"><value>Não deu para comparar: {0}</value></data>
+  <data name="Meas.NaoDeuConferirPresentmon" xml:space="preserve"><value>Não deu para conferir o PresentMon: </value></data>
+  <data name="Meas.NaoDeuLerBibliotecas" xml:space="preserve"><value>Não deu para ler as bibliotecas: {0}</value></data>
+  <data name="Meas.NaoDeuLerDiario" xml:space="preserve"><value>Não deu para ler o diário: {0}</value></data>
+  <data name="Meas.NaoDeuLerSessoes" xml:space="preserve"><value>Não deu para ler as sessões salvas: {0}</value></data>
+  <data name="Meas.NaoDeuSalvarPreferencias" xml:space="preserve"><value>Não deu para salvar as preferências em </value></data>
+  <data name="Meas.NaoFoiPossivelIniciar" xml:space="preserve"><value>Não foi possível iniciar a detecção de jogos: {0}</value></data>
+  <data name="Meas.NaoFoiPossivelRegistrar" xml:space="preserve"><value>Não foi possível registrar o atalho: {0}</value></data>
+  <data name="Meas.NaoImportadas" xml:space="preserve"><value> Não importadas: </value></data>
+  <data name="Meas.NaoJogo" xml:space="preserve"><value>Não é jogo</value></data>
+  <data name="Meas.NaoPrivilegioAdministradorDesfazer" xml:space="preserve"><value>Não dá privilégio de administrador. Desfazer tira a conta do grupo (só se ela não estava lá antes).</value></data>
+  <data name="Meas.NArquivoSSessao" xml:space="preserve"><value>{0} arquivo(s) de sessão ilegível(is) em {1} foram ignorados.</value></data>
+  <data name="Meas.NenhumaBibliotecaEncontradaSteam" xml:space="preserve"><value>Nenhuma biblioteca encontrada (Steam, Epic, Riot, Battle.net, Xbox). Jogos conhecidos e a sua lista continuam valendo.</value></data>
+  <data name="Meas.NenhumaMudancaNexusAtiva" xml:space="preserve"><value>Nenhuma mudança do NEXUS ativa nesta partida.</value></data>
+  <data name="Meas.NenhumaSessaoMaisN" xml:space="preserve"><value>Nenhuma sessão com mais de {0} dias.</value></data>
+  <data name="Meas.NenhumJogoAberto" xml:space="preserve"><value>Nenhum jogo aberto</value></data>
+  <data name="Meas.NenhumJogoMedidoAinda" xml:space="preserve"><value>Nenhum jogo medido ainda</value></data>
+  <data name="Meas.NEntrouSuaLista" xml:space="preserve"><value>{0} entrou na sua lista de jogos.</value></data>
+  <data name="Meas.NexusConfereArquivoOficial" xml:space="preserve"><value>o NEXUS confere que o arquivo é o oficial (impressão digital SHA-256 conhecida ou assinatura digital da Intel Corporation); se não for, </value></data>
+  <data name="Meas.NexusContinuaUsandoPresentmon" xml:space="preserve"><value>O NEXUS continua usando o PresentMon que o acompanha (conferido); o arquivo indicado fica como alternativa.</value></data>
+  <data name="Meas.NexusDeixaTratarEste" xml:space="preserve"><value>O NEXUS deixa de tratar este programa como jogo.</value></data>
+  <data name="Meas.NexusMostradorFps" xml:space="preserve"><value>NEXUS · mostrador de FPS</value></data>
+  <data name="Meas.NexusMudouEntreDuas" xml:space="preserve"><value>O que o NEXUS mudou entre as duas partidas</value></data>
+  <data name="Meas.NexusPercebeQuandoJogo" xml:space="preserve"><value>O NEXUS percebe quando um jogo abre, mede cada partida e compara com a anterior. Medir não altera nada no PC.</value></data>
+  <data name="Meas.NexusUsaPresentmonFerramenta" xml:space="preserve"><value>O NEXUS usa o PresentMon, ferramenta gratuita e oficial da Intel (licença MIT), para ler o tempo de cada quadro (rastreamento de eventos </value></data>
+  <data name="Meas.NexusVaiColocarSua" xml:space="preserve"><value>O NEXUS vai colocar a sua conta no grupo do Windows "Usuários do log de desempenho" (o Windows pede permissão uma vez).
+
+</value></data>
+  <data name="Meas.NJaUsadoOutro" xml:space="preserve"><value>{0} já é usado por outro programa. Escolha outra combinação.</value></data>
+  <data name="Meas.NJogoSNas" xml:space="preserve"><value>{0} jogo(s) nas bibliotecas: {1}.</value></data>
+  <data name="Meas.NLigaDesligaMostrador" xml:space="preserve"><value>{0} liga e desliga o mostrador, mesmo com o NEXUS minimizado.</value></data>
+  <data name="Meas.NMudancas" xml:space="preserve"><value>{0} mudanças</value></data>
+  <data name="Meas.NNaoSeraMais" xml:space="preserve"><value>{0} não será mais tratado como jogo.</value></data>
+  <data name="Meas.NomeExecutavelExEldenring" xml:space="preserve"><value>Nome do executável, ex.: eldenring.exe</value></data>
+  <data name="Meas.NPartidaNN" xml:space="preserve"><value>{0}: partida de {1} → {2}</value></data>
+  <data name="Meas.NPartidas" xml:space="preserve"><value>{0} partidas</value></data>
+  <data name="Meas.NSaiuSuaLista" xml:space="preserve"><value>{0} saiu da sua lista.</value></data>
+  <data name="Meas.NSessaoOesAntiga" xml:space="preserve"><value>{0} sessão(ões) antiga(s) apagada(s) da pasta de sessões do NEXUS.</value></data>
+  <data name="Meas.NSessaoOesExportada" xml:space="preserve"><value>{0} sessão(ões) exportada(s) para {1}.</value></data>
+  <data name="Meas.NSessaoOesImportada" xml:space="preserve"><value>{0} sessão(ões) importada(s).</value></data>
+  <data name="Meas.NSNS" xml:space="preserve"><value>{0:0} s de {1} s</value></data>
+  <data name="Meas.NuncaTratarComoJogo" xml:space="preserve"><value>Nunca tratar como jogo</value></data>
+  <data name="Meas.NVoltouPoderSer" xml:space="preserve"><value>{0} voltou a poder ser detectado.</value></data>
+  <data name="Meas.OndeEstaPresentmon" xml:space="preserve"><value>Onde está o PresentMon?</value></data>
+  <data name="Meas.PararGuardar" xml:space="preserve"><value>Parar e guardar</value></data>
+  <data name="Meas.PartidaAtipicaOutroMapa" xml:space="preserve"><value>Partida atípica (outro mapa, download no PC, carregamento longo)? Tire das comparações.</value></data>
+  <data name="Meas.PartidaInteira" xml:space="preserve"><value>A partida inteira.</value></data>
+  <data name="Meas.PartidaNCurtaDemais" xml:space="preserve"><value>Partida de {0} curta demais ({1:0} s): não foi guardada (mínimo {2} s).</value></data>
+  <data name="Meas.PartidaNGuardadaAntes" xml:space="preserve"><value>Partida de {0} guardada. Antes x depois: {1}</value></data>
+  <data name="Meas.PartidaNGuardadaN" xml:space="preserve"><value>Partida de {0} guardada: {1:0} FPS médio, 1% low {2:0}.</value></data>
+  <data name="Meas.Partidas" xml:space="preserve"><value>Partidas de </value></data>
+  <data name="Meas.PartidaSeguinteMostraAntes" xml:space="preserve"><value>Na partida seguinte, mostra o antes x depois.</value></data>
+  <data name="Meas.PartidasGuardadas" xml:space="preserve"><value>Partidas guardadas</value></data>
+  <data name="Meas.PartidasJogo" xml:space="preserve"><value>Partidas do jogo</value></data>
+  <data name="Meas.PartidaSo" xml:space="preserve"><value>uma partida só</value></data>
+  <data name="Meas.PartidaTerminouMasNao" xml:space="preserve"><value>A partida terminou, mas não deu para guardar: {0}</value></data>
+  <data name="Meas.PedeAvisoWindowsVez" xml:space="preserve"><value>(pede o aviso do Windows uma vez). Vale depois de sair e entrar de novo na conta; dá para desfazer. Esse grupo deixa programas da sua </value></data>
+  <data name="Meas.PercebeQuandoJogoAbre" xml:space="preserve"><value>Percebe quando um jogo abre. Só lê o nome do programa.</value></data>
+  <data name="Meas.PermissaoWindows" xml:space="preserve"><value>Permissão do Windows</value></data>
+  <data name="Meas.PioresMomentos" xml:space="preserve"><value>Os piores momentos.</value></data>
+  <data name="Meas.Piorou" xml:space="preserve"><value>Piorou</value></data>
+  <data name="Meas.Presentmon" xml:space="preserve"><value>O que é o PresentMon?</value></data>
+  <data name="Meas.PresentmonAcompanhaNexusFaltou" xml:space="preserve"><value>O PresentMon acompanha o NEXUS; se faltou ou foi recusado, baixe o PresentMon-2.x-x64.exe oficial da Intel (GitHub, seção Releases).</value></data>
+  <data name="Meas.PresentmonNAcompanhaNexus" xml:space="preserve"><value>PresentMon {0} (acompanha o NEXUS)</value></data>
+  <data name="Meas.PresentmonNaoEncontrado" xml:space="preserve"><value>PresentMon não encontrado</value></data>
+  <data name="Meas.PresentmonNaoEncontradoNas" xml:space="preserve"><value>PresentMon não encontrado nas pastas conhecidas.</value></data>
+  <data name="Meas.PresentmonParouSemEnviar" xml:space="preserve"><value>O PresentMon parou sem enviar quadros. Veja a saída: </value></data>
+  <data name="Meas.PresentmonPresentmonExePresentmon" xml:space="preserve"><value>PresentMon (PresentMon*.exe)|PresentMon*.exe|Executável (*.exe)|*.exe</value></data>
+  <data name="Meas.PresentmonProntoNN" xml:space="preserve"><value>PresentMon pronto ({0}). {1}</value></data>
+  <data name="Meas.PresentmonRecusado" xml:space="preserve"><value>PresentMon recusado</value></data>
+  <data name="Meas.PrimeiraPartidaDesteJogo" xml:space="preserve"><value>Primeira partida deste jogo: o FPS aparece ao medir</value></data>
+  <data name="Meas.PrimeiraPartidaMedidaDeste" xml:space="preserve"><value>Primeira partida medida deste jogo: ela vira a referência das próximas.</value></data>
+  <data name="Meas.ProcurarNovo" xml:space="preserve"><value>Procurar de novo</value></data>
+  <data name="Meas.ProntoMedir" xml:space="preserve"><value>Pronto para medir</value></data>
+  <data name="Meas.ProntoSuaContaEsta" xml:space="preserve"><value>Pronto: sua conta está no grupo "Usuários do log de desempenho". Saia e entre de novo no Windows para medir sem aviso.</value></data>
+  <data name="Meas.QuaisProgramasSaoJogos" xml:space="preserve"><value>Quais programas são jogos</value></data>
+  <data name="Meas.QuandoJogoAbreNexus" xml:space="preserve"><value>Quando um jogo abre, o NEXUS começa a medir; quando fecha, guarda a partida e compara com a anterior.</value></data>
+  <data name="Meas.RelatorioSalvoN" xml:space="preserve"><value>Relatório salvo em {0}.</value></data>
+  <data name="Meas.RemoveEstaPartidaCsv" xml:space="preserve"><value>Remove esta partida (e o CSV dela) da pasta de sessões do NEXUS. Pede confirmação.</value></data>
+  <data name="Meas.Remover" xml:space="preserve"><value>Remover</value></data>
+  <data name="Meas.RemoverN" xml:space="preserve"><value>Remover {0}</value></data>
+  <data name="Meas.SalvaArquivoTextoVeredito" xml:space="preserve"><value>Salva um arquivo de texto com o veredito, os números, as mudanças e os avisos.</value></data>
+  <data name="Meas.Salve" xml:space="preserve"><value>Salve</value></data>
+  <data name="Meas.Segundos" xml:space="preserve"><value>segundos</value></data>
+  <data name="Meas.SemJogoDetectadoExecutavel" xml:space="preserve"><value>Sem jogo detectado? Executável:</value></data>
+  <data name="Meas.SemPermissaoEspecialCada" xml:space="preserve"><value>Sem permissão especial, cada medição pede permissão ao Windows (o PresentMon precisa de administrador para rastrear os quadros). </value></data>
+  <data name="Meas.SessaoNApagada" xml:space="preserve"><value>Sessão "{0}" apagada.</value></data>
+  <data name="Meas.SoNomePastaCada" xml:space="preserve"><value>Só o nome e a pasta de cada programa são lidos. O NEXUS não abre o jogo nem lê a memória dele.</value></data>
+  <data name="Meas.SuaContaJaEsta" xml:space="preserve"><value>Sua conta já está no grupo "Usuários do log de desempenho". Saia e entre de novo no Windows para medir sem aviso; até lá o PresentMon continua pedindo permissão.</value></data>
+  <data name="Meas.SuaContaPodeMedir" xml:space="preserve"><value>Sua conta pode medir sem aviso do Windows.</value></data>
+  <data name="Meas.SuaListaSempreJogo" xml:space="preserve"><value>Sua lista (sempre jogo)</value></data>
+  <data name="Meas.SuasPartidasMarcadasAntes" xml:space="preserve"><value>Suas partidas marcadas: antes x depois</value></data>
+  <data name="Meas.SuperiorDireito" xml:space="preserve"><value>Superior direito</value></data>
+  <data name="Meas.SuperiorEsquerdo" xml:space="preserve"><value>Superior esquerdo</value></data>
+  <data name="Meas.TambemConsiderarJogoEstiver" xml:space="preserve"><value>Também considerar jogo o que estiver em tela cheia</value></data>
+  <data name="Meas.TempoCadaQuadroAntes" xml:space="preserve"><value>Tempo de cada quadro: antes (ciano) e depois (âmbar).</value></data>
+  <data name="Meas.TempoCadaQuadroLongo" xml:space="preserve"><value>Tempo de cada quadro ao longo da partida. As linhas tracejadas marcam 60, 144 e 240 FPS.</value></data>
+  <data name="Meas.TempoMedianoCadaQuadro" xml:space="preserve"><value>Tempo mediano de cada quadro no último segundo.</value></data>
+  <data name="Meas.TextoTxtTxt" xml:space="preserve"><value>Texto (*.txt)|*.txt</value></data>
+  <data name="Meas.TirarMarca" xml:space="preserve"><value>Tirar marca</value></data>
+  <data name="Meas.Tomada" xml:space="preserve"><value>na tomada</value></data>
+  <data name="Meas.TorreEstreitaEsquerdaQuadros" xml:space="preserve"><value>Torre estreita à esquerda: quadros rápidos e iguais.</value></data>
+  <data name="Meas.TrancosVisiveis" xml:space="preserve"><value>Trancos visíveis.</value></data>
+  <data name="Meas.Ultima" xml:space="preserve"><value>última </value></data>
+  <data name="Meas.UltimaPartidaCadaJogo" xml:space="preserve"><value>A última partida de cada jogo e as marcadas nunca são apagadas. Só a pasta de sessões do NEXUS.</value></data>
+  <data name="Meas.UltimoJogoMedido" xml:space="preserve"><value>Último jogo medido</value></data>
+  <data name="Meas.UltimoJogoMedidoN" xml:space="preserve"><value>Último jogo medido: {0}, em {1}.</value></data>
+  <data name="Meas.Ultimos60SegundosTempo" xml:space="preserve"><value>Últimos 60 segundos: tempo de cada quadro (âmbar) e a partida de referência (ciano).</value></data>
+  <data name="Meas.UsarEsteAtalho" xml:space="preserve"><value>Usar este atalho</value></data>
+  <data name="Meas.UsarOuNaoNas" xml:space="preserve"><value>Usar ou não nas comparações</value></data>
+  <data name="Meas.UseCtrlAltOu" xml:space="preserve"><value>Use Ctrl, Alt ou Win com uma letra, número ou F1–F24. Ex.: Ctrl+Shift+F.</value></data>
+  <data name="Meas.VerPreviaAgora" xml:space="preserve"><value>Ver a prévia agora</value></data>
+  <data name="Meas.Versao1X" xml:space="preserve"><value>versão 1.x</value></data>
+  <data name="Meas.Versao2X" xml:space="preserve"><value>versão 2.x</value></data>
+  <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>Você aplicou {0} depois da última partida de {1}. </value></data>
+  <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>Se o Windows pedir permissão para o PresentMon, aceite para medir.</value></data>
+  <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>do Windows, sem entrar no jogo). A versão </value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Assistente</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratório</value></data>

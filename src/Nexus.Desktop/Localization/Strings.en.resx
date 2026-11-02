@@ -1173,6 +1173,281 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Gpu.WindowsPassaApresentarEste" xml:space="preserve"><value>Windows starts presenting this game in flip mode (less lag in windowed and borderless, and allows G-SYNC/FreeSync in a window). </value></data>
   <data name="Gpu.WindowsProprioJogoJogo" xml:space="preserve"><value>From Windows and the game itself, one game at a time. With Undo.</value></data>
   <data name="Gpu.WindowsSoMostraAdaptador" xml:space="preserve"><value>Windows only shows the basic adapter (no vendor driver).</value></data>
+  <data name="Meas.AbertoAgora" xml:space="preserve"><value>Open now</value></data>
+  <data name="Meas.AbertoAgoraNN" xml:space="preserve"><value>Open now: {0}, {1}{2}.</value></data>
+  <data name="Meas.AbraJogoNexusComeca" xml:space="preserve"><value>Open a game: NEXUS starts measuring by itself.</value></data>
+  <data name="Meas.AbraJogoNexusMede" xml:space="preserve"><value>Open a game: NEXUS measures by itself.</value></data>
+  <data name="Meas.AbraJogoVerFps" xml:space="preserve"><value>Open a game to see the FPS here</value></data>
+  <data name="Meas.AbrirAjustes" xml:space="preserve"><value>Open settings</value></data>
+  <data name="Meas.AbrirPastaSessoes" xml:space="preserve"><value>Open the sessions folder</value></data>
+  <data name="Meas.Adicionar" xml:space="preserve"><value>Add</value></data>
+  <data name="Meas.AguardandoQuadros" xml:space="preserve"><value>waiting for frames…</value></data>
+  <data name="Meas.AjustesMedicao" xml:space="preserve"><value>Measurement settings</value></data>
+  <data name="Meas.AlemBibliotecasListasTrata" xml:space="preserve"><value>Besides the libraries and lists, treats any fullscreen program as a game (except known browsers and players).</value></data>
+  <data name="Meas.AmbarAgora" xml:space="preserve"><value>Amber: now.</value></data>
+  <data name="Meas.AmbarDepois" xml:space="preserve"><value>Amber: after.</value></data>
+  <data name="Meas.AntesAcreditarResultado" xml:space="preserve"><value>Before trusting the result</value></data>
+  <data name="Meas.AntesN" xml:space="preserve"><value>Before · {0}</value></data>
+  <data name="Meas.AntesXDepois" xml:space="preserve"><value>Before vs after</value></data>
+  <data name="Meas.AntesXDepoisAparece" xml:space="preserve"><value>The before vs after shows up here</value></data>
+  <data name="Meas.AnticheatsVanguardEasyAnti" xml:space="preserve"><value>anti-cheats (Vanguard, Easy Anti-Cheat, BattlEye). It shows in borderless windowed mode, which is the default on Windows 11 with the optimizations </value></data>
+  <data name="Meas.Apagar" xml:space="preserve"><value>Delete</value></data>
+  <data name="Meas.ApagarAteNSessao" xml:space="preserve"><value>Delete up to {0} session(s) older than {1} days? Each game's last match and those marked as before/after stay.</value></data>
+  <data name="Meas.ApagarPartidasMais" xml:space="preserve"><value>Delete matches older than</value></data>
+  <data name="Meas.ApagarSessao" xml:space="preserve"><value>Delete session</value></data>
+  <data name="Meas.ApagarSessaoNArquivo" xml:space="preserve"><value>Delete the session "{0}"? Its file in the NEXUS sessions folder will be removed.</value></data>
+  <data name="Meas.AtalhoDesligado" xml:space="preserve"><value>Shortcut off.</value></data>
+  <data name="Meas.AtalhoGlobalValeWindows" xml:space="preserve"><value>A global shortcut works across all of Windows while NEXUS is open (including in the tray). Choose a combination no other program uses.</value></data>
+  <data name="Meas.AtalhoMostrador" xml:space="preserve"><value>Display shortcut</value></data>
+  <data name="Meas.AtalhoTecladoLigarDesligar" xml:space="preserve"><value>Keyboard shortcut to turn on and off</value></data>
+  <data name="Meas.AtivasNestaPartidaN" xml:space="preserve"><value>Active in this match: {0}{1}.</value></data>
+  <data name="Meas.Automatico" xml:space="preserve"><value>automatic</value></data>
+  <data name="Meas.AvisoWindowsAgoraDepois" xml:space="preserve"><value>One Windows prompt now, and then never again for each match (takes effect after signing out and back in).</value></data>
+  <data name="Meas.Baixe" xml:space="preserve"><value>Download</value></data>
+  <data name="Meas.CadaJogoMedidoAparece" xml:space="preserve"><value>Each measured game shows up here with its FPS and the trend of its matches.</value></data>
+  <data name="Meas.CadaQuadroVivo" xml:space="preserve"><value>Every frame, live</value></data>
+  <data name="Meas.CantoTela" xml:space="preserve"><value>Screen corner</value></data>
+  <data name="Meas.CianoAntes" xml:space="preserve"><value>Cyan: before.</value></data>
+  <data name="Meas.ColocaEsteExecutavelSua" xml:space="preserve"><value>Adds this executable to your game list.</value></data>
+  <data name="Meas.ColocaSuaContaGrupo" xml:space="preserve"><value>Adds your account to the Windows "Performance Log Users" group (one Windows prompt now). Can be undone.</value></data>
+  <data name="Meas.ComecaMedirAgoraJogo" xml:space="preserve"><value>Starts measuring the open game now (or the given executable).</value></data>
+  <data name="Meas.ComoFoiCalculado" xml:space="preserve"><value>How was it calculated?</value></data>
+  <data name="Meas.ComparandoPartidasInteiras" xml:space="preserve"><value>Comparing whole matches</value></data>
+  <data name="Meas.ComparandoTrechosEquivalentesDuas" xml:space="preserve"><value>Comparing equivalent stretches of two matches</value></data>
+  <data name="Meas.CompararAnterior" xml:space="preserve"><value>Compare with the previous one</value></data>
+  <data name="Meas.ContaIniciaremRastreamentosEventos" xml:space="preserve"><value>account start Windows event traces; it doesn't grant administrator privilege.</value></data>
+  <data name="Meas.CsvPresentmonOuCapframex" xml:space="preserve"><value>PresentMon or CapFrameX CSV.</value></data>
+  <data name="Meas.DdMmHhMm" xml:space="preserve"><value>dd/MM 'at' HH:mm</value></data>
+  <data name="Meas.DeixarPresentmonPedirPermissao" xml:space="preserve"><value>Let PresentMon ask Windows for permission</value></data>
+  <data name="Meas.DentroVariacao" xml:space="preserve"><value>Within the variation</value></data>
+  <data name="Meas.DepoisDissoPresentmonMede" xml:space="preserve"><value>After that PresentMon measures without the Windows prompt on every match. It takes effect after you sign out and back in.
+
+</value></data>
+  <data name="Meas.DepoisN" xml:space="preserve"><value>After · {0}</value></data>
+  <data name="Meas.DesfeitaDepois" xml:space="preserve"><value> · undone afterwards</value></data>
+  <data name="Meas.DesfeitoSuaContaSaiu" xml:space="preserve"><value>Undone: your account left the group (takes effect after signing out and back in).</value></data>
+  <data name="Meas.DetalhesDestaPartida" xml:space="preserve"><value>Details of this match</value></data>
+  <data name="Meas.Detecta" xml:space="preserve"><value>Detects</value></data>
+  <data name="Meas.DiasGuardarPartidas" xml:space="preserve"><value>Days to keep matches</value></data>
+  <data name="Meas.DiferencaApareceDepois30" xml:space="preserve"><value>The difference shows up after 30 s of play.</value></data>
+  <data name="Meas.DiferencaPequena" xml:space="preserve"><value>Small difference</value></data>
+  <data name="Meas.DiferencaQuandoHouverIntervalo" xml:space="preserve"><value>Difference and, when available, the 95% interval.</value></data>
+  <data name="Meas.DuracaoMinimaPartidaSegundos" xml:space="preserve"><value>Minimum match length, in seconds</value></data>
+  <data name="Meas.EleNaoExecutadoCopia" xml:space="preserve"><value>it isn't run. If the embedded copy is missing, NEXUS looks for Intel's PresentMon app, CapFrameX, Downloads, or the file you point to.</value></data>
+  <data name="Meas.Engasgos" xml:space="preserve"><value>Stutters</value></data>
+  <data name="Meas.Entendi" xml:space="preserve"><value>Got it</value></data>
+  <data name="Meas.EsconderPrevia" xml:space="preserve"><value>Hide preview</value></data>
+  <data name="Meas.EstaPartidaNaoEntra" xml:space="preserve"><value>This match is no longer used in comparisons.</value></data>
+  <data name="Meas.EstaPartidaVoltouEntrar" xml:space="preserve"><value>This match is back in the comparisons.</value></data>
+  <data name="Meas.ExCs2ExeComo" xml:space="preserve"><value>E.g.: cs2.exe (as shown in Task Manager, Details tab).</value></data>
+  <data name="Meas.ExCtrlShiftF" xml:space="preserve"><value>E.g.: Ctrl+Shift+F, Alt+F10, Ctrl+Alt+O.</value></data>
+  <data name="Meas.ExecutavelJogoMedirMao" xml:space="preserve"><value>Game executable to measure manually</value></data>
+  <data name="Meas.ExecutavelSuaListaJogos" xml:space="preserve"><value>Executable for your game list</value></data>
+  <data name="Meas.ExportarRelatorio" xml:space="preserve"><value>Export report</value></data>
+  <data name="Meas.ExportarRelatorioAntesX" xml:space="preserve"><value>Export the before vs after report</value></data>
+  <data name="Meas.ExportarSessoesCsv" xml:space="preserve"><value>Export sessions (CSV)</value></data>
+  <data name="Meas.ExportarTodasCsv" xml:space="preserve"><value>Export all (CSV)</value></data>
+  <data name="Meas.FalhaAcompanharJogoN" xml:space="preserve"><value>Failed to follow the game: {0}</value></data>
+  <data name="Meas.FaltaPresentmon" xml:space="preserve"><value>PresentMon is missing</value></data>
+  <data name="Meas.FavorAntesSemProva" xml:space="preserve"><value>Favors before, without proof</value></data>
+  <data name="Meas.FavorDepoisSemProva" xml:space="preserve"><value>Favors after, without proof</value></data>
+  <data name="Meas.ForaComparacoes" xml:space="preserve"><value>Out of comparisons</value></data>
+  <data name="Meas.FpsAgora" xml:space="preserve"><value>FPS now</value></data>
+  <data name="Meas.FpsCantoTelaCima" xml:space="preserve"><value>FPS in the corner of the screen, on top of the game.</value></data>
+  <data name="Meas.FpsMedio" xml:space="preserve"><value>Average FPS</value></data>
+  <data name="Meas.FpsMedioDesdeComeco" xml:space="preserve"><value>Average FPS since the start of the match.</value></data>
+  <data name="Meas.FpsMedioUltimaPartida" xml:space="preserve"><value>Average FPS in this game's last match</value></data>
+  <data name="Meas.FpsMedioUltimaPartida2" xml:space="preserve"><value>Average FPS in the last match</value></data>
+  <data name="Meas.FrametimeMs" xml:space="preserve"><value>Frametime (ms)</value></data>
+  <data name="Meas.FrametimeP99" xml:space="preserve"><value>Frametime P99</value></data>
+  <data name="Meas.FuncionaAnticheat" xml:space="preserve"><value>Does it work with anti-cheat?</value></data>
+  <data name="Meas.GravaTempoCadaQuadro" xml:space="preserve"><value>Records the time of every frame, without hooking into the game.</value></data>
+  <data name="Meas.GuardarPartidasPeloMenos" xml:space="preserve"><value>Save matches of at least</value></data>
+  <data name="Meas.IgualPratica" xml:space="preserve"><value>Same in practice</value></data>
+  <data name="Meas.ImportarCapturaCsvPresentmon" xml:space="preserve"><value>Import capture (PresentMon or CapFrameX CSV)</value></data>
+  <data name="Meas.ImportarCsv" xml:space="preserve"><value>Import CSV</value></data>
+  <data name="Meas.InferiorDireito" xml:space="preserve"><value>Bottom right</value></data>
+  <data name="Meas.InferiorEsquerdo" xml:space="preserve"><value>Bottom left</value></data>
+  <data name="Meas.JanelaPequenaCimaJogo" xml:space="preserve"><value>A small window on top of the game with FPS, 1% low and frametime. It doesn't hook into the game.</value></data>
+  <data name="Meas.JaVemNexusPasta" xml:space="preserve"><value> already ships with NEXUS, in the tools\PresentMon folder. Before each use </value></data>
+  <data name="Meas.JogoLembrar" xml:space="preserve"><value>It's a game: remember</value></data>
+  <data name="Meas.JogosJanelaTelaCheia" xml:space="preserve"><value>for windowed games. In exclusive fullscreen the game owns the screen and no window shows on top: switch to borderless.</value></data>
+  <data name="Meas.JogosMedidos" xml:space="preserve"><value>Measured games</value></data>
+  <data name="Meas.JogueMaisPartidaDeste" xml:space="preserve"><value>Play one more match of this game (2 minutes or more) and NEXUS compares it with the previous one.</value></data>
+  <data name="Meas.JoguePartida2Minutos" xml:space="preserve"><value>Play a match (2 minutes or more) so we can measure the before and after.</value></data>
+  <data name="Meas.JoguePartidaMedirAntes" xml:space="preserve"><value>Play a match to measure the before and after</value></data>
+  <data name="Meas.LendoBibliotecasJogos" xml:space="preserve"><value>Reading the game libraries…</value></data>
+  <data name="Meas.LerBibliotecasNovo" xml:space="preserve"><value>Read the libraries again</value></data>
+  <data name="Meas.LigarSozinhoQuandoJogo" xml:space="preserve"><value>Turn on by itself when a game opens</value></data>
+  <data name="Meas.LigueMedicaoAutomaticaJogue" xml:space="preserve"><value>Turn on automatic measurement and play a match. In the next match of the same game, the before vs after shows up here by itself.</value></data>
+  <data name="Meas.LigueMedicaoAutomaticaNao" xml:space="preserve"><value> Turn on automatic measurement so you don't have to remember.</value></data>
+  <data name="Meas.LigueMedirAutomaticamenteAbra" xml:space="preserve"><value>Turn on "Measure automatically" and open a game.</value></data>
+  <data name="Meas.LimparAgora" xml:space="preserve"><value>Clean now</value></data>
+  <data name="Meas.LimparSessoesAntigas" xml:space="preserve"><value>Clean old sessions</value></data>
+  <data name="Meas.LinhaCianoPartidaN" xml:space="preserve"><value>Cyan line: match from {0} ({1} average FPS, 1% low {2}).</value></data>
+  <data name="Meas.LocalappdataNexusPresentmonOu" xml:space="preserve"><value>In %LocalAppData%\NEXUS\PresentMon, or point to where you saved it.</value></data>
+  <data name="Meas.LocalizarPresentmon" xml:space="preserve"><value>Locate PresentMon</value></data>
+  <data name="Meas.MaisBaixoMaisReto" xml:space="preserve"><value> Lower and flatter is better. </value></data>
+  <data name="Meas.MaisBaixoMaisReto2" xml:space="preserve"><value> Lower and flatter is better.</value></data>
+  <data name="Meas.MaisN" xml:space="preserve"><value> and {0} more</value></data>
+  <data name="Meas.Mao" xml:space="preserve"><value>manually</value></data>
+  <data name="Meas.MarcarComoAntes" xml:space="preserve"><value>Mark as before</value></data>
+  <data name="Meas.MarcarComoDepois" xml:space="preserve"><value>Mark as after</value></data>
+  <data name="Meas.Meca" xml:space="preserve"><value>Measure</value></data>
+  <data name="Meas.MedeCadaPartidaSozinho" xml:space="preserve"><value>Measures every match by itself.</value></data>
+  <data name="Meas.Media1QuadrosMais" xml:space="preserve"><value>Average of the slowest 1% of frames in the last 10 s: the hitch you feel right now.</value></data>
+  <data name="Meas.MedicaoAutomatica" xml:space="preserve"><value>Automatic measurement</value></data>
+  <data name="Meas.MedicaoAutomaticaDesligada" xml:space="preserve"><value>Automatic measurement off.</value></data>
+  <data name="Meas.MedicaoAutomaticaDesligada2" xml:space="preserve"><value> · automatic measurement off</value></data>
+  <data name="Meas.MedicaoAutomaticaLigadaProxima" xml:space="preserve"><value>Automatic measurement on: the next match will be measured by itself.</value></data>
+  <data name="Meas.MedicaoGuardaPartidaJogo" xml:space="preserve"><value>Stops measuring and saves the match (the game stays open).</value></data>
+  <data name="Meas.MedindoAgora" xml:space="preserve"><value>Measuring now</value></data>
+  <data name="Meas.MedindoAgoraN" xml:space="preserve"><value>Measuring now · {0}</value></data>
+  <data name="Meas.MedindoHaN" xml:space="preserve"><value> · measuring for {0}</value></data>
+  <data name="Meas.MedindoN" xml:space="preserve"><value>Measuring {0}…</value></data>
+  <data name="Meas.MedindoNIniciadoMao" xml:space="preserve"><value>Measuring {0} (started manually).</value></data>
+  <data name="Meas.MedirAgora" xml:space="preserve"><value>Measure now</value></data>
+  <data name="Meas.MedirAutomaticamente" xml:space="preserve"><value>Measure automatically</value></data>
+  <data name="Meas.MedirFaltaPecaGratuita" xml:space="preserve"><value>To measure, a free piece is missing</value></data>
+  <data name="Meas.MedirNaoMudaNada" xml:space="preserve"><value>Measuring changes nothing on the PC</value></data>
+  <data name="Meas.MedirSemPedirPermissao" xml:space="preserve"><value>Measure without asking for permission every time</value></data>
+  <data name="Meas.MedirSemPedirPermissao2" xml:space="preserve"><value>With "Measure without asking for permission every time", NEXUS adds your account to the Windows "Performance Log Users" group </value></data>
+  <data name="Meas.MedirSozinhoQuandoJogo" xml:space="preserve"><value>Measure by itself when a game opens</value></data>
+  <data name="Meas.Melhorou" xml:space="preserve"><value>Improved</value></data>
+  <data name="Meas.MenorMaisEstavel" xml:space="preserve"><value>Lower is more stable.</value></data>
+  <data name="Meas.MostraAntesXDepois" xml:space="preserve"><value>Shows this match in Before vs after against the reference NEXUS picked.</value></data>
+  <data name="Meas.MostradorAtalhoQuaisProgramas" xml:space="preserve"><value>Display, shortcut, which programs are games, PresentMon and saved matches.</value></data>
+  <data name="Meas.MostradorFps" xml:space="preserve"><value>FPS display</value></data>
+  <data name="Meas.MostradorFpsDesligado" xml:space="preserve"><value>FPS display off.</value></data>
+  <data name="Meas.MostradorFpsJogo" xml:space="preserve"><value>In-game FPS display</value></data>
+  <data name="Meas.MostradorFpsLigado" xml:space="preserve"><value>FPS display on.</value></data>
+  <data name="Meas.MostradorJanelaProprioNexus" xml:space="preserve"><value>The display is a NEXUS window on top of the game: it doesn't hook into the game, uses no hooks or injection, so it's safe with </value></data>
+  <data name="Meas.MostrarUsoCpuGpu" xml:space="preserve"><value>Show CPU and GPU usage and GPU temperature</value></data>
+  <data name="Meas.MudaProgramasSuaConta" xml:space="preserve"><value>What changes: programs on your account can start Windows event traces (which is what PresentMon uses). </value></data>
+  <data name="Meas.N0GuardarSempre" xml:space="preserve"><value>0 = keep forever.</value></data>
+  <data name="Meas.N1Low" xml:space="preserve"><value>1% low</value></data>
+  <data name="Meas.N1Low2" xml:space="preserve"><value>1% low </value></data>
+  <data name="Meas.N1LowCadaPartida" xml:space="preserve"><value>1% low of each match, from oldest to newest.</value></data>
+  <data name="Meas.N1LowNTendencia" xml:space="preserve"><value>1% low {0}% in the trend</value></data>
+  <data name="Meas.N1Partida" xml:space="preserve"><value>1 match</value></data>
+  <data name="Meas.NaoDeuAbrirPasta" xml:space="preserve"><value>Couldn't open the folder: {0}</value></data>
+  <data name="Meas.NaoDeuCompararN" xml:space="preserve"><value>Couldn't compare: {0}</value></data>
+  <data name="Meas.NaoDeuConferirPresentmon" xml:space="preserve"><value>Couldn't check PresentMon: </value></data>
+  <data name="Meas.NaoDeuLerBibliotecas" xml:space="preserve"><value>Couldn't read the libraries: {0}</value></data>
+  <data name="Meas.NaoDeuLerDiario" xml:space="preserve"><value>Couldn't read the journal: {0}</value></data>
+  <data name="Meas.NaoDeuLerSessoes" xml:space="preserve"><value>Couldn't read the saved sessions: {0}</value></data>
+  <data name="Meas.NaoDeuSalvarPreferencias" xml:space="preserve"><value>Couldn't save the preferences to </value></data>
+  <data name="Meas.NaoFoiPossivelIniciar" xml:space="preserve"><value>Could not start game detection: {0}</value></data>
+  <data name="Meas.NaoFoiPossivelRegistrar" xml:space="preserve"><value>Could not register the shortcut: {0}</value></data>
+  <data name="Meas.NaoImportadas" xml:space="preserve"><value> Not imported: </value></data>
+  <data name="Meas.NaoJogo" xml:space="preserve"><value>Not a game</value></data>
+  <data name="Meas.NaoPrivilegioAdministradorDesfazer" xml:space="preserve"><value>It doesn't grant administrator privilege. Undo removes the account from the group (only if it wasn't there before).</value></data>
+  <data name="Meas.NArquivoSSessao" xml:space="preserve"><value>{0} unreadable session file(s) in {1} were ignored.</value></data>
+  <data name="Meas.NenhumaBibliotecaEncontradaSteam" xml:space="preserve"><value>No library found (Steam, Epic, Riot, Battle.net, Xbox). Known games and your list still apply.</value></data>
+  <data name="Meas.NenhumaMudancaNexusAtiva" xml:space="preserve"><value>No NEXUS change active in this match.</value></data>
+  <data name="Meas.NenhumaSessaoMaisN" xml:space="preserve"><value>No session older than {0} days.</value></data>
+  <data name="Meas.NenhumJogoAberto" xml:space="preserve"><value>No game open</value></data>
+  <data name="Meas.NenhumJogoMedidoAinda" xml:space="preserve"><value>No game measured yet</value></data>
+  <data name="Meas.NEntrouSuaLista" xml:space="preserve"><value>{0} was added to your game list.</value></data>
+  <data name="Meas.NexusConfereArquivoOficial" xml:space="preserve"><value>NEXUS checks that the file is the official one (known SHA-256 fingerprint or Intel Corporation's digital signature); if it isn't, </value></data>
+  <data name="Meas.NexusContinuaUsandoPresentmon" xml:space="preserve"><value>NEXUS keeps using the PresentMon that ships with it (verified); the file you chose stays as an alternative.</value></data>
+  <data name="Meas.NexusDeixaTratarEste" xml:space="preserve"><value>NEXUS stops treating this program as a game.</value></data>
+  <data name="Meas.NexusMostradorFps" xml:space="preserve"><value>NEXUS · FPS display</value></data>
+  <data name="Meas.NexusMudouEntreDuas" xml:space="preserve"><value>What NEXUS changed between the two matches</value></data>
+  <data name="Meas.NexusPercebeQuandoJogo" xml:space="preserve"><value>NEXUS notices when a game opens, measures each match and compares it with the previous one. Measuring changes nothing on the PC.</value></data>
+  <data name="Meas.NexusUsaPresentmonFerramenta" xml:space="preserve"><value>NEXUS uses PresentMon, Intel's free and official tool (MIT license), to read the time of each frame (event tracing </value></data>
+  <data name="Meas.NexusVaiColocarSua" xml:space="preserve"><value>NEXUS will add your account to the Windows "Performance Log Users" group (Windows asks for permission once).
+
+</value></data>
+  <data name="Meas.NJaUsadoOutro" xml:space="preserve"><value>{0} is already used by another program. Choose another combination.</value></data>
+  <data name="Meas.NJogoSNas" xml:space="preserve"><value>{0} game(s) in the libraries: {1}.</value></data>
+  <data name="Meas.NLigaDesligaMostrador" xml:space="preserve"><value>{0} turns the display on and off, even with NEXUS minimized.</value></data>
+  <data name="Meas.NMudancas" xml:space="preserve"><value>{0} changes</value></data>
+  <data name="Meas.NNaoSeraMais" xml:space="preserve"><value>{0} will no longer be treated as a game.</value></data>
+  <data name="Meas.NomeExecutavelExEldenring" xml:space="preserve"><value>Executable name, e.g.: eldenring.exe</value></data>
+  <data name="Meas.NPartidaNN" xml:space="preserve"><value>{0}: match from {1} → {2}</value></data>
+  <data name="Meas.NPartidas" xml:space="preserve"><value>{0} matches</value></data>
+  <data name="Meas.NSaiuSuaLista" xml:space="preserve"><value>{0} left your list.</value></data>
+  <data name="Meas.NSessaoOesAntiga" xml:space="preserve"><value>{0} old session(s) deleted from the NEXUS sessions folder.</value></data>
+  <data name="Meas.NSessaoOesExportada" xml:space="preserve"><value>{0} session(s) exported to {1}.</value></data>
+  <data name="Meas.NSessaoOesImportada" xml:space="preserve"><value>{0} session(s) imported.</value></data>
+  <data name="Meas.NSNS" xml:space="preserve"><value>{0:0} s of {1} s</value></data>
+  <data name="Meas.NuncaTratarComoJogo" xml:space="preserve"><value>Never treat as a game</value></data>
+  <data name="Meas.NVoltouPoderSer" xml:space="preserve"><value>{0} can be detected again.</value></data>
+  <data name="Meas.OndeEstaPresentmon" xml:space="preserve"><value>Where is PresentMon?</value></data>
+  <data name="Meas.PararGuardar" xml:space="preserve"><value>Stop and save</value></data>
+  <data name="Meas.PartidaAtipicaOutroMapa" xml:space="preserve"><value>Unusual match (another map, a download on the PC, long loading)? Take it out of the comparisons.</value></data>
+  <data name="Meas.PartidaInteira" xml:space="preserve"><value>The whole match.</value></data>
+  <data name="Meas.PartidaNCurtaDemais" xml:space="preserve"><value>{0} match too short ({1:0} s): not saved (minimum {2} s).</value></data>
+  <data name="Meas.PartidaNGuardadaAntes" xml:space="preserve"><value>{0} match saved. Before vs after: {1}</value></data>
+  <data name="Meas.PartidaNGuardadaN" xml:space="preserve"><value>{0} match saved: {1:0} average FPS, 1% low {2:0}.</value></data>
+  <data name="Meas.Partidas" xml:space="preserve"><value>Matches of </value></data>
+  <data name="Meas.PartidaSeguinteMostraAntes" xml:space="preserve"><value>In the next match, shows before vs after.</value></data>
+  <data name="Meas.PartidasGuardadas" xml:space="preserve"><value>Saved matches</value></data>
+  <data name="Meas.PartidasJogo" xml:space="preserve"><value>Game matches</value></data>
+  <data name="Meas.PartidaSo" xml:space="preserve"><value>a single match</value></data>
+  <data name="Meas.PartidaTerminouMasNao" xml:space="preserve"><value>The match ended, but it couldn't be saved: {0}</value></data>
+  <data name="Meas.PedeAvisoWindowsVez" xml:space="preserve"><value>(one Windows prompt). It takes effect after signing out and back in; can be undone. That group lets programs on your </value></data>
+  <data name="Meas.PercebeQuandoJogoAbre" xml:space="preserve"><value>Notices when a game opens. Only reads the program name.</value></data>
+  <data name="Meas.PermissaoWindows" xml:space="preserve"><value>Windows permission</value></data>
+  <data name="Meas.PioresMomentos" xml:space="preserve"><value>The worst moments.</value></data>
+  <data name="Meas.Piorou" xml:space="preserve"><value>Got worse</value></data>
+  <data name="Meas.Presentmon" xml:space="preserve"><value>What is PresentMon?</value></data>
+  <data name="Meas.PresentmonAcompanhaNexusFaltou" xml:space="preserve"><value>PresentMon ships with NEXUS; if it's missing or was refused, download the official Intel PresentMon-2.x-x64.exe (GitHub, Releases section).</value></data>
+  <data name="Meas.PresentmonNAcompanhaNexus" xml:space="preserve"><value>PresentMon {0} (ships with NEXUS)</value></data>
+  <data name="Meas.PresentmonNaoEncontrado" xml:space="preserve"><value>PresentMon not found</value></data>
+  <data name="Meas.PresentmonNaoEncontradoNas" xml:space="preserve"><value>PresentMon not found in the known folders.</value></data>
+  <data name="Meas.PresentmonParouSemEnviar" xml:space="preserve"><value>PresentMon stopped without sending frames. See the output: </value></data>
+  <data name="Meas.PresentmonPresentmonExePresentmon" xml:space="preserve"><value>PresentMon (PresentMon*.exe)|PresentMon*.exe|Executable (*.exe)|*.exe</value></data>
+  <data name="Meas.PresentmonProntoNN" xml:space="preserve"><value>PresentMon ready ({0}). {1}</value></data>
+  <data name="Meas.PresentmonRecusado" xml:space="preserve"><value>PresentMon refused</value></data>
+  <data name="Meas.PrimeiraPartidaDesteJogo" xml:space="preserve"><value>First match of this game: FPS shows up when measuring</value></data>
+  <data name="Meas.PrimeiraPartidaMedidaDeste" xml:space="preserve"><value>First measured match of this game: it becomes the reference for the next ones.</value></data>
+  <data name="Meas.ProcurarNovo" xml:space="preserve"><value>Search again</value></data>
+  <data name="Meas.ProntoMedir" xml:space="preserve"><value>Ready to measure</value></data>
+  <data name="Meas.ProntoSuaContaEsta" xml:space="preserve"><value>Done: your account is in the "Performance Log Users" group. Sign out and back in to Windows to measure without a prompt.</value></data>
+  <data name="Meas.QuaisProgramasSaoJogos" xml:space="preserve"><value>Which programs are games</value></data>
+  <data name="Meas.QuandoJogoAbreNexus" xml:space="preserve"><value>When a game opens, NEXUS starts measuring; when it closes, it saves the match and compares it with the previous one.</value></data>
+  <data name="Meas.RelatorioSalvoN" xml:space="preserve"><value>Report saved to {0}.</value></data>
+  <data name="Meas.RemoveEstaPartidaCsv" xml:space="preserve"><value>Removes this match (and its CSV) from the NEXUS sessions folder. Asks for confirmation.</value></data>
+  <data name="Meas.Remover" xml:space="preserve"><value>Remove</value></data>
+  <data name="Meas.RemoverN" xml:space="preserve"><value>Remove {0}</value></data>
+  <data name="Meas.SalvaArquivoTextoVeredito" xml:space="preserve"><value>Saves a text file with the verdict, the numbers, the changes and the warnings.</value></data>
+  <data name="Meas.Salve" xml:space="preserve"><value>Save</value></data>
+  <data name="Meas.Segundos" xml:space="preserve"><value>seconds</value></data>
+  <data name="Meas.SemJogoDetectadoExecutavel" xml:space="preserve"><value>No game detected? Executable:</value></data>
+  <data name="Meas.SemPermissaoEspecialCada" xml:space="preserve"><value>Without special permission, each measurement asks Windows for permission (PresentMon needs administrator to trace frames). </value></data>
+  <data name="Meas.SessaoNApagada" xml:space="preserve"><value>Session "{0}" deleted.</value></data>
+  <data name="Meas.SoNomePastaCada" xml:space="preserve"><value>Only each program's name and folder are read. NEXUS doesn't open the game or read its memory.</value></data>
+  <data name="Meas.SuaContaJaEsta" xml:space="preserve"><value>Your account is already in the "Performance Log Users" group. Sign out and back in to Windows to measure without a prompt; until then PresentMon keeps asking for permission.</value></data>
+  <data name="Meas.SuaContaPodeMedir" xml:space="preserve"><value>Your account can measure without a Windows prompt.</value></data>
+  <data name="Meas.SuaListaSempreJogo" xml:space="preserve"><value>Your list (always a game)</value></data>
+  <data name="Meas.SuasPartidasMarcadasAntes" xml:space="preserve"><value>Your marked matches: before vs after</value></data>
+  <data name="Meas.SuperiorDireito" xml:space="preserve"><value>Top right</value></data>
+  <data name="Meas.SuperiorEsquerdo" xml:space="preserve"><value>Top left</value></data>
+  <data name="Meas.TambemConsiderarJogoEstiver" xml:space="preserve"><value>Also treat whatever is fullscreen as a game</value></data>
+  <data name="Meas.TempoCadaQuadroAntes" xml:space="preserve"><value>Time of each frame: before (cyan) and after (amber).</value></data>
+  <data name="Meas.TempoCadaQuadroLongo" xml:space="preserve"><value>Time of each frame over the match. The dashed lines mark 60, 144 and 240 FPS.</value></data>
+  <data name="Meas.TempoMedianoCadaQuadro" xml:space="preserve"><value>Median time of each frame in the last second.</value></data>
+  <data name="Meas.TextoTxtTxt" xml:space="preserve"><value>Text (*.txt)|*.txt</value></data>
+  <data name="Meas.TirarMarca" xml:space="preserve"><value>Remove mark</value></data>
+  <data name="Meas.Tomada" xml:space="preserve"><value>plugged in</value></data>
+  <data name="Meas.TorreEstreitaEsquerdaQuadros" xml:space="preserve"><value>Narrow tower on the left: fast, even frames.</value></data>
+  <data name="Meas.TrancosVisiveis" xml:space="preserve"><value>Visible hitches.</value></data>
+  <data name="Meas.Ultima" xml:space="preserve"><value>last </value></data>
+  <data name="Meas.UltimaPartidaCadaJogo" xml:space="preserve"><value>The last match of each game and marked ones are never deleted. Only the NEXUS sessions folder.</value></data>
+  <data name="Meas.UltimoJogoMedido" xml:space="preserve"><value>Last game measured</value></data>
+  <data name="Meas.UltimoJogoMedidoN" xml:space="preserve"><value>Last game measured: {0}, on {1}.</value></data>
+  <data name="Meas.Ultimos60SegundosTempo" xml:space="preserve"><value>Last 60 seconds: time of each frame (amber) and the reference match (cyan).</value></data>
+  <data name="Meas.UsarEsteAtalho" xml:space="preserve"><value>Use this shortcut</value></data>
+  <data name="Meas.UsarOuNaoNas" xml:space="preserve"><value>Use it or not in comparisons</value></data>
+  <data name="Meas.UseCtrlAltOu" xml:space="preserve"><value>Use Ctrl, Alt or Win with a letter, number or F1–F24. E.g.: Ctrl+Shift+F.</value></data>
+  <data name="Meas.VerPreviaAgora" xml:space="preserve"><value>See preview now</value></data>
+  <data name="Meas.Versao1X" xml:space="preserve"><value>version 1.x</value></data>
+  <data name="Meas.Versao2X" xml:space="preserve"><value>version 2.x</value></data>
+  <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>You applied {0} after the last match of {1}. </value></data>
+  <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>If Windows asks for permission for PresentMon, accept it to measure.</value></data>
+  <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>for Windows, without hooking into the game). Version </value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Assistant</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automatic</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Lab</value></data>

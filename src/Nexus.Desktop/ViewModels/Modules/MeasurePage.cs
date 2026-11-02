@@ -45,10 +45,10 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private MeasuredSession? _liveReference;
     private DetectedGame? _detected;
     private string _status = "";
-    private string _heroTitle = "Nenhum jogo aberto";
+    private string _heroTitle = Loc.T("Meas.NenhumJogoAberto");
     private string _heroDetail = "";
     private string _captureNote = "";
-    private string _heroKicker = "Nenhum jogo aberto", _heroGame = "Pronto para medir", _heroFpsLabel = "Abra um jogo para ver o FPS aqui";
+    private string _heroKicker = Loc.T("Meas.NenhumJogoAberto"), _heroGame = Loc.T("Meas.ProntoMedir"), _heroFpsLabel = Loc.T("Meas.AbraJogoVerFps");
     private double _heroFps = double.NaN;
     private string _liveFps = "—", _liveLow1 = "—", _liveFrametime = "—", _liveAverage = "—", _liveDelta = "", _liveClock = "";
     private IReadOnlyList<TracePoint> _liveTrace = [], _referenceTrace = [];
@@ -60,7 +60,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private string _manualExe = "";
     private string _hotkeyText;
     private string _hotkeyStatus = "";
-    private string _libraryText = "Lendo as bibliotecas de jogos…";
+    private string _libraryText = Loc.T("Meas.LendoBibliotecasJogos");
     private string _inviteText = "";
     private SessionComparisonResult? _manual;
     private readonly IPresentMonTrustProbe _trust = PresentMonLocator.SystemProbe();
@@ -83,13 +83,13 @@ public sealed class MeasurePage : ModulePage, IDisposable
 
         StartCaptureCommand = new RelayCommand(() => _ = StartManualAsync(), () => !IsCapturing && HasPresentMon && (_detected is not null || PresentMonCli.IsValidExeName(ManualExe.Trim())));
         StopCaptureCommand = new RelayCommand(() => _ = StopManualAsync(), () => IsCapturing);
-        AddCurrentGameCommand = new RelayCommand(() => SetPrefs(_prefs.WithUserGame(_detected!.ExeName), $"{_detected!.ExeName} entrou na sua lista de jogos."),
+        AddCurrentGameCommand = new RelayCommand(() => SetPrefs(_prefs.WithUserGame(_detected!.ExeName), Loc.F("Meas.NEntrouSuaLista", _detected!.ExeName)),
             () => _detected is { Reason: not DetectionReason.UserList });
-        ExcludeCurrentCommand = new RelayCommand(() => SetPrefs(_prefs.WithExcluded(_detected!.ExeName), $"{_detected!.ExeName} não será mais tratado como jogo."),
+        ExcludeCurrentCommand = new RelayCommand(() => SetPrefs(_prefs.WithExcluded(_detected!.ExeName), Loc.F("Meas.NNaoSeraMais", _detected!.ExeName)),
             () => _detected is not null);
         AddGameCommand = new RelayCommand(AddGame, () => PresentMonCli.IsValidExeName(NewGameExe.Trim()));
-        RemoveGameCommand = new TextCommand(exe => SetPrefs(_prefs with { UserGames = _prefs.UserGames.Where(g => g != exe).ToList() }, $"{exe} saiu da sua lista."));
-        RemoveExcludedCommand = new TextCommand(exe => SetPrefs(_prefs with { ExcludedGames = _prefs.ExcludedGames.Where(g => g != exe).ToList() }, $"{exe} voltou a poder ser detectado."));
+        RemoveGameCommand = new TextCommand(exe => SetPrefs(_prefs with { UserGames = _prefs.UserGames.Where(g => g != exe).ToList() }, Loc.F("Meas.NSaiuSuaLista", exe)));
+        RemoveExcludedCommand = new TextCommand(exe => SetPrefs(_prefs with { ExcludedGames = _prefs.ExcludedGames.Where(g => g != exe).ToList() }, Loc.F("Meas.NVoltouPoderSer", exe)));
         ApplyHotkeyCommand = new RelayCommand(ApplyHotkey);
         BrowseCommand = new RelayCommand(Browse);
         RescanPresentMonCommand = new RelayCommand(RescanPresentMon);
@@ -134,7 +134,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             if (_pm is null && string.Equals(_prefs.PresentMonPath, configured, StringComparison.OrdinalIgnoreCase))
             {
                 _pm = located;
-                if (error is not null) Status = "Não deu para conferir o PresentMon: " + error;
+                if (error is not null) Status = Loc.T("Meas.NaoDeuConferirPresentmon") + error;
                 _prefs = _prefs with { PresentMonPath = _pm?.Path ?? configured };
                 foreach (var p in new[] { nameof(PresentMonPath), nameof(HasPresentMon), nameof(PresentMonText), nameof(PresentMonTrustText), nameof(ShowIntro) })
                     OnPropertyChanged(p);
@@ -142,12 +142,12 @@ public sealed class MeasurePage : ModulePage, IDisposable
             }
             Reload(sessions);
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"Não deu para ler as sessões salvas: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = Loc.F("Meas.NaoDeuLerSessoes", ex.Message); }
     }
 
-    public override string Title => "Medir";
+    public override string Title => Loc.T("Nav.Medir");
     public override string Group => Loc.T("Nav.Medir");
-    public override string Subtitle => "O NEXUS percebe quando um jogo abre, mede cada partida e compara com a anterior. Medir não altera nada no PC.";
+    public override string Subtitle => Loc.T("Meas.NexusPercebeQuandoJogo");
 
     // ------------------------------------------------------------------ estado geral
 
@@ -204,7 +204,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     }
     public bool HasComparison => Comparison is not null;
     public string ComparisonTitle => Comparison is { } c
-        ? $"{c.Current.DisplayName}: partida de {c.Reference.CapturedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt)} → {c.Current.CapturedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt)}"
+        ? Loc.F("Meas.NPartidaNN", c.Current.DisplayName, c.Reference.CapturedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt), c.Current.CapturedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt))
         : "";
     public string ComparisonVerdict => Comparison?.Verdict ?? "";
     public string ComparisonTone => Comparison?.Tone ?? "Neutral";
@@ -212,19 +212,19 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public Tone ComparisonToneValue => ComparisonTone switch { "Good" => Tone.Good, "Bad" => Tone.Bad, _ => Tone.Info };
     public string ComparisonIconKey => ComparisonTone switch { "Good" => "Icon.TrendUp", "Bad" => "Icon.TrendDown", _ => "Icon.Info" };
     /// <summary>Botão do estado vazio: só aparece enquanto a medição automática está desligada.</summary>
-    public string ComparisonEmptyAction => AutoMeasure ? "" : "Medir automaticamente";
-    public string ComparisonModeText => Comparison?.Mode == "partidas" ? "Comparando partidas inteiras" : "Comparando trechos equivalentes de duas partidas";
+    public string ComparisonEmptyAction => AutoMeasure ? "" : Loc.T("Meas.MedirAutomaticamente");
+    public string ComparisonModeText => Comparison?.Mode == "partidas" ? Loc.T("Meas.ComparandoPartidasInteiras") : Loc.T("Meas.ComparandoTrechosEquivalentesDuas");
     public IReadOnlyList<ComparisonRow> ComparisonRows => Comparison?.Result.Metrics.Select(m => new ComparisonRow(m)).ToList() ?? [];
     public IReadOnlyList<string> ComparisonWarnings => Comparison?.Warnings ?? [];
-    public IReadOnlyList<string> ComparisonChanges => Comparison?.ChangesBetween.Select(c => $"{c.Title} · {c.At.ToLocalTime().ToString("dd/MM HH:mm", Pt)}{(c.Active ? "" : " · desfeita depois")}").ToList() ?? [];
+    public IReadOnlyList<string> ComparisonChanges => Comparison?.ChangesBetween.Select(c => $"{c.Title} · {c.At.ToLocalTime().ToString("dd/MM HH:mm", Pt)}{(c.Active ? "" : Loc.T("Meas.DesfeitaDepois"))}").ToList() ?? [];
     public string ComparisonMethod => Comparison?.Result.Method ?? "";
     public string ComparisonWhy => Comparison?.Why ?? "";
     public IReadOnlyList<TracePoint> ComparisonBeforeTrace => Comparison?.Reference.Trace ?? [];
     public IReadOnlyList<TracePoint> ComparisonAfterTrace => Comparison?.Current.Trace ?? [];
     /// <summary>Sem comparação: explica o que falta (primeira partida, nenhuma partida...).</summary>
     public string ComparisonEmptyText => _all.Count == 0
-        ? "Ligue a medição automática e jogue uma partida. Na próxima partida do mesmo jogo, o antes x depois aparece aqui sozinho."
-        : "Jogue mais uma partida deste jogo (2 minutos ou mais) e o NEXUS compara com a anterior.";
+        ? Loc.T("Meas.LigueMedicaoAutomaticaJogue")
+        : Loc.T("Meas.JogueMaisPartidaDeste");
 
     // ------------------------------------------------------------------ jogos e sessões
 
@@ -254,7 +254,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public bool AutoMeasure
     {
         get => _prefs.AutoMeasure;
-        set { if (value != _prefs.AutoMeasure) SetPrefs(_prefs with { AutoMeasure = value }, value ? "Medição automática ligada: a próxima partida será medida sozinha." : "Medição automática desligada."); }
+        set { if (value != _prefs.AutoMeasure) SetPrefs(_prefs with { AutoMeasure = value }, value ? Loc.T("Meas.MedicaoAutomaticaLigadaProxima") : Loc.T("Meas.MedicaoAutomaticaDesligada")); }
     }
 
     /// <summary>O botão do mostrador (o atalho global faz o mesmo).</summary>
@@ -263,7 +263,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         get => _overlay.Enabled;
         set { if (value != _overlay.Enabled) { _overlay.SetEnabled(value); EnsureSystemLoad(); _ = EnsureCaptureForOverlayAsync(); } }
     }
-    public string PreviewText => _overlay.Preview ? "Esconder a prévia" : "Ver a prévia agora";
+    public string PreviewText => _overlay.Preview ? Loc.T("Meas.EsconderPrevia") : Loc.T("Meas.VerPreviaAgora");
     public bool OverlayOnGameStart { get => _prefs.OverlayOnGameStart; set { if (value != _prefs.OverlayOnGameStart) SetPrefs(_prefs with { OverlayOnGameStart = value }, null); } }
     public bool OverlayShowSystem
     {
@@ -298,36 +298,36 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public bool HasPresentMon => _pm is { Usable: true } pm && File.Exists(pm.Path);
     public string PresentMonText => HasPresentMon
         ? _pm!.Source == PresentMonSource.Bundled
-            ? $"PresentMon {PresentMonTrust.BundledVersion} (acompanha o NEXUS)"
-            : $"{Path.GetFileName(_pm.Path)} ({PresentMonCli.GenerationOf(_pm.Path) switch { PresentMonGeneration.V1 => "versão 1.x", _ => "versão 2.x" }}, {_pm.SourceText})"
-        : _pm is not null ? "PresentMon recusado" : "PresentMon não encontrado";
+            ? Loc.F("Meas.PresentmonNAcompanhaNexus", PresentMonTrust.BundledVersion)
+            : $"{Path.GetFileName(_pm.Path)} ({PresentMonCli.GenerationOf(_pm.Path) switch { PresentMonGeneration.V1 => Loc.T("Meas.Versao1X"), _ => Loc.T("Meas.Versao2X") }}, {_pm.SourceText})"
+        : _pm is not null ? Loc.T("Meas.PresentmonRecusado") : Loc.T("Meas.PresentmonNaoEncontrado");
     /// <summary>Resultado da conferência (por que foi aceito ou recusado).</summary>
     public string PresentMonTrustText => _pm?.Verdict.Reason ?? "";
     public string PresentMonHelp { get; } =
-        "O NEXUS usa o PresentMon, ferramenta gratuita e oficial da Intel (licença MIT), para ler o tempo de cada quadro (rastreamento de eventos " +
-        "do Windows, sem entrar no jogo). A versão " + PresentMonTrust.BundledVersion + " já vem com o NEXUS, na pasta tools\\PresentMon. Antes de cada uso " +
-        "o NEXUS confere que o arquivo é o oficial (impressão digital SHA-256 conhecida ou assinatura digital da Intel Corporation); se não for, " +
-        "ele não é executado. Se a cópia embutida faltar, o NEXUS procura o app PresentMon da Intel, o CapFrameX, Downloads, ou o arquivo que você indicar.";
+        Loc.T("Meas.NexusUsaPresentmonFerramenta") +
+        Loc.T("Meas.WindowsSemEntrarJogo") + PresentMonTrust.BundledVersion + Loc.T("Meas.JaVemNexusPasta") +
+        Loc.T("Meas.NexusConfereArquivoOficial") +
+        Loc.T("Meas.EleNaoExecutadoCopia");
     public bool CanTraceSilently { get; } = SafeCanTrace();
     public string RightsText => CanTraceSilently
-        ? "Sua conta pode medir sem aviso do Windows."
-        : "Sem permissão especial, cada medição pede permissão ao Windows (o PresentMon precisa de administrador para rastrear os quadros). " +
-          "Com \"Medir sem pedir permissão toda vez\", o NEXUS coloca a sua conta no grupo do Windows \"Usuários do log de desempenho\" " +
-          "(pede o aviso do Windows uma vez). Vale depois de sair e entrar de novo na conta; dá para desfazer. Esse grupo deixa programas da sua " +
-          "conta iniciarem rastreamentos de eventos do Windows; não dá privilégio de administrador.";
+        ? Loc.T("Meas.SuaContaPodeMedir")
+        : Loc.T("Meas.SemPermissaoEspecialCada") +
+          Loc.T("Meas.MedirSemPedirPermissao2") +
+          Loc.T("Meas.PedeAvisoWindowsVez") +
+          Loc.T("Meas.ContaIniciaremRastreamentosEventos");
 
     /// <summary>A conta já está no grupo, mas o acesso atual ainda não tem o grupo (falta sair e entrar de novo).</summary>
     public bool PerfLogPendingLogon => !CanTraceSilently && _perfLogMember == true;
     public bool ShowPerfLogOffer => OperatingSystem.IsWindows() && !CanTraceSilently && _perfLogMember != true;
     public bool CanUndoPerfLog => _perfLogRun is not null;
     public string PerfLogText => CanTraceSilently ? ""
-        : _perfLogMember == true ? "Sua conta já está no grupo \"Usuários do log de desempenho\". Saia e entre de novo no Windows para medir sem aviso; até lá o PresentMon continua pedindo permissão."
-        : "Um aviso do Windows agora, e depois nunca mais a cada partida (vale depois de sair e entrar de novo na conta).";
+        : _perfLogMember == true ? Loc.T("Meas.SuaContaJaEsta")
+        : Loc.T("Meas.AvisoWindowsAgoraDepois");
 
     public string OverlayHelp { get; } =
-        "O mostrador é uma janela do próprio NEXUS por cima do jogo: não entra no jogo, não usa ganchos nem injeção, por isso é seguro com " +
-        "anticheats (Vanguard, Easy Anti-Cheat, BattlEye). Ele aparece em janela sem bordas, que é o padrão no Windows 11 com as otimizações " +
-        "para jogos em janela. Em tela cheia exclusiva o jogo é dono da tela e nenhuma janela aparece por cima: troque para sem bordas.";
+        Loc.T("Meas.MostradorJanelaProprioNexus") +
+        Loc.T("Meas.AnticheatsVanguardEasyAnti") +
+        Loc.T("Meas.JogosJanelaTelaCheia");
 
     // ------------------------------------------------------------------ comandos
 
@@ -394,7 +394,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            Status = $"Não foi possível iniciar a detecção de jogos: {ex.Message}";
+            Status = Loc.F("Meas.NaoFoiPossivelIniciar", ex.Message);
         }
     }
 
@@ -445,12 +445,12 @@ public sealed class MeasurePage : ModulePage, IDisposable
                     break;
             }
             if (_engine.Capture is { Ended: true } c && _engine.Session is { Frames: 0 } && c.Log.Length > 0)
-                CaptureNote = "O PresentMon parou sem enviar quadros. Veja a saída: " + Shorten(c.Log);
+                CaptureNote = Loc.T("Meas.PresentmonParouSemEnviar") + Shorten(c.Log);
             UpdateHero();
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            Status = $"Falha ao acompanhar o jogo: {ex.Message}";
+            Status = Loc.F("Meas.FalhaAcompanharJogoN", ex.Message);
         }
         finally { _polling = false; }
     }
@@ -468,11 +468,11 @@ public sealed class MeasurePage : ModulePage, IDisposable
         _onBattery = WindowsProcessProbe.OnBattery() == true;
         _liveReference = AutoCompare.LiveReference(game.Key, DateTimeOffset.Now, _all, _changes);
         ReferenceText = _liveReference is { } r
-            ? $"Linha ciano: partida de {r.CapturedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt)} ({r.Summary.AverageFps.ToString("0", Pt)} FPS médio, 1% low {r.Summary.OnePercentLowAverageFps.ToString("0", Pt)})."
-            : "Primeira partida medida deste jogo: ela vira a referência das próximas.";
-        CaptureNote = RequestElevation && !CanTraceSilently ? "Se o Windows pedir permissão para o PresentMon, aceite para medir." : "";
+            ? Loc.F("Meas.LinhaCianoPartidaN", r.CapturedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt), r.Summary.AverageFps.ToString("0", Pt), r.Summary.OnePercentLowAverageFps.ToString("0", Pt))
+            : Loc.T("Meas.PrimeiraPartidaMedidaDeste");
+        CaptureNote = RequestElevation && !CanTraceSilently ? Loc.T("Meas.WindowsPedirPermissaoPresentmon") : "";
         _liveTimer.Start();
-        Status = $"Medindo {game.Name}…";
+        Status = Loc.F("Meas.MedindoN", game.Name);
         Notify();
     }
 
@@ -490,7 +490,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private async Task StartManualAsync()
     {
         if (_engine is null) return;
-        var game = _detected ?? new DetectedGame(GameMatcher.Pretty(ManualExe.Trim()), ManualExe.Trim(), 0, DetectionReason.UserList, "à mão");
+        var game = _detected ?? new DetectedGame(GameMatcher.Pretty(ManualExe.Trim()), ManualExe.Trim(), 0, DetectionReason.UserList, Loc.T("Meas.Mao"));
         var ok = await Task.Run(() => { lock (_engineGate) return _engine.StartManual(game, DateTimeOffset.Now); });
         if (ok) OnCaptureStarted(game);
     }
@@ -515,12 +515,12 @@ public sealed class MeasurePage : ModulePage, IDisposable
         var r = session.Read();
         LiveFps = Num(r.CurrentFps, "0");
         HeroFps = double.IsFinite(r.CurrentFps) ? r.CurrentFps : double.NaN;
-        HeroKicker = $"Medindo agora · {TimeSpan.FromSeconds(r.ElapsedSeconds).ToString(r.ElapsedSeconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss", Pt)}";
+        HeroKicker = Loc.F("Meas.MedindoAgoraN", TimeSpan.FromSeconds(r.ElapsedSeconds).ToString(r.ElapsedSeconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss", Pt));
         LiveLow1 = Num(r.Low1Fps, "0");
         LiveFrametime = Num(r.FrametimeMs, "0.0");
         LiveAverage = Num(r.AverageFps, "0");
         LiveClock = TimeSpan.FromSeconds(r.ElapsedSeconds).ToString(r.ElapsedSeconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss", Pt);
-        LiveDelta = LiveComparison.Delta(r, _liveReference)?.Text ?? (_liveReference is null ? "" : "A diferença aparece depois de 30 s de jogo.");
+        LiveDelta = LiveComparison.Delta(r, _liveReference)?.Text ?? (_liveReference is null ? "" : Loc.T("Meas.DiferencaApareceDepois30"));
         var trace = session.Trace();
         var end = r.ElapsedSeconds;
         var from = Math.Max(0, end - 60);
@@ -537,7 +537,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         ClearLive();
         if (finished.Seconds < _prefs.MinSessionSeconds || finished.Frames < 100)
         {
-            Status = $"Partida de {finished.Game.Name} curta demais ({finished.Seconds:0} s): não foi guardada (mínimo {_prefs.MinSessionSeconds} s).";
+            Status = Loc.F("Meas.PartidaNCurtaDemais", finished.Game.Name, finished.Seconds, _prefs.MinSessionSeconds);
             Notify();
             return;
         }
@@ -554,7 +554,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
                 {
                     finished.WriteCsv(tmp);
                     var s = _store.Import(tmp, $"{finished.Game.Name} {finished.StartedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt)}", finished.Game.ExeName,
-                        finished.Automatic ? "automático" : "ao vivo", finished.StartedAt);
+                        finished.Automatic ? Loc.T("Meas.Automatico") : Loc.T("Shell.Vivo"), finished.StartedAt);
                     s = s with
                     {
                         GameName = finished.Game.Name,
@@ -574,13 +574,13 @@ public sealed class MeasurePage : ModulePage, IDisposable
             Reload(saved.Game);
             Compare(saved);
             Status = Comparison is { } c && c.Current.Id == saved.Id
-                ? $"Partida de {saved.DisplayName} guardada. Antes x depois: {c.Verdict}"
-                : $"Partida de {saved.DisplayName} guardada: {saved.Summary.AverageFps:0} FPS médio, 1% low {saved.Summary.OnePercentLowAverageFps:0}.";
+                ? Loc.F("Meas.PartidaNGuardadaAntes", saved.DisplayName, c.Verdict)
+                : Loc.F("Meas.PartidaNGuardadaN", saved.DisplayName, saved.Summary.AverageFps, saved.Summary.OnePercentLowAverageFps);
             Host?.Notify(Status);
         }
         catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException or ArgumentException)
         {
-            Status = $"A partida terminou, mas não deu para guardar: {ex.Message}";
+            Status = Loc.F("Meas.PartidaTerminouMasNao", ex.Message);
         }
         Notify();
     }
@@ -598,21 +598,21 @@ public sealed class MeasurePage : ModulePage, IDisposable
         if (_detected is { } g)
         {
             HeroTitle = g.Name;
-            var measuring = _engine?.Session is { } s ? $" · medindo há {LiveClockOr(s)}" : AutoMeasure ? "" : " · medição automática desligada";
-            HeroDetail = $"Aberto agora: {g.ExeName}, {g.ReasonText}{measuring}.";
+            var measuring = _engine?.Session is { } s ? Loc.F("Meas.MedindoHaN", LiveClockOr(s)) : AutoMeasure ? "" : Loc.T("Meas.MedicaoAutomaticaDesligada2");
+            HeroDetail = Loc.F("Meas.AbertoAgoraNN", g.ExeName, g.ReasonText, measuring);
         }
         else if (_engine?.Session is { } s)
         {
             HeroTitle = s.Game.Name;
-            HeroDetail = $"Medindo {s.Game.ExeName} (iniciado à mão).";
+            HeroDetail = Loc.F("Meas.MedindoNIniciadoMao", s.Game.ExeName);
         }
         else
         {
             var last = _all.MaxBy(x => x.CapturedAt);
-            HeroTitle = "Nenhum jogo aberto";
+            HeroTitle = Loc.T("Meas.NenhumJogoAberto");
             HeroDetail = last is null
-                ? (AutoMeasure ? "Abra um jogo: o NEXUS começa a medir sozinho." : "Ligue \"Medir automaticamente\" e abra um jogo.")
-                : $"Último jogo medido: {last.DisplayName}, em {last.CapturedAt.ToLocalTime().ToString("dd/MM 'às' HH:mm", Pt)}.";
+                ? (AutoMeasure ? Loc.T("Meas.AbraJogoNexusComeca") : Loc.T("Meas.LigueMedirAutomaticamenteAbra"))
+                : Loc.F("Meas.UltimoJogoMedidoN", last.DisplayName, last.CapturedAt.ToLocalTime().ToString(Loc.T("Meas.DdMmHhMm"), Pt));
         }
         UpdateHeroNumbers();
         OnPropertyChanged(nameof(IsPlaying));
@@ -629,23 +629,23 @@ public sealed class MeasurePage : ModulePage, IDisposable
         if (capturing is not null)
         {
             HeroGame = _detected?.Name ?? capturing.Game.Name;
-            if (!HeroKicker.StartsWith("Medindo", StringComparison.Ordinal)) HeroKicker = "Medindo agora";
-            HeroFpsLabel = "FPS agora";
+            if (!HeroKicker.StartsWith("Medindo", StringComparison.Ordinal)) HeroKicker = Loc.T("Meas.MedindoAgora");
+            HeroFpsLabel = Loc.T("Meas.FpsAgora");
             return;
         }
         if (_detected is { } g)
         {
             var previous = _all.Where(x => x.Game == GameKey.Of(g.ExeName)).MaxBy(x => x.CapturedAt);
-            HeroKicker = "Aberto agora";
+            HeroKicker = Loc.T("Meas.AbertoAgora");
             HeroGame = g.Name;
             HeroFps = previous?.Summary.AverageFps ?? double.NaN;
-            HeroFpsLabel = previous is null ? "Primeira partida deste jogo: o FPS aparece ao medir" : "FPS médio na última partida deste jogo";
+            HeroFpsLabel = previous is null ? Loc.T("Meas.PrimeiraPartidaDesteJogo") : Loc.T("Meas.FpsMedioUltimaPartida");
             return;
         }
-        HeroKicker = last is null ? "Nenhum jogo aberto" : "Último jogo medido";
-        HeroGame = last?.DisplayName ?? "Pronto para medir";
+        HeroKicker = last is null ? Loc.T("Meas.NenhumJogoAberto") : Loc.T("Meas.UltimoJogoMedido");
+        HeroGame = last?.DisplayName ?? Loc.T("Meas.ProntoMedir");
         HeroFps = last?.Summary.AverageFps ?? double.NaN;
-        HeroFpsLabel = last is null ? "Abra um jogo para ver o FPS aqui" : "FPS médio na última partida";
+        HeroFpsLabel = last is null ? Loc.T("Meas.AbraJogoVerFps") : Loc.T("Meas.FpsMedioUltimaPartida2");
     }
 
     private static string LiveClockOr(LiveSession s) => TimeSpan.FromSeconds(s.Seconds).ToString(s.Seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture);
@@ -661,27 +661,27 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private void RegisterHotkey()
     {
         if (!OperatingSystem.IsWindows()) return;
-        if (!_prefs.HotkeyEnabled) { _hotkey?.Unregister(); HotkeyStatus = "Atalho desligado."; return; }
+        if (!_prefs.HotkeyEnabled) { _hotkey?.Unregister(); HotkeyStatus = Loc.T("Meas.AtalhoDesligado"); return; }
         try
         {
             if (_hotkey is null)
             {
                 _hotkey = new GlobalHotkey();
-                _hotkey.Pressed += () => { _overlay.Toggle(); EnsureSystemLoad(); _ = EnsureCaptureForOverlayAsync(); Host?.Notify(_overlay.Enabled ? "Mostrador de FPS ligado." : "Mostrador de FPS desligado."); };
+                _hotkey.Pressed += () => { _overlay.Toggle(); EnsureSystemLoad(); _ = EnsureCaptureForOverlayAsync(); Host?.Notify(_overlay.Enabled ? Loc.T("Meas.MostradorFpsLigado") : Loc.T("Meas.MostradorFpsDesligado")); };
             }
             var key = Hotkey.Parse(_prefs.OverlayHotkey);
             HotkeyStatus = _hotkey.Register(key)
-                ? $"{key} liga e desliga o mostrador, mesmo com o NEXUS minimizado."
-                : $"{key} já é usado por outro programa. Escolha outra combinação.";
+                ? Loc.F("Meas.NLigaDesligaMostrador", key)
+                : Loc.F("Meas.NJaUsadoOutro", key);
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { HotkeyStatus = $"Não foi possível registrar o atalho: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { HotkeyStatus = Loc.F("Meas.NaoFoiPossivelRegistrar", ex.Message); }
     }
 
     private void ApplyHotkey()
     {
         if (!Hotkey.TryParse(HotkeyText, out var key))
         {
-            HotkeyStatus = "Use Ctrl, Alt ou Win com uma letra, número ou F1–F24. Ex.: Ctrl+Shift+F.";
+            HotkeyStatus = Loc.T("Meas.UseCtrlAltOu");
             return;
         }
         HotkeyText = key.ToString();
@@ -734,7 +734,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         if (Comparison is null || selectGame is not null) Compare(_all.Where(s => _selectedGame is null || s.Game == _selectedGame.Key).MaxBy(s => s.CapturedAt));
         RecomputeManual();
         foreach (var p in new[] { nameof(HasSessions), nameof(HasGames), nameof(ComparisonEmptyText) }) OnPropertyChanged(p);
-                        if (bad > 0) Status = $"{bad} arquivo(s) de sessão ilegível(is) em {_store.Folder} foram ignorados.";
+                        if (bad > 0) Status = Loc.F("Meas.NArquivoSSessao", bad, _store.Folder);
         UpdateHero();
     }
 
@@ -749,7 +749,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private void Compare(MeasuredSession? current)
     {
         try { Comparison = current is null ? null : AutoCompare.Compare(current, _all, _changes); }
-        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException) { Comparison = null; Status = $"Não deu para comparar: {ex.Message}"; }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException) { Comparison = null; Status = Loc.F("Meas.NaoDeuCompararN", ex.Message); }
         OnPropertyChanged(nameof(ComparisonEmptyText));
             }
 
@@ -768,7 +768,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             _changes = await Task.Run(ReadChanges);
             if (Comparison is { } c) Compare(_all.FirstOrDefault(s => s.Id == c.Current.Id));
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"Não deu para ler o diário: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = Loc.F("Meas.NaoDeuLerDiario", ex.Message); }
     }
 
     /// <summary>Mudanças do NEXUS dos dois diários (usuário e administrador), abertos SOMENTE para leitura.</summary>
@@ -807,8 +807,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
             return;
         }
         var n = _changes.Count(c => c.At > lastSession.CapturedAt);
-        InviteText = $"Você aplicou {(n == 1 ? $"\"{latestChange.Title}\"" : $"{n} mudanças")} depois da última partida de {lastSession.DisplayName}. " +
-                     "Jogue uma partida (2 minutos ou mais) para medirmos o antes e depois." + (AutoMeasure ? "" : " Ligue a medição automática para não precisar lembrar.");
+        InviteText = Loc.F("Meas.VoceAplicouNDepois", (n == 1 ? $"\"{latestChange.Title}\"" : Loc.F("Meas.NMudancas", n)), lastSession.DisplayName) +
+                     Loc.T("Meas.JoguePartida2Minutos") + (AutoMeasure ? "" : Loc.T("Meas.LigueMedicaoAutomaticaNao"));
     }
 
     private async Task ReadLibraryAsync(bool force)
@@ -816,7 +816,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         if (!OperatingSystem.IsWindows()) return;
         if (!force && DateTimeOffset.Now - _libraryReadAt < TimeSpan.FromMinutes(10)) return;
         _libraryReadAt = DateTimeOffset.Now;
-        LibraryText = "Lendo as bibliotecas de jogos…";
+        LibraryText = Loc.T("Meas.LendoBibliotecasJogos");
         try
         {
             var notes = new List<string>();
@@ -824,10 +824,10 @@ public sealed class MeasurePage : ModulePage, IDisposable
             _library = games;
             var byStore = games.GroupBy(g => g.Store).Select(g => $"{g.Key} {g.Count()}");
             LibraryText = games.Count == 0
-                ? "Nenhuma biblioteca encontrada (Steam, Epic, Riot, Battle.net, Xbox). Jogos conhecidos e a sua lista continuam valendo."
-                : $"{games.Count} jogo(s) nas bibliotecas: {string.Join(", ", byStore)}." + (notes.Count > 0 ? " " + string.Join(" ", notes) : "");
+                ? Loc.T("Meas.NenhumaBibliotecaEncontradaSteam")
+                : Loc.F("Meas.NJogoSNas", games.Count, string.Join(", ", byStore)) + (notes.Count > 0 ? " " + string.Join(" ", notes) : "");
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { LibraryText = $"Não deu para ler as bibliotecas: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { LibraryText = Loc.F("Meas.NaoDeuLerBibliotecas", ex.Message); }
     }
 
     private static string? GpuDriver(SystemFacts? facts) =>
@@ -838,7 +838,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private void SetPrefs(MeasurePreferences prefs, string? message)
     {
         _prefs = prefs.Normalize();
-        if (!_prefs.Save(_prefsPath)) Status = "Não deu para salvar as preferências em " + _prefsPath;
+        if (!_prefs.Save(_prefsPath)) Status = Loc.T("Meas.NaoDeuSalvarPreferencias") + _prefsPath;
         else if (message is not null) Status = message;
         foreach (var p in new[] { nameof(AutoMeasure), nameof(OverlayOnGameStart), nameof(OverlayShowSystem), nameof(OverlayCornerValue), nameof(HotkeyEnabled),
                      nameof(DetectFullscreen), nameof(RequestElevation), nameof(MinSessionSeconds), nameof(KeepDays), nameof(UserGames), nameof(ExcludedGames),
@@ -851,17 +851,17 @@ public sealed class MeasurePage : ModulePage, IDisposable
     {
         var exe = NewGameExe.Trim();
         if (!PresentMonCli.IsValidExeName(exe)) return;
-        SetPrefs(_prefs.WithUserGame(exe), $"{exe} entrou na sua lista de jogos.");
+        SetPrefs(_prefs.WithUserGame(exe), Loc.F("Meas.NEntrouSuaLista", exe));
         NewGameExe = "";
     }
 
     private void Browse()
     {
-        var dialog = new Microsoft.Win32.OpenFileDialog { Title = "Onde está o PresentMon?", Filter = "PresentMon (PresentMon*.exe)|PresentMon*.exe|Executável (*.exe)|*.exe" };
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = Loc.T("Meas.OndeEstaPresentmon"), Filter = Loc.T("Meas.PresentmonPresentmonExePresentmon") };
         if (dialog.ShowDialog() != true) return;
         RelocatePresentMon(dialog.FileName);
         SetPrefs(_prefs, _pm is { Usable: true, Source: PresentMonSource.Bundled } bundled && !string.Equals(bundled.Path, dialog.FileName, StringComparison.OrdinalIgnoreCase)
-            ? "O NEXUS continua usando o PresentMon que o acompanha (conferido); o arquivo indicado fica como alternativa."
+            ? Loc.T("Meas.NexusContinuaUsandoPresentmon")
             : PresentMonStatus());
     }
 
@@ -875,14 +875,14 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private void RelocatePresentMon(string? configured)
     {
         try { _pm = PresentMonLocator.Locate(configured, AppContext.BaseDirectory, _trust); }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { _pm = null; _status = "Não deu para conferir o PresentMon: " + ex.Message; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { _pm = null; _status = Loc.T("Meas.NaoDeuConferirPresentmon") + ex.Message; }
         _prefs = _prefs with { PresentMonPath = _pm?.Path ?? configured };
     }
 
     private string PresentMonStatus() => _pm switch
     {
-        null => "PresentMon não encontrado nas pastas conhecidas.",
-        { Usable: true } pm => $"PresentMon pronto ({pm.SourceText}). {pm.Verdict.Reason}",
+        null => Loc.T("Meas.PresentmonNaoEncontradoNas"),
+        { Usable: true } pm => Loc.F("Meas.PresentmonProntoNN", pm.SourceText, pm.Verdict.Reason),
         var pm => pm.Verdict.Reason,
     };
 
@@ -904,17 +904,17 @@ public sealed class MeasurePage : ModulePage, IDisposable
         try
         {
             Busy = true;
-            var r = await Host.ApplyAsync("Medir sem pedir permissão toda vez",
-                "O NEXUS vai colocar a sua conta no grupo do Windows \"Usuários do log de desempenho\" (o Windows pede permissão uma vez).\n\n" +
-                "Depois disso o PresentMon mede sem o aviso do Windows a cada partida. Vale depois que você sair e entrar de novo na conta.\n\n" +
-                "O que muda: programas da sua conta passam a poder iniciar rastreamentos de eventos do Windows (é o que o PresentMon usa). " +
-                "Não dá privilégio de administrador. Desfazer tira a conta do grupo (só se ela não estava lá antes).",
+            var r = await Host.ApplyAsync(Loc.T("Meas.MedirSemPedirPermissao"),
+                Loc.T("Meas.NexusVaiColocarSua") +
+                Loc.T("Meas.DepoisDissoPresentmonMede") +
+                Loc.T("Meas.MudaProgramasSuaConta") +
+                Loc.T("Meas.NaoPrivilegioAdministradorDesfazer"),
                 [new ActionRequest(PerfLogActionId)], BrokerLevel.Admin);
-            if (r is null) { Status = "Cancelado. Nada foi alterado."; return; }
+            if (r is null) { Status = Loc.T("Shell.CanceladoNadaFoiAlterado"); return; }
             if (r.Response is { Ok: true, RunId: { } run })
             {
                 _perfLogRun = run;
-                Status = "Pronto: sua conta está no grupo \"Usuários do log de desempenho\". Saia e entre de novo no Windows para medir sem aviso.";
+                Status = Loc.T("Meas.ProntoSuaContaEsta");
             }
             else Status = r.Message;
         }
@@ -933,7 +933,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             Busy = true;
             var r = await Host.RevertAsync(run, BrokerLevel.Admin);
             if (r is null) return;
-            if (r.Ok) { _perfLogRun = null; Status = "Desfeito: sua conta saiu do grupo (vale depois de sair e entrar de novo)."; }
+            if (r.Ok) { _perfLogRun = null; Status = Loc.T("Meas.DesfeitoSuaContaSaiu"); }
             else Status = r.Message;
         }
         finally
@@ -962,7 +962,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
 
     private void Import()
     {
-        var dialog = new Microsoft.Win32.OpenFileDialog { Title = "Importar captura (CSV do PresentMon ou CapFrameX)", Filter = "CSV (*.csv)|*.csv", Multiselect = true };
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = Loc.T("Meas.ImportarCapturaCsvPresentmon"), Filter = Loc.T("Clean.CsvCsvCsv"), Multiselect = true };
         if (dialog.ShowDialog() != true) return;
         var ok = 0;
         var errors = new List<string>();
@@ -973,16 +973,16 @@ public sealed class MeasurePage : ModulePage, IDisposable
             catch (Exception ex) when (ex is InvalidDataException or IOException or ArgumentException or UnauthorizedAccessException) { errors.Add($"{Path.GetFileName(f)}: {ex.Message}"); }
         }
         Reload(lastGame);
-        Status = $"{ok} sessão(ões) importada(s)." + (errors.Count > 0 ? " Não importadas: " + string.Join(" · ", errors) : "");
+        Status = Loc.F("Meas.NSessaoOesImportada", ok) + (errors.Count > 0 ? Loc.T("Meas.NaoImportadas") + string.Join(" · ", errors) : "");
     }
 
     private void Delete()
     {
         if (Selected is not { } row) return;
-        if (Host?.Confirm("Apagar sessão", $"Apagar a sessão \"{row.Name}\"? O arquivo dela na pasta de sessões do NEXUS será removido.") != true) return;
+        if (Host?.Confirm(Loc.T("Meas.ApagarSessao"), Loc.F("Meas.ApagarSessaoNArquivo", row.Name)) != true) return;
         _store.Delete(row.Session);
         Reload();
-        Status = $"Sessão \"{row.Name}\" apagada.";
+        Status = Loc.F("Meas.SessaoNApagada", row.Name);
     }
 
     private void ToggleExclude()
@@ -991,7 +991,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         var updated = row.Session with { Excluded = !row.Session.Excluded };
         _store.Save(updated);
         Reload();
-        Status = updated.Excluded ? "Esta partida não entra mais nas comparações." : "Esta partida voltou a entrar nas comparações.";
+        Status = updated.Excluded ? Loc.T("Meas.EstaPartidaNaoEntra") : Loc.T("Meas.EstaPartidaVoltouEntrar");
     }
 
     private void Retag(SessionTag tag)
@@ -1007,20 +1007,20 @@ public sealed class MeasurePage : ModulePage, IDisposable
         if (Comparison is not { } c) return;
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Exportar relatório do antes x depois", Filter = "Texto (*.txt)|*.txt",
+            Title = Loc.T("Meas.ExportarRelatorioAntesX"), Filter = Loc.T("Meas.TextoTxtTxt"),
             FileName = $"nexus-antes-depois-{c.Current.Game.Replace(".exe", "", StringComparison.OrdinalIgnoreCase)}-{DateTime.Now:yyyyMMdd-HHmm}.txt",
         };
         if (dialog.ShowDialog() != true) return;
         File.WriteAllText(dialog.FileName, SessionLibrary.Report(c), new System.Text.UTF8Encoding(true));
-        Status = $"Relatório salvo em {dialog.FileName}.";
+        Status = Loc.F("Meas.RelatorioSalvoN", dialog.FileName);
     }
 
     private void ExportCsv()
     {
-        var dialog = new Microsoft.Win32.SaveFileDialog { Title = "Exportar sessões (CSV)", Filter = "CSV (*.csv)|*.csv", FileName = $"nexus-sessoes-{DateTime.Now:yyyyMMdd-HHmm}.csv" };
+        var dialog = new Microsoft.Win32.SaveFileDialog { Title = Loc.T("Meas.ExportarSessoesCsv"), Filter = Loc.T("Clean.CsvCsvCsv"), FileName = $"nexus-sessoes-{DateTime.Now:yyyyMMdd-HHmm}.csv" };
         if (dialog.ShowDialog() != true) return;
         File.WriteAllText(dialog.FileName, SessionLibrary.SummaryCsv(_all), new System.Text.UTF8Encoding(true));
-        Status = $"{_all.Count} sessão(ões) exportada(s) para {dialog.FileName}.";
+        Status = Loc.F("Meas.NSessaoOesExportada", _all.Count, dialog.FileName);
     }
 
     private void Cleanup()
@@ -1028,11 +1028,11 @@ public sealed class MeasurePage : ModulePage, IDisposable
         if (KeepDays <= 0) return;
         var limit = DateTimeOffset.Now.AddDays(-KeepDays);
         var count = _all.Count(s => s.CapturedAt < limit && s.Tag == SessionTag.None);
-        if (count == 0) { Status = $"Nenhuma sessão com mais de {KeepDays} dias."; return; }
-        if (Host?.Confirm("Limpar sessões antigas", $"Apagar até {count} sessão(ões) com mais de {KeepDays} dias? A última partida de cada jogo e as marcadas como antes/depois ficam.") != true) return;
+        if (count == 0) { Status = Loc.F("Meas.NenhumaSessaoMaisN", KeepDays); return; }
+        if (Host?.Confirm(Loc.T("Meas.LimparSessoesAntigas"), Loc.F("Meas.ApagarAteNSessao", count, KeepDays)) != true) return;
         var removed = _store.Cleanup(limit);
         Reload();
-        Status = $"{removed} sessão(ões) antiga(s) apagada(s) da pasta de sessões do NEXUS.";
+        Status = Loc.F("Meas.NSessaoOesAntiga", removed);
     }
 
     private void OpenFolder()
@@ -1042,7 +1042,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             Directory.CreateDirectory(_store.Folder);
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("explorer.exe") { ArgumentList = { _store.Folder }, UseShellExecute = false });
         }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException or UnauthorizedAccessException) { Status = $"Não deu para abrir a pasta: {ex.Message}"; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException or UnauthorizedAccessException) { Status = Loc.F("Meas.NaoDeuAbrirPasta", ex.Message); }
     }
 
     /// <summary>Arquivos temporários de capturas anteriores (de um NEXUS fechado no meio da partida).</summary>
