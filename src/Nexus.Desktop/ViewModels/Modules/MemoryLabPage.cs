@@ -51,7 +51,7 @@ public sealed class MemBarRow
     public required double Fraction { get; init; }
     public string Detail { get; init; } = "";
     /// <summary>A barra do teórico (cinza, referência).</summary>
-    public bool IsTheory => Label == "Teórico";
+    public bool IsTheory => Label == Loc.T("Mem.Teorico");
 }
 
 /// <summary>Fonte citada (abre no navegador).</summary>
@@ -79,7 +79,7 @@ public sealed class MemFindingRow : ObservableObject
     /// <summary>Só o arquivo de paginação tem botão aqui (o texto da confirmação é dele).</summary>
     public bool HasAction => ActionId == MemoryDiagnosis.PageFileActionId;
     public bool HasSteps => Steps.Count > 0;
-    public string SeverityText => Severity switch { "bad" => "Problema", "warn" => "Atenção", "good" => "Tudo certo", _ => "Informação" };
+    public string SeverityText => Severity switch { "bad" => Loc.T("Gpu.Problema"), "warn" => Loc.T("Gpu.Atencao"), "good" => Loc.T("Gpu.TudoCerto"), _ => Loc.T("Mem.Informacao") };
     public UiTone ToneKind => Severity switch { "bad" => UiTone.Bad, "warn" => UiTone.Warn, "good" => UiTone.Good, _ => UiTone.Info };
     public string IconKey => Severity switch { "bad" => "Icon.Error", "warn" => "Icon.Warning", "good" => "Icon.Check", _ => "Icon.Info" };
     public bool HasDetails => Steps.Count > 0 || Sources.Count > 0;
@@ -111,7 +111,7 @@ public sealed class MemoryLabPage : ModulePage
     private LatencyResult? _latency;
     private ChannelCheck? _check;
     private bool _loaded, _measuring, _stateLoading;
-    private string _headline = "Lendo a memória…", _headlineTone = "info", _subline = "", _capacityText = "", _channelText = "";
+    private string _headline = Loc.T("Mem.LendoMemoria"), _headlineTone = "info", _subline = "", _capacityText = "", _channelText = "";
     private string _verdict = "", _theoryText = "", _latencyText = "", _latencyDetail = "", _progress = "", _compareText = "", _stateNote = "";
     private string _gamingHeadline = "", _gamingDetail = "";
     private bool _attempted;
@@ -187,16 +187,16 @@ public sealed class MemoryLabPage : ModulePage
     };
     public string ChannelModeText => _analysis?.Layout.Mode switch
     {
-        ChannelMode.SingleChannel => "Canal único",
-        ChannelMode.DualChannel => "Dois canais (dual channel)",
-        ChannelMode.QuadChannel => "Quatro canais",
-        ChannelMode.MultiChannel => "Vários canais",
+        ChannelMode.SingleChannel => Loc.T("Mem.CanalUnico"),
+        ChannelMode.DualChannel => Loc.T("Mem.DoisCanaisDualChannel"),
+        ChannelMode.QuadChannel => Loc.T("Mem.QuatroCanais"),
+        ChannelMode.MultiChannel => Loc.T("Mem.VariosCanais"),
         null => "",
-        _ => "Canais não identificados",
+        _ => Loc.T("Mem.CanaisNaoIdentificados"),
     };
     /// <summary>"1 de 2 slots em uso".</summary>
     public string SlotsText => _analysis is { } a
-        ? $"{a.Inventory.Populated.Count} de {a.Inventory.Devices.Count} {(a.Inventory.Devices.Count == 1 ? "posição" : "posições")} em uso"
+        ? Loc.F("Mem.NNNUso", a.Inventory.Populated.Count, a.Inventory.Devices.Count, (a.Inventory.Devices.Count == 1 ? Loc.T("Mem.Posicao") : Loc.T("Mem.Posicoes")))
         : "";
     /// <summary>Banda teórica com a configuração de agora (GB/s; 0 = velocidade não informada).</summary>
     public double TheoryGbps => _analysis?.TheoreticalGbps ?? 0;
@@ -212,7 +212,7 @@ public sealed class MemoryLabPage : ModulePage
     public double CommitPercent => _state is { CommitTotalBytes: { } ct, CommitLimitBytes: { } cl } && cl > 0 ? ct * 100.0 / cl : double.NaN;
     public double StandbyBytes => _state?.StandbyBytes is { } sb ? sb : double.NaN;
     public bool HasState => _state is not null;
-    public string CancelText => Measuring ? "Cancelar medição" : "";
+    public string CancelText => Measuring ? Loc.T("Cpu.CancelarMedicao") : "";
 
     private void NotifyNumbers()
     {
@@ -227,14 +227,14 @@ public sealed class MemoryLabPage : ModulePage
     }
 
     public static string MythText =>
-        "\"Limpador de RAM\" não acelera nada. O Windows usa a memória livre como cache (lista de espera) de propósito: o que está " +
-        "ali abre mais rápido e é devolvido na hora a quem precisar. Esvaziar à força joga esse cache fora, faz os programas lerem " +
-        "de novo do disco e empurra páginas para o arquivo de paginação. Por isso o NEXUS não tem esse botão.";
+        Loc.T("Mem.LimpadorRamNaoAcelera") +
+        Loc.T("Mem.AliAbreMaisRapido") +
+        Loc.T("Mem.NovoDiscoEmpurraPaginas");
 
     public static string NoDriverText =>
-        "Timings detalhados (tCL, tRCD, tRP, tRAS…) e a leitura direta do chip SPD do módulo exigem acesso ao barramento SMBus da placa, " +
-        "que só um driver de kernel tem. O NEXUS não instala driver: mostra o que o firmware informa (SMBIOS), o que o número de peça " +
-        "revela e o que a medição comprova. Para os timings exatos, use o CPU-Z ou o utilitário do fabricante da placa.";
+        Loc.T("Mem.TimingsDetalhadosTclTrcd") +
+        Loc.T("Mem.SoDriverKernelTem") +
+        Loc.T("Mem.RevelaMedicaoComprovaTimings");
 
     public override async Task OnFactsReadyAsync(SystemFacts facts)
     {
@@ -256,7 +256,7 @@ public sealed class MemoryLabPage : ModulePage
     {
         try
         {
-            if (!OperatingSystem.IsWindows()) { Headline = "Disponível só no Windows"; return; }
+            if (!OperatingSystem.IsWindows()) { Headline = Loc.T("Mem.DisponivelSoWindows"); return; }
             var gpus = _facts?.Gpus ?? [];
             var analysis = await Task.Run(() => MemoryLabAnalyzer.Analyze(WindowsMemoryReader.ReadSmbios(), gpus));
             _analysis = analysis;
@@ -266,8 +266,8 @@ public sealed class MemoryLabPage : ModulePage
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            Headline = "Não foi possível ler a memória";
-            Message = $"Leitura do SMBIOS falhou: {ex.Message}";
+            Headline = Loc.T("Mem.NaoFoiPossivelLer");
+            Message = Loc.F("Mem.LeituraSmbiosFalhouN", ex.Message);
         }
         finally
         {
@@ -280,17 +280,17 @@ public sealed class MemoryLabPage : ModulePage
     {
         if (!OperatingSystem.IsWindows() || _stateLoading) return;
         _stateLoading = true;
-        StateNote = "Lendo o estado da memória do Windows…";
+        StateNote = Loc.T("Mem.LendoEstadoMemoriaWindows");
         try
         {
             var sysMain = _facts?.Services.FirstOrDefault(s => string.Equals(s.Name, "SysMain", StringComparison.OrdinalIgnoreCase));
             _state = await Task.Run(() => WindowsMemoryReader.ReadState(sysMain?.State, sysMain?.StartType));
             ShowState();
             NotifyNumbers();
-            StateNote = _state.Problems.Count == 0 ? "" : "Não lido: " + string.Join("; ", _state.Problems.Select(p => $"{p.Key} ({p.Value})"));
+            StateNote = _state.Problems.Count == 0 ? "" : Loc.T("Mem.NaoLido") + string.Join("; ", _state.Problems.Select(p => $"{p.Key} ({p.Value})"));
             Rebuild();
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { StateNote = $"Não foi possível ler o estado: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { StateNote = Loc.F("Mem.NaoFoiPossivelLer2", ex.Message); }
         finally { _stateLoading = false; CommandManager.InvalidateRequerySuggested(); }
     }
 
@@ -305,17 +305,17 @@ public sealed class MemoryLabPage : ModulePage
             _ => "info",
         };
         var machine = string.Join(" ", new[] { a.Machine.SystemMaker, a.Machine.Model }.Where(s => s is not null));
-        var kind = a.Machine.Portable switch { true => "notebook", false => "PC de mesa", _ => null };
+        var kind = a.Machine.Portable switch { true => "notebook", false => Loc.T("Mem.PcMesa"), _ => null };
         Subline = string.Join(" · ", new[] { machine.Length > 0 ? machine : null, kind, a.Layout.Explanation }.Where(s => s is not null));
 
         var inv = a.Inventory;
         var free = inv.Empty.Count(d => !d.LooksSoldered);
         var soldered = inv.Populated.Count(d => d.LooksSoldered);
-        var parts = new List<string> { $"{Gb(inv.InstalledBytes)} instalados" };
-        if (inv.MaxCapacityBytes is { } max) parts.Add($"a placa aceita até {Gb(max)}");
-        parts.Add($"{inv.Devices.Count} posiç{(inv.Devices.Count == 1 ? "ão" : "ões")}");
-        parts.Add(free == 0 ? "nenhum slot livre" : $"{free} slot{(free > 1 ? "s" : "")} livre{(free > 1 ? "s" : "")}");
-        if (soldered > 0) parts.Add($"{soldered} soldad{(soldered > 1 ? "as" : "a")} na placa");
+        var parts = new List<string> { Loc.F("Mem.NInstalados", Gb(inv.InstalledBytes)) };
+        if (inv.MaxCapacityBytes is { } max) parts.Add(Loc.F("Mem.PlacaAceitaAteN", Gb(max)));
+        parts.Add(inv.Devices.Count == 1 ? Loc.F("Mem.N1Posicao", 1) : Loc.F("Mem.NPosicoes", inv.Devices.Count));
+        parts.Add(free == 0 ? Loc.T("Mem.NenhumSlotLivre") : free > 1 ? Loc.F("Mem.NSlotsLivres", free) : Loc.F("Mem.N1SlotLivre", free));
+        if (soldered > 0) parts.Add(soldered > 1 ? Loc.F("Mem.NSoldadas", soldered) : Loc.F("Mem.N1Soldada", soldered));
         CapacityText = string.Join(" · ", parts);
 
         Channels.Clear();
@@ -328,18 +328,18 @@ public sealed class MemoryLabPage : ModulePage
                 var part = d.Populated ? PartNumberDecoder.Decode(d.PartNumber) : null;
                 return new MemSlotRow
                 {
-                    Title = d.Locator ?? d.BankLocator ?? "sem nome",
+                    Title = d.Locator ?? d.BankLocator ?? Loc.T("Mem.SemNome"),
                     Occupied = d.Populated,
-                    SizeText = d.Populated ? Gb(d.SizeBytes) : "vazio",
-                    Detail = d.Populated ? $"{d.Type} {(d.LooksSoldered ? "soldada" : FormName(d.FormFactor))}".Trim() : "slot livre",
+                    SizeText = d.Populated ? Gb(d.SizeBytes) : Loc.T("Mem.Vazio"),
+                    Detail = d.Populated ? $"{d.Type} {(d.LooksSoldered ? Loc.T("Mem.Soldada") : FormName(d.FormFactor))}".Trim() : Loc.T("Mem.SlotLivre"),
                     Tip = $"{d.Locator} / {d.BankLocator}" + (part is { Decoded: true } ? "\n" + part.Summary : ""),
                 };
             }).ToList();
-            Channels.Add(new MemChannelGroup { Name = g.Key == "?" ? "Canal não informado" : $"Canal {g.Key}", HasMemory = slots.Any(s => s.Occupied), Slots = slots });
+            Channels.Add(new MemChannelGroup { Name = g.Key == "?" ? Loc.T("Mem.CanalNaoInformado") : Loc.F("Mem.CanalN", g.Key), HasMemory = slots.Any(s => s.Occupied), Slots = slots });
         }
         ChannelText = a.Layout.FromNames
-            ? "Canais lidos dos nomes que o firmware dá aos slots."
-            : "O firmware não informa o canal no nome dos slots: o diagrama é uma estimativa e a medição de banda confirma.";
+            ? Loc.T("Mem.CanaisLidosNomesFirmware")
+            : Loc.T("Mem.FirmwareNaoInformaCanal");
 
         Modules.Clear();
         for (var i = 0; i < inv.Populated.Count; i++)
@@ -349,34 +349,34 @@ public sealed class MemoryLabPage : ModulePage
             var (vendor, how) = JedecVendors.Resolve(d.Manufacturer, d.ModuleManufacturerId);
             var fields = new List<MemField>
             {
-                new("Slot", $"{d.Locator ?? "?"}{(d.BankLocator is null ? "" : $" · {d.BankLocator}")}"),
-                new("Fabricante", vendor is null ? "desconhecido" : $"{vendor} ({how})"),
-                new("Número de peça", d.PartNumber ?? "não informado"),
-                new("Série", d.SerialNumber ?? "não informada"),
-                new("Tamanho", Gb(d.SizeBytes)),
-                new("Tipo", d.Type ?? "não informado"),
-                new("Forma", d.LooksSoldered ? "soldada na placa" : FormName(d.FormFactor) + (d.FormFactorRaw is null ? "" : $" ({d.FormFactorRaw})")),
-                new("Velocidade nominal", d.SpeedMts is { } s ? $"{s} MT/s" : "não informada"),
-                new("Velocidade configurada", d.ConfiguredSpeedMts is { } c ? $"{c} MT/s" : "não informada"),
-                new("Ranks", d.Rank is { } r ? r.ToString(Pt) : "não informado"),
-                new("Largura de dados", d.DataWidthBits is { } w ? $"{w} bits{(d.TotalWidthBits is { } tw && tw > w ? $" ({tw} com ECC)" : "")}" : "não informada"),
-                new("Tensão (mín/máx/config.)", Volts(d.MinVoltageMv, d.MaxVoltageMv, d.ConfiguredVoltageMv)),
+                new(Loc.T("Mem.Slot"), $"{d.Locator ?? "?"}{(d.BankLocator is null ? "" : $" · {d.BankLocator}")}"),
+                new(Loc.T("Cpu.Fabricante"), vendor is null ? Loc.T("Mem.Desconhecido") : $"{vendor} ({how})"),
+                new(Loc.T("Mem.NumeroPeca"), d.PartNumber ?? Loc.T("Gpu.NaoInformado")),
+                new(Loc.T("Mem.Serie"), d.SerialNumber ?? Loc.T("Mem.NaoInformada")),
+                new(Loc.T("Prog.Tamanho"), Gb(d.SizeBytes)),
+                new(Loc.T("Mem.Tipo"), d.Type ?? Loc.T("Gpu.NaoInformado")),
+                new(Loc.T("Mem.Forma"), d.LooksSoldered ? Loc.T("Mem.SoldadaPlaca") : FormName(d.FormFactor) + (d.FormFactorRaw is null ? "" : $" ({d.FormFactorRaw})")),
+                new(Loc.T("Mem.VelocidadeNominal"), d.SpeedMts is { } s ? $"{s} MT/s" : Loc.T("Mem.NaoInformada")),
+                new(Loc.T("Mem.VelocidadeConfigurada"), d.ConfiguredSpeedMts is { } c ? $"{c} MT/s" : Loc.T("Mem.NaoInformada")),
+                new(Loc.T("Mem.Ranks"), d.Rank is { } r ? r.ToString(Pt) : Loc.T("Gpu.NaoInformado")),
+                new(Loc.T("Mem.LarguraDados"), d.DataWidthBits is { } w ? Loc.F("Mem.NBitsN", w, (d.TotalWidthBits is { } tw && tw > w ? Loc.F("Mem.NEcc", tw) : "")) : Loc.T("Mem.NaoInformada")),
+                new(Loc.T("Mem.TensaoMinMaxConfig"), Volts(d.MinVoltageMv, d.MaxVoltageMv, d.ConfiguredVoltageMv)),
             };
-            if (d.Registered) fields.Add(new MemField("Buffer", "registrada (RDIMM)"));
+            if (d.Registered) fields.Add(new MemField(Loc.T("Mem.Buffer"), Loc.T("Mem.RegistradaRdimm")));
             var notes = part.Notes.ToList();
-            if (part.KitModules is > 1) notes.Add($"Vendido em kit de {part.KitModules} módulos ({Gb(part.KitTotalBytes)} no total).");
+            if (part.KitModules is > 1) notes.Add(Loc.F("Mem.VendidoKitNModulos", part.KitModules, Gb(part.KitTotalBytes)));
             if (part.Profile is "XMP" or "EXPO" or "XMP/EXPO" && part.SpeedMts is { } adv)
-                notes.Add($"A velocidade anunciada ({adv} MT/s) depende do perfil {part.Profile} no BIOS; sem ele, o módulo roda na velocidade JEDEC.");
+                notes.Add(Loc.F("Mem.VelocidadeAnunciadaNMt", adv, part.Profile));
             Modules.Add(new MemModuleRow
             {
-                Title = $"{Gb(d.SizeBytes)} {d.Type} · {d.Locator ?? "slot"}",
+                Title = $"{Gb(d.SizeBytes)} {d.Type} · {d.Locator ?? Loc.T("Mem.Slot2")}",
                 Decoded = part.Summary,
                 Confidence = part.Confidence switch
                 {
-                    DecodeConfidence.High => "Decodificação: confiança alta (padrão público do fabricante)",
-                    DecodeConfidence.Medium => "Decodificação: confiança média (parte do número segue padrão conhecido)",
-                    DecodeConfidence.Low => "Decodificação: confiança baixa (só a geração)",
-                    _ => "Número de peça desconhecido: nada foi deduzido dele",
+                    DecodeConfidence.High => Loc.T("Mem.DecodificacaoConfiancaAltaPadrao"),
+                    DecodeConfidence.Medium => Loc.T("Mem.DecodificacaoConfiancaMediaParte"),
+                    DecodeConfidence.Low => Loc.T("Mem.DecodificacaoConfiancaBaixaSo"),
+                    _ => Loc.T("Mem.NumeroPecaDesconhecidoNada"),
                 },
                 Fields = fields,
                 Notes = notes,
@@ -385,8 +385,8 @@ public sealed class MemoryLabPage : ModulePage
 
         var theory = a.TheoreticalGbps;
         TheoryText = a.ConfiguredMts is { } mts && theory > 0
-            ? string.Create(Pt, $"Teórico: {mts} MT/s × {a.Layout.BusWidthBits / 8} bytes ({a.Layout.BusWidthBits} bits, {a.Layout.ChannelCount} canal{(a.Layout.ChannelCount == 1 ? "" : "is")}) = {theory:0.0} GB/s.")
-            : "Velocidade não informada pelo firmware: sem valor teórico para comparar.";
+            ? Loc.F("Mem.TeoricoNMtS", mts, a.Layout.BusWidthBits / 8, a.Layout.BusWidthBits, a.Layout.ChannelCount, (a.Layout.ChannelCount == 1 ? Loc.T("Mem.CanalPalavra") : Loc.T("Mem.CanaisPalavra")), theory)
+            : Loc.T("Mem.VelocidadeNaoInformadaPelo");
         var gaming = MemoryDiagnosis.Gaming(a.Layout, a.Machine);
         GamingHeadline = gaming.Headline;
         GamingDetail = gaming.Detail;
@@ -399,18 +399,18 @@ public sealed class MemoryLabPage : ModulePage
     {
         var s = _state!;
         WindowsState.Clear();
-        WindowsState.Add(new MemField("Em uso agora", s.TotalPhysicalBytes is { } t && s.AvailablePhysicalBytes is { } av ? $"{Gb(t - av)} de {Gb(t)} ({(t - av) * 100.0 / t:0}%)" : "?"));
-        WindowsState.Add(new MemField("Memória comprometida", s.CommitTotalBytes is { } ct && s.CommitLimitBytes is { } cl ? $"{Gb(ct)} de {Gb(cl)} (limite = RAM + paginação)" : "?"));
-        WindowsState.Add(new MemField("Pico desde que ligou", s.CommitPeakBytes is { } pk ? $"{Gb(pk)}{(s.Uptime is { } up ? $" (ligado há {Uptime(up)})" : "")}" : "?"));
-        WindowsState.Add(new MemField("Cache (lista de espera)", s.StandbyBytes is { } sb ? $"{Gb(sb)} — memória em cache, devolvida na hora a quem precisar" : "?"));
-        WindowsState.Add(new MemField("Faltas de página", s.PageFaultsPerSec is { } pf
-            ? string.Create(Pt, $"{pf:N0}/s no total; {s.PagesInputPerSec ?? 0:N0} páginas/s lidas do disco (só estas indicam falta de RAM)")
+        WindowsState.Add(new MemField(Loc.T("Mem.UsoAgora"), s.TotalPhysicalBytes is { } t && s.AvailablePhysicalBytes is { } av ? Loc.F("Mem.NNN", Gb(t - av), Gb(t), (t - av) * 100.0 / t) : "?"));
+        WindowsState.Add(new MemField(Loc.T("Mem.MemoriaComprometida"), s.CommitTotalBytes is { } ct && s.CommitLimitBytes is { } cl ? Loc.F("Mem.NNLimiteRam", Gb(ct), Gb(cl)) : "?"));
+        WindowsState.Add(new MemField(Loc.T("Mem.PicoDesdeLigou"), s.CommitPeakBytes is { } pk ? $"{Gb(pk)}{(s.Uptime is { } up ? Loc.F("Mem.LigadoHaN", Uptime(up)) : "")}" : "?"));
+        WindowsState.Add(new MemField(Loc.T("Mem.CacheListaEspera"), s.StandbyBytes is { } sb ? Loc.F("Mem.NMemoriaCacheDevolvida", Gb(sb)) : "?"));
+        WindowsState.Add(new MemField(Loc.T("Mem.FaltasPagina"), s.PageFaultsPerSec is { } pf
+            ? Loc.F("Mem.NSTotalN", pf, s.PagesInputPerSec ?? 0)
             : "?"));
-        WindowsState.Add(new MemField("Compressão de memória", s.CompressionEnabled switch { true => "ligada", false => "desligada", _ => "não lida" } + (s.CompressionSource.Length > 0 ? $" ({s.CompressionSource})" : "")));
-        WindowsState.Add(new MemField("Arquivo de paginação", s.PageFile.Describe() + (s.PageFileCurrentBytes is { } pfs && pfs > 0 ? $" · tamanho atual {Gb(pfs)}" : "")));
-        WindowsState.Add(new MemField("SysMain (Superfetch)", s.SysMainState is null ? "não lido" : $"{s.SysMainState}{(s.SysMainStartType is null ? "" : $", início {s.SysMainStartType}")} — veja a página Serviços"));
+        WindowsState.Add(new MemField(Loc.T("Mem.CompressaoMemoria"), s.CompressionEnabled switch { true => "ligada", false => "desligada", _ => Loc.T("Mem.NaoLida") } + (s.CompressionSource.Length > 0 ? $" ({s.CompressionSource})" : "")));
+        WindowsState.Add(new MemField(Loc.T("Mem.ArquivoPaginacao"), s.PageFile.Describe() + (s.PageFileCurrentBytes is { } pfs && pfs > 0 ? Loc.F("Mem.TamanhoAtualN", Gb(pfs)) : "")));
+        WindowsState.Add(new MemField(Loc.T("Mem.SysmainSuperfetch"), s.SysMainState is null ? Loc.T("Mem.NaoLido2") : Loc.F("Mem.NNVejaPagina", s.SysMainState, (s.SysMainStartType is null ? "" : Loc.F("Mem.InicioN", s.SysMainStartType)))));
         if (s.EnablePrefetcher is { } ep)
-            WindowsState.Add(new MemField("Prefetch", ep switch { 0 => "desligado", 1 => "só programas", 2 => "só inicialização", 3 => "programas e inicialização (padrão)", _ => ep.ToString(Pt) }));
+            WindowsState.Add(new MemField(Loc.T("Mem.Prefetch"), ep switch { 0 => "desligado", 1 => Loc.T("Mem.SoProgramas"), 2 => Loc.T("Mem.SoInicializacao"), 3 => Loc.T("Mem.ProgramasInicializacaoPadrao"), _ => ep.ToString(Pt) }));
     }
 
     private void Rebuild()
@@ -450,7 +450,7 @@ public sealed class MemoryLabPage : ModulePage
         {
             var avail = OperatingSystem.IsWindows() ? WindowsMemoryReader.AvailablePhysical() : null;
             var options = BenchmarkOptions.ForAvailableMemory(avail ?? 2 * GiB, Environment.ProcessorCount);
-            ProgressText = $"Preparando {Gb((ulong)options.BufferBytes * 2)} para a banda…";
+            ProgressText = Loc.F("Mem.PreparandoNBanda", Gb((ulong)options.BufferBytes * 2));
             var bw = await Task.Run(() => MemoryBenchmark.MeasureBandwidth(options, progress, token), token);
             _bandwidth = bw;
             var lat = await Task.Run(() => MemoryBenchmark.MeasureLatency(options, null, progress, token), token);
@@ -458,11 +458,11 @@ public sealed class MemoryLabPage : ModulePage
             ShowMeasure();
             NotifyNumbers();
             SaveRun();
-            ProgressText = "Medição concluída e salva para comparar depois.";
+            ProgressText = Loc.T("Mem.MedicaoConcluidaSalvaComparar");
             Rebuild();
         }
-        catch (OperationCanceledException) { ProgressText = "Medição cancelada."; }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { ProgressText = $"A medição falhou: {ex.Message}"; }
+        catch (OperationCanceledException) { ProgressText = Loc.T("Clean.MedicaoCancelada"); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { ProgressText = Loc.F("Cpu.MedicaoFalhouN", ex.Message); }
         finally
         {
             _cancel = null;
@@ -480,26 +480,26 @@ public sealed class MemoryLabPage : ModulePage
         var scale = Math.Max(theory, Math.Max(bw.ReadGbps, Math.Max(bw.WriteGbps, bw.CopyGbps))) * 1.05;
         Bars.Clear();
         if (theory > 0)
-            Bars.Add(new MemBarRow { Label = "Teórico", ValueText = string.Create(Pt, $"{theory:0.0} GB/s"), Fraction = theory / scale, Detail = TheoryText });
-        Bars.Add(Bar("Leitura", bw.ReadGbps, theory, scale, bw.ReadSamples));
-        Bars.Add(Bar("Escrita", bw.WriteGbps, theory, scale, bw.WriteSamples));
-        Bars.Add(Bar("Cópia", bw.CopyGbps, theory, scale, bw.CopySamples));
+            Bars.Add(new MemBarRow { Label = Loc.T("Mem.Teorico"), ValueText = string.Create(Pt, $"{theory:0.0} GB/s"), Fraction = theory / scale, Detail = TheoryText });
+        Bars.Add(Bar(Loc.T("Pg.Leitura"), bw.ReadGbps, theory, scale, bw.ReadSamples));
+        Bars.Add(Bar(Loc.T("Mem.Escrita"), bw.WriteGbps, theory, scale, bw.WriteSamples));
+        Bars.Add(Bar(Loc.T("Mem.Copia"), bw.CopyGbps, theory, scale, bw.CopySamples));
         OnPropertyChanged(nameof(HasBars));
 
         var lat = _latency!;
         LatencyText = string.Create(Pt, $"{lat.RandomNs:0.0} ns");
-        LatencyDetail = string.Create(Pt,
-            $"Perseguição de ponteiros aleatória num bloco de {Gb((ulong)lat.BlockBytes)} (bem maior que o cache L3): {lat.RandomNs:0.0} ns por acesso. " +
-            $"Visitando página por página (quase sem falta de TLB): {lat.PageLocalNs:0.0} ns. {lat.PageNote} " +
-            $"Banda: {bw.Threads} threads, blocos de {Gb((ulong)bw.BufferBytes)}, {bw.Passes} passadas (mediana), {bw.Instructions}.");
+        LatencyDetail =
+            Loc.F("Mem.PerseguicaoPonteirosAleatoriaNum", Gb((ulong)lat.BlockBytes), lat.RandomNs) +
+            Loc.F("Mem.VisitandoPaginaPaginaQuase", lat.PageLocalNs, lat.PageNote) +
+            Loc.F("Mem.BandaNThreadsBlocos", bw.Threads, Gb((ulong)bw.BufferBytes), bw.Passes, bw.Instructions);
     }
 
     private static MemBarRow Bar(string label, double gbps, double theory, double scale, IReadOnlyList<double> samples) => new()
     {
         Label = label,
-        ValueText = string.Create(Pt, $"{gbps:0.0} GB/s") + (theory > 0 ? string.Create(Pt, $" · {gbps / theory * 100:0}% do teórico") : ""),
+        ValueText = string.Create(Pt, $"{gbps:0.0} GB/s") + (theory > 0 ? Loc.F("Mem.NTeorico", gbps / theory * 100) : ""),
         Fraction = scale > 0 ? Math.Clamp(gbps / scale, 0, 1) : 0,
-        Detail = "Passadas: " + string.Join(" · ", samples.Select(s => s.ToString("0.0", Pt))),
+        Detail = Loc.T("Mem.Passadas") + string.Join(" · ", samples.Select(s => s.ToString("0.0", Pt))),
     };
 
     private void SaveRun()
@@ -513,7 +513,7 @@ public sealed class MemoryLabPage : ModulePage
                 ChannelMode = a.Layout.Mode.ToString(), TheoreticalGbps = a.TheoreticalGbps, Bandwidth = _bandwidth, Latency = _latency, ChannelVerdict = _check?.Text,
             });
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Message = $"Não foi possível salvar a medição: {ex.Message}"; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Message = Loc.F("Mem.NaoFoiPossivelSalvar", ex.Message); }
         LoadRuns();
     }
 
@@ -527,8 +527,8 @@ public sealed class MemoryLabPage : ModulePage
                 r.Latency is { } l ? l.RandomNs.ToString("0.0", Pt) + " ns" : "—"));
         OnPropertyChanged(nameof(HasRuns));
         CompareText = runs.Count >= 2 && runs[0].Bandwidth is { } now && runs[1].Bandwidth is { } before && before.ReadGbps > 0
-            ? string.Create(Pt, $"Leitura: {before.ReadGbps:0.0} → {now.ReadGbps:0.0} GB/s ({(now.ReadGbps / before.ReadGbps - 1) * 100:+0;-0}%) em relação à medição de {runs[1].TakenAt.ToLocalTime():dd/MM HH:mm}.")
-            : runs.Count == 1 ? "Primeira medição salva. Meça de novo depois de mudar algo (ex.: segundo módulo) para comparar." : "";
+            ? Loc.F("Mem.LeituraNNGb", before.ReadGbps, now.ReadGbps, (now.ReadGbps / before.ReadGbps - 1) * 100, runs[1].TakenAt.ToLocalTime())
+            : runs.Count == 1 ? Loc.T("Mem.PrimeiraMedicaoSalvaMeca") : "";
     }
 
     // ------------------------------------------------------------------ ação reversível (pelo aplicador)
@@ -537,18 +537,18 @@ public sealed class MemoryLabPage : ModulePage
     {
         // O texto e o nível abaixo são do arquivo de paginação, a única ação desta página; outra ação precisaria do próprio texto.
         if (Host is null || row.ActionId != MemoryDiagnosis.PageFileActionId) return;
-        var r = await Host.ApplyAsync("Arquivo de paginação automático",
-            "O Windows volta a gerenciar o arquivo de paginação sozinho (padrão do sistema).\n\nRisco: baixo; ocupa alguns GB no disco.\n" +
-            "Exige administrador e vale depois de reiniciar.\nDesfazer: volta exatamente a configuração anterior.",
+        var r = await Host.ApplyAsync(Loc.T("Mem.ArquivoPaginacaoAutomatico"),
+            Loc.T("Mem.WindowsVoltaGerenciarArquivo") +
+            Loc.T("Mem.ExigeAdministradorValeDepois"),
             [new ActionRequest(MemoryDiagnosis.PageFileActionKey)], BrokerLevel.Admin);
         if (r is null) return;
         var outcome = r.Response?.Results is { Count: > 0 } items ? items[0].Outcome : "";
         if (outcome is "Verified" or "AlreadyConfigured")
         {
             row.RunId = outcome == "Verified" ? r.Response?.RunId : null;
-            row.Status = outcome == "Verified" ? "Aplicado. Reinicie o PC para valer." : "Já estava no automático.";
+            row.Status = outcome == "Verified" ? Loc.T("Mem.AplicadoReiniciePcValer") : Loc.T("Mem.JaEstavaAutomatico");
         }
-        else row.Status = outcome.Length == 0 ? r.Message : $"Não aplicado ({outcome}).";
+        else row.Status = outcome.Length == 0 ? r.Message : Loc.F("Mem.NaoAplicadoN", outcome);
         Message = row.Status;
     }
 
@@ -557,8 +557,8 @@ public sealed class MemoryLabPage : ModulePage
         if (Host is null || row.RunId is not { } run) return;
         var r = await Host.RevertAsync(run, BrokerLevel.Admin);
         if (r is null) return;
-        if (r.Response?.FullyRestored == true) { row.RunId = null; row.Status = "Desfeito. Reinicie o PC para valer."; }
-        else row.Status = $"Não desfeito: {r.Message}";
+        if (r.Response?.FullyRestored == true) { row.RunId = null; row.Status = Loc.T("Mem.DesfeitoReiniciePcValer"); }
+        else row.Status = Loc.F("Mem.NaoDesfeitoN", r.Message);
         Message = row.Status;
     }
 
@@ -581,21 +581,21 @@ public sealed class MemoryLabPage : ModulePage
 
     private static string Volts(int? min, int? max, int? conf)
     {
-        if (min is null && max is null && conf is null) return "não informada";
+        if (min is null && max is null && conf is null) return Loc.T("Mem.NaoInformada");
         static string V(int? mv) => mv is { } v ? (v / 1000.0).ToString("0.00", Pt) + " V" : "?";
         return $"{V(min)} / {V(max)} / {V(conf)}";
     }
 
     private static string Uptime(TimeSpan t) =>
-        t.TotalDays >= 1 ? string.Create(Pt, $"{(int)t.TotalDays} d {t.Hours} h") : string.Create(Pt, $"{t.Hours} h {t.Minutes} min");
+        t.TotalDays >= 1 ? string.Create(Pt, $"{(int)t.TotalDays} d {t.Hours} h") : Loc.F("Mem.NHNMin", t.Hours, t.Minutes);
 
     private static string FormName(MemoryFormFactor f) => f switch
     {
-        MemoryFormFactor.Dimm => "DIMM (PC de mesa)",
-        MemoryFormFactor.SoDimm => "SODIMM (notebook)",
+        MemoryFormFactor.Dimm => Loc.T("Mem.DimmPcMesa"),
+        MemoryFormFactor.SoDimm => Loc.T("Mem.SodimmNotebook"),
         MemoryFormFactor.Soldered => "soldada",
         MemoryFormFactor.Camm => "CAMM",
         MemoryFormFactor.Other => "outro",
-        _ => "não informada",
+        _ => Loc.T("Mem.NaoInformada"),
     };
 }

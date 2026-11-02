@@ -1749,8 +1749,173 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>You applied {0} after the last match of {1}. </value></data>
   <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>If Windows asks for permission for PresentMon, accept it to measure.</value></data>
   <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>for Windows, without hooking into the game). Version </value></data>
+  <data name="Mem.AliAbreMaisRapido" xml:space="preserve"><value>there opens faster and is handed back instantly to whoever needs it. Forcing it empty throws that cache away, makes programs read </value></data>
+  <data name="Mem.AplicadoReiniciePcValer" xml:space="preserve"><value>Applied. Restart the PC for it to take effect.</value></data>
+  <data name="Mem.ArquivoPaginacao" xml:space="preserve"><value>Page file</value></data>
+  <data name="Mem.ArquivoPaginacaoAutomatico" xml:space="preserve"><value>Automatic page file</value></data>
+  <data name="Mem.BandaGbSArquivos" xml:space="preserve"><value>Bandwidth in GB/s. Files in %LocalAppData%\NEXUS\lab\memory.</value></data>
+  <data name="Mem.BandaNThreadsBlocos" xml:space="preserve"><value>Bandwidth: {0} threads, {1} blocks, {2} passes (median), {3}.</value></data>
+  <data name="Mem.Buffer" xml:space="preserve"><value>Buffer</value></data>
+  <data name="Mem.CacheListaEspera" xml:space="preserve"><value>Cache (standby list)</value></data>
+  <data name="Mem.CacheProntaDevolver" xml:space="preserve"><value>In cache, ready to give back:</value></data>
+  <data name="Mem.CadaCanalEstradaAte" xml:space="preserve"><value>Each channel is a road to the processor. A channel without a stick sits idle.</value></data>
+  <data name="Mem.CanaisLidosNomesFirmware" xml:space="preserve"><value>Channels read from the names the firmware gives the slots.</value></data>
+  <data name="Mem.CanaisNaoIdentificados" xml:space="preserve"><value>Channels not identified</value></data>
+  <data name="Mem.CanaisPalavra" xml:space="preserve"><value>channels</value></data>
+  <data name="Mem.CanalN" xml:space="preserve"><value>Channel {0}</value></data>
+  <data name="Mem.CanalNaoInformado" xml:space="preserve"><value>Channel not reported</value></data>
+  <data name="Mem.CanalPalavra" xml:space="preserve"><value>channel</value></data>
+  <data name="Mem.CanalUnico" xml:space="preserve"><value>Single channel</value></data>
+  <data name="Mem.ComoFoiMedido" xml:space="preserve"><value>How it was measured</value></data>
+  <data name="Mem.CompreIgual" xml:space="preserve"><value>Buy the same</value></data>
+  <data name="Mem.CompressaoMemoria" xml:space="preserve"><value>Memory compression</value></data>
+  <data name="Mem.Configuracao" xml:space="preserve"><value>Setup</value></data>
+  <data name="Mem.Copia" xml:space="preserve"><value>Copy</value></data>
+  <data name="Mem.DecodificacaoConfiancaAltaPadrao" xml:space="preserve"><value>Decoding: high confidence (manufacturer's public pattern)</value></data>
+  <data name="Mem.DecodificacaoConfiancaBaixaSo" xml:space="preserve"><value>Decoding: low confidence (generation only)</value></data>
+  <data name="Mem.DecodificacaoConfiancaMediaParte" xml:space="preserve"><value>Decoding: medium confidence (part of the number follows a known pattern)</value></data>
+  <data name="Mem.Desconhecido" xml:space="preserve"><value>unknown</value></data>
+  <data name="Mem.DesfeitoReiniciePcValer" xml:space="preserve"><value>Undone. Restart the PC for it to take effect.</value></data>
+  <data name="Mem.DimmPcMesa" xml:space="preserve"><value>DIMM (desktop PC)</value></data>
+  <data name="Mem.DisponivelSoWindows" xml:space="preserve"><value>Only available on Windows</value></data>
+  <data name="Mem.DoisCanaisDualChannel" xml:space="preserve"><value>Two channels (dual channel)</value></data>
+  <data name="Mem.DualChannelLigaSozinho" xml:space="preserve"><value>Dual channel turns on by itself. Compare before and after here.</value></data>
+  <data name="Mem.EncaixeVazio" xml:space="preserve"><value>Fit it in the empty slot</value></data>
+  <data name="Mem.Encontramos" xml:space="preserve"><value>What we found</value></data>
+  <data name="Mem.Escrita" xml:space="preserve"><value>Write</value></data>
+  <data name="Mem.EsperaCadaIdaMemoria" xml:space="preserve"><value>Wait for each trip to memory. Lower is better.</value></data>
+  <data name="Mem.ExigeAdministradorValeDepois" xml:space="preserve"><value>Requires administrator and takes effect after restarting.
+Undo: returns exactly to the previous setting.</value></data>
+  <data name="Mem.FaixasTestesPublicosNao" xml:space="preserve"><value>Ranges from public tests, not a promise: depends on the game and the graphics card.</value></data>
+  <data name="Mem.FaltasPagina" xml:space="preserve"><value>Page faults</value></data>
+  <data name="Mem.FichaCompletaPente" xml:space="preserve"><value>Full stick spec sheet</value></data>
+  <data name="Mem.FirmwareNaoInformaCanal" xml:space="preserve"><value>The firmware doesn't report the channel in the slot names: the diagram is an estimate and the bandwidth measurement confirms it.</value></data>
+  <data name="Mem.Forma" xml:space="preserve"><value>Form factor</value></data>
+  <data name="Mem.ImportaSegundoAnelMemoria" xml:space="preserve"><value>What matters is the second ring: memory promised to programs near the limit (RAM + page file).</value></data>
+  <data name="Mem.Informacao" xml:space="preserve"><value>Information</value></data>
+  <data name="Mem.InicioN" xml:space="preserve"><value>, startup {0}</value></data>
+  <data name="Mem.JaEstavaAutomatico" xml:space="preserve"><value>It was already automatic.</value></data>
+  <data name="Mem.LarguraBanda" xml:space="preserve"><value>Bandwidth</value></data>
+  <data name="Mem.LarguraBandaTeoricaGb" xml:space="preserve"><value>Theoretical bandwidth (GB/s)</value></data>
+  <data name="Mem.LarguraDados" xml:space="preserve"><value>Data width</value></data>
+  <data name="Mem.Latencia" xml:space="preserve"><value>Latency</value></data>
+  <data name="Mem.LatenciaRam" xml:space="preserve"><value>RAM latency</value></data>
+  <data name="Mem.LeituraNNGb" xml:space="preserve"><value>Read: {0:0.0} → {1:0.0} GB/s ({2:+0;-0}%) compared with the measurement of {3:dd/MM HH:mm}.</value></data>
+  <data name="Mem.LeituraSmbiosFalhouN" xml:space="preserve"><value>SMBIOS read failed: {0}</value></data>
+  <data name="Mem.LendoEstadoMemoriaWindows" xml:space="preserve"><value>Reading the Windows memory state…</value></data>
+  <data name="Mem.LendoMemoria" xml:space="preserve"><value>Reading the memory…</value></data>
+  <data name="Mem.LigadoHaN" xml:space="preserve"><value> (on for {0})</value></data>
+  <data name="Mem.Limite" xml:space="preserve"><value>of the limit</value></data>
+  <data name="Mem.LimpadorRamNaoAcelera" xml:space="preserve"><value>A "RAM cleaner" speeds up nothing. Windows uses free memory as cache (standby list) on purpose: what's </value></data>
+  <data name="Mem.MecaNovo" xml:space="preserve"><value>Measure again</value></data>
+  <data name="Mem.MedicaoConcluidaSalvaComparar" xml:space="preserve"><value>Measurement finished and saved for later comparison.</value></data>
+  <data name="Mem.MedicoesAnteriores" xml:space="preserve"><value>Previous measurements</value></data>
+  <data name="Mem.MedirVelocidade" xml:space="preserve"><value>Measure speed</value></data>
+  <data name="Mem.MedirVelocidade15S" xml:space="preserve"><value>Measure speed (≈ 15 s)</value></data>
+  <data name="Mem.MemoriaComprometida" xml:space="preserve"><value>Committed memory</value></data>
+  <data name="Mem.MemoriaInstalada" xml:space="preserve"><value>Installed memory</value></data>
+  <data name="Mem.MemoriaWindowsAgora" xml:space="preserve"><value>Windows memory now</value></data>
+  <data name="Mem.MesmoTamanhoTipoVelocidade" xml:space="preserve"><value>Same size, type and speed as the stick already there.</value></data>
+  <data name="Mem.N1PenteAgora" xml:space="preserve"><value>1 stick (now)</value></data>
+  <data name="Mem.N1PenteSoCanal" xml:space="preserve"><value>With 1 stick only one channel works. With 2 identical sticks, both channels work together.</value></data>
+  <data name="Mem.N1Posicao" xml:space="preserve"><value>{0} slot</value></data>
+  <data name="Mem.N1SlotLivre" xml:space="preserve"><value>{0} free slot</value></data>
+  <data name="Mem.N1Soldada" xml:space="preserve"><value>{0} soldered on the board</value></data>
+  <data name="Mem.N2PentesIguais" xml:space="preserve"><value>2 identical sticks</value></data>
+  <data name="Mem.NaoAplicadoN" xml:space="preserve"><value>Not applied ({0}).</value></data>
+  <data name="Mem.NaoDesfeitoN" xml:space="preserve"><value>Not undone: {0}</value></data>
+  <data name="Mem.NaoFoiPossivelLer" xml:space="preserve"><value>Could not read the memory</value></data>
+  <data name="Mem.NaoFoiPossivelLer2" xml:space="preserve"><value>Could not read the state: {0}</value></data>
+  <data name="Mem.NaoFoiPossivelSalvar" xml:space="preserve"><value>Could not save the measurement: {0}</value></data>
+  <data name="Mem.NaoHaLimpadorRam" xml:space="preserve"><value>Why there's no "RAM cleaner": free memory becomes cache on purpose, and emptying it doesn't speed anything up.</value></data>
+  <data name="Mem.NaoInformada" xml:space="preserve"><value>not reported</value></data>
+  <data name="Mem.NaoLida" xml:space="preserve"><value>not read</value></data>
+  <data name="Mem.NaoLido" xml:space="preserve"><value>Not read: </value></data>
+  <data name="Mem.NaoLido2" xml:space="preserve"><value>not read</value></data>
   <data name="Mem.NavSubtitle" xml:space="preserve"><value>Reverse engineering of your memory: modules, channels, real speed and measured latency.</value></data>
   <data name="Mem.NavTitle" xml:space="preserve"><value>RAM</value></data>
+  <data name="Mem.NBitsN" xml:space="preserve"><value>{0} bits{1}</value></data>
+  <data name="Mem.NEcc" xml:space="preserve"><value> ({0} with ECC)</value></data>
+  <data name="Mem.NenhumSlotLivre" xml:space="preserve"><value>no free slot</value></data>
+  <data name="Mem.NHNMin" xml:space="preserve"><value>{0} h {1} min</value></data>
+  <data name="Mem.NInstalados" xml:space="preserve"><value>{0} installed</value></data>
+  <data name="Mem.NMemoriaCacheDevolvida" xml:space="preserve"><value>{0} — cached memory, handed back instantly to whoever needs it</value></data>
+  <data name="Mem.NNLimiteRam" xml:space="preserve"><value>{0} of {1} (limit = RAM + paging)</value></data>
+  <data name="Mem.NNN" xml:space="preserve"><value>{0} of {1} ({2:0}%)</value></data>
+  <data name="Mem.NNNUso" xml:space="preserve"><value>{0} of {1} {2} in use</value></data>
+  <data name="Mem.NNVejaPagina" xml:space="preserve"><value>{0}{1} — see the Services page</value></data>
+  <data name="Mem.NovoDiscoEmpurraPaginas" xml:space="preserve"><value>again from disk and pushes pages to the page file. That's why NEXUS has no such button.</value></data>
+  <data name="Mem.NPosicoes" xml:space="preserve"><value>{0} slots</value></data>
+  <data name="Mem.NSlotsLivres" xml:space="preserve"><value>{0} free slots</value></data>
+  <data name="Mem.NSoldadas" xml:space="preserve"><value>{0} soldered on the board</value></data>
+  <data name="Mem.NSTotalN" xml:space="preserve"><value>{0:N0}/s in total; {1:N0} pages/s read from disk (only these indicate a lack of RAM)</value></data>
+  <data name="Mem.NTeorico" xml:space="preserve"><value> · {0:0}% of theoretical</value></data>
+  <data name="Mem.NumeroPeca" xml:space="preserve"><value>Part number</value></data>
+  <data name="Mem.NumeroPecaDesconhecidoNada" xml:space="preserve"><value>Unknown part number: nothing was inferred from it</value></data>
+  <data name="Mem.OndeEstaoPentes" xml:space="preserve"><value>Where the sticks are</value></data>
+  <data name="Mem.OndeVemEsteDesenho" xml:space="preserve"><value>Where does this drawing come from?</value></data>
+  <data name="Mem.ParadoSemPente" xml:space="preserve"><value>  idle, no stick</value></data>
+  <data name="Mem.Passadas" xml:space="preserve"><value>Passes: </value></data>
+  <data name="Mem.PcDesligadoForaTomada" xml:space="preserve"><value>PC off and unplugged. The dashed slot above.</value></data>
+  <data name="Mem.PcMesa" xml:space="preserve"><value>Desktop PC</value></data>
+  <data name="Mem.PentesInstalados" xml:space="preserve"><value>Installed sticks</value></data>
+  <data name="Mem.PerseguicaoPonteirosAleatoriaNum" xml:space="preserve"><value>Random pointer chasing in a {0} block (much larger than the L3 cache): {1:0.0} ns per access. </value></data>
+  <data name="Mem.PicoDesdeLigou" xml:space="preserve"><value>Peak since power on</value></data>
+  <data name="Mem.PlacaAceitaAteN" xml:space="preserve"><value>the board supports up to {0}</value></data>
+  <data name="Mem.Posicao" xml:space="preserve"><value>slot</value></data>
+  <data name="Mem.Posicoes" xml:space="preserve"><value>slots</value></data>
+  <data name="Mem.Prefetch" xml:space="preserve"><value>Prefetch</value></data>
+  <data name="Mem.PreparandoNBanda" xml:space="preserve"><value>Preparing {0} for bandwidth…</value></data>
+  <data name="Mem.PrimeiraMedicaoSalvaMeca" xml:space="preserve"><value>First measurement saved. Measure again after changing something (e.g. a second module) to compare.</value></data>
+  <data name="Mem.ProgramasInicializacaoPadrao" xml:space="preserve"><value>programs and boot (default)</value></data>
+  <data name="Mem.Quando" xml:space="preserve"><value>When</value></data>
+  <data name="Mem.QuantoProcessadorConseguePuxar" xml:space="preserve"><value>How much the processor can pull per second.</value></data>
+  <data name="Mem.QuatroCanais" xml:space="preserve"><value>Four channels</value></data>
+  <data name="Mem.QuemEstaUsandoMemoria" xml:space="preserve"><value>Who is using the memory?</value></data>
+  <data name="Mem.Ranks" xml:space="preserve"><value>Ranks</value></data>
+  <data name="Mem.RegistradaRdimm" xml:space="preserve"><value>registered (RDIMM)</value></data>
+  <data name="Mem.RevelaMedicaoComprovaTimings" xml:space="preserve"><value>reveals and what the measurement proves. For exact timings, use CPU-Z or the board maker's utility.</value></data>
+  <data name="Mem.SegundoPenteIgualDobra" xml:space="preserve"><value>A second identical stick doubles the road</value></data>
+  <data name="Mem.SemNome" xml:space="preserve"><value>no name</value></data>
+  <data name="Mem.Serie" xml:space="preserve"><value>Serial</value></data>
+  <data name="Mem.Slot" xml:space="preserve"><value>Slot</value></data>
+  <data name="Mem.Slot2" xml:space="preserve"><value>slot</value></data>
+  <data name="Mem.SlotLivre" xml:space="preserve"><value>free slot</value></data>
+  <data name="Mem.SodimmNotebook" xml:space="preserve"><value>SODIMM (laptop)</value></data>
+  <data name="Mem.SoDriverKernelTem" xml:space="preserve"><value>which only a kernel driver has. NEXUS doesn't install drivers: it shows what the firmware reports (SMBIOS), what the part number </value></data>
+  <data name="Mem.SoInicializacao" xml:space="preserve"><value>boot only</value></data>
+  <data name="Mem.Soldada" xml:space="preserve"><value>soldered</value></data>
+  <data name="Mem.SoldadaPlaca" xml:space="preserve"><value>soldered on the board</value></data>
+  <data name="Mem.SoProgramas" xml:space="preserve"><value>programs only</value></data>
+  <data name="Mem.SysmainSuperfetch" xml:space="preserve"><value>SysMain (Superfetch)</value></data>
+  <data name="Mem.TamanhoAtualN" xml:space="preserve"><value> · current size {0}</value></data>
+  <data name="Mem.TensaoMinMaxConfig" xml:space="preserve"><value>Voltage (min/max/config.)</value></data>
+  <data name="Mem.Teorico" xml:space="preserve"><value>Theoretical</value></data>
+  <data name="Mem.TeoricoMaximoConfiguracao" xml:space="preserve"><value>theoretical (the setup's maximum)</value></data>
+  <data name="Mem.TeoricoNMtS" xml:space="preserve"><value>Theoretical: {0} MT/s × {1} bytes ({2} bits, {3} {4}) = {5:0.0} GB/s.</value></data>
+  <data name="Mem.TimingsDetalhadosTclTrcd" xml:space="preserve"><value>Detailed timings (tCL, tRCD, tRP, tRAS…) and reading the module's SPD chip directly require access to the board's SMBus, </value></data>
+  <data name="Mem.Tipo" xml:space="preserve"><value>Type</value></data>
+  <data name="Mem.TodosNumerosWindows" xml:space="preserve"><value>All the Windows numbers</value></data>
+  <data name="Mem.Uns15SegundosLendo" xml:space="preserve"><value>About 15 seconds reading and writing memory. Close games and keep the charger plugged in. Changes nothing.</value></data>
+  <data name="Mem.Uso" xml:space="preserve"><value>  in use</value></data>
+  <data name="Mem.UsoAgora" xml:space="preserve"><value>In use now</value></data>
+  <data name="Mem.VariosCanais" xml:space="preserve"><value>Several channels</value></data>
+  <data name="Mem.Vazio" xml:space="preserve"><value>empty</value></data>
+  <data name="Mem.VazioCabeMaisPente" xml:space="preserve"><value>Empty: one more stick fits</value></data>
+  <data name="Mem.VelocidadeAindaNaoMedida" xml:space="preserve"><value>Speed not measured yet.</value></data>
+  <data name="Mem.VelocidadeAnunciadaNMt" xml:space="preserve"><value>The advertised speed ({0} MT/s) depends on the {1} profile in the BIOS; without it, the module runs at JEDEC speed.</value></data>
+  <data name="Mem.VelocidadeConfigurada" xml:space="preserve"><value>Configured speed</value></data>
+  <data name="Mem.VelocidadeMedida" xml:space="preserve"><value>Measured speed</value></data>
+  <data name="Mem.VelocidadeNaoInformadaPelo" xml:space="preserve"><value>Speed not reported by the firmware: no theoretical value to compare.</value></data>
+  <data name="Mem.VelocidadeNominal" xml:space="preserve"><value>Rated speed</value></data>
+  <data name="Mem.VendidoKitNModulos" xml:space="preserve"><value>Sold in a kit of {0} modules ({1} total).</value></data>
+  <data name="Mem.VerSemDriver" xml:space="preserve"><value>What can be seen without a driver?</value></data>
+  <data name="Mem.VisitandoPaginaPaginaQuase" xml:space="preserve"><value>Visiting page by page (almost no TLB misses): {0:0.0} ns. {1} </value></data>
+  <data name="Mem.VoltarAutomatico" xml:space="preserve"><value>Back to automatic</value></data>
+  <data name="Mem.WindowsVoltaGerenciarArquivo" xml:space="preserve"><value>Windows manages the page file by itself again (system default).
+
+Risk: low; it takes a few GB on disk.
+</value></data>
   <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Who is eating memory, whether something is leaking, and how to fix it now and for good.</value></data>
   <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memory: diagnosis</value></data>
   <data name="Mon.AbrindoContadoresWindows" xml:space="preserve"><value>Opening Windows counters…</value></data>

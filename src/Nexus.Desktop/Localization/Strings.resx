@@ -1749,8 +1749,173 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>Você aplicou {0} depois da última partida de {1}. </value></data>
   <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>Se o Windows pedir permissão para o PresentMon, aceite para medir.</value></data>
   <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>do Windows, sem entrar no jogo). A versão </value></data>
+  <data name="Mem.AliAbreMaisRapido" xml:space="preserve"><value>ali abre mais rápido e é devolvido na hora a quem precisar. Esvaziar à força joga esse cache fora, faz os programas lerem </value></data>
+  <data name="Mem.AplicadoReiniciePcValer" xml:space="preserve"><value>Aplicado. Reinicie o PC para valer.</value></data>
+  <data name="Mem.ArquivoPaginacao" xml:space="preserve"><value>Arquivo de paginação</value></data>
+  <data name="Mem.ArquivoPaginacaoAutomatico" xml:space="preserve"><value>Arquivo de paginação automático</value></data>
+  <data name="Mem.BandaGbSArquivos" xml:space="preserve"><value>Banda em GB/s. Arquivos em %LocalAppData%\NEXUS\lab\memory.</value></data>
+  <data name="Mem.BandaNThreadsBlocos" xml:space="preserve"><value>Banda: {0} threads, blocos de {1}, {2} passadas (mediana), {3}.</value></data>
+  <data name="Mem.Buffer" xml:space="preserve"><value>Buffer</value></data>
+  <data name="Mem.CacheListaEspera" xml:space="preserve"><value>Cache (lista de espera)</value></data>
+  <data name="Mem.CacheProntaDevolver" xml:space="preserve"><value>Em cache, pronta para devolver:</value></data>
+  <data name="Mem.CadaCanalEstradaAte" xml:space="preserve"><value>Cada canal é uma estrada até o processador. Canal sem pente fica parado.</value></data>
+  <data name="Mem.CanaisLidosNomesFirmware" xml:space="preserve"><value>Canais lidos dos nomes que o firmware dá aos slots.</value></data>
+  <data name="Mem.CanaisNaoIdentificados" xml:space="preserve"><value>Canais não identificados</value></data>
+  <data name="Mem.CanaisPalavra" xml:space="preserve"><value>canais</value></data>
+  <data name="Mem.CanalN" xml:space="preserve"><value>Canal {0}</value></data>
+  <data name="Mem.CanalNaoInformado" xml:space="preserve"><value>Canal não informado</value></data>
+  <data name="Mem.CanalPalavra" xml:space="preserve"><value>canal</value></data>
+  <data name="Mem.CanalUnico" xml:space="preserve"><value>Canal único</value></data>
+  <data name="Mem.ComoFoiMedido" xml:space="preserve"><value>Como foi medido</value></data>
+  <data name="Mem.CompreIgual" xml:space="preserve"><value>Compre igual</value></data>
+  <data name="Mem.CompressaoMemoria" xml:space="preserve"><value>Compressão de memória</value></data>
+  <data name="Mem.Configuracao" xml:space="preserve"><value>Configuração</value></data>
+  <data name="Mem.Copia" xml:space="preserve"><value>Cópia</value></data>
+  <data name="Mem.DecodificacaoConfiancaAltaPadrao" xml:space="preserve"><value>Decodificação: confiança alta (padrão público do fabricante)</value></data>
+  <data name="Mem.DecodificacaoConfiancaBaixaSo" xml:space="preserve"><value>Decodificação: confiança baixa (só a geração)</value></data>
+  <data name="Mem.DecodificacaoConfiancaMediaParte" xml:space="preserve"><value>Decodificação: confiança média (parte do número segue padrão conhecido)</value></data>
+  <data name="Mem.Desconhecido" xml:space="preserve"><value>desconhecido</value></data>
+  <data name="Mem.DesfeitoReiniciePcValer" xml:space="preserve"><value>Desfeito. Reinicie o PC para valer.</value></data>
+  <data name="Mem.DimmPcMesa" xml:space="preserve"><value>DIMM (PC de mesa)</value></data>
+  <data name="Mem.DisponivelSoWindows" xml:space="preserve"><value>Disponível só no Windows</value></data>
+  <data name="Mem.DoisCanaisDualChannel" xml:space="preserve"><value>Dois canais (dual channel)</value></data>
+  <data name="Mem.DualChannelLigaSozinho" xml:space="preserve"><value>O dual channel liga sozinho. Compare aqui o antes e depois.</value></data>
+  <data name="Mem.EncaixeVazio" xml:space="preserve"><value>Encaixe no vazio</value></data>
+  <data name="Mem.Encontramos" xml:space="preserve"><value>O que encontramos</value></data>
+  <data name="Mem.Escrita" xml:space="preserve"><value>Escrita</value></data>
+  <data name="Mem.EsperaCadaIdaMemoria" xml:space="preserve"><value>Espera por cada ida à memória. Menor é melhor.</value></data>
+  <data name="Mem.ExigeAdministradorValeDepois" xml:space="preserve"><value>Exige administrador e vale depois de reiniciar.
+Desfazer: volta exatamente a configuração anterior.</value></data>
+  <data name="Mem.FaixasTestesPublicosNao" xml:space="preserve"><value>Faixas de testes públicos, não promessa: depende do jogo e da placa de vídeo.</value></data>
+  <data name="Mem.FaltasPagina" xml:space="preserve"><value>Faltas de página</value></data>
+  <data name="Mem.FichaCompletaPente" xml:space="preserve"><value>Ficha completa do pente</value></data>
+  <data name="Mem.FirmwareNaoInformaCanal" xml:space="preserve"><value>O firmware não informa o canal no nome dos slots: o diagrama é uma estimativa e a medição de banda confirma.</value></data>
+  <data name="Mem.Forma" xml:space="preserve"><value>Forma</value></data>
+  <data name="Mem.ImportaSegundoAnelMemoria" xml:space="preserve"><value>O que importa é o segundo anel: memória prometida aos programas perto do limite (RAM + arquivo de paginação).</value></data>
+  <data name="Mem.Informacao" xml:space="preserve"><value>Informação</value></data>
+  <data name="Mem.InicioN" xml:space="preserve"><value>, início {0}</value></data>
+  <data name="Mem.JaEstavaAutomatico" xml:space="preserve"><value>Já estava no automático.</value></data>
+  <data name="Mem.LarguraBanda" xml:space="preserve"><value>Largura de banda</value></data>
+  <data name="Mem.LarguraBandaTeoricaGb" xml:space="preserve"><value>Largura de banda teórica (GB/s)</value></data>
+  <data name="Mem.LarguraDados" xml:space="preserve"><value>Largura de dados</value></data>
+  <data name="Mem.Latencia" xml:space="preserve"><value>Latência</value></data>
+  <data name="Mem.LatenciaRam" xml:space="preserve"><value>Latência da RAM</value></data>
+  <data name="Mem.LeituraNNGb" xml:space="preserve"><value>Leitura: {0:0.0} → {1:0.0} GB/s ({2:+0;-0}%) em relação à medição de {3:dd/MM HH:mm}.</value></data>
+  <data name="Mem.LeituraSmbiosFalhouN" xml:space="preserve"><value>Leitura do SMBIOS falhou: {0}</value></data>
+  <data name="Mem.LendoEstadoMemoriaWindows" xml:space="preserve"><value>Lendo o estado da memória do Windows…</value></data>
+  <data name="Mem.LendoMemoria" xml:space="preserve"><value>Lendo a memória…</value></data>
+  <data name="Mem.LigadoHaN" xml:space="preserve"><value> (ligado há {0})</value></data>
+  <data name="Mem.Limite" xml:space="preserve"><value>do limite</value></data>
+  <data name="Mem.LimpadorRamNaoAcelera" xml:space="preserve"><value>"Limpador de RAM" não acelera nada. O Windows usa a memória livre como cache (lista de espera) de propósito: o que está </value></data>
+  <data name="Mem.MecaNovo" xml:space="preserve"><value>Meça de novo</value></data>
+  <data name="Mem.MedicaoConcluidaSalvaComparar" xml:space="preserve"><value>Medição concluída e salva para comparar depois.</value></data>
+  <data name="Mem.MedicoesAnteriores" xml:space="preserve"><value>Medições anteriores</value></data>
+  <data name="Mem.MedirVelocidade" xml:space="preserve"><value>Medir velocidade</value></data>
+  <data name="Mem.MedirVelocidade15S" xml:space="preserve"><value>Medir velocidade (≈ 15 s)</value></data>
+  <data name="Mem.MemoriaComprometida" xml:space="preserve"><value>Memória comprometida</value></data>
+  <data name="Mem.MemoriaInstalada" xml:space="preserve"><value>Memória instalada</value></data>
+  <data name="Mem.MemoriaWindowsAgora" xml:space="preserve"><value>Memória do Windows agora</value></data>
+  <data name="Mem.MesmoTamanhoTipoVelocidade" xml:space="preserve"><value>Mesmo tamanho, tipo e velocidade do pente que já está aí.</value></data>
+  <data name="Mem.N1PenteAgora" xml:space="preserve"><value>1 pente (agora)</value></data>
+  <data name="Mem.N1PenteSoCanal" xml:space="preserve"><value>Com 1 pente só um canal trabalha. Com 2 pentes iguais, os dois canais trabalham juntos.</value></data>
+  <data name="Mem.N1Posicao" xml:space="preserve"><value>{0} posição</value></data>
+  <data name="Mem.N1SlotLivre" xml:space="preserve"><value>{0} slot livre</value></data>
+  <data name="Mem.N1Soldada" xml:space="preserve"><value>{0} soldada na placa</value></data>
+  <data name="Mem.N2PentesIguais" xml:space="preserve"><value>2 pentes iguais</value></data>
+  <data name="Mem.NaoAplicadoN" xml:space="preserve"><value>Não aplicado ({0}).</value></data>
+  <data name="Mem.NaoDesfeitoN" xml:space="preserve"><value>Não desfeito: {0}</value></data>
+  <data name="Mem.NaoFoiPossivelLer" xml:space="preserve"><value>Não foi possível ler a memória</value></data>
+  <data name="Mem.NaoFoiPossivelLer2" xml:space="preserve"><value>Não foi possível ler o estado: {0}</value></data>
+  <data name="Mem.NaoFoiPossivelSalvar" xml:space="preserve"><value>Não foi possível salvar a medição: {0}</value></data>
+  <data name="Mem.NaoHaLimpadorRam" xml:space="preserve"><value>Por que não há "limpador de RAM": memória livre vira cache de propósito, e esvaziar não acelera.</value></data>
+  <data name="Mem.NaoInformada" xml:space="preserve"><value>não informada</value></data>
+  <data name="Mem.NaoLida" xml:space="preserve"><value>não lida</value></data>
+  <data name="Mem.NaoLido" xml:space="preserve"><value>Não lido: </value></data>
+  <data name="Mem.NaoLido2" xml:space="preserve"><value>não lido</value></data>
   <data name="Mem.NavSubtitle" xml:space="preserve"><value>Engenharia reversa da sua memória: módulos, canais, velocidade real e latência medida.</value></data>
   <data name="Mem.NavTitle" xml:space="preserve"><value>Memória RAM</value></data>
+  <data name="Mem.NBitsN" xml:space="preserve"><value>{0} bits{1}</value></data>
+  <data name="Mem.NEcc" xml:space="preserve"><value> ({0} com ECC)</value></data>
+  <data name="Mem.NenhumSlotLivre" xml:space="preserve"><value>nenhum slot livre</value></data>
+  <data name="Mem.NHNMin" xml:space="preserve"><value>{0} h {1} min</value></data>
+  <data name="Mem.NInstalados" xml:space="preserve"><value>{0} instalados</value></data>
+  <data name="Mem.NMemoriaCacheDevolvida" xml:space="preserve"><value>{0} — memória em cache, devolvida na hora a quem precisar</value></data>
+  <data name="Mem.NNLimiteRam" xml:space="preserve"><value>{0} de {1} (limite = RAM + paginação)</value></data>
+  <data name="Mem.NNN" xml:space="preserve"><value>{0} de {1} ({2:0}%)</value></data>
+  <data name="Mem.NNNUso" xml:space="preserve"><value>{0} de {1} {2} em uso</value></data>
+  <data name="Mem.NNVejaPagina" xml:space="preserve"><value>{0}{1} — veja a página Serviços</value></data>
+  <data name="Mem.NovoDiscoEmpurraPaginas" xml:space="preserve"><value>de novo do disco e empurra páginas para o arquivo de paginação. Por isso o NEXUS não tem esse botão.</value></data>
+  <data name="Mem.NPosicoes" xml:space="preserve"><value>{0} posições</value></data>
+  <data name="Mem.NSlotsLivres" xml:space="preserve"><value>{0} slots livres</value></data>
+  <data name="Mem.NSoldadas" xml:space="preserve"><value>{0} soldadas na placa</value></data>
+  <data name="Mem.NSTotalN" xml:space="preserve"><value>{0:N0}/s no total; {1:N0} páginas/s lidas do disco (só estas indicam falta de RAM)</value></data>
+  <data name="Mem.NTeorico" xml:space="preserve"><value> · {0:0}% do teórico</value></data>
+  <data name="Mem.NumeroPeca" xml:space="preserve"><value>Número de peça</value></data>
+  <data name="Mem.NumeroPecaDesconhecidoNada" xml:space="preserve"><value>Número de peça desconhecido: nada foi deduzido dele</value></data>
+  <data name="Mem.OndeEstaoPentes" xml:space="preserve"><value>Onde estão os pentes</value></data>
+  <data name="Mem.OndeVemEsteDesenho" xml:space="preserve"><value>De onde vem este desenho?</value></data>
+  <data name="Mem.ParadoSemPente" xml:space="preserve"><value>  parado, sem pente</value></data>
+  <data name="Mem.Passadas" xml:space="preserve"><value>Passadas: </value></data>
+  <data name="Mem.PcDesligadoForaTomada" xml:space="preserve"><value>PC desligado e fora da tomada. O slot tracejado acima.</value></data>
+  <data name="Mem.PcMesa" xml:space="preserve"><value>PC de mesa</value></data>
+  <data name="Mem.PentesInstalados" xml:space="preserve"><value>Pentes instalados</value></data>
+  <data name="Mem.PerseguicaoPonteirosAleatoriaNum" xml:space="preserve"><value>Perseguição de ponteiros aleatória num bloco de {0} (bem maior que o cache L3): {1:0.0} ns por acesso. </value></data>
+  <data name="Mem.PicoDesdeLigou" xml:space="preserve"><value>Pico desde que ligou</value></data>
+  <data name="Mem.PlacaAceitaAteN" xml:space="preserve"><value>a placa aceita até {0}</value></data>
+  <data name="Mem.Posicao" xml:space="preserve"><value>posição</value></data>
+  <data name="Mem.Posicoes" xml:space="preserve"><value>posições</value></data>
+  <data name="Mem.Prefetch" xml:space="preserve"><value>Prefetch</value></data>
+  <data name="Mem.PreparandoNBanda" xml:space="preserve"><value>Preparando {0} para a banda…</value></data>
+  <data name="Mem.PrimeiraMedicaoSalvaMeca" xml:space="preserve"><value>Primeira medição salva. Meça de novo depois de mudar algo (ex.: segundo módulo) para comparar.</value></data>
+  <data name="Mem.ProgramasInicializacaoPadrao" xml:space="preserve"><value>programas e inicialização (padrão)</value></data>
+  <data name="Mem.Quando" xml:space="preserve"><value>Quando</value></data>
+  <data name="Mem.QuantoProcessadorConseguePuxar" xml:space="preserve"><value>Quanto o processador consegue puxar por segundo.</value></data>
+  <data name="Mem.QuatroCanais" xml:space="preserve"><value>Quatro canais</value></data>
+  <data name="Mem.QuemEstaUsandoMemoria" xml:space="preserve"><value>Quem está usando a memória?</value></data>
+  <data name="Mem.Ranks" xml:space="preserve"><value>Ranks</value></data>
+  <data name="Mem.RegistradaRdimm" xml:space="preserve"><value>registrada (RDIMM)</value></data>
+  <data name="Mem.RevelaMedicaoComprovaTimings" xml:space="preserve"><value>revela e o que a medição comprova. Para os timings exatos, use o CPU-Z ou o utilitário do fabricante da placa.</value></data>
+  <data name="Mem.SegundoPenteIgualDobra" xml:space="preserve"><value>Um segundo pente igual dobra a estrada</value></data>
+  <data name="Mem.SemNome" xml:space="preserve"><value>sem nome</value></data>
+  <data name="Mem.Serie" xml:space="preserve"><value>Série</value></data>
+  <data name="Mem.Slot" xml:space="preserve"><value>Slot</value></data>
+  <data name="Mem.Slot2" xml:space="preserve"><value>slot</value></data>
+  <data name="Mem.SlotLivre" xml:space="preserve"><value>slot livre</value></data>
+  <data name="Mem.SodimmNotebook" xml:space="preserve"><value>SODIMM (notebook)</value></data>
+  <data name="Mem.SoDriverKernelTem" xml:space="preserve"><value>que só um driver de kernel tem. O NEXUS não instala driver: mostra o que o firmware informa (SMBIOS), o que o número de peça </value></data>
+  <data name="Mem.SoInicializacao" xml:space="preserve"><value>só inicialização</value></data>
+  <data name="Mem.Soldada" xml:space="preserve"><value>soldada</value></data>
+  <data name="Mem.SoldadaPlaca" xml:space="preserve"><value>soldada na placa</value></data>
+  <data name="Mem.SoProgramas" xml:space="preserve"><value>só programas</value></data>
+  <data name="Mem.SysmainSuperfetch" xml:space="preserve"><value>SysMain (Superfetch)</value></data>
+  <data name="Mem.TamanhoAtualN" xml:space="preserve"><value> · tamanho atual {0}</value></data>
+  <data name="Mem.TensaoMinMaxConfig" xml:space="preserve"><value>Tensão (mín/máx/config.)</value></data>
+  <data name="Mem.Teorico" xml:space="preserve"><value>Teórico</value></data>
+  <data name="Mem.TeoricoMaximoConfiguracao" xml:space="preserve"><value>teórico (o máximo da configuração)</value></data>
+  <data name="Mem.TeoricoNMtS" xml:space="preserve"><value>Teórico: {0} MT/s × {1} bytes ({2} bits, {3} {4}) = {5:0.0} GB/s.</value></data>
+  <data name="Mem.TimingsDetalhadosTclTrcd" xml:space="preserve"><value>Timings detalhados (tCL, tRCD, tRP, tRAS…) e a leitura direta do chip SPD do módulo exigem acesso ao barramento SMBus da placa, </value></data>
+  <data name="Mem.Tipo" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Mem.TodosNumerosWindows" xml:space="preserve"><value>Todos os números do Windows</value></data>
+  <data name="Mem.Uns15SegundosLendo" xml:space="preserve"><value>Uns 15 segundos lendo e escrevendo na memória. Feche jogos e deixe o carregador ligado. Não muda nada.</value></data>
+  <data name="Mem.Uso" xml:space="preserve"><value>  em uso</value></data>
+  <data name="Mem.UsoAgora" xml:space="preserve"><value>Em uso agora</value></data>
+  <data name="Mem.VariosCanais" xml:space="preserve"><value>Vários canais</value></data>
+  <data name="Mem.Vazio" xml:space="preserve"><value>vazio</value></data>
+  <data name="Mem.VazioCabeMaisPente" xml:space="preserve"><value>Vazio: cabe mais um pente</value></data>
+  <data name="Mem.VelocidadeAindaNaoMedida" xml:space="preserve"><value>Velocidade ainda não medida.</value></data>
+  <data name="Mem.VelocidadeAnunciadaNMt" xml:space="preserve"><value>A velocidade anunciada ({0} MT/s) depende do perfil {1} no BIOS; sem ele, o módulo roda na velocidade JEDEC.</value></data>
+  <data name="Mem.VelocidadeConfigurada" xml:space="preserve"><value>Velocidade configurada</value></data>
+  <data name="Mem.VelocidadeMedida" xml:space="preserve"><value>Velocidade medida</value></data>
+  <data name="Mem.VelocidadeNaoInformadaPelo" xml:space="preserve"><value>Velocidade não informada pelo firmware: sem valor teórico para comparar.</value></data>
+  <data name="Mem.VelocidadeNominal" xml:space="preserve"><value>Velocidade nominal</value></data>
+  <data name="Mem.VendidoKitNModulos" xml:space="preserve"><value>Vendido em kit de {0} módulos ({1} no total).</value></data>
+  <data name="Mem.VerSemDriver" xml:space="preserve"><value>O que dá para ver sem driver?</value></data>
+  <data name="Mem.VisitandoPaginaPaginaQuase" xml:space="preserve"><value>Visitando página por página (quase sem falta de TLB): {0:0.0} ns. {1} </value></data>
+  <data name="Mem.VoltarAutomatico" xml:space="preserve"><value>Voltar para automático</value></data>
+  <data name="Mem.WindowsVoltaGerenciarArquivo" xml:space="preserve"><value>O Windows volta a gerenciar o arquivo de paginação sozinho (padrão do sistema).
+
+Risco: baixo; ocupa alguns GB no disco.
+</value></data>
   <data name="MemDoc.NavSubtitle" xml:space="preserve"><value>Quem está comendo a memória, se algo está vazando, e como resolver agora e de vez.</value></data>
   <data name="MemDoc.NavTitle" xml:space="preserve"><value>Memória: diagnóstico</value></data>
   <data name="Mon.AbrindoContadoresWindows" xml:space="preserve"><value>Abrindo os contadores do Windows…</value></data>
