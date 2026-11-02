@@ -39,6 +39,7 @@
       "condition": "Jogo DX10/DX11 em janela ou sem bordas. Não se aplica a DX12/Vulkan.",
       "handlerKind": "DirectXUserGpuPreference",
       "target": { "hive": "HKCU", "path": "Software\\Microsoft\\DirectX\\UserGpuPreferences", "name": "{gameExePath}", "token": "SwapEffectUpgradeEnable" },
+      "userParameters": { "gameExePath": "(?i)[A-Z]:\\\\(?:[^\\\\/:*?\"<>|\\x00-\\x1f]{1,120}\\\\){0,16}[^\\\\/:*?\"<>|\\x00-\\x1f]{1,120}\\.exe" },
       "desiredValue": "1",
       "mechanism": "Converte apresentação blt-model em flip-model para jogos compatíveis, reduzindo latência de apresentação e permitindo VRR.",
       "evidence": [ { "level": "VendorDocumented", "source": "https://support.microsoft.com/en-us/topic/3f006843-2c7e-4ed0-9a5e-f9389e535952" } ],
@@ -111,18 +112,6 @@
       "verification": "Releitura após reinício + D3DKMTQueryAdapterInfo (estado efetivo).", "revert": "Restaurar valor original ou remover."
     },
     {
-      "id": "startup.run-entry.disable", "version": 1,
-      "title": "Desativar item de inicialização",
-      "classification": "Conditional",
-      "condition": "Item identificado como residente, com atividade concorrente observada, e escolhido pelo usuário.",
-      "handlerKind": "StartupApproved",
-      "target": { "scope": "{HKCU|HKLM}", "kind": "{Run|Run32|StartupFolder}", "entryName": "{name}" },
-      "mechanism": "Mesmo mecanismo do Gerenciador de Tarefas: valor binário em Explorer\\StartupApproved (byte 0 = 0x02 habilitado, 0x03 desabilitado). Não apaga a entrada Run.",
-      "evidence": [ { "level": "Observed", "source": "Formato não documentado oficialmente; comportamento observado do Gerenciador de Tarefas." } ],
-      "risks": "Software pode se re-registrar.", "privileges": "User|Admin", "persistence": "Persistent", "reboot": "NextLogon",
-      "verification": "Releitura do binário.", "revert": "Restaurar binário original ou remover se ausente."
-    },
-    {
       "id": "svc.sysmain.manual.lab", "version": 1,
       "title": "SysMain em Manual",
       "classification": "Experimental",
@@ -139,8 +128,11 @@
       "title": "CS2: fps_max",
       "classification": "Conditional",
       "handlerKind": "SourceCfgConvar",
-      "target": { "file": "{cs2CfgDir}\\autoexec.cfg", "convar": "fps_max" },
-      "mechanism": "Limitador interno do jogo. Validado contra dump cvarlist da versão instalada.",
+      "condition": "CS2 instalado pela Steam e dump do comando cvarlist da versão instalada (console.log ao lado da pasta cfg, gravado com -condebug).",
+      "target": { "root": "{cs2CfgDir}", "file": "autoexec.cfg", "convar": "fps_max" },
+      "userParameters": { "cs2CfgDir": "(?i)[A-Z]:\\\\(?:(?!\\.\\.?\\\\)[^\\\\/:*?\"<>|\\x00-\\x1f]{1,120}\\\\){0,8}steamapps\\\\common\\\\Counter-Strike Global Offensive\\\\game\\\\csgo\\\\cfg" },
+      "allowedValues": ["0", "60", "120", "141", "144", "162", "165", "200", "237", "240", "300", "400"],
+      "mechanism": "Limitador interno do jogo (0 = sem limite; o padrão do CS2 é 400). Com G-SYNC/FreeSync, um limite um pouco abaixo da taxa do monitor evita sair da faixa do VRR. Validado contra dump cvarlist da versão instalada.",
       "evidence": [ { "level": "Observed", "source": "Convar presente no dump da versão instalada (requerido antes de aplicar)." } ],
       "risks": "Steam Cloud pode sobrescrever arquivos sincronizados.", "privileges": "User", "persistence": "Persistent", "reboot": "GameRestart",
       "verification": "Releitura e parsing do arquivo.", "revert": "Restaurar a linha original, ou remover se ausente; demais linhas intocadas."
@@ -162,6 +154,7 @@
     { "id": "myth.winutil-presumed-original", "classification": "Rejected", "reason": "Reverter para um valor 'original' fixo no catálogo não restaura o estado real da máquina." },
     { "id": "proc.game.ecoqos-optout.session", "classification": "Deferred", "reason": "Adiado: o handler ProcessPowerThrottling nunca foi implementado e nenhuma tela informa o processo do jogo ({gameProcess}). Ficava no catálogo como ação sem handler (o autoteste contava \"sem handler\"). Volta quando houver handler de sessão com teste e um diagnóstico que observe o jogo em EcoQoS.", "source": "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setprocessinformation" },
     { "id": "nvidia.drs.frame-rate-limit.per-app", "classification": "Deferred", "reason": "Adiado: o handler NvidiaDrsSetting (NvAPI DRS) nunca foi implementado e nenhuma tela informa o executável do jogo ({gameExe}). Ficava no catálogo como ação sem handler. Use o limitador do próprio jogo ou o Painel de Controle da NVIDIA.", "source": "https://github.com/NVIDIA/nvapi/blob/main/NvApiDriverSettings.h" },
+    { "id": "startup.run-entry.disable", "classification": "Deferred", "reason": "Substituída pelas ações boot.startup.user.run e boot.startup.machine.run (página Inicialização), que fazem o mesmo (Explorer\\StartupApproved) com o item escolhido na lista, impacto medido e Desfazer. Esta versão genérica pedia escopo/tipo/nome que nenhuma tela informava e nunca chegou a ser aplicada." },
     { "id": "myth.disable-security-features", "classification": "Rejected", "reason": "VBS/HVCI/Defender/anticheat estão fora do escopo do perfil de otimização." }
   ]
 }

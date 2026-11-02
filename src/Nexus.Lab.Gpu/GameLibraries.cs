@@ -174,13 +174,16 @@ public static partial class GameLibraries
     }
 
     /// <summary>"GpuPreference=2;SwapEffectUpgradeEnable=1;" → 2. Null se o token não existir.</summary>
-    public static int? ParseGpuPreference(string? raw)
+    public static int? ParseGpuPreference(string? raw) => ParseToken(raw, "GpuPreference");
+
+    /// <summary>Valor inteiro de um token ("Nome=valor;") da string de UserGpuPreferences; null se ausente.</summary>
+    public static int? ParseToken(string? raw, string token)
     {
         if (raw is null) return null;
         foreach (var part in raw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             var eq = part.IndexOf('=');
-            if (eq > 0 && part[..eq] == "GpuPreference" && int.TryParse(part[(eq + 1)..], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var v))
+            if (eq > 0 && part[..eq] == token && int.TryParse(part[(eq + 1)..], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var v))
                 return v;
         }
         return null;

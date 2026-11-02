@@ -47,9 +47,16 @@ public sealed class CvarCatalog
 public sealed class SourceCfgConvarHandler : IActionHandler, IRestoreValidator
 {
     public const string Kind = "SourceCfgConvar";
-    private readonly Func<CvarCatalog?> _cvars;
+    private readonly Func<ActionInstance, CvarCatalog?> _cvars;
 
-    public SourceCfgConvarHandler(Func<CvarCatalog?> cvarCatalogProvider) => _cvars = cvarCatalogProvider;
+    public SourceCfgConvarHandler(Func<CvarCatalog?> cvarCatalogProvider)
+    {
+        ArgumentNullException.ThrowIfNull(cvarCatalogProvider);
+        _cvars = _ => cvarCatalogProvider();
+    }
+
+    /// <summary>Dump escolhido pela ação (ex.: o console.log da instalação do CS2 cujo cfg é o alvo).</summary>
+    public SourceCfgConvarHandler(Func<ActionInstance, CvarCatalog?> cvarCatalogProvider) => _cvars = cvarCatalogProvider ?? throw new ArgumentNullException(nameof(cvarCatalogProvider));
 
     public string HandlerKind => Kind;
 
@@ -65,8 +72,10 @@ public sealed class SourceCfgConvarHandler : IActionHandler, IRestoreValidator
         if (!action.Target["file"].EndsWith(".cfg", StringComparison.OrdinalIgnoreCase))
             return Applicability.Blocked("Somente arquivos .cfg.");
 
-        var cvars = _cvars();
-        if (cvars is null) return Applicability.Blocked("Sem dump de cvarlist da versão instalada; validação impossível.");
+        var cvars = _cvars(action);
+        if (cvars is null)
+            return Applicability.Blocked("Sem dump de cvarlist da versão instalada; validação impossível. Abra o jogo com -condebug nas opções de inicialização, " +
+                                         "digite cvarlist no console, feche o jogo e tente de novo.");
         if (!cvars.Contains(action.Target["convar"]))
             return Applicability.NotApplicable($"'{action.Target["convar"]}' não existe na versão instalada ({cvars.SourceDescription}).");
 

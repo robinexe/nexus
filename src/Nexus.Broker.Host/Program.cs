@@ -135,7 +135,7 @@ namespace Nexus.Broker.Host
                 .Add(new PowerActiveSchemeHandler(new WindowsPowerBackend()))
                 .Add(new PowerSettingValueHandler(new WindowsPowerBackend()))
                 .Add(new ServiceStartTypeHandler(new WindowsServiceBackend()))
-                .Add(new SourceCfgConvarHandler(() => null));
+                .Add(new SourceCfgConvarHandler(Cs2Install.CvarsFor)); // dump do cvarlist: console.log da instalação alvo
             // Módulos (limpeza, programas, privacidade...): cada um entrega seus handlers; o catálogo diz o que pode ser pedido.
             var environment = new HandlerEnvironment(registry, Path.GetDirectoryName(Path.GetFullPath(o.JournalPath))!, asSystem, facts.IsElevated == true);
             foreach (var handler in ModuleHandlers.All(environment)) handlers.Add(handler);
