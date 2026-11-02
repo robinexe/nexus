@@ -1,0 +1,228 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Ajustes do driver NVIDIA (perfis DRS) pelo handler NvidiaDrsSetting de Nexus.Lab.Gpu. Lista FECHADA de ids e valores conferidos em NvApiDriverSettings.h (NVIDIA/nvapi); o handler recusa qualquer outro. Por jogo: só o nome do executável (userParameters exe). Ver docs/modules/nvidia.md.",
+  "actions": [
+    {
+      "id": "gpu.nv.shadercache.max",
+      "version": 1,
+      "title": "Cache de sombreador do driver NVIDIA maior (100 GB ou ilimitado)",
+      "classification": "Conditional",
+      "condition": "Placa NVIDIA e vários jogos pesados (biblioteca grande). Com poucos jogos o cache padrão já basta.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "base",
+        "setting": "0x00AC8497"
+      },
+      "allowedValues": [
+        "102400",
+        "4294967295"
+      ],
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Muda \"Tamanho do cache de sombreador\" (Shader disk cache maximum size, id 0x00AC8497, valor em MB) no perfil global: 102400 = 100 GB, 4294967295 = ilimitado. O jogo compila cada sombreador na primeira vez que precisa e o driver guarda o resultado em disco; quando o cache enche, o driver joga fora os mais antigos e o jogo volta a compilar durante a partida (travadinhas). Não aumenta FPS: só evita que as travadinhas da primeira vez voltem.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (PS_SHADERDISKCACHE_MAX_SIZE_ID 0x00AC8497; MAX 0xFFFFFFFF; padrão 0x4000)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "Notas do driver NVIDIA 496.13: 'Added Shader Cache Size control to set the maximum amount of disk space to use for storing shader compiles'"
+        },
+        {
+          "level": "Community",
+          "source": "github.com/Orbmu2k/nvidiaProfileInspector: CustomSettingNames.xml (0x00AC8497 em MB: 0x2800 = 10GB, 0x19000 = 100GB, 0xFFFFFFFF = Unlimited)"
+        }
+      ],
+      "risks": "A pasta %LOCALAPPDATA%\\NVIDIA\\DXCache (e GLCache) pode crescer dezenas de GB. Atualizar o driver apaga o cache de qualquer jeito. Só afeta placas NVIDIA.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil global: valor do usuário igual ao pedido.",
+      "revert": "Devolve o tamanho que o perfil global tinha; se era o padrão do driver, tira o valor do usuário e o driver volta ao padrão dele."
+    },
+    {
+      "id": "gpu.nv.lowlatency.on.per-app",
+      "version": 1,
+      "title": "Modo de baixa latência \"Ligado\" neste jogo (driver NVIDIA)",
+      "classification": "Conditional",
+      "condition": "Jogo DirectX 9/11 limitado pela placa de vídeo (uso da GPU perto de 100%), sem NVIDIA Reflex. Em DirectX 12/Vulkan ou com Reflex o driver ignora.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "app",
+        "exe": "{exe}",
+        "setting": "0x007BA09E"
+      },
+      "userParameters": {
+        "exe": "(?i)[A-Za-z0-9 ._()+\\-]{1,64}\\.exe"
+      },
+      "desiredValue": "1",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Máximo de quadros pré-renderizados\" = 1 (PRERENDERLIMIT_ID 0x007BA09E) no perfil do jogo: é o \"Modo de baixa latência: Ligado\" do painel. A fila de quadros prontos esperando a placa cai para 1, então a imagem chega mais cedo. O modo \"Ultra\" não tem id público e o NEXUS não o usa.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (PRERENDERLIMIT_ID 0x007BA09E; 0 = o app decide)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "nvidia.com/en-us/geforce/news/gamescom-2019-game-ready-driver/ (On: 'Limits the number of queued frames to 1'; DX9/DX11; mais efeito com GPU no limite entre 60 e 100 FPS)"
+        },
+        {
+          "level": "Observed",
+          "source": "blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/14/ (Low Latency Mode On com limitador de FPS)"
+        }
+      ],
+      "risks": "Com a CPU no limite, a fila curta pode baixar um pouco o FPS médio ou piorar a constância. Meça antes e depois.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil do executável: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil tinha (do usuário ou o predefinido da NVIDIA). Se o ajuste não existia, ele é tirado do perfil; se o perfil foi criado pelo NEXUS (\"NEXUS - jogo.exe\") e ficou vazio, é removido."
+    },
+    {
+      "id": "gpu.nv.power.max.per-app",
+      "version": 1,
+      "title": "Preferir desempenho máximo neste jogo (driver NVIDIA)",
+      "classification": "Conditional",
+      "condition": "Jogo leve ou limitado pela CPU em que a placa fica baixando o clock (FPS oscilando com uso de GPU baixo). Em jogo pesado a placa já fica no máximo.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "app",
+        "exe": "{exe}",
+        "setting": "0x1057EB71"
+      },
+      "userParameters": {
+        "exe": "(?i)[A-Za-z0-9 ._()+\\-]{1,64}\\.exe"
+      },
+      "desiredValue": "1",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Modo de gerenciamento de energia\" = Preferir desempenho máximo (PREFERRED_PSTATE_ID 0x1057EB71, valor 1; o padrão é 5, ideal) só no perfil deste jogo. Com o jogo aberto a placa não desce para os estados de economia entre um pico e outro, o que evita quedas de clock em cenas leves.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (PREFERRED_PSTATE_ID 0x1057EB71; PREFER_MAX = 1; padrão OPTIMAL_POWER = 5)"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Painel de Controle NVIDIA > Gerenciar as configurações 3D > Configurações de programa > Modo de gerenciamento de energia"
+        }
+      ],
+      "risks": "Mais consumo, calor e ventoinha enquanto o jogo estiver aberto; no notebook na bateria, menos autonomia. Não aplicar no perfil global (a placa nunca descansaria): o NEXUS só aplica por jogo.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil do executável: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil tinha (do usuário ou o predefinido da NVIDIA). Se o ajuste não existia, ele é tirado do perfil; se o perfil foi criado pelo NEXUS (\"NEXUS - jogo.exe\") e ficou vazio, é removido."
+    },
+    {
+      "id": "gpu.nv.fps-cap.per-app",
+      "version": 1,
+      "title": "Limitar o FPS neste jogo pelo driver NVIDIA (taxa máxima de quadros)",
+      "classification": "Conditional",
+      "condition": "Monitor G-SYNC/FreeSync (limite 3 abaixo da taxa do monitor) ou jogo que passa muito da taxa do monitor sem limitador próprio. Limitador dentro do jogo, quando existe, é melhor.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "app",
+        "exe": "{exe}",
+        "setting": "0x10835002"
+      },
+      "userParameters": {
+        "exe": "(?i)[A-Za-z0-9 ._()+\\-]{1,64}\\.exe"
+      },
+      "allowedValues": [
+        "30",
+        "40",
+        "45",
+        "50",
+        "57",
+        "60",
+        "72",
+        "87",
+        "90",
+        "97",
+        "117",
+        "120",
+        "141",
+        "144",
+        "162",
+        "165",
+        "177",
+        "197",
+        "237",
+        "240"
+      ],
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Taxa máxima de quadros\" (FRL_FPS_ID 0x10835002, em FPS, 0 = desligada) no perfil do jogo. Com G-SYNC, ficar alguns FPS abaixo da taxa do monitor mantém o jogo dentro da faixa do G-SYNC (sem rasgo e sem o atraso do V-Sync). Sem G-SYNC, limita calor e ventoinha e deixa o tempo de quadro mais constante.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (FRL_FPS_ID 0x10835002; 0..0x3FF)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "nvidia.com/de-de/drivers/details/156395 (driver 441.87: Max Frame Rate no Painel de Controle)"
+        },
+        {
+          "level": "Observed",
+          "source": "blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/14/ ('Set (a minimum of) 3 FPS limit below display's maximum refresh rate')"
+        }
+      ],
+      "risks": "Limite abaixo do que a placa entrega reduz o FPS de propósito. Um limitador do próprio jogo costuma ter menos atraso que o do driver.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil do executável: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil tinha (do usuário ou o predefinido da NVIDIA). Se o ajuste não existia, ele é tirado do perfil; se o perfil foi criado pelo NEXUS (\"NEXUS - jogo.exe\") e ficou vazio, é removido."
+    },
+    {
+      "id": "gpu.nv.vsync.force-on.per-app",
+      "version": 1,
+      "title": "V-Sync ligado no driver neste jogo (para G-SYNC com limite de FPS)",
+      "classification": "Conditional",
+      "condition": "SÓ com monitor G-SYNC/G-SYNC Compatible ligado E limite de FPS abaixo da taxa do monitor (desligue o V-Sync do jogo). Sem G-SYNC, V-Sync ligado aumenta o atraso.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "app",
+        "exe": "{exe}",
+        "setting": "0x00A879CF"
+      },
+      "userParameters": {
+        "exe": "(?i)[A-Za-z0-9 ._()+\\-]{1,64}\\.exe"
+      },
+      "desiredValue": "1199655232",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Sincronização vertical\" = Ligada (VSYNCMODE_ID 0x00A879CF, VSYNCMODE_FORCEON 0x47814940; o padrão é o jogo decidir) no perfil do jogo. Com G-SYNC e FPS limitado abaixo da taxa do monitor, o V-Sync do driver quase nunca entra: só segura os rasgos de tela quando o tempo de quadro oscila, sem o atraso do V-Sync clássico.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (VSYNCMODE_ID 0x00A879CF; FORCEON 0x47814940; PASSIVE 0x60925292 padrão)"
+        },
+        {
+          "level": "Observed",
+          "source": "blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/14/ (G-SYNC + NVCP V-SYNC On + limite 3 FPS abaixo)"
+        }
+      ],
+      "risks": "Sem G-SYNC (ou sem limite de FPS) o V-Sync ligado prende o FPS na taxa do monitor e acrescenta atraso de entrada. Use só na combinação da condição.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil do executável: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil tinha (do usuário ou o predefinido da NVIDIA). Se o ajuste não existia, ele é tirado do perfil; se o perfil foi criado pelo NEXUS (\"NEXUS - jogo.exe\") e ficou vazio, é removido."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "gpu.nv.lowlatency.ultra",
+      "classification": "Rejected",
+      "reason": "O modo \"Ultra\" do painel não tem id público em NvApiDriverSettings.h; gravar id não documentado está fora da regra do NEXUS. Use NVIDIA Reflex no jogo, quando houver.",
+      "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h"
+    },
+    {
+      "id": "gpu.nv.power.max.global",
+      "classification": "Rejected",
+      "reason": "\"Preferir desempenho máximo\" no perfil global deixa a placa sem descansar fora dos jogos (calor, consumo, bateria) sem ganho; o NEXUS só aplica por jogo.",
+      "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h"
+    }
+  ]
+}
