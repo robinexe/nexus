@@ -341,3 +341,83 @@ public static class PlainFindings
         return all.Select(f => TopicOf(f.Id)).Distinct(StringComparer.Ordinal).Where(t => !bad.Contains(t)).ToList();
     }
 }
+
+// ================================================================== Histórico em palavras simples
+
+/// <summary>"Hoje 14:30 — Limpeza: 12 itens limpos" a partir do diário (lógica pura, testada): nunca chave de ação nem estado cru.</summary>
+public static class SimpleHistoryText
+{
+    /// <summary>Assunto de uma execução pela maioria das ações (prefixo do id): Limpeza, Privacidade, Inicialização…</summary>
+    public static string Category(IEnumerable<string> actionKeys)
+    {
+        ArgumentNullException.ThrowIfNull(actionKeys);
+        var top = actionKeys.Select(CategoryKey).GroupBy(k => k).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal).FirstOrDefault()?.Key;
+        return top switch
+        {
+            "clean" => Loc.T("Simple.Hist.Cleaning"),
+            "privacy" => Loc.T("Simple.Hist.Privacy"),
+            "startup" => Loc.T("Simple.Hist.Startup"),
+            "gpu" => Loc.T("Simple.Hist.Gpu"),
+            "restore" => Loc.T("Simple.Hist.RestorePoint"),
+            "drivers" => Loc.T("Simple.Hist.Drivers"),
+            "programs" => Loc.T("Simple.Hist.Programs"),
+            "security" => Loc.T("Simple.Hist.Security"),
+            _ => Loc.T("Simple.Hist.Windows"),
+        };
+    }
+
+    private static string CategoryKey(string key)
+    {
+        var k = key ?? "";
+        if (k.StartsWith("cleaning.", StringComparison.Ordinal) || k.StartsWith("disk.", StringComparison.Ordinal)) return "clean";
+        if (k.StartsWith("privacy.", StringComparison.Ordinal)) return "privacy";
+        if (k.StartsWith("boot.", StringComparison.Ordinal) || k.StartsWith("startup.", StringComparison.Ordinal) || k.StartsWith("svc.", StringComparison.Ordinal)) return "startup";
+        if (k.StartsWith("nvidia.", StringComparison.Ordinal) || k.StartsWith("gpu", StringComparison.Ordinal) || k.StartsWith("fps.", StringComparison.Ordinal) || k.StartsWith("cs2.", StringComparison.Ordinal)) return "gpu";
+        if (k.StartsWith("system.restore", StringComparison.Ordinal)) return "restore";
+        if (k.StartsWith("driverupdates.", StringComparison.Ordinal)) return "drivers";
+        if (k.StartsWith("programs.", StringComparison.Ordinal)) return "programs";
+        if (k.StartsWith("security.", StringComparison.Ordinal) || k.StartsWith("scanner.", StringComparison.Ordinal)) return "security";
+        return "windows";
+    }
+
+    /// <summary>"Limpeza: 12 itens limpos", "Privacidade: 3 mudanças".</summary>
+    public static string Describe(IReadOnlyCollection<string> actionKeys)
+    {
+        ArgumentNullException.ThrowIfNull(actionKeys);
+        var n = actionKeys.Count;
+        var cleaning = actionKeys.Count(k => CategoryKey(k) == "clean") * 2 > n;
+        var what = cleaning
+            ? (n == 1 ? Loc.T("Simple.Hist.Cleaned1") : Loc.F("Simple.Hist.CleanedN", n))
+            : (n == 1 ? Loc.T("Simple.Hist.Changes1") : Loc.F("Simple.Hist.ChangesN", n));
+        return Loc.F("Simple.Hist.Line", Category(actionKeys), what);
+    }
+
+    /// <summary>"Hoje 14:30", "Ontem 09:12" ou "28/10 14:30" (data no formato do idioma).</summary>
+    public static string When(DateTime local, DateTime now)
+    {
+        var time = local.ToString("t", Loc.Culture);
+        if (local.Date == now.Date) return Loc.F("Simple.Hist.Today", time);
+        if (local.Date == now.Date.AddDays(-1)) return Loc.F("Simple.Hist.Yesterday", time);
+        var day = local.ToString(Loc.Language == "en" ? "M/d" : "dd/MM", Loc.Culture);
+        return $"{day} {time}";
+    }
+}
+
+/// <summary>Resumo amigável do "Otimizar meu PC com segurança" ("Pronto! Liberamos 9,3 GB, ajustamos 12 coisas.").</summary>
+public static class SimpleOptimizeText
+{
+    public static string Summary(double freedBytes, int applied)
+    {
+        var freed = freedBytes >= 1024 * 1024; // menos de 1 MB não vale a frase
+        var things = Math.Max(0, applied);
+        return (freed, things) switch
+        {
+            (true, > 1) => Loc.F("Simple.Opt.DoneFreedN", ImproveCards.Bytes(freedBytes), things),
+            (true, 1) => Loc.F("Simple.Opt.DoneFreed1", ImproveCards.Bytes(freedBytes)),
+            (true, _) => Loc.F("Simple.Opt.DoneFreedOnly", ImproveCards.Bytes(freedBytes)),
+            (false, > 1) => Loc.F("Simple.Opt.DoneN", things),
+            (false, 1) => Loc.T("Simple.Opt.Done1"),
+            _ => Loc.T("Simple.Opt.DoneNothing"),
+        };
+    }
+}

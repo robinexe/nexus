@@ -6,6 +6,8 @@ using Nexus.Assistant;
 using Nexus.Broker;
 using Nexus.Core;
 using Nexus.Desktop.Services;
+using Nexus.Desktop.Services.Shell;
+using Nexus.Desktop.ViewModels.Simple;
 using Nexus.HardwareDiscovery;
 using Nexus.Persistence;
 
@@ -45,7 +47,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
 
     public MainViewModel()
     {
-        Pages = [Overview, Hardware, Diagnostics, CpuLab, GpuLab, MemoryLab, MemoryDoctor, Assistant, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
+        // Modo simples: vitrines sobre as páginas completas (que continuam todas aqui; só a navegação muda com o modo).
+        SimpleOptimize = new SimpleOptimizePage(Assistant, Home);
+        SimpleClean = new SimpleCleanPage(Cleaning);
+        SimpleGames = new SimpleGamesPage(GpuLab, Measure);
+        Pages = [Home, SimpleOptimize, SimpleClean, SimpleGames, SimpleProblems, SimpleHistory,
+            Overview, Hardware, Diagnostics, CpuLab, GpuLab, MemoryLab, MemoryDoctor, Assistant, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
             Privacy, Security, Scanner, SystemTools, DriverUpdates, Measure, Monitor, History, Settings, Capabilities];
         Broker.Candidates = Plan.Candidates;
         Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
@@ -67,6 +74,113 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         ShowDiagnosticsCommand = new RelayCommand(() => SelectedPage = Diagnostics);
         ShowHardwareCommand = new RelayCommand(() => SelectedPage = Hardware);
         foreach (var module in Pages.OfType<ModulePage>()) module.Attach(this);
+
+        // Modo da interface: escolha gravada; sem escolha, simples (boas-vindas para quem nunca usou, aviso para quem já usava).
+        Welcome = new WelcomeFlow(m => { SetMode(m); ShowSimpleNotice = false; });
+        ToggleModeCommand = new RelayCommand(() => SetMode(IsSimpleMode ? UiMode.Full : UiMode.Simple));
+        DismissNoticeCommand = new RelayCommand(() => { ShowSimpleNotice = false; SetMode(UiMode.Simple); });
+        NoticeFullCommand = new RelayCommand(() => { ShowSimpleNotice = false; SetMode(UiMode.Full); });
+        var startup = SelfTestMode ? new UiStartup(UiMode.Simple, false, false) : UiModeStartup.Decide(UiSettings.Current.UiMode, HadPriorUse());
+        _mode = startup.Mode;
+        _showSimpleNotice = startup.ShowSimpleNotice;
+        Welcome.IsVisible = startup.ShowWelcome;
+        _selectedPage = PageByName(ShellModes.StartPage(_mode)) ?? Overview;
+        UiSettings.Changed += (_, _) => { if (ShellModes.Parse(UiSettings.Current.UiMode) is { } m && m != _mode) SetMode(m, persist: false); };
+        Settings.GetMode = () => _mode;
+        Settings.ChangeMode = m => SetMode(m);
+
+        // A nota da tela Início acompanha o que muda: limpeza medida, recomendações do Automático, rodada do Assistente.
+        Cleaning.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(CleaningPage.SafeBytes)) RefreshSimple(); };
+        Automation.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(AutomationPage.CandidateActionKeys)) RefreshSimple(); };
+        Assistant.AutoFinished += (_, _) => _ = AfterAutomaticAsync();
+    }
+
+    // ------------------------------------------------------------------ modo simples / completo
+
+    private UiMode _mode;
+    private bool _showSimpleNotice;
+
+    public HomePage Home { get; } = Make<HomePage>();
+    public SimpleOptimizePage SimpleOptimize { get; }
+    public SimpleCleanPage SimpleClean { get; }
+    public SimpleGamesPage SimpleGames { get; }
+    public SimpleProblemsPage SimpleProblems { get; } = Make<SimpleProblemsPage>();
+    public SimpleHistoryPage SimpleHistory { get; } = Make<SimpleHistoryPage>();
+    public WelcomeFlow Welcome { get; }
+
+    public UiMode Mode => _mode;
+    public bool IsSimpleMode => _mode == UiMode.Simple;
+    public bool IsFullMode => _mode == UiMode.Full;
+    /// <summary>Páginas da navegação lateral no modo atual (simples: 6, sem grupos; completo: todas as de antes).</summary>
+    public IReadOnlyList<PageViewModel> NavPages => ShellModes.Navigation(_mode, Pages, p => p.GetType().Name);
+    /// <summary>Link no pé da navegação: "Mostrar todas as ferramentas" / "Voltar ao modo simples".</summary>
+    public string ToggleModeText => IsSimpleMode ? Loc.T("Simple.Shell.ShowAll") : Loc.T("Simple.Shell.BackToSimple");
+    public RelayCommand ToggleModeCommand { get; }
+    /// <summary>Aviso único para quem já usava: "Deixamos o NEXUS mais simples. Quer tudo como antes? Ajustes › Modo completo".</summary>
+    public bool ShowSimpleNotice { get => _showSimpleNotice; private set => Set(ref _showSimpleNotice, value); }
+    public RelayCommand DismissNoticeCommand { get; }
+    public RelayCommand NoticeFullCommand { get; }
+
+    /// <summary>Troca o modo (e grava, fora do autoteste). A página aberta continua se existir no novo modo; senão, a tela inicial dele.</summary>
+    public void SetMode(UiMode mode, bool persist = true)
+    {
+        if (persist && !SelfTestMode) UiSettings.Update(st => st with { UiMode = ShellModes.Store(mode) });
+        if (mode == _mode && persist) { OnPropertyChanged(nameof(NavPages)); return; }
+        _mode = mode;
+        foreach (var n in new[] { nameof(Mode), nameof(IsSimpleMode), nameof(IsFullMode), nameof(NavPages), nameof(ToggleModeText) }) OnPropertyChanged(n);
+        Settings.ModeChanged();
+        if (!ShellModes.IsInNavigation(mode, SelectedPage.GetType().Name) && PageByName(ShellModes.StartPage(mode)) is { } start) SelectedPage = start;
+        if (mode == UiMode.Simple) StartBackgroundMeasurements();
+    }
+
+    private PageViewModel? PageByName(string name) => Pages.FirstOrDefault(p => p.GetType().Name == name);
+
+    /// <summary>Já usou o NEXUS antes desta versão? (preferências, Assistente ou algum diário do aplicador no disco.)</summary>
+    private static bool HadPriorUse()
+    {
+        try
+        {
+            return File.Exists(UiSettings.Path) || File.Exists(AssistantStateStore.DefaultPath) ||
+                   File.Exists(LocalBroker.JournalPath(BrokerLevel.User)) || File.Exists(LocalBroker.JournalPath(BrokerLevel.Admin));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { return true; }
+    }
+
+    /// <summary>No modo simples a tela Início precisa do espaço recuperável: mede a limpeza (só leitura) em segundo plano.</summary>
+    private void StartBackgroundMeasurements()
+    {
+        if (_snapshot is null || Cleaning.Scanning || !double.IsNaN(Cleaning.SafeBytes)) return;
+        _ = Cleaning.OnShownAsync();
+    }
+
+    /// <summary>Junta as leituras que já existem na nota e nos cartões do modo simples (Início, Problemas, Jogos).</summary>
+    private void RefreshSimple()
+    {
+        if (_snapshot is null) return;
+        var f = _snapshot.Facts;
+        var keys = Automation.CandidateActionKeys.ToHashSet(StringComparer.Ordinal);
+        int? pending = Catalog.Rows.Count == 0 || keys.Count == 0 ? null
+            : Catalog.Rows.Count(r => keys.Contains(r.Entry.Definition.Key) && r.ReadState == "change");
+        var gpu = SimpleHealth.MainGpu(f.Gpus);
+        Home.Update(new HealthInputs
+        {
+            Findings = _findings,
+            RecoverableBytes = Cleaning.SafeBytes,
+            PendingRecommendations = pending,
+            GpuDriverDate = SimpleHealth.ParseDriverDate(gpu?.DriverDate),
+            MemoryModules = f.MemoryModules.Count(m => m.SizeBytes is not null),
+            MemorySlots = f.MemoryModules.Count,
+        });
+        SimpleProblems.Update(_findings, Assistant.PendingUserActions);
+        var gm = _findings.FirstOrDefault(x => x.Id == "win.gamemode");
+        SimpleGames.SetGameMode(gm is null || gm.Basis == FactStatus.Unavailable ? null : gm.Severity != DiagnosticSeverity.Attention);
+    }
+
+    /// <summary>Depois de "Otimizar meu PC com segurança": relê o PC e mede a limpeza de novo, para a nota mostrar o resultado.</summary>
+    private async Task AfterAutomaticAsync()
+    {
+        await LoadAsync();
+        if (Cleaning.RescanCommand.CanExecute(null)) Cleaning.RescanCommand.Execute(null);
     }
 
     // ------------------------------------------------------------------ IModuleHost (páginas dos módulos)
@@ -109,6 +223,14 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         // Quem passa marcos (o Assistente) tem a própria tela de progresso: a da janela não aparece por cima.
         var own = stages is null ? ApplyView.Begin(title, requests.Select(r => (r.ActionId, ActionName(r.ActionId))).ToList(), level, name: ActionName) : null;
         return await ExecuteWithProgressAsync(() => Confirm(title, confirmation), level, b => b.Execute(requests, "modulo"), stages, own, revert: false);
+    }
+
+    /// <summary>Modo automático do Assistente: o usuário já confirmou tudo uma vez, no começo (ver IModuleHost.ApplyConfirmedAsync).</summary>
+    public async Task<BrokerCallResult?> ApplyConfirmedAsync(string title, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages)
+    {
+        if (requests.Count == 0 || RefuseInSelfTest()) return null;
+        var own = stages is null ? ApplyView.Begin(title, requests.Select(r => (r.ActionId, ActionName(r.ActionId))).ToList(), level, name: ActionName) : null;
+        return await ExecuteWithProgressAsync(() => true, level, b => b.Execute(requests, "modulo"), stages, own, revert: false);
     }
 
     /// <summary>Tela de progresso da janela (qualquer aplicar/desfazer vindo de uma página que não tenha a sua própria).</summary>
@@ -323,6 +445,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             Hardware.Sections = snapshot.Sections.Select(s => new SectionViewModel(s)).ToList();
             Diagnostics.Findings = _findings;
             Overview.Cards = OverviewPage.Build(snapshot, _findings);
+            RefreshSimple();
 
             Status = Loc.T("Shell.LendoEstadoRealAcoes");
             await LoadCatalogAsync(snapshot.Facts);
@@ -350,6 +473,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
                 catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"{module.Title}: {ex.Message}"; }
             }
             await LoadOwnerChecksAsync(snapshot);
+            RefreshSimple();
+            if (IsSimpleMode) StartBackgroundMeasurements();
         }
         catch (Exception ex)
         {
@@ -378,6 +503,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
             _findings = [.. _findings.Where(f => f.Owner is null && !(xmp && f.Id == "mem.speed")), .. owner];
             Diagnostics.Findings = _findings;
             Overview.Cards = OverviewPage.Build(snapshot, _findings);
+            RefreshSimple();
             if (HardwarePage.OwnerSection(owner) is { } section)
                 Hardware.Sections = [.. Hardware.Sections.Where(x => x.Title != HardwarePage.OwnerSectionTitle), new SectionViewModel(section)];
         }
@@ -645,6 +771,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         if (_snapshot is not null) await LoadCatalogAsync(_snapshot.Facts);
         await LoadHistoryAsync();
         await BrokerStatusAsync();
+        RefreshSimple();
     }
 
     /// <summary>Diário (SQLite) e sondagem da trava lidos fora da thread da interface; o resultado entra na página igual a antes.</summary>
@@ -656,6 +783,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         History.Status = status;
         History.Runs = runs;
         if (noJournal) History.Entries = [];
+        await SimpleHistory.LoadAsync();
     }
 
     private static (string Coordination, string Status, IReadOnlyList<HistoryRun> Runs, bool NoJournal) ReadHistory(string path)

@@ -129,6 +129,8 @@ public sealed class AutomationPage : ModulePage
     /// <summary>"prévia" (antes de perguntar ao aplicador) ou "confirmado pelo aplicador".</summary>
     public string PlanState { get => _planState; private set => Set(ref _planState, value); }
     public int PlanCount => _plan.Count;
+    /// <summary>Ações de risco baixo que o Automático recomenda para este PC (a tela Início conta as que ainda mudariam algo).</summary>
+    public IReadOnlyList<string> CandidateActionKeys => _candidates.Select(c => c.Request.ActionId).ToList();
     public string PlanCountText => PlanNumberRaw.ToString(CultureInfo.InvariantCulture);
     /// <summary>"Limpeza segura: 9 regras, 1,2 GB recuperáveis (vão para a quarentena)".</summary>
     public string CleaningText { get => _cleaningText; private set { if (Set(ref _cleaningText, value)) { Raise(nameof(HasCleaning), nameof(PlanNumber)); OnPropertyChanged(nameof(PlanCountText)); } } }
@@ -182,6 +184,7 @@ public sealed class AutomationPage : ModulePage
             _catalog = built.Catalog;
             _set = built.Set;
             _candidates = OneClickPlanner.Candidates(built.Set, built.Catalog);
+            OnPropertyChanged(nameof(CandidateActionKeys));
             _planVerified = false;
             ShowProfile(built.Set.Profile, built.Traits);
             ShowRecommendations(built.Set);

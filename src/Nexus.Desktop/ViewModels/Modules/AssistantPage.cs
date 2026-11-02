@@ -7,6 +7,7 @@ using Nexus.Automation;
 using Nexus.Broker;
 using Nexus.Core;
 using Nexus.Desktop.Services;
+using Nexus.Desktop.ViewModels.Simple;
 using Nexus.Desktop.Views.Controls;
 using Tone = Nexus.Desktop.Views.Controls.Tone;
 using Nexus.HardwareDiscovery;
@@ -220,6 +221,8 @@ public sealed class AssistantPage : ModulePage
         ExportReportCommand = new RelayCommand(ExportReport, () => _state.ReportPath is { } p && File.Exists(p));
         FinishCommand = new RelayCommand(Finish, () => !Busy && _flow.IsLast && _report is not null);
         CancelScanCommand = new RelayCommand(() => _cancel?.Cancel(), () => _scanning);
+        StartAutoCommand = new RelayCommand(() => _ = RunAsync(RunAutomaticAsync), () => !Busy && Host?.Facts is not null);
+        ProcessView.PropertyChanged += (_, e) => { if (_autoRunning && e.PropertyName == nameof(AssistantProcess.Percent)) OnPropertyChanged(nameof(AutoPercent)); };
         RefreshStart();
     }
 
@@ -515,6 +518,7 @@ public sealed class AssistantPage : ModulePage
             Scanning = false;
         }
         if (!ReferenceEquals(ProcessView.Tracker, tracker)) return; // outra leitura já tomou a tela
+        if (_auto) return; // modo automático: a próxima etapa toma a tela sem a pausa do resumo
         if (summary is not null && !cts.IsCancellationRequested) await ProcessView.FinishAsync(summary);
         else ProcessView.Close();
     }
@@ -884,7 +888,7 @@ public sealed class AssistantPage : ModulePage
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) { Message = Loc.F("Asst.NaoConseguiGravarRelatorio2", ex.Message); }
         finally { Scanning = false; }
-        if (ReferenceEquals(ProcessView.Tracker, tracker))
+        if (ReferenceEquals(ProcessView.Tracker, tracker) && !_auto)
             await ProcessView.FinishAsync(_report is null
                 ? new ProcessSummary(Loc.T("Asst.NaoConseguiGravarRelatorio"), ProcessTaskStatus.Failed)
                 : new ProcessSummary($"{_report.AppliedCount} {(_report.AppliedCount == 1 ? Loc.T("Asst.MudancaAplicada") : Loc.T("Asst.MudancasAplicadas2"))} • {ProcessText.Duration(tracker.Elapsed)}", ProcessTaskStatus.Done));
@@ -932,6 +936,150 @@ public sealed class AssistantPage : ModulePage
         if (!Host.Confirm(Loc.T("Asst.AbrirNavegador"), Loc.F("Asst.AbrirEstaPaginaNavegador", url))) return;
         try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose(); }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = Loc.F("Asst.NaoConseguiAbrirNavegador", ex.Message); }
+    }
+
+    // ------------------------------------------------------------------ modo automático (modo simples: "Otimizar meu PC com segurança")
+
+    private bool _auto, _autoRunning, _autoApplying;
+    private int _autoIndex;
+    private string _autoSummary = "";
+    private double _autoBytes;
+    private int _autoApplied;
+
+    /// <summary>Roda todas as etapas sozinho, aplicando só o que é de risco baixo e recomendado (<see cref="AutoPilot"/>).</summary>
+    public RelayCommand StartAutoCommand { get; }
+    public bool AutoRunning { get => _autoRunning; private set { if (Set(ref _autoRunning, value)) RaiseAuto(); } }
+    /// <summary>"Pronto! Liberamos 9,3 GB e ajustamos 12 coisas." (vazio até terminar uma rodada automática).</summary>
+    public string AutoSummary { get => _autoSummary; private set { if (Set(ref _autoSummary, value)) RaiseAuto(); } }
+    public bool AutoDone => !_autoRunning && _autoSummary.Length > 0;
+    public bool AutoIdle => !_autoRunning && _autoSummary.Length == 0;
+    /// <summary>Andamento da rodada inteira (0–100): cada etapa vale uma parte igual (metade lendo, metade aplicando) e o relatório a última.</summary>
+    public double AutoPercent
+    {
+        get
+        {
+            var total = AutoPilot.Steps.Count + 1;
+            var within = Math.Clamp(ProcessView.Percent / 100, 0, 1);
+            var part = _autoIndex >= AutoPilot.Steps.Count ? within : _autoApplying ? 0.5 + within / 2 : within / 2;
+            return Math.Clamp(100.0 * (_autoIndex + part) / total, 0, 100);
+        }
+    }
+    /// <summary>Qual dos 4 itens está acontecendo agora (null = nenhum: antes de começar ou no relatório).</summary>
+    public AutoPilot.Phase? AutoPhase => _autoRunning && _autoIndex < AutoPilot.Steps.Count ? AutoPilot.PhaseOf(AutoPilot.Steps[_autoIndex]) : null;
+    /// <summary>Item terminado: todas as etapas dele já passaram (ou a rodada acabou).</summary>
+    public bool IsPhaseDone(AutoPilot.Phase phase) => AutoDone || (_autoRunning && AutoPilot.Steps.Select((s, i) => (s, i)).Where(x => AutoPilot.PhaseOf(x.s) == phase).All(x => x.i < _autoIndex));
+    /// <summary>Chamado quando uma rodada automática termina (a janela relê o PC para a nota da tela Início).</summary>
+    public event EventHandler? AutoFinished;
+    /// <summary>"O que só você pode fazer" juntado pelo assistente (para a tela Problemas do modo simples).</summary>
+    public IReadOnlyList<UserAction> PendingUserActions => _state.UserActions;
+
+    private void RaiseAuto()
+    {
+        foreach (var n in new[] { nameof(AutoDone), nameof(AutoIdle), nameof(AutoPercent), nameof(AutoPhase) }) OnPropertyChanged(n);
+        AutoProgressChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Andamento/fase mudou (a tela Otimizar do modo simples atualiza os 4 itens).</summary>
+    public event EventHandler? AutoProgressChanged;
+
+    /// <summary>
+    /// Uma confirmação no começo (com a lista do que acontece e o aviso único do Windows); depois cada etapa do
+    /// <see cref="AutoPilot"/> lê, confere no aplicador e aplica só o que <see cref="AutoPilot.IsAutomatic"/> aceita, sem perguntar
+    /// de novo. As outras etapas ficam "puladas" (o passo a passo do modo completo continua com tudo). Termina com o relatório
+    /// e um resumo curto. "Desfazer tudo" continua cobrindo esta rodada e as anteriores.
+    /// </summary>
+    private async Task RunAutomaticAsync()
+    {
+        var host = Host;
+        if (host?.Facts is null) return;
+        if (!host.Confirm(Loc.T("Simple.Opt.ConfirmTitle"), Loc.T("Simple.Opt.ConfirmText")))
+        {
+            Message = Loc.T("Shell.CanceladoNadaFoiAlterado");
+            return;
+        }
+        var catalogDir = NexusServices.CatalogDirectory;
+        _catalog ??= await Task.Run(() => AssistantCatalog.Load(catalogDir));
+        // Rodada nova, mas o "Desfazer tudo" continua valendo para o que as rodadas anteriores fizeram.
+        var previous = _state;
+        _state = new AssistantState();
+        _state.Runs.AddRange(previous.Runs.Where(r => !r.Reverted));
+        foreach (var (k, v) in previous.AppPreferences) _state.AppPreferences[k] = v;
+        _flow = new AssistantFlow(_state);
+        _report = null;
+        _autoBytes = 0;
+        _autoApplied = 0;
+        _autoIndex = 0;
+        _autoApplying = false;
+        AutoSummary = "";
+        _auto = true;
+        AutoRunning = true;
+        InFlow = true;
+        Save();
+        try
+        {
+            while (!_flow.IsLast)
+            {
+                var step = _state.Current;
+                var index = -1;
+                for (var i = 0; i < AutoPilot.Steps.Count; i++) if (AutoPilot.Steps[i] == step) index = i;
+                if (index < 0) { _flow.Skip(Loc.T("Simple.Opt.SkippedAuto")); continue; }
+                _autoIndex = index;
+                _autoApplying = false;
+                RaiseAuto();
+                _scan = null; // leitura que falhar não pode reaplicar o que a etapa anterior propôs
+                await ScanAsync(step);
+                var scan = _scan;
+                var chosen = scan is null ? [] : AutoPilot.Select(scan.Changes);
+                var summary = scan is null ? Loc.T("Asst.Verificada") : scan.Recommendation;
+                if (chosen.Count > 0)
+                {
+                    _autoApplying = true;
+                    RaiseAuto();
+                    var tracker = ProcessView.Begin(step, Loc.T("Shell.Aplicando"), apply: true, Segments());
+                    var lookup = chosen.Any(c => c.Request.ActionId == StepPlanners.RestorePointAction)
+                        ? tracker.Add("restore-lookup", Loc.T("Asst.ProcurandoPontoRestauracaoRecente"), ProcessTimeModel.RestorePointLookup) : null;
+                    ProcessView.Observer!.Planned(ApplyGrouping.Group(step, chosen));
+                    var recent = lookup is null ? null : await RecentRestorePointAsync(tracker, lookup);
+                    var result = await AssistantRunner.ApplyAsync(_state, step, chosen, new ConfirmedWriter(host), ProcessView.Observer, recent);
+                    _autoBytes += ProcessView.Observer.MovedBytes;
+                    _autoApplied += result.Applied;
+                    summary = result.Summary;
+                }
+                if (scan is not null) AssistantRunner.RecordUnselected(_state, scan.Changes.Where(c => !chosen.Contains(c)));
+                _flow.Advance(summary, scan?.Facts);
+                Save();
+            }
+            _autoIndex = AutoPilot.Steps.Count;
+            _autoApplying = false;
+            RaiseAuto();
+            await BuildReportAsync();
+            _flow.Advance(Loc.T("Asst.RelatorioGerado"));
+            Save();
+            AutoSummary = SimpleOptimizeText.Summary(_autoBytes, _autoApplied);
+        }
+        finally
+        {
+            _auto = false;
+            ProcessView.Close();
+            InFlow = false;
+            AutoRunning = false;
+            RefreshStart();
+            OnPropertyChanged(nameof(PendingUserActions));
+        }
+        AutoFinished?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Escrita do modo automático: o usuário confirmou tudo no começo; cada lote vai ao aplicador sem outra caixa.</summary>
+    private sealed class ConfirmedWriter(IModuleHost host) : IAssistantWriter
+    {
+        public async Task<WriteOutcome?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level) =>
+            await host.ApplyConfirmedAsync(title, requests, level, null) is { } r ? WriteOutcome.From(r) : null;
+
+        public async Task<WriteOutcome?> ApplyAsync(string title, string confirmation, IReadOnlyList<ActionRequest> requests, BrokerLevel level, IProgress<ApplyStage>? stages) =>
+            await host.ApplyConfirmedAsync(title, requests, level, stages) is { } r ? WriteOutcome.From(r) : null;
+
+        public async Task<WriteOutcome?> RevertAsync(Guid runId, BrokerLevel level) =>
+            await host.RevertAsync(runId, level) is { } r ? WriteOutcome.From(r) : null;
     }
 
     // ------------------------------------------------------------------ desfazer tudo

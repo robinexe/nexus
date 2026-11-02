@@ -3735,4 +3735,38 @@ Exige administrador.</value></data>
   <data name="Simple.Topic.Games" xml:space="preserve"><value>jogos</value></data>
   <data name="Simple.Topic.Startup" xml:space="preserve"><value>inicialização</value></data>
   <data name="Simple.Topic.Windows" xml:space="preserve"><value>Windows</value></data>
+  <data name="Simple.Hist.Cleaning" xml:space="preserve"><value>Limpeza</value></data>
+  <data name="Simple.Hist.Privacy" xml:space="preserve"><value>Privacidade</value></data>
+  <data name="Simple.Hist.Startup" xml:space="preserve"><value>Inicialização</value></data>
+  <data name="Simple.Hist.Gpu" xml:space="preserve"><value>Placa de vídeo</value></data>
+  <data name="Simple.Hist.RestorePoint" xml:space="preserve"><value>Ponto de restauração</value></data>
+  <data name="Simple.Hist.Drivers" xml:space="preserve"><value>Drivers</value></data>
+  <data name="Simple.Hist.Programs" xml:space="preserve"><value>Programas</value></data>
+  <data name="Simple.Hist.Security" xml:space="preserve"><value>Segurança</value></data>
+  <data name="Simple.Hist.Windows" xml:space="preserve"><value>Ajustes do Windows</value></data>
+  <data name="Simple.Hist.Cleaned1" xml:space="preserve"><value>1 item limpo</value></data>
+  <data name="Simple.Hist.CleanedN" xml:space="preserve"><value>{0} itens limpos</value></data>
+  <data name="Simple.Hist.Changes1" xml:space="preserve"><value>1 mudança</value></data>
+  <data name="Simple.Hist.ChangesN" xml:space="preserve"><value>{0} mudanças</value></data>
+  <data name="Simple.Hist.Line" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="Simple.Hist.Today" xml:space="preserve"><value>Hoje {0}</value></data>
+  <data name="Simple.Hist.Yesterday" xml:space="preserve"><value>Ontem {0}</value></data>
+  <data name="Simple.Opt.DoneFreedN" xml:space="preserve"><value>Pronto! Liberamos {0} e ajustamos {1} coisas.</value></data>
+  <data name="Simple.Opt.DoneFreed1" xml:space="preserve"><value>Pronto! Liberamos {0} e ajustamos 1 coisa.</value></data>
+  <data name="Simple.Opt.DoneFreedOnly" xml:space="preserve"><value>Pronto! Liberamos {0}.</value></data>
+  <data name="Simple.Opt.DoneN" xml:space="preserve"><value>Pronto! Ajustamos {0} coisas.</value></data>
+  <data name="Simple.Opt.Done1" xml:space="preserve"><value>Pronto! Ajustamos 1 coisa.</value></data>
+  <data name="Simple.Opt.DoneNothing" xml:space="preserve"><value>Pronto! Seu PC já estava em dia: nada precisou mudar.</value></data>
+  <data name="Simple.Opt.ConfirmTitle" xml:space="preserve"><value>Otimizar meu PC com segurança</value></data>
+  <data name="Simple.Opt.ConfirmText" xml:space="preserve"><value>O NEXUS vai:
+
+• Limpar arquivos temporários (vão para a quarentena e podem voltar)
+• Ajustar o Windows para jogos
+• Desligar programas que atrasam a inicialização
+• Conferir segurança e drivers
+
+Só entra o que é de risco baixo e pode ser desfeito em Histórico. O Windows vai pedir permissão de administrador uma vez e o NEXUS cria um ponto de restauração antes.
+
+Começar agora?</value></data>
+  <data name="Simple.Opt.SkippedAuto" xml:space="preserve"><value>Fica para o passo a passo (modo completo).</value></data>
 </root>

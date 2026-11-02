@@ -326,6 +326,7 @@ public sealed class SimpleModeTests
         Assert.False(AutoPilot.IsAutomatic(C("g@1", confirmIrreversible: true)));
         Assert.False(AutoPilot.IsAutomatic(C("h@1", undoable: false)));            // efeito imediato sem desfazer
         Assert.False(AutoPilot.IsAutomatic(C(StepPlanners.DriverInstallAction)));  // instalar driver fica para o usuário
+        Assert.False(AutoPilot.IsAutomatic(C(Nexus.Lab.Gpu.GpuDiagnostics.DisplayModeAction))); // a tela pode apagar
     }
 
     [Fact]
@@ -354,5 +355,36 @@ public sealed class SimpleModeTests
         all.Add(Modules.AssistantFakes.Change(c, "t.user.low2@1", optIn: true));
         var picked = AutoPilot.Select(all).Select(p => p.Request.ActionId).ToList();
         Assert.Equal(["t.user.low@1", "t.admin.low@1"], picked);
+    }
+
+    // ------------------------------------------------------------------ Histórico simples
+
+    [Fact]
+    public void History_lines_never_show_action_keys()
+    {
+        var cleaning = new[] { "cleaning.chrome-cache@1", "cleaning.temp@1", "cleaning.edge-cache@1", "system.restore.create-point@1" };
+        var line = SimpleHistoryText.Describe(cleaning);
+        Assert.Equal("Limpeza: 4 itens limpos", line);
+        Assert.DoesNotContain("@", line, StringComparison.Ordinal);
+        Assert.Equal("Privacidade: 1 mudança", SimpleHistoryText.Describe(["privacy.ads.off@1"]));
+        Assert.Equal("Inicialização: 2 mudanças", SimpleHistoryText.Describe(["boot.startup.x@1", "boot.startup.y@1"]));
+        Assert.Equal("Ajustes do Windows: 1 mudança", SimpleHistoryText.Describe(["sys.something@1"]));
+    }
+
+    [Fact]
+    public void History_dates_are_friendly()
+    {
+        var now = new DateTime(2026, 11, 2, 18, 0, 0);
+        Assert.Equal("Hoje 14:30", SimpleHistoryText.When(new DateTime(2026, 11, 2, 14, 30, 0), now));
+        Assert.Equal("Ontem 09:05", SimpleHistoryText.When(new DateTime(2026, 11, 1, 9, 5, 0), now));
+        Assert.Equal("28/10 14:30", SimpleHistoryText.When(new DateTime(2026, 10, 28, 14, 30, 0), now));
+    }
+
+    [Fact]
+    public void Optimize_summary_is_short_and_friendly()
+    {
+        Assert.Equal("Pronto! Liberamos 9,3 GB e ajustamos 12 coisas.", SimpleOptimizeText.Summary(9.3 * Gb, 12));
+        Assert.Equal("Pronto! Ajustamos 3 coisas.", SimpleOptimizeText.Summary(0, 3));
+        Assert.Equal("Pronto! Seu PC já estava em dia: nada precisou mudar.", SimpleOptimizeText.Summary(0, 0));
     }
 }

@@ -26,8 +26,12 @@ public static class AutoPilot
         _ => Phase.Tune,
     };
 
-    /// <summary>Ações que nunca entram no automático, mesmo de risco baixo: instalar driver (baixa e instala; fica para o usuário decidir).</summary>
-    public static IReadOnlySet<string> NeverAutomatic { get; } = new HashSet<string>(StringComparer.Ordinal) { StepPlanners.DriverInstallAction };
+    /// <summary>
+    /// Ações que nunca entram no automático, mesmo de risco baixo: instalar driver (baixa e instala; fica para o usuário decidir) e
+    /// trocar o modo do monitor (a tela pode apagar; no passo a passo há o "Manter esta taxa?" que volta sozinho).
+    /// </summary>
+    public static IReadOnlySet<string> NeverAutomatic { get; } = new HashSet<string>(StringComparer.Ordinal)
+        { StepPlanners.DriverInstallAction, Nexus.Lab.Gpu.GpuDiagnostics.DisplayModeAction };
 
     /// <summary>Entra no automático? Só risco baixo recomendado (marcado por padrão), desfazível ou o ponto de restauração, nunca irreversível.</summary>
     public static bool IsAutomatic(ProposedChange c)

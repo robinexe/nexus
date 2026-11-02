@@ -78,6 +78,30 @@ public sealed class CleaningPage : ModulePage
         OpenRulesFolderCommand = new RelayCommand(OpenRulesFolder);
         ReloadRulesCommand = new RelayCommand(() => _ = ReloadRulesAsync(), () => !_scanning && !Busy);
         ShowCleanCommand = new RelayCommand(() => Tab = "clean");
+        CleanSafeCommand = new RelayCommand(() => _ = RunAsync(CleanSafeAsync), () => !Busy && !_scanning && Host is not null && SafeRows().Any());
+    }
+
+    // ------------------------------------------------------------------ modo simples: "Limpar agora" (só regras de risco baixo)
+
+    /// <summary>
+    /// Regras que o modo simples limpa sem perguntar item por item: as que já vêm marcadas por padrão, embutidas (não do
+    /// usuário), sem dados pessoais (senhas, histórico, sessões) e com algo medido para liberar. Vão para a quarentena como sempre.
+    /// </summary>
+    private IEnumerable<CleaningRuleRow> SafeRows() => AllRows().Where(r => r.CanClean && r.Rule.DefaultSelected && !r.Rule.Sensitive && !r.Rule.IsUserRule && r.Measured && r.Bytes > 0);
+
+    /// <summary>Quanto o "Limpar agora" do modo simples libera (NaN enquanto mede).</summary>
+    public double SafeBytes => _scanned ? SafeRows().Sum(r => r.Bytes) : double.NaN;
+    /// <summary>"Ver o que será limpo": nome e tamanho de cada regra segura.</summary>
+    public IReadOnlyList<CleaningSafeItem> SafeItems => SafeRows().OrderByDescending(r => r.Bytes).Select(r => new CleaningSafeItem(r.Title, r.SizeText)).ToList();
+    public RelayCommand CleanSafeCommand { get; }
+
+    /// <summary>Marca só as regras seguras e limpa pelo caminho de sempre (confirmação com a lista, quarentena, desfazer).</summary>
+    private async Task CleanSafeAsync()
+    {
+        foreach (var r in AllRows()) r.SetSelected(false);
+        foreach (var r in SafeRows()) r.SetSelected(true);
+        SelectionChanged();
+        await CleanSelectedAsync();
     }
 
     public override string Title => Loc.T("AsstStep.Limpeza");
@@ -252,8 +276,8 @@ public sealed class CleaningPage : ModulePage
             };
             var results = await Task.Run(() => CleaningScanner.ScanAsync(rules, folders, SystemProcessProbe.Instance, DateTime.UtcNow,
                 RecycleBinInfo.TryQuery, cancel: cancel.Token), cancel.Token);
-            Populate(results);
             _scanned = true;
+            Populate(results);
             await MeasureRecycleBinAsync();
             await LoadHistoryAsync();
             await MeasureFreeSpaceAsync();
@@ -320,6 +344,8 @@ public sealed class CleaningPage : ModulePage
         var total = cleanable.Sum(r => r.Bytes);
         RecoverableText = Bytes(total);
         RecoverableBytes = total;
+        OnPropertyChanged(nameof(SafeBytes));
+        OnPropertyChanged(nameof(SafeItems));
         var unmeasured = cleanable.Count(r => !r.Measured);
         RecoverableCaption = Loc.T("Clean.RecuperaveisSeguranca") + (unmeasured > 0 ? Loc.F("Clean.MaisNItemNs", unmeasured) : "") +
                              Loc.T("Clean.MedidoAgoraSemMexer2");
@@ -940,3 +966,6 @@ public sealed class UserRuleFileRow(UserRuleFile file, CleaningRuleSet loaded)
         : file.RuleIds.Count == 0 ? Loc.T("Clean.SemRegras")
         : string.Join(", ", file.RuleIds.Select(id => loaded.Find(id)?.Title ?? id));
 }
+
+/// <summary>Uma linha do "Ver o que será limpo" do modo simples.</summary>
+public sealed record CleaningSafeItem(string Title, string SizeText);
