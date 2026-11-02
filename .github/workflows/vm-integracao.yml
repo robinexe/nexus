@@ -201,6 +201,14 @@ jobs:
           ($(if ($bad) { $codes -join ' ' } else { '0' })) | Out-File saida/ui/ui-lang.exitcode -Encoding ascii
           "idiomas: $($codes -join ' ')"
 
+      - name: Diagnóstico da interface (desktop-diag.log e erros)
+        if: always()
+        shell: pwsh
+        run: |
+          $d = Join-Path $env:LOCALAPPDATA 'NEXUS'
+          foreach ($f in 'desktop-diag.log', 'desktop-erros.log') { if (Test-Path (Join-Path $d $f)) { Copy-Item (Join-Path $d $f) saida/ -Force } }
+          Get-ChildItem saida -Recurse -Filter ui.progress.txt | ForEach-Object { "== $($_.FullName)"; Get-Content $_.FullName -Tail 6 }
+
       - name: Veredito dos autotestes
         if: always()
         shell: pwsh

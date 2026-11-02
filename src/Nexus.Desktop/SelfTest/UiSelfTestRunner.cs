@@ -170,6 +170,7 @@ internal sealed class UiSelfTestRunner
         var vm = (MainViewModel)_window.DataContext;
         try
         {
+            Progress("leitura do PC: esperando");
             // 1) A leitura do PC (a janela começa sozinha no Loaded).
             var sw = Stopwatch.StartNew();
             while (sw.Elapsed < InitialTimeout && (vm.Facts is null || vm.Busy)) await Task.Delay(250, CancellationToken.None);
@@ -178,6 +179,7 @@ internal sealed class UiSelfTestRunner
             initialStatus = Sanitizer.Clean(vm.Status);
             await IdleAsync();
             startup = Swap();
+            Progress($"leitura do PC: {(initialDone ? "concluída" : "não concluiu")} em {initialSeconds:0.0} s");
 
             // 2) As 6 telas da lista lateral, as 2 telas da boas-vindas e a tela Otimizar trabalhando e no fim (dados de
             //    demonstração). Depois "Ferramentas avançadas" e cada ferramenta dela (qualquer página nova entra sozinha).
@@ -241,6 +243,27 @@ internal sealed class UiSelfTestRunner
     /// <param name="cleanup">Desfaz o estado especial depois da imagem.</param>
     private async Task<UiPageResult> VisitAsync(MainViewModel vm, PageViewModel page, int index, string? label = null, Action? stage = null, Action? cleanup = null)
     {
+        Progress($"{index} {label ?? page.Title} ({page.GetType().Name}): abrindo");
+        try { return await VisitCoreAsync(vm, page, index, label, stage, cleanup); }
+        finally { Progress($"{index}: concluída"); }
+    }
+
+    /// <summary>
+    /// Andamento gravado a cada passo (ui.progress.txt ao lado do JSON): se o processo for morto por tempo, mostra em que tela
+    /// e em que fase parou (o JSON só é gravado no fim).
+    /// </summary>
+    private void Progress(string step)
+    {
+        try
+        {
+            File.AppendAllText(Path.Combine(Path.GetDirectoryName(_jsonPath)!, "ui.progress.txt"),
+                $"{_clock.Elapsed.TotalSeconds,7:0.0} s  {step}{Environment.NewLine}");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+    }
+
+    private async Task<UiPageResult> VisitCoreAsync(MainViewModel vm, PageViewModel page, int index, string? label, Action? stage, Action? cleanup)
+    {
         Swap();
         var notes = new List<string>();
         var sw = Stopwatch.StartNew();
@@ -268,6 +291,7 @@ internal sealed class UiSelfTestRunner
             await Task.Delay(200);
         }
         if (!idle) notes.Add($"Continuava ocupada depois de {PageTimeout.TotalSeconds:0} s.");
+        Progress($"{index}: {(idle ? "ociosa" : "ainda ocupada")}, montando a imagem");
         if (stage is not null)
         {
             try { stage(); }
