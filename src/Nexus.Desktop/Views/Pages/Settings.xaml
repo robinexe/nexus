@@ -155,6 +155,28 @@
           </DockPanel>
         </Border>
 
+        <!-- ===== Modo da interface (vale na hora; settings.json) ===== -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,22" BorderBrush="{StaticResource Brush.TraceLine}">
+          <DockPanel>
+            <Grid Width="38" Height="38" Margin="0,0,12,0" DockPanel.Dock="Left" VerticalAlignment="Top">
+              <Ellipse Fill="{StaticResource Brush.TraceSoft}"/>
+              <c:Icon Data="{StaticResource Icon.Apps}" Size="19" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+            </Grid>
+            <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Margin="12,0,0,0">
+              <RadioButton GroupName="UiMode" IsChecked="{Binding IsSimpleModeChoice}" Margin="0,0,0,8">
+                <TextBlock Text="{l:T Simple.Settings.Simple}"/>
+              </RadioButton>
+              <RadioButton GroupName="UiMode" IsChecked="{Binding IsFullModeChoice}">
+                <TextBlock Text="{l:T Simple.Settings.Full}"/>
+              </RadioButton>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="{l:T Simple.Settings.Title}" Style="{StaticResource Text.H2}"/>
+              <TextBlock Text="{l:T Simple.Settings.Detail}" Style="{StaticResource Text.Small}" TextWrapping="Wrap"/>
+            </StackPanel>
+          </DockPanel>
+        </Border>
+
         <!-- ===== Agendamentos ===== -->
         <TextBlock Text="{l:T Settings.Agendamentos}" Style="{StaticResource Text.H2}" Margin="0,4,0,12"/>
         <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,16">

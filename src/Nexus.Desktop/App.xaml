@@ -40,6 +40,7 @@
         <ResourceDictionary Source="Views/Pages/Settings.xaml"/>
         <ResourceDictionary Source="Views/Pages/History.xaml"/>
         <ResourceDictionary Source="Views/Pages/Capabilities.xaml"/>
+        <ResourceDictionary Source="Views/Pages/Simple.xaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

@@ -1,0 +1,468 @@
+<!--
+  Modo simples (pedido: "facilitar a vida do usuário leigo"). Seis telas, uma ideia cada, palavras simples, no máximo uma
+  frase por elemento, letra maior e espaço de sobra. O único elemento marcante é o anel da saúde no Início; o resto é quieto.
+    Início ....... anel com a palavra ("Seu PC está ótimo / pode melhorar / precisa de atenção"), UM botão "Otimizar meu PC com
+                   segurança", no máximo 3 cartões "O que dá para melhorar" (frase + botão), "Tudo pode ser desfeito".
+    Otimizar ..... antes: 4 itens e "Começar"; durante: anel do andamento e o item atual; depois: resumo, "Ver detalhes",
+                   "Desfazer tudo". (Assistente completo no modo automático: AssistantPage.RunAutomaticAsync.)
+    Limpar ....... "X GB podem ser liberados" + "Limpar agora"; lista só em "Ver o que será limpo".
+    Jogos ........ cartão por jogo: "Medir FPS" e só as opções que valem para ele, em palavras simples.
+    Problemas .... o que precisa de você, com "O que fazer"; o que está bem fica recolhido.
+    Histórico .... "Hoje 14:30 — Limpeza: 12 itens limpos — Desfazer" e "Desfazer tudo".
+  Lógica: ViewModels/Simple/SimplePages.cs (vitrines) e SimpleLogic.cs (pura, testada).
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
+                    xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
+                    xmlns:sv="clr-namespace:Nexus.Desktop.ViewModels.Simple"
+                    xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
+                    xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell">
+
+  <!-- ===== Estilos do modo simples (letra maior, mais ar) ===== -->
+  <Style x:Key="S.Title" TargetType="TextBlock" BasedOn="{StaticResource Text.Display}">
+    <Setter Property="FontSize" Value="34"/>
+    <Setter Property="LineHeight" Value="40"/>
+  </Style>
+  <Style x:Key="S.Lead" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+  </Style>
+  <Style x:Key="S.Item" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
+    <Setter Property="FontSize" Value="17"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style x:Key="S.Section" TargetType="TextBlock" BasedOn="{StaticResource Text.H2}">
+    <Setter Property="FontSize" Value="19"/>
+    <Setter Property="Margin" Value="0,36,0,14"/>
+  </Style>
+  <Style x:Key="S.Card" TargetType="Border" BasedOn="{StaticResource Panel.Card}">
+    <Setter Property="Padding" Value="22,18"/>
+    <Setter Property="Margin" Value="0,0,0,12"/>
+  </Style>
+  <Style x:Key="S.Big" TargetType="Button" BasedOn="{StaticResource Button.Primary}">
+    <Setter Property="FontSize" Value="17"/>
+    <Setter Property="Padding" Value="26,14"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
+  <Style x:Key="S.Message" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource Brush.SignalSoft}"/>
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Control}"/>
+    <Setter Property="Padding" Value="14,10"/>
+    <Setter Property="Margin" Value="0,0,0,18"/>
+  </Style>
+
+  <!-- ================================================================== INÍCIO -->
+  <DataTemplate DataType="{x:Type sv:HomePage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="940" HorizontalAlignment="Stretch">
+
+        <!-- O elemento marcante: o anel da saúde com a palavra. -->
+        <Grid Margin="0,8,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Grid Width="264" Height="264" VerticalAlignment="Center" AutomationProperties.Name="{Binding Headline}">
+            <c:SkeletonLoader Shape="Hero" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+            <Grid Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+              <c:ProcessRing Value="{Binding Score}" IsActive="False" Tone="{Binding Tone}" Thickness="14"/>
+              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="170">
+                <TextBlock Text="{Binding Word}" FontFamily="{StaticResource Font.Display}" FontSize="30" TextAlignment="Center"
+                           Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}" TextWrapping="Wrap"/>
+              </StackPanel>
+            </Grid>
+          </Grid>
+          <StackPanel Grid.Column="1" Margin="40,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Headline}" Style="{StaticResource S.Title}" AutomationProperties.LiveSetting="Polite"/>
+            <TextBlock Text="{l:T Simple.Home.Caption}" Style="{StaticResource S.Lead}" Margin="0,8,0,26"/>
+            <Button Style="{StaticResource S.Big}" Command="{Binding OptimizeCommand}" AutomationProperties.Name="{l:T Simple.Home.Optimize}">
+              <StackPanel Orientation="Horizontal">
+                <c:Icon Data="{StaticResource Icon.Bolt}" Size="19" Margin="0,0,10,0"/>
+                <TextBlock Text="{l:T Simple.Home.Optimize}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <!-- O que dá para melhorar: no máximo 3, uma frase e um botão. -->
+        <TextBlock Text="{l:T Simple.Home.Improve}" Style="{StaticResource S.Section}" Visibility="{Binding HasCards, Converter={StaticResource BoolToVis}}"/>
+        <ItemsControl ItemsSource="{Binding Cards}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type sv:ImproveCardRow}">
+              <Border Style="{StaticResource S.Card}">
+                <StackPanel>
+                  <DockPanel>
+                    <Grid Width="44" Height="44" DockPanel.Dock="Left" Margin="0,0,16,0">
+                      <Ellipse Fill="{StaticResource Brush.TraceSoft}"/>
+                      <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+                    </Grid>
+                    <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0">
+                      <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
+                              Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Target}"
+                              Visibility="{Binding Navigates, Converter={StaticResource BoolToVis}}"/>
+                      <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
+                              Command="{Binding ToggleHowToCommand}" Visibility="{Binding IsHowTo, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Text}" Style="{StaticResource S.Item}"/>
+                  </DockPanel>
+                  <TextBlock Text="{Binding HowTo}" Style="{StaticResource S.Lead}" FontSize="15" Margin="60,12,0,0"
+                             Visibility="{Binding ShowHowTo, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="{l:T Simple.Home.NothingToDo}" Detail="{l:T Simple.Home.NothingToDoDetail}"
+                      Margin="0,30,0,0" Visibility="{Binding NoCards, Converter={StaticResource BoolToVis}}"/>
+
+        <!-- Confiança: tudo se desfaz. -->
+        <StackPanel Orientation="Horizontal" Margin="0,30,0,0">
+          <c:Icon Data="{StaticResource Icon.Undo}" Size="17" Foreground="{StaticResource Brush.Good}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+          <TextBlock Text="{l:T Simple.Home.Undoable}" Style="{StaticResource S.Lead}" FontSize="15" VerticalAlignment="Center"/>
+          <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Home.SeeHistory}" Margin="6,0,0,0"
+                  Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SimpleHistoryPage"/>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
+
+  <!-- ================================================================== OTIMIZAR -->
+  <DataTemplate DataType="{x:Type sv:SimpleOptimizePage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="860" HorizontalAlignment="Stretch">
+        <Border Style="{StaticResource S.Message}" Visibility="{Binding Assistant.Message, Converter={StaticResource NullToCollapsed}}">
+          <TextBlock Text="{Binding Assistant.Message}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+        </Border>
+
+        <!-- Antes: o que vai acontecer -->
+        <StackPanel Visibility="{Binding Assistant.AutoIdle, Converter={StaticResource BoolToVis}}">
+          <TextBlock Text="{l:T Simple.Home.Optimize}" Style="{StaticResource S.Title}"/>
+          <TextBlock Text="{l:T Simple.Opt.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,26"/>
+          <ItemsControl ItemsSource="{Binding Phases}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type sv:OptimizePhaseRow}">
+                <DockPanel Margin="0,0,0,16">
+                  <Grid Width="44" Height="44" Margin="0,0,16,0">
+                    <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+                    <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+                  </Grid>
+                  <TextBlock Text="{Binding Title}" Style="{StaticResource S.Item}"/>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Orientation="Horizontal" Margin="0,8,0,28">
+            <c:Icon Data="{StaticResource Icon.Lock}" Size="16" Foreground="{StaticResource Brush.Good}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBlock Text="{l:T Simple.Opt.Safe}" Style="{StaticResource S.Lead}" FontSize="15" VerticalAlignment="Center"/>
+          </StackPanel>
+          <Button Style="{StaticResource S.Big}" Content="{l:T Simple.Opt.Start}" MinWidth="200" Command="{Binding Assistant.StartAutoCommand}"/>
+        </StackPanel>
+
+        <!-- Durante: anel do andamento e o item atual -->
+        <StackPanel Visibility="{Binding Running, Converter={StaticResource BoolToVis}}">
+          <TextBlock Text="{l:T Simple.Opt.Working}" Style="{StaticResource S.Title}"/>
+          <TextBlock Text="{l:T Simple.Opt.WorkingLead}" Style="{StaticResource S.Lead}" Margin="0,8,0,26"/>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Width="220" Height="220" VerticalAlignment="Top">
+              <c:ProcessRing Value="{Binding Percent}" IsActive="{Binding Running}" Tone="Warn" Thickness="13"/>
+              <c:AnimatedNumber Value="{Binding Percent}" Kind="Percent" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="50"
+                                Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+            <StackPanel Grid.Column="1" Margin="40,6,0,0">
+              <ItemsControl ItemsSource="{Binding Phases}" Focusable="False">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="{x:Type sv:OptimizePhaseRow}">
+                    <DockPanel Margin="0,0,0,18">
+                      <Grid Width="36" Height="36" Margin="0,0,14,0" c:Pulse.IsOn="{Binding IsCurrent}">
+                        <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
+                        <c:Icon Data="{Binding StateIcon, Converter={StaticResource ResourceByKey}}" Size="17" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}"
+                                HorizontalAlignment="Center"/>
+                      </Grid>
+                      <TextBlock x:Name="T" Text="{Binding Title}" Style="{StaticResource S.Item}" Foreground="{StaticResource Brush.TextMuted}"/>
+                    </DockPanel>
+                    <DataTemplate.Triggers>
+                      <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                        <Setter TargetName="T" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding IsDone}" Value="True">
+                        <Setter TargetName="T" Property="Foreground" Value="{StaticResource Brush.Text}"/>
+                      </DataTrigger>
+                    </DataTemplate.Triggers>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Border Style="{StaticResource Panel.Notice}" Margin="0,6,0,0" Visibility="{Binding Assistant.ProcessView.IsWaiting, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{l:T Simple.Opt.AnswerWindows}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
+              </Border>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+
+        <!-- Depois: resumo curto -->
+        <StackPanel Visibility="{Binding Assistant.AutoDone, Converter={StaticResource BoolToVis}}">
+          <Grid Width="72" Height="72" HorizontalAlignment="Left" Margin="0,0,0,20">
+            <Ellipse Fill="{StaticResource Brush.GoodSoft}"/>
+            <c:Icon Data="{StaticResource Icon.Check}" Size="34" Foreground="{StaticResource Brush.Good}" HorizontalAlignment="Center"/>
+          </Grid>
+          <TextBlock Text="{Binding Assistant.AutoSummary}" Style="{StaticResource S.Title}" AutomationProperties.LiveSetting="Assertive"/>
+          <TextBlock Text="{Binding Home.Headline}" FontFamily="{StaticResource Font.Display}" FontSize="22" Margin="0,10,0,30"
+                     Foreground="{Binding Home.Tone, Converter={StaticResource ToneBrush}}"/>
+          <WrapPanel>
+            <Button Style="{StaticResource S.Big}" Content="{l:T Simple.Opt.BackHome}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HomePage"
+                    Margin="0,0,10,10"/>
+            <Button Style="{StaticResource Button.Secondary}" Content="{l:T Simple.Opt.Details}" Command="{Binding Assistant.OpenReportCommand}" Padding="18,12" Margin="0,0,10,10"/>
+            <Button Style="{StaticResource Button.Secondary}" Command="{Binding Assistant.UndoAllCommand}" Padding="18,12" Margin="0,0,10,10">
+              <StackPanel Orientation="Horizontal">
+                <c:Icon Data="{StaticResource Icon.Undo}" Size="16" Margin="0,0,8,0"/>
+                <TextBlock Text="{l:T Simple.Opt.UndoAll}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+          </WrapPanel>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
+
+  <!-- ================================================================== LIMPAR -->
+  <DataTemplate DataType="{x:Type sv:SimpleCleanPage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="860" HorizontalAlignment="Stretch">
+        <Border Style="{StaticResource S.Message}" Visibility="{Binding Cleaning.Message, Converter={StaticResource NullToCollapsed}}">
+          <TextBlock Text="{Binding Cleaning.Message}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+        </Border>
+
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center">
+            <c:SkeletonLoader Shape="Lines" Lines="2" Width="320" HorizontalAlignment="Left" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+            <StackPanel Visibility="{Binding IsLoading, Converter={StaticResource FalseToVisible}}">
+              <c:AnimatedNumber Value="{Binding Cleaning.SafeBytes}" Kind="Bytes" FontFamily="{StaticResource Font.Numbers}" FontSize="64" Foreground="{StaticResource Brush.Trace}"/>
+              <TextBlock Text="{l:T Simple.Clean.CanFree}" Style="{StaticResource S.Title}" FontSize="28" Margin="0,-4,0,0"/>
+            </StackPanel>
+            <TextBlock Text="{l:T Simple.Clean.Lead}" Style="{StaticResource S.Lead}" Margin="0,12,0,26"/>
+            <Button Style="{StaticResource S.Big}" Command="{Binding Cleaning.CleanSafeCommand}" MinWidth="200">
+              <StackPanel Orientation="Horizontal">
+                <c:Icon Data="{StaticResource Icon.Clean}" Size="19" Margin="0,0,10,0"/>
+                <TextBlock Text="{l:T Simple.Clean.Now}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+          <Image Grid.Column="1" Source="{StaticResource Illo.Cleaning}" Width="240" Margin="24,0,0,0" VerticalAlignment="Center"/>
+        </Grid>
+
+        <c:EmptyState Illustration="{StaticResource Illo.Cleaning}" Text="{l:T Simple.Clean.Nothing}" Detail="{l:T Simple.Clean.NothingDetail}" Margin="0,24,0,0"
+                      Visibility="{Binding NothingToClean, Converter={StaticResource BoolToVis}}"/>
+
+        <WrapPanel Margin="-8,28,0,0">
+          <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Clean.SeeList}" Command="{Binding ToggleListCommand}" Margin="0,0,12,0"
+                  Visibility="{Binding HasSomething, Converter={StaticResource BoolToVis}}"/>
+          <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Clean.Undo}" Command="{Binding Cleaning.UndoLastCommand}" Margin="0,0,12,0"/>
+          <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Clean.EmptyBin}" Command="{Binding Cleaning.PurgeAllCommand}"
+                  ToolTip="{l:T Simple.Clean.EmptyBinTip}"/>
+        </WrapPanel>
+
+        <Border Style="{StaticResource Panel.Inset}" Padding="18,12" Margin="0,10,0,0" Visibility="{Binding ShowList, Converter={StaticResource BoolToVis}}">
+          <ItemsControl ItemsSource="{Binding Cleaning.SafeItems}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type vm:CleaningSafeItem}">
+                <DockPanel Margin="0,5">
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontFamily="{StaticResource Font.Numbers}" FontSize="15" Foreground="{StaticResource Brush.Trace}" Margin="16,0,0,0"/>
+                  <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
+
+  <!-- ================================================================== JOGOS -->
+  <DataTemplate DataType="{x:Type sv:SimpleGamesPage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="940" HorizontalAlignment="Stretch">
+        <Border Style="{StaticResource S.Message}" Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}">
+          <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+        </Border>
+
+        <TextBlock Text="{l:T Simple.Games.Title}" Style="{StaticResource S.Title}"/>
+        <TextBlock Text="{l:T Simple.Games.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,20"/>
+
+        <!-- Modo de jogo do Windows (resumo) -->
+        <Border Style="{StaticResource S.Card}" Margin="0,0,0,24">
+          <DockPanel>
+            <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" Content="{l:T Simple.Card.TweaksAction}"
+                    Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SimpleOptimizePage"
+                    Visibility="{Binding GameModeOff, Converter={StaticResource BoolToVis}}"/>
+            <Grid Width="44" Height="44" Margin="0,0,16,0">
+              <Ellipse Fill="{Binding GameModeTone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
+              <c:Icon Data="{StaticResource Icon.Games}" Size="21" Foreground="{Binding GameModeTone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
+            </Grid>
+            <TextBlock Text="{Binding GameModeText}" Style="{StaticResource S.Item}"/>
+          </DockPanel>
+        </Border>
+
+        <c:SkeletonLoader Shape="Lines" Lines="5" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+        <c:EmptyState Illustration="{StaticResource Illo.Measure}" Text="{l:T Simple.Games.None}" Detail="{l:T Simple.Games.NoneDetail}"
+                      ActionText="{l:T Simple.Games.Measure}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="MeasurePage"
+                      Visibility="{Binding NoGames, Converter={StaticResource BoolToVis}}"/>
+
+        <ItemsControl ItemsSource="{Binding Games}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type sv:SimpleGameRow}">
+              <Border Style="{StaticResource S.Card}">
+                <StackPanel>
+                  <DockPanel>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" Command="{Binding MeasureCommand}" VerticalAlignment="Center">
+                      <StackPanel Orientation="Horizontal">
+                        <c:Icon Data="{StaticResource Icon.Measure}" Size="16" Margin="0,0,8,0"/>
+                        <TextBlock Text="{l:T Simple.Games.Measure}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                      </StackPanel>
+                    </Button>
+                    <Border Width="48" Height="48" CornerRadius="10" Background="{StaticResource Brush.SurfaceHi}" Margin="0,0,16,0">
+                      <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource Font.Display}" FontSize="22" Foreground="{StaticResource Brush.Trace}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}" FontSize="19" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                  </DockPanel>
+                  <StackPanel Margin="64,14,0,0" Visibility="{Binding HasOptions, Converter={StaticResource BoolToVis}}">
+                    <CheckBox IsChecked="{Binding LowLatency}" Margin="0,0,0,8" Visibility="{Binding CanNvidia, Converter={StaticResource BoolToVis}}">
+                      <TextBlock Text="{l:T Simple.Games.LowLatency}" FontSize="15"/>
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding MaxPower}" Margin="0,0,0,8" Visibility="{Binding CanNvidia, Converter={StaticResource BoolToVis}}">
+                      <TextBlock Text="{l:T Simple.Games.MaxPower}" FontSize="15"/>
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding FpsCap}" Margin="0,0,0,8" Visibility="{Binding CanFps, Converter={StaticResource BoolToVis}}">
+                      <TextBlock Text="{Binding FpsText}" FontSize="15"/>
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding Windowed}" Margin="0,0,0,8" Visibility="{Binding CanWindowed, Converter={StaticResource BoolToVis}}">
+                      <TextBlock Text="{l:T Simple.Games.Windowed}" FontSize="15"/>
+                    </CheckBox>
+                    <Button Style="{StaticResource Button.Primary}" Content="{l:T Simple.Games.Apply}" Command="{Binding ApplyCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                  </StackPanel>
+                  <c:StatusChip Tone="Good" Text="{l:T Simple.Games.WindowedOn}" HorizontalAlignment="Left" Margin="64,10,0,0"
+                                Visibility="{Binding WindowedOn, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
+
+  <!-- ================================================================== PROBLEMAS -->
+  <DataTemplate DataType="{x:Type sv:SimpleProblemsPage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="900" HorizontalAlignment="Stretch">
+        <Border Style="{StaticResource S.Message}" Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}">
+          <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
+        </Border>
+        <TextBlock Text="{l:T Simple.Problems.Title}" Style="{StaticResource S.Title}"/>
+        <TextBlock Text="{Binding CountText}" Style="{StaticResource S.Lead}" Margin="0,8,0,24" Visibility="{Binding HasItems, Converter={StaticResource BoolToVis}}"/>
+
+        <c:SkeletonLoader Shape="Lines" Lines="5" Margin="0,20,0,0" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+        <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="{l:T Simple.Problems.None}" Detail="{l:T Simple.Problems.NoneDetail}" Margin="0,24,0,0"
+                      Visibility="{Binding NoItems, Converter={StaticResource BoolToVis}}"/>
+
+        <ItemsControl ItemsSource="{Binding Items}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type sv:ProblemRow}">
+              <Border Style="{StaticResource S.Card}">
+                <DockPanel>
+                  <Grid Width="44" Height="44" DockPanel.Dock="Left" Margin="0,0,16,0" VerticalAlignment="Top">
+                    <Ellipse Fill="{StaticResource Brush.TraceSoft}"/>
+                    <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+                  </Grid>
+                  <StackPanel DockPanel.Dock="Right" Margin="16,0,0,0" VerticalAlignment="Center">
+                    <Button Style="{StaticResource Button.Secondary}" Margin="0" MinWidth="110" Content="{Binding ActionText}"
+                            Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Target}"
+                            Visibility="{Binding HasTarget, Converter={StaticResource BoolToVis}}"/>
+                    <Button Style="{StaticResource Button.Secondary}" Margin="0" MinWidth="110" Content="{l:T Simple.Problems.OpenPage}"
+                            Command="{Binding OpenCommand}" Visibility="{Binding HasLink, Converter={StaticResource BoolToVis}}"/>
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource S.Item}" FontWeight="SemiBold"/>
+                    <TextBlock Style="{StaticResource S.Lead}" FontSize="15" Margin="0,6,0,0">
+                      <Run Text="{l:T Simple.Card.WhatToDo}" Foreground="{StaticResource Brush.Signal}"/><Run Text=": "/><Run Text="{Binding WhatToDo, Mode=OneWay}"/>
+                    </TextBlock>
+                  </StackPanel>
+                </DockPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <c:ExplainToggle Header="{Binding FineHeader}" Margin="0,18,0,0" Visibility="{Binding HasFine, Converter={StaticResource BoolToVis}}">
+          <ItemsControl ItemsSource="{Binding FineTopics}" Focusable="False">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <c:StatusChip Tone="Good" Text="{Binding}" Margin="0,0,8,8"/>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </c:ExplainToggle>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
+
+  <!-- ================================================================== HISTÓRICO -->
+  <DataTemplate DataType="{x:Type sv:SimpleHistoryPage}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="900" HorizontalAlignment="Stretch">
+        <Border Style="{StaticResource S.Message}" Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}">
+          <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
+        </Border>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Command="{Binding UndoAllCommand}" Padding="16,10" Margin="16,0,0,0" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+              <c:Icon Data="{StaticResource Icon.Undo}" Size="16" Margin="0,0,8,0"/>
+              <TextBlock Text="{l:T Simple.Hist.UndoAll}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <TextBlock Text="{l:T Simple.Hist.Title}" Style="{StaticResource S.Title}"/>
+        </DockPanel>
+        <TextBlock Text="{l:T Simple.Hist.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,24"/>
+
+        <c:EmptyState Illustration="{StaticResource Illo.History}" Text="{l:T Simple.Hist.None}" Detail="{l:T Simple.Hist.NoneDetail}"
+                      Visibility="{Binding NoRows, Converter={StaticResource BoolToVis}}"/>
+
+        <Border Style="{StaticResource Panel.Card}" Padding="22,6" Visibility="{Binding HasRows, Converter={StaticResource BoolToVis}}">
+          <ItemsControl ItemsSource="{Binding Rows}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type sv:SimpleHistoryRow}">
+                <DockPanel Margin="0,12">
+                  <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Hist.Undo}" Command="{Binding UndoCommand}"
+                            Visibility="{Binding Active, Converter={StaticResource BoolToVis}}"/>
+                    <c:StatusChip Tone="Neutral" Text="{l:T Simple.Hist.UndoneChip}" Visibility="{Binding Undone, Converter={StaticResource BoolToVis}}"/>
+                  </StackPanel>
+                  <TextBlock DockPanel.Dock="Left" Text="{Binding When}" Width="170" FontFamily="{StaticResource Font.Numbers}" FontSize="15"
+                             Foreground="{StaticResource Brush.TextMuted}" VerticalAlignment="Center" TextWrapping="NoWrap"/>
+                  <TextBlock Text="{Binding What}" Style="{StaticResource S.Item}" FontSize="16"/>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Border>
+
+        <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,18,0,0" Content="{l:T Simple.Hist.SeeAll}"
+                Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HistoryPage"/>
+      </StackPanel>
+    </ScrollViewer>
+  </DataTemplate>
+</ResourceDictionary>

@@ -26,13 +26,9 @@ public partial class MainWindow : Window
         using (UiWatchdog.Phase("janela: InitializeComponent", logAboveMs: 30)) InitializeComponent();
         using (UiWatchdog.Phase("janela: MainViewModel (27 páginas)")) _vm = new MainViewModel();
 
-        // Navegação agrupada por PageViewModel.Group. A lista vai antes do DataContext para o SelectedItem já achar a página.
-        var ordered = _vm.Pages
-            .OrderBy(p => ShellMap.GroupRank(p.Group))
-            .ToList();
-        var view = new ListCollectionView(ordered);
-        view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PageViewModel.Group)));
-        Nav.ItemsSource = view;
+        // Navegação do modo (simples: 6 itens sem grupos; completo: agrupada por PageViewModel.Group). A lista vai antes do
+        // DataContext para o SelectedItem já achar a página.
+        BuildNavigation();
         Nav.SelectionChanged += KeepSelection;
 
         DataContext = _vm;
@@ -61,6 +57,24 @@ public partial class MainWindow : Window
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(MainViewModel.SelectedPage)) ShellMotion.EnterPage(PageHost);
+        if (e.PropertyName == nameof(MainViewModel.NavPages)) BuildNavigation();
+    }
+
+    /// <summary>Monta a lista lateral do modo atual. Só o modo completo tem cabeçalhos de grupo.</summary>
+    private void BuildNavigation()
+    {
+        var pages = _vm.NavPages;
+        if (_vm.IsSimpleMode)
+        {
+            Nav.ItemsSource = pages.ToList();
+        }
+        else
+        {
+            var view = new ListCollectionView(pages.OrderBy(p => ShellMap.GroupRank(p.Group)).ToList());
+            view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PageViewModel.Group)));
+            Nav.ItemsSource = view;
+        }
+        Nav.SelectedItem = pages.Contains(_vm.SelectedPage) ? _vm.SelectedPage : null;
     }
 
     // ------------------------------------------------------------------ navegação pelas páginas (ShellCommands.Navigate)
@@ -85,10 +99,19 @@ public partial class MainWindow : Window
         _ => null,
     };
 
-    /// <summary>Ctrl+clique desmarcaria o item ativo e deixaria a área de conteúdo vazia: volta para a página anterior.</summary>
+    /// <summary>
+    /// Ctrl+clique desmarcaria o item ativo e deixaria a área de conteúdo vazia: volta para a página anterior. Abrir uma página que
+    /// não está na lista do modo (ex.: do modo simples para "Atualizar drivers") também tira a seleção — essa fica.
+    /// </summary>
     private void KeepSelection(object sender, SelectionChangedEventArgs e)
     {
-        if (Nav.SelectedItem is null && e.RemovedItems.Count > 0) Nav.SelectedItem = e.RemovedItems[0];
+        // A seleção vai da janela para a lista (OneWay); o clique do usuário volta para a janela aqui.
+        if (Nav.SelectedItem is PageViewModel page)
+        {
+            if (!ReferenceEquals(page, _vm.SelectedPage)) _vm.SelectedPage = page;
+            return;
+        }
+        if (e.RemovedItems.Count > 0 && _vm.NavPages.Contains(_vm.SelectedPage)) Nav.SelectedItem = _vm.SelectedPage;
     }
 
     // ------------------------------------------------------------------ bandeja

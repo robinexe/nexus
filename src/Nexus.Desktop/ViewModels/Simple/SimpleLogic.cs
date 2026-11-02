@@ -373,7 +373,7 @@ public static class SimpleHistoryText
         if (k.StartsWith("privacy.", StringComparison.Ordinal)) return "privacy";
         if (k.StartsWith("boot.", StringComparison.Ordinal) || k.StartsWith("startup.", StringComparison.Ordinal) || k.StartsWith("svc.", StringComparison.Ordinal)) return "startup";
         if (k.StartsWith("nvidia.", StringComparison.Ordinal) || k.StartsWith("gpu", StringComparison.Ordinal) || k.StartsWith("fps.", StringComparison.Ordinal) || k.StartsWith("cs2.", StringComparison.Ordinal)) return "gpu";
-        if (k.StartsWith("system.restore", StringComparison.Ordinal)) return "restore";
+        if (k.StartsWith("system.restore.create-point", StringComparison.Ordinal)) return "restore";
         if (k.StartsWith("driverupdates.", StringComparison.Ordinal)) return "drivers";
         if (k.StartsWith("programs.", StringComparison.Ordinal)) return "programs";
         if (k.StartsWith("security.", StringComparison.Ordinal) || k.StartsWith("scanner.", StringComparison.Ordinal)) return "security";

@@ -3769,4 +3769,120 @@ Solo entra lo que es de bajo riesgo y se puede deshacer en Historial. Windows pe
 
 ¿Empezar ahora?</value></data>
   <data name="Simple.Opt.SkippedAuto" xml:space="preserve"><value>Queda para el paso a paso (modo completo).</value></data>
+  <data name="Simple.Nav.Home" xml:space="preserve"><value>Inicio</value></data>
+  <data name="Simple.Nav.Optimize" xml:space="preserve"><value>Optimizar</value></data>
+  <data name="Simple.Nav.Clean" xml:space="preserve"><value>Limpiar</value></data>
+  <data name="Simple.Nav.Games" xml:space="preserve"><value>Juegos</value></data>
+  <data name="Simple.Nav.Problems" xml:space="preserve"><value>Problemas</value></data>
+  <data name="Simple.Nav.History" xml:space="preserve"><value>Historial</value></data>
+  <data name="Simple.Nav.Group" xml:space="preserve"><value>Modo simple</value></data>
+  <data name="Simple.Home.Subtitle" xml:space="preserve"><value>Cómo está tu PC y qué se puede mejorar.</value></data>
+  <data name="Simple.Home.Reading" xml:space="preserve"><value>Revisando tu PC…</value></data>
+  <data name="Simple.Home.Caption" xml:space="preserve"><value>Revisado ahora, sin cambiar nada.</value></data>
+  <data name="Simple.Home.Optimize" xml:space="preserve"><value>Optimizar mi PC con seguridad</value></data>
+  <data name="Simple.Home.Improve" xml:space="preserve"><value>Qué se puede mejorar</value></data>
+  <data name="Simple.Home.NothingToDo" xml:space="preserve"><value>Nada que mejorar ahora.</value></data>
+  <data name="Simple.Home.NothingToDoDetail" xml:space="preserve"><value>NEXUS vuelve a revisar cada vez que lo abres.</value></data>
+  <data name="Simple.Home.Undoable" xml:space="preserve"><value>Todo lo que hace NEXUS se puede deshacer.</value></data>
+  <data name="Simple.Home.SeeHistory" xml:space="preserve"><value>Ver el historial</value></data>
+  <data name="Simple.Opt.Subtitle" xml:space="preserve"><value>Lo hace todo solo, solo lo seguro.</value></data>
+  <data name="Simple.Opt.Lead" xml:space="preserve"><value>NEXUS lo hace todo solo, en pocos minutos:</value></data>
+  <data name="Simple.Opt.PhaseClean" xml:space="preserve"><value>Limpiar archivos temporales</value></data>
+  <data name="Simple.Opt.PhaseTune" xml:space="preserve"><value>Ajustar Windows para juegos</value></data>
+  <data name="Simple.Opt.PhaseStartup" xml:space="preserve"><value>Desactivar programas que retrasan el inicio</value></data>
+  <data name="Simple.Opt.PhaseCheck" xml:space="preserve"><value>Revisar seguridad y drivers</value></data>
+  <data name="Simple.Opt.Finishing" xml:space="preserve"><value>Preparando el resumen</value></data>
+  <data name="Simple.Opt.Safe" xml:space="preserve"><value>Solo lo que es seguro y se puede deshacer.</value></data>
+  <data name="Simple.Opt.Start" xml:space="preserve"><value>Empezar</value></data>
+  <data name="Simple.Opt.Working" xml:space="preserve"><value>Optimizando tu PC…</value></data>
+  <data name="Simple.Opt.WorkingLead" xml:space="preserve"><value>Puedes seguir usando el PC. No lo apagues hasta que termine.</value></data>
+  <data name="Simple.Opt.AnswerWindows" xml:space="preserve"><value>Responde al aviso de Windows para continuar.</value></data>
+  <data name="Simple.Opt.BackHome" xml:space="preserve"><value>Volver al inicio</value></data>
+  <data name="Simple.Opt.Details" xml:space="preserve"><value>Ver detalles</value></data>
+  <data name="Simple.Opt.UndoAll" xml:space="preserve"><value>Deshacer todo</value></data>
+  <data name="Simple.Clean.Subtitle" xml:space="preserve"><value>Libera espacio con seguridad.</value></data>
+  <data name="Simple.Clean.CanFree" xml:space="preserve"><value>se pueden liberar</value></data>
+  <data name="Simple.Clean.Lead" xml:space="preserve"><value>Va a la papelera de NEXUS: si echas algo en falta, puedes deshacerlo.</value></data>
+  <data name="Simple.Clean.Now" xml:space="preserve"><value>Limpiar ahora</value></data>
+  <data name="Simple.Clean.Nothing" xml:space="preserve"><value>Nada que limpiar ahora.</value></data>
+  <data name="Simple.Clean.NothingDetail" xml:space="preserve"><value>Tu PC ya está limpio. Vuelve en unos días.</value></data>
+  <data name="Simple.Clean.SeeList" xml:space="preserve"><value>Ver qué se limpiará</value></data>
+  <data name="Simple.Clean.Undo" xml:space="preserve"><value>Deshacer la última limpieza</value></data>
+  <data name="Simple.Clean.EmptyBin" xml:space="preserve"><value>Vaciar la papelera de NEXUS</value></data>
+  <data name="Simple.Clean.EmptyBinTip" xml:space="preserve"><value>Borra para siempre lo que ya se limpió. Esto no se puede deshacer.</value></data>
+  <data name="Simple.Games.Title" xml:space="preserve"><value>Juegos</value></data>
+  <data name="Simple.Games.Subtitle" xml:space="preserve"><value>Tus juegos y lo que mejora cada uno.</value></data>
+  <data name="Simple.Games.Lead" xml:space="preserve"><value>Marca lo que quieras en cada juego. Todo se puede deshacer.</value></data>
+  <data name="Simple.Games.GameModeOn" xml:space="preserve"><value>Modo de juego de Windows: activado</value></data>
+  <data name="Simple.Games.GameModeOff" xml:space="preserve"><value>Modo de juego de Windows: desactivado</value></data>
+  <data name="Simple.Games.GameModeUnknown" xml:space="preserve"><value>Modo de juego de Windows: no se pudo leer</value></data>
+  <data name="Simple.Games.None" xml:space="preserve"><value>No se encontraron juegos.</value></data>
+  <data name="Simple.Games.NoneDetail" xml:space="preserve"><value>NEXUS busca juegos de Steam, Epic y otras tiendas. Los demás se pueden medir en Medir FPS.</value></data>
+  <data name="Simple.Games.Measure" xml:space="preserve"><value>Medir FPS</value></data>
+  <data name="Simple.Games.LowLatency" xml:space="preserve"><value>Menos retraso en los controles</value></data>
+  <data name="Simple.Games.MaxPower" xml:space="preserve"><value>Tarjeta gráfica siempre al máximo</value></data>
+  <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Limitar los FPS para que vaya más estable ({0} FPS)</value></data>
+  <data name="Simple.Games.Windowed" xml:space="preserve"><value>Juego en ventana más fluido</value></data>
+  <data name="Simple.Games.WindowedOn" xml:space="preserve"><value>Juego en ventana más fluido: ya activado</value></data>
+  <data name="Simple.Games.Apply" xml:space="preserve"><value>Aplicar</value></data>
+  <data name="Simple.Games.ApplyTitle" xml:space="preserve"><value>Juegos: {0}</value></data>
+  <data name="Simple.Games.ConfirmNv" xml:space="preserve"><value>{0}: NEXUS va a guardar en el driver de NVIDIA, solo para este juego:
+
+{1}
+
+Windows pide permiso de administrador. Vuelve como estaba en Historial.</value></data>
+  <data name="Simple.Games.ConfirmWindowed" xml:space="preserve"><value>{0}: activar "juego en ventana más fluido" (optimización de Windows para juegos en ventana), solo para este juego.
+
+Vuelve como estaba en Historial.</value></data>
+  <data name="Simple.Games.DoneNv" xml:space="preserve"><value>Ajustes de la tarjeta gráfica aplicados.</value></data>
+  <data name="Simple.Games.DoneWindowed" xml:space="preserve"><value>Juego en ventana más fluido activado.</value></data>
+  <data name="Simple.Games.UndoHint" xml:space="preserve"><value>Para volver como estaba, usa Historial.</value></data>
+  <data name="Simple.Problems.Title" xml:space="preserve"><value>Problemas</value></data>
+  <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>Lo que necesita de ti y cómo resolverlo.</value></data>
+  <data name="Simple.Problems.Count1" xml:space="preserve"><value>1 cosa necesita de ti.</value></data>
+  <data name="Simple.Problems.CountN" xml:space="preserve"><value>{0} cosas necesitan de ti.</value></data>
+  <data name="Simple.Problems.None" xml:space="preserve"><value>Nada necesita de ti ahora.</value></data>
+  <data name="Simple.Problems.NoneDetail" xml:space="preserve"><value>Si aparece algo, la pantalla Inicio te avisa.</value></data>
+  <data name="Simple.Problems.Details" xml:space="preserve"><value>Ver detalles</value></data>
+  <data name="Simple.Problems.OpenPage" xml:space="preserve"><value>Abrir la página</value></data>
+  <data name="Simple.Problems.FineHeader" xml:space="preserve"><value>Todo bien con: {0}</value></data>
+  <data name="Simple.Hist.Subtitle" xml:space="preserve"><value>Lo que cambió NEXUS y cómo deshacerlo.</value></data>
+  <data name="Simple.Hist.Title" xml:space="preserve"><value>Lo que cambió NEXUS</value></data>
+  <data name="Simple.Hist.Lead" xml:space="preserve"><value>Cada línea vuelve como estaba con un clic.</value></data>
+  <data name="Simple.Hist.None" xml:space="preserve"><value>Todavía no se cambió nada.</value></data>
+  <data name="Simple.Hist.NoneDetail" xml:space="preserve"><value>Cuando NEXUS cambie algo, aparece aquí con el botón Deshacer.</value></data>
+  <data name="Simple.Hist.SeeAll" xml:space="preserve"><value>Ver todo en detalle</value></data>
+  <data name="Simple.Hist.Undo" xml:space="preserve"><value>Deshacer</value></data>
+  <data name="Simple.Hist.UndoAll" xml:space="preserve"><value>Deshacer todo</value></data>
+  <data name="Simple.Hist.UndoAllConfirm" xml:space="preserve"><value>¿Deshacer todo lo que cambió NEXUS ({0} registros)?
+
+Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrador.</value></data>
+  <data name="Simple.Hist.Undone" xml:space="preserve"><value>Deshecho. Volvió como estaba.</value></data>
+  <data name="Simple.Hist.UndoneAll" xml:space="preserve"><value>Todo deshecho. Volvió como estaba.</value></data>
+  <data name="Simple.Hist.UndoneSome" xml:space="preserve"><value>{0} de {1} deshechos. El resto está en Ver todo en detalle.</value></data>
+  <data name="Simple.Hist.UndoneChip" xml:space="preserve"><value>Deshecho</value></data>
+  <data name="Simple.Notice.Text" xml:space="preserve"><value>Hicimos NEXUS más simple. ¿Quieres todo como antes? Ajustes › Modo completo.</value></data>
+  <data name="Simple.Notice.Ok" xml:space="preserve"><value>Entendido</value></data>
+  <data name="Simple.Notice.Full" xml:space="preserve"><value>Usar el modo completo</value></data>
+  <data name="Simple.Shell.ShowAll" xml:space="preserve"><value>Mostrar todas las herramientas</value></data>
+  <data name="Simple.Shell.BackToSimple" xml:space="preserve"><value>Volver al modo simple</value></data>
+  <data name="Simple.Shell.ModeTip" xml:space="preserve"><value>Cambia entre el modo simple (lo esencial) y el completo (todas las herramientas). También en Ajustes.</value></data>
+  <data name="Simple.Settings.Title" xml:space="preserve"><value>Modo de NEXUS</value></data>
+  <data name="Simple.Settings.Detail" xml:space="preserve"><value>Simple muestra solo lo esencial, con palabras sencillas. Completo muestra todas las herramientas.</value></data>
+  <data name="Simple.Settings.Simple" xml:space="preserve"><value>Simple (recomendado)</value></data>
+  <data name="Simple.Settings.Full" xml:space="preserve"><value>Completo</value></data>
+  <data name="Simple.Welcome.Name" xml:space="preserve"><value>Bienvenida a NEXUS</value></data>
+  <data name="Simple.Welcome.T1" xml:space="preserve"><value>NEXUS deja tu PC más rápido y limpio</value></data>
+  <data name="Simple.Welcome.S1" xml:space="preserve"><value>Revisa el PC, muestra lo que se puede mejorar y lo hace por ti.</value></data>
+  <data name="Simple.Welcome.T2" xml:space="preserve"><value>Nada cambia sin tu aprobación y todo se puede deshacer</value></data>
+  <data name="Simple.Welcome.S2" xml:space="preserve"><value>Cada cambio queda guardado en el Historial. Un clic lo deja como estaba.</value></data>
+  <data name="Simple.Welcome.T3" xml:space="preserve"><value>¿Cómo lo prefieres?</value></data>
+  <data name="Simple.Welcome.Simple" xml:space="preserve"><value>Simple (recomendado)</value></data>
+  <data name="Simple.Welcome.SimpleDetail" xml:space="preserve"><value>Seis pantallas, solo lo esencial.</value></data>
+  <data name="Simple.Welcome.Full" xml:space="preserve"><value>Completo</value></data>
+  <data name="Simple.Welcome.FullDetail" xml:space="preserve"><value>Todas las herramientas, para quien quiere detalles.</value></data>
+  <data name="Simple.Welcome.ChangeLater" xml:space="preserve"><value>Puedes cambiarlo cuando quieras en Ajustes.</value></data>
+  <data name="Simple.Welcome.Skip" xml:space="preserve"><value>Omitir</value></data>
+  <data name="Simple.Welcome.Back" xml:space="preserve"><value>Atrás</value></data>
+  <data name="Simple.Welcome.Next" xml:space="preserve"><value>Siguiente</value></data>
 </root>
