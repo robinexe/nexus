@@ -51,7 +51,7 @@ public sealed class SectionViewModel(DiscoverySection s)
     public int DetectedCount => Facts.Count(f => f.Status == FactStatus.Detected);
     public int UnavailableCount => Facts.Count(f => f.Status == FactStatus.Unavailable);
     /// <summary>"8 valores · 1 sem leitura".</summary>
-    public string CountText => PageText.Plural(Facts.Count, "valor", "valores") + (UnavailableCount > 0 ? $" · {UnavailableCount} sem leitura" : "");
+    public string CountText => PageText.Plural(Facts.Count, "valor", "valores") + (UnavailableCount > 0 ? Loc.F("Pg.NSemLeitura", UnavailableCount) : "");
     public bool HasTables => Tables.Count > 0;
     /// <summary>Fontes distintas da seção, para o "De onde vêm estes valores?".</summary>
     public string Sources => string.Join(" · ", Facts.Select(f => f.Source).Concat(Tables.Select(t => t.Source))
@@ -63,7 +63,7 @@ public sealed class HardwarePage : PageViewModel
     private IReadOnlyList<SectionViewModel> _sections = [];
     public override string Title => "Hardware";
     public override string Group => Loc.T("Nav.MeuPc");
-    public override string Subtitle => "Leitura do sistema: cada valor mostra se foi detectado, inferido ou está indisponível, e a fonte.";
+    public override string Subtitle => Loc.T("Pg.LeituraSistemaCadaValor");
     public IReadOnlyList<SectionViewModel> Sections
     {
         get => _sections;
@@ -103,8 +103,8 @@ public sealed class HardwarePage : PageViewModel
     {
         ArgumentNullException.ThrowIfNull(findings);
         var facts = findings.Where(f => f.Owner is not null).Select(f => new Fact(f.Title,
-            f.Severity switch { DiagnosticSeverity.Attention => "Vale conferir", DiagnosticSeverity.Info => "Para saber", _ => "Em ordem" },
-            f.Basis, $"{f.Owner!.SourceTitle} ({f.Owner.SourceUrl})", $"{f.Evidence} {f.Owner.Explanation} Ganho medido: {f.Owner.Gain}")).ToList();
+            f.Severity switch { DiagnosticSeverity.Attention => Loc.T("Pg.ValeConferir"), DiagnosticSeverity.Info => Loc.T("Pg.Saber"), _ => Loc.T("Pg.Ordem2") },
+            f.Basis, $"{f.Owner!.SourceTitle} ({f.Owner.SourceUrl})", Loc.F("Pg.NNGanhoMedido", f.Evidence, f.Owner.Explanation, f.Owner.Gain))).ToList();
         return facts.Count == 0 ? null : new DiscoverySection(OwnerSectionTitle, facts);
     }
 }
@@ -114,9 +114,9 @@ public sealed class HardwarePage : PageViewModel
 public sealed class DiagnosticsPage : PageViewModel
 {
     private IReadOnlyList<DiagnosticFinding> _findings = [];
-    public override string Title => "Diagnóstico";
+    public override string Title => Loc.T("Pg.Diagnostico");
     public override string Group => Loc.T("Nav.MeuPc");
-    public override string Subtitle => "Somente leitura. Cada achado cita a evidência; nenhum presume ganho de desempenho.";
+    public override string Subtitle => Loc.T("Pg.SomenteLeituraCadaAchado");
     public IReadOnlyList<DiagnosticFinding> Findings
     {
         get => _findings;
@@ -146,7 +146,7 @@ public sealed class DiagnosticsPage : PageViewModel
     public double InfoNumber => HasFindings ? InfoCount : double.NaN;
     public double OkNumber => HasFindings ? OkCount : double.NaN;
     public double UnavailableNumber => HasFindings ? UnavailableCount : double.NaN;
-    public string HealthCaption => !HasFindings ? "" : AttentionCount == 0 ? "Nada pede atenção agora" : $"{AttentionCount} {AttentionLabel}";
+    public string HealthCaption => !HasFindings ? "" : AttentionCount == 0 ? Loc.T("Pg.NadaPedeAtencaoAgora") : $"{AttentionCount} {AttentionLabel}";
 
     // Derivados para a apresentação: atenção primeiro, depois informativo, depois ok.
     public IReadOnlyList<DiagnosticFinding> Ordered => Findings.OrderBy(f => Rank(f.Severity)).ToList();
@@ -156,7 +156,7 @@ public sealed class DiagnosticsPage : PageViewModel
     public int OkCount => Findings.Count(f => f.Severity == DiagnosticSeverity.Ok);
     public int UnavailableCount => Findings.Count(f => f.Basis == FactStatus.Unavailable);
     public int Total => Findings.Count;
-    public string AttentionLabel => AttentionCount == 1 ? "ponto para conferir" : "pontos para conferir";
+    public string AttentionLabel => AttentionCount == 1 ? Loc.T("Pg.PontoConferir") : Loc.T("Pg.PontosConferir2");
     public bool HasFindings => Findings.Count > 0;
     public bool NoAttention => HasFindings && AttentionCount == 0;
 
@@ -166,8 +166,8 @@ public sealed class DiagnosticsPage : PageViewModel
         DiagnosticSeverity.Info => 1,
         _ => 2,
     };
-    public string Summary => $"{Findings.Count(f => f.Severity == DiagnosticSeverity.Attention)} ponto(s) de atenção · " +
-                             $"{Findings.Count(f => f.Basis == FactStatus.Unavailable)} não avaliável(is) · {Findings.Count} no total";
+    public string Summary => Loc.F("Pg.NPontoSAtencao", Findings.Count(f => f.Severity == DiagnosticSeverity.Attention)) +
+                             Loc.F("Pg.NNaoAvaliavelIs", Findings.Count(f => f.Basis == FactStatus.Unavailable), Findings.Count);
 }
 
 /// <summary>Achado do diagnóstico pronto para o cartão: ícone do módulo, tom da severidade e a página que resolve.</summary>
@@ -189,9 +189,9 @@ public sealed class FindingCard(DiagnosticFinding finding)
     };
     public string SeverityText => Finding.Severity switch
     {
-        DiagnosticSeverity.Attention => "Vale conferir",
-        DiagnosticSeverity.Info => "Para saber",
-        _ => "Em ordem",
+        DiagnosticSeverity.Attention => Loc.T("Pg.ValeConferir"),
+        DiagnosticSeverity.Info => Loc.T("Pg.Saber"),
+        _ => Loc.T("Pg.Ordem2"),
     };
     /// <summary>Página que resolve ou aprofunda (nome do tipo, para ShellCommands.Navigate).</summary>
     public string Target => ShellMap.PageForFinding(Finding.Id);
@@ -221,7 +221,7 @@ public sealed class FindingCard(DiagnosticFinding finding)
 
 public sealed class CatalogRow : ObservableObject
 {
-    private string _current = "lendo…";
+    private string _current = Loc.T("Pg.Lendo");
     private string? _readError;
     private bool _include;
 
@@ -232,7 +232,7 @@ public sealed class CatalogRow : ObservableObject
         NotInstantiableReason = notInstantiableReason;
         ReadLabel = readLabel;
         _include = instance is not null;
-        if (instance is null) _current = "não lido: " + notInstantiableReason;
+        if (instance is null) _current = Loc.T("Pg.NaoLido") + notInstantiableReason;
     }
 
     public CatalogEntry Entry { get; }
@@ -247,7 +247,7 @@ public sealed class CatalogRow : ObservableObject
     public string Handler => Entry.Definition.HandlerKind;
     public string Privileges => Entry.PrivilegesRaw;
     public string Desired => Instance?.Desired.Describe() ?? Entry.DesiredValue ?? "—";
-    public string Persistence => Entry.Definition.Persistence == PersistenceKind.Session ? "Sessão" : "Persistente";
+    public string Persistence => Entry.Definition.Persistence == PersistenceKind.Session ? Loc.T("Pg.Sessao") : Loc.T("Pg.Persistente");
     public string Reboot => Entry.Definition.Reboot.ToString();
     public string Mechanism => Entry.Definition.Mechanism;
     public string Risks => Entry.Definition.Risks;
@@ -256,7 +256,7 @@ public sealed class CatalogRow : ObservableObject
     public string? Verification => Entry.Verification;
     public string? Revert => Entry.Revert;
     public string Target => string.Join("  ·  ", Entry.TargetTemplate.Select(kv => $"{kv.Key}={kv.Value}"));
-    public string ApplyLabel { get; } = "aplicável neste PC pela página Aplicar, com confirmação e desfazer";
+    public string ApplyLabel { get; } = Loc.T("Pg.AplicavelNestePcPela");
     public bool CanSimulate => Instance is not null;
 
     public string Current
@@ -296,7 +296,7 @@ public sealed class CatalogRow : ObservableObject
     public string ReadState =>
         Instance is null ? "unread"
         : ReadError is not null ? "error"
-        : _current == "lendo…" ? "reading"
+        : _current == Loc.T("Pg.Lendo") ? "reading"
         : _current == Desired || _current.StartsWith(Desired + "  (", StringComparison.Ordinal) ? "same"
         : "change";
 
@@ -305,11 +305,11 @@ public sealed class CatalogRow : ObservableObject
 
     public string ReadStateText => ReadState switch
     {
-        "unread" => "Ainda não dá pra ler neste PC",
-        "error" => "Não deu pra ler agora",
-        "reading" => "Lendo o valor atual…",
-        "same" => "Já está assim no seu PC",
-        _ => "Mudaria com este ajuste",
+        "unread" => Loc.T("Pg.AindaNaoPraLer"),
+        "error" => Loc.T("Pg.NaoDeuPraLer"),
+        "reading" => Loc.T("Pg.LendoValorAtual"),
+        "same" => Loc.T("Pg.JaEstaAssimSeu"),
+        _ => Loc.T("Pg.MudariaEsteAjuste"),
     };
 
     /// <summary>Tom do selo da leitura: verde já está assim, âmbar mudaria, vermelho falhou, ciano lendo, neutro sem leitura.</summary>
@@ -325,11 +325,11 @@ public sealed class CatalogRow : ObservableObject
     /// <summary>Texto curto do selo ("Já está assim", "Mudaria", "Não deu pra ler").</summary>
     public string ReadChipText => ReadState switch
     {
-        "same" => "Já está assim",
-        "change" => "Mudaria",
-        "error" => "Não deu pra ler",
-        "reading" => "Lendo…",
-        _ => "Sem leitura aqui",
+        "same" => Loc.T("Pg.JaEstaAssim"),
+        "change" => Loc.T("Pg.Mudaria"),
+        "error" => Loc.T("Pg.NaoDeuPraLer2"),
+        "reading" => Loc.T("Settings.Lendo"),
+        _ => Loc.T("Pg.SemLeituraAqui"),
     };
 
     /// <summary>Ícone do assunto do ajuste (pelo prefixo do id).</summary>
@@ -351,9 +351,9 @@ public sealed class CatalogPage : PageViewModel
     private IReadOnlyList<RejectedCatalogItem> _rejected = [];
     private CatalogRow? _selected;
     private string _version = "";
-    public override string Title => "O que dá pra ajustar";
+    public override string Title => Loc.T("Pg.PraAjustar");
     public override string Group => Loc.T("Nav.Otimizar");
-    public override string Subtitle => "Cada ajuste mostra o valor lido agora no seu PC e o que ele passaria a ser. Nada é aplicado nesta página.";
+    public override string Subtitle => Loc.T("Pg.CadaAjusteMostraValor");
     private bool _isMythsTab;
 
     public CatalogPage()
@@ -428,8 +428,8 @@ public sealed class CatalogPage : PageViewModel
     public CatalogRow? Selected { get => _selected; set => Set(ref _selected, value); }
     public string Version { get => _version; set => Set(ref _version, value); }
 
-    public string RowsTitle => Rows.Count == 1 ? "1 ajuste" : $"{Rows.Count} ajustes";
-    public string MythsTitle => Rejected.Count == 1 ? "1 mito que não aplicamos" : $"{Rejected.Count} mitos que não aplicamos";
+    public string RowsTitle => Rows.Count == 1 ? Loc.T("Pg.N1Ajuste") : Loc.F("Pg.NAjustes", Rows.Count);
+    public string MythsTitle => Rejected.Count == 1 ? Loc.T("Pg.N1MitoNaoAplicamos") : Loc.F("Pg.NMitosNaoAplicamos", Rejected.Count);
 
     /// <summary>Itens recusados do catálogo como "mitos", com título e veredito legíveis; os não recomendados vêm primeiro.</summary>
     public IReadOnlyList<MythItem> Myths => Rejected
@@ -464,11 +464,11 @@ public sealed record PlanRow(string Action, string Status, string Observed, stri
 public sealed class PlanPage : PageViewModel
 {
     private IReadOnlyList<PlanRow> _rows = [];
-    private string _summary = "Nenhuma simulação executada.";
+    private string _summary = Loc.T("Pg.NenhumaSimulacaoExecutada");
     private bool _busy;
-    public override string Title => "Testar sem aplicar";
+    public override string Title => Loc.T("Pg.TestarSemAplicar");
     public override string Group => Loc.T("Nav.Otimizar");
-    public override string Subtitle => "Simule antes de mexer: a gente relê o estado real do PC e mostra o que mudaria, em ordem e por lote. Nada é aplicado.";
+    public override string Subtitle => Loc.T("Pg.SimuleAntesMexerGente");
     public PlanPage()
     {
         Candidates.CollectionChanged += (_, e) =>
@@ -502,14 +502,14 @@ public sealed class PlanPage : PageViewModel
     public bool HasCandidates => Candidates.Count > 0;
     /// <summary>Destaque: quantos mudariam (depois de simular); antes disso, o texto "Ainda não testado".</summary>
     public double HeroNumber => HasResult ? Count(PlanStatus.Pending) : double.NaN;
-    public string HeroValueText => HasResult ? "" : "Ainda não testado";
+    public string HeroValueText => HasResult ? "" : Loc.T("Pg.AindaNaoTestado");
     public double PendingCount => HasResult ? Count(PlanStatus.Pending) : double.NaN;
     public double AlreadyCount => HasResult ? Count(PlanStatus.AlreadyConfigured) : double.NaN;
     public double NotApplicableCount => HasResult ? Count(PlanStatus.NotApplicable) : double.NaN;
     public double BlockedCount => HasResult ? Count(PlanStatus.Blocked) : double.NaN;
     /// <summary>Marcados para testar agora (os mesmos da página Aplicar).</summary>
     public double SelectedCount => Candidates.Count(c => c.Include);
-    public string SelectedCaption => $"de {Candidates.Count} que dá pra ler aqui";
+    public string SelectedCaption => Loc.F("Pg.NPraLerAqui", Candidates.Count);
     public IReadOnlyList<FlowStep> Flow { get; } = OptimizeFlow.For("PlanPage");
 
     private int Count(PlanStatus s) => Rows.Count(r => r.Kind == s);
@@ -529,16 +529,16 @@ public sealed class PlanPage : PageViewModel
     /// <summary>Resultado da simulação agrupado na ordem de leitura: o que mudaria primeiro, o que barrou por último.</summary>
     public IReadOnlyList<PlanGroup> Groups =>
     [
-        new(PlanStatus.Pending, "Seria aplicada", "Hoje está diferente do desejado. É isso que mudaria.", Rows.Where(r => r.Kind == PlanStatus.Pending).ToList()),
-        new(PlanStatus.AlreadyConfigured, "Já está assim", "O seu PC já tem o valor desejado. Nada a fazer.", Rows.Where(r => r.Kind == PlanStatus.AlreadyConfigured).ToList()),
-        new(PlanStatus.NotApplicable, "Não se aplica", "Não faz sentido neste PC ou nesta versão do Windows.", Rows.Where(r => r.Kind == PlanStatus.NotApplicable).ToList()),
-        new(PlanStatus.Blocked, "Bloqueada", "Algo impede a mudança com segurança. O motivo está em cada item.", Rows.Where(r => r.Kind == PlanStatus.Blocked).ToList()),
+        new(PlanStatus.Pending, Loc.T("Shell.SeriaAplicada"), Loc.T("Pg.HojeEstaDiferenteDesejado"), Rows.Where(r => r.Kind == PlanStatus.Pending).ToList()),
+        new(PlanStatus.AlreadyConfigured, Loc.T("Pg.JaEstaAssim"), Loc.T("Pg.SeuPcJaTem"), Rows.Where(r => r.Kind == PlanStatus.AlreadyConfigured).ToList()),
+        new(PlanStatus.NotApplicable, Loc.T("Pg.NaoAplica"), Loc.T("Pg.NaoFazSentidoNeste"), Rows.Where(r => r.Kind == PlanStatus.NotApplicable).ToList()),
+        new(PlanStatus.Blocked, Loc.T("Shell.Bloqueada"), Loc.T("Pg.AlgoImpedeMudancaSeguranca"), Rows.Where(r => r.Kind == PlanStatus.Blocked).ToList()),
     ];
     public string Summary { get => _summary; set => Set(ref _summary, value); }
     public bool Busy { get => _busy; set => Set(ref _busy, value); }
     public RelayCommand? SimulateCommand { get; set; }
     public string BlockedNotice { get; } =
-        "Aqui nada é aplicado: a simulação só lê. Para aplicar de verdade, use a página Aplicar: ela pede confirmação, registra tudo e permite desfazer.";
+        Loc.T("Pg.AquiNadaAplicadoSimulacao");
 }
 
 // ------------------------------------------------------------------ Histórico
@@ -547,7 +547,7 @@ public sealed record HistoryRun(Guid RunId, string Started, string Status, strin
 {
     /// <summary>Execução ainda sem encerramento registrado (algo dela pode estar valendo).</summary>
     [JsonIgnore]
-    public bool IsOpen => Status == "não encerrada";
+    public bool IsOpen => Status == Loc.T("Shell.NaoEncerrada");
 }
 
 public sealed record HistoryEntry(long Id, string State, string Action, string Target, string Original, string Desired, string Observed, string? Note)
@@ -571,7 +571,7 @@ public sealed class HistoryRunCard(HistoryRun run, RelayCommand undo)
     public string Catalog => Run.Catalog;
     public bool IsOpen => Run.IsOpen;
     public Tone Tone => Run.IsOpen ? Tone.Warn : Tone.Neutral;
-    public string StatusText => Run.IsOpen ? "Ainda valendo" : Run.Status.Length > 0 ? char.ToUpperInvariant(Run.Status[0]) + Run.Status[1..] : "";
+    public string StatusText => Run.IsOpen ? Loc.T("Pg.AindaValendo") : Run.Status.Length > 0 ? char.ToUpperInvariant(Run.Status[0]) + Run.Status[1..] : "";
     public RelayCommand UndoCommand { get; } = undo;
 }
 
@@ -584,9 +584,9 @@ public sealed class HistoryPage : PageViewModel
     private string _status = "";
     private string _coordination = "";
     private bool _undoing;
-    public override string Title => "Histórico";
+    public override string Title => Loc.T("Pg.Historico");
     public override string Group => Loc.T("Nav.Registro");
-    public override string Subtitle => "Tudo o que o serviço registrou no diário, aberto só para leitura, e se há algum executor em uso agora.";
+    public override string Subtitle => Loc.T("Pg.TudoServicoRegistrouDiario");
     public string JournalPath { get; set; } = NexusServices.DefaultJournalPath;
     public IReadOnlyList<HistoryRun> Runs
     {
@@ -609,8 +609,8 @@ public sealed class HistoryPage : PageViewModel
                 OnPropertyChanged(name);
         }
     }
-    public string RunsTitle => Runs.Count == 1 ? "1 execução" : $"{Runs.Count} execuções";
-    public string EntriesTitle => Entries.Count == 1 ? "1 ajuste nesta execução" : $"{Entries.Count} ajustes nesta execução";
+    public string RunsTitle => Runs.Count == 1 ? Loc.T("Pg.N1Execucao") : Loc.F("Pg.NExecucoes", Runs.Count);
+    public string EntriesTitle => Entries.Count == 1 ? Loc.T("Pg.N1AjusteNestaExecucao") : Loc.F("Pg.NAjustesNestaExecucao", Entries.Count);
     public string Status { get => _status; set => Set(ref _status, value); }
     public string Coordination
     {
@@ -653,9 +653,9 @@ public sealed class HistoryPage : PageViewModel
         : Coordination.StartsWith("Executor ativo", StringComparison.Ordinal) ? Tone.Warn : Tone.Neutral;
     public string CoordinationChip => CoordinationTone switch
     {
-        Tone.Good => "Nada aplicando agora",
-        Tone.Warn => "Aplicando agora",
-        _ => "Não deu pra conferir",
+        Tone.Good => Loc.T("Pg.NadaAplicandoAgora"),
+        Tone.Warn => Loc.T("Pg.AplicandoAgora"),
+        _ => Loc.T("Pg.NaoDeuPraConferir"),
     };
     public IReadOnlyList<FlowStep> Flow { get; } = OptimizeFlow.For("HistoryPage");
 
@@ -678,7 +678,7 @@ public sealed class HistoryPage : PageViewModel
             var r = await host.RevertAsync(run.RunId, level);
             if (r is not null) Status = r.Message;
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"Não foi possível desfazer: {ex.Message}"; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = Loc.F("Pg.NaoFoiPossivelDesfazer", ex.Message); }
         finally
         {
             _undoing = false;
@@ -691,9 +691,9 @@ public sealed class HistoryPage : PageViewModel
 
 public sealed class CapabilitiesPage : PageViewModel
 {
-    public override string Title => "O que já funciona";
+    public override string Title => Loc.T("Settings.JaFunciona");
     public override string Group => Loc.T("Nav.Registro");
-    public override string Subtitle => "Sem maquiagem: o que já existe nesta versão e o que foi conferido de verdade, item por item.";
+    public override string Subtitle => Loc.T("Pg.SemMaquiagemJaExiste");
     public IReadOnlyList<CapabilityRow> Rows { get; } = CapabilityCatalog.Rows(OperatingSystem.IsWindows());
 
     /// <summary>Capacidades agrupadas por área, na ordem em que as áreas aparecem.</summary>
@@ -754,10 +754,10 @@ public sealed class OverviewPage : PageViewModel
 {
     private IReadOnlyList<OverviewCard> _cards = [];
     private string _footer = "";
-    public override string Title => "Meu PC";
+    public override string Title => Loc.T("Nav.MeuPc");
     public override string Group => Loc.T("Nav.MeuPc");
-    public override string Subtitle => "Resumo do que foi lido deste PC. Modo somente leitura: nada é alterado.";
-    private static readonly string[] HardwareOrder = ["Processador", "GPU", "Memória", "Disco"];
+    public override string Subtitle => Loc.T("Pg.ResumoFoiLidoDeste");
+    private static readonly string[] HardwareOrder = [Loc.T("Pg.Processador"), "GPU", Loc.T("Pg.Memoria"), Loc.T("Pg.Disco")];
 
     public IReadOnlyList<OverviewCard> Cards
     {
@@ -777,15 +777,15 @@ public sealed class OverviewPage : PageViewModel
     // Derivados para a apresentação.
     public IReadOnlyList<OverviewCard> HeroCards =>
         HardwareOrder.Select(t => Cards.FirstOrDefault(c => c.Title == t)).OfType<OverviewCard>().ToList();
-    public IReadOnlyList<OverviewCard> OtherCards => Cards.Where(c => c.Kind == OverviewCardKind.Fact && c.Title != "Leitura").ToList();
-    public OverviewCard? Reading => Cards.FirstOrDefault(c => c.Title == "Leitura");
+    public IReadOnlyList<OverviewCard> OtherCards => Cards.Where(c => c.Kind == OverviewCardKind.Fact && c.Title != Loc.T("Pg.Leitura")).ToList();
+    public OverviewCard? Reading => Cards.FirstOrDefault(c => c.Title == Loc.T("Pg.Leitura"));
     public bool HasData => Cards.Count > 0;
     public bool IsLoading => Cards.Count == 0;
 
-    public OverviewCard? Cpu => Hardware("Processador");
+    public OverviewCard? Cpu => Hardware(Loc.T("Pg.Processador"));
     public OverviewCard? Gpu => Hardware("GPU");
-    public OverviewCard? Ram => Hardware("Memória");
-    public OverviewCard? Disk => Hardware("Disco");
+    public OverviewCard? Ram => Hardware(Loc.T("Pg.Memoria"));
+    public OverviewCard? Disk => Hardware(Loc.T("Pg.Disco"));
     private OverviewCard? Hardware(string title) => Cards.FirstOrDefault(c => c.Kind == OverviewCardKind.Hardware && c.Title == title);
 
     public IReadOnlyList<OverviewCard> Recommendations => Cards.Where(c => c.Kind == OverviewCardKind.Recommendation).ToList();
@@ -795,16 +795,16 @@ public sealed class OverviewPage : PageViewModel
     public string HealthCaption => Cards.FirstOrDefault(c => c.Kind == OverviewCardKind.Health)?.Value ?? "";
 
     /// <summary>Nome do PC (fabricante e modelo), ou "Seu PC".</summary>
-    public string HeroTitle => Cards.FirstOrDefault(c => c.Title == "Sistema") is { Status: not FactStatus.Unavailable } s ? s.Value : "Seu PC";
+    public string HeroTitle => Cards.FirstOrDefault(c => c.Title == Loc.T("Nav.Sistema")) is { Status: not FactStatus.Unavailable } s ? s.Value : Loc.T("Pg.SeuPc");
     public string HeroCaption => Cards.FirstOrDefault(c => c.Title == "Windows") is { Status: not FactStatus.Unavailable } w
-        ? (w.Value.StartsWith("Windows", StringComparison.OrdinalIgnoreCase) ? w.Value : "Windows " + w.Value) + ". Ler não muda nada."
-        : "Tudo o que o NEXUS leu do seu PC. Ler não muda nada.";
+        ? (w.Value.StartsWith("Windows", StringComparison.OrdinalIgnoreCase) ? w.Value : "Windows " + w.Value) + Loc.T("Pg.LerNaoMudaNada")
+        : Loc.T("Pg.TudoNexusLeuSeu");
 
     public static IReadOnlyList<OverviewCard> Build(SystemSnapshot s, IReadOnlyList<DiagnosticFinding> findings)
     {
         var f = s.Facts;
         OverviewCard Card(string title, string? value, string detail, FactStatus ok = FactStatus.Detected) =>
-            new(title, value ?? "indisponível", value is null ? FactStatus.Unavailable : ok, detail);
+            new(title, value ?? Loc.T("Pg.Indisponivel"), value is null ? FactStatus.Unavailable : ok, detail);
 
         // Notebook híbrido: mostrar a placa dedicada (a que roda os jogos), não a integrada que desenha a tela.
         static int GpuRank(GpuInfo g)
@@ -823,38 +823,38 @@ public sealed class OverviewPage : PageViewModel
         var attention = findings.Count(x => x.Severity == DiagnosticSeverity.Attention);
         var cards = new List<OverviewCard>
         {
-            Card("Windows", f.WindowsEdition is null && f.WindowsBuild is null ? null : $"{f.WindowsEdition} · build {f.WindowsBuild}", "Registro CurrentVersion"),
-            Card("Processador", f.CpuModel, f.PhysicalCores is null ? "Topologia indisponível" : $"{f.PhysicalCores} núcleos / {f.LogicalProcessors} threads") with
+            Card("Windows", f.WindowsEdition is null && f.WindowsBuild is null ? null : Loc.F("Pg.NBuildN", f.WindowsEdition, f.WindowsBuild), Loc.T("Pg.RegistroCurrentversion")),
+            Card(Loc.T("Pg.Processador"), f.CpuModel, f.PhysicalCores is null ? Loc.T("Pg.TopologiaIndisponivel") : Loc.F("Pg.NNucleosNThreads", f.PhysicalCores, f.LogicalProcessors)) with
             {
-                Kind = OverviewCardKind.Hardware, Number = f.PhysicalCores ?? double.NaN, Suffix = " núcleos", Target = "CpuLabPage",
-                IllustrationKey = "Illo.Cpu", Trend = f.LogicalProcessors is { } t ? $"{t} threads" : "", Note = f.CpuModel ?? "",
+                Kind = OverviewCardKind.Hardware, Number = f.PhysicalCores ?? double.NaN, Suffix = Loc.T("Pg.Nucleos"), Target = "CpuLabPage",
+                IllustrationKey = "Illo.Cpu", Trend = f.LogicalProcessors is { } t ? Loc.F("Pg.NThreads", t) : "", Note = f.CpuModel ?? "",
             },
-            Card("GPU", gpu?.Name, gpu is null ? "SetupAPI" : $"Driver {gpu.DriverVersion ?? "?"} ({gpu.DriverDate ?? "?"})") with
+            Card("GPU", gpu?.Name, gpu is null ? "SetupAPI" : Loc.F("Pg.DriverNN", gpu.DriverVersion ?? "?", gpu.DriverDate ?? "?")) with
             {
                 Kind = OverviewCardKind.Hardware, Number = gpu?.MemoryBytes is { } vram and > 0 ? vram : double.NaN, Target = "GpuLabPage",
-                IllustrationKey = "Illo.Gpu", Trend = f.Gpus.Count > 1 ? $"{f.Gpus.Count} placas" : "",
-                Note = gpu?.MemoryBytes is > 0 ? gpu.Name : gpu is null ? "" : $"Driver {gpu.DriverVersion ?? "?"}",
+                IllustrationKey = "Illo.Gpu", Trend = f.Gpus.Count > 1 ? Loc.F("Pg.NPlacas", f.Gpus.Count) : "",
+                Note = gpu?.MemoryBytes is > 0 ? gpu.Name : gpu is null ? "" : Loc.F("Pg.DriverN", gpu.DriverVersion ?? "?"),
             },
-            Card("Memória", f.TotalMemoryBytes is null ? null : Units.Bytes(f.TotalMemoryBytes), MemoryDetail(f)) with
+            Card(Loc.T("Pg.Memoria"), f.TotalMemoryBytes is null ? null : Units.Bytes(f.TotalMemoryBytes), MemoryDetail(f)) with
             {
                 Kind = OverviewCardKind.Hardware, Number = f.TotalMemoryBytes is { } total ? total : double.NaN, Target = "MemoryLabPage",
                 IllustrationKey = "Illo.Ram", Trend = MemoryTrend(f.MemoryModules.Count, sized.Count), TrendWarns = sized.Count == 1,
                 Note = MemoryDetail(f),
             },
             DiskCard(f),
-            Card("Plano de energia", f.ActivePowerSchemeName ?? f.ActivePowerScheme?.ToString("D"), "PowerGetActiveScheme"),
-            Card("Sistema", f.SystemModel is null ? null : $"{f.SystemManufacturer} {f.SystemModel}",
-                f.IsVirtualMachine switch { true => "Máquina virtual (inferido)", false => "Hardware físico (inferido)", null => "SMBIOS" }),
-            new("Diagnóstico", $"{attention} ponto(s) de atenção", FactStatus.Detected, $"{findings.Count} achados; veja a página Diagnóstico"),
-            new("Leitura", s.Elapsed.TotalSeconds.ToString("0.0", CultureInfo.InvariantCulture) + " s", FactStatus.Detected,
-                $"Capturado em {s.TakenAt:dd/MM/yyyy HH:mm:ss}"),
+            Card(Loc.T("Pg.PlanoEnergia"), f.ActivePowerSchemeName ?? f.ActivePowerScheme?.ToString("D"), "PowerGetActiveScheme"),
+            Card(Loc.T("Nav.Sistema"), f.SystemModel is null ? null : $"{f.SystemManufacturer} {f.SystemModel}",
+                f.IsVirtualMachine switch { true => Loc.T("Pg.MaquinaVirtualInferido"), false => Loc.T("Pg.HardwareFisicoInferido"), null => "SMBIOS" }),
+            new(Loc.T("Pg.Diagnostico"), Loc.F("Pg.NPontoSAtencao2", attention), FactStatus.Detected, Loc.F("Pg.NAchadosVejaPagina", findings.Count)),
+            new(Loc.T("Pg.Leitura"), s.Elapsed.TotalSeconds.ToString("0.0", CultureInfo.InvariantCulture) + " s", FactStatus.Detected,
+                Loc.F("Pg.CapturadoN", s.TakenAt)),
         };
-        if (installed > 0 && cards.FindIndex(c => c.Title == "Memória") is var mi and >= 0 && cards[mi].Status == FactStatus.Unavailable)
+        if (installed > 0 && cards.FindIndex(c => c.Title == Loc.T("Pg.Memoria")) is var mi and >= 0 && cards[mi].Status == FactStatus.Unavailable)
             cards[mi] = cards[mi] with { Number = installed };
 
         var score = DesignMath.HealthScore(findings.Count, attention);
-        cards.Add(new OverviewCard("Itens em ordem", attention == 0 ? "Nada pede atenção agora" : attention == 1 ? "1 ponto para conferir" : $"{attention} pontos para conferir",
-            FactStatus.Detected, $"{findings.Count} verificações")
+        cards.Add(new OverviewCard(Loc.T("Pg.ItensOrdem"), attention == 0 ? Loc.T("Pg.NadaPedeAtencaoAgora") : attention == 1 ? Loc.T("Pg.N1PontoConferir") : Loc.F("Pg.NPontosConferir", attention),
+            FactStatus.Detected, Loc.F("Pg.NVerificacoes", findings.Count))
         { Kind = OverviewCardKind.Health, Number = score ?? double.NaN, Target = "DiagnosticsPage" });
 
         cards.AddRange(Recommend(f, findings));
@@ -864,7 +864,7 @@ public sealed class OverviewPage : PageViewModel
     private static string MemoryDetail(SystemFacts f)
     {
         var m = f.MemoryModules.FirstOrDefault(x => x.SizeBytes is not null);
-        if (m is null) return f.MemoryModules.Count == 0 ? "Módulos indisponíveis" : $"{f.MemoryModules.Count} módulo(s)";
+        if (m is null) return f.MemoryModules.Count == 0 ? Loc.T("Pg.ModulosIndisponiveis") : Loc.F("Pg.NModuloS", f.MemoryModules.Count);
         var speed = m.ConfiguredSpeedMts ?? m.MaxSpeedMts;
         return string.Join(" · ", new[] { m.Type, speed is null ? null : $"{speed} MT/s" }.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
@@ -873,9 +873,9 @@ public sealed class OverviewPage : PageViewModel
     internal static string MemoryTrend(int slotsListed, int modules) => modules switch
     {
         0 => "",
-        _ when slotsListed > modules => $"{modules} de {slotsListed} slots",
-        1 => "canal único",
-        _ => $"{modules} pentes",
+        _ when slotsListed > modules => Loc.F("Pg.NNSlots", modules, slotsListed),
+        1 => Loc.T("Pg.CanalUnico"),
+        _ => Loc.F("Pg.NPentes", modules),
     };
 
     private static OverviewCard DiskCard(SystemFacts f)
@@ -883,15 +883,15 @@ public sealed class OverviewPage : PageViewModel
         var letter = string.IsNullOrEmpty(f.SystemDrive) ? 'C' : char.ToUpperInvariant(f.SystemDrive[0]);
         var d = f.Drives.FirstOrDefault(x => x.Name.Length > 0 && char.ToUpperInvariant(x.Name[0]) == letter);
         if (d is not { TotalBytes: { } total and > 0, FreeBytes: { } free })
-            return new OverviewCard("Disco", "indisponível", FactStatus.Unavailable, $"Unidade {letter}:")
-            { Kind = OverviewCardKind.Hardware, Target = "DiskPage", IllustrationKey = "Illo.Disk", Note = $"Unidade {letter}:" };
+            return new OverviewCard(Loc.T("Pg.Disco"), Loc.T("Pg.Indisponivel"), FactStatus.Unavailable, Loc.F("Pg.UnidadeN", letter))
+            { Kind = OverviewCardKind.Hardware, Target = "DiskPage", IllustrationKey = "Illo.Disk", Note = Loc.F("Pg.UnidadeN", letter) };
         var used = 100.0 * (total - free) / total;
         var media = f.SystemDiskMedia == DiskMedia.Unknown ? "" : $" ({StorageClassifier.Describe(f.SystemDiskMedia, f.SystemDiskBus)})";
-        return new OverviewCard("Disco", Units.Bytes(free) + " livres", FactStatus.Detected, $"Unidade {letter}:{media} de {Units.Bytes(total)}")
+        return new OverviewCard(Loc.T("Pg.Disco"), Units.Bytes(free) + " livres", FactStatus.Detected, Loc.F("Pg.UnidadeNNN", letter, media, Units.Bytes(total)))
         {
             Kind = OverviewCardKind.Hardware, Number = free, Target = "DiskPage", IllustrationKey = "Illo.Disk",
-            Note = $"livres na unidade {letter}:{media} de {Units.Bytes(total)}",
-            Trend = $"{used.ToString("0", CultureInfo.GetCultureInfo("pt-BR"))}% usado", TrendWarns = used >= 85,
+            Note = Loc.F("Pg.LivresUnidadeNN", letter, media, Units.Bytes(total)),
+            Trend = Loc.F("Pg.NUsado", used.ToString("0", CultureInfo.GetCultureInfo("pt-BR"))), TrendWarns = used >= 85,
         };
     }
 
@@ -909,7 +909,7 @@ public sealed class OverviewPage : PageViewModel
         foreach (var x in findings.Where(x => x.Severity == DiagnosticSeverity.Attention))
         {
             var target = ShellMap.PageForFinding(x.Id);
-            Add(new OverviewCard(x.Title, "Vale conferir", x.Basis, "Não é garantia de FPS: meça antes e depois.")
+            Add(new OverviewCard(x.Title, Loc.T("Pg.ValeConferir"), x.Basis, Loc.T("Pg.NaoGarantiaFpsMeca"))
             {
                 Kind = OverviewCardKind.Recommendation, Target = target, ActionText = ShellMap.ActionFor(target),
                 IconKey = ShellMap.IconFor(target), TrendWarns = true,
@@ -919,9 +919,9 @@ public sealed class OverviewPage : PageViewModel
         {
             Kind = OverviewCardKind.Recommendation, Target = target, ActionText = ShellMap.ActionFor(target), IconKey = ShellMap.IconFor(target),
         };
-        Add(Tip("Libere espaço com segurança", "Tudo vai para a quarentena e pode voltar.", "CleaningPage"));
-        Add(Tip("Meça uma partida", "FPS e engasgos, quadro a quadro, antes de mexer.", "MeasurePage"));
-        Add(Tip("Veja o que dá pra ajustar", "Cada ajuste mostra o risco e como desfazer.", "CatalogPage"));
+        Add(Tip(Loc.T("Pg.LibereEspacoSeguranca"), Loc.T("Pg.TudoVaiQuarentenaPode"), "CleaningPage"));
+        Add(Tip(Loc.T("Pg.MecaPartida"), Loc.T("Pg.FpsEngasgosQuadroQuadro"), "MeasurePage"));
+        Add(Tip(Loc.T("Pg.VejaPraAjustar"), Loc.T("Pg.CadaAjusteMostraRisco"), "CatalogPage"));
         return list;
     }
 }
@@ -958,7 +958,7 @@ public sealed class BrokerPage : PageViewModel
     private bool _connected;
     private bool _writeAllowed;
     private bool _busy;
-    private string _serviceStatus = "Não consultado. Clique em \"Consultar serviço\".";
+    private string _serviceStatus = Loc.T("Pg.NaoConsultadoCliqueConsultar");
     private string _gate = "";
     private string _coordination = "";
     private string _lastMessage = "";
@@ -966,10 +966,10 @@ public sealed class BrokerPage : PageViewModel
     private bool _sessionOpen;
     private IReadOnlyList<BrokerResultRow> _results = [];
 
-    public override string Title => "Aplicar";
+    public override string Title => Loc.T("Shell.Aplicar");
     public override string Group => Loc.T("Nav.Otimizar");
     public override string Subtitle =>
-        "Aplique os ajustes marcados neste PC. Cada mudança é registrada antes e pode ser desfeita; as de sistema pedem permissão ao Windows e criam um ponto de restauração.";
+        Loc.T("Pg.ApliqueAjustesMarcadosNeste");
 
     private ObservableCollection<CatalogRow> _candidates = [];
 
@@ -993,7 +993,7 @@ public sealed class BrokerPage : PageViewModel
 
     /// <summary>Marcados para aplicar agora (os mesmos de Testar sem aplicar).</summary>
     public double SelectedCount => _candidates.Count(c => c.Include);
-    public string SelectedCaption => $"de {_candidates.Count} disponíveis";
+    public string SelectedCaption => Loc.F("Pg.NDisponiveis", _candidates.Count);
     public bool HasCandidates => _candidates.Count > 0;
     public bool HasLastRun => LastRun is not null;
     public bool HasResults => Results.Count > 0;
@@ -1003,13 +1003,13 @@ public sealed class BrokerPage : PageViewModel
     public double ProblemCount => Results.Count(r => r.Tone == Tone.Bad);
     /// <summary>Tom do estado da escrita: verde liberada, ciano recusada (estado, não erro), neutro sem resposta.</summary>
     public Tone GateTone => GateState switch { "open" => Tone.Good, "blocked" => Tone.Info, _ => Tone.Neutral };
-    public string GateChip => GateState switch { "open" => "Pronto para aplicar", "blocked" => "Aplicador recusou escrever", _ => "Aplicador ainda não consultado" };
+    public string GateChip => GateState switch { "open" => Loc.T("Pg.ProntoAplicar"), "blocked" => Loc.T("Pg.AplicadorRecusouEscrever"), _ => Loc.T("Pg.AplicadorAindaNaoConsultado") };
     /// <summary>Legenda de 1 linha do destaque.</summary>
     public string GateCaption => GateState switch
     {
-        "open" => "Você confirma antes. Tudo fica no diário e pode ser desfeito.",
-        "blocked" => "O aplicador respondeu, mas não liberou a escrita. Nada foi alterado.",
-        _ => "O aplicador inicia sozinho quando você aplica ou consulta.",
+        "open" => Loc.T("Pg.VoceConfirmaAntesTudo"),
+        "blocked" => Loc.T("Pg.AplicadorRespondeuMasNao"),
+        _ => Loc.T("Pg.AplicadorIniciaSozinhoQuando"),
     };
     public IReadOnlyList<FlowStep> Flow { get; } = OptimizeFlow.For("BrokerPage");
 
@@ -1048,16 +1048,16 @@ public sealed class BrokerPage : PageViewModel
 
     public string GateTitle => GateState switch
     {
-        "open" => "Pronto para aplicar neste PC",
-        "blocked" => "Aplicação recusada pelo aplicador",
-        _ => "Aplicador ainda não iniciado",
+        "open" => Loc.T("Pg.ProntoAplicarNestePc"),
+        "blocked" => Loc.T("Pg.AplicacaoRecusadaPeloAplicador"),
+        _ => Loc.T("Pg.AplicadorAindaNaoIniciado"),
     };
 
     public string GateExplain => GateState switch
     {
-        "open" => "Aplicar pede a sua confirmação. Ajustes do seu usuário são aplicados direto; ajustes de sistema pedem permissão no aviso do Windows. Tudo fica no diário para desfazer.",
-        "blocked" => "O aplicador respondeu, mas recusou escrever. O motivo aparece abaixo; nada foi alterado.",
-        _ => "Clique em Consultar para iniciar o aplicador do NEXUS e conferir se está pronto. Ele também inicia sozinho quando você aplicar.",
+        "open" => Loc.T("Pg.AplicarPedeSuaConfirmacao"),
+        "blocked" => Loc.T("Pg.AplicadorRespondeuMasRecusou"),
+        _ => Loc.T("Pg.CliqueConsultarIniciarAplicador"),
     };
 
     private void RaiseGate()
@@ -1085,7 +1085,7 @@ public sealed class BrokerPage : PageViewModel
         set { if (Set(ref _lastRun, value)) { OnPropertyChanged(nameof(LastRunText)); OnPropertyChanged(nameof(HasLastRun)); } }
     }
     public bool SessionOpen { get => _sessionOpen; set => Set(ref _sessionOpen, value); }
-    public string LastRunText => LastRun is null ? "nenhuma execução nesta sessão da interface" : LastRun.Value.ToString();
+    public string LastRunText => LastRun is null ? Loc.T("Pg.NenhumaExecucaoNestaSessao") : LastRun.Value.ToString();
     public IReadOnlyList<BrokerResultRow> Results
     {
         get => _results;
@@ -1122,10 +1122,10 @@ public static class OptimizeFlow
     /// <summary>Os 4 passos; <paramref name="currentPage"/> (nome do tipo) marca o passo "você está aqui".</summary>
     public static IReadOnlyList<FlowStep> For(string? currentPage) =>
     [
-        new(1, "Simular", "Relê o PC e mostra o que mudaria. Nada é aplicado.", "Icon.Plan", "PlanPage", currentPage == "PlanPage"),
-        new(2, "Confirmar", "Você aprova. Mudança de sistema pede permissão.", "Icon.Apply", "BrokerPage", currentPage == "BrokerPage"),
-        new(3, "Registrar", "O original fica guardado no diário antes de mudar.", "Icon.History", "HistoryPage", currentPage == "HistoryPage"),
-        new(4, "Desfazer", "Volta ao valor original quando você quiser.", "Icon.Undo", "HistoryPage", false),
+        new(1, Loc.T("Pg.Simular"), Loc.T("Pg.RelePcMostraMudaria"), "Icon.Plan", "PlanPage", currentPage == "PlanPage"),
+        new(2, Loc.T("Pg.Confirmar"), Loc.T("Pg.VoceAprovaMudancaSistema"), "Icon.Apply", "BrokerPage", currentPage == "BrokerPage"),
+        new(3, Loc.T("Pg.Registrar"), Loc.T("Pg.OriginalFicaGuardadoDiario"), "Icon.History", "HistoryPage", currentPage == "HistoryPage"),
+        new(4, Loc.T("Shell.Desfazer"), Loc.T("Pg.VoltaValorOriginalQuando"), "Icon.Undo", "HistoryPage", false),
     ];
 }
 

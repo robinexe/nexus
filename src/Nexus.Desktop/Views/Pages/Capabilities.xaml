@@ -7,6 +7,7 @@
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:opt="clr-namespace:Nexus.Desktop.Views.Optimize"
                     xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
@@ -16,29 +17,29 @@
       <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
 
         <!-- ===== Destaque ===== -->
-        <c:HeroPanel Illustration="{StaticResource Illo.Diagnostics}" Title="Validado com teste real"
+        <c:HeroPanel Illustration="{StaticResource Illo.Diagnostics}" Title="{l:T Pg.ValidadoTesteReal}"
                      Number="{Binding ValidatedCount}" Suffix="{Binding ValidatedSuffix}"
-                     Caption="Validado = existe registro de um teste de verdade. Sem ele, fica como não validado."
-                     SecondaryText="Ver o histórico" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="HistoryPage">
+                     Caption="{l:T Pg.ValidadoExisteRegistroTeste}"
+                     SecondaryText="{l:T Pg.VerHistorico}" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="HistoryPage">
           <StackPanel Width="164">
-            <c:RingMeter Value="{Binding ValidatedPercent}" Label="validado" Width="136" Height="136" Thickness="11" HorizontalAlignment="Center"/>
+            <c:RingMeter Value="{Binding ValidatedPercent}" Label="{l:T Pg.Validado}" Width="136" Height="136" Thickness="11" HorizontalAlignment="Center"/>
           </StackPanel>
         </c:HeroPanel>
 
         <!-- ===== Quatro números ===== -->
         <UniformGrid Columns="4" Margin="-7,0">
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Check}" Number="{Binding ValidatedCount}" Tone="Good"
-                      Label="Validado" Detail="Funciona e foi testado de verdade."/>
+                      Label="{l:T Pg.Validado2}" Detail="{l:T Pg.FuncionaFoiTestadoVerdade}"/>
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Info}" Number="{Binding NotValidatedCount}" Tone="Info"
-                      Label="Sem teste real ainda" Detail="Existe, falta a evidência registrada."/>
+                      Label="{l:T Pg.SemTesteRealAinda}" Detail="{l:T Pg.ExisteFaltaEvidenciaRegistrada}"/>
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Close}" Number="{Binding NotSupportedCount}"
-                      Label="Não roda aqui" Detail="Precisa de outro ambiente."/>
+                      Label="{l:T Pg.NaoRodaAqui}" Detail="{l:T Pg.PrecisaOutroAmbiente}"/>
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Plus}" Number="{Binding PendingCount}" Tone="Warn"
-                      Label="Pendente" Detail="Ainda não existe nesta versão."/>
+                      Label="{l:T Pg.Pendente}" Detail="{l:T Pg.AindaNaoExisteNesta}"/>
         </UniformGrid>
 
         <!-- ===== Áreas ===== -->
-        <TextBlock Text="Área por área" Style="{StaticResource Text.H2}" Margin="0,26,0,12"/>
+        <TextBlock Text="{l:T Pg.AreaArea}" Style="{StaticResource Text.H2}" Margin="0,26,0,12"/>
         <ItemsControl ItemsSource="{Binding Groups}" Focusable="False">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>

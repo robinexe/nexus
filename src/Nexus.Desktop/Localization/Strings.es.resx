@@ -6,6 +6,54 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Cap.Acoes" xml:space="preserve"><value>Acciones</value></data>
+  <data name="Cap.AcoesReaisVmRegistro" xml:space="preserve"><value>Acciones reales en VM (registro, energía, SysMain, core parking)</value></data>
+  <data name="Cap.AdiadoForaCatalogoAtivo" xml:space="preserve"><value>Aplazado: fuera del catálogo activo hasta que exista un handler (listado en rechazadas).</value></data>
+  <data name="Cap.AplicaNestePcAplicador" xml:space="preserve"><value>Aplica en este PC (aplicador bajo demanda; aviso de Windows para ajustes de sistema; punto de restauración; diario para deshacer).</value></data>
+  <data name="Cap.AplicarAcoesReaisNeste" xml:space="preserve"><value>Aplicar acciones reales en este PC (host físico)</value></data>
+  <data name="Cap.AplicarReverterPelaPagina" xml:space="preserve"><value>Aplicar/revertir desde la página Broker</value></data>
+  <data name="Cap.AssinaturaAuthenticodeClienteBroker" xml:space="preserve"><value>Firma Authenticode del cliente del broker</value></data>
+  <data name="Cap.Base" xml:space="preserve"><value>Base</value></data>
+  <data name="Cap.BrokerOperacoesTipadasRestritas" xml:space="preserve"><value>Broker con operaciones tipadas y restringidas (consola y servicio)</value></data>
+  <data name="Cap.CatalogadoHandlerNaoImplementado" xml:space="preserve"><value>Catalogado; handler no implementado.</value></data>
+  <data name="Cap.CompilacaoTestesUnitarios" xml:space="preserve"><value>Compilación y pruebas unitarias</value></data>
+  <data name="Cap.Conferida3110Contra" xml:space="preserve"><value>Verificada el 31/10 contra una recolección del propio Windows: igual, salvo el modelo del disco truncado (limitación conocida). SSD/HDD por el propio disco (IOCTL, sin administrador) desde el 02/11: verificar en Windows.</value></data>
+  <data name="Cap.CoordenacaoEntreExecutoresTrava" xml:space="preserve"><value>Coordinación entre ejecutores (bloqueo del SO)</value></data>
+  <data name="Cap.Descoberta" xml:space="preserve"><value>Descubrimiento</value></data>
+  <data name="Cap.DiagnosticoCatalogoEstadoReal" xml:space="preserve"><value>Diagnóstico, catálogo con estado real, simulación local, historial</value></data>
+  <data name="Cap.DiarioSqliteEstadosTransicoes" xml:space="preserve"><value>Diario SQLite, estados y transiciones (esquema 3)</value></data>
+  <data name="Cap.EcoqosProcessoProcesspowerthrottling" xml:space="preserve"><value>EcoQoS del proceso (ProcessPowerThrottling)</value></data>
+  <data name="Cap.Execucao" xml:space="preserve"><value>Ejecución</value></data>
+  <data name="Cap.ExigeCertificadoAssinaturaCodigo" xml:space="preserve"><value>Requiere un certificado de firma de código.</value></data>
+  <data name="Cap.FuncionouWindowsCapturasSinteticas" xml:space="preserve"><value>Funcionó en Windows con capturas sintéticas en el formato de PresentMon (31/10). Falta verificar con una captura real.</value></data>
+  <data name="Cap.GravarPresentmonPeloNexus" xml:space="preserve"><value>Grabar con PresentMon desde NEXUS</value></data>
+  <data name="Cap.HandlerTestadoArquivosTemporarios" xml:space="preserve"><value>Handler probado con archivos temporales; detección de la carpeta del juego pendiente.</value></data>
+  <data name="Cap.ImplementadoNaoValidado" xml:space="preserve"><value>implementado, no validado</value></data>
+  <data name="Cap.ImplementadoValidado" xml:space="preserve"><value>implementado y validado</value></data>
+  <data name="Cap.ImportarCsvVerTraco" xml:space="preserve"><value>Importar CSV, ver el trazo y comparar antes/después</value></data>
+  <data name="Cap.Interface" xml:space="preserve"><value>Interfaz</value></data>
+  <data name="Cap.InvestigadorStuttersLaboratorioB" xml:space="preserve"><value>Investigador de tirones, laboratorio A/B, informes, asistente de IA</value></data>
+  <data name="Cap.Jogos" xml:space="preserve"><value>Juegos</value></data>
+  <data name="Cap.Liberado31102026" xml:space="preserve"><value>Habilitado el 31/10/2026 por decisión del responsable, con confirmación, diario, deshacer y punto de restauración. Validado en VM; en el PC físico, depende de que tú apliques.</value></data>
+  <data name="Cap.Medicao" xml:space="preserve"><value>Medición</value></data>
+  <data name="Cap.NaoSuportadoNesteAmbiente" xml:space="preserve"><value>no compatible con este entorno</value></data>
+  <data name="Cap.NemDescobertaNemHandler" xml:space="preserve"><value>Ni descubrimiento ni handler.</value></data>
+  <data name="Cap.NexusRecoverRecoverAlteracao" xml:space="preserve"><value>nexus-recover recover con un cambio real</value></data>
+  <data name="Cap.NexusRecoverRunsShow" xml:space="preserve"><value>nexus-recover runs/show/scan/accept</value></data>
+  <data name="Cap.NvidiaDrs" xml:space="preserve"><value>NVIDIA DRS</value></data>
+  <data name="Cap.Outros" xml:space="preserve"><value>Otros</value></data>
+  <data name="Cap.Recuperacao" xml:space="preserve"><value>Recuperación</value></data>
+  <data name="Cap.SomenteLeituraHandlersSimulationonly" xml:space="preserve"><value>Solo lectura (handlers en SimulationOnlyHandler, diario abierto solo para lectura).</value></data>
+  <data name="Cap.TarefasAgendadas" xml:space="preserve"><value>Tareas programadas</value></data>
+  <data name="Cap.TestadoPresentmonFalsoArgumentos" xml:space="preserve"><value>Probado con un PresentMon falso (argumentos, errores, permiso). Nunca se ejecutó con el PresentMon real: no viene con NEXUS.</value></data>
+  <data name="Cap.TestesDiarioRealArquivo" xml:space="preserve"><value>Pruebas con un diario real en un archivo temporal, incluida la migración de esquema y el uso entre hilos.</value></data>
+  <data name="Cap.TestesProcessosReaisAprovados" xml:space="preserve"><value>Pruebas con procesos reales aprobadas en Windows (incluye un proceso que muere en medio de la aplicación y de la restauración).</value></data>
+  <data name="Cap.ValidadoVmCiEscrita" xml:space="preserve"><value>Validado en la VM del CI: escritura real en el registro, fallo simulado, la CLI real restauró y eliminó la clave creada.</value></data>
+  <data name="Cap.ValidadoWindowsContraDiario" xml:space="preserve"><value>Validado en Windows contra un diario de prueba; accept con procesos reales.</value></data>
+  <data name="Cap.VmCi66" xml:space="preserve"><value>VM del CI: 6/6 pruebas con cambio y reversión reales.</value></data>
+  <data name="Cap.VmCiServicoLocalsystem" xml:space="preserve"><value>VM del CI: servicio LocalSystem instalado; HKCU del cliente aplicado y revertido; HKCU de SYSTEM intacto; propietario del pipe verificado; ACL del bloqueo y de los datos.</value></data>
+  <data name="Cap.WindowsCpuTopologiaGpu" xml:space="preserve"><value>Windows, CPU/topología, GPU/driver, memoria/SMBIOS, discos, red, energía, servicios, inicio</value></data>
+  <data name="Cap.WindowsSdk100" xml:space="preserve"><value>Windows (SDK 10.0.403) y VM Windows del CI: compilación con 0 advertencias, todas las pruebas unitarias aprobadas.</value></data>
   <data name="Nav.Assistente" xml:space="preserve"><value>Asistente</value></data>
   <data name="Nav.Automatico" xml:space="preserve"><value>Automático</value></data>
   <data name="Nav.Laboratorio" xml:space="preserve"><value>Laboratorio</value></data>
@@ -26,6 +74,314 @@
   <data name="Nav.VerPlacaVideo" xml:space="preserve"><value>Ver la tarjeta gráfica</value></data>
   <data name="Nav.VerProcessador" xml:space="preserve"><value>Ver el procesador</value></data>
   <data name="Nav.VerSeguranca" xml:space="preserve"><value>Ver la seguridad</value></data>
+  <data name="Pg.AbreListaAjustesNada" xml:space="preserve"><value>Abre la lista de ajustes. No se aplica nada.</value></data>
+  <data name="Pg.AbrirFonteNavegador" xml:space="preserve"><value>Abrir la fuente en el navegador</value></data>
+  <data name="Pg.Agora" xml:space="preserve"><value>ahora</value></data>
+  <data name="Pg.AgoraSeuPc" xml:space="preserve"><value>Ahora en tu PC</value></data>
+  <data name="Pg.AindaNaoExisteNesta" xml:space="preserve"><value>Todavía no existe en esta versión.</value></data>
+  <data name="Pg.AindaNaoPraLer" xml:space="preserve"><value>Todavía no se puede leer en este PC</value></data>
+  <data name="Pg.AindaNaoTestado" xml:space="preserve"><value>Todavía no probado</value></data>
+  <data name="Pg.AindaValendo" xml:space="preserve"><value>Todavía vigente</value></data>
+  <data name="Pg.AjusteDesfazer" xml:space="preserve"><value>Del ajuste al deshacer</value></data>
+  <data name="Pg.AjusteRelacionado" xml:space="preserve"><value>Ajuste relacionado:</value></data>
+  <data name="Pg.AjustesAparecemQuandoLeitura" xml:space="preserve"><value>Los ajustes aparecen cuando termine la lectura del PC.</value></data>
+  <data name="Pg.AjustesCatalogo" xml:space="preserve"><value>Ajustes del catálogo</value></data>
+  <data name="Pg.AjustesMarcados" xml:space="preserve"><value>Ajustes marcados</value></data>
+  <data name="Pg.AjustesNexusConhece" xml:space="preserve"><value>Ajustes que NEXUS conoce</value></data>
+  <data name="Pg.AjustesSuaContaSao" xml:space="preserve"><value>Los ajustes de tu cuenta se aplican directamente. Los ajustes de sistema piden permiso en el aviso de Windows y crean antes un punto de restauración. Aplicar solo se habilita cuando el aplicador confirma que puede escribir.</value></data>
+  <data name="Pg.AlgoImpedeMudancaSeguranca" xml:space="preserve"><value>Algo impide el cambio por seguridad. El motivo está en cada elemento.</value></data>
+  <data name="Pg.AlgoImpedeSeguranca" xml:space="preserve"><value>Algo lo impide por seguridad.</value></data>
+  <data name="Pg.Alvo" xml:space="preserve"><value>Destino</value></data>
+  <data name="Pg.Andamento" xml:space="preserve"><value>En curso</value></data>
+  <data name="Pg.AplicacaoRecusadaPeloAplicador" xml:space="preserve"><value>Aplicación rechazada por el aplicador</value></data>
+  <data name="Pg.AplicaConfere" xml:space="preserve"><value>Aplica y verifica</value></data>
+  <data name="Pg.Aplicador" xml:space="preserve"><value>Aplicador</value></data>
+  <data name="Pg.AplicadorAindaNaoConsultado" xml:space="preserve"><value>Aplicador todavía sin consultar</value></data>
+  <data name="Pg.AplicadorAindaNaoIniciado" xml:space="preserve"><value>Aplicador todavía no iniciado</value></data>
+  <data name="Pg.AplicadorIniciaSozinhoQuando" xml:space="preserve"><value>El aplicador se inicia solo cuando aplicas o consultas.</value></data>
+  <data name="Pg.AplicadorRecusouEscrever" xml:space="preserve"><value>El aplicador se negó a escribir</value></data>
+  <data name="Pg.AplicadorRespondeuMasNao" xml:space="preserve"><value>El aplicador respondió, pero no habilitó la escritura. No se cambió nada.</value></data>
+  <data name="Pg.AplicadorRespondeuMasRecusou" xml:space="preserve"><value>El aplicador respondió, pero se negó a escribir. El motivo aparece abajo; no se cambió nada.</value></data>
+  <data name="Pg.Aplicados" xml:space="preserve"><value>Aplicados</value></data>
+  <data name="Pg.AplicadosRevertidosOuJa" xml:space="preserve"><value>Aplicados, revertidos o ya correctos.</value></data>
+  <data name="Pg.AplicandoAgora" xml:space="preserve"><value>Aplicando ahora</value></data>
+  <data name="Pg.Aplicar" xml:space="preserve"><value>Aplicar…</value></data>
+  <data name="Pg.AplicarPedeSuaConfirmacao" xml:space="preserve"><value>Aplicar pide tu confirmación. Los ajustes de tu usuario se aplican directamente; los de sistema piden permiso en el aviso de Windows. Todo queda en el diario para deshacer.</value></data>
+  <data name="Pg.AplicavelNestePcPela" xml:space="preserve"><value>aplicable en este PC desde la página Aplicar, con confirmación y deshacer</value></data>
+  <data name="Pg.ApliqueAjustesMarcadosNeste" xml:space="preserve"><value>Aplica los ajustes marcados en este PC. Cada cambio se registra antes y se puede deshacer; los de sistema piden permiso a Windows y crean un punto de restauración.</value></data>
+  <data name="Pg.Aponta" xml:space="preserve"><value>Señala</value></data>
+  <data name="Pg.AquiApareceCadaAjuste" xml:space="preserve"><value>Aquí aparece cada ajuste: el valor original, el deseado y el último leído.</value></data>
+  <data name="Pg.AquiApareceEleFaz" xml:space="preserve"><value>Aquí aparece lo que hace, el riesgo y cómo deshacerlo.</value></data>
+  <data name="Pg.AquiNadaAplicadoSimulacao" xml:space="preserve"><value>Aquí no se aplica nada: la simulación solo lee. Para aplicar de verdad, usa la página Aplicar: pide confirmación, registra todo y permite deshacer.</value></data>
+  <data name="Pg.AreaArea" xml:space="preserve"><value>Área por área</value></data>
+  <data name="Pg.AvancadoAlteracoesFicaramPela" xml:space="preserve"><value>Avanzado: cambios que quedaron a medias</value></data>
+  <data name="Pg.BaseConclusao" xml:space="preserve"><value>Base de la conclusión</value></data>
+  <data name="Pg.CadaAjusteMostraRisco" xml:space="preserve"><value>Cada ajuste muestra el riesgo y cómo deshacerlo.</value></data>
+  <data name="Pg.CadaAjusteMostraValor" xml:space="preserve"><value>Cada ajuste muestra el valor leído ahora en tu PC y en qué se convertiría. En esta página no se aplica nada.</value></data>
+  <data name="Pg.CadaMostraValorAgora" xml:space="preserve"><value>Cada uno muestra el valor actual y el de después. Aquí no se aplica nada.</value></data>
+  <data name="Pg.CadaValorDizOnde" xml:space="preserve"><value>Cada valor dice de dónde vino. Leer no cambia nada.</value></data>
+  <data name="Pg.CalculadosPartirOutrosValores" xml:space="preserve"><value>Calculados a partir de otros valores.</value></data>
+  <data name="Pg.CaminhoTodaMudanca" xml:space="preserve"><value>El camino de cada cambio</value></data>
+  <data name="Pg.CanalUnico" xml:space="preserve"><value>canal único</value></data>
+  <data name="Pg.CapturadoN" xml:space="preserve"><value>Capturado el {0:dd/MM/yyyy HH:mm:ss}</value></data>
+  <data name="Pg.Catalogo" xml:space="preserve"><value>· catálogo</value></data>
+  <data name="Pg.CatalogoApareceQuandoLeitura" xml:space="preserve"><value>El catálogo aparece cuando termine la lectura del PC.</value></data>
+  <data name="Pg.CirculamVideosPacksOtimizacao" xml:space="preserve"><value>Circulan en videos y paquetes de optimización, pero quedan fuera de NEXUS. El motivo de cada uno está aquí.</value></data>
+  <data name="Pg.ClicarAplicar" xml:space="preserve"><value>Al hacer clic en Aplicar</value></data>
+  <data name="Pg.CliqueConsultarIniciarAplicador" xml:space="preserve"><value>Haz clic en Consultar para iniciar el aplicador de NEXUS y comprobar si está listo. También se inicia solo cuando aplicas.</value></data>
+  <data name="Pg.CliqueDevolveValorOriginal" xml:space="preserve"><value>Un clic devuelve el valor original.</value></data>
+  <data name="Pg.ComoAplicar" xml:space="preserve"><value>Cómo aplicar</value></data>
+  <data name="Pg.ComoConferir" xml:space="preserve"><value>Cómo comprobarlo</value></data>
+  <data name="Pg.ComoDeveriamEstar" xml:space="preserve"><value>Como deberían estar.</value></data>
+  <data name="Pg.ComoNexusLeEste" xml:space="preserve"><value>Cómo lee NEXUS este valor</value></data>
+  <data name="Pg.ComoNexusTrabalha" xml:space="preserve"><value>Cómo trabaja NEXUS</value></data>
+  <data name="Pg.Compara" xml:space="preserve"><value>Compara</value></data>
+  <data name="Pg.ConfereRegrasDocumentadas" xml:space="preserve"><value>Compara con reglas documentadas, una por una.</value></data>
+  <data name="Pg.Conferidos" xml:space="preserve"><value>Verificados</value></data>
+  <data name="Pg.Conferir" xml:space="preserve"><value>Para revisar</value></data>
+  <data name="Pg.Confirmar" xml:space="preserve"><value>Confirmar</value></data>
+  <data name="Pg.ConsultarAplicador" xml:space="preserve"><value>Consultar el aplicador</value></data>
+  <data name="Pg.Deduzidos" xml:space="preserve"><value>Deducidos</value></data>
+  <data name="Pg.Depois" xml:space="preserve"><value>después</value></data>
+  <data name="Pg.DepoisAjuste" xml:space="preserve"><value>Después del ajuste</value></data>
+  <data name="Pg.DepoisReiniciar" xml:space="preserve"><value>Después de reiniciar</value></data>
+  <data name="Pg.Desejado" xml:space="preserve"><value>deseado</value></data>
+  <data name="Pg.Desfaz" xml:space="preserve"><value>Deshace</value></data>
+  <data name="Pg.Desfazer" xml:space="preserve"><value>Deshacer:</value></data>
+  <data name="Pg.Desfazer2" xml:space="preserve"><value>Se puede deshacer</value></data>
+  <data name="Pg.DesfazerDevolveValoresOriginais" xml:space="preserve"><value>Deshacer devuelve los valores originales guardados en el diario. Cerrar sesión deshace lo que solo valía para esta sesión.</value></data>
+  <data name="Pg.DesfazerEstaExecucao" xml:space="preserve"><value>Deshacer esta ejecución…</value></data>
+  <data name="Pg.DesfazerExecucaoN" xml:space="preserve"><value>Deshacer la ejecución de {0}</value></data>
+  <data name="Pg.Detalhes" xml:space="preserve"><value>Detalles</value></data>
+  <data name="Pg.DetalhesTecnicos" xml:space="preserve"><value>Detalles técnicos</value></data>
+  <data name="Pg.Diagnostico" xml:space="preserve"><value>Diagnóstico</value></data>
+  <data name="Pg.DiarioAbertoSoLeitura" xml:space="preserve"><value>El diario se abre solo para lectura. Deshacer pasa por el aplicador, que verifica el valor actual antes de devolver el original.</value></data>
+  <data name="Pg.DicaForumNaoMedicao" xml:space="preserve"><value>Un consejo de foro no es una medición</value></data>
+  <data name="Pg.DiretoFonteSemDeducao" xml:space="preserve"><value>Directo de la fuente, sin deducción</value></data>
+  <data name="Pg.Disco" xml:space="preserve"><value>Disco</value></data>
+  <data name="Pg.DiscoSistema" xml:space="preserve"><value>Disco del sistema</value></data>
+  <data name="Pg.DriverN" xml:space="preserve"><value>Driver {0}</value></data>
+  <data name="Pg.DriverNN" xml:space="preserve"><value>Driver {0} ({1})</value></data>
+  <data name="Pg.Duracao" xml:space="preserve"><value>Duración</value></data>
+  <data name="Pg.ElesAparecemQuandoCatalogo" xml:space="preserve"><value>Aparecen cuando se lee el catálogo.</value></data>
+  <data name="Pg.ElesAparecemQuandoLeitura" xml:space="preserve"><value>Aparecen cuando termine la lectura del PC.</value></data>
+  <data name="Pg.EncerrarSessao" xml:space="preserve"><value>Cerrar sesión</value></data>
+  <data name="Pg.EscolhaAjusteLista" xml:space="preserve"><value>Elige un ajuste de la lista.</value></data>
+  <data name="Pg.EscolhaExecucao" xml:space="preserve"><value>Elige una ejecución.</value></data>
+  <data name="Pg.ExecucoesDiario" xml:space="preserve"><value>Ejecuciones en el diario</value></data>
+  <data name="Pg.ExecucoesRegistradas" xml:space="preserve"><value>Ejecuciones registradas</value></data>
+  <data name="Pg.ExisteFaltaEvidenciaRegistrada" xml:space="preserve"><value>Existe, falta la evidencia registrada.</value></data>
+  <data name="Pg.FalhaOuConflito" xml:space="preserve"><value>Falla o conflicto.</value></data>
+  <data name="Pg.FalhaOuConflitoNada" xml:space="preserve"><value>Falla o conflicto. Nada forzado.</value></data>
+  <data name="Pg.Faz" xml:space="preserve"><value>Qué hace</value></data>
+  <data name="Pg.FoiEncontrado" xml:space="preserve"><value>Lo que se encontró</value></data>
+  <data name="Pg.Fonte" xml:space="preserve"><value>Fuente:</value></data>
+  <data name="Pg.ForaTesteEnquanto" xml:space="preserve"><value>Fuera de la prueba por ahora:</value></data>
+  <data name="Pg.FpsEngasgosQuadroQuadro" xml:space="preserve"><value>FPS y tirones, fotograma a fotograma, antes de tocar nada.</value></data>
+  <data name="Pg.FuncionaFoiTestadoVerdade" xml:space="preserve"><value>Funciona y se probó de verdad.</value></data>
+  <data name="Pg.GanhoMedido" xml:space="preserve"><value>Ganancia medida:</value></data>
+  <data name="Pg.GenteRelePcMostra" xml:space="preserve"><value>Volvemos a leer el PC y mostramos lo que cambiaría. No se aplica nada.</value></data>
+  <data name="Pg.GostouAplicarVoceConfirma" xml:space="preserve"><value>¿Te gusta? En Aplicar confirmas, el original queda guardado y se puede deshacer.</value></data>
+  <data name="Pg.GuardaOriginal" xml:space="preserve"><value>Guarda el original</value></data>
+  <data name="Pg.HardwareDriversWindowsLer" xml:space="preserve"><value>Hardware, drivers y Windows. Leer nunca cambia nada.</value></data>
+  <data name="Pg.HardwareFisicoInferido" xml:space="preserve"><value>Hardware físico (deducido)</value></data>
+  <data name="Pg.Historico" xml:space="preserve"><value>Historial</value></data>
+  <data name="Pg.HojeEstaDiferente" xml:space="preserve"><value>Hoy está diferente.</value></data>
+  <data name="Pg.HojeEstaDiferenteDesejado" xml:space="preserve"><value>Hoy está distinto de lo deseado. Eso es lo que cambiaría.</value></data>
+  <data name="Pg.Identificador" xml:space="preserve"><value>Identificador</value></data>
+  <data name="Pg.IncluirTeste" xml:space="preserve"><value>Incluir en la prueba</value></data>
+  <data name="Pg.Indisponivel" xml:space="preserve"><value>no disponible</value></data>
+  <data name="Pg.InformacaoUtilSemProblema" xml:space="preserve"><value>Información útil, sin problema.</value></data>
+  <data name="Pg.IrAplicar" xml:space="preserve"><value>Ir a Aplicar</value></data>
+  <data name="Pg.ItensOrdem" xml:space="preserve"><value>Elementos en orden</value></data>
+  <data name="Pg.JaEstaAssim" xml:space="preserve"><value>Ya está así</value></data>
+  <data name="Pg.JaEstaAssimSeu" xml:space="preserve"><value>Ya está así en tu PC</value></data>
+  <data name="Pg.JaEstaoAssim" xml:space="preserve"><value>ya están así</value></data>
+  <data name="Pg.JanelaMostraVaiMudar" xml:space="preserve"><value>Una ventana muestra lo que va a cambiar. Sin clic, no cambia nada.</value></data>
+  <data name="Pg.Le" xml:space="preserve"><value>Lee</value></data>
+  <data name="Pg.LeHardwareWindowsLer" xml:space="preserve"><value>Lee el hardware y Windows. Leer nunca cambia nada.</value></data>
+  <data name="Pg.Leitura" xml:space="preserve"><value>Lectura</value></data>
+  <data name="Pg.LeituraSistemaCadaValor" xml:space="preserve"><value>Lectura del sistema: cada valor muestra si fue detectado, deducido o no está disponible, y la fuente.</value></data>
+  <data name="Pg.Lendo" xml:space="preserve"><value>leyendo…</value></data>
+  <data name="Pg.LendoValorAtual" xml:space="preserve"><value>Leyendo el valor actual…</value></data>
+  <data name="Pg.LerNaoMudaNada" xml:space="preserve"><value>. Leer no cambia nada.</value></data>
+  <data name="Pg.LibereEspacoSeguranca" xml:space="preserve"><value>Libera espacio con seguridad</value></data>
+  <data name="Pg.Lido" xml:space="preserve"><value>leído</value></data>
+  <data name="Pg.LidosDireto" xml:space="preserve"><value>leídos directamente</value></data>
+  <data name="Pg.LidosDiretoFonte" xml:space="preserve"><value>Leídos directamente de la fuente</value></data>
+  <data name="Pg.LidoUltimo" xml:space="preserve"><value>último leído</value></data>
+  <data name="Pg.LivresUnidadeNN" xml:space="preserve"><value>libres en la unidad {0}:{1} de {2}</value></data>
+  <data name="Pg.MaquinaVirtualInferido" xml:space="preserve"><value>Máquina virtual (deducido)</value></data>
+  <data name="Pg.MarcadosAgora" xml:space="preserve"><value>Marcados ahora</value></data>
+  <data name="Pg.MarcadosAplicar" xml:space="preserve"><value>Marcados para aplicar</value></data>
+  <data name="Pg.MarcadosTestar" xml:space="preserve"><value>marcados para probar</value></data>
+  <data name="Pg.MarqueEsquerdaSimuleItem" xml:space="preserve"><value>Marca a la izquierda y simula: elemento por elemento, qué cambiaría y qué ya está bien.</value></data>
+  <data name="Pg.MecanismoLeituraEscrita" xml:space="preserve"><value>Mecanismo de lectura y escritura</value></data>
+  <data name="Pg.MecaPartida" xml:space="preserve"><value>Mide una partida</value></data>
+  <data name="Pg.Memoria" xml:space="preserve"><value>Memoria</value></data>
+  <data name="Pg.MemoriaRam" xml:space="preserve"><value>Memoria RAM</value></data>
+  <data name="Pg.MesmosTestarSemAplicar" xml:space="preserve"><value>Los mismos de Probar sin aplicar.</value></data>
+  <data name="Pg.ModulosIndisponiveis" xml:space="preserve"><value>Módulos no disponibles</value></data>
+  <data name="Pg.MostraEvidenciaOndeResolver" xml:space="preserve"><value>Muestra la evidencia y dónde resolverlo.</value></data>
+  <data name="Pg.MostraValePenaRisco" xml:space="preserve"><value>Muestra lo que vale la pena, con el riesgo de cada cosa.</value></data>
+  <data name="Pg.MotivoApareceProprioItem" xml:space="preserve"><value>El motivo aparece en el propio elemento.</value></data>
+  <data name="Pg.MudaramOuMudariam" xml:space="preserve"><value>Cambiaron o cambiarían.</value></data>
+  <data name="Pg.MudaramValemAgora" xml:space="preserve"><value>Cambiaron y están vigentes.</value></data>
+  <data name="Pg.Mudaria" xml:space="preserve"><value>Cambiaría</value></data>
+  <data name="Pg.MudariaEsteAjuste" xml:space="preserve"><value>Cambiaría con este ajuste</value></data>
+  <data name="Pg.MudariamNestePc" xml:space="preserve"><value>cambiarían en este PC</value></data>
+  <data name="Pg.MudariamSeuPc" xml:space="preserve"><value>Cambiarían en tu PC</value></data>
+  <data name="Pg.N1Ajuste" xml:space="preserve"><value>1 ajuste</value></data>
+  <data name="Pg.N1AjusteNestaExecucao" xml:space="preserve"><value>1 ajuste en esta ejecución</value></data>
+  <data name="Pg.N1Execucao" xml:space="preserve"><value>1 ejecución</value></data>
+  <data name="Pg.N1MitoNaoAplicamos" xml:space="preserve"><value>1 mito que no aplicamos</value></data>
+  <data name="Pg.N1PontoConferir" xml:space="preserve"><value>1 punto para revisar</value></data>
+  <data name="Pg.NAchadosVejaPagina" xml:space="preserve"><value>{0} hallazgos; mira la página Diagnóstico</value></data>
+  <data name="Pg.NadaAplicadoSemSeu" xml:space="preserve"><value>Nada se aplica sin tu clic.</value></data>
+  <data name="Pg.NadaAplicandoAgora" xml:space="preserve"><value>Nada aplicándose ahora</value></data>
+  <data name="Pg.NadaFazer" xml:space="preserve"><value>Nada que hacer.</value></data>
+  <data name="Pg.NadaPedeAtencaoAgora" xml:space="preserve"><value>Nada requiere atención ahora</value></data>
+  <data name="Pg.NadaRegistradoAinda" xml:space="preserve"><value>Nada registrado todavía.</value></data>
+  <data name="Pg.NadaSimuladoAinda" xml:space="preserve"><value>Nada simulado todavía.</value></data>
+  <data name="Pg.NadaTestarAinda" xml:space="preserve"><value>Nada que probar todavía.</value></data>
+  <data name="Pg.NAjustes" xml:space="preserve"><value>{0} ajustes</value></data>
+  <data name="Pg.NAjustesNestaExecucao" xml:space="preserve"><value>{0} ajustes en esta ejecución</value></data>
+  <data name="Pg.NaoAplica" xml:space="preserve"><value>No aplica</value></data>
+  <data name="Pg.NaoConsultadoCliqueConsultar" xml:space="preserve"><value>Sin consultar. Haz clic en "Consultar servicio".</value></data>
+  <data name="Pg.NaoDeuAvaliarNeste" xml:space="preserve"><value>No se pudo evaluar en este PC.</value></data>
+  <data name="Pg.NaoDeuPraConferir" xml:space="preserve"><value>No se pudo verificar</value></data>
+  <data name="Pg.NaoDeuPraLer" xml:space="preserve"><value>No se pudo leer ahora</value></data>
+  <data name="Pg.NaoDeuPraLer2" xml:space="preserve"><value>No se pudo leer</value></data>
+  <data name="Pg.NaoFazSentidoNeste" xml:space="preserve"><value>No tiene sentido en este PC o en esta versión de Windows.</value></data>
+  <data name="Pg.NaoFoiPossivelDesfazer" xml:space="preserve"><value>No se pudo deshacer: {0}</value></data>
+  <data name="Pg.NaoGarantiaFpsMeca" xml:space="preserve"><value>No garantiza FPS: mide antes y después.</value></data>
+  <data name="Pg.NaoLido" xml:space="preserve"><value>no leído:</value></data>
+  <data name="Pg.NaoRodaAqui" xml:space="preserve"><value>No se ejecuta aquí</value></data>
+  <data name="Pg.NaoServeEstePc" xml:space="preserve"><value>No sirve para este PC.</value></data>
+  <data name="Pg.NBuildN" xml:space="preserve"><value>{0} · compilación {1}</value></data>
+  <data name="Pg.NDisponiveis" xml:space="preserve"><value>de {0} disponibles</value></data>
+  <data name="Pg.NenhumAchadoGaranteFps" xml:space="preserve"><value>Ningún hallazgo garantiza más FPS. Cambia una cosa a la vez y vuelve a medir.</value></data>
+  <data name="Pg.NenhumaExecucaoNestaSessao" xml:space="preserve"><value>ninguna ejecución en esta sesión de la interfaz</value></data>
+  <data name="Pg.NenhumAjusteDisponivelAinda" xml:space="preserve"><value>Ningún ajuste disponible todavía.</value></data>
+  <data name="Pg.NenhumaRespostaAinda" xml:space="preserve"><value>Ninguna respuesta todavía.</value></data>
+  <data name="Pg.NenhumaSimulacaoExecutada" xml:space="preserve"><value>Ninguna simulación ejecutada.</value></data>
+  <data name="Pg.NenhumMitoCarregado" xml:space="preserve"><value>Ningún mito cargado.</value></data>
+  <data name="Pg.NExecucoes" xml:space="preserve"><value>{0} ejecuciones</value></data>
+  <data name="Pg.NexusRecomendaAgora" xml:space="preserve"><value>Lo que NEXUS recomienda ahora</value></data>
+  <data name="Pg.NMitosNaoAplicamos" xml:space="preserve"><value>{0} mitos que no aplicamos</value></data>
+  <data name="Pg.NModuloS" xml:space="preserve"><value>{0} módulo(s)</value></data>
+  <data name="Pg.NNaoAvaliavelIs" xml:space="preserve"><value>{0} no evaluable(s) · {1} en total</value></data>
+  <data name="Pg.NNGanhoMedido" xml:space="preserve"><value>{0} {1} Ganancia medida: {2}</value></data>
+  <data name="Pg.NNSlots" xml:space="preserve"><value>{0} de {1} ranuras</value></data>
+  <data name="Pg.NNucleosNThreads" xml:space="preserve"><value>{0} núcleos / {1} hilos</value></data>
+  <data name="Pg.NPentes" xml:space="preserve"><value>{0} módulos</value></data>
+  <data name="Pg.NPlacas" xml:space="preserve"><value>{0} tarjetas</value></data>
+  <data name="Pg.NPontoSAtencao" xml:space="preserve"><value>{0} punto(s) de atención ·</value></data>
+  <data name="Pg.NPontoSAtencao2" xml:space="preserve"><value>{0} punto(s) de atención</value></data>
+  <data name="Pg.NPontosConferir" xml:space="preserve"><value>{0} puntos para revisar</value></data>
+  <data name="Pg.NPraLerAqui" xml:space="preserve"><value>de {0} que se pueden leer aquí</value></data>
+  <data name="Pg.NSemLeitura" xml:space="preserve"><value> · {0} sin lectura</value></data>
+  <data name="Pg.NThreads" xml:space="preserve"><value>{0} hilos</value></data>
+  <data name="Pg.Nucleos" xml:space="preserve"><value> núcleos</value></data>
+  <data name="Pg.NUsado" xml:space="preserve"><value>{0}% usado</value></data>
+  <data name="Pg.NVerificacoes" xml:space="preserve"><value>{0} verificaciones</value></data>
+  <data name="Pg.OndeVem" xml:space="preserve"><value>De dónde viene</value></data>
+  <data name="Pg.OndeVemEstesValores" xml:space="preserve"><value>¿De dónde vienen estos valores?</value></data>
+  <data name="Pg.OndeVemIsso" xml:space="preserve"><value>¿De dónde viene esto?</value></data>
+  <data name="Pg.Ordem" xml:space="preserve"><value>en orden</value></data>
+  <data name="Pg.Ordem2" xml:space="preserve"><value>En orden</value></data>
+  <data name="Pg.Original" xml:space="preserve"><value>original</value></data>
+  <data name="Pg.OriginalFicaGuardadoDiario" xml:space="preserve"><value>El original queda guardado en el diario antes de cambiar.</value></data>
+  <data name="Pg.PartidaAntesOutraDepois" xml:space="preserve"><value>Una partida antes y otra después dicen si cambió.</value></data>
+  <data name="Pg.PcDesligouMeioAplicacao" xml:space="preserve"><value>Si el PC se apagó en medio de una aplicación, el diario sabe qué faltó. Recuperar deshace esos cambios con confirmación.</value></data>
+  <data name="Pg.PecaPeca" xml:space="preserve"><value>Pieza por pieza</value></data>
+  <data name="Pg.Pendente" xml:space="preserve"><value>Pendiente</value></data>
+  <data name="Pg.Perfil" xml:space="preserve"><value>· perfil</value></data>
+  <data name="Pg.Permissao" xml:space="preserve"><value>Permiso</value></data>
+  <data name="Pg.Persistente" xml:space="preserve"><value>Persistente</value></data>
+  <data name="Pg.PistasConfiguracaoCadaEvidencia" xml:space="preserve"><value>Pistas de la configuración, cada una con su evidencia. Leer no cambia nada.</value></data>
+  <data name="Pg.PlacaVideo" xml:space="preserve"><value>Tarjeta gráfica</value></data>
+  <data name="Pg.PlanoEnergia" xml:space="preserve"><value>Plan de energía</value></data>
+  <data name="Pg.PodeValerOlhadaMeca" xml:space="preserve"><value>Puede valer la pena mirarlo. Mide antes.</value></data>
+  <data name="Pg.PontoConferir" xml:space="preserve"><value>punto para revisar</value></data>
+  <data name="Pg.PontosConferir" xml:space="preserve"><value>Puntos para revisar</value></data>
+  <data name="Pg.PontosConferir2" xml:space="preserve"><value>puntos para revisar</value></data>
+  <data name="Pg.PraAjustar" xml:space="preserve"><value>Qué se puede ajustar</value></data>
+  <data name="Pg.PrecisaOutroAmbiente" xml:space="preserve"><value>Necesita otro entorno.</value></data>
+  <data name="Pg.Problema" xml:space="preserve"><value>Con problemas</value></data>
+  <data name="Pg.Processador" xml:space="preserve"><value>Procesador</value></data>
+  <data name="Pg.ProntoAplicar" xml:space="preserve"><value>Listo para aplicar</value></data>
+  <data name="Pg.ProntoAplicarNestePc" xml:space="preserve"><value>Listo para aplicar en este PC</value></data>
+  <data name="Pg.QuandoVale" xml:space="preserve"><value>Cuándo aplica</value></data>
+  <data name="Pg.QuandoValePena" xml:space="preserve"><value>Cuándo vale la pena</value></data>
+  <data name="Pg.QuandoVoceAplicarAjuste" xml:space="preserve"><value>Cuando apliques un ajuste, cada ejecución aparece aquí con lo que cambió y un botón para deshacer.</value></data>
+  <data name="Pg.RecuperarInterrompidas" xml:space="preserve"><value>Recuperar interrumpidas…</value></data>
+  <data name="Pg.Registrar" xml:space="preserve"><value>Registrar</value></data>
+  <data name="Pg.RegistroCurrentversion" xml:space="preserve"><value>Registro CurrentVersion</value></data>
+  <data name="Pg.ReleDepoisMudarTer" xml:space="preserve"><value>Vuelve a leer después de cambiar para estar seguro.</value></data>
+  <data name="Pg.RelePcMostraMudaria" xml:space="preserve"><value>Vuelve a leer el PC y muestra lo que cambiaría. No se aplica nada.</value></data>
+  <data name="Pg.RespostaAplicador" xml:space="preserve"><value>Respuesta del aplicador</value></data>
+  <data name="Pg.RespostaCadaAjuste" xml:space="preserve"><value>Respuesta de cada ajuste</value></data>
+  <data name="Pg.ResumoFoiLidoDeste" xml:space="preserve"><value>Resumen de lo que se leyó de este PC. Modo solo lectura: no se cambia nada.</value></data>
+  <data name="Pg.ResumoSimulacao" xml:space="preserve"><value>Resumen de la simulación</value></data>
+  <data name="Pg.RevertidosOuJaOriginal" xml:space="preserve"><value>Revertidos o ya en el original.</value></data>
+  <data name="Pg.Risco" xml:space="preserve"><value>Riesgo:</value></data>
+  <data name="Pg.Saber" xml:space="preserve"><value>Para saber</value></data>
+  <data name="Pg.SemDados" xml:space="preserve"><value>Sin datos</value></data>
+  <data name="Pg.SemEncerramentoRegistrado" xml:space="preserve"><value>sin cierre registrado</value></data>
+  <data name="Pg.SemLeitura" xml:space="preserve"><value>Sin lectura</value></data>
+  <data name="Pg.SemLeituraAqui" xml:space="preserve"><value>Sin lectura aquí</value></data>
+  <data name="Pg.SemMaquiagemJaExiste" xml:space="preserve"><value>Sin maquillaje: lo que ya existe en esta versión y lo que se verificó de verdad, elemento por elemento.</value></data>
+  <data name="Pg.SemTesteRealAinda" xml:space="preserve"><value>Sin prueba real todavía</value></data>
+  <data name="Pg.Sessao" xml:space="preserve"><value>Sesión</value></data>
+  <data name="Pg.SeuEquipamento" xml:space="preserve"><value>Tu equipo</value></data>
+  <data name="Pg.SeuPc" xml:space="preserve"><value>Tu PC</value></data>
+  <data name="Pg.SeuPcJaTem" xml:space="preserve"><value>Tu PC ya tiene el valor deseado. Nada que hacer.</value></data>
+  <data name="Pg.Simular" xml:space="preserve"><value>Simular</value></data>
+  <data name="Pg.SimularPeloAplicador" xml:space="preserve"><value>Simular con el aplicador</value></data>
+  <data name="Pg.SimuleAntesMexerGente" xml:space="preserve"><value>Simula antes de tocar nada: volvemos a leer el estado real del PC y mostramos lo que cambiaría, en orden y por lote. No se aplica nada.</value></data>
+  <data name="Pg.SimuleOuApliqueResultado" xml:space="preserve"><value>Simula o aplica: el resultado de cada ajuste aparece aquí.</value></data>
+  <data name="Pg.SoAjustesPraLer" xml:space="preserve"><value>Solo los ajustes que se pueden leer en este PC.</value></data>
+  <data name="Pg.SoLeNuncaEscreve" xml:space="preserve"><value>Solo lee, nunca escribe</value></data>
+  <data name="Pg.SomenteLeituraCadaAchado" xml:space="preserve"><value>Solo lectura. Cada hallazgo cita la evidencia; ninguno supone una ganancia de rendimiento.</value></data>
+  <data name="Pg.SoVocePodeFazer" xml:space="preserve"><value>Solo tú puedes hacerlo: NEXUS no toca la BIOS ni el hardware.</value></data>
+  <data name="Pg.Sugere" xml:space="preserve"><value>Sugiere</value></data>
+  <data name="Pg.Testar" xml:space="preserve"><value>Qué probar</value></data>
+  <data name="Pg.TestarAjuste" xml:space="preserve"><value>Probar un ajuste</value></data>
+  <data name="Pg.TestarSemAplicar" xml:space="preserve"><value>Probar sin aplicar</value></data>
+  <data name="Pg.TopologiaIndisponivel" xml:space="preserve"><value>Topología no disponible</value></data>
+  <data name="Pg.TudoFicaRegistradoPode" xml:space="preserve"><value>Todo queda registrado y se puede revertir.</value></data>
+  <data name="Pg.TudoNexusLeuSeu" xml:space="preserve"><value>Todo lo que NEXUS leyó de tu PC. Leer no cambia nada.</value></data>
+  <data name="Pg.TudoNexusMudouValor" xml:space="preserve"><value>Todo lo que NEXUS cambió, con el valor original guardado para deshacer.</value></data>
+  <data name="Pg.TudoServicoRegistrouDiario" xml:space="preserve"><value>Todo lo que el servicio registró en el diario, abierto solo para lectura, y si hay algún ejecutor en uso ahora.</value></data>
+  <data name="Pg.TudoVaiQuarentenaPode" xml:space="preserve"><value>Todo va a la cuarentena y puede volver.</value></data>
+  <data name="Pg.UnidadeN" xml:space="preserve"><value>Unidad {0}:</value></data>
+  <data name="Pg.UnidadeNNN" xml:space="preserve"><value>Unidad {0}:{1} de {2}</value></data>
+  <data name="Pg.ValeConferir" xml:space="preserve"><value>Vale la pena revisar</value></data>
+  <data name="Pg.Validado" xml:space="preserve"><value>validado</value></data>
+  <data name="Pg.Validado2" xml:space="preserve"><value>Validado</value></data>
+  <data name="Pg.ValidadoExisteRegistroTeste" xml:space="preserve"><value>Validado = existe un registro de una prueba real. Sin él, queda como no validado.</value></data>
+  <data name="Pg.ValidadoTesteReal" xml:space="preserve"><value>Validado con una prueba real</value></data>
+  <data name="Pg.ValoresLidosSeuPc" xml:space="preserve"><value>Valores leídos de tu PC</value></data>
+  <data name="Pg.ValorHojeVaiDiario" xml:space="preserve"><value>El valor de hoy va al diario antes de escribir.</value></data>
+  <data name="Pg.ValorOriginalCadaAjuste" xml:space="preserve"><value>El valor original de cada ajuste está guardado en el diario.</value></data>
+  <data name="Pg.VejaPraAjustar" xml:space="preserve"><value>Mira qué se puede ajustar</value></data>
+  <data name="Pg.VerAjuste" xml:space="preserve"><value>Ver ajuste</value></data>
+  <data name="Pg.VerHistorico" xml:space="preserve"><value>Ver el historial</value></data>
+  <data name="Pg.VerHistorico2" xml:space="preserve"><value>Ver en el Historial</value></data>
+  <data name="Pg.VerMitos" xml:space="preserve"><value>Ver los mitos</value></data>
+  <data name="Pg.VerPraAjustar" xml:space="preserve"><value>Ver qué se puede ajustar</value></data>
+  <data name="Pg.VerTodoHardware" xml:space="preserve"><value>Ver todo el hardware</value></data>
+  <data name="Pg.VerTudoFoiLido" xml:space="preserve"><value>Ver todo lo leído</value></data>
+  <data name="Pg.VoceAprovaMudancaSistema" xml:space="preserve"><value>Tú apruebas. Un cambio de sistema pide permiso.</value></data>
+  <data name="Pg.VoceConfirma" xml:space="preserve"><value>Tú confirmas</value></data>
+  <data name="Pg.VoceConfirmaAntesTudo" xml:space="preserve"><value>Confirmas antes. Todo queda en el diario y se puede deshacer.</value></data>
+  <data name="Pg.VoceEstaAqui" xml:space="preserve"><value>Estás aquí</value></data>
+  <data name="Pg.VoceMede" xml:space="preserve"><value>Tú mides</value></data>
+  <data name="Pg.VoltaAjustesDestaExecucao" xml:space="preserve"><value>Devuelve los ajustes de esta ejecución a su valor original (pide confirmación).</value></data>
+  <data name="Pg.VoltarMeuPc" xml:space="preserve"><value>Volver a Mi PC</value></data>
+  <data name="Pg.VoltaValorOriginalQuando" xml:space="preserve"><value>Vuelve al valor original cuando quieras.</value></data>
+  <data name="Pg.WindowsDriversFirmwareInformaram" xml:space="preserve"><value>Informados por Windows, drivers y firmware.</value></data>
   <data name="Settings.AbreMinimizadoBandejaEntrada" xml:space="preserve"><value>Se abre minimizado en la bandeja. Es una entrada en Run de tu cuenta (sin administrador), con diario y deshacer; también aparece en el Administrador de tareas y en la página Inicio.</value></data>
   <data name="Settings.AbreWindows" xml:space="preserve"><value>Se abre con Windows</value></data>
   <data name="Settings.AbrirNexusMinimizadoBandeja" xml:space="preserve"><value>¿Abrir NEXUS minimizado en la bandeja cada vez que inicies sesión en Windows?

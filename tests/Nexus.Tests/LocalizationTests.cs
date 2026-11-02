@@ -18,11 +18,11 @@ public sealed partial class LocalizationTests
     /// </summary>
     private static readonly HashSet<string> XamlNotYetTranslated = new(StringComparer.Ordinal)
     {
-        "Views/Pages/Assistant.xaml", "Views/Pages/Automation.xaml", "Views/Pages/Broker.xaml", "Views/Pages/Capabilities.xaml",
-        "Views/Pages/Catalog.xaml", "Views/Pages/Cleaning.xaml", "Views/Pages/CpuLab.xaml", "Views/Pages/Diagnostics.xaml",
-        "Views/Pages/Disk.xaml", "Views/Pages/DriverUpdates.xaml", "Views/Pages/GpuLab.xaml", "Views/Pages/Hardware.xaml",
-        "Views/Pages/History.xaml", "Views/Pages/Measure.xaml", "Views/Pages/MemoryDoctor.xaml", "Views/Pages/MemoryLab.xaml",
-        "Views/Pages/Monitor.xaml", "Views/Pages/Overview.xaml", "Views/Pages/Plan.xaml", "Views/Pages/Privacy.xaml",
+        "Views/Pages/Assistant.xaml", "Views/Pages/Automation.xaml",
+        "Views/Pages/Cleaning.xaml", "Views/Pages/CpuLab.xaml",
+        "Views/Pages/Disk.xaml", "Views/Pages/DriverUpdates.xaml", "Views/Pages/GpuLab.xaml",
+        "Views/Pages/Measure.xaml", "Views/Pages/MemoryDoctor.xaml", "Views/Pages/MemoryLab.xaml",
+        "Views/Pages/Monitor.xaml", "Views/Pages/Privacy.xaml",
         "Views/Pages/Programs.xaml", "Views/Pages/Scanner.xaml", "Views/Pages/Security.xaml", "Views/Pages/Services.xaml",
         "Views/Pages/Startup.xaml", "Views/Pages/SystemTools.xaml",
     };

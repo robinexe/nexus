@@ -143,7 +143,9 @@ public sealed partial class XamlBindingTests
 
         var broker = File.ReadAllText(Path.Combine(root, "src", "Nexus.Desktop", "Views", "Pages", "Broker.xaml"));
         Assert.Contains("{Binding LastSummary}", broker, StringComparison.Ordinal);
-        Assert.Contains("Detalhes técnicos", broker, StringComparison.Ordinal);
+        // "Detalhes técnicos" (texto traduzido: chave Pg.DetalhesTecnicos em Localization/Strings*.resx).
+        Assert.Contains("{l:T Pg.DetalhesTecnicos}", broker, StringComparison.Ordinal);
+        Assert.Contains(">Detalhes técnicos<", File.ReadAllText(Path.Combine(root, "src", "Nexus.Desktop", "Localization", "Strings.resx")), StringComparison.Ordinal);
         Assert.Contains("LastSummary", all["BrokerPage"]);
         Assert.Contains("HasLastMessage", all["BrokerPage"]);
     }

@@ -8,6 +8,7 @@
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:v="clr-namespace:Nexus.Desktop.Views"
                     xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
@@ -17,14 +18,14 @@
       <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
 
         <!-- ===== Destaque ===== -->
-        <c:HeroPanel Illustration="{StaticResource Illo.Pc}" Title="Valores lidos do seu PC"
+        <c:HeroPanel Illustration="{StaticResource Illo.Pc}" Title="{l:T Pg.ValoresLidosSeuPc}"
                      Number="{Binding TotalFacts}" IsLoading="{Binding IsLoading}"
-                     Caption="Cada valor diz de onde veio. Ler não muda nada."
-                     ActionText="Ver o diagnóstico" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="DiagnosticsPage"
-                     SecondaryText="Voltar ao Meu PC" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="OverviewPage">
+                     Caption="{l:T Pg.CadaValorDizOnde}"
+                     ActionText="{l:T Nav.VerDiagnostico}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="DiagnosticsPage"
+                     SecondaryText="{l:T Pg.VoltarMeuPc}" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="OverviewPage">
           <StackPanel Width="164">
-            <c:RingMeter Value="{Binding DetectedPercent}" Label="lidos direto" Width="136" Height="136" Thickness="11" HorizontalAlignment="Center"/>
-            <TextBlock Text="Direto da fonte, sem dedução" Style="{StaticResource Text.Small}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            <c:RingMeter Value="{Binding DetectedPercent}" Label="{l:T Pg.LidosDireto}" Width="136" Height="136" Thickness="11" HorizontalAlignment="Center"/>
+            <TextBlock Text="{l:T Pg.DiretoFonteSemDeducao}" Style="{StaticResource Text.Small}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,10,0,0"/>
           </StackPanel>
         </c:HeroPanel>
 
@@ -32,15 +33,15 @@
         <c:SkeletonLoader Shape="Tiles" Columns="3" Height="150" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         <UniformGrid Columns="3" Margin="-7,0,-7,8" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Check}" Number="{Binding DetectedNumber}" Tone="Info"
-                      Label="Lidos direto da fonte" Detail="Windows, drivers e firmware informaram."/>
+                      Label="{l:T Pg.LidosDiretoFonte}" Detail="{l:T Pg.WindowsDriversFirmwareInformaram}"/>
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Sparkle}" Number="{Binding InferredNumber}"
-                      Label="Deduzidos" Detail="Calculados a partir de outros valores."/>
+                      Label="{l:T Pg.Deduzidos}" Detail="{l:T Pg.CalculadosPartirOutrosValores}"/>
           <c:StatTile Margin="7,0" Icon="{StaticResource Icon.Search}" Number="{Binding UnavailableNumber}"
-                      Label="Sem leitura" Detail="O motivo aparece no próprio item."/>
+                      Label="{l:T Pg.SemLeitura}" Detail="{l:T Pg.MotivoApareceProprioItem}"/>
         </UniformGrid>
 
         <!-- ===== Seções ===== -->
-        <TextBlock Text="Peça por peça" Style="{StaticResource Text.H2}" Margin="0,22,0,12" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}"/>
+        <TextBlock Text="{l:T Pg.PecaPeca}" Style="{StaticResource Text.H2}" Margin="0,22,0,12" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}"/>
         <c:SkeletonLoader Shape="Lines" Lines="8" Margin="4,16,4,0" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         <ItemsControl ItemsSource="{Binding Sections}" Focusable="False">
           <ItemsControl.ItemTemplate>
@@ -70,7 +71,7 @@
                         <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,8" Background="Transparent">
                           <Border.ToolTip>
                             <TextBlock>
-                              <Run Text="Fonte:"/> <Run Text="{Binding Source, Mode=OneWay}"/>
+                              <Run Text="{l:T Pg.Fonte}"/> <Run Text="{Binding Source, Mode=OneWay}"/>
                             </TextBlock>
                           </Border.ToolTip>
                           <Grid>
@@ -103,7 +104,7 @@
                               <DockPanel Margin="0,0,0,6">
                                 <ContentPresenter DockPanel.Dock="Right" Content="{Binding Status}" ContentTemplate="{StaticResource Chip}"/>
                                 <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center">
-                                  <Run Text="Fonte:"/> <Run Text="{Binding Source, Mode=OneWay}"/>
+                                  <Run Text="{l:T Pg.Fonte}"/> <Run Text="{Binding Source, Mode=OneWay}"/>
                                 </TextBlock>
                               </DockPanel>
                               <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Margin="0,0,0,6"
@@ -116,7 +117,7 @@
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
 
-                  <c:ExplainToggle Header="De onde vêm estes valores?" Margin="0,6,0,0">
+                  <c:ExplainToggle Header="{l:T Pg.OndeVemEstesValores}" Margin="0,6,0,0">
                     <TextBlock Text="{Binding Sources}" Style="{StaticResource Text.Small}"/>
                   </c:ExplainToggle>
                 </StackPanel>

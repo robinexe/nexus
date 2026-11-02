@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
                     xmlns:vm="clr-namespace:Nexus.Desktop.ViewModels"
                     xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls"
                     xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell">
@@ -47,12 +48,12 @@
       <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
 
         <!-- ===== 1. Destaque ===== -->
-        <c:HeroPanel Illustration="{StaticResource Illo.Pc}" Title="Meu PC"
+        <c:HeroPanel Illustration="{StaticResource Illo.Pc}" Title="{l:T Nav.MeuPc}"
                      ValueText="{Binding HeroTitle}" Caption="{Binding HeroCaption}" IsLoading="{Binding IsLoading}"
-                     ActionText="Medir uma partida" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="MeasurePage"
-                     SecondaryText="Ver o diagnóstico" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="DiagnosticsPage">
+                     ActionText="{l:T Nav.MedirPartida}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="MeasurePage"
+                     SecondaryText="{l:T Nav.VerDiagnostico}" SecondaryCommand="{x:Static shell:ShellCommands.Navigate}" SecondaryCommandParameter="DiagnosticsPage">
           <StackPanel Width="164">
-            <c:RingMeter Value="{Binding HealthScore}" WarnAt="80" BadAt="50" Label="em ordem" Width="136" Height="136" Thickness="11"
+            <c:RingMeter Value="{Binding HealthScore}" WarnAt="80" BadAt="50" Label="{l:T Pg.Ordem}" Width="136" Height="136" Thickness="11"
                          HorizontalAlignment="Center"/>
             <TextBlock Text="{Binding HealthCaption}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}"
                        TextAlignment="Center" HorizontalAlignment="Center" Margin="0,10,0,0"/>
@@ -60,29 +61,29 @@
         </c:HeroPanel>
 
         <!-- ===== 2. Seu equipamento ===== -->
-        <TextBlock Text="Seu equipamento" Style="{StaticResource Text.H2}" Margin="0,6,0,12"/>
+        <TextBlock Text="{l:T Pg.SeuEquipamento}" Style="{StaticResource Text.H2}" Margin="0,6,0,12"/>
         <c:SkeletonLoader Shape="Tiles" Columns="4" Height="196" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         <UniformGrid Columns="4" Margin="-7,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
-          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Cpu}" Label="Processador"
+          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Cpu}" Label="{l:T Pg.Processador}"
                       Number="{Binding Cpu.Number}" Suffix="{Binding Cpu.Suffix}" Value="{Binding Cpu.Value}" Detail="{Binding Cpu.Note}"
                       Trend="{Binding Cpu.Trend}" TrendTone="{Binding Cpu.TrendTone}"
                       Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Cpu.Target}"/>
-          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Gpu}" Label="Placa de vídeo" Kind="Bytes"
+          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Gpu}" Label="{l:T Pg.PlacaVideo}" Kind="Bytes"
                       Number="{Binding Gpu.Number}" Value="{Binding Gpu.Value}" Detail="{Binding Gpu.Note}"
                       Trend="{Binding Gpu.Trend}" TrendTone="{Binding Gpu.TrendTone}"
                       Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Gpu.Target}"/>
-          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Ram}" Label="Memória RAM" Kind="Bytes"
+          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Ram}" Label="{l:T Pg.MemoriaRam}" Kind="Bytes"
                       Number="{Binding Ram.Number}" Value="{Binding Ram.Value}" Detail="{Binding Ram.Note}"
                       Trend="{Binding Ram.Trend}" TrendTone="{Binding Ram.TrendTone}"
                       Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Ram.Target}"/>
-          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Disk}" Label="Disco do sistema" Kind="Bytes"
+          <c:StatTile Margin="7,0" Illustration="{StaticResource Illo.Disk}" Label="{l:T Pg.DiscoSistema}" Kind="Bytes"
                       Number="{Binding Disk.Number}" Value="{Binding Disk.Value}" Detail="{Binding Disk.Note}"
                       Trend="{Binding Disk.Trend}" TrendTone="{Binding Disk.TrendTone}"
                       Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Disk.Target}"/>
         </UniformGrid>
 
         <!-- ===== 3. Recomendações ===== -->
-        <TextBlock Text="O que o NEXUS recomenda agora" Style="{StaticResource Text.H2}" Margin="0,30,0,12"/>
+        <TextBlock Text="{l:T Pg.NexusRecomendaAgora}" Style="{StaticResource Text.H2}" Margin="0,30,0,12"/>
         <c:SkeletonLoader Shape="Tiles" Columns="3" Height="170" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         <ItemsControl ItemsSource="{Binding Recommendations}" ItemTemplate="{StaticResource O.Recommendation}" Focusable="False" Margin="-7,0">
           <ItemsControl.ItemsPanel>
@@ -95,18 +96,18 @@
         <!-- ===== 4. Como o NEXUS trabalha ===== -->
         <Border Style="{StaticResource Panel.Inset}" Padding="22,18,8,18" Margin="0,30,0,0">
           <StackPanel>
-            <TextBlock Text="Como o NEXUS trabalha" Style="{StaticResource Text.H2}" Margin="0,0,0,16"/>
+            <TextBlock Text="{l:T Pg.ComoNexusTrabalha}" Style="{StaticResource Text.H2}" Margin="0,0,0,16"/>
             <c:HowItWorks>
-              <c:StepItem Icon="{StaticResource Icon.Search}" Title="Lê" Text="Lê o hardware e o Windows. Ler nunca muda nada."/>
-              <c:StepItem Icon="{StaticResource Icon.Sparkle}" Title="Sugere" Text="Mostra o que vale a pena, com o risco de cada coisa."/>
-              <c:StepItem Icon="{StaticResource Icon.Check}" Title="Você confirma" Text="Nada é aplicado sem o seu clique." Tone="Warn"/>
-              <c:StepItem Icon="{StaticResource Icon.Undo}" Title="Desfaz" Text="Tudo fica registrado e pode voltar." Tone="Good"/>
+              <c:StepItem Icon="{StaticResource Icon.Search}" Title="{l:T Pg.Le}" Text="{l:T Pg.LeHardwareWindowsLer}"/>
+              <c:StepItem Icon="{StaticResource Icon.Sparkle}" Title="{l:T Pg.Sugere}" Text="{l:T Pg.MostraValePenaRisco}"/>
+              <c:StepItem Icon="{StaticResource Icon.Check}" Title="{l:T Pg.VoceConfirma}" Text="{l:T Pg.NadaAplicadoSemSeu}" Tone="Warn"/>
+              <c:StepItem Icon="{StaticResource Icon.Undo}" Title="{l:T Pg.Desfaz}" Text="{l:T Pg.TudoFicaRegistradoPode}" Tone="Good"/>
             </c:HowItWorks>
           </StackPanel>
         </Border>
 
         <!-- ===== Detalhes recolhidos: o resto do que foi lido ===== -->
-        <c:ExplainToggle Header="Ver tudo o que foi lido" Margin="0,22,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+        <c:ExplainToggle Header="{l:T Pg.VerTudoFoiLido}" Margin="0,22,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
           <StackPanel>
             <ItemsControl ItemsSource="{Binding OtherCards}" Focusable="False">
               <ItemsControl.ItemsPanel>
@@ -129,7 +130,7 @@
             </ItemsControl>
             <TextBlock Text="{Binding Footer}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,4,0,0"
                        Visibility="{Binding Footer, Converter={StaticResource NullToCollapsed}}"/>
-            <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,6,0,0" Content="Ver todo o hardware"
+            <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,6,0,0" Content="{l:T Pg.VerTodoHardware}"
                     Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HardwarePage"/>
           </StackPanel>
         </c:ExplainToggle>
