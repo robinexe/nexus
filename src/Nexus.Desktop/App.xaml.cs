@@ -129,6 +129,7 @@ public partial class App : Application
         catch (UnauthorizedAccessException) { }
         e.Handled = true;
         if (SelfTest.UiSelfTestRunner.Current is { } selfTest) { selfTest.RecordException(e.Exception); return; } // autoteste: registra, sem janela
+        if (ViewModels.MainViewModel.SelfTestMode) return; // autoteste antes do runner existir: nunca uma janela modal (ninguém clica; travava o CI)
         // Um erro que se repete (ex.: binding a cada atualização) vira UMA janela, não uma pilha: o mesmo texto só aparece uma vez,
         // e nunca duas janelas ao mesmo tempo. O registro em desktop-erros.log continua completo.
         var key = e.Exception.GetType().FullName + ":" + e.Exception.Message;

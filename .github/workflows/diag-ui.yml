@@ -26,10 +26,12 @@ jobs:
           $exe = Resolve-Path 'src/Nexus.Desktop/bin/Release/net10.0-windows/Nexus.Desktop.exe'
           $out = Join-Path $PWD 'saida/ui.json'
           $p = Start-Process -FilePath $exe -ArgumentList '--selftest-ui', ('"' + $out + '"'), '--lang', 'pt-BR' -PassThru
-          Start-Sleep 90
+          Start-Sleep 150
           if (Test-Path saida/ui.progress.txt) { Get-Content saida/ui.progress.txt -Tail 10 }
           $diag = Join-Path $env:LOCALAPPDATA 'NEXUS\desktop-diag.log'
           if (Test-Path $diag) { Get-Content $diag -Tail 30 }
+          $err = Join-Path $env:LOCALAPPDATA 'NEXUS\desktop-erros.log'
+          if (Test-Path $err) { Copy-Item $err saida/; '=== desktop-erros.log'; Get-Content $err -Tail 60 }
           if (-not $p.HasExited) {
             & "$env:USERPROFILE\.dotnet\tools\dotnet-stack.exe" report -p $p.Id | Tee-Object saida/pilha.txt
             $p.Kill()
