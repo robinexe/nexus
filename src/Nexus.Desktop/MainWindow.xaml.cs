@@ -85,7 +85,8 @@ public partial class MainWindow : Window
     private PageViewModel? FindPage(object? parameter) => parameter switch
     {
         PageViewModel p => p,
-        string name => _vm.Pages.FirstOrDefault(p => string.Equals(p.GetType().Name, name, StringComparison.Ordinal)),
+        // _vm ainda é null enquanto o InitializeComponent monta os botões (o WPF já pergunta CanExecute): nada a navegar ainda.
+        string name when _vm is not null => _vm.Pages.FirstOrDefault(p => string.Equals(p.GetType().Name, name, StringComparison.Ordinal)),
         _ => null,
     };
 
