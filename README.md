@@ -1,80 +1,107 @@
-# NEXUS Performance Lab
+# NEXUS
 
-Laboratório de desempenho para jogos no Windows (foco VALORANT e CS2): diagnostica, aplica alterações reais e reversíveis, mede e compara.
+Desempenho e manutenção do Windows para quem joga, **sem quebrar nada**. O NEXUS lê o seu PC, explica o que encontrou e,
+quando você confirma, aplica ajustes reais. Cada mudança mostra o que faz, de onde vem a informação, o risco e como
+desfazer; tudo fica num histórico e pode ser desfeito.
 
-> **Status (2026-10-30):** compila e passa em 99/99 testes em Linux; versão anterior validada no Windows (55 testes).
-> Interface desktop e descoberta de hardware em **modo somente leitura**. Aplicação de otimizações **bloqueada** até os
-> testes em VM Windows. Comece por **`HANDOFF.md`**.
+Versão atual: **1.0.0** (novidades em [`CHANGELOG.md`](CHANGELOG.md)).
 
-## Instalação (Windows 10/11, 64 bits)
+## O que faz
 
-Baixe da página de Releases (ou dos artifacts do workflow `release`) e confira o SHA-256 em `SHA256SUMS.txt`
-(`Get-FileHash .\arquivo -Algorithm SHA256`). Não precisa do .NET instalado.
+- **Assistente**: lê o PC e monta um plano em etapas (limpeza, inicialização, privacidade, energia, drivers, ajustes), aplica
+  com progresso real, gera um relatório e tem "Desfazer tudo".
+- **Manutenção**: limpeza (para a quarentena, nunca apaga direto), espaço em disco, desinstalador com sobras, inicialização e
+  serviços, privacidade, segurança (placar do Defender e verificação de arquivos), ferramentas do sistema, tarefas agendadas.
+- **Desempenho com honestidade**: ajustes com fonte (Microsoft e fabricantes), mitos marcados como mitos, ajustes da placa
+  de vídeo (DirectX, NVIDIA por jogo), laboratório de processador e memória, "o que só você pode fazer" (BIOS, XMP, MUX).
+- **Medir**: FPS e tempo de quadro com o PresentMon oficial da Intel (incluído), antes x depois no seu PC.
+- **Drivers**: Windows Update oficial e drivers de vídeo NVIDIA/AMD dos servidores do fabricante, com assinatura conferida e
+  cópia do driver anterior.
 
-- **Instalador (recomendado):** `NEXUS-<versão>-win-x64-instalador.exe`. Instala em `%ProgramFiles%\NEXUS` (pede
-  administrador), cria atalho no Menu Iniciar e, se você marcar, o serviço do aplicador. Desinstale por Configurações →
-  Aplicativos: o desinstalador pergunta antes de apagar os seus dados e, à parte, a quarentena (padrão: manter).
-- **Portátil:** `NEXUS-<versão>-win-x64-portatil.zip`. Extraia tudo numa pasta e abra `Nexus.Desktop.exe`. Os dados ficam
-  em `%LocalAppData%\NEXUS` e `%ProgramData%\NEXUS`. Se mover a pasta, ligue de novo a verificação semanal. Para ações de
-  administrador frequentes, prefira o instalador: numa pasta do seu usuário, outros programas podem trocar os arquivos que
-  rodariam como administrador (`tools\Test-NexusFolderSafety.ps1` confere a pasta).
+## Requisitos
 
-Gerar os pacotes: `python tools/packaging/publish.py` (pasta e ZIP) e o workflow `release.yml` (instalador, testes de
-instalação numa VM descartável, SHA-256, Release em rascunho em tags `v*`). Detalhes: `docs/08-packaging.md`.
+- Windows 10 (versão 1809 ou mais nova) ou Windows 11, **64 bits (x64)**.
+- Não precisa instalar o .NET (vem junto).
+- Conta de administrador só para as mudanças de sistema (o Windows pede permissão na hora).
 
-## Documentos
+## Instalar
+
+Baixe da página de Releases:
+
+- **Instalador (recomendado):** `NEXUS-1.0.0-win-x64-instalador.exe`. Instala em `%ProgramFiles%\NEXUS`, mostra os
+  [termos de uso](docs/legal/TERMOS-DE-USO.md) e cria o atalho no Menu Iniciar. Depois disso o NEXUS se atualiza sozinho
+  (pode desligar em Ajustes → Atualizações).
+- **Portátil:** `NEXUS-1.0.0-win-x64-portatil.zip`. Extraia tudo numa pasta e abra `Nexus.Desktop.exe`. Para usar ações de
+  administrador com frequência, prefira o instalador: numa pasta do seu usuário, outros programas poderiam trocar os
+  arquivos que rodam como administrador (`tools\Test-NexusFolderSafety.ps1` confere a pasta).
+
+### Aviso do Windows (SmartScreen) e como conferir o download
+
+O NEXUS **ainda não tem certificado de assinatura de código** (custa caro e exige empresa registrada). Por isso o Windows
+pode mostrar "O Windows protegeu o computador" ao abrir o instalador e "Editor desconhecido" no aviso de permissão. Isso não
+quer dizer que o arquivo tem vírus; quer dizer que o Windows não sabe quem o publicou.
+
+Antes de clicar em "Mais informações → Executar assim mesmo", confira que o arquivo é exatamente o publicado:
+
+```powershell
+Get-FileHash .\NEXUS-1.0.0-win-x64-instalador.exe -Algorithm SHA256
+```
+
+O resultado tem de ser igual à linha do arquivo em `SHA256SUMS.txt` (na mesma página de Releases). Diferente: não abra e
+baixe de novo. As atualizações automáticas já são conferidas pelo próprio NEXUS (manifesto com assinatura digital e SHA-256).
+
+### Desinstalar
+
+Configurações do Windows → Aplicativos → NEXUS. **Antes**, use "Desfazer" no NEXUS para o que quiser reverter. O desinstalador
+pergunta se apaga os dados (padrão: manter), porque sem o histórico o NEXUS não consegue mais desfazer o que alterou; a
+quarentena tem pergunta própria.
+
+## Privacidade
+
+Sem conta, sem telemetria, sem anúncios. Os dados ficam no seu PC (`%LocalAppData%\NEXUS` e `%ProgramData%\NEXUS`). O NEXUS
+só usa a internet para procurar a própria atualização (GitHub, assinada), drivers (Windows Update, NVIDIA, AMD), atualizações
+de programas pelos gerenciadores que você tem, e links que você clica. Detalhes: [`docs/legal/PRIVACIDADE.md`](docs/legal/PRIVACIDADE.md).
+
+O NEXUS é um projeto independente, sem afiliação com Microsoft, NVIDIA, AMD ou Intel. Componentes de terceiros e licenças:
+[`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
+
+## Para desenvolvedores
+
+Requer o .NET 10 SDK (`global.json`). Comece por [`HANDOFF.md`](HANDOFF.md).
+
+```powershell
+dotnet restore Nexus.slnx --locked-mode
+dotnet build Nexus.slnx -c Release --no-restore           # 0 avisos esperados
+dotnet test  Nexus.slnx -c Release --no-build --filter Category=Unit
+```
+
+Os testes unitários não alteram o sistema (backends em memória e pastas temporárias) e rodam também em Linux. Testes com
+escrita real rodam numa VM Windows descartável do GitHub Actions (`.github/workflows/vm-integracao.yml`).
+
+- **`Abrir NEXUS.cmd`**: abre o NEXUS **instalado** (onde as ações de administrador funcionam). `Abrir NEXUS.cmd dev`
+  compila e abre a cópia de desenvolvimento (`src\Nexus.Desktop\bin\Release`), que não roda ações de administrador porque a
+  pasta é gravável.
+- **Pacotes e versões**: `python tools/packaging/publish.py` e o workflow `release.yml`; como lançar uma versão em
+  [`docs/08-packaging.md`](docs/08-packaging.md) (seção 8).
+- **Linha de comando**: `nexus --help` (verificar, recomendar, simular, aplicar pelo aplicador, desfazer, histórico, medir).
+
+### Recuperação sem a interface
+
+```powershell
+nexus-recover scan              # operações interrompidas (somente leitura)
+nexus-recover recover           # restaura; recusa se houver execução ativa; conflitos ficam pendentes
+nexus-recover show <runId>
+nexus-recover accept <entryId>  # mantém o estado atual e encerra uma entrada pendente (só grava no diário)
+```
+
+### Documentos
 
 | Arquivo | Conteúdo |
 |---|---|
-| `docs/01-research-matrix.md` | 10 repositórios inspecionados (commit, licença, mecanismo, decisão) + docs oficiais |
-| `docs/02-architecture.md` | Módulos, fronteira de privilégio, modelo de ameaças, protocolo do broker |
-| `docs/03-capability-matrix.md` | O que existe, o que foi testado, o que falta |
+| `docs/02-architecture.md` | Módulos, fronteira de privilégio, modelo de ameaças, protocolo do aplicador |
+| `docs/modules/*.md` | Cada módulo: o que faz, fontes, riscos, como desfaz, o que não faz e por quê |
 | `docs/05-dependencies.md` | Dependências, licenças e obrigações |
-| `docs/06-build-log.md` | Comandos, códigos de saída e evidências por ambiente |
-| `docs/07-recovery-cases.md` | Casos ambíguos de recuperação, revisão independente e decisões pendentes |
-| `docs/08-packaging.md` | Publicação, ZIP portátil, instalador, workflow de release, assinatura e ícone |
-| `HANDOFF.md` | Estado verificado, pendências e comandos reproduzíveis |
-| `catalog/actions.v1.json` | 13 ações classificadas + 14 mitos/ajustes rejeitados com motivo |
-
-## Build e testes (requer .NET 10 SDK)
-
-```powershell
-dotnet restore Nexus.slnx
-dotnet build Nexus.slnx -c Release --no-restore
-dotnet test  Nexus.slnx -c Release --no-build --filter Category=Unit
-powershell -ExecutionPolicy Bypass -File .\tools\etapa1-windows.ps1   # tudo, com log em %TEMP%
-```
-
-Os testes não alteram o sistema: usam backends em memória, diretórios temporários e processos auxiliares que só
-escrevem em %TEMP%. Eles rodam também em Linux/macOS.
-
-## Interface (somente leitura)
-
-Duplo clique em **`Abrir NEXUS.cmd`** (compila na primeira vez; não precisa de Visual Studio nem de administrador). Executável: `src\Nexus.Desktop\bin\Release\net10.0-windows\Nexus.Desktop.exe`. Mostra hardware, diagnóstico, catálogo com o estado
-real, simulação do plano (dry-run), histórico e capacidades. Não aplica nada.
-
-## Broker e testes em VM
-
-`nexus-broker` serve o protocolo fechado do broker por named pipe. As escritas reais só passam por um portão que exige
-máquina virtual de teste liberada; no PC físico ele só responde a leituras e simulações. Para testar aplicação e rollback
-reais com segurança: `tools\vm\README.md` (Windows Sandbox descartável).
-
-## Medir e comparar
-
-Página **Medir**: grava uma partida com o PresentMon (ferramenta gratuita da Intel; baixe em github.com/GameTechDev/PresentMon e
-indique onde salvou) ou importa CSV do PresentMon/CapFrameX. Mostra o traço de cada quadro, FPS médio, 1% low, frametime P99 e
-engasgos. Página **Comparar**: sessões marcadas como "antes" e "depois"; com 3 ou mais de cada lado, diz se a melhora é real
-(intervalo de confiança de 95%); com menos, mostra a diferença e avisa que ela não prova nada. Medir não altera nada no PC.
-
-## Recuperação sem a interface
-
-```powershell
-nexus-recover scan                      # operações interrompidas e se há executor ativo (somente leitura)
-nexus-recover recover                   # restaura; recusa (exit 5) se houver execução ativa; conflitos ficam pendentes
-nexus-recover recover --force           # restaura também itens alterados externamente
-nexus-recover show <runId>
-nexus-recover accept <entryId>          # mantém o estado atual e encerra uma entrada pendente (só grava no diário)
-```
-
-Regras: nunca escreve sobre algo que o NEXUS não escreveu sem `--force`; nunca declara "recuperação completa" com
-falha parcial; nunca interfere numa execução ativa.
+| `docs/07-recovery-cases.md` | Casos de recuperação e decisões |
+| `docs/08-packaging.md` | Publicação, instalador, ZIP, release, versões, assinatura |
+| `docs/11-atualizacao.md` | Atualização automática assinada |
+| `docs/legal/` | Termos de uso e Política de privacidade |
