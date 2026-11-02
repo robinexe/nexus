@@ -145,7 +145,7 @@
     {
       "id": "review.startup.legacy",
       "kind": "Review",
-      "module": "startup.",
+      "module": "boot.",
       "title": "Revisar programas que iniciam com o Windows",
       "any": ["hdd", "low-ram", "few-cores"],
       "priority": 1,

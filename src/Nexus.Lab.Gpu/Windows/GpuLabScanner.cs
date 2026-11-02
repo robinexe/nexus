@@ -11,7 +11,9 @@ namespace Nexus.Lab.Gpu.Windows;
 [SupportedOSPlatform("windows")]
 public static class GpuLabScanner
 {
-    public static GpuLabReport Scan(NvmlSession? nvml, string nvmlStatus, bool includeGames = true)
+    /// <param name="probeD3D12">Cria um dispositivo D3D12 temporário em cada GPU dedicada para saber se o Resizable BAR está ligado
+    /// (acorda a GPU dedicada do notebook por um instante). Desligado por padrão; ligue onde o estado do ReBAR é mostrado.</param>
+    public static GpuLabReport Scan(NvmlSession? nvml, string nvmlStatus, bool includeGames = true, bool probeD3D12 = false)
     {
         var notes = new List<string>();
         T Guard<T>(string what, Func<T> f, T fallback)
@@ -38,6 +40,9 @@ public static class GpuLabScanner
             if (match is not null) usedPci.Add(match);
             var nv = nvidia.FirstOrDefault(n => n.VendorId == d.VendorId && n.DeviceId == d.DeviceId && (n.PciSubSystemId is null || d.SubSysId == 0 || n.PciSubSystemId == d.SubSysId));
             var (hagsSup, hagsOn) = d.Software ? (null, null) : Guard("HAGS", () => GraphicsState.Hags(d.Luid), ((bool?)null, (bool?)null));
+            bool? uploadHeap = null;
+            if (probeD3D12 && !d.Software && !GpuIdentity.IsIntegrated(d.VendorId, d.DeviceId, d.DedicatedVideo))
+                uploadHeap = Guard("D3D12 (Resizable BAR)", () => Dxgi.GpuUploadHeapSupported(d.Luid), (bool?)null);
             var link = match?.Pcie ?? new PcieLinkState(null, null, null, null);
             // NVML conhece o link pelo lado da placa mesmo quando o Windows não expõe as DEVPKEY.
             if (!link.HasData && nv is not null && (nv.PcieGen is not null || nv.PcieWidth is not null))
@@ -65,6 +70,7 @@ public static class GpuLabScanner
                 Pcie = link,
                 HagsSupported = hagsSup,
                 HagsEnabled = hagsOn,
+                GpuUploadHeapSupported = uploadHeap,
                 Nvidia = nv,
             });
         }

@@ -63,14 +63,50 @@ em **Gravar**, tem 10 s para voltar ao jogo e o NEXUS lê 1×/s por 60 s (NVML; 
 | Monitor abaixo da taxa máxima (ex.: 144 Hz a 60 Hz) | modo atual × maior taxa listada na mesma resolução | **`gpulab.display.mode@1`** (Usar N Hz) |
 | Jogo sem preferência / na integrada (só em híbrido) | `UserGpuPreferences` + manifesto da loja | **`gpulab.app.gpu-preference@1`** (handler do núcleo `DirectXUserGpuPreference`) |
 | Driver com mais de 6 meses / 1 ano / 2 anos | data do driver | abre a página **oficial** (NVIDIA/AMD/Intel) depois de confirmação; nunca baixa nada |
-| PCIe mais estreito que placa e porta permitem | link atual × máximos | conselho (slot/encaixe; notebook é fixo) |
+| PCIe mais estreito que placa e porta permitem | link atual × máximos (teto da GPU corrigido pela arquitetura: uma Turing informada como 4.0 vira 3.0) | conselho (slot/encaixe); em notebook é **informação**: largura é fiação de fábrica |
 | Tela interna pela iGPU | `QueryDisplayConfig` | conselho (MUX/modo dedicado do fabricante, monitor na porta da dGPU) |
 | HAGS desligado numa RTX 40/50 | D3DKMT / registro | `gpu.hags.lab@1` = 2 (Admin, reinício) — só aqui, porque a geração de quadros do DLSS exige; nas outras GPUs HAGS é só informação (efeito pequeno e variável) |
 | Modo de Jogo desligado | `AutoGameModeEnabled = 0` | `win.gamemode.enable@1` |
-| ReBAR desligado/ligado (NVIDIA Ampere+) | BAR1 | conselho (BIOS: Above 4G + Re-Size BAR; notebook depende do fabricante) |
+| ReBAR desligado/ligado (RTX 30+, RX 6000+, Arc) | NVML BAR1 (NVIDIA) ou D3D12 `GPUUploadHeapSupported` (qualquer fabricante; só `true` prova "ligado") | conselho (BIOS: Above 4G + Re-Size BAR); alerta forte só na Intel Arc, inclusive "confira na BIOS" sem afirmar estado |
 | Limite de potência abaixo do padrão | NVML | conselho (voltar no programa que mudou) |
 | Na bateria | `GetSystemPowerStatus` | conselho |
 | MPO desligado | `OverlayTestMode = 5` | só informação (não mexemos) |
+
+### Resizable BAR: como é lido (`HardwareCaps.ResizableBar`)
+
+- **NVIDIA:** tamanho da janela BAR1 pelo NVML (`nvmlDeviceGetBAR1MemoryInfo`, o mesmo número de "BAR1 Memory Usage" do
+  `nvidia-smi -q`). ≤ 300 MB = desligado (256 MB é a janela clássica); ≥ metade da VRAM = ligado.
+- **Qualquer GPU dedicada:** um dispositivo D3D12 temporário (`D3D12CreateDevice` no adaptador, feature level 11_0) e
+  `CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16 = 45)`. A especificação das GPU upload heaps
+  (microsoft.github.io/DirectX-Specs/d3d/D3D12GPUUploadHeaps.html) só expõe o recurso quando a VRAM inteira é visível pela
+  CPU, ou seja, ReBAR ligado numa dGPU. `false` não prova nada (runtime/driver antigos não oferecem). A consulta acorda a
+  dGPU do notebook por um instante; por isso `GpuLabScanner.Scan(..., probeD3D12: true)` é opcional (Placa de vídeo,
+  Assistente e "só você pode fazer" ligam).
+
+### "Só você pode fazer" (`OwnerChecks`, em Nexus.HardwareDiscovery)
+
+Pontos que dependem de BIOS, hardware ou software do fabricante. Só informam (nenhuma ação do catálogo), com explicação,
+ganho medido e fonte; aparecem no Diagnóstico, no Hardware e na lista do Assistente. Montados por `OwnerFactsBuilder`
+(Nexus.Assistant) a partir do relatório da GPU e do SMBIOS.
+
+| Id | Regra | Ganho citado | Fonte |
+|---|---|---|---|
+| `owner.rebar` | Arc desligado/desconhecido = atenção; NVIDIA/AMD desligado = informação; sem leitura = nada | Arc A770: 76–80% do normal sem ReBAR; NVIDIA 0–2%; AMD ~7% | Tom's Hardware (TechPowerUp); TechSpot |
+| `owner.xmp` | em uso < 97% e ≥ 200 MT/s abaixo do anunciado (SMBIOS ou número de peça). Desktop = atenção; notebook = informação | depende do jogo | Custom PC (EXPO) |
+| `owner.mux` | notebook com iGPU + dGPU NVIDIA/AMD; quem desenha a tela interna (QueryDisplayConfig) | +9% em média (ASUS), varia muito (Laptop Mag) | ASUS ROG; Laptop Mag |
+| `owner.pcie` | largura atual < largura da **própria GPU**; notebook = informação ("projeto do notebook"); slot estreito = informação; desktop = atenção | ~2% numa RTX 4090 em 4.0 x8 | TechPowerUp |
+
+Limitação: o Windows só vê a velocidade que o firmware anuncia (em geral JEDEC). Sem número de peça decodificado e com o
+anunciado igual ao em uso, `owner.xmp` não acusa nada.
+
+### Ajustes por jogo (seção "Ajustes por jogo")
+
+- **Otimizações para jogos em janela neste jogo:** `win.windowed-game-optimizations.per-app@1` com `gameExePath` (mesma regra
+  de `GameLibraries.ExePattern`). Só DX10/DX11 em janela/sem bordas. Separado da opção global do Windows.
+- **CS2 fps_max:** `cs2.cfg.fps_max@1` com `cs2CfgDir` (só `...\steamapps\common\Counter-Strike Global Offensive\game\csgo\cfg`,
+  sem `.`/`..`) e um valor de `allowedValues`. O aplicador só grava com um dump do `cvarlist` da versão instalada: o
+  `console.log` em `game\csgo` (gravado com `-condebug`) com o rodapé "N total convars/concommands". Sem ele: bloqueado, com
+  instrução. Formato do dump e leitura automática do `autoexec.cfg` pelo CS2 ainda a confirmar num PC real.
 
 ## Handler `GpuLabDisplayMode`
 

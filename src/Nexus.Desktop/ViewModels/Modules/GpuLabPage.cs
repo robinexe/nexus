@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using Nexus.Broker;
+using Nexus.GameProfiles.SourceCfg;
 using Nexus.HardwareDiscovery;
 using Nexus.Lab.Gpu;
 using Nexus.Lab.Gpu.Windows;
@@ -47,6 +48,10 @@ public sealed class GpuLabPage : ModulePage
         RecordCommand = new RelayCommand(() => _ = ToggleRecordingAsync(), () => _hasReport && (!Busy || IsRecording));
         ApplyNvCommand = new RelayCommand(() => _ = ApplyNvAsync(), () => !Busy && NvAvailable && SelectedNvGame is not null && (NvLowLatency || NvMaxPower || NvFpsCap || NvVsync));
         ApplyShaderCacheCommand = new RelayCommand(() => _ = ApplyShaderCacheAsync(), () => !Busy && NvAvailable && SelectedShaderCache is not null);
+        ApplyWindowedCommand = new RelayCommand(() => _ = ApplyWindowedAsync(), () => !Busy && SelectedWindowedGame is { IsOn: false });
+        ApplyCs2FpsCommand = new RelayCommand(() => _ = ApplyCs2FpsAsync(), () => !Busy && _cs2CfgDir is not null && SelectedCs2Fps is not null);
+        foreach (var v in Cs2Install.FpsMaxValues) Cs2FpsOptions.Add(v);
+        _selectedCs2Fps = "400";
         foreach (var f in NvidiaDrsActions.FpsCaps) NvFpsOptions.Add(f);
         ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[0], "100 GB"));
         ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[1], "Ilimitado"));
@@ -127,11 +132,12 @@ public sealed class GpuLabPage : ModulePage
                 try { _nvml = NvmlSession.TryOpen(out _nvmlStatus); }
                 catch (Exception ex) when (ex is not OutOfMemoryException) { _nvmlStatus = $"NVML indisponível: {ex.Message}"; }
             }
-            return GpuLabScanner.Scan(_nvml, _nvmlStatus);
+            return GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true);
         });
         _report = report;
         Build(report);
         HasReport = true;
+        await ReadCs2Async(report);
         await ReadNvidiaAsync();
     });
 
@@ -155,7 +161,7 @@ public sealed class GpuLabPage : ModulePage
         Cards.Clear();
         if (primary is not null)
         {
-            Cards.Add(PcieCard(primary));
+            Cards.Add(PcieCard(primary, r.IsLaptop));
             Cards.Add(LimitsCard(primary));
             Cards.Add(MemoryCard(primary));
             Cards.Add(MonitorCard(r));
@@ -193,6 +199,17 @@ public sealed class GpuLabPage : ModulePage
             Games.Add(new GpuGameRow(g, pref, fix, this));
         }
 
+        var selectedExe = SelectedWindowedGame?.ExePath;
+        WindowedGames.Clear();
+        foreach (var g in r.Games.Where(g => GameLibraries.IsValidExePath(g.ExePath)))
+        {
+            var raw = r.AppPreferences.FirstOrDefault(p => string.Equals(p.ExePath, g.ExePath, StringComparison.OrdinalIgnoreCase))?.RawValue;
+            WindowedGames.Add(new WindowedGameOption(g.Name, g.ExePath!, GameLibraries.ParseToken(raw, "SwapEffectUpgradeEnable"), g.ExePathSure));
+        }
+        OnPropertyChanged(nameof(HasWindowedGames));
+        SelectedWindowedGame = WindowedGames.FirstOrDefault(w => string.Equals(w.ExePath, selectedExe, StringComparison.OrdinalIgnoreCase))
+                               ?? WindowedGames.FirstOrDefault(w => !w.IsOn) ?? WindowedGames.FirstOrDefault();
+
         Notes.Clear();
         foreach (var n in r.Notes) Notes.Add(n);
         if (primary?.Nvidia?.MaxGraphicsClockMhz is { } mx) ChartMaxClock = mx;
@@ -212,13 +229,15 @@ public sealed class GpuLabPage : ModulePage
         return string.Join(" · ", parts);
     }
 
-    private static GpuStatCard PcieCard(GpuAdapter a)
+    private static GpuStatCard PcieCard(GpuAdapter a, bool laptop)
     {
         if (a.IsIntegrated) return new("Barramento", "Integrada", "Fica dentro do processador: não usa slot PCIe.", "info", "Icon.Hardware");
-        var (level, text) = Pcie.IdleVerdict(a.Pcie, false);
-        if (!a.Pcie.HasData) return new("Barramento PCIe", "—", text, "info", "Icon.Hardware");
-        var detail = $"Placa: {a.Pcie.Describe(current: false)}" + (a.Pcie.PortMaxGen is { } pg ? $" · porta: PCIe {Pcie.GenLabel(pg)} x{a.Pcie.PortMaxWidth?.ToString(CultureInfo.InvariantCulture) ?? "?"}" : "") + ". " + text;
-        return new("Barramento PCIe (agora)", a.Pcie.Describe(), detail, level, "Icon.Hardware");
+        var (link, note) = HardwareCaps.PcieWithGpuCeiling(a);
+        var (level, text) = Pcie.IdleVerdict(link, false, laptop);
+        if (!link.HasData) return new("Barramento PCIe", "—", text, "info", "Icon.Hardware");
+        var detail = $"GPU: {link.Describe(current: false)}" + (link.PortMaxGen is { } pg ? $" · porta: PCIe {Pcie.GenLabel(pg)} x{link.PortMaxWidth?.ToString(CultureInfo.InvariantCulture) ?? "?"}" : "") + ". " + text +
+                     (note is null ? "" : " " + note);
+        return new("Barramento PCIe (agora)", link.Describe(), detail, level, "Icon.Hardware");
     }
 
     private static GpuStatCard LimitsCard(GpuAdapter a)
@@ -259,12 +278,13 @@ public sealed class GpuLabPage : ModulePage
         var hags = a.HagsEnabled ?? (r.Settings.HwSchMode == 2 ? true : r.Settings.HwSchMode == 1 ? false : null);
         yield return new("Agendamento por hardware (HAGS)", hags is null ? "não informado" : hags.Value ? "ligado" : "desligado",
             hags == true ? "good" : "info", a.HagsEnabled is null ? "Lido do registro do Windows." : "Informado pelo driver.");
-        if (a.Nvidia?.Bar1TotalBytes is { } bar1)
+        if (!a.IsIntegrated)
         {
-            var on = bar1 > 300UL << 20;
-            yield return new("Resizable BAR", on ? "ligado" : "desligado", on ? "good" : "info", $"Janela BAR1 de {bar1 >> 20} MB (NVML).");
+            var rb = HardwareCaps.ResizableBar(a);
+            yield return rb.Enabled is { } on
+                ? new("Resizable BAR", on ? "ligado" : "desligado", on ? "good" : HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", $"{rb.Evidence} Fonte: {rb.Source}.")
+                : new("Resizable BAR", "não dá para afirmar", HardwareCaps.IsIntelArcDiscrete(a) ? "warn" : "info", rb.Evidence);
         }
-        else yield return new("Resizable BAR", "sem leitura", "info", "Só dá para ler em placas NVIDIA (NVML).");
         yield return new("MPO (planos de sobreposição)", r.Settings.OverlayTestMode == 5 ? "desligado no registro" : "padrão do Windows",
             r.Settings.OverlayTestMode == 5 ? "warn" : "good", "Desligar o MPO à mão só se recomenda para tela piscando.");
         yield return new("Modo de Jogo", r.Settings.AutoGameModeEnabled == 0 ? "desligado" : "ligado", r.Settings.AutoGameModeEnabled == 0 ? "warn" : "good",
@@ -348,9 +368,10 @@ public sealed class GpuLabPage : ModulePage
         if (r.Response is { Ok: true, RunId: { } run }) Changes.Insert(0, new GpuAppliedChange(change, run, level, this));
         Message = StartupPage.Describe(r);
         _report = null;
-        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus));
+        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true));
         _report = report;
         Build(report);
+        await ReadCs2Async(report);
     }
 
     internal Task UndoAsync(GpuAppliedChange c) => RunAsync(async () =>
@@ -360,10 +381,79 @@ public sealed class GpuLabPage : ModulePage
         if (r is null) return;
         if (r.Response?.FullyRestored == true) Changes.Remove(c);
         Message = r.Message;
-        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus));
+        var report = await Task.Run(() => GpuLabScanner.Scan(_nvml, _nvmlStatus, probeD3D12: true));
         _report = report;
         Build(report);
+        await ReadCs2Async(report);
         await ReadNvidiaAsync();
+    });
+
+    // ------------------------------------------------------------------ por jogo, sem driver: janela (DX10/11) e fps_max do CS2
+
+    public const string WindowedPerAppAction = "win.windowed-game-optimizations.per-app@1";
+    private WindowedGameOption? _selectedWindowedGame;
+    private string? _cs2CfgDir, _selectedCs2Fps;
+    private string _cs2Status = "Procurando o Counter-Strike 2 na Steam…";
+    private bool _cs2Found;
+
+    public RelayCommand ApplyWindowedCommand { get; }
+    public RelayCommand ApplyCs2FpsCommand { get; }
+    /// <summary>Jogos com executável conhecido (Steam/Epic) e o estado de "Otimizações para jogos em janela" de cada um.</summary>
+    public ObservableCollection<WindowedGameOption> WindowedGames { get; } = [];
+    public bool HasWindowedGames => WindowedGames.Count > 0;
+    public WindowedGameOption? SelectedWindowedGame
+    {
+        get => _selectedWindowedGame;
+        set { if (Set(ref _selectedWindowedGame, value)) OnPropertyChanged(nameof(WindowedState)); }
+    }
+    public string WindowedState => SelectedWindowedGame?.StateText ?? "";
+    public bool Cs2Found { get => _cs2Found; private set => Set(ref _cs2Found, value); }
+    /// <summary>Onde está o CS2, o fps_max atual e se há o dump do cvarlist que o aplicador exige.</summary>
+    public string Cs2Status { get => _cs2Status; private set => Set(ref _cs2Status, value); }
+    public ObservableCollection<string> Cs2FpsOptions { get; } = [];
+    public string? SelectedCs2Fps { get => _selectedCs2Fps; set => Set(ref _selectedCs2Fps, value); }
+
+    /// <summary>CS2 instalado (manifesto Steam): pasta cfg, fps_max atual e dump do cvarlist. Só leitura.</summary>
+    private async Task ReadCs2Async(GpuLabReport r)
+    {
+        var cfg = r.Games.Where(g => g.Store == "Steam").Select(g => Cs2Install.CfgDirFromInstallDir(g.InstallDir)).FirstOrDefault(c => c is not null);
+        _cs2CfgDir = cfg;
+        Cs2Found = cfg is not null;
+        if (cfg is null)
+        {
+            Cs2Status = "Counter-Strike 2 não encontrado nas bibliotecas da Steam.";
+            return;
+        }
+        var (current, dump) = await Task.Run(() => (Cs2Install.ReadFpsMax(cfg), Cs2Install.ReadDump(cfg)));
+        Cs2Status = $"CS2 em {cfg}. fps_max no autoexec.cfg: {current ?? "não definido (o jogo usa o padrão, 400)"}. " +
+                    (dump is null
+                        ? "Falta a lista de comandos desta versão: abra o CS2 com -condebug nas opções de inicialização da Steam, digite cvarlist no console e feche o jogo. Sem ela o NEXUS não grava (é a prova de que fps_max existe na sua versão)."
+                        : $"Lista de comandos desta versão encontrada ({dump.Count} itens, {dump.SourceDescription}).");
+        if (current is not null && Cs2FpsOptions.Contains(current)) SelectedCs2Fps = current;
+    }
+
+    private Task ApplyWindowedAsync() => RunAsync(async () =>
+    {
+        if (Host is null || SelectedWindowedGame is not { } g) return;
+        var exe = g.ExePath;
+        var text = $"Ligar \"Otimizações para jogos em janela\" só para:\n{exe}\n\n" +
+                   "O Windows passa a apresentar este jogo no modo flip (menos atraso em janela e sem bordas, e permite G-SYNC/FreeSync em janela). " +
+                   "Só vale para jogos DirectX 10/11 em janela ou sem bordas: em DirectX 12, Vulkan ou tela cheia exclusiva não muda nada. " +
+                   "É a mesma opção de Configurações > Sistema > Tela > Elementos gráficos, por jogo, e vale na próxima vez que o jogo abrir. Desfazer devolve o que era.";
+        await ApplyAsync("Otimizações para jogos em janela neste jogo", text,
+            new ActionRequest(WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = exe }), BrokerLevel.User,
+            $"Janela otimizada: {System.IO.Path.GetFileName(exe)}");
+    });
+
+    private Task ApplyCs2FpsAsync() => RunAsync(async () =>
+    {
+        if (Host is null || _cs2CfgDir is not { } cfg || SelectedCs2Fps is not { } fps) return;
+        var text = $"Gravar fps_max {fps} no autoexec.cfg do CS2?\n\n{cfg}\n\n" +
+                   (fps == "0" ? "0 tira o limite do jogo. " : "O jogo não passa desse FPS. Com G-SYNC/FreeSync, um limite um pouco abaixo da taxa do monitor (ex.: 141 em 144 Hz) mantém o VRR ativo. ") +
+                   "Só a linha do fps_max muda; o resto do arquivo fica igual. Vale na próxima vez que o jogo abrir (se o CS2 não ler o autoexec sozinho, adicione +exec autoexec nas opções de inicialização). " +
+                   "A Steam Cloud pode sobrescrever o arquivo. Desfazer devolve a linha que havia.";
+        await ApplyAsync("CS2: limite de FPS", text,
+            new ActionRequest(Cs2Install.FpsMaxActionKey, fps, new Dictionary<string, string> { ["cs2CfgDir"] = cfg }), BrokerLevel.User, $"CS2 fps_max {fps}");
     });
 
     // ------------------------------------------------------------------ driver NVIDIA por jogo (perfis DRS)
@@ -625,7 +715,7 @@ public sealed class GpuLabPage : ModulePage
 
     private void Analyze(GpuAdapter gpu, List<GpuTelemetrySample> samples)
     {
-        var a = RecordingAnalyzer.Analyze(samples, gpu.Nvidia?.MaxGraphicsClockMhz, gpu.Pcie, _report?.IsLaptop ?? false);
+        var a = RecordingAnalyzer.Analyze(samples, gpu.Nvidia?.MaxGraphicsClockMhz, HardwareCaps.PcieWithGpuCeiling(gpu).Link, _report?.IsLaptop ?? false);
         Verdict = a.Verdict;
         VerdictTone = a.VerdictLevel;
         RecordFindings.Clear();
@@ -793,6 +883,19 @@ public sealed class GpuGameRow
     public GpuFinding? Fix { get; }
     public bool HasFix => Fix is not null;
     public RelayCommand FixCommand { get; }
+}
+
+/// <summary>Jogo para "Otimizações para jogos em janela": executável e o token SwapEffectUpgradeEnable atual (1 = ligado, 0 = desligado, null = padrão).</summary>
+public sealed record WindowedGameOption(string Name, string ExePath, int? SwapEffectUpgrade, bool ExeSure)
+{
+    public bool IsOn => SwapEffectUpgrade == 1;
+    public string Label => Name + (ExeSure ? "" : " (executável provável)");
+    public string StateText => SwapEffectUpgrade switch
+    {
+        1 => "Já ligado para este jogo.",
+        0 => "Desligado para este jogo (alguém marcou \"não\").",
+        _ => "Segue a opção geral do Windows (sem escolha própria).",
+    } + " " + ExePath;
 }
 
 /// <summary>Mudança aplicada nesta sessão, com Desfazer.</summary>

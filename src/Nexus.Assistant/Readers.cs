@@ -82,11 +82,44 @@ public static class AssistantReaders
             }
             catch (Exception ex) when (Expected(ex)) { }
             IReadOnlyList<GpuFinding> gpuFindings = [];
-            try { gpuFindings = GpuDiagnostics.Evaluate(GpuLabScanner.Scan(null, "NVML não usado pelo assistente."), DateOnly.FromDateTime(DateTime.Today)); }
+            GpuLabReport? gpuReport = null;
+            try
+            {
+                gpuReport = ScanGpuForOwnerChecks();
+                gpuFindings = GpuDiagnostics.Evaluate(gpuReport, DateOnly.FromDateTime(DateTime.Today));
+            }
             catch (Exception ex) when (Expected(ex)) { }
-            return new PcReading(StepPlanners.MyPc(catalog, facts, profile, memory, memFindings, gpuFindings, measured), summary, profile);
+            var owner = OwnerChecks.Evaluate(OwnerFactsBuilder.From(gpuReport, memory, facts));
+            return new PcReading(StepPlanners.MyPc(catalog, facts, profile, memory, memFindings, gpuFindings, measured, owner), summary, profile);
         }
         catch (Exception ex) when (Expected(ex)) { return new PcReading(StepScan.Unavailable("Laboratórios", ex.Message), summary, null); }
+    }
+
+    /// <summary>
+    /// Leitura da GPU para os pontos "só você pode fazer": NVML (janela BAR1 da NVIDIA) aberto e fechado na hora, e a consulta
+    /// D3D12 do Resizable BAR. Só leitura; sem jogos (não são usados aqui).
+    /// </summary>
+    public static GpuLabReport ScanGpuForOwnerChecks()
+    {
+        NvmlSession? nvml = null;
+        var status = "NVML não aberto.";
+        try { nvml = NvmlSession.TryOpen(out status); }
+        catch (Exception ex) when (Expected(ex)) { status = $"NVML indisponível: {ex.Message}"; }
+        try { return GpuLabScanner.Scan(nvml, status, includeGames: false, probeD3D12: true); }
+        finally { nvml?.Dispose(); }
+    }
+
+    /// <summary>Pontos "só você pode fazer" lidos na hora (GPU + memória). Falha de leitura = menos pontos, nunca exceção.</summary>
+    public static IReadOnlyList<DiagnosticFinding> OwnerFindings(SystemFacts facts)
+    {
+        ArgumentNullException.ThrowIfNull(facts);
+        GpuLabReport? gpu = null;
+        MemoryAnalysis? memory = null;
+        try { gpu = ScanGpuForOwnerChecks(); }
+        catch (Exception ex) when (Expected(ex)) { }
+        try { memory = MemoryLabAnalyzer.Analyze(WindowsMemoryReader.ReadSmbios(), facts.Gpus); }
+        catch (Exception ex) when (Expected(ex)) { }
+        return OwnerChecks.Evaluate(OwnerFactsBuilder.From(gpu, memory, facts));
     }
 
     /// <summary>Perfil do relatório lido na hora (quando a etapa 2 foi pulada ou o assistente foi retomado).</summary>

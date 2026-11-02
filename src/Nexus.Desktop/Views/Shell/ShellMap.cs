@@ -75,7 +75,9 @@ public static class ShellMap
     public static string PageForFinding(string? findingId)
     {
         var id = findingId ?? "";
-        if (id.StartsWith("mem.", StringComparison.Ordinal)) return "MemoryLabPage";
+        if (id.StartsWith("mem.", StringComparison.Ordinal) || id == "owner.xmp") return "MemoryLabPage";
+        if (id is "owner.rebar" or "owner.mux" or "owner.pcie") return "GpuLabPage";
+        if (id.StartsWith("startup.", StringComparison.Ordinal)) return "StartupPage";
         if (id.StartsWith("gpu.", StringComparison.Ordinal)) return "GpuLabPage";
         if (id.StartsWith("disk.", StringComparison.Ordinal)) return "CleaningPage";
         if (id.StartsWith("sec.", StringComparison.Ordinal)) return "SecurityPage";
@@ -94,6 +96,7 @@ public static class ShellMap
         ["SecurityPage"] = "Ver a segurança",
         ["CatalogPage"] = "Ver os ajustes",
         ["MeasurePage"] = "Medir uma partida",
+        ["StartupPage"] = "Ver a inicialização",
         ["DiagnosticsPage"] = "Ver o diagnóstico",
     };
 

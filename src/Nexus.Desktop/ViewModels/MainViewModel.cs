@@ -326,6 +326,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
                 try { await module.OnFactsReadyAsync(snapshot.Facts); }
                 catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"{module.Title}: {ex.Message}"; }
             }
+            await LoadOwnerChecksAsync(snapshot);
         }
         catch (Exception ex)
         {
@@ -335,6 +336,29 @@ public sealed class MainViewModel : ObservableObject, IModuleHost
         {
             Busy = false;
         }
+    }
+
+    /// <summary>
+    /// "Só você pode fazer" (Resizable BAR, XMP/EXPO, MUX, link PCIe): lidos depois do resto (NVML + consulta D3D12 + SMBIOS),
+    /// fora da thread da interface. Entram no Diagnóstico e no Hardware; falha de leitura só deixa de mostrar o ponto.
+    /// </summary>
+    private async Task LoadOwnerChecksAsync(SystemSnapshot snapshot)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        try
+        {
+            Nexus.Desktop.Services.Shell.UiWatchdog.Step("leitura do PC → só você pode fazer");
+            var owner = await Task.Run(() => Nexus.Assistant.AssistantReaders.OwnerFindings(snapshot.Facts));
+            if (owner.Count == 0 || !ReferenceEquals(_snapshot, snapshot)) return;
+            // owner.xmp diz o mesmo que mem.speed, com a explicação e a fonte: fica só ele.
+            var xmp = owner.Any(f => f.Id == OwnerChecks.XmpId);
+            _findings = [.. _findings.Where(f => f.Owner is null && !(xmp && f.Id == "mem.speed")), .. owner];
+            Diagnostics.Findings = _findings;
+            Overview.Cards = OverviewPage.Build(snapshot, _findings);
+            if (HardwarePage.OwnerSection(owner) is { } section)
+                Hardware.Sections = [.. Hardware.Sections.Where(x => x.Title != HardwarePage.OwnerSectionTitle), new SectionViewModel(section)];
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"Só você pode fazer: {ex.Message}"; }
     }
 
     private async Task LoadCatalogAsync(SystemFacts facts)
