@@ -25,5 +25,7 @@
     <ProjectReference Include="..\Nexus.Lab.Cpu\Nexus.Lab.Cpu.csproj" />
     <ProjectReference Include="..\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
     <ProjectReference Include="..\Nexus.Lab.Memory\Nexus.Lab.Memory.csproj" />
+    <!-- Cartões de jogo (GameCardAudience) para a recomendação por hardware. -->
+    <ProjectReference Include="..\Nexus.GameProfiles\Nexus.GameProfiles.csproj" />
   </ItemGroup>
 </Project>

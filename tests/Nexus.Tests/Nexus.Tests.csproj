@@ -53,6 +53,8 @@
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\SimpleLogic.cs" Link="Shell\SimpleLogic.cs" />
     <!-- Jogos: estado real de cada opção e o que a desfaz no diário (GameOptionStateTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameOptionStates.cs" Link="Shell\GameOptionStates.cs" />
+    <!-- Recomendação por hardware: textos dos vereditos, seleção padrão e frase do perfil (HardwareRecommendationTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\HardwareFitText.cs" Link="Shell\HardwareFitText.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameSessionStore.cs" Link="Shell\GameSessionStore.cs" />
     <!-- Laboratório A/B: candidatos, pedidos e frases do veredito (AbLabPageTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Modules\AbLabText.cs" Link="Shell\AbLabText.cs" />

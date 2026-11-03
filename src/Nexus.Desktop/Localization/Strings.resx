@@ -4355,4 +4355,50 @@ São {2} partidas de pelo menos 3 minutos. Entre elas, o NEXUS aplica o ajuste p
   <data name="Ab.Candidate.TestedPlain" xml:space="preserve"><value>Testado aqui: {0}</value></data>
   <data name="Simple.Games.Compare" xml:space="preserve"><value>Comparar com e sem</value></data>
   <data name="Simple.Games.CompareTip" xml:space="preserve"><value>Laboratório A/B: jogue uma partida sem e outra com um ajuste; só fica o que melhorar de verdade.</value></data>
+  <data name="Fit.LaptopHeat" xml:space="preserve"><value>Não indicado para notebook: esquenta mais e o processador acaba reduzindo a velocidade</value></data>
+  <data name="Fit.OnBattery" xml:space="preserve"><value>Não indicado na bateria: o Windows limita a potência e o ajuste só gasta bateria</value></data>
+  <data name="Fit.IntegratedGpu" xml:space="preserve"><value>Não indicado sem placa de vídeo dedicada</value></data>
+  <data name="Fit.WeakGpuRelief" xml:space="preserve"><value>Recomendado para o seu PC: alivia a placa de vídeo</value></data>
+  <data name="Fit.StrongGpuNoNeed" xml:space="preserve"><value>Não indicado: sua placa é forte e isto tira qualidade sem precisar</value></data>
+  <data name="Fit.StrongGpuUse" xml:space="preserve"><value>Recomendado para o seu PC: aproveita a placa de vídeo forte</value></data>
+  <data name="Fit.LowRamRelief" xml:space="preserve"><value>Recomendado para o seu PC: libera memória RAM (8 GB ou menos)</value></data>
+  <data name="Fit.SysMainHelpsHere" xml:space="preserve"><value>Não indicado: com HD ou pouca memória, o SysMain ajuda a abrir programas</value></data>
+  <data name="Fit.HddFewerWrites" xml:space="preserve"><value>Recomendado para o seu PC: menos gravações no disco rígido</value></data>
+  <data name="Fit.NotNvidia" xml:space="preserve"><value>Não indicado: só vale em placas NVIDIA</value></data>
+  <data name="Fit.NotAmd" xml:space="preserve"><value>Não indicado: só vale em placas AMD</value></data>
+  <data name="Fit.NotIntel" xml:space="preserve"><value>Não indicado: só vale em placas Intel</value></data>
+  <data name="Fit.NvidiaGpu" xml:space="preserve"><value>Recomendado para o seu PC: é um ajuste do driver NVIDIA</value></data>
+  <data name="Fit.AmdGpu" xml:space="preserve"><value>Recomendado para o seu PC: é um ajuste para placas AMD</value></data>
+  <data name="Fit.IntelGpu" xml:space="preserve"><value>Recomendado para o seu PC: é um ajuste para placas Intel</value></data>
+  <data name="Fit.Competitive" xml:space="preserve"><value>Recomendado para você: menos atraso nos comandos</value></data>
+  <data name="Fit.LaptopWifi" xml:space="preserve"><value>Recomendado para notebook: o Wi-Fi não dorme entre pacotes e o ping fica estável</value></data>
+  <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recomendado para notebook: menos calor e ruído</value></data>
+  <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recomendado para o seu PC: a gravação em segundo plano ocupa a placa de vídeo</value></data>
+  <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Aplicar o recomendado</value></data>
+  <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Aplicar o recomendado para este PC (as opções marcadas acima, de uma vez)</value></data>
+  <data name="Simple.Games.ConfirmRecommended" xml:space="preserve"><value>{0}: ligar o recomendado para este PC ({1})? Dá para desfazer.</value></data>
+  <data name="Simple.Games.ConfirmRecommendedAdmin" xml:space="preserve"><value>{0}: ligar o recomendado para este PC ({1})? O Windows pede permissão de administrador. Dá para desfazer.</value></data>
+  <data name="Profile.Title" xml:space="preserve"><value>Perfil do PC</value></data>
+  <data name="Profile.Lead" xml:space="preserve"><value>O NEXUS usa este perfil para marcar o que é recomendado para o seu PC nos Ajustes rápidos, no Automático e em Jogos.</value></data>
+  <data name="Profile.Reading" xml:space="preserve"><value>Lendo o seu PC…</value></data>
+  <data name="Profile.PreferLowLatency" xml:space="preserve"><value>Prefiro menos atraso a imagem bonita (jogo competitivo)</value></data>
+  <data name="Profile.PreferLowLatencyWhy" xml:space="preserve"><value>Isto não é hardware, é escolha sua: com a opção ligada, ajustes como Reflex, baixa latência do driver e sombras desligadas passam a aparecer como recomendados. Nada é aplicado sozinho.</value></data>
+  <data name="Profile.Laptop" xml:space="preserve"><value>Notebook</value></data>
+  <data name="Profile.Desktop" xml:space="preserve"><value>Desktop</value></data>
+  <data name="Profile.Pc" xml:space="preserve"><value>PC</value></data>
+  <data name="Profile.GpuIntegrated" xml:space="preserve"><value>vídeo integrado</value></data>
+  <data name="Profile.GpuEntry" xml:space="preserve"><value>placa de entrada</value></data>
+  <data name="Profile.GpuMid" xml:space="preserve"><value>placa intermediária</value></data>
+  <data name="Profile.GpuStrong" xml:space="preserve"><value>placa forte</value></data>
+  <data name="Profile.FormWithGpu" xml:space="preserve"><value>{0} com {1}</value></data>
+  <data name="Profile.Gb" xml:space="preserve"><value>{0} GB</value></data>
+  <data name="Profile.Ram" xml:space="preserve"><value>{0} GB de RAM</value></data>
+  <data name="Profile.Ssd" xml:space="preserve"><value>SSD</value></data>
+  <data name="Profile.Hdd" xml:space="preserve"><value>disco rígido (HD)</value></data>
+  <data name="Profile.OnBattery" xml:space="preserve"><value>na bateria agora</value></data>
+  <data name="Profile.Unknown.Gpu" xml:space="preserve"><value>placa de vídeo</value></data>
+  <data name="Profile.Unknown.Ram" xml:space="preserve"><value>memória RAM</value></data>
+  <data name="Profile.Unknown.Form" xml:space="preserve"><value>notebook ou desktop</value></data>
+  <data name="Profile.Unknown.Disk" xml:space="preserve"><value>tipo do disco</value></data>
+  <data name="Profile.Unknown.List" xml:space="preserve"><value>Não deu para ler: {0}. Sem essa leitura, o NEXUS não recomenda nem desaconselha por ela.</value></data>
 </root>

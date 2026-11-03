@@ -44,6 +44,13 @@
           "Nexus.WindowsActions": "[1.0.0, )"
         }
       },
+      "nexus.gameprofiles": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.hardwarediscovery": {
         "type": "Project"
       },

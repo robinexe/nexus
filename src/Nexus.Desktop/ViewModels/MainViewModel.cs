@@ -44,6 +44,10 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
     private bool _busy;
     private SystemSnapshot? _snapshot;
     private IReadOnlyList<DiagnosticFinding> _findings = [];
+    private Nexus.Assistant.HardwareProfile? _hardware;
+
+    /// <summary>Perfil de hardware deste PC (recomendações por hardware); null até a primeira leitura. Recalculado quando a preferência muda.</summary>
+    public Nexus.Assistant.HardwareProfile? HardwareProfile { get => _hardware; private set => Set(ref _hardware, value); }
 
     public MainViewModel()
     {
@@ -104,6 +108,11 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         // Notebook na bateria: um jogo começou (detecção do Medir) → aviso, se ligado em Ajustes.
         Measure.GameStarted += (_, game) => Checks.OnGameStarted(game, UiSettings.Current.GameBatteryNotice, DateTimeOffset.Now);
         Checks.Notice += (_, n) => System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => { Status = n.Text; GameNotice?.Invoke(this, n); });
+        // Ajustes › Perfil do PC: a preferência "menos atraso" muda o que é recomendado (sem reler o PC).
+        UiSettings.Changed += (_, _) =>
+        {
+            if (HardwareProfile is { } h && h.Competitive != UiSettings.Current.PreferLowLatency) { HardwareProfile = h with { Competitive = UiSettings.Current.PreferLowLatency }; RefreshSimple(); }
+        };
     }
 
     // ------------------------------------------------------------------ checagens do PC (somente leitura)
@@ -249,13 +258,15 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
 
     /// <summary>
     /// Os ajustes rápidos: as recomendações do Automático para este PC que viram uma ação do catálogo pedível de um clique.
-    /// Recomendado (aparece por padrão) = as de um clique do Automático (risco baixo); o resto vai para "Mostrar mais opções".
+    /// Recomendado (aparece por padrão) = as de um clique do Automático (risco baixo) que o perfil de hardware não desaconselha
+    /// (<see cref="HardwareRules"/>); o resto vai para "Mostrar mais opções" com a palavra de risco ou "não indicado para notebook".
     /// "Ligado" vem da leitura do estado atual (Detect) do catálogo.
     /// </summary>
     private List<QuickTweakData> BuildQuickTweaks()
     {
         var list = new List<QuickTweakData>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
+        var hardware = HardwareProfile ?? Nexus.Assistant.HardwareProfile.Empty;
         foreach (var rec in Automation.ActionableRecommendations)
         {
             if (rec.ActionKey is not { } key || ApplicableRow(key) is not { } row || !seen.Add(row.Entry.Definition.Key)) continue;
@@ -263,10 +274,12 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
             if (!ok) continue;
             var category = QuickTweakText.CategoryOf(row.Entry.Definition.Id);
             var experimental = IsExperimental(row.Entry);
-            var recommended = rec.OneClick && !experimental && RiskOf(row.Entry) == Nexus.Automation.ActionRisk.Low;
+            var fit = HardwareRules.ForAction(hardware, row.Entry.Definition.Id);
+            var recommended = QuickTweakSelection.IsRecommended(rec.OneClick && !experimental && RiskOf(row.Entry) == Nexus.Automation.ActionRisk.Low, fit);
+            var riskWord = recommended ? "" : fit.IsNotRecommended ? FitText.Sentence(fit) : QuickTweakText.RiskWord(category, RiskOf(row.Entry), experimental);
             list.Add(new QuickTweakData(row.Entry.Definition.Key, row.Title, QuickTweakText.FirstSentence(rec.Reason), category,
-                row.ReadState == "same", recommended, recommended ? "" : QuickTweakText.RiskWord(category, RiskOf(row.Entry), experimental),
-                new ActionRequest(row.Entry.Definition.Key, value), LevelOf(row.Entry)));
+                row.ReadState == "same", recommended, riskWord, new ActionRequest(row.Entry.Definition.Key, value), LevelOf(row.Entry))
+                { FitNote = fit.IsRecommended ? FitText.Sentence(fit) : "" });
         }
         return list;
     }
@@ -540,6 +553,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
             var snapshot = await Task.Run(Discovery.Capture);
             Nexus.Desktop.Services.Shell.UiWatchdog.Step($"leitura do PC pronta em {snapshot.Elapsed.TotalSeconds:0.0} s (fora da interface)");
             _snapshot = snapshot;
+            HardwareProfile = await Task.Run(() => HardwareProfiler.Classify(snapshot.Facts, Nexus.Automation.PcTraitsProbe.Read(snapshot.Facts.SystemDrive), UiSettings.Current.PreferLowLatency));
             _findings = DiagnosticRules.Evaluate(snapshot.Facts);
             Hardware.Sections = snapshot.Sections.Select(s => new SectionViewModel(s)).ToList();
             Diagnostics.Findings = _findings;
