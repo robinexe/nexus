@@ -81,7 +81,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         var startup = SelfTestMode ? new UiStartup(false, false) : UiModeStartup.Decide(UiSettings.Current.UiMode, HadPriorUse());
         Welcome.IsVisible = startup.ShowWelcome;
         Home.Actions = this;
+        Home.Checks = Checks;
         SimpleProblems.Actions = this;
+        SimpleProblems.Checks = Checks;
         SimpleGames.Actions = this;
         SimpleOptimize.QuickTweaks.Host = this;
         SimpleOptimize.QuickTweaks.FindRun = SimpleHistory.FindSingleActionRun;
@@ -92,6 +94,39 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         Cleaning.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(CleaningPage.SafeBytes)) RefreshSimple(); };
         Automation.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(AutomationPage.CandidateActionKeys)) RefreshSimple(); };
         Assistant.AutoFinished += (_, _) => _ = AfterAutomaticAsync();
+
+        // Checagens do PC (rede, discos, monitor, limitação do processador): entram no Diagnóstico, no Início e em Problemas.
+        Checks.Changed += (_, _) => System.Windows.Application.Current?.Dispatcher.BeginInvoke(MergePcChecks);
+        // Notebook na bateria: um jogo começou (detecção do Medir) → aviso, se ligado em Ajustes.
+        Measure.GameStarted += (_, game) => Checks.OnGameStarted(game, UiSettings.Current.GameBatteryNotice, DateTimeOffset.Now);
+        Checks.Notice += (_, n) => System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => { Status = n.Text; GameNotice?.Invoke(this, n); });
+    }
+
+    // ------------------------------------------------------------------ checagens do PC (somente leitura)
+
+    /// <summary>Rede para jogos, saúde dos discos, monitor, limitação do processador e o aviso de bateria.</summary>
+    public PcChecksCoordinator Checks { get; } = PcChecksCoordinator.Shared;
+
+    /// <summary>Aviso para a bandeja (título, texto): "Na bateria o FPS cai bastante; ligue na tomada".</summary>
+    public event EventHandler<(string Title, string Text)>? GameNotice;
+
+    private void MergePcChecks()
+    {
+        if (_snapshot is null) return;
+        _findings = [.. _findings.Where(f => !PcChecks.IsPcCheckId(f.Id)), .. Checks.Findings];
+        Diagnostics.Findings = _findings;
+        RefreshSimple();
+    }
+
+    private async Task RunPcChecksAsync(SystemSnapshot snapshot)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        try
+        {
+            Nexus.Desktop.Services.Shell.UiWatchdog.Step("leitura do PC → checagens (rede, discos, monitor, processador)");
+            await Checks.RunAutomaticAsync(snapshot.Facts.PhysicalDisks);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Nexus.Desktop.Services.Shell.UiWatchdog.Note("checagens do PC: " + ex.Message); }
     }
 
     // ------------------------------------------------------------------ interface simples (a única) e ferramentas avançadas
@@ -149,6 +184,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         Home.Update(new HealthInputs
         {
             Findings = _findings,
+            Plain = Checks.Plain,
             RecoverableBytes = Cleaning.SafeBytes,
             PendingRecommendations = pending,
             GpuDriverDate = SimpleHealth.ParseDriverDate(gpu?.DriverDate),
@@ -523,6 +559,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
                 catch (Exception ex) when (ex is not OutOfMemoryException) { Status = $"{module.Title}: {ex.Message}"; }
             }
             await LoadOwnerChecksAsync(snapshot);
+            MergePcChecks(); // a leitura nova trocou os achados: as checagens já lidas voltam até a próxima rodada terminar
+            _ = RunPcChecksAsync(snapshot);
             RefreshSimple();
             StartBackgroundMeasurements();
         }

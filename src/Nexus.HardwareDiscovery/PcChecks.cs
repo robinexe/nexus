@@ -218,6 +218,12 @@ public static class PcChecks
                 list.Add(F(InternetId, "Ping estável até a internet", DiagnosticSeverity.Ok, ev));
         }
 
+        // No Wi-Fi com instabilidade, o próprio Wi-Fi é o primeiro suspeito: o aviso de cabo vira ponto de atenção.
+        var link = list.FindIndex(x => x.Id == LinkId);
+        if (f.Link == LinkKind.WiFi && link >= 0 && list[link].Severity != DiagnosticSeverity.Attention &&
+            list.Any(x => x.Id is LocalId or InternetId && x.Severity == DiagnosticSeverity.Attention))
+            list[link] = list[link] with { Title = "Wi-Fi com conexão instável: prefira cabo", Severity = DiagnosticSeverity.Attention };
+
         // Bufferbloat
         if (f.Bufferbloat is { WorstIncreaseMs: { } inc } b)
         {
@@ -242,7 +248,7 @@ public static class PcChecks
         ArgumentNullException.ThrowIfNull(disks);
         ArgumentNullException.ThrowIfNull(games);
         var list = new List<DiagnosticFinding>();
-        foreach (var d in disks) list.Add(Disk(d));
+        foreach (var d in disks.OrderBy(DiskRank)) list.Add(Disk(d)); // o mais grave primeiro (falhando, gasto, quente, ok)
 
         // Jogos em HD (ou SSD SATA): carregamento, não FPS.
         var byNumber = disks.Where(d => d.Number is not null).GroupBy(d => d.Number!.Value).ToDictionary(g => g.Key, g => g.First());
@@ -264,6 +270,17 @@ public static class PcChecks
                 DiagnosticSeverity.Info, $"No SSD SATA: {Names(onSata)}.",
                 "Se sobrar espaço no NVMe, mover os jogos que você mais joga encurta o carregamento. Pela própria loja, sem perder nada.", gain, LoadTimeSource));
         return list;
+    }
+
+    /// <summary>0 = falhando, 1 = perto do fim, 2 = quente, 3 = sem alerta (mesma ordem das regras de <see cref="Disk"/>).</summary>
+    public static int DiskRank(DiskHealthFacts d)
+    {
+        ArgumentNullException.ThrowIfNull(d);
+        var errors = (d.ReadErrorsUncorrected ?? 0) + (d.WriteErrorsUncorrected ?? 0);
+        if (string.Equals(d.Health, "Unhealthy", StringComparison.OrdinalIgnoreCase) || errors > 0 ||
+            d.OperationalStatus.Any(o => o is "Falha prevista" or "Erro" or "Erro não recuperável")) return 0;
+        if (string.Equals(d.Health, "Warning", StringComparison.OrdinalIgnoreCase) || d.WearPercent >= WornPercent) return 1;
+        return d.TemperatureC is { } t && t >= (d.Media == DiskMedia.Hdd ? HotHddC : HotSsdC) ? 2 : 3;
     }
 
     public static DiagnosticFinding Disk(DiskHealthFacts d)

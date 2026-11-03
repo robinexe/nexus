@@ -164,6 +164,9 @@
           </StackPanel>
         </Border>
 
+        <!-- ===== Rede para jogos (checagens do PC; modelo em PcChecks.xaml) ===== -->
+        <ContentControl Content="{Binding GameNetwork}" Focusable="False"/>
+
         <!-- ===== 3a. Rede ===== -->
         <Border Style="{StaticResource ST.Section}">
           <StackPanel>

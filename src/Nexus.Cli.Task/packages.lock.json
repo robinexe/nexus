@@ -202,6 +202,7 @@
         "type": "Project",
         "dependencies": {
           "Nexus.Core": "[1.0.0, )",
+          "Nexus.HardwareDiscovery": "[1.0.0, )",
           "Nexus.WindowsActions": "[1.0.0, )"
         }
       },

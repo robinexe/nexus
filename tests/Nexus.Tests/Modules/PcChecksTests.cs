@@ -95,6 +95,17 @@ public sealed class PcChecksTests
     }
 
     [Fact]
+    public void Wifi_with_an_unstable_connection_becomes_attention()
+    {
+        var wobbly = PingStats.From("192.168.0.1", [2, 40, 3, 45, 2, 50]);
+        var f = One(PcChecks.Network(new NetworkCheckFacts(LinkKind.WiFi, "Wi-Fi", 80, Gateway: wobbly)), PcChecks.LinkId);
+        Assert.Equal(DiagnosticSeverity.Attention, f.Severity);
+        Assert.Contains("cabo", f.Title, StringComparison.Ordinal);
+        var wired = One(PcChecks.Network(new NetworkCheckFacts(LinkKind.Wired, "Eth", Gateway: wobbly)), PcChecks.LinkId);
+        Assert.Equal(DiagnosticSeverity.Ok, wired.Severity);
+    }
+
+    [Fact]
     public void Router_that_ignores_ping_is_not_an_alarm()
     {
         var f = One(PcChecks.Network(new NetworkCheckFacts(LinkKind.Wired, Gateway: PingStats.From("192.168.0.1", [null, null, null]))), PcChecks.LocalId);

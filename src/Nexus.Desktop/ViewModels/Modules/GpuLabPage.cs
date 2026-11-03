@@ -353,6 +353,21 @@ public sealed class GpuLabPage : ModulePage
         }
     });
 
+    /// <summary>
+    /// "Usar 144 Hz" das telas simples (Início/Problemas): lê a placa se ainda não leu, acha o achado do monitor e segue o mesmo
+    /// caminho do botão daqui (confirmação, ação reversível gpulab.display.mode e "Manter esta taxa?" de 15 s).
+    /// </summary>
+    public async Task FixRefreshAsync(string device)
+    {
+        if (_report is null && !Busy) await LoadAsync();
+        // A navegação até aqui já dispara a leitura (OnShownAsync): espera ela terminar (até ~30 s) antes de procurar o achado.
+        for (var i = 0; i < 300 && (Busy || _report is null); i++) await Task.Delay(100);
+        var f = Findings.Select(r => r.Finding).FirstOrDefault(x => x.Fix == GpuFixKind.DisplayMode && x.FixArguments is { } a &&
+                                                                     a.TryGetValue("device", out var d) && d == device);
+        if (f is null) { Message = Loc.T("Pc.Display.AlreadyMax"); return; }
+        await FixAsync(f);
+    }
+
     private static Dictionary<string, string> Copy(IReadOnlyDictionary<string, string> a) => a.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
 
     private void OpenOfficialPage(string url)

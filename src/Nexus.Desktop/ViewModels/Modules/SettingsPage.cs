@@ -251,6 +251,8 @@ public sealed class SettingsPage : ModulePage
     public bool TrayIcon { get => UiSettings.Current.TrayIcon; set => Change(s => s with { TrayIcon = value }); }
     public bool MinimizeToTray { get => UiSettings.Current.MinimizeToTray; set => Change(s => s with { MinimizeToTray = value }); }
     public bool CloseToTray { get => UiSettings.Current.CloseToTray; set => Change(s => s with { CloseToTray = value }); }
+    /// <summary>Aviso de notebook na bateria quando um jogo abre (checagens do PC).</summary>
+    public bool GameBatteryNotice { get => UiSettings.Current.GameBatteryNotice; set => Change(s => s with { GameBatteryNotice = value }); }
 
     private void Change(Func<NexusSettings, NexusSettings> change)
     {
@@ -260,6 +262,7 @@ public sealed class SettingsPage : ModulePage
         OnPropertyChanged(nameof(TrayIcon));
         OnPropertyChanged(nameof(MinimizeToTray));
         OnPropertyChanged(nameof(CloseToTray));
+        OnPropertyChanged(nameof(GameBatteryNotice));
         OnPropertyChanged(nameof(NotificationsTone));
         OnPropertyChanged(nameof(NotificationsChip));
     }

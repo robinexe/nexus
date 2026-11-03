@@ -41,6 +41,7 @@
         <ResourceDictionary Source="Views/Pages/History.xaml"/>
         <ResourceDictionary Source="Views/Pages/Capabilities.xaml"/>
         <ResourceDictionary Source="Views/Pages/Simple.xaml"/>
+        <ResourceDictionary Source="Views/Pages/PcChecks.xaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

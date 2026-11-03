@@ -449,7 +449,7 @@
                     <Button Style="{StaticResource Button.Secondary}" Margin="0" MinWidth="110" Content="{Binding ActionText}"
                             Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Target}"
                             Visibility="{Binding HasTarget, Converter={StaticResource BoolToVis}}"/>
-                    <Button Style="{StaticResource Button.Secondary}" Margin="0" MinWidth="110" Content="{l:T Simple.Problems.OpenPage}"
+                    <Button Style="{StaticResource Button.Secondary}" Margin="0" MinWidth="110" Content="{Binding LinkText}"
                             Command="{Binding OpenCommand}" Visibility="{Binding HasLink, Converter={StaticResource BoolToVis}}"/>
                   </StackPanel>
                   <StackPanel>

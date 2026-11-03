@@ -35,6 +35,8 @@ public sealed record NexusSettings
     /// <summary>"simple" depois da primeira abertura da interface simples (que é a única). Null = ainda não abriu esta versão
     /// (quem nunca usou vê a boas-vindas). O antigo "full" do modo completo é migrado para "simple" ao abrir.</summary>
     public string? UiMode { get; init; }
+    /// <summary>Avisar "Na bateria o FPS cai bastante; ligue na tomada" quando um jogo abre com o notebook na bateria. Padrão: ligado.</summary>
+    public bool GameBatteryNotice { get; init; } = true;
 
     public static NexusSettings Defaults { get; } = new();
 

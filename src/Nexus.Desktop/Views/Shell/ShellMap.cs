@@ -83,6 +83,11 @@ public static class ShellMap
     public static string PageForFinding(string? findingId)
     {
         var id = findingId ?? "";
+        // Checagens do PC: rede → Ferramentas do sistema (Rede para jogos); saúde dos discos → Disco; monitor → Placa de vídeo.
+        if (id.StartsWith("net.", StringComparison.Ordinal)) return "SystemToolsPage";
+        if (id.StartsWith("diskhealth.", StringComparison.Ordinal)) return "DiskPage";
+        if (id.StartsWith("display.", StringComparison.Ordinal)) return "GpuLabPage";
+        if (id == "cpu.firmware-limit") return "DiagnosticsPage";
         if (id.StartsWith("mem.", StringComparison.Ordinal) || id == "owner.xmp") return "MemoryLabPage";
         if (id is "owner.rebar" or "owner.mux" or "owner.pcie") return "GpuLabPage";
         if (id.StartsWith("startup.", StringComparison.Ordinal)) return "StartupPage";

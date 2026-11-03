@@ -45,6 +45,9 @@ public sealed class DiskPage : ModulePage, IDisposable
     private IReadOnlyList<DiskFileRow> _topCards = [];
     private IReadOnlyList<DiskFileRow> _moreFiles = [];
 
+    /// <summary>Saúde dos discos (checagens do PC): estado, temperatura, desgaste, erros, horas ligado e jogos em HD.</summary>
+    public Nexus.Desktop.ViewModels.Simple.DiskHealthPanel DiskHealth { get; } = new(Nexus.Desktop.ViewModels.Simple.PcChecksCoordinator.Shared);
+
     public DiskPage()
     {
         AnalyzeVolumeCommand = new RelayCommand(() => _ = AnalyzeAsync(SelectedVolume?.Volume.RootPath), () => !Scanning && SelectedVolume is not null);
