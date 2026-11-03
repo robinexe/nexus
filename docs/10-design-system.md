@@ -436,6 +436,10 @@ pelo aplicador. O cartão/linha em que o usuário clicou fica à vista mesmo dep
   clique (driver NVIDIA por jogo, jogos em janela).
 - **Problemas**: achados em palavras simples (`PlainFindings`), "O que fazer" em 1–2 frases e "Resolver" de um clique quando há
   ação de risco baixo. O que está bem fica recolhido.
+- **Checagens do PC** (`docs/modules/pc-checks.md`): rede para jogos, saúde dos discos, monitor abaixo da taxa, limitação do
+  processador pelo firmware. Entram em Problemas com os números da leitura (`PcCheckText`); disco falhando e monitor abaixo da
+  taxa também viram cartão no Início ("Usar 144 Hz" leva à Placa de vídeo, que volta sozinha em 15 s). Notebook na bateria ao
+  abrir um jogo: aviso na bandeja (desligável em Ajustes).
 - **Histórico**: os dois diários, "Hoje 14:30 — Limpeza: 12 itens limpos — Desfazer" (`SimpleHistoryText`), "Desfazer tudo".
 - Nunca aparecem chave de ação, estado cru do aplicador nem valor técnico.
 - Testes: `SimpleModeTests` (navegação, migração, nota, cartões, achados, histórico, ajustes rápidos, seleção do automático).
