@@ -397,6 +397,11 @@ public sealed class SimpleProblemsPage : ModulePage
     private IReadOnlyList<string> _fine = [];
     private bool _hasData;
 
+    public SimpleProblemsPage() => Crash = new CrashReportPanel(() => Host);
+
+    /// <summary>"O jogo fechou sozinho?": juntar informações do travamento (só leitura + ZIP onde o usuário escolher).</summary>
+    public CrashReportPanel Crash { get; }
+
     public override string Title => Loc.T("Simple.Nav.Problems");
     public override string Group => Loc.T("Simple.Nav.Group");
     public override string Subtitle => Loc.T("Simple.Problems.Subtitle");

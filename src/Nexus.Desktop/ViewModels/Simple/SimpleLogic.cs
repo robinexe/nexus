@@ -363,7 +363,7 @@ public static class SimpleHistoryText
     private static string CategoryKey(string key)
     {
         var k = key ?? "";
-        if (k.StartsWith("cleaning.", StringComparison.Ordinal) || k.StartsWith("disk.", StringComparison.Ordinal)) return "clean";
+        if (k.StartsWith("cleaning.", StringComparison.Ordinal) || k.StartsWith("disk.", StringComparison.Ordinal) || k.StartsWith("files.", StringComparison.Ordinal)) return "clean";
         if (k.StartsWith("privacy.", StringComparison.Ordinal)) return "privacy";
         if (k.StartsWith("boot.", StringComparison.Ordinal) || k.StartsWith("startup.", StringComparison.Ordinal) || k.StartsWith("svc.", StringComparison.Ordinal)) return "startup";
         if (k.StartsWith("nvidia.", StringComparison.Ordinal) || k.StartsWith("gpu", StringComparison.Ordinal) || k.StartsWith("fps.", StringComparison.Ordinal) || k.StartsWith("cs2.", StringComparison.Ordinal)) return "gpu";

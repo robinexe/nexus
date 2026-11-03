@@ -3898,4 +3898,43 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.Quick.ConfirmOn" xml:space="preserve"><value>Turn on "{0}"? You can undo it.</value></data>
   <data name="Simple.Quick.ConfirmOff" xml:space="preserve"><value>Undo "{0}" and put it back how it was?</value></data>
   <data name="Simple.Quick.NothingToUndo" xml:space="preserve"><value>Already like that (or done with other changes): undo it in History</value></data>
+  <data name="Boot.TrendFaster" xml:space="preserve"><value>Trend: the last {0} boots are {1} faster on average than the {2} before them.</value></data>
+  <data name="Boot.TrendSlower" xml:space="preserve"><value>Trend: the last {0} boots are {1} slower on average than the {2} before them.</value></data>
+  <data name="Boot.TrendStable" xml:space="preserve"><value>Trend: steady (average {0} over the last boots).</value></data>
+  <data name="Boot.CompareWaiting" xml:space="preserve"><value>You changed startup with NEXUS on {0}. Restart the PC to see the before and after.</value></data>
+  <data name="Boot.CompareFaster" xml:space="preserve"><value>Before and after the startup change on {0}: {1} → {2} (average of {3} boots before and {4} after). It got faster.</value></data>
+  <data name="Boot.CompareSlower" xml:space="preserve"><value>Before and after the startup change on {0}: {1} → {2} (average of {3} boots before and {4} after). It got slower: check whether something new started opening with Windows.</value></data>
+  <data name="Boot.CompareSame" xml:space="preserve"><value>Before and after the startup change on {0}: {1} → {2} ({3} boots before, {4} after). The difference is within the normal boot-to-boot variation.</value></data>
+  <data name="Crash.Section" xml:space="preserve"><value>Did a game close by itself?</value></data>
+  <data name="Crash.Title" xml:space="preserve"><value>Gather crash information</value></data>
+  <data name="Crash.Lead" xml:space="preserve"><value>Reads what Windows recorded when a game closed or the video driver restarted, explains it in plain words and saves a ZIP file for whoever is helping you. Nothing changes on the PC.</value></data>
+  <data name="Crash.Read" xml:space="preserve"><value>Gather information</value></data>
+  <data name="Crash.Reading" xml:space="preserve"><value>Reading Windows records…</value></data>
+  <data name="Crash.Save" xml:space="preserve"><value>Save ZIP…</value></data>
+  <data name="Crash.OpenFolder" xml:space="preserve"><value>Open folder</value></data>
+  <data name="Crash.Privacy" xml:space="preserve"><value>The ZIP only contains Windows records and a summary of the PC's parts. No documents, photos, memory dumps or your account name.</value></data>
+  <data name="Crash.DumpsNote" xml:space="preserve"><value>"Keep details" asks Windows for a small file (minidump) of that game's next 3 crashes, for support to analyze. Needs administrator; it can be undone.</value></data>
+  <data name="Crash.KeepDumps" xml:space="preserve"><value>Keep details</value></data>
+  <data name="Crash.KeepDumpsTitle" xml:space="preserve"><value>Keep details of the next crashes</value></data>
+  <data name="Crash.KeepDumpsConfirm" xml:space="preserve"><value>Ask Windows to keep a minidump of {0}'s next crashes? Windows will ask for administrator permission. It can be undone.</value></data>
+  <data name="Crash.SaveTitle" xml:space="preserve"><value>Save crash information</value></data>
+  <data name="Crash.ZipFilter" xml:space="preserve"><value>ZIP file (*.zip)|*.zip</value></data>
+  <data name="Crash.Saved" xml:space="preserve"><value>Saved to {0}</value></data>
+  <data name="Crash.SaveFailed" xml:space="preserve"><value>Could not save: {0}</value></data>
+  <data name="Crash.ReadFailed" xml:space="preserve"><value>Could not read the records: {0}</value></data>
+  <data name="Crash.GameClosed1" xml:space="preserve"><value>{0} closed by itself once in the last 7 days</value></data>
+  <data name="Crash.GameClosedN" xml:space="preserve"><value>{0} closed by itself {1} times in the last 7 days</value></data>
+  <data name="Crash.MoreGames" xml:space="preserve"><value>{0} more game(s) also closed</value></data>
+  <data name="Crash.Hangs1" xml:space="preserve"><value>a game stopped responding once</value></data>
+  <data name="Crash.HangsN" xml:space="preserve"><value>games stopped responding {0} times</value></data>
+  <data name="Crash.VideoReset1" xml:space="preserve"><value>the video driver stopped and restarted once</value></data>
+  <data name="Crash.VideoResetN" xml:space="preserve"><value>the video driver stopped and restarted {0} times</value></data>
+  <data name="Crash.Advice.UpdateGpuDriver" xml:space="preserve"><value>update the video driver (preferably a clean install, in Advanced tools › Update drivers)</value></data>
+  <data name="Crash.Advice.VerifyGameFiles" xml:space="preserve"><value>verify the game files in the store (Steam: Properties › Installed Files › Verify integrity)</value></data>
+  <data name="Crash.Advice.CheckOverclockAndTemps" xml:space="preserve"><value>if the graphics card, processor or memory (XMP/EXPO) is overclocked, go back to default and check the temperature</value></data>
+  <data name="Crash.Advice.TestMemory" xml:space="preserve"><value>test the RAM (Windows Memory Diagnostic: press Windows, type mdsched)</value></data>
+  <data name="Crash.Nothing" xml:space="preserve"><value>No game closed by itself and the video driver did not restart in the last 7 days (as far as Windows recorded). If the game closed without warning, save the ZIP anyway for whoever is helping you.</value></data>
+  <data name="Crash.GameLine1" xml:space="preserve"><value>once · last on {1}</value></data>
+  <data name="Crash.GameLineN" xml:space="preserve"><value>{0} times · last on {1}</value></data>
+  <data name="Crash.WhatToDo" xml:space="preserve"><value>What to do:</value></data>
 </root>

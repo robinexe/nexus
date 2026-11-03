@@ -1,9 +1,12 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using Nexus.Boot.Impact;
 using Nexus.Boot.Inventory;
 using Nexus.Boot.Windows;
 using Nexus.Broker;
+using Nexus.Core;
 using Nexus.Desktop.Views.Controls;
+using Nexus.Persistence;
 
 namespace Nexus.Desktop.ViewModels;
 
@@ -162,16 +165,18 @@ public sealed class StartupPage : ModulePage
 
     private async Task ReadAsync()
     {
-        var (inventory, report) = await Task.Run(() =>
+        var (inventory, report, changes) = await Task.Run(() =>
         {
             var r = WindowsBootEventReader.Read();
+            var ch = StartupChangeTimes();
             var inv = new StartupInventory(new WindowsBootRegistryReader(), new WindowsFileInspector(), Environment.GetEnvironmentVariable,
                     Environment.GetFolderPath(Environment.SpecialFolder.Windows))
                 .Read(WindowsStartupFolders.Current(), new WindowsTaskScheduler(), new WindowsServiceReader(), r);
-            return (inv, r);
+            return (inv, r, ch);
         });
         _loaded = true;
         ShowBoot(report);
+        ShowTrend(report, changes);
         _all = inventory.Items.Select(i => new StartupRow(i, this)).ToList();
         Notes.Clear();
         foreach (var n in inventory.Notes) Notes.Add(n);
@@ -221,6 +226,73 @@ public sealed class StartupPage : ModulePage
         foreach (var b in recent)
             BootBars.Add(new BootBar(Math.Max(4, 90.0 * b.TotalMs / max), b.TimeUtc.ToLocalTime().ToString("dd/MM", System.Globalization.CultureInfo.CurrentCulture),
                 BootReport.Seconds(b.TotalMs), ReferenceEquals(b, last)) { IsSlow = b.TotalMs > average * 1.25 });
+    }
+
+    // ------------------------------------------------------------------ tendência e antes x depois (eventos 100 + diário)
+
+    private string _trendText = "";
+    private string _compareText = "";
+    private Tone _compareTone = Tone.Neutral;
+
+    /// <summary>"Tendência: os últimos 5 boots estão 4,2 s mais rápidos que os 5 anteriores." (vazio sem boots suficientes).</summary>
+    public string TrendText { get => _trendText; private set { if (Set(ref _trendText, value)) OnPropertyChanged(nameof(HasTrend)); } }
+    public bool HasTrend => _trendText.Length > 0;
+    /// <summary>Antes x depois da última vez que você mudou a inicialização pelo NEXUS (datas do diário).</summary>
+    public string CompareText { get => _compareText; private set { if (Set(ref _compareText, value)) OnPropertyChanged(nameof(HasCompare)); } }
+    public bool HasCompare => _compareText.Length > 0;
+    public Tone CompareTone { get => _compareTone; private set => Set(ref _compareTone, value); }
+
+    internal static string Sec(double ms) => (ms / 1000.0).ToString(ms >= 10_000 ? "0" : "0.0", Loc.Culture) + " s";
+
+    private void ShowTrend(BootReport report, IReadOnlyList<DateTimeOffset> changes)
+    {
+        (TrendText, CompareText, CompareTone) = TrendTexts(report.Boots, changes);
+    }
+
+    /// <summary>Frases da tendência e do antes x depois (lógica em <see cref="BootTrends"/>; aqui só o texto).</summary>
+    internal static (string Trend, string Compare, Tone Tone) TrendTexts(IReadOnlyList<BootRecord> boots, IReadOnlyList<DateTimeOffset> changes)
+    {
+        var t = BootTrends.Trend(boots);
+        var trend = t.Direction switch
+        {
+            BootTrendDirection.Faster => Loc.F("Boot.TrendFaster", t.RecentCount, Sec(Math.Abs(t.DeltaMs)), t.PreviousCount),
+            BootTrendDirection.Slower => Loc.F("Boot.TrendSlower", t.RecentCount, Sec(Math.Abs(t.DeltaMs)), t.PreviousCount),
+            BootTrendDirection.Stable => Loc.F("Boot.TrendStable", Sec(t.RecentAverageMs)),
+            _ => "",
+        };
+        if (BootTrends.LatestComparison(boots, changes) is not { } c) return (trend, "", Tone.Neutral);
+        var when = c.ChangeUtc.ToLocalTime().ToString("g", Loc.Culture);
+        if (c.WaitingForBoot) return (trend, Loc.F("Boot.CompareWaiting", when), Tone.Info);
+        var meaningful = BootTrends.IsMeaningful(c);
+        var (b, a) = (Sec(c.BeforeAverageMs), Sec(c.AfterAverageMs));
+        if (!meaningful) return (trend, Loc.F("Boot.CompareSame", when, b, a, c.BeforeCount, c.AfterCount), Tone.Neutral);
+        return c.DeltaMs < 0
+            ? (trend, Loc.F("Boot.CompareFaster", when, b, a, c.BeforeCount, c.AfterCount), Tone.Good)
+            : (trend, Loc.F("Boot.CompareSlower", when, b, a, c.BeforeCount, c.AfterCount), Tone.Warn);
+    }
+
+    /// <summary>Quando o NEXUS mudou a inicialização (desligou/ligou itens), pelos dois diários (só leitura).</summary>
+    private static List<DateTimeOffset> StartupChangeTimes()
+    {
+        var list = new List<DateTimeOffset>();
+        foreach (var level in new[] { BrokerLevel.User, BrokerLevel.Admin })
+        {
+            var path = LocalBroker.JournalPath(level);
+            if (!File.Exists(path)) continue;
+            try
+            {
+                using var journal = SqliteJournal.OpenReadOnly(path);
+                foreach (var run in journal.Runs())
+                {
+                    var entries = journal.Entries(run.RunId);
+                    if (entries.Any(e => e.Action.Definition.Id.StartsWith("boot.", StringComparison.Ordinal) &&
+                                         e.State is JournalState.Applied or JournalState.Verified or JournalState.Reverted))
+                        list.Add(run.StartedAt);
+                }
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { } // diário ilegível: só fica sem o antes x depois
+        }
+        return list;
     }
 
     private void ApplyFilter()

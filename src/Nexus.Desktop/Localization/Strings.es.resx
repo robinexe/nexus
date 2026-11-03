@@ -3898,4 +3898,43 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Quick.ConfirmOn" xml:space="preserve"><value>¿Activar "{0}"? Se puede deshacer.</value></data>
   <data name="Simple.Quick.ConfirmOff" xml:space="preserve"><value>¿Deshacer "{0}" y volver como estaba?</value></data>
   <data name="Simple.Quick.NothingToUndo" xml:space="preserve"><value>Ya estaba así (o se hizo junto con otros): deshazlo en Historial</value></data>
+  <data name="Boot.TrendFaster" xml:space="preserve"><value>Tendencia: los últimos {0} arranques son {1} más rápidos, en promedio, que los {2} anteriores.</value></data>
+  <data name="Boot.TrendSlower" xml:space="preserve"><value>Tendencia: los últimos {0} arranques son {1} más lentos, en promedio, que los {2} anteriores.</value></data>
+  <data name="Boot.TrendStable" xml:space="preserve"><value>Tendencia: estable (promedio de {0} en los últimos arranques).</value></data>
+  <data name="Boot.CompareWaiting" xml:space="preserve"><value>Cambiaste el inicio con NEXUS el {0}. Reinicia el PC para ver el antes y después.</value></data>
+  <data name="Boot.CompareFaster" xml:space="preserve"><value>Antes y después del cambio en el inicio el {0}: {1} → {2} (promedio de {3} arranques antes y {4} después). Quedó más rápido.</value></data>
+  <data name="Boot.CompareSlower" xml:space="preserve"><value>Antes y después del cambio en el inicio el {0}: {1} → {2} (promedio de {3} arranques antes y {4} después). Quedó más lento: mira si algo nuevo empezó a abrir con Windows.</value></data>
+  <data name="Boot.CompareSame" xml:space="preserve"><value>Antes y después del cambio en el inicio el {0}: {1} → {2} ({3} arranques antes, {4} después). La diferencia está dentro de la variación normal entre arranques.</value></data>
+  <data name="Crash.Section" xml:space="preserve"><value>¿El juego se cerró solo?</value></data>
+  <data name="Crash.Title" xml:space="preserve"><value>Reunir información del cierre</value></data>
+  <data name="Crash.Lead" xml:space="preserve"><value>Lee lo que Windows registró cuando un juego se cerró o el controlador de video se reinició, lo explica con palabras simples y guarda un archivo ZIP para quien te ayude. Nada cambia en el PC.</value></data>
+  <data name="Crash.Read" xml:space="preserve"><value>Reunir información</value></data>
+  <data name="Crash.Reading" xml:space="preserve"><value>Leyendo los registros de Windows…</value></data>
+  <data name="Crash.Save" xml:space="preserve"><value>Guardar ZIP…</value></data>
+  <data name="Crash.OpenFolder" xml:space="preserve"><value>Abrir carpeta</value></data>
+  <data name="Crash.Privacy" xml:space="preserve"><value>El ZIP solo lleva registros de Windows y un resumen de las piezas del PC. No lleva documentos, fotos, volcados de memoria ni el nombre de tu cuenta.</value></data>
+  <data name="Crash.DumpsNote" xml:space="preserve"><value>"Guardar detalles" pide a Windows un archivo pequeño (minivolcado) de los próximos 3 cierres de ese juego, para que el soporte lo analice. Requiere administrador; se puede deshacer.</value></data>
+  <data name="Crash.KeepDumps" xml:space="preserve"><value>Guardar detalles</value></data>
+  <data name="Crash.KeepDumpsTitle" xml:space="preserve"><value>Guardar detalles de los próximos cierres</value></data>
+  <data name="Crash.KeepDumpsConfirm" xml:space="preserve"><value>¿Pedir a Windows que guarde un minivolcado de los próximos cierres de {0}? Windows pedirá permiso de administrador. Se puede deshacer.</value></data>
+  <data name="Crash.SaveTitle" xml:space="preserve"><value>Guardar información del cierre</value></data>
+  <data name="Crash.ZipFilter" xml:space="preserve"><value>Archivo ZIP (*.zip)|*.zip</value></data>
+  <data name="Crash.Saved" xml:space="preserve"><value>Guardado en {0}</value></data>
+  <data name="Crash.SaveFailed" xml:space="preserve"><value>No se pudo guardar: {0}</value></data>
+  <data name="Crash.ReadFailed" xml:space="preserve"><value>No se pudieron leer los registros: {0}</value></data>
+  <data name="Crash.GameClosed1" xml:space="preserve"><value>{0} se cerró solo 1 vez en los últimos 7 días</value></data>
+  <data name="Crash.GameClosedN" xml:space="preserve"><value>{0} se cerró solo {1} veces en los últimos 7 días</value></data>
+  <data name="Crash.MoreGames" xml:space="preserve"><value>{0} juego(s) más también se cerraron</value></data>
+  <data name="Crash.Hangs1" xml:space="preserve"><value>un juego dejó de responder 1 vez</value></data>
+  <data name="Crash.HangsN" xml:space="preserve"><value>los juegos dejaron de responder {0} veces</value></data>
+  <data name="Crash.VideoReset1" xml:space="preserve"><value>el controlador de video se detuvo y reinició 1 vez</value></data>
+  <data name="Crash.VideoResetN" xml:space="preserve"><value>el controlador de video se detuvo y reinició {0} veces</value></data>
+  <data name="Crash.Advice.UpdateGpuDriver" xml:space="preserve"><value>actualiza el controlador de video (de preferencia con instalación limpia, en Herramientas avanzadas › Actualizar controladores)</value></data>
+  <data name="Crash.Advice.VerifyGameFiles" xml:space="preserve"><value>verifica los archivos del juego en la tienda (Steam: Propiedades › Archivos instalados › Verificar integridad)</value></data>
+  <data name="Crash.Advice.CheckOverclockAndTemps" xml:space="preserve"><value>si la tarjeta gráfica, el procesador o la memoria (XMP/EXPO) tienen overclock, vuelve a los valores de fábrica y revisa la temperatura</value></data>
+  <data name="Crash.Advice.TestMemory" xml:space="preserve"><value>prueba la memoria RAM (Diagnóstico de memoria de Windows: tecla Windows, escribe mdsched)</value></data>
+  <data name="Crash.Nothing" xml:space="preserve"><value>Ningún juego se cerró solo y el controlador de video no se reinició en los últimos 7 días (según lo que registró Windows). Si el juego se cerró sin aviso, guarda el ZIP igualmente para quien te ayude.</value></data>
+  <data name="Crash.GameLine1" xml:space="preserve"><value>1 vez · la última el {1}</value></data>
+  <data name="Crash.GameLineN" xml:space="preserve"><value>{0} veces · la última el {1}</value></data>
+  <data name="Crash.WhatToDo" xml:space="preserve"><value>Qué hacer:</value></data>
 </root>

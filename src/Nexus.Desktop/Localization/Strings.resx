@@ -3898,4 +3898,43 @@ Cada coisa volta como era antes. O que é do sistema pede permissão de administ
   <data name="Simple.Quick.ConfirmOn" xml:space="preserve"><value>Ligar "{0}"? Dá para desfazer.</value></data>
   <data name="Simple.Quick.ConfirmOff" xml:space="preserve"><value>Desfazer "{0}" e voltar como era?</value></data>
   <data name="Simple.Quick.NothingToUndo" xml:space="preserve"><value>Já estava assim (ou foi feito junto com outros): desfaça em Histórico</value></data>
+  <data name="Boot.TrendFaster" xml:space="preserve"><value>Tendência: os últimos {0} boots estão {1} mais rápidos, em média, que os {2} anteriores.</value></data>
+  <data name="Boot.TrendSlower" xml:space="preserve"><value>Tendência: os últimos {0} boots estão {1} mais lentos, em média, que os {2} anteriores.</value></data>
+  <data name="Boot.TrendStable" xml:space="preserve"><value>Tendência: estável (média de {0} nos últimos boots).</value></data>
+  <data name="Boot.CompareWaiting" xml:space="preserve"><value>Você mudou a inicialização pelo NEXUS em {0}. Reinicie o PC para ver o antes e depois.</value></data>
+  <data name="Boot.CompareFaster" xml:space="preserve"><value>Antes e depois da mudança na inicialização em {0}: {1} → {2} (média de {3} boots antes e {4} depois). Ficou mais rápido.</value></data>
+  <data name="Boot.CompareSlower" xml:space="preserve"><value>Antes e depois da mudança na inicialização em {0}: {1} → {2} (média de {3} boots antes e {4} depois). Ficou mais lento: veja se algo novo passou a abrir com o Windows.</value></data>
+  <data name="Boot.CompareSame" xml:space="preserve"><value>Antes e depois da mudança na inicialização em {0}: {1} → {2} ({3} boots antes, {4} depois). Diferença dentro da variação normal de um boot para outro.</value></data>
+  <data name="Crash.Section" xml:space="preserve"><value>O jogo fechou sozinho?</value></data>
+  <data name="Crash.Title" xml:space="preserve"><value>Juntar informações do travamento</value></data>
+  <data name="Crash.Lead" xml:space="preserve"><value>Lê o que o Windows registrou quando um jogo fechou ou o driver de vídeo reiniciou, explica em palavras simples e salva um arquivo ZIP para quem for ajudar. Nada muda no PC.</value></data>
+  <data name="Crash.Read" xml:space="preserve"><value>Juntar informações</value></data>
+  <data name="Crash.Reading" xml:space="preserve"><value>Lendo os registros do Windows…</value></data>
+  <data name="Crash.Save" xml:space="preserve"><value>Salvar ZIP…</value></data>
+  <data name="Crash.OpenFolder" xml:space="preserve"><value>Abrir pasta</value></data>
+  <data name="Crash.Privacy" xml:space="preserve"><value>O ZIP leva só registros do Windows e um resumo das peças do PC. Não leva documentos, fotos, despejos de memória nem o nome da sua conta.</value></data>
+  <data name="Crash.DumpsNote" xml:space="preserve"><value>"Guardar detalhes" pede ao Windows um arquivo pequeno (minidespejo) dos próximos 3 travamentos daquele jogo, para o suporte analisar. Precisa de administrador; dá para desfazer.</value></data>
+  <data name="Crash.KeepDumps" xml:space="preserve"><value>Guardar detalhes</value></data>
+  <data name="Crash.KeepDumpsTitle" xml:space="preserve"><value>Guardar detalhes dos próximos travamentos</value></data>
+  <data name="Crash.KeepDumpsConfirm" xml:space="preserve"><value>Pedir ao Windows para guardar um minidespejo dos próximos travamentos de {0}? O Windows vai pedir permissão de administrador. Dá para desfazer.</value></data>
+  <data name="Crash.SaveTitle" xml:space="preserve"><value>Salvar informações do travamento</value></data>
+  <data name="Crash.ZipFilter" xml:space="preserve"><value>Arquivo ZIP (*.zip)|*.zip</value></data>
+  <data name="Crash.Saved" xml:space="preserve"><value>Salvo em {0}</value></data>
+  <data name="Crash.SaveFailed" xml:space="preserve"><value>Não foi possível salvar: {0}</value></data>
+  <data name="Crash.ReadFailed" xml:space="preserve"><value>Não foi possível ler os registros: {0}</value></data>
+  <data name="Crash.GameClosed1" xml:space="preserve"><value>{0} fechou sozinho 1 vez nos últimos 7 dias</value></data>
+  <data name="Crash.GameClosedN" xml:space="preserve"><value>{0} fechou sozinho {1} vezes nos últimos 7 dias</value></data>
+  <data name="Crash.MoreGames" xml:space="preserve"><value>mais {0} jogo(s) também fecharam</value></data>
+  <data name="Crash.Hangs1" xml:space="preserve"><value>um jogo parou de responder 1 vez</value></data>
+  <data name="Crash.HangsN" xml:space="preserve"><value>jogos pararam de responder {0} vezes</value></data>
+  <data name="Crash.VideoReset1" xml:space="preserve"><value>o driver de vídeo parou e reiniciou 1 vez</value></data>
+  <data name="Crash.VideoResetN" xml:space="preserve"><value>o driver de vídeo parou e reiniciou {0} vezes</value></data>
+  <data name="Crash.Advice.UpdateGpuDriver" xml:space="preserve"><value>atualize o driver de vídeo (de preferência com instalação limpa, em Ferramentas avançadas › Atualizar drivers)</value></data>
+  <data name="Crash.Advice.VerifyGameFiles" xml:space="preserve"><value>verifique os arquivos do jogo pela loja (Steam: Propriedades › Arquivos instalados › Verificar integridade)</value></data>
+  <data name="Crash.Advice.CheckOverclockAndTemps" xml:space="preserve"><value>se houver overclock na placa de vídeo, no processador ou na memória (XMP/EXPO), volte ao padrão e confira a temperatura</value></data>
+  <data name="Crash.Advice.TestMemory" xml:space="preserve"><value>teste a memória RAM (Diagnóstico de Memória do Windows: tecla Windows, digite mdsched)</value></data>
+  <data name="Crash.Nothing" xml:space="preserve"><value>Nenhum jogo fechou sozinho e o driver de vídeo não reiniciou nos últimos 7 dias (pelo que o Windows registrou). Se o jogo fechou sem aviso, salve o ZIP mesmo assim para quem for ajudar.</value></data>
+  <data name="Crash.GameLine1" xml:space="preserve"><value>1 vez · última em {1}</value></data>
+  <data name="Crash.GameLineN" xml:space="preserve"><value>{0} vezes · última em {1}</value></data>
+  <data name="Crash.WhatToDo" xml:space="preserve"><value>O que fazer:</value></data>
 </root>
