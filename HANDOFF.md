@@ -250,7 +250,15 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     "Feito ✓ — Desfazer"); docs/10-design-system.md §9. Defeito achado só no CI: NullReference no CanExecute da navegação
     durante o InitializeComponent + janela de erro modal no autoteste (travava o CI 20 min) — corrigidos; workflow
     diag-ui.yml grava a pilha .NET. Instalador 1.0.0-ci.22. 2178 testes.
-22. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
+22. **02/11 noite:** pesquisa de funções novas (só software) → "Por que travou?" (causa provável de cada engasgo pelas
+    colunas do PresentMon 2.6 + CPU por processo e leitura de disco do jogo), "Atraso de drivers" (aproximação por contadores
+    PDH, sem admin), Rede para jogos (ping/jitter/perda + bufferbloat com confirmação, speed.cloudflare.com), Saúde dos discos
+    (MSFT_StorageReliabilityCounter; jogos em HD), monitor abaixo da taxa máxima (um clique com volta em 15 s), aviso de
+    notebook na bateria, aviso de limitação pelo firmware (evento 37 / % Performance Limit), "O jogo fechou sozinho?" (eventos +
+    ZIP + minidumps por jogo opcional), tempo de boot com antes/depois, sessão de jogo (teto temporário da Otimização de
+    Entrega), teste do mouse (Raw Input), arquivos duplicados (quarentena), 6 mitos novos. docs/modules/pc-checks.md,
+    utilidades.md, measure.md. 2320 testes; VM 2022/2025 verde (pt/en/es). Instalador 1.0.0-ci.23.
+23. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
     diagnósticos, idiomas), rodar _claude\Configurar-Atualizacoes.cmd, certificado de assinatura de código, publicar a
     1.0.0 (tag v1.0.0) e subir VersionPrefix para 1.0.1. Depois: VALORANT, investigador de travadinhas, A/B automático, IA. NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
