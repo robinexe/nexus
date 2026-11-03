@@ -541,7 +541,7 @@ public sealed class SystemToolsHandlerTests : IDisposable
     public void Catalog_loads_and_every_kind_is_registered()
     {
         var mine = Catalog.Actions.Where(a => a.Definition.Id.StartsWith("system.", StringComparison.Ordinal)).ToList();
-        Assert.Equal(7, mine.Count);
+        Assert.Equal(8, mine.Count); // + system.crash.localdumps (catalog/utilities.v1.json)
         Assert.Equal(Catalog.Actions.Count, Catalog.Actions.Select(a => a.Definition.Key).Distinct().Count());
         var kinds = SystemToolsHandlers.Create(Env()).Select(h => h.HandlerKind).ToHashSet();
         Assert.All(mine, a => Assert.Contains(a.Definition.HandlerKind, kinds));
