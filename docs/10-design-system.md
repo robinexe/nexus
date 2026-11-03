@@ -434,6 +434,15 @@ pelo aplicador. O cartão/linha em que o usuário clicou fica à vista mesmo dep
 - **Limpar**: "X GB podem ser liberados", "Limpar agora" (só regras seguras, para a quarentena), lista em "Ver o que será limpo".
 - **Jogos**: Modo de jogo do Windows com "Ligar" de um clique. Por jogo: "Medir FPS" e cada opção que vale com "Ligar" de um
   clique (driver NVIDIA por jogo, jogos em janela).
+  - Cada opção mostra o estado REAL, lido de onde a ação escreve (`GameOptionStates.cs`, lógica pura testada em
+    `GameOptionStateTests`): Modo de jogo pelo registro (releitura do catálogo depois de aplicar), driver NVIDIA pelo leitor do
+    DRS em cada executável (o da biblioteca e, se ele só abre o jogo, o que desenha: `GameAliases`), jogos em janela pelo token
+    `SwapEffectUpgradeEnable` de UserGpuPreferences, Fortnite pelo GameUserSettings.ini, Sessão de jogo por `game-session.json`.
+  - Ligada: "✓ Ligado — Desfazer" quando o diário tem a execução que só mexeu nela (chave da ação + alvo do jogo); feita junto
+    com outras coisas: "Desfazer no Histórico"; ligada por fora do NEXUS: só "✓ Ligado". Valor diferente: "Está com outro valor".
+  - Os botões são os mesmos entre aberturas da tela; a cada abertura e depois de aplicar/desfazer, relê só aquele jogo.
+- **Início/Problemas depois de aplicar**: o diagnóstico só é refeito na próxima leitura do PC; até lá, um achado cuja ação do
+  catálogo já está como ela deixa (releitura "same") conta como resolvido (`ResolvedFindings`) e não volta como pendente.
 - **Problemas**: achados em palavras simples (`PlainFindings`), "O que fazer" em 1–2 frases e "Resolver" de um clique quando há
   ação de risco baixo. O que está bem fica recolhido.
 - **Checagens do PC** (`docs/modules/pc-checks.md`): rede para jogos, saúde dos discos, monitor abaixo da taxa, limitação do
