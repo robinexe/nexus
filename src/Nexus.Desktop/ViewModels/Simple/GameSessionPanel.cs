@@ -1,5 +1,3 @@
-using System.IO;
-using System.Text.Json;
 using System.Windows.Threading;
 using Nexus.Broker;
 using Nexus.Measurement;
@@ -21,23 +19,21 @@ public sealed class GameSessionPanel : ObservableObject
     private readonly Func<MeasurePage?> _measure;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(5) };
     private readonly GameSessionCap _cap = new();
-    private readonly string _statePath;
-    private State _state = new(false, null);
+    private readonly GameSessionStore _store;
+    private GameSessionState _state = GameSessionState.Off;
     private bool _working;
     private string _status = "";
     private IReadOnlyList<string> _warnings = [];
     private string? _gameName;
 
-    private sealed record State(bool Enabled, Guid? PendingRun);
-
     public GameSessionPanel(Func<IModuleHost?> host, Func<MeasurePage?> measure, string? statePath = null)
     {
         _host = host ?? throw new ArgumentNullException(nameof(host));
         _measure = measure ?? throw new ArgumentNullException(nameof(measure));
-        _statePath = statePath ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NEXUS", "game-session.json");
+        _store = new GameSessionStore(statePath ?? GameSessionStore.DefaultPath);
         _timer.Tick += async (_, _) => await TickAsync();
         ToggleCommand = new RelayCommand(Toggle, () => !_working);
-        Load();
+        _state = _store.Load();
         if (_state.PendingRun is not null) _cap.Resume();
         UpdateStatus();
     }
@@ -172,23 +168,9 @@ public sealed class GameSessionPanel : ObservableObject
         };
     }
 
-    private void Load()
-    {
-        try
-        {
-            if (File.Exists(_statePath)) _state = JsonSerializer.Deserialize<State>(File.ReadAllText(_statePath)) ?? _state;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException) { _state = new(false, null); }
-    }
-
-    private void Save(State state)
+    private void Save(GameSessionState state)
     {
         _state = state;
-        try
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(_statePath)!);
-            File.WriteAllText(_statePath, JsonSerializer.Serialize(state));
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // só perde a lembrança entre aberturas
+        _store.Save(state);
     }
 }
