@@ -24,6 +24,9 @@ public sealed class GpuLabPage : ModulePage
     public const int RecordDelaySeconds = 10;
 
     private GpuLabReport? _report;
+
+    /// <summary>Última leitura (só leitura), para outras telas (Jogos: GPU principal e taxa do monitor para o Fortnite).</summary>
+    public GpuLabReport? Report => _report;
     private NvmlSession? _nvml;
     private string _nvmlStatus = "";
     private bool _nvmlTried;

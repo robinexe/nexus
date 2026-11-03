@@ -456,6 +456,16 @@
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
+                  <!-- Estado atual lido do jogo e aviso (Fortnite: "Agora: Modo desempenho · limite 141 FPS"; "feche o Fortnite antes") -->
+                  <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.Signal}" Margin="64,10,0,0"
+                             TextWrapping="Wrap" Visibility="{Binding HasStatus, Converter={StaticResource BoolToVis}}"/>
+                  <DockPanel Margin="64,6,0,0" Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}">
+                    <c:Icon Data="{StaticResource Icon.Info}" Size="15" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,8,0" VerticalAlignment="Top"
+                            Visibility="{Binding IsRunning, Converter={StaticResource FalseToVisible}}"/>
+                    <c:Icon Data="{StaticResource Icon.Warning}" Size="15" Foreground="{StaticResource Brush.Trace}" Margin="0,2,8,0" VerticalAlignment="Top"
+                            Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap"/>
+                  </DockPanel>
                   <c:StatusChip Tone="Good" Text="{l:T Simple.Games.WindowedOn}" HorizontalAlignment="Left" Margin="64,10,0,0"
                                 Visibility="{Binding WindowedOn, Converter={StaticResource BoolToVis}}"/>
                   <!-- Por que travou? (última partida medida deste jogo) -->

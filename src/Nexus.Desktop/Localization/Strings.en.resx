@@ -3943,6 +3943,22 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: turn on "{1}"? You can undo it.</value></data>
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: turn on "{1}"? Windows will ask for administrator permission. You can undo it.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>Turn on Windows Game Mode? You can undo it.</value></data>
+  <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>More FPS on a weak PC (Performance mode)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflex" xml:space="preserve"><value>Less latency (Reflex + {0} FPS limit)</value></data>
+  <data name="Simple.Games.Fn.LatencyCap" xml:space="preserve"><value>Less latency ({0} FPS limit)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflexOnly" xml:space="preserve"><value>Less latency (NVIDIA Reflex)</value></data>
+  <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Sharp image when turning (no motion blur)</value></data>
+  <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: turn on "{0}"? Close Fortnite first. You can undo it.</value></data>
+  <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Close Fortnite first: while open it rewrites its settings on exit. Aim already has no acceleration: the game reads the mouse directly.</value></data>
+  <data name="Simple.Games.Fn.Running" xml:space="preserve"><value>Fortnite is open right now. Close the game to apply these options.</value></data>
+  <data name="Simple.Games.Fn.NotFound" xml:space="preserve"><value>Open Fortnite once so NEXUS can find the game settings.</value></data>
+  <data name="Simple.Games.Fn.Now" xml:space="preserve"><value>Now: {0}</value></data>
+  <data name="Simple.Games.Fn.ModePerf" xml:space="preserve"><value>Performance mode</value></data>
+  <data name="Simple.Games.Fn.ModeDx12" xml:space="preserve"><value>DirectX 12</value></data>
+  <data name="Simple.Games.Fn.Cap" xml:space="preserve"><value>{0} FPS limit</value></data>
+  <data name="Simple.Games.Fn.NoCap" xml:space="preserve"><value>no FPS limit</value></data>
+  <data name="Simple.Games.Fn.ReflexOn" xml:space="preserve"><value>Reflex on</value></data>
+  <data name="Simple.Games.Fn.ReflexOff" xml:space="preserve"><value>Reflex off</value></data>
   <data name="Simple.One.Fix" xml:space="preserve"><value>Fix it</value></data>
   <data name="Simple.One.Working" xml:space="preserve"><value>Applying…</value></data>
   <data name="Simple.One.Done" xml:space="preserve"><value>Done</value></data>

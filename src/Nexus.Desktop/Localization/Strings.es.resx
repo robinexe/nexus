@@ -3943,6 +3943,22 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: ¿activar "{1}"? Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ¿activar "{1}"? Windows pide permiso de administrador. Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>¿Activar el Modo de juego de Windows? Se puede deshacer.</value></data>
+  <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>Más FPS en PC débil (Modo rendimiento)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflex" xml:space="preserve"><value>Menos retraso (Reflex + límite de {0} FPS)</value></data>
+  <data name="Simple.Games.Fn.LatencyCap" xml:space="preserve"><value>Menos retraso (límite de {0} FPS)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflexOnly" xml:space="preserve"><value>Menos retraso (NVIDIA Reflex)</value></data>
+  <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Imagen nítida al girar (sin desenfoque de movimiento)</value></data>
+  <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: ¿activar "{0}"? Cierra Fortnite antes. Se puede deshacer.</value></data>
+  <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Cierra Fortnite antes: abierto, reescribe la configuración al salir. La mira ya no tiene aceleración: el juego lee el ratón directamente.</value></data>
+  <data name="Simple.Games.Fn.Running" xml:space="preserve"><value>Fortnite está abierto ahora. Cierra el juego para aplicar estas opciones.</value></data>
+  <data name="Simple.Games.Fn.NotFound" xml:space="preserve"><value>Abre Fortnite una vez para que NEXUS encuentre la configuración del juego.</value></data>
+  <data name="Simple.Games.Fn.Now" xml:space="preserve"><value>Ahora: {0}</value></data>
+  <data name="Simple.Games.Fn.ModePerf" xml:space="preserve"><value>Modo rendimiento</value></data>
+  <data name="Simple.Games.Fn.ModeDx12" xml:space="preserve"><value>DirectX 12</value></data>
+  <data name="Simple.Games.Fn.Cap" xml:space="preserve"><value>límite de {0} FPS</value></data>
+  <data name="Simple.Games.Fn.NoCap" xml:space="preserve"><value>sin límite de FPS</value></data>
+  <data name="Simple.Games.Fn.ReflexOn" xml:space="preserve"><value>Reflex activado</value></data>
+  <data name="Simple.Games.Fn.ReflexOff" xml:space="preserve"><value>Reflex desactivado</value></data>
   <data name="Simple.One.Fix" xml:space="preserve"><value>Resolver</value></data>
   <data name="Simple.One.Working" xml:space="preserve"><value>Aplicando…</value></data>
   <data name="Simple.One.Done" xml:space="preserve"><value>Hecho</value></data>
