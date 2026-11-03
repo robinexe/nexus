@@ -388,7 +388,7 @@ public static class SimpleHistoryText
         if (k.StartsWith("cleaning.", StringComparison.Ordinal) || k.StartsWith("disk.", StringComparison.Ordinal) || k.StartsWith("files.", StringComparison.Ordinal)) return "clean";
         if (k.StartsWith("privacy.", StringComparison.Ordinal)) return "privacy";
         if (k.StartsWith("boot.", StringComparison.Ordinal) || k.StartsWith("startup.", StringComparison.Ordinal) || k.StartsWith("svc.", StringComparison.Ordinal)) return "startup";
-        if (k.StartsWith("nvidia.", StringComparison.Ordinal) || k.StartsWith("gpu", StringComparison.Ordinal) || k.StartsWith("fps.", StringComparison.Ordinal) || k.StartsWith("cs2.", StringComparison.Ordinal)) return "gpu";
+        if (k.StartsWith("nvidia.", StringComparison.Ordinal) || k.StartsWith("gpu", StringComparison.Ordinal) || k.StartsWith("fps.", StringComparison.Ordinal) || k.StartsWith("cs2.", StringComparison.Ordinal) || k.StartsWith("fortnite.", StringComparison.Ordinal)) return "gpu";
         if (k.StartsWith("system.restore.create-point", StringComparison.Ordinal)) return "restore";
         if (k.StartsWith("driverupdates.", StringComparison.Ordinal)) return "drivers";
         if (k.StartsWith("programs.", StringComparison.Ordinal)) return "programs";
@@ -455,7 +455,7 @@ public static class QuickTweakText
             id.Contains("throttl", StringComparison.Ordinal) || id.Contains("aspm", StringComparison.Ordinal) || id.Contains(".epp", StringComparison.Ordinal) ||
             id.Contains("battery", StringComparison.Ordinal) || id.Contains("parking", StringComparison.Ordinal)) return QuickCategory.Power;
         if (id.StartsWith("fps.", StringComparison.Ordinal) || id.StartsWith("gpu", StringComparison.Ordinal) || id.StartsWith("nvidia.", StringComparison.Ordinal) ||
-            id.StartsWith("cs2.", StringComparison.Ordinal) || id.Contains("game", StringComparison.Ordinal) || id.Contains("mpo", StringComparison.Ordinal) ||
+            id.StartsWith("cs2.", StringComparison.Ordinal) || id.StartsWith("fortnite.", StringComparison.Ordinal) || id.Contains("game", StringComparison.Ordinal) || id.Contains("mpo", StringComparison.Ordinal) ||
             id.Contains("mouse", StringComparison.Ordinal) || id.Contains("windowed", StringComparison.Ordinal) || id.Contains("directx", StringComparison.Ordinal)) return QuickCategory.Games;
         return QuickCategory.Speed;
     }

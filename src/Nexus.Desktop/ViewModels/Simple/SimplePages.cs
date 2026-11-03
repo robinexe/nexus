@@ -5,6 +5,8 @@ using Nexus.Broker;
 using Nexus.Core;
 using Nexus.Desktop.Views.Controls;
 using Nexus.Desktop.Views.Shell;
+using Nexus.GameProfiles;
+using Nexus.GameProfiles.Fortnite;
 using Nexus.HardwareDiscovery;
 using Nexus.Lab.Gpu;
 using Nexus.Persistence;
@@ -275,6 +277,14 @@ public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOpt
     /// <summary>"Por que travou?" da última partida medida, em uma linha ("12 travadas: a maioria provavelmente por…"), ou vazio.</summary>
     public string StutterVerdict { get; init; } = "";
     public bool HasStutterVerdict => StutterVerdict.Length > 0;
+    /// <summary>Estado atual lido do jogo (Fortnite: "Agora: Modo desempenho · limite 141 FPS · Reflex ligado"), ou vazio.</summary>
+    public string Status { get; init; } = "";
+    public bool HasStatus => Status.Length > 0;
+    /// <summary>Aviso fixo do jogo (Fortnite: "feche o Fortnite antes"), ou vazio.</summary>
+    public string Note { get; init; } = "";
+    public bool HasNote => Note.Length > 0;
+    /// <summary>O jogo está aberto agora e as opções dele não podem ser aplicadas.</summary>
+    public bool IsRunning { get; init; }
 }
 
 /// <summary>
@@ -358,9 +368,19 @@ public sealed class SimpleGamesPage : ModulePage
         try
         {
             await Gpu.OnShownAsync(); // leitura da placa e da biblioteca de jogos (só leitura)
+            _fortnite = await Task.Run(ReadFortnite);
             Build();
         }
         finally { IsLoading = false; }
+    }
+
+    /// <summary>Fortnite: configurações atuais (GameUserSettings.ini do seu perfil) e se o jogo está aberto. Só leitura.</summary>
+    private (FortniteState State, bool Running) _fortnite = (FortniteState.NotFound, false);
+
+    private static (FortniteState, bool) ReadFortnite()
+    {
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        return (string.IsNullOrEmpty(local) ? FortniteState.NotFound : FortniteState.Read(local), FortniteProcesses.AnyRunning());
     }
 
     private void Build()
@@ -395,10 +415,62 @@ public sealed class SimpleGamesPage : ModulePage
         if (windowedPath is not null)
             options.Add(Option(name, Loc.T("Simple.Games.Windowed"),
                 new ActionRequest(GpuLabPage.WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = windowedPath }), BrokerLevel.User));
+        var fortnite = string.Equals(exe, FortniteSettings.GameExe, StringComparison.OrdinalIgnoreCase);
+        if (fortnite) options.InsertRange(0, FortniteOptions());
         return new SimpleGameRow(name, exe, options, windowedOn, new RelayCommand(() => { Measure.ManualExe = exe; Host?.Navigate(Measure); }))
         {
             StutterVerdict = Measure.LatestStutterVerdict(exe),
+            Status = fortnite ? FortniteStatus(_fortnite.State) : "",
+            Note = fortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : "",
+            IsRunning = fortnite && _fortnite.Running,
         };
+    }
+
+    /// <summary>
+    /// Fortnite (GameUserSettings.ini, sua conta, com o jogo fechado): Modo desempenho; menos atraso (limite 3 abaixo do monitor +
+    /// Reflex nas placas NVIDIA); imagem nítida (sem desfoque). A "mira sem aceleração" não entra: no Windows o jogo já lê o mouse
+    /// direto, e a chave bDisableMouseAcceleration não faz nada (mito no catálogo).
+    /// </summary>
+    private List<GameOption> FortniteOptions()
+    {
+        var list = new List<GameOption>
+        {
+            FortniteOption(Loc.T("Simple.Games.Fn.Perf"),
+                [(new ActionRequest(FortniteSettings.RhiDx12Action, null), BrokerLevel.User), (new ActionRequest(FortniteSettings.PerformanceModeAction, null), BrokerLevel.User)]),
+        };
+        var report = Gpu.Report;
+        var monitors = report?.Monitors ?? [];
+        var monitor = monitors.FirstOrDefault(m => m.Primary) ?? (monitors.Count > 0 ? monitors[0] : null);
+        var cap = monitor is null ? null : FortniteSettings.SuggestedFpsLimit(monitor.Current.Hz);
+        var nvidia = report?.Primary?.Vendor == GpuVendor.Nvidia;
+        var latency = new List<(ActionRequest, BrokerLevel)>();
+        if (cap is not null) latency.Add((new ActionRequest(FortniteSettings.FpsLimitAction, cap), BrokerLevel.User));
+        if (nvidia) latency.Add((new ActionRequest(FortniteSettings.ReflexAction, FortniteSettings.ReflexOn), BrokerLevel.User));
+        if (latency.Count > 0)
+        {
+            var text = (cap, nvidia) switch
+            {
+                ({ } c, true) => Loc.F("Simple.Games.Fn.LatencyReflex", FortniteSettings.FpsLabel(c)),
+                ({ } c, false) => Loc.F("Simple.Games.Fn.LatencyCap", FortniteSettings.FpsLabel(c)),
+                _ => Loc.T("Simple.Games.Fn.LatencyReflexOnly"),
+            };
+            list.Add(FortniteOption(text, latency));
+        }
+        list.Add(FortniteOption(Loc.T("Simple.Games.Fn.Clear"), [(new ActionRequest(FortniteSettings.MotionBlurOffAction, null), BrokerLevel.User)]));
+        return list;
+    }
+
+    private GameOption FortniteOption(string text, IReadOnlyList<(ActionRequest Request, BrokerLevel Level)> requests) =>
+        new(text, new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier, q => q.ApplyAsync("Fortnite", Loc.F("Simple.Games.Fn.Confirm", text), requests)));
+
+    /// <summary>"Agora: Modo desempenho · limite 141 FPS · Reflex ligado" (ou "abra o jogo uma vez").</summary>
+    private static string FortniteStatus(FortniteState s)
+    {
+        if (!s.FileFound) return Loc.T("Simple.Games.Fn.NotFound");
+        var parts = new List<string> { s.IsPerformanceMode ? Loc.T("Simple.Games.Fn.ModePerf") : Loc.T("Simple.Games.Fn.ModeDx12") };
+        parts.Add(s.FrameRateLimit is { } f && FortniteSettings.FpsLabel(f) is var label && label != "0" ? Loc.F("Simple.Games.Fn.Cap", label) : Loc.T("Simple.Games.Fn.NoCap"));
+        if (s.Reflex is { } r) parts.Add(r == "0" ? Loc.T("Simple.Games.Fn.ReflexOff") : Loc.T("Simple.Games.Fn.ReflexOn"));
+        return Loc.F("Simple.Games.Fn.Now", string.Join(" · ", parts));
     }
 
     private GameOption Option(string game, string text, ActionRequest request, BrokerLevel level) =>

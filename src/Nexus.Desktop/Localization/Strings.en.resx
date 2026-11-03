@@ -1198,6 +1198,42 @@ NEXUS doesn't download or install anything: choose the driver there, on the manu
   <data name="Gpu.AgoraHz" xml:space="preserve"><value>Now (Hz)</value></data>
   <data name="Gpu.AgoraNTelaFicou" xml:space="preserve"><value>Now: {0}. If the screen went black or is flickering, do nothing: the previous mode comes back by itself.</value></data>
   <data name="Gpu.AjustesJogo" xml:space="preserve"><value>Per-game tweaks</value></data>
+  <data name="Gpu.Fn.Title" xml:space="preserve"><value>Fortnite: game settings</value></data>
+  <data name="Gpu.Fn.Reading" xml:space="preserve"><value>Looking for Fortnite…</value></data>
+  <data name="Gpu.Fn.NotInstalled" xml:space="preserve"><value>Fortnite not found (Epic Games).</value></data>
+  <data name="Gpu.Fn.NoFile" xml:space="preserve"><value>Fortnite is installed, but GameUserSettings.ini does not exist in this profile yet: open the game once and close it.</value></data>
+  <data name="Gpu.Fn.Absent" xml:space="preserve"><value>(not set)</value></data>
+  <data name="Gpu.Fn.Status" xml:space="preserve"><value>GameUserSettings.ini: renderer {0}, level {1}, limit {2} FPS, Reflex {3}, V-Sync {4}, motion blur {5}, shadows {6}, grass {7}.</value></data>
+  <data name="Gpu.Fn.RunningNow" xml:space="preserve"><value>Fortnite is open right now: close it to apply.</value></data>
+  <data name="Gpu.Fn.HintWeak" xml:space="preserve"><value>{0} ({1:0.#} GB): Performance mode usually gives much more FPS. Measure before and after.</value></data>
+  <data name="Gpu.Fn.HintStrong" xml:space="preserve"><value>{0} ({1:0.#} GB): full DirectX 12 runs well; Performance mode still gives more FPS with simple visuals.</value></data>
+  <data name="Gpu.Fn.NoReflex" xml:space="preserve"><value>This GPU is not NVIDIA: Reflex does not exist on it.</value></data>
+  <data name="Gpu.Fn.CloseFirst" xml:space="preserve"><value>Close Fortnite first: while open it rewrites the file on exit and the change is lost.</value></data>
+  <data name="Gpu.Fn.Mode" xml:space="preserve"><value>Rendering mode</value></data>
+  <data name="Gpu.Fn.ModePerf" xml:space="preserve"><value>Performance (weak PC)</value></data>
+  <data name="Gpu.Fn.ModeDx12" xml:space="preserve"><value>Full DirectX 12</value></data>
+  <data name="Gpu.Fn.ModePerfText" xml:space="preserve"><value>Use Fortnite Performance mode? Much simpler visuals, less memory and less GPU and CPU load. On some PCs minimum FPS gets worse: measure before and after.</value></data>
+  <data name="Gpu.Fn.ModeDx12Text" xml:space="preserve"><value>Use full DirectX 12? Unlocks Nanite, Lumen and TSR; shaders are precompiled while loading. After a driver update the first match takes longer.</value></data>
+  <data name="Gpu.Fn.Fps" xml:space="preserve"><value>FPS limit</value></data>
+  <data name="Gpu.Fn.NoLimit" xml:space="preserve"><value>No limit</value></data>
+  <data name="Gpu.Fn.FpsText" xml:space="preserve"><value>Limit Fortnite to {0} FPS? With G-SYNC/FreeSync, 3 below the monitor refresh rate stays inside the VRR range.</value></data>
+  <data name="Gpu.Fn.FpsChange" xml:space="preserve"><value>{0} FPS limit</value></data>
+  <data name="Gpu.Fn.Reflex" xml:space="preserve"><value>NVIDIA Reflex</value></data>
+  <data name="Gpu.Fn.ReflexOn" xml:space="preserve"><value>On</value></data>
+  <data name="Gpu.Fn.ReflexBoost" xml:space="preserve"><value>On + boost</value></data>
+  <data name="Gpu.Fn.ReflexOff" xml:space="preserve"><value>Off</value></data>
+  <data name="Gpu.Fn.ReflexText" xml:space="preserve"><value>NVIDIA Reflex in Fortnite: {0}? Removes the frame queue when the GPU is maxed out. Boost keeps clocks high (more power).</value></data>
+  <data name="Gpu.Fn.Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="Gpu.Fn.VSyncOff" xml:space="preserve"><value>In-game V-Sync off</value></data>
+  <data name="Gpu.Fn.VSyncOffText" xml:space="preserve"><value>Turn off Fortnite V-Sync? Less latency; without a VRR monitor the image may tear.</value></data>
+  <data name="Gpu.Fn.BlurOff" xml:space="preserve"><value>No motion blur</value></data>
+  <data name="Gpu.Fn.BlurOffText" xml:space="preserve"><value>Turn off Fortnite motion blur? Sharp image when turning; small FPS gain.</value></data>
+  <data name="Gpu.Fn.ShadowsOff" xml:space="preserve"><value>Shadows off</value></data>
+  <data name="Gpu.Fn.ShadowsOffText" xml:space="preserve"><value>Turn off Fortnite shadows? It is the most expensive option in DirectX 12; in Performance mode the gain is small.</value></data>
+  <data name="Gpu.Fn.GrassOff" xml:space="preserve"><value>No grass (experimental)</value></data>
+  <data name="Gpu.Fn.GrassOffText" xml:space="preserve"><value>Turn off grass (hidden key bShowGrass)? There is no published measurement of a gain: test with Measure before and after.</value></data>
+  <data name="Gpu.Fn.Honest" xml:space="preserve"><value>Only GameUserSettings.ini in your profile (the file Epic says is meant to be changed). No Engine.ini, game files or anti-cheat. Everything can be undone.</value></data>
+  <data name="Gpu.Fn.Change" xml:space="preserve"><value>Fortnite: {0}</value></data>
   <data name="Gpu.AltoDesempenho" xml:space="preserve"><value>high performance</value></data>
   <data name="Gpu.AltoDesempenhoN" xml:space="preserve"><value>High performance: {0}</value></data>
   <data name="Gpu.AlvoMaxNC" xml:space="preserve"><value> · max target {0:0} °C</value></data>
@@ -3967,6 +4003,22 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: turn on "{1}"? You can undo it.</value></data>
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: turn on "{1}"? Windows will ask for administrator permission. You can undo it.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>Turn on Windows Game Mode? You can undo it.</value></data>
+  <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>More FPS on a weak PC (Performance mode)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflex" xml:space="preserve"><value>Less latency (Reflex + {0} FPS limit)</value></data>
+  <data name="Simple.Games.Fn.LatencyCap" xml:space="preserve"><value>Less latency ({0} FPS limit)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflexOnly" xml:space="preserve"><value>Less latency (NVIDIA Reflex)</value></data>
+  <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Sharp image when turning (no motion blur)</value></data>
+  <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: turn on "{0}"? Close Fortnite first. You can undo it.</value></data>
+  <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Close Fortnite first: while open it rewrites its settings on exit. Aim already has no acceleration: the game reads the mouse directly.</value></data>
+  <data name="Simple.Games.Fn.Running" xml:space="preserve"><value>Fortnite is open right now. Close the game to apply these options.</value></data>
+  <data name="Simple.Games.Fn.NotFound" xml:space="preserve"><value>Open Fortnite once so NEXUS can find the game settings.</value></data>
+  <data name="Simple.Games.Fn.Now" xml:space="preserve"><value>Now: {0}</value></data>
+  <data name="Simple.Games.Fn.ModePerf" xml:space="preserve"><value>Performance mode</value></data>
+  <data name="Simple.Games.Fn.ModeDx12" xml:space="preserve"><value>DirectX 12</value></data>
+  <data name="Simple.Games.Fn.Cap" xml:space="preserve"><value>{0} FPS limit</value></data>
+  <data name="Simple.Games.Fn.NoCap" xml:space="preserve"><value>no FPS limit</value></data>
+  <data name="Simple.Games.Fn.ReflexOn" xml:space="preserve"><value>Reflex on</value></data>
+  <data name="Simple.Games.Fn.ReflexOff" xml:space="preserve"><value>Reflex off</value></data>
   <data name="Simple.One.Fix" xml:space="preserve"><value>Fix it</value></data>
   <data name="Simple.One.Working" xml:space="preserve"><value>Applying…</value></data>
   <data name="Simple.One.Done" xml:space="preserve"><value>Done</value></data>

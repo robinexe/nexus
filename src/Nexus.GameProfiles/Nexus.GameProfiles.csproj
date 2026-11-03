@@ -5,5 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
+    <!-- HandlerEnvironment e registro (ProfileList) para o módulo de jogos (Fortnite). -->
+    <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
   </ItemGroup>
 </Project>

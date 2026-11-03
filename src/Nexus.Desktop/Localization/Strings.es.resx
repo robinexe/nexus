@@ -1198,6 +1198,42 @@ NEXUS no descarga ni instala nada: elige el driver allí, en el sitio del fabric
   <data name="Gpu.AgoraHz" xml:space="preserve"><value>Ahora (Hz)</value></data>
   <data name="Gpu.AgoraNTelaFicou" xml:space="preserve"><value>Ahora: {0}. Si la pantalla se quedó negra o parpadea, no hagas nada: el modo anterior vuelve solo.</value></data>
   <data name="Gpu.AjustesJogo" xml:space="preserve"><value>Ajustes por juego</value></data>
+  <data name="Gpu.Fn.Title" xml:space="preserve"><value>Fortnite: configuración del juego</value></data>
+  <data name="Gpu.Fn.Reading" xml:space="preserve"><value>Buscando Fortnite…</value></data>
+  <data name="Gpu.Fn.NotInstalled" xml:space="preserve"><value>Fortnite no encontrado (Epic Games).</value></data>
+  <data name="Gpu.Fn.NoFile" xml:space="preserve"><value>Fortnite instalado, pero GameUserSettings.ini aún no existe en este perfil: abre el juego una vez y ciérralo.</value></data>
+  <data name="Gpu.Fn.Absent" xml:space="preserve"><value>(no está)</value></data>
+  <data name="Gpu.Fn.Status" xml:space="preserve"><value>GameUserSettings.ini: renderizador {0}, nivel {1}, límite {2} FPS, Reflex {3}, V-Sync {4}, desenfoque {5}, sombras {6}, hierba {7}.</value></data>
+  <data name="Gpu.Fn.RunningNow" xml:space="preserve"><value>Fortnite está abierto ahora: ciérralo para aplicar.</value></data>
+  <data name="Gpu.Fn.HintWeak" xml:space="preserve"><value>{0} ({1:0.#} GB): el Modo rendimiento suele dar muchos más FPS. Mide antes y después.</value></data>
+  <data name="Gpu.Fn.HintStrong" xml:space="preserve"><value>{0} ({1:0.#} GB): DirectX 12 completo funciona bien; el Modo rendimiento aún da más FPS con un aspecto simple.</value></data>
+  <data name="Gpu.Fn.NoReflex" xml:space="preserve"><value>Esta tarjeta no es NVIDIA: Reflex no existe en ella.</value></data>
+  <data name="Gpu.Fn.CloseFirst" xml:space="preserve"><value>Cierra Fortnite antes: abierto, reescribe el archivo al salir y el cambio se pierde.</value></data>
+  <data name="Gpu.Fn.Mode" xml:space="preserve"><value>Modo de renderizado</value></data>
+  <data name="Gpu.Fn.ModePerf" xml:space="preserve"><value>Rendimiento (PC débil)</value></data>
+  <data name="Gpu.Fn.ModeDx12" xml:space="preserve"><value>DirectX 12 completo</value></data>
+  <data name="Gpu.Fn.ModePerfText" xml:space="preserve"><value>¿Usar el Modo rendimiento de Fortnite? Aspecto mucho más simple, menos memoria y menos carga en la tarjeta y la CPU. En algunos PC los mínimos de FPS empeoran: mide antes y después.</value></data>
+  <data name="Gpu.Fn.ModeDx12Text" xml:space="preserve"><value>¿Usar DirectX 12 completo? Habilita Nanite, Lumen y TSR; los sombreadores se precompilan al cargar. Tras actualizar el driver la primera partida tarda más.</value></data>
+  <data name="Gpu.Fn.Fps" xml:space="preserve"><value>Límite de FPS</value></data>
+  <data name="Gpu.Fn.NoLimit" xml:space="preserve"><value>Sin límite</value></data>
+  <data name="Gpu.Fn.FpsText" xml:space="preserve"><value>¿Limitar Fortnite a {0} FPS? Con G-SYNC/FreeSync, 3 por debajo de la frecuencia del monitor queda dentro del rango VRR.</value></data>
+  <data name="Gpu.Fn.FpsChange" xml:space="preserve"><value>límite {0} FPS</value></data>
+  <data name="Gpu.Fn.Reflex" xml:space="preserve"><value>NVIDIA Reflex</value></data>
+  <data name="Gpu.Fn.ReflexOn" xml:space="preserve"><value>Activado</value></data>
+  <data name="Gpu.Fn.ReflexBoost" xml:space="preserve"><value>Activado + boost</value></data>
+  <data name="Gpu.Fn.ReflexOff" xml:space="preserve"><value>Desactivado</value></data>
+  <data name="Gpu.Fn.ReflexText" xml:space="preserve"><value>NVIDIA Reflex en Fortnite: ¿{0}? Elimina la cola de fotogramas cuando la tarjeta está al límite. El boost mantiene el reloj alto (más consumo).</value></data>
+  <data name="Gpu.Fn.Apply" xml:space="preserve"><value>Aplicar</value></data>
+  <data name="Gpu.Fn.VSyncOff" xml:space="preserve"><value>V-Sync del juego desactivado</value></data>
+  <data name="Gpu.Fn.VSyncOffText" xml:space="preserve"><value>¿Desactivar el V-Sync de Fortnite? Menos retraso; sin monitor VRR la imagen puede cortarse.</value></data>
+  <data name="Gpu.Fn.BlurOff" xml:space="preserve"><value>Sin desenfoque de movimiento</value></data>
+  <data name="Gpu.Fn.BlurOffText" xml:space="preserve"><value>¿Desactivar el desenfoque de movimiento de Fortnite? Imagen nítida al girar; poca ganancia de FPS.</value></data>
+  <data name="Gpu.Fn.ShadowsOff" xml:space="preserve"><value>Sombras desactivadas</value></data>
+  <data name="Gpu.Fn.ShadowsOffText" xml:space="preserve"><value>¿Desactivar las sombras de Fortnite? Es la opción más cara en DirectX 12; en Modo rendimiento la ganancia es pequeña.</value></data>
+  <data name="Gpu.Fn.GrassOff" xml:space="preserve"><value>Sin hierba (experimental)</value></data>
+  <data name="Gpu.Fn.GrassOffText" xml:space="preserve"><value>¿Desactivar la hierba (clave oculta bShowGrass)? No hay medición publicada de ganancia: prueba con Medir antes y después.</value></data>
+  <data name="Gpu.Fn.Honest" xml:space="preserve"><value>Solo GameUserSettings.ini de tu perfil (el archivo que Epic dice que está hecho para cambiarse). Nada de Engine.ini, archivos del juego ni antitrampas. Todo se puede deshacer.</value></data>
+  <data name="Gpu.Fn.Change" xml:space="preserve"><value>Fortnite: {0}</value></data>
   <data name="Gpu.AltoDesempenho" xml:space="preserve"><value>alto rendimiento</value></data>
   <data name="Gpu.AltoDesempenhoN" xml:space="preserve"><value>Alto rendimiento: {0}</value></data>
   <data name="Gpu.AlvoMaxNC" xml:space="preserve"><value> · objetivo máx. {0:0} °C</value></data>
@@ -3967,6 +4003,22 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: ¿activar "{1}"? Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ¿activar "{1}"? Windows pide permiso de administrador. Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>¿Activar el Modo de juego de Windows? Se puede deshacer.</value></data>
+  <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>Más FPS en PC débil (Modo rendimiento)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflex" xml:space="preserve"><value>Menos retraso (Reflex + límite de {0} FPS)</value></data>
+  <data name="Simple.Games.Fn.LatencyCap" xml:space="preserve"><value>Menos retraso (límite de {0} FPS)</value></data>
+  <data name="Simple.Games.Fn.LatencyReflexOnly" xml:space="preserve"><value>Menos retraso (NVIDIA Reflex)</value></data>
+  <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Imagen nítida al girar (sin desenfoque de movimiento)</value></data>
+  <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: ¿activar "{0}"? Cierra Fortnite antes. Se puede deshacer.</value></data>
+  <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Cierra Fortnite antes: abierto, reescribe la configuración al salir. La mira ya no tiene aceleración: el juego lee el ratón directamente.</value></data>
+  <data name="Simple.Games.Fn.Running" xml:space="preserve"><value>Fortnite está abierto ahora. Cierra el juego para aplicar estas opciones.</value></data>
+  <data name="Simple.Games.Fn.NotFound" xml:space="preserve"><value>Abre Fortnite una vez para que NEXUS encuentre la configuración del juego.</value></data>
+  <data name="Simple.Games.Fn.Now" xml:space="preserve"><value>Ahora: {0}</value></data>
+  <data name="Simple.Games.Fn.ModePerf" xml:space="preserve"><value>Modo rendimiento</value></data>
+  <data name="Simple.Games.Fn.ModeDx12" xml:space="preserve"><value>DirectX 12</value></data>
+  <data name="Simple.Games.Fn.Cap" xml:space="preserve"><value>límite de {0} FPS</value></data>
+  <data name="Simple.Games.Fn.NoCap" xml:space="preserve"><value>sin límite de FPS</value></data>
+  <data name="Simple.Games.Fn.ReflexOn" xml:space="preserve"><value>Reflex activado</value></data>
+  <data name="Simple.Games.Fn.ReflexOff" xml:space="preserve"><value>Reflex desactivado</value></data>
   <data name="Simple.One.Fix" xml:space="preserve"><value>Resolver</value></data>
   <data name="Simple.One.Working" xml:space="preserve"><value>Aplicando…</value></data>
   <data name="Simple.One.Done" xml:space="preserve"><value>Hecho</value></data>

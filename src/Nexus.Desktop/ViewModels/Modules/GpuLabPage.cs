@@ -17,13 +17,16 @@ namespace Nexus.Desktop.ViewModels;
 /// entrega tudo (PCIe, limites de potência/temperatura, monitor abaixo da taxa, app na integrada, HAGS). Leitura direto
 /// daqui; toda correção vai pelo aplicador (Host.ApplyAsync) com diário e Desfazer. A gravação de 60 s só lê sensores.
 /// </summary>
-public sealed class GpuLabPage : ModulePage
+public sealed partial class GpuLabPage : ModulePage
 {
     private static CultureInfo Pt => Loc.Culture; // idioma da interface (docs/12-idiomas.md)
     public const int RecordSeconds = 60;
     public const int RecordDelaySeconds = 10;
 
     private GpuLabReport? _report;
+
+    /// <summary>Última leitura (só leitura), para outras telas (Jogos: GPU principal e taxa do monitor para o Fortnite).</summary>
+    public GpuLabReport? Report => _report;
     private NvmlSession? _nvml;
     private string _nvmlStatus = "";
     private bool _nvmlTried;
@@ -56,6 +59,7 @@ public sealed class GpuLabPage : ModulePage
         ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[0], Loc.T("Gpu.N100Gb")));
         ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[1], Loc.T("Gpu.Ilimitado")));
         _selectedShaderCache = ShaderCacheOptions[0];
+        InitFortnite();
     }
 
     public override string Title => Loc.T("Pg.PlacaVideo");
@@ -380,9 +384,12 @@ public sealed class GpuLabPage : ModulePage
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { Message = Loc.F("Asst.NaoFoiPossivelAbrir", ex.Message); }
     }
 
-    private async Task ApplyAsync(string title, string text, ActionRequest request, BrokerLevel level, string change, Action<GpuAppliedChange>? applied = null)
+    private Task ApplyAsync(string title, string text, ActionRequest request, BrokerLevel level, string change, Action<GpuAppliedChange>? applied = null) =>
+        ApplyAsync(title, text, [request], level, change, applied);
+
+    private async Task ApplyAsync(string title, string text, IReadOnlyList<ActionRequest> requests, BrokerLevel level, string change, Action<GpuAppliedChange>? applied = null)
     {
-        var r = await Host!.ApplyAsync(title, text, [request], level);
+        var r = await Host!.ApplyAsync(title, text, requests, level);
         if (r is null) return;
         if (r.Response is { Ok: true, RunId: { } run })
         {
@@ -533,6 +540,7 @@ public sealed class GpuLabPage : ModulePage
     /// <summary>CS2 instalado (manifesto Steam): pasta cfg, fps_max atual e dump do cvarlist. Só leitura.</summary>
     private async Task ReadCs2Async(GpuLabReport r)
     {
+        await ReadFortniteAsync(r);
         var cfg = r.Games.Where(g => g.Store == "Steam").Select(g => Cs2Install.CfgDirFromInstallDir(g.InstallDir)).FirstOrDefault(c => c is not null);
         _cs2CfgDir = cfg;
         Cs2Found = cfg is not null;
