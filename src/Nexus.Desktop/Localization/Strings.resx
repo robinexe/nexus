@@ -1198,6 +1198,42 @@ O NEXUS não baixa nem instala nada: escolha o driver lá, no site do fabricante
   <data name="Gpu.AgoraHz" xml:space="preserve"><value>Agora (Hz)</value></data>
   <data name="Gpu.AgoraNTelaFicou" xml:space="preserve"><value>Agora: {0}. Se a tela ficou preta ou piscando, não faça nada: o modo anterior volta sozinho.</value></data>
   <data name="Gpu.AjustesJogo" xml:space="preserve"><value>Ajustes por jogo</value></data>
+  <data name="Gpu.Fn.Title" xml:space="preserve"><value>Fortnite: configurações do jogo</value></data>
+  <data name="Gpu.Fn.Reading" xml:space="preserve"><value>Procurando o Fortnite…</value></data>
+  <data name="Gpu.Fn.NotInstalled" xml:space="preserve"><value>Fortnite não encontrado (Epic Games).</value></data>
+  <data name="Gpu.Fn.NoFile" xml:space="preserve"><value>Fortnite instalado, mas o GameUserSettings.ini ainda não existe neste perfil: abra o jogo uma vez e feche.</value></data>
+  <data name="Gpu.Fn.Absent" xml:space="preserve"><value>(não está)</value></data>
+  <data name="Gpu.Fn.Status" xml:space="preserve"><value>GameUserSettings.ini: renderizador {0}, nível {1}, limite {2} FPS, Reflex {3}, V-Sync {4}, desfoque {5}, sombras {6}, grama {7}.</value></data>
+  <data name="Gpu.Fn.RunningNow" xml:space="preserve"><value>O Fortnite está aberto agora: feche para aplicar.</value></data>
+  <data name="Gpu.Fn.HintWeak" xml:space="preserve"><value>{0} ({1:0.#} GB): o Modo desempenho costuma dar muito mais FPS. Meça antes e depois.</value></data>
+  <data name="Gpu.Fn.HintStrong" xml:space="preserve"><value>{0} ({1:0.#} GB): o DirectX 12 completo roda bem; o Modo desempenho ainda dá mais FPS com visual simples.</value></data>
+  <data name="Gpu.Fn.NoReflex" xml:space="preserve"><value>Esta placa não é NVIDIA: o Reflex não existe nela.</value></data>
+  <data name="Gpu.Fn.CloseFirst" xml:space="preserve"><value>Feche o Fortnite antes: aberto, ele regrava o arquivo ao sair e a mudança se perde.</value></data>
+  <data name="Gpu.Fn.Mode" xml:space="preserve"><value>Modo de renderização</value></data>
+  <data name="Gpu.Fn.ModePerf" xml:space="preserve"><value>Desempenho (PC fraco)</value></data>
+  <data name="Gpu.Fn.ModeDx12" xml:space="preserve"><value>DirectX 12 completo</value></data>
+  <data name="Gpu.Fn.ModePerfText" xml:space="preserve"><value>Usar o Modo desempenho do Fortnite? Visual bem mais simples, menos memória e menos carga na placa e na CPU. Em alguns PCs os mínimos de FPS pioram: meça antes e depois.</value></data>
+  <data name="Gpu.Fn.ModeDx12Text" xml:space="preserve"><value>Usar o DirectX 12 completo? Libera Nanite, Lumen e TSR; os sombreadores são pré-compilados ao carregar. Depois de atualizar o driver a primeira partida demora mais.</value></data>
+  <data name="Gpu.Fn.Fps" xml:space="preserve"><value>Limite de FPS</value></data>
+  <data name="Gpu.Fn.NoLimit" xml:space="preserve"><value>Sem limite</value></data>
+  <data name="Gpu.Fn.FpsText" xml:space="preserve"><value>Limitar o Fortnite a {0} FPS? Com G-SYNC/FreeSync, 3 abaixo da taxa do monitor fica dentro da faixa do VRR.</value></data>
+  <data name="Gpu.Fn.FpsChange" xml:space="preserve"><value>limite {0} FPS</value></data>
+  <data name="Gpu.Fn.Reflex" xml:space="preserve"><value>NVIDIA Reflex</value></data>
+  <data name="Gpu.Fn.ReflexOn" xml:space="preserve"><value>Ligado</value></data>
+  <data name="Gpu.Fn.ReflexBoost" xml:space="preserve"><value>Ligado + boost</value></data>
+  <data name="Gpu.Fn.ReflexOff" xml:space="preserve"><value>Desligado</value></data>
+  <data name="Gpu.Fn.ReflexText" xml:space="preserve"><value>NVIDIA Reflex no Fortnite: {0}? Corta a fila de quadros quando a placa está no limite. O boost mantém o clock alto (mais consumo).</value></data>
+  <data name="Gpu.Fn.Apply" xml:space="preserve"><value>Aplicar</value></data>
+  <data name="Gpu.Fn.VSyncOff" xml:space="preserve"><value>V-Sync do jogo desligado</value></data>
+  <data name="Gpu.Fn.VSyncOffText" xml:space="preserve"><value>Desligar o V-Sync do Fortnite? Menos atraso; sem monitor VRR a imagem pode rasgar.</value></data>
+  <data name="Gpu.Fn.BlurOff" xml:space="preserve"><value>Sem desfoque de movimento</value></data>
+  <data name="Gpu.Fn.BlurOffText" xml:space="preserve"><value>Desligar o desfoque de movimento do Fortnite? Imagem nítida ao virar; ganho de FPS pequeno.</value></data>
+  <data name="Gpu.Fn.ShadowsOff" xml:space="preserve"><value>Sombras desligadas</value></data>
+  <data name="Gpu.Fn.ShadowsOffText" xml:space="preserve"><value>Desligar as sombras do Fortnite? É a opção mais cara no DirectX 12; no Modo desempenho o ganho é pequeno.</value></data>
+  <data name="Gpu.Fn.GrassOff" xml:space="preserve"><value>Sem grama (experimental)</value></data>
+  <data name="Gpu.Fn.GrassOffText" xml:space="preserve"><value>Desligar a grama (chave escondida bShowGrass)? Não há medição publicada de ganho: teste com o Medir antes e depois.</value></data>
+  <data name="Gpu.Fn.Honest" xml:space="preserve"><value>Só o GameUserSettings.ini do seu perfil (o arquivo que a Epic diz ser feito para mudar). Nada de Engine.ini, arquivos do jogo ou anticheat. Tudo com Desfazer.</value></data>
+  <data name="Gpu.Fn.Change" xml:space="preserve"><value>Fortnite: {0}</value></data>
   <data name="Gpu.AltoDesempenho" xml:space="preserve"><value>alto desempenho</value></data>
   <data name="Gpu.AltoDesempenhoN" xml:space="preserve"><value>Alto desempenho: {0}</value></data>
   <data name="Gpu.AlvoMaxNC" xml:space="preserve"><value> · alvo máx. {0:0} °C</value></data>

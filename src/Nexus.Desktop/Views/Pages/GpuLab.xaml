@@ -373,6 +373,50 @@
           </Border>
         </Grid>
 
+        <!-- Fortnite (GameUserSettings.ini do seu perfil, pelo aplicador, com o jogo fechado) -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,14">
+          <StackPanel>
+            <DockPanel Margin="0,0,0,8">
+              <c:Icon Data="{StaticResource Icon.Games}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,8,0"/>
+              <TextBlock Text="{l:T Gpu.Fn.Title}" Style="{StaticResource Text.H2}" FontSize="15.5" TextWrapping="Wrap"/>
+            </DockPanel>
+            <TextBlock Text="{Binding FnStatus}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding FnHint}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" TextWrapping="Wrap" Margin="0,6,0,0"
+                       Visibility="{Binding FnHint, Converter={StaticResource NullToCollapsed}}"/>
+            <DockPanel Margin="0,6,0,0">
+              <c:Icon Data="{StaticResource Icon.Warning}" Size="14" Foreground="{StaticResource Brush.Trace}" Margin="0,0,6,0" VerticalAlignment="Top"/>
+              <TextBlock Text="{l:T Gpu.Fn.CloseFirst}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap"/>
+            </DockPanel>
+            <StackPanel Visibility="{Binding FnFound, Converter={StaticResource BoolToVis}}" Margin="0,8,0,0">
+              <WrapPanel Margin="0,4,0,0">
+                <TextBlock Text="{l:T Gpu.Fn.Mode}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center" MinWidth="130"/>
+                <ComboBox ItemsSource="{Binding FnModes}" SelectedItem="{Binding SelectedFnMode}" DisplayMemberPath="Label" MinWidth="170" Margin="0,0,10,0"
+                          AutomationProperties.Name="{l:T Gpu.Fn.Mode}"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.Apply}" Command="{Binding ApplyFnModeCommand}"/>
+              </WrapPanel>
+              <WrapPanel Margin="0,8,0,0">
+                <TextBlock Text="{l:T Gpu.Fn.Fps}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center" MinWidth="130"/>
+                <ComboBox ItemsSource="{Binding FnFpsOptions}" SelectedItem="{Binding SelectedFnFps}" DisplayMemberPath="Label" MinWidth="110" Margin="0,0,10,0"
+                          AutomationProperties.Name="{l:T Gpu.Fn.Fps}"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.Apply}" Command="{Binding ApplyFnFpsCommand}"/>
+              </WrapPanel>
+              <WrapPanel Margin="0,8,0,0">
+                <TextBlock Text="{l:T Gpu.Fn.Reflex}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center" MinWidth="130"/>
+                <ComboBox ItemsSource="{Binding FnReflexOptions}" SelectedItem="{Binding SelectedFnReflex}" DisplayMemberPath="Label" MinWidth="170" Margin="0,0,10,0"
+                          AutomationProperties.Name="{l:T Gpu.Fn.Reflex}"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.Apply}" Command="{Binding ApplyFnReflexCommand}"/>
+              </WrapPanel>
+              <WrapPanel Margin="0,10,0,0">
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.VSyncOff}" Command="{Binding ApplyFnVSyncCommand}" Margin="0,0,8,6"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.BlurOff}" Command="{Binding ApplyFnBlurCommand}" Margin="0,0,8,6"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.ShadowsOff}" Command="{Binding ApplyFnShadowsCommand}" Margin="0,0,8,6"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.GrassOff}" Command="{Binding ApplyFnGrassCommand}" Margin="0,0,8,6"/>
+              </WrapPanel>
+              <TextBlock Text="{l:T Gpu.Fn.Honest}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
         <!-- ===== 6b. Driver NVIDIA por jogo (perfis do driver, pelo aplicador) ===== -->
         <ContentControl Content="{l:T Gpu.DriverNvidiaJogo}" Tag="{StaticResource Icon.Settings}" ContentTemplate="{StaticResource G.SectionHeader}" Focusable="False" Margin="0,8,0,2"/>
         <TextBlock Text="{l:T Gpu.MesmosAjustesPainelControle}" Style="{StaticResource Text.Small}" Margin="0,0,0,12"/>

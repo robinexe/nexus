@@ -425,4 +425,18 @@ public sealed class FortniteTests : IDisposable
         Assert.Contains("FortniteClient-Win64-Shipping", FortniteSettings.BlockingProcesses);
         Assert.Equal("FortniteClient-Win64-Shipping.exe", FortniteSettings.GameExe);
     }
+
+    [Fact]
+    public void Every_fortnite_action_is_reachable_from_the_screens()
+    {
+        var simple = File.ReadAllText(Path.Combine(Wiring.Root, "src/Nexus.Desktop/ViewModels/Simple/SimplePages.cs"));
+        var advanced = File.ReadAllText(Path.Combine(Wiring.Root, "src/Nexus.Desktop/ViewModels/Modules/GpuLabPage.Fortnite.cs"));
+        var names = typeof(FortniteSettings).GetFields().Where(f => f.IsLiteral && f.Name.EndsWith("Action", StringComparison.Ordinal)).ToList();
+        Assert.Equal(Wiring.Catalog.Actions.Count(a => a.Definition.Id.StartsWith("fortnite.", StringComparison.Ordinal)), names.Count);
+        foreach (var f in names)
+            Assert.True(advanced.Contains("FortniteSettings." + f.Name, StringComparison.Ordinal), $"{f.Name} sem botão em Placa de vídeo › Ajustes por jogo");
+        // Jogos (simples): as três opções de um clique
+        foreach (var name in new[] { "RhiDx12Action", "PerformanceModeAction", "FpsLimitAction", "ReflexAction", "MotionBlurOffAction" })
+            Assert.Contains("FortniteSettings." + name, simple, StringComparison.Ordinal);
+    }
 }
