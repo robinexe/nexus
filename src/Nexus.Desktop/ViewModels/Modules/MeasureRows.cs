@@ -45,6 +45,14 @@ public sealed class SessionRow : ObservableObject
     public string StutterText => Session.Summary.StuttersPerMinute.ToString("0.0", Pt) + "/min";
     public string DurationText => TimeSpan.FromMilliseconds(Session.Summary.DurationMs).ToString(Session.Summary.DurationMs >= 3_600_000 ? @"h\:mm\:ss" : @"m\:ss", Pt);
     public string FramesText => Session.Summary.Frames.ToString("N0", Pt) + " quadros";
+    // "Por que travou?" (null em partidas gravadas antes desta função)
+    public bool HasStutters => Session.Stutters is not null;
+    public string StutterVerdict => StutterWords.Verdict(Session.Stutters);
+    public Tone StutterTone => StutterWords.ToneOf(Session.Stutters);
+    public IReadOnlyList<StutterCauseRow> StutterCauses => StutterWords.Rows(Session.Stutters);
+    public IReadOnlyList<string> StutterWorst => StutterWords.Worst(Session.Stutters);
+    public bool HasStutterWorst => Session.Stutters is { Worst.Count: > 0 };
+    public string StutterNotes => StutterWords.Notes(Session.Stutters);
     public IReadOnlyList<TracePoint> Trace => Session.Trace;
     public IReadOnlyList<HistogramBin> Histogram => Session.Histogram;
 

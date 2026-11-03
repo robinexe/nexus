@@ -385,7 +385,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         {
             _probe = new WindowsProcessProbe();
             _engine = new AutoMeasureEngine(_probe, new PresentMonLiveStarter(() => _prefs.PresentMonPath, () => _prefs.RequestElevation && !CanTraceSilently,
-                verify: p => PresentMonTrust.Verify(p, _trust)));
+                verify: p => PresentMonTrust.Verify(p, _trust)), activity: StartActivity);
             _ = RefreshPerfLogAsync();
             _pollTimer.Start();
             RegisterHotkey();
@@ -396,6 +396,22 @@ public sealed class MeasurePage : ModulePage, IDisposable
         {
             Status = Loc.F("Meas.NaoFoiPossivelIniciar", ex.Message);
         }
+    }
+
+    /// <summary>"Por que travou?": durante a partida, quem mais usou CPU além do jogo e quanto o jogo leu (a cada 2 s, só leitura).</summary>
+    private static CaptureActivitySampler? StartActivity(LiveSession session) =>
+        OperatingSystem.IsWindows() ? new CaptureActivitySampler(new WindowsActivitySource(), session).Start() : null;
+
+    /// <summary>Teste "Atraso de drivers" (DPC/interrupções, aproximação de nível de usuário).</summary>
+    public DriverLatencyPanel DriverLatency { get; } = new();
+
+    /// <summary>Uma linha de "Por que travou?" da última partida medida deste jogo (para a tela Jogos), ou vazio.</summary>
+    public string LatestStutterVerdict(string exe)
+    {
+        if (string.IsNullOrWhiteSpace(exe)) return "";
+        var key = GameKey.Of(exe);
+        var last = _all.Where(x => x.Game == key && x.Stutters is not null).MaxBy(x => x.CapturedAt);
+        return last is null ? "" : StutterWords.Verdict(last.Stutters);
     }
 
     public void Dispose()
@@ -555,8 +571,12 @@ public sealed class MeasurePage : ModulePage, IDisposable
                     finished.WriteCsv(tmp);
                     var s = _store.Import(tmp, $"{finished.Game.Name} {finished.StartedAt.ToLocalTime().ToString("dd/MM HH:mm", Pt)}", finished.Game.ExeName,
                         finished.Automatic ? Loc.T("Meas.Automatico") : Loc.T("Shell.Vivo"), finished.StartedAt);
+                    StutterReport? stutters = s.Stutters;
+                    try { stutters = StutterAnalyzer.Analyze(finished.StutterFrames(), finished.Activity()); }
+                    catch (Exception ex) when (ex is ArgumentException or InvalidOperationException) { } // fica a análise sem atividade
                     s = s with
                     {
+                        Stutters = stutters,
                         GameName = finished.Game.Name,
                         Automatic = finished.Automatic,
                         Applied = active,

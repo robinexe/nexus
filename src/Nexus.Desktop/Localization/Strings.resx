@@ -1749,6 +1749,79 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>Você aplicou {0} depois da última partida de {1}. </value></data>
   <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>Se o Windows pedir permissão para o PresentMon, aceite para medir.</value></data>
   <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>do Windows, sem entrar no jogo). A versão </value></data>
+  <data name="Stutter.Title" xml:space="preserve"><value>Por que travou?</value></data>
+  <data name="Stutter.Probable" xml:space="preserve"><value>causa provável</value></data>
+  <data name="Stutter.None" xml:space="preserve"><value>Nenhuma travada nesta partida.</value></data>
+  <data name="Stutter.Count1" xml:space="preserve"><value>1 travada</value></data>
+  <data name="Stutter.CountN" xml:space="preserve"><value>{0} travadas</value></data>
+  <data name="Stutter.Single" xml:space="preserve"><value>{0}: provavelmente por {1}</value></data>
+  <data name="Stutter.Majority" xml:space="preserve"><value>{0}: a maioria provavelmente por {1}</value></data>
+  <data name="Stutter.Mixed" xml:space="preserve"><value>{0}: causas variadas — provavelmente {1}</value></data>
+  <data name="Stutter.And" xml:space="preserve"><value> e </value></data>
+  <data name="Stutter.Cause.Gpu" xml:space="preserve"><value>placa de vídeo no limite</value></data>
+  <data name="Stutter.Cause.Cpu" xml:space="preserve"><value>processador ou o próprio jogo</value></data>
+  <data name="Stutter.Cause.Shader" xml:space="preserve"><value>compilação de shader ou carregamento</value></data>
+  <data name="Stutter.Cause.Background" xml:space="preserve"><value>outro programa usando o processador</value></data>
+  <data name="Stutter.Cause.BackgroundNamed" xml:space="preserve"><value>outro programa usando o processador ({0})</value></data>
+  <data name="Stutter.Cause.Unknown" xml:space="preserve"><value>causa sem dados suficientes</value></data>
+  <data name="Stutter.Hint.Gpu" xml:space="preserve"><value> — baixar a qualidade gráfica ou limitar o FPS costuma ajudar</value></data>
+  <data name="Stutter.Hint.Cpu" xml:space="preserve"><value> — comum em cenas cheias; limitar o FPS deixa o ritmo mais estável</value></data>
+  <data name="Stutter.Hint.Shader" xml:space="preserve"><value> — normal nos primeiros minutos de um jogo novo</value></data>
+  <data name="Stutter.Hint.Background" xml:space="preserve"><value> — feche esse programa antes de jogar</value></data>
+  <data name="Stutter.Hint.Unknown" xml:space="preserve"><value> — meça de novo com o PresentMon que acompanha o NEXUS</value></data>
+  <data name="Stutter.Explain.Gpu" xml:space="preserve"><value>Nesses quadros a placa de vídeo trabalhou bem mais que o normal.</value></data>
+  <data name="Stutter.Explain.Cpu" xml:space="preserve"><value>Nesses quadros o processador (ou o jogo esperando algo) demorou, e a placa de vídeo ficou esperando.</value></data>
+  <data name="Stutter.Explain.Shader" xml:space="preserve"><value>Do lado do processador, no começo da partida ou com o jogo lendo muito do disco: o jogo provavelmente preparava shaders ou carregava a cena. Costuma sumir ao passar de novo pelo mesmo trecho.</value></data>
+  <data name="Stutter.Explain.Background" xml:space="preserve"><value>Do lado do processador, com outro programa usando bastante CPU naquele momento.</value></data>
+  <data name="Stutter.Explain.Unknown" xml:space="preserve"><value>A captura não trouxe o tempo de CPU e de GPU por quadro; não dá para dizer a causa.</value></data>
+  <data name="Stutter.WorstHeader" xml:space="preserve"><value>As piores travadas</value></data>
+  <data name="Stutter.WorstLine" xml:space="preserve"><value>aos {0} · {1:0} ms (normal: {2:0} ms) · provável: {3}</value></data>
+  <data name="Stutter.HowHeader" xml:space="preserve"><value>Como foi calculado</value></data>
+  <data name="Stutter.Note.NoCpuGpu" xml:space="preserve"><value>Esta captura não tem o tempo de CPU e de GPU por quadro (PresentMon antigo ou arquivo importado): as causas ficam como "sem dados".</value></data>
+  <data name="Stutter.Note.NoActivity" xml:space="preserve"><value>Sem amostras dos outros programas nesta partida (importada ou gravada antes desta versão): "outro programa" não pode ser apontado.</value></data>
+  <data name="Stutter.Note.NoDisk" xml:space="preserve"><value>Não deu para ler quanto o jogo leu do disco (jogo protegido): "shader ou carregamento" usa só o começo da partida.</value></data>
+  <data name="Stutter.Note.Generated" xml:space="preserve"><value>{0:N0} quadros criados pela geração de quadros do driver foram ignorados (não foram desenhados pelo jogo).</value></data>
+  <data name="Stutter.Note.Method" xml:space="preserve"><value>Travada = quadro que demorou mais que o dobro do normal e pelo menos 8 ms a mais (normal = mediana dos 30 quadros anteriores); picos a menos de 0,25 s um do outro contam como uma. Causa provável pelo pior quadro: se o tempo da placa de vídeo cresceu junto, placa de vídeo; senão, processador/jogo, e então: outro programa com 10% ou mais da CPU naquele momento, ou começo da partida (3 min)/jogo lendo 8 MB/s ou mais = shader ou carregamento. Amostras de outros programas a cada 2 s.</value></data>
+  <data name="Stutter.Note.Admin" xml:space="preserve"><value>Com administrador, um rastreamento do kernel (ETW) mostraria exatamente quais arquivos o jogo leu e qual driver segurou o processador em cada travada. O NEXUS não faz isso para não pedir permissão a cada partida; por isso a causa é sempre "provável".</value></data>
+  <data name="Simple.Games.StutterTip" xml:space="preserve"><value>Por que travou? (última partida medida)</value></data>
+  <data name="Dpc.Title" xml:space="preserve"><value>Atraso de drivers</value></data>
+  <data name="Dpc.Lead" xml:space="preserve"><value>Teste de 1 a 3 minutos: quanto do processador os drivers seguram (DPC e interrupções). Só lê; não muda nada.</value></data>
+  <data name="Dpc.Duration" xml:space="preserve"><value>Duração</value></data>
+  <data name="Dpc.Sec60" xml:space="preserve"><value>1 min</value></data>
+  <data name="Dpc.Sec120" xml:space="preserve"><value>2 min</value></data>
+  <data name="Dpc.Sec180" xml:space="preserve"><value>3 min</value></data>
+  <data name="Dpc.Start" xml:space="preserve"><value>Testar agora</value></data>
+  <data name="Dpc.Cancel" xml:space="preserve"><value>Parar</value></data>
+  <data name="Dpc.Running" xml:space="preserve"><value>Testando… use o PC como de costume (música, navegador, Wi‑Fi) para o teste ver o que costuma travar.</value></data>
+  <data name="Dpc.RunningTip" xml:space="preserve"><value>Dica: se o áudio costuma estalar ou o jogo dar travadinhas, faça isso agora.</value></data>
+  <data name="Dpc.WindowsOnly" xml:space="preserve"><value>Este teste só funciona no Windows.</value></data>
+  <data name="Dpc.Unavailable" xml:space="preserve"><value>O Windows não ofereceu os contadores de DPC/interrupção: {0}</value></data>
+  <data name="Dpc.NoData" xml:space="preserve"><value>O teste não conseguiu nenhuma leitura. Tente de novo.</value></data>
+  <data name="Dpc.Cancelled" xml:space="preserve"><value>Teste interrompido: resultado com {0} segundos lidos.</value></data>
+  <data name="Dpc.Failed" xml:space="preserve"><value>Não deu para fazer o teste: {0}</value></data>
+  <data name="Dpc.Verdict.Good" xml:space="preserve"><value>Bom</value></data>
+  <data name="Dpc.Verdict.May" xml:space="preserve"><value>Pode causar engasgos</value></data>
+  <data name="Dpc.Verdict.Bad" xml:space="preserve"><value>Ruim</value></data>
+  <data name="Dpc.Detail.Good" xml:space="preserve"><value>Os drivers usaram pouco do processador durante todo o teste. Atraso de drivers não deve ser a causa de travadas.</value></data>
+  <data name="Dpc.Detail.May" xml:space="preserve"><value>Em alguns momentos os drivers seguraram um núcleo por bastante tempo. Isso pode causar estalos no áudio e travadinhas curtas.</value></data>
+  <data name="Dpc.Detail.Bad" xml:space="preserve"><value>Os drivers tomaram uma parte grande de um núcleo. Isso costuma causar engasgos, estalos de áudio e queda de FPS.</value></data>
+  <data name="Dpc.Peak" xml:space="preserve"><value>Pior momento: {0} com {1:0.#}% do tempo em drivers, aos {2:0} s.</value></data>
+  <data name="Dpc.Average" xml:space="preserve"><value>Média do teste: {0:0.##}% em DPC e {1:0.##}% em interrupções; {2} de {3} segundos com algum núcleo acima de 5%.</value></data>
+  <data name="Dpc.CallAverage" xml:space="preserve"><value>Duração média de cada chamada (pior núcleo): DPC {0}, interrupção {1}.</value></data>
+  <data name="Dpc.CoreLine" xml:space="preserve"><value>{0}: pior {1:0.#}%, média {2:0.##}%</value></data>
+  <data name="Dpc.Core" xml:space="preserve"><value>núcleo {0}</value></data>
+  <data name="Dpc.CulpritsTitle" xml:space="preserve"><value>Culpados mais comuns (o teste não aponta qual é):</value></data>
+  <data name="Dpc.Culprit.Wifi" xml:space="preserve"><value>Wi‑Fi</value></data>
+  <data name="Dpc.Culprit.Audio" xml:space="preserve"><value>Áudio</value></data>
+  <data name="Dpc.Culprit.Network" xml:space="preserve"><value>Rede (cabo)</value></data>
+  <data name="Dpc.Culprit.Video" xml:space="preserve"><value>Vídeo</value></data>
+  <data name="Dpc.Advice.Wifi" xml:space="preserve"><value>O campeão de atrasos em notebooks. Atualize o driver Wi‑Fi pelo NEXUS (Atualizar drivers) ou no site do fabricante; para testar, jogue com cabo e o Wi‑Fi desligado.</value></data>
+  <data name="Dpc.Advice.Audio" xml:space="preserve"><value>Drivers de áudio (Realtek, placas USB, efeitos de som) costumam causar estalos. Atualize pelo NEXUS e desligue "melhorias de áudio" que você não usa.</value></data>
+  <data name="Dpc.Advice.Network" xml:space="preserve"><value>Placas de rede com driver antigo também seguram o processador. Atualize o driver de rede pelo NEXUS (Atualizar drivers).</value></data>
+  <data name="Dpc.Advice.Video" xml:space="preserve"><value>O driver da placa de vídeo é outro suspeito comum. Instale a versão nova pelo NEXUS (Atualizar drivers baixa a oficial da NVIDIA/AMD).</value></data>
+  <data name="Dpc.OpenDrivers" xml:space="preserve"><value>Abrir Atualizar drivers</value></data>
+  <data name="Dpc.HowHeader" xml:space="preserve"><value>Como foi medido (aproximação)</value></data>
+  <data name="Dpc.Approx" xml:space="preserve"><value>Aproximação sem administrador: o NEXUS lê uma vez por segundo os contadores do Windows "% DPC Time", "% Interrupt Time", "DPCs Queued/sec" e "Interrupts/sec" de cada núcleo. Ruim = algum segundo com 20% ou mais de um núcleo em drivers (ou média de 3%); pode causar engasgos = 5% ou mais (ou média de 1%). Esses limites são do NEXUS, não uma norma. A duração média de cada chamada é a conta tempo ÷ quantidade: é média, não o pior caso. O que só um rastreamento do kernel (administrador, como o LatencyMon faz) mostraria: QUAL driver (ndis.sys, nvlddmkm.sys…) e a pior chamada isolada — um atraso único de 2 ms some na média de um segundo. O teste não muda a resolução do timer nem nada do sistema.</value></data>
   <data name="Mem.AliAbreMaisRapido" xml:space="preserve"><value>ali abre mais rápido e é devolvido na hora a quem precisar. Esvaziar à força joga esse cache fora, faz os programas lerem </value></data>
   <data name="Mem.AplicadoReiniciePcValer" xml:space="preserve"><value>Aplicado. Reinicie o PC para valer.</value></data>
   <data name="Mem.ArquivoPaginacao" xml:space="preserve"><value>Arquivo de paginação</value></data>

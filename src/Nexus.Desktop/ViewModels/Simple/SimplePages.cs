@@ -268,6 +268,9 @@ public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOpt
     public bool HasOptions => Options.Count > 0;
     public bool WindowedOn { get; } = windowedOn;
     public RelayCommand MeasureCommand { get; } = measure;
+    /// <summary>"Por que travou?" da última partida medida, em uma linha ("12 travadas: a maioria provavelmente por…"), ou vazio.</summary>
+    public string StutterVerdict { get; init; } = "";
+    public bool HasStutterVerdict => StutterVerdict.Length > 0;
 }
 
 /// <summary>
@@ -367,7 +370,10 @@ public sealed class SimpleGamesPage : ModulePage
         if (windowedPath is not null)
             options.Add(Option(name, Loc.T("Simple.Games.Windowed"),
                 new ActionRequest(GpuLabPage.WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = windowedPath }), BrokerLevel.User));
-        return new SimpleGameRow(name, exe, options, windowedOn, new RelayCommand(() => { Measure.ManualExe = exe; Host?.Navigate(Measure); }));
+        return new SimpleGameRow(name, exe, options, windowedOn, new RelayCommand(() => { Measure.ManualExe = exe; Host?.Navigate(Measure); }))
+        {
+            StutterVerdict = Measure.LatestStutterVerdict(exe),
+        };
     }
 
     private GameOption Option(string game, string text, ActionRequest request, BrokerLevel level) =>

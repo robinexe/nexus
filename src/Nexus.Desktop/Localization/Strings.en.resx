@@ -1749,6 +1749,79 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Meas.VoceAplicouNDepois" xml:space="preserve"><value>You applied {0} after the last match of {1}. </value></data>
   <data name="Meas.WindowsPedirPermissaoPresentmon" xml:space="preserve"><value>If Windows asks for permission for PresentMon, accept it to measure.</value></data>
   <data name="Meas.WindowsSemEntrarJogo" xml:space="preserve"><value>for Windows, without hooking into the game). Version </value></data>
+  <data name="Stutter.Title" xml:space="preserve"><value>Why did it stutter?</value></data>
+  <data name="Stutter.Probable" xml:space="preserve"><value>likely cause</value></data>
+  <data name="Stutter.None" xml:space="preserve"><value>No stutters in this match.</value></data>
+  <data name="Stutter.Count1" xml:space="preserve"><value>1 stutter</value></data>
+  <data name="Stutter.CountN" xml:space="preserve"><value>{0} stutters</value></data>
+  <data name="Stutter.Single" xml:space="preserve"><value>{0}: likely caused by {1}</value></data>
+  <data name="Stutter.Majority" xml:space="preserve"><value>{0}: most likely caused by {1}</value></data>
+  <data name="Stutter.Mixed" xml:space="preserve"><value>{0}: mixed causes — likely {1}</value></data>
+  <data name="Stutter.And" xml:space="preserve"><value> and </value></data>
+  <data name="Stutter.Cause.Gpu" xml:space="preserve"><value>the graphics card at its limit</value></data>
+  <data name="Stutter.Cause.Cpu" xml:space="preserve"><value>the processor or the game itself</value></data>
+  <data name="Stutter.Cause.Shader" xml:space="preserve"><value>shader compilation or loading</value></data>
+  <data name="Stutter.Cause.Background" xml:space="preserve"><value>another program using the processor</value></data>
+  <data name="Stutter.Cause.BackgroundNamed" xml:space="preserve"><value>another program using the processor ({0})</value></data>
+  <data name="Stutter.Cause.Unknown" xml:space="preserve"><value>a cause there is not enough data for</value></data>
+  <data name="Stutter.Hint.Gpu" xml:space="preserve"><value> — lowering graphics quality or capping FPS usually helps</value></data>
+  <data name="Stutter.Hint.Cpu" xml:space="preserve"><value> — common in busy scenes; capping FPS makes pacing steadier</value></data>
+  <data name="Stutter.Hint.Shader" xml:space="preserve"><value> — normal in the first minutes of a new game</value></data>
+  <data name="Stutter.Hint.Background" xml:space="preserve"><value> — close that program before playing</value></data>
+  <data name="Stutter.Hint.Unknown" xml:space="preserve"><value> — measure again with the PresentMon that comes with NEXUS</value></data>
+  <data name="Stutter.Explain.Gpu" xml:space="preserve"><value>In these frames the graphics card worked much longer than usual.</value></data>
+  <data name="Stutter.Explain.Cpu" xml:space="preserve"><value>In these frames the processor (or the game waiting on something) took longer, and the graphics card waited.</value></data>
+  <data name="Stutter.Explain.Shader" xml:space="preserve"><value>On the processor side, early in the match or while the game was reading a lot from disk: the game was probably preparing shaders or loading the scene. It usually goes away when you pass the same spot again.</value></data>
+  <data name="Stutter.Explain.Background" xml:space="preserve"><value>On the processor side, while another program was using a lot of CPU at that moment.</value></data>
+  <data name="Stutter.Explain.Unknown" xml:space="preserve"><value>The capture did not include CPU and GPU time per frame, so the cause cannot be told.</value></data>
+  <data name="Stutter.WorstHeader" xml:space="preserve"><value>The worst stutters</value></data>
+  <data name="Stutter.WorstLine" xml:space="preserve"><value>at {0} · {1:0} ms (usual: {2:0} ms) · likely: {3}</value></data>
+  <data name="Stutter.HowHeader" xml:space="preserve"><value>How it was calculated</value></data>
+  <data name="Stutter.Note.NoCpuGpu" xml:space="preserve"><value>This capture has no CPU and GPU time per frame (old PresentMon or imported file): causes show as "not enough data".</value></data>
+  <data name="Stutter.Note.NoActivity" xml:space="preserve"><value>No samples of other programs in this match (imported or recorded before this version): "another program" cannot be pointed out.</value></data>
+  <data name="Stutter.Note.NoDisk" xml:space="preserve"><value>Could not read how much the game read from disk (protected game): "shader or loading" uses only the start of the match.</value></data>
+  <data name="Stutter.Note.Generated" xml:space="preserve"><value>{0:N0} frames created by driver frame generation were ignored (the game did not draw them).</value></data>
+  <data name="Stutter.Note.Method" xml:space="preserve"><value>Stutter = a frame that took more than twice the usual and at least 8 ms more (usual = median of the previous 30 frames); spikes less than 0.25 s apart count as one. Likely cause from the worst frame: if graphics card time grew too, the graphics card; otherwise processor/game, and then: another program using 10% or more of the CPU at that moment, or the start of the match (3 min)/the game reading 8 MB/s or more = shader or loading. Other programs are sampled every 2 s.</value></data>
+  <data name="Stutter.Note.Admin" xml:space="preserve"><value>With administrator rights, a kernel trace (ETW) would show exactly which files the game read and which driver held the processor in each stutter. NEXUS does not do this so it does not ask for permission every match; that is why the cause is always "likely".</value></data>
+  <data name="Simple.Games.StutterTip" xml:space="preserve"><value>Why did it stutter? (last measured match)</value></data>
+  <data name="Dpc.Title" xml:space="preserve"><value>Driver latency</value></data>
+  <data name="Dpc.Lead" xml:space="preserve"><value>1 to 3 minute test: how much of the processor drivers hold (DPC and interrupts). Read-only; changes nothing.</value></data>
+  <data name="Dpc.Duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="Dpc.Sec60" xml:space="preserve"><value>1 min</value></data>
+  <data name="Dpc.Sec120" xml:space="preserve"><value>2 min</value></data>
+  <data name="Dpc.Sec180" xml:space="preserve"><value>3 min</value></data>
+  <data name="Dpc.Start" xml:space="preserve"><value>Test now</value></data>
+  <data name="Dpc.Cancel" xml:space="preserve"><value>Stop</value></data>
+  <data name="Dpc.Running" xml:space="preserve"><value>Testing… use the PC as usual (music, browser, Wi‑Fi) so the test sees what usually stutters.</value></data>
+  <data name="Dpc.RunningTip" xml:space="preserve"><value>Tip: if audio usually crackles or the game hitches, do that now.</value></data>
+  <data name="Dpc.WindowsOnly" xml:space="preserve"><value>This test only works on Windows.</value></data>
+  <data name="Dpc.Unavailable" xml:space="preserve"><value>Windows did not provide the DPC/interrupt counters: {0}</value></data>
+  <data name="Dpc.NoData" xml:space="preserve"><value>The test got no readings. Try again.</value></data>
+  <data name="Dpc.Cancelled" xml:space="preserve"><value>Test stopped: result from {0} seconds read.</value></data>
+  <data name="Dpc.Failed" xml:space="preserve"><value>Could not run the test: {0}</value></data>
+  <data name="Dpc.Verdict.Good" xml:space="preserve"><value>Good</value></data>
+  <data name="Dpc.Verdict.May" xml:space="preserve"><value>May cause hitches</value></data>
+  <data name="Dpc.Verdict.Bad" xml:space="preserve"><value>Bad</value></data>
+  <data name="Dpc.Detail.Good" xml:space="preserve"><value>Drivers used little of the processor during the whole test. Driver latency is unlikely to cause stutters.</value></data>
+  <data name="Dpc.Detail.May" xml:space="preserve"><value>At some moments drivers held a core for quite a while. This can cause audio crackles and short hitches.</value></data>
+  <data name="Dpc.Detail.Bad" xml:space="preserve"><value>Drivers took a large part of a core. This usually causes hitches, audio crackles and FPS drops.</value></data>
+  <data name="Dpc.Peak" xml:space="preserve"><value>Worst moment: {0} with {1:0.#}% of its time in drivers, at {2:0} s.</value></data>
+  <data name="Dpc.Average" xml:space="preserve"><value>Test average: {0:0.##}% in DPC and {1:0.##}% in interrupts; {2} of {3} seconds with some core above 5%.</value></data>
+  <data name="Dpc.CallAverage" xml:space="preserve"><value>Average duration of each call (worst core): DPC {0}, interrupt {1}.</value></data>
+  <data name="Dpc.CoreLine" xml:space="preserve"><value>{0}: worst {1:0.#}%, average {2:0.##}%</value></data>
+  <data name="Dpc.Core" xml:space="preserve"><value>core {0}</value></data>
+  <data name="Dpc.CulpritsTitle" xml:space="preserve"><value>Most common culprits (the test does not point out which one):</value></data>
+  <data name="Dpc.Culprit.Wifi" xml:space="preserve"><value>Wi‑Fi</value></data>
+  <data name="Dpc.Culprit.Audio" xml:space="preserve"><value>Audio</value></data>
+  <data name="Dpc.Culprit.Network" xml:space="preserve"><value>Network (wired)</value></data>
+  <data name="Dpc.Culprit.Video" xml:space="preserve"><value>Graphics</value></data>
+  <data name="Dpc.Advice.Wifi" xml:space="preserve"><value>The top latency culprit on laptops. Update the Wi‑Fi driver through NEXUS (Update drivers) or from the maker's site; to test, play wired with Wi‑Fi turned off.</value></data>
+  <data name="Dpc.Advice.Audio" xml:space="preserve"><value>Audio drivers (Realtek, USB interfaces, sound effects) often cause crackles. Update through NEXUS and turn off "audio enhancements" you do not use.</value></data>
+  <data name="Dpc.Advice.Network" xml:space="preserve"><value>Network adapters with old drivers also hold the processor. Update the network driver through NEXUS (Update drivers).</value></data>
+  <data name="Dpc.Advice.Video" xml:space="preserve"><value>The graphics driver is another common suspect. Install the new version through NEXUS (Update drivers downloads the official NVIDIA/AMD one).</value></data>
+  <data name="Dpc.OpenDrivers" xml:space="preserve"><value>Open Update drivers</value></data>
+  <data name="Dpc.HowHeader" xml:space="preserve"><value>How it was measured (approximation)</value></data>
+  <data name="Dpc.Approx" xml:space="preserve"><value>Approximation without administrator rights: NEXUS reads the Windows counters "% DPC Time", "% Interrupt Time", "DPCs Queued/sec" and "Interrupts/sec" for each core once per second. Bad = some second with 20% or more of a core in drivers (or a 3% average); may cause hitches = 5% or more (or a 1% average). These limits are NEXUS's own, not a standard. The average duration of each call is time ÷ count: an average, not the worst case. What only a kernel trace (administrator, as LatencyMon does) would show: WHICH driver (ndis.sys, nvlddmkm.sys…) and the single worst call — one 2 ms delay vanishes in a one-second average. The test does not change the timer resolution or anything else on the system.</value></data>
   <data name="Mem.AliAbreMaisRapido" xml:space="preserve"><value>there opens faster and is handed back instantly to whoever needs it. Forcing it empty throws that cache away, makes programs read </value></data>
   <data name="Mem.AplicadoReiniciePcValer" xml:space="preserve"><value>Applied. Restart the PC for it to take effect.</value></data>
   <data name="Mem.ArquivoPaginacao" xml:space="preserve"><value>Page file</value></data>
