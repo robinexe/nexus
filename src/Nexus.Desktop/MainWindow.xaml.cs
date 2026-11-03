@@ -31,6 +31,8 @@ public partial class MainWindow : Window
 
         DataContext = _vm;
         _vm.PropertyChanged += OnViewModelChanged;
+        // Aviso de notebook na bateria ao abrir um jogo (checagens do PC): notificação da bandeja, se o ícone estiver ligado.
+        _vm.GameNotice += (_, n) => _tray?.Notify(n.Title, n.Text, null, warning: true);
         SourceInitialized += (_, _) => DarkTitleBar.Apply(this);
         ContentRendered += (_, _) => UiWatchdog.Step("janela desenhada pela primeira vez");
         Loaded += async (_, _) =>

@@ -72,6 +72,8 @@ public sealed class HomePage : ModulePage
 
     /// <summary>De onde vêm os pedidos dos cartões (a janela).</summary>
     internal ISimpleActions? Actions { get; set; }
+    /// <summary>Checagens do PC (monitor abaixo da taxa: o cartão leva ao "Usar 144 Hz" da página Placa de vídeo).</summary>
+    internal PcChecksCoordinator? Checks { get; set; }
 
     /// <summary>Chamado pela janela sempre que uma leitura muda (diagnóstico, limpeza medida, catálogo relido).</summary>
     public void Update(HealthInputs inputs)
@@ -114,6 +116,8 @@ public sealed class HomePage : ModulePage
                     q => q.ApplyAsync(Loc.T("Simple.One.Fix"), Loc.F("Simple.One.ConfirmFix", c.Text), [req])), null);
             case ImproveKind.GpuDriver:
                 return new ImproveCardRow(c, null, new RelayCommand(() => _ = OpenDriversAsync()));
+            case ImproveKind.Monitor when c.FindingId is { } fid && Checks?.State.DisplayFor(fid) is { MaxHz: { } max } m:
+                return new ImproveCardRow(c with { ActionText = PcCheckText.UseHz(max) }, null, new RelayCommand(() => _ = MonitorFix.RunAsync(Host, m.Device)));
             default:
                 return new ImproveCardRow(c, null, null);
         }
@@ -391,6 +395,8 @@ public sealed record ProblemRow(string Key, string Title, string WhatToDo, strin
     public bool HasTarget => Fix is null && Target.Length > 0;
     public RelayCommand? OpenCommand { get; init; }
     public bool HasLink => OpenCommand is not null;
+    /// <summary>Texto do botão de <see cref="OpenCommand"/> ("Abrir página"; no monitor, "Usar 144 Hz").</summary>
+    public string LinkText { get; init; } = Loc.T("Simple.Problems.OpenPage");
 }
 
 /// <summary>
@@ -408,6 +414,8 @@ public sealed class SimpleProblemsPage : ModulePage
     public override string Subtitle => Loc.T("Simple.Problems.Subtitle");
 
     internal ISimpleActions? Actions { get; set; }
+    /// <summary>Checagens do PC: frases com os números da leitura e o botão "Usar 144 Hz" do monitor.</summary>
+    internal PcChecksCoordinator? Checks { get; set; }
     public IReadOnlyList<ProblemRow> Items { get => _items; private set => Set(ref _items, value); }
     public bool IsLoading => !_hasData;
     public bool HasItems => _items.Count > 0;
@@ -427,9 +435,19 @@ public sealed class SimpleProblemsPage : ModulePage
         // Linha em que o usuário acabou de clicar fica (com "Feito ✓ — Desfazer") mesmo que o problema tenha sumido da leitura.
         var kept = _items.Where(r => r.Fix is { IsReady: false } || r.Fix is { HasNote: true }).ToList();
         var rows = new List<ProblemRow>(kept);
+        var plain = Checks?.Plain;
         foreach (var f in findings.Where(f => f.Severity == DiagnosticSeverity.Attention && kept.All(k => k.Key != f.Id)))
         {
-            var p = PlainFindings.For(f);
+            var p = PlainFindings.For(f, plain);
+            if (Checks?.State.DisplayFor(f.Id) is { MaxHz: { } max } monitor)
+            {
+                rows.Add(new ProblemRow(f.Id, p.Title, p.WhatToDo, p.IconKey, PlainFindings.ImpactOf(f))
+                {
+                    OpenCommand = new RelayCommand(() => _ = MonitorFix.RunAsync(Host, monitor.Device)),
+                    LinkText = PcCheckText.UseHz(max),
+                });
+                continue;
+            }
             var (target, action) = TargetFor(f.Id);
             var fix = Actions is { } a && f.RelatedActionId is { } id && a.LowRiskRequest(id) is { } req
                 ? new OneClickAction(Loc.T("Simple.One.Fix"), Applier, q => q.ApplyAsync(Loc.T("Simple.One.Fix"), Loc.F("Simple.One.ConfirmFix", p.Title), [req]))
@@ -454,6 +472,8 @@ public sealed class SimpleProblemsPage : ModulePage
         _ when id.StartsWith("startup.", StringComparison.Ordinal) => ("SimpleOptimizePage", Loc.T("Simple.Card.TweaksAction")),
         "disk.system-free" => ("SimpleCleanPage", Loc.T("Simple.Card.CleanupAction")),
         _ when id.StartsWith("mem.", StringComparison.Ordinal) || id.StartsWith("owner.", StringComparison.Ordinal) || id == "disk.system-media" => ("", ""),
+        // Disco falhando/quente e limitação do processador: é com você (backup, ventilação); a explicação já está na linha.
+        _ when id.StartsWith(PcChecks.DiskPrefix, StringComparison.Ordinal) && id != PcChecks.GamesOnSlowDiskId => ("DiskPage", Loc.T("Simple.Problems.Details")),
         _ => (ShellMap.PageForFinding(id), Loc.T("Simple.Problems.Details")),
     };
 

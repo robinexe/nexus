@@ -193,6 +193,9 @@
           </ListBox.ItemTemplate>
         </ListBox>
 
+        <!-- ===== Saúde dos discos (checagens do PC; modelo em PcChecks.xaml) ===== -->
+        <ContentControl Content="{Binding DiskHealth}" Focusable="False"/>
+
         <!-- Como funciona -->
         <Border Style="{StaticResource Panel.Inset}" Padding="22,16,8,16" Margin="0,0,0,20">
           <c:HowItWorks>

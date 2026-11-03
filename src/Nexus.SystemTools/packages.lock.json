@@ -5,6 +5,9 @@
       "nexus.core": {
         "type": "Project"
       },
+      "nexus.hardwarediscovery": {
+        "type": "Project"
+      },
       "nexus.windowsactions": {
         "type": "Project",
         "dependencies": {

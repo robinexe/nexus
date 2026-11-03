@@ -359,6 +359,9 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public RelayCommand JoinPerfLogCommand { get; }
     public RelayCommand UndoPerfLogCommand { get; }
 
+    /// <summary>Um jogo acabou de abrir (nome do jogo). A janela usa para o aviso de notebook na bateria (checagens do PC).</summary>
+    public event EventHandler<string>? GameStarted;
+
     // ------------------------------------------------------------------ ciclo de vida
 
     public override async Task OnFactsReadyAsync(SystemFacts facts)
@@ -449,6 +452,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             switch (ev.Kind)
             {
                 case GameEventKind.Started:
+                    GameStarted?.Invoke(this, (ev.Game ?? game)?.Name ?? "");
                     _overlay.OnGame(true, _prefs.OverlayOnGameStart);
                     EnsureSystemLoad();
                     if (ev.CaptureStarted) OnCaptureStarted(ev.Game!);

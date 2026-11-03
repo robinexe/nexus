@@ -3971,4 +3971,72 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Quick.ConfirmOn" xml:space="preserve"><value>¿Activar "{0}"? Se puede deshacer.</value></data>
   <data name="Simple.Quick.ConfirmOff" xml:space="preserve"><value>¿Deshacer "{0}" y volver como estaba?</value></data>
   <data name="Simple.Quick.NothingToUndo" xml:space="preserve"><value>Ya estaba así (o se hizo junto con otros): deshazlo en Historial</value></data>
+  <data name="Simple.Topic.Network" xml:space="preserve"><value>red</value></data>
+  <data name="Simple.Topic.Monitor" xml:space="preserve"><value>monitor</value></data>
+  <data name="Pc.NotInformed" xml:space="preserve"><value>no informado</value></data>
+  <data name="Pc.Net.Title" xml:space="preserve"><value>Red para juegos</value></data>
+  <data name="Pc.Net.Lead" xml:space="preserve"><value>Ping, variación y pérdida hasta el router y hasta el servidor del juego. Solo lee; nada cambia.</value></data>
+  <data name="Pc.Net.HostLabel" xml:space="preserve"><value>Servidor del juego (IP o nombre; predeterminado 1.1.1.1)</value></data>
+  <data name="Pc.Net.HostInvalid" xml:space="preserve"><value>Usa solo una IP o un nombre como servidor.ejemplo.com.</value></data>
+  <data name="Pc.Net.Test" xml:space="preserve"><value>Probar</value></data>
+  <data name="Pc.Net.BloatButton" xml:space="preserve"><value>Probar con la conexión llena (hasta ~{0} MB)</value></data>
+  <data name="Pc.Net.BloatTitle" xml:space="preserve"><value>Probar con la conexión llena</value></data>
+  <data name="Pc.Net.BloatConfirm" xml:space="preserve"><value>Esta prueba descarga y envía datos de prueba (bytes aleatorios, nunca programas) por el servidor público de prueba de velocidad de Cloudflare durante unos 20 segundos y mide el ping mientras tanto.
+
+Usa hasta ~{0} MB de datos. Si tu internet tiene límite de datos, omite esta prueba.
+
+¿Continuar?</value></data>
+  <data name="Pc.Net.Testing" xml:space="preserve"><value>Probando: 30 pings al router y al servidor…</value></data>
+  <data name="Pc.Net.Done" xml:space="preserve"><value>Listo. El resultado también aparece en Problemas cuando requiere atención.</value></data>
+  <data name="Pc.Net.Cancelled" xml:space="preserve"><value>Prueba cancelada.</value></data>
+  <data name="Pc.Net.Failed" xml:space="preserve"><value>No se pudo probar: {0}</value></data>
+  <data name="Pc.Net.Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Pc.Net.PhaseIdle" xml:space="preserve"><value>Midiendo el ping con la conexión en reposo…</value></data>
+  <data name="Pc.Net.PhaseDownload" xml:space="preserve"><value>Midiendo el ping mientras descarga…</value></data>
+  <data name="Pc.Net.PhaseUpload" xml:space="preserve"><value>Midiendo el ping mientras envía…</value></data>
+  <data name="Pc.Net.BloatDone" xml:space="preserve"><value>Listo: nota {0} (usó {1:0} MB).</value></data>
+  <data name="Pc.Net.Empty" xml:space="preserve"><value>Haz clic en Probar para medir. La lectura automática solo prueba el router (nada sale de tu casa).</value></data>
+  <data name="Pc.Net.Explain" xml:space="preserve"><value>La variación (jitter) y la pérdida importan más que el ping para jugar. Si el router oscila, el problema está en casa (Wi-Fi, cable, router). Si solo oscila el servidor, es el proveedor o el camino al juego. Bufferbloat es el ping que sube cuando alguien descarga o ve video: la solución es SQM/QoS en el router. La prueba con carga usa el servidor público de prueba de Cloudflare (speed.cloudflare.com) y nada se guarda en el disco.</value></data>
+  <data name="Pc.Net.WeakWifi" xml:space="preserve"><value>Señal de Wi-Fi débil ({0}%)</value></data>
+  <data name="Pc.Net.WifiUnstable" xml:space="preserve"><value>El Wi-Fi puede estar haciendo inestable tu juego</value></data>
+  <data name="Pc.Net.WifiDo" xml:space="preserve"><value>El cable de red es más estable que el Wi-Fi para jugar. Si no puedes, acerca la PC al router y usa la red de 5 GHz.</value></data>
+  <data name="Pc.Net.Local" xml:space="preserve"><value>La conexión entre la PC y el router es inestable</value></data>
+  <data name="Pc.Net.LocalDo" xml:space="preserve"><value>El problema está en casa: usa cable, acércate al router o reinicia el router.</value></data>
+  <data name="Pc.Net.Loss" xml:space="preserve"><value>Parte de los paquetes se pierde hasta internet ({0:0}%)</value></data>
+  <data name="Pc.Net.Jitter" xml:space="preserve"><value>El ping varía mucho hasta internet (±{0:0} ms)</value></data>
+  <data name="Pc.Net.IspDo" xml:space="preserve"><value>Si el router está estable, es el proveedor o el camino al juego: prueba en otro horario y, si sigue, llama a soporte con este resultado.</value></data>
+  <data name="Pc.Net.Bloat" xml:space="preserve"><value>El ping sube {0:0} ms cuando internet está llena</value></data>
+  <data name="Pc.Net.BloatDo" xml:space="preserve"><value>Activa SQM/QoS en el router (a veces llamado Smart Queue) con el límite un poco por debajo de la velocidad contratada. Un internet más rápido no lo resuelve.</value></data>
+  <data name="Pc.Disk.Title" xml:space="preserve"><value>Salud de los discos</value></data>
+  <data name="Pc.Disk.Lead" xml:space="preserve"><value>Lo que cada disco informa a Windows: estado, temperatura, desgaste, errores y horas encendido. Solo lee.</value></data>
+  <data name="Pc.Disk.Reread" xml:space="preserve"><value>Leer de nuevo</value></data>
+  <data name="Pc.Disk.Empty" xml:space="preserve"><value>Aún sin lectura de los discos (o Windows no respondió).</value></data>
+  <data name="Pc.Disk.Temp" xml:space="preserve"><value>Temperatura:</value></data>
+  <data name="Pc.Disk.Wear" xml:space="preserve"><value>Desgaste:</value></data>
+  <data name="Pc.Disk.Errors" xml:space="preserve"><value>Errores no corregidos:</value></data>
+  <data name="Pc.Disk.Hours" xml:space="preserve"><value>Horas encendido:</value></data>
+  <data name="Pc.Disk.Healthy" xml:space="preserve"><value>saludable</value></data>
+  <data name="Pc.Disk.Warning" xml:space="preserve"><value>alerta</value></data>
+  <data name="Pc.Disk.Unhealthy" xml:space="preserve"><value>con fallas</value></data>
+  <data name="Pc.Disk.Explain" xml:space="preserve"><value>Los números vienen del propio disco (MSFT_PhysicalDisk y MSFT_StorageReliabilityCounter). Algunos solo aparecen con NEXUS abierto como administrador, y muchos discos no informan todo: entonces aparece "no informado", nunca un número inventado. Los juegos en un disco duro cargan mucho más lento (TechSpot midió más de 4 minutos en un juego); los FPS casi no cambian.</value></data>
+  <data name="Pc.Disk.NameN" xml:space="preserve"><value>Disco {0} ({1})</value></data>
+  <data name="Pc.Disk.NameOnly" xml:space="preserve"><value>Disco {0}</value></data>
+  <data name="Pc.Disk.Failing" xml:space="preserve"><value>{0} puede estar fallando</value></data>
+  <data name="Pc.Disk.FailingDo" xml:space="preserve"><value>Haz una copia de seguridad ahora de lo importante (fotos, documentos, partidas guardadas) y cambia el disco.</value></data>
+  <data name="Pc.Disk.Worn" xml:space="preserve"><value>{0} está cerca del fin de su vida útil</value></data>
+  <data name="Pc.Disk.WornDo" xml:space="preserve"><value>Todavía funciona, pero haz copia de seguridad de lo importante y planea el cambio.</value></data>
+  <data name="Pc.Disk.Hot" xml:space="preserve"><value>{0} se está calentando ({1} °C)</value></data>
+  <data name="Pc.Disk.HotDo" xml:space="preserve"><value>Un disco caliente se vuelve más lento para protegerse. Revisa la ventilación; en una PC de escritorio, un disipador en el SSD ayuda.</value></data>
+  <data name="Pc.Disk.Games1" xml:space="preserve"><value>Un juego está en un disco duro y carga mucho más lento</value></data>
+  <data name="Pc.Disk.GamesN" xml:space="preserve"><value>{0} juegos están en un disco duro y cargan mucho más lento</value></data>
+  <data name="Pc.Disk.GamesDo" xml:space="preserve"><value>Mueve los juegos al SSD desde la propia tienda (Steam: Propiedades › Archivos instalados › Mover). No se pierde nada.</value></data>
+  <data name="Pc.Display.Below" xml:space="preserve"><value>El monitor está a {0} Hz, pero admite {1} Hz</value></data>
+  <data name="Pc.Display.BelowDo" xml:space="preserve"><value>Haz clic en Usar {0} Hz: la imagen es más fluida. Si la pantalla parpadea o se apaga, vuelve sola en 15 segundos.</value></data>
+  <data name="Pc.Display.Use" xml:space="preserve"><value>Usar {0} Hz</value></data>
+  <data name="Pc.Display.AlreadyMax" xml:space="preserve"><value>Este monitor ya está en la frecuencia más alta que admite.</value></data>
+  <data name="Pc.Cpu.Limited" xml:space="preserve"><value>El firmware está limitando la velocidad del procesador</value></data>
+  <data name="Pc.Cpu.LimitedDo" xml:space="preserve"><value>Puede ser temperatura, energía o límite del fabricante: revisa la ventilación y, enchufado, usa el modo de energía del fabricante.</value></data>
+  <data name="Pc.Battery.Title" xml:space="preserve"><value>Portátil con batería</value></data>
+  <data name="Pc.Battery.Text" xml:space="preserve"><value>Con batería los FPS bajan mucho; conéctalo a la corriente.</value></data>
+  <data name="Pc.Battery.Setting" xml:space="preserve"><value>Avisarme cuando abra un juego con el portátil en batería</value></data>
 </root>

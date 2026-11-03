@@ -251,6 +251,7 @@
               <CheckBox Content="{l:T Settings.IconeNexusBandeja}" IsChecked="{Binding TrayIcon}" Margin="0,14,0,0"/>
               <CheckBox Content="{l:T Settings.MinimizarEscondeBandeja}" IsChecked="{Binding MinimizeToTray}" Margin="24,8,0,0" IsEnabled="{Binding TrayIcon}"/>
               <CheckBox Content="{l:T Settings.FecharXEscondeBandeja}" IsChecked="{Binding CloseToTray}" Margin="24,8,0,0" IsEnabled="{Binding TrayIcon}"/>
+              <CheckBox Content="{l:T Pc.Battery.Setting}" IsChecked="{Binding GameBatteryNotice}" Margin="0,14,0,0"/>
               <c:ExplainToggle Margin="0,10,0,0"
                                Content="{l:T Settings.AvisoAbreRelatorioClicar}"/>
             </StackPanel>

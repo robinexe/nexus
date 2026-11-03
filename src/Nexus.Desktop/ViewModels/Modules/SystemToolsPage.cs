@@ -78,8 +78,12 @@ public sealed class SystemToolsPage : ModulePage
     private double _dnsNumber = double.NaN, _arpNumber = double.NaN, _driverPackages = double.NaN, _restoreCount = double.NaN, _oldWifi = double.NaN;
     private UiTone _protectionTone = UiTone.Neutral;
 
+    /// <summary>Rede para jogos (checagens do PC): ping/jitter/perda, Wi-Fi ou cabo e o teste de bufferbloat.</summary>
+    public Nexus.Desktop.ViewModels.Simple.GameNetworkPanel GameNetwork { get; }
+
     public SystemToolsPage()
     {
+        GameNetwork = new Nexus.Desktop.ViewModels.Simple.GameNetworkPanel(Nexus.Desktop.ViewModels.Simple.PcChecksCoordinator.Shared, () => Host);
         RefreshCommand = new RelayCommand(() => _ = RunAsync(LoadAsync), () => !Busy);
         FlushDnsCommand = new RelayCommand(() => _ = RunAsync(() => EphemeralAsync(Loc.T("Tools.LimparCacheDns2"),
             Loc.T("Tools.EsvaziarCacheDnsWindows") +

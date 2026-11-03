@@ -71,9 +71,9 @@ public static class OwnerChecks
     public static readonly (string Title, string Url) PcieSource =
         ("TechPowerUp: escalonamento PCI-Express da RTX 4090", "https://www.techpowerup.com/review/nvidia-geforce-rtx-4090-pci-express-scaling/");
 
-    /// <summary>As únicas páginas que a interface aceita abrir a partir destes achados (fontes fixas, nunca texto de fora).</summary>
+    /// <summary>As únicas páginas que a interface aceita abrir a partir destes achados e das checagens do PC (fontes fixas, nunca texto de fora).</summary>
     public static IReadOnlySet<string> SourceUrls { get; } = new HashSet<string>(
-        new[] { ArcSource, ReBarSource, ExpoSource, MuxSource, MuxSkeptic, PcieSource }.Select(x => x.Url), StringComparer.Ordinal);
+        new[] { ArcSource, ReBarSource, ExpoSource, MuxSource, MuxSkeptic, PcieSource }.Select(x => x.Url).Concat(PcChecks.SourceUrls), StringComparer.Ordinal);
 
     public static IReadOnlyList<DiagnosticFinding> Evaluate(OwnerCheckFacts f)
     {

@@ -92,6 +92,8 @@ public sealed record HealthInputs
     public int MemorySlots { get; init; }
     /// <summary>Hoje (testes fixam).</summary>
     public DateTime Now { get; init; } = DateTime.Now;
+    /// <summary>Frases simples já montadas com os números da leitura (checagens do PC: rede, discos, monitor, processador).</summary>
+    public IReadOnlyDictionary<string, PlainFinding>? Plain { get; init; }
 
     public bool HasData => Findings.Count > 0;
     public bool SingleChannel => MemoryModules == 1;
@@ -185,7 +187,7 @@ public static partial class SimpleHealth
 // ================================================================== "O que dá para melhorar" (no máximo 3 cartões)
 
 /// <summary>Que tipo de melhoria (decide o botão e a ordem quando o impacto empata).</summary>
-public enum ImproveKind { Cleanup, GpuDriver, SingleChannel, PendingTweaks, LowDisk, SlowDisk, Finding }
+public enum ImproveKind { Cleanup, GpuDriver, SingleChannel, PendingTweaks, LowDisk, SlowDisk, Finding, DiskHealth, Monitor }
 
 /// <summary>Um cartão da tela Início: uma frase, um botão, a página que o botão abre e o impacto (para ordenar).</summary>
 public sealed record ImproveCard(ImproveKind Kind, string Text, string ActionText, string Target, int Impact, string IconKey)
@@ -222,14 +224,22 @@ public static class ImproveCards
         foreach (var f in i.Findings.Where(f => f.Severity == DiagnosticSeverity.Attention))
         {
             if (f.Id == "mem.channels" && i.SingleChannel) continue; // já é o cartão da memória
-            var plain = PlainFindings.For(f);
-            var kind = f.Id switch { "disk.system-free" => ImproveKind.LowDisk, "disk.system-media" => ImproveKind.SlowDisk, _ => ImproveKind.Finding };
+            var plain = PlainFindings.For(f, i.Plain);
+            var kind = f.Id switch
+            {
+                "disk.system-free" => ImproveKind.LowDisk,
+                "disk.system-media" => ImproveKind.SlowDisk,
+                _ when f.Id.StartsWith(PcChecks.DisplayRefreshPrefix, StringComparison.Ordinal) => ImproveKind.Monitor,
+                _ when f.Id.StartsWith(PcChecks.DiskPrefix, StringComparison.Ordinal) && f.Id != PcChecks.GamesOnSlowDiskId => ImproveKind.DiskHealth,
+                _ => ImproveKind.Finding,
+            };
             var (action, target) = kind switch
             {
                 ImproveKind.LowDisk => (Loc.T("Simple.Card.CleanupAction"), "SimpleCleanPage"),
                 _ => (Loc.T("Simple.Card.WhatToDo"), "SimpleProblemsPage"),
             };
-            list.Add(new ImproveCard(kind, plain.Title, action, target, kind == ImproveKind.LowDisk ? 68 : f.Owner is not null ? 45 : 40, plain.IconKey)
+            var impact = kind switch { ImproveKind.LowDisk => 68, ImproveKind.DiskHealth => 80, ImproveKind.Monitor => 62, _ => f.Owner is not null ? 45 : 40 };
+            list.Add(new ImproveCard(kind, plain.Title, action, target, impact, plain.IconKey)
             { HowTo = plain.WhatToDo, FindingId = f.Id, FixActionId = f.RelatedActionId });
         }
         return list;
@@ -274,9 +284,13 @@ public sealed record PlainFinding(string Title, string WhatToDo, string Topic, s
 /// </summary>
 public static class PlainFindings
 {
-    public static PlainFinding For(DiagnosticFinding f)
+    public static PlainFinding For(DiagnosticFinding f) => For(f, null);
+
+    /// <summary>Com as frases já montadas pelas checagens do PC (têm os números da leitura); o resto pela tabela abaixo.</summary>
+    public static PlainFinding For(DiagnosticFinding f, IReadOnlyDictionary<string, PlainFinding>? plain)
     {
         ArgumentNullException.ThrowIfNull(f);
+        if (plain is not null && plain.TryGetValue(f.Id, out var ready)) return ready;
         var topic = TopicOf(f.Id);
         return f.Id switch
         {
@@ -300,6 +314,9 @@ public static class PlainFindings
     public static string TopicOf(string? id)
     {
         var x = id ?? "";
+        if (x.StartsWith("net.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Network");
+        if (x.StartsWith("display.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Monitor");
+        if (x.StartsWith(PcChecks.DiskPrefix, StringComparison.Ordinal)) return Loc.T("Simple.Topic.Disk");
         if (x.StartsWith("mem.", StringComparison.Ordinal) || x == "owner.xmp") return Loc.T("Simple.Topic.Memory");
         if (x.StartsWith("disk.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Disk");
         if (x.StartsWith("gpu.", StringComparison.Ordinal) || x.StartsWith("owner.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Gpu");
@@ -316,6 +333,11 @@ public static class PlainFindings
         ArgumentNullException.ThrowIfNull(f);
         return f.Id switch
         {
+            PcChecks.GamesOnSlowDiskId => 60,
+            _ when f.Id.StartsWith(PcChecks.DiskPrefix, StringComparison.Ordinal) => 95, // disco falhando: backup antes de tudo
+            _ when f.Id.StartsWith(PcChecks.DisplayRefreshPrefix, StringComparison.Ordinal) => 72,
+            PcChecks.ThrottleId => 65,
+            _ when f.Id.StartsWith("net.", StringComparison.Ordinal) => 55,
             "disk.system-media" => 90,
             "disk.system-free" => 85,
             "mem.channels" or "mem.speed" or "owner.xmp" => 80,

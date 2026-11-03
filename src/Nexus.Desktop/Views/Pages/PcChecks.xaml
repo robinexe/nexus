@@ -1,0 +1,118 @@
+<!--
+  Checagens do PC (somente leitura) nas páginas avançadas:
+    - "Rede para jogos" (dentro de Ferramentas do sistema): servidor do jogo, Testar (ping/variação/perda até o roteador e o
+      servidor, Wi-Fi ou cabo com o sinal), "Testar com a conexão cheia" (bufferbloat, só depois de confirmar quanto de dados usa)
+      e os achados com o que fazer.
+    - "Saúde dos discos" (dentro de Disco): cada disco físico com estado, temperatura, desgaste, erros e horas ligado
+      ("não informado" quando o Windows não dá) e os avisos (disco falhando, quente, jogos num HD).
+  Os achados também aparecem no Diagnóstico, na tela Início e em Problemas (palavras simples). ViewModels em
+  ViewModels/Simple/PcCheckPanels.cs.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:l="clr-namespace:Nexus.Desktop.Localization"
+                    xmlns:sv="clr-namespace:Nexus.Desktop.ViewModels.Simple"
+                    xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls">
+
+  <!-- Um achado: selo de tom, título, evidência e o que fazer. -->
+  <DataTemplate x:Key="PC.Finding" DataType="{x:Type sv:PcCheckFindingRow}">
+    <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,10,0,10">
+      <DockPanel>
+        <Ellipse DockPanel.Dock="Left" Fill="{Binding Tone, Converter={StaticResource ToneBrush}}" Width="10" Height="10" Margin="0,6,12,0" VerticalAlignment="Top"/>
+        <StackPanel>
+          <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" FontWeight="SemiBold"/>
+          <TextBlock Text="{Binding Evidence}" Style="{StaticResource Text.Small}" Margin="0,3,0,0"/>
+          <TextBlock Text="{Binding Advice}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" Margin="0,4,0,0"
+                     Visibility="{Binding HasAdvice, Converter={StaticResource BoolToVis}}"/>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+  </DataTemplate>
+
+  <!-- ================================================================== Rede para jogos -->
+  <DataTemplate DataType="{x:Type sv:GameNetworkPanel}">
+    <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,16" Padding="20,16,20,18">
+      <StackPanel>
+        <DockPanel Margin="0,0,0,10">
+          <Grid Width="38" Height="38" Margin="0,0,12,0">
+            <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+            <c:Icon Data="{StaticResource Icon.Network}" Size="19" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+          </Grid>
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="{l:T Pc.Net.Title}" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="{l:T Pc.Net.Lead}" Style="{StaticResource Text.Small}"/>
+          </StackPanel>
+        </DockPanel>
+
+        <TextBlock Text="{l:T Pc.Net.HostLabel}" Style="{StaticResource Text.Small}" Margin="0,4,0,4"/>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Command="{Binding BloatCommand}" Content="{Binding BloatButtonText}" Margin="8,0,0,0"/>
+          <Button DockPanel.Dock="Right" Style="{StaticResource Button.Primary}" Command="{Binding TestCommand}" Content="{l:T Pc.Net.Test}" Margin="8,0,0,0"/>
+          <TextBox Text="{Binding HostText, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{l:T Pc.Net.HostLabel}" VerticalContentAlignment="Center"/>
+        </DockPanel>
+        <TextBlock Text="{l:T Pc.Net.HostInvalid}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Bad}" Margin="0,4,0,0"
+                   Visibility="{Binding HostInvalid, Converter={StaticResource BoolToVis}}"/>
+        <DockPanel Margin="0,8,0,0" Visibility="{Binding HasStatus, Converter={StaticResource BoolToVis}}">
+          <Button DockPanel.Dock="Right" Style="{StaticResource Button.Ghost}" Command="{Binding CancelCommand}" Content="{l:T Pc.Net.Cancel}"
+                  Visibility="{Binding Running, Converter={StaticResource BoolToVis}}"/>
+          <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"
+                     AutomationProperties.LiveSetting="Polite"/>
+        </DockPanel>
+        <ProgressBar IsIndeterminate="True" Height="3" Margin="0,8,0,0" Visibility="{Binding Running, Converter={StaticResource BoolToVis}}"/>
+
+        <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource PC.Finding}" Focusable="False" Margin="0,10,0,0"/>
+        <TextBlock Text="{l:T Pc.Net.Empty}" Style="{StaticResource Text.Small}" Margin="0,10,0,0"
+                   Visibility="{Binding HasRows, Converter={StaticResource FalseToVisible}}"/>
+        <c:ExplainToggle Margin="0,10,0,0" Content="{l:T Pc.Net.Explain}"/>
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+
+  <!-- ================================================================== Saúde dos discos -->
+  <DataTemplate DataType="{x:Type sv:DiskHealthPanel}">
+    <Border Style="{StaticResource Panel.Card}" Margin="0,4,0,16" Padding="20,16,20,18">
+      <StackPanel>
+        <DockPanel Margin="0,0,0,10">
+          <Button DockPanel.Dock="Right" Style="{StaticResource Button.Ghost}" Command="{Binding RefreshCommand}" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+              <c:Icon Data="{StaticResource Icon.Refresh}" Size="14" Margin="0,0,6,0"/>
+              <TextBlock Text="{l:T Pc.Disk.Reread}" TextWrapping="NoWrap"/>
+            </StackPanel>
+          </Button>
+          <Grid Width="38" Height="38" Margin="0,0,12,0">
+            <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+            <c:Icon Data="{StaticResource Icon.Disk}" Size="19" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+          </Grid>
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="{l:T Pc.Disk.Title}" Style="{StaticResource Text.H2}"/>
+            <TextBlock Text="{l:T Pc.Disk.Lead}" Style="{StaticResource Text.Small}"/>
+          </StackPanel>
+        </DockPanel>
+        <ProgressBar IsIndeterminate="True" Height="3" Margin="0,0,0,8" Visibility="{Binding Reading, Converter={StaticResource BoolToVis}}"/>
+        <TextBlock Text="{l:T Pc.Disk.Empty}" Style="{StaticResource Text.Small}" Visibility="{Binding NoDisks, Converter={StaticResource BoolToVis}}"/>
+
+        <ItemsControl ItemsSource="{Binding Disks}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type sv:DiskHealthRow}">
+              <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,10,0,10">
+                <StackPanel>
+                  <DockPanel>
+                    <c:StatusChip DockPanel.Dock="Right" Tone="{Binding Tone}" Text="{Binding Health}" Margin="12,0,0,0"/>
+                    <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" FontWeight="SemiBold"/>
+                  </DockPanel>
+                  <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
+                    <Run Text="{Binding Type, Mode=OneWay}"/><Run Text=" · "/><Run Text="{l:T Pc.Disk.Temp}"/><Run Text=" "/><Run Text="{Binding Temperature, Mode=OneWay}"/><Run Text=" · "/><Run Text="{l:T Pc.Disk.Wear}"/><Run Text=" "/><Run Text="{Binding Wear, Mode=OneWay}"/><Run Text=" · "/><Run Text="{l:T Pc.Disk.Errors}"/><Run Text=" "/><Run Text="{Binding Errors, Mode=OneWay}"/><Run Text=" · "/><Run Text="{l:T Pc.Disk.Hours}"/><Run Text=" "/><Run Text="{Binding Hours, Mode=OneWay}"/>
+                  </TextBlock>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <ItemsControl ItemsSource="{Binding Notes}" ItemTemplate="{StaticResource PC.Finding}" Focusable="False" Margin="0,6,0,0"
+                      Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
+        <c:ExplainToggle Margin="0,10,0,0" Content="{l:T Pc.Disk.Explain}"/>
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+</ResourceDictionary>
