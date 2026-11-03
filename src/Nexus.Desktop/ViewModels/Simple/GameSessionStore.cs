@@ -42,6 +42,13 @@ public sealed record GameSessionState(bool Enabled, Guid? PendingRun)
         }
     }
 
+    /// <summary>
+    /// Ligado E confirmado para este conjunto: o painel grava a lista de ações (nunca nula) ao ligar com confirmação. O arquivo da
+    /// "Sessão de jogo" antiga tinha Enabled sem lista: o usuário confirmou só o teto de downloads, então aqui conta como desligado.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool ConfirmedOn => Enabled && Actions is not null;
+
     [System.Text.Json.Serialization.JsonIgnore]
     public bool HasPending => PendingRun is not null || PendingRuns is { Count: > 0 };
 

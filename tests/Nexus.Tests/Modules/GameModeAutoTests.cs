@@ -223,6 +223,9 @@ public sealed class GameModeAutoTests
             File.WriteAllText(path, $"{{\"Enabled\":true,\"PendingRun\":\"{legacy}\"}}");
             var old = new GameSessionStore(path).Load();
             Assert.Null(old.Actions);
+            Assert.True(old.Enabled);
+            Assert.False(old.ConfirmedOn); // confirmou só o teto de downloads, não o conjunto: o painel trata como desligado
+            Assert.True(loaded.ConfirmedOn);
             Assert.Equal([new PendingGameRun(legacy, BrokerLevel.Admin)], old.AllPendingRuns);
             Assert.True(old.HasPending);
             Assert.False(old.Settled().HasPending);

@@ -70,9 +70,16 @@ public sealed class GameModeAutoPanel : ObservableObject
         RetryUndoCommand = new RelayCommand(() => { _machine.RetryUndo(); _ = TickAsync(); }, () => !_working && _phase == GameModeAutoPhase.UndoFailed);
         StopDelayOptions = [.. DelayChoices.Select(s => new DelayOption(Loc.F("GameAuto.Seconds", s), s))];
         _state = _store.Load();
+        // Arquivo da "Sessão de jogo" antiga (ligada sem lista de ações): o usuário confirmou só o teto de downloads, não este
+        // conjunto. Volta a desligado (o que ficou aplicado continua pendente e é desfeito); ligar de novo pede confirmação.
+        if (!_state.ConfirmedOn) _state = _state with { Enabled = false };
         _machine.StopDelay = TimeSpan.FromSeconds(_state.StopDelaySeconds ?? (int)GameModeAutoMachine.DefaultStopDelay.TotalSeconds);
         _stopDelay = StopDelayOptions.FirstOrDefault(o => o.Seconds == (int)_machine.StopDelay.TotalSeconds) ?? StopDelayOptions[1];
-        if (_state.HasPending) _machine.Resume(_state.PendingGame);
+        if (_state.HasPending)
+        {
+            _machine.Resume(_state.PendingGame);
+            _ = _machine.Next(_state.Enabled, null, DateTimeOffset.Now); // a folga conta a partir desta abertura
+        }
         Items = [.. GameModeActions.All.Select(Row)];
         UpdateStatus();
     }
@@ -164,7 +171,8 @@ public sealed class GameModeAutoPanel : ObservableObject
             var what = string.Join("\n", ChosenKeys().Select(k => "• " + ActionText(k)));
             if (what.Length == 0) what = Loc.T("GameAuto.ConfirmNothing");
             if (!host.Confirm(Loc.T("GameAuto.Title"), Loc.F("GameAuto.ConfirmOn", what, _stopDelay.Seconds))) return;
-            Save(_state with { Enabled = true });
+            // A lista gravada nunca fica nula depois de ligar: é a prova de que o usuário confirmou ESTE conjunto.
+            Save(_state with { Enabled = true, Actions = Items.Where(i => i.IsOn).Select(i => i.Action.Key).ToList() });
             _measure()?.StartWatching();
             _timer.Start();
             Notice?.Invoke(this, (Loc.T("GameAuto.Title"), Loc.T("GameAuto.Tray.On")));

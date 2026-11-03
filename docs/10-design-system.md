@@ -437,12 +437,15 @@ pelo aplicador. O cartão/linha em que o usuário clicou fica à vista mesmo dep
   - Cada opção mostra o estado REAL, lido de onde a ação escreve (`GameOptionStates.cs`, lógica pura testada em
     `GameOptionStateTests`): Modo de jogo pelo registro (releitura do catálogo depois de aplicar), driver NVIDIA pelo leitor do
     DRS em cada executável (o da biblioteca e, se ele só abre o jogo, o que desenha: `GameAliases`), jogos em janela pelo token
-    `SwapEffectUpgradeEnable` de UserGpuPreferences, Fortnite pelo GameUserSettings.ini, Sessão de jogo por `game-session.json`.
+    `SwapEffectUpgradeEnable` de UserGpuPreferences, Fortnite pelo GameUserSettings.ini, Modo jogo automático por `game-session.json`.
   - Ligada: "✓ Ligado — Desfazer" quando o diário tem a execução que só mexeu nela (chave da ação + alvo do jogo); feita junto
     com outras coisas: "Desfazer no Histórico"; ligada por fora do NEXUS: só "✓ Ligado". Valor diferente: "Está com outro valor".
   - Os botões são os mesmos entre aberturas da tela; a cada abertura e depois de aplicar/desfazer, relê só aquele jogo.
   - "Comparar com e sem" (jogos com opções): abre o **Laboratório A/B** já com o jogo escolhido — uma partida sem, o NEXUS aplica,
     uma partida com; só fica o que melhorar de verdade (`docs/modules/ablab.md`).
+  - **Modo jogo automático** (cartão, desligado por padrão): Ligar/Desligar com confirmação, "O que ele faz" com caixas de marcar
+    (lista fechada em palavras simples), folga antes de desfazer, selo "Ativo agora: \<jogo\>" e aviso discreto na bandeja ao
+    ligar/aplicar/desfazer; desfazer que falha 3 vezes vira linha em Problemas (`docs/modules/game-mode-auto.md`).
 - **Início/Problemas depois de aplicar**: o diagnóstico só é refeito na próxima leitura do PC; até lá, um achado cuja ação do
   catálogo já está como ela deixa (releitura "same") conta como resolvido (`ResolvedFindings`) e não volta como pendente.
 - **Problemas**: achados em palavras simples (`PlainFindings`), "O que fazer" em 1–2 frases e "Resolver" de um clique quando há

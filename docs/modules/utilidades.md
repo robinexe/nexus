@@ -7,7 +7,7 @@ Cinco ferramentas pequenas espalhadas onde o usuário procura por elas, mais sei
 |---|---|---|---|
 | Juntar informações do travamento | Problemas › "O jogo fechou sozinho?" | `Nexus.SystemTools/Crash/*`, `ViewModels/Simple/CrashReportPanel.cs` | Só o ZIP que o usuário salva; minidespejo por jogo pelo aplicador |
 | Tempo de inicialização (tendência, antes x depois) | Ferramentas avançadas › Inicialização | `Nexus.Boot/Impact/BootTrend.cs`, `StartupPage` | Não |
-| Sessão de jogo | Jogos › "Sessão de jogo" (desligada por padrão) | `Nexus.Measurement/GameSessionCap.cs`, `ViewModels/Simple/GameSessionPanel.cs` | Sim, pelo aplicador, desfeito sozinho |
+| Sessão de jogo → **Modo jogo automático** (03/11) | Jogos › "Modo jogo automático" (desligado por padrão) | `Nexus.Measurement/GameModeAuto.cs`, `ViewModels/Simple/GameModeAutoPanel.cs`; ver `docs/modules/game-mode-auto.md` | Sim, pelo aplicador, desfeito sozinho |
 | Teste do mouse | Jogos › "Teste do mouse" | `Nexus.Measurement/MousePolling.cs`, `Windows/RawMouseInput.cs`, `Views/Modules/Mouse/MouseTestWindow.cs` | Não |
 | Arquivos duplicados | Ferramentas avançadas › Espaço em disco | `Nexus.DiskTools/Analysis/DuplicateFinder.cs`, `ViewModels/Modules/DuplicatesPanel.cs` | Sim, quarentena pelo aplicador |
 
@@ -52,19 +52,15 @@ datas vêm dos dois diários, execuções com ações `boot.*` aplicadas ou desf
 costuma exigir administrador: a página já mostra o motivo e segue sem números. Fonte:
 https://eventlogxp.com/blog/windows-boot-performance-diagnostics-1/
 
-## 3. Sessão de jogo
+## 3. Sessão de jogo → Modo jogo automático
 
-Desligada por padrão; ligar pede confirmação com o texto honesto (ganho pequeno; o Windows pede permissão de administrador a
-cada jogo, a menos que o NEXUS esteja aberto como administrador). Com um jogo detectado pela mesma detecção do Medir
-(`MeasurePage.CurrentGame`) há 20 s, aplica `game.session.do-foreground-cap@1` — política documentada
-`DOPercentageMaxForegroundBandwidth = 20` (Store/Xbox/"Verificar atualizações"; o automático em segundo plano já tem o ajuste
-`sys.do.background-bandwidth.cap50`). Com o jogo fechado há 15 s, desfaz a execução pelo aplicador sem perguntar de novo
-(o usuário aceitou ao ligar). A execução fica anotada em `%LocalAppData%\NEXUS\game-session.json`: se o NEXUS fechar com o
-jogo aberto, desfaz na próxima abertura. Recusa do aviso do Windows = não tenta de novo até o próximo jogo.
-O valor entrou na lista fechada `PrivacyPolicyAllowlist` (mesma chave das duas políticas da Otimização de Entrega que já
-estavam lá; o teste exige que toda entrada seja usada pelo catálogo). Ao aplicar, avisa se Steam, Epic, OneDrive, Backup do
-Windows, Battle.net, EA, Ubisoft ou GOG transferiram mais de 1 MB/s em 2 s (`GetProcessIoCounters`, acesso limitado). O NEXUS
-não mexe nesses programas. Fontes: https://learn.microsoft.com/en-us/windows/deployment/do/waas-delivery-optimization-reference ,
+Em 03/11 a "Sessão de jogo" virou o **Modo jogo automático** (`docs/modules/game-mode-auto.md`): o teto temporário da
+Otimização de Entrega (`game.session.do-foreground-cap@1`, política documentada `DOPercentageMaxForegroundBandwidth = 20`,
+só com o NEXUS aberto como administrador) passou a ser uma das opções de um conjunto fechado aplicado quando um jogo abre e
+desfeito pelas execuções do diário quando ele fecha. `GameSessionCap` (a máquina antiga, só o teto) continua no código com os
+testes de 02/11; a nova é `GameModeAutoMachine`. O aviso de Steam/Epic/OneDrive/Backup/Battle.net/EA/Ubisoft/GOG transferindo
+mais de 1 MB/s em 2 s (`GetProcessIoCounters`, acesso limitado) continua ao aplicar; o NEXUS não mexe nesses programas.
+O valor da política está na lista fechada `PrivacyPolicyAllowlist`. Fontes: https://learn.microsoft.com/en-us/windows/deployment/do/waas-delivery-optimization-reference ,
 https://www.pcgamer.com/latest-windows-10-update-stops-future-updates-interrupting-your-game
 
 ## 4. Teste do mouse
@@ -108,6 +104,6 @@ mais antiga.
 ## Conferir no Windows
 
 Problemas › "Juntar informações" num PC com travamentos reais (conferir contagem contra o Visualizador de Eventos e o ZIP);
-"Guardar detalhes" e Desfazer (regedit); Inicialização com o NEXUS como administrador; sessão de jogo com um jogo aberto
+"Guardar detalhes" e Desfazer (regedit); Inicialização com o NEXUS como administrador; modo jogo automático com um jogo aberto
 (aviso do Windows, `HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization` durante e depois); teste do mouse com mouses
 de 125/1000/4000+ Hz; duplicados numa pasta de Downloads e Desfazer.

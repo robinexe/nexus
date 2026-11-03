@@ -1,6 +1,8 @@
 namespace Nexus.Measurement;
 
 // =====================================================================================================================
+// Sessão de jogo (02/11; desde 03/11 a tela usa o Modo jogo automático, GameModeAuto.cs, que generaliza esta máquina para um
+// conjunto de ações. GameSessionCap fica como a versão de uma ação só, com os testes de 02/11.)
 // Sessão de jogo (desligada por padrão): com um jogo aberto, aplica um limite temporário aos downloads em primeiro plano da
 // Otimização de Entrega (Microsoft Store/Xbox/"Verificar atualizações") e desfaz quando o jogo fecha. O Modo de Jogo do Windows
 // já segura instalações de driver e avisos de reinício, e o indexador já recua sozinho desde o 2004: o que sobra é pouco, e a
