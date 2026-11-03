@@ -152,6 +152,15 @@ public sealed class GameRow(GameHistory h)
     public string TrendText => Model.Low1ChangePercent is { } c ? Loc.F("Meas.N1LowNTendencia", c.ToString("+0;-0;0", Pt)) : Loc.T("Meas.PartidaSo");
 }
 
+/// <summary>Um processo que estava desenhando quadros (para o usuário escolher o jogo à mão).</summary>
+public sealed class PresenterRow(int pid, string name, double fps)
+{
+    public int Pid { get; } = pid;
+    public string PidText { get; } = pid.ToString(CultureInfo.InvariantCulture);
+    public string Name { get; } = name;
+    public string Text { get; } = Loc.F("Meas.Live.PresenterN", name, fps, pid);
+}
+
 /// <summary>Comando com parâmetro de texto (ex.: remover um item da lista de jogos pelo nome do executável).</summary>
 public sealed class TextCommand(Action<string> execute) : System.Windows.Input.ICommand
 {

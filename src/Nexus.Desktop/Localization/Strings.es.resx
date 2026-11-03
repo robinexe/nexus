@@ -1482,7 +1482,31 @@ Es el mismo cambio de Configuración &gt; Pantalla &gt; Frecuencia de actualizac
   <data name="Meas.AbrirAjustes" xml:space="preserve"><value>Abrir los ajustes</value></data>
   <data name="Meas.AbrirPastaSessoes" xml:space="preserve"><value>Abrir la carpeta de sesiones</value></data>
   <data name="Meas.Adicionar" xml:space="preserve"><value>Agregar</value></data>
-  <data name="Meas.AguardandoQuadros" xml:space="preserve"><value>esperando fotogramas…</value></data>
+  <data name="Meas.Live.Procurando" xml:space="preserve"><value>buscando el juego…</value></data>
+  <data name="Meas.Live.AguardandoPermissao" xml:space="preserve"><value>esperando el permiso de Windows…</value></data>
+  <data name="Meas.Live.SemPermissao" xml:space="preserve"><value>sin permiso para medir</value></data>
+  <data name="Meas.Live.NaoDesenhando" xml:space="preserve"><value>el juego no está dibujando (¿minimizado?)</value></data>
+  <data name="Meas.Live.MedindoN" xml:space="preserve"><value>midiendo {0}</value></data>
+  <data name="Meas.Live.MedindoOutroN" xml:space="preserve"><value>El proceso detectado no dibujaba fotogramas: NEXUS está midiendo el que dibuja por el juego ({0}).</value></data>
+  <data name="Meas.Live.Falhou" xml:space="preserve"><value>PresentMon se detuvo</value></data>
+  <data name="Meas.Live.DicaTimeout" xml:space="preserve"><value>abre NEXUS › Medir para ver qué hacer</value></data>
+  <data name="Meas.Live.TimeoutProcurando" xml:space="preserve"><value>Hace 15 s que no llegan fotogramas del juego. Con el juego abierto y en pantalla, haz clic en "Elegir el proceso del juego" y elige el que está dibujando.</value></data>
+  <data name="Meas.Live.TimeoutPermissao" xml:space="preserve"><value>Windows pidió permiso para que PresentMon mida, y el aviso puede estar parpadeando en la barra de tareas (detrás del juego). Acéptalo, o usa "Permitir medición" para no necesitarlo más.</value></data>
+  <data name="Meas.Live.TimeoutNaoDesenhando" xml:space="preserve"><value>El juego está abierto, pero no presenta fotogramas desde hace 15 s: minimizado, en segundo plano o en una pantalla de carga. Vuelve al juego.</value></data>
+  <data name="Meas.Live.SemPermissaoTexto" xml:space="preserve"><value>Tu cuenta no tiene permiso para rastrear fotogramas: Windows exige administrador o el grupo "Usuarios del registro de rendimiento". Elige una opción abajo.</value></data>
+  <data name="Meas.Live.AvisoRecusado" xml:space="preserve"><value>El aviso de Windows fue rechazado o cerrado.</value></data>
+  <data name="Meas.Live.LiberarMedicao" xml:space="preserve"><value>Permitir medición (pide permiso de Windows una vez)</value></data>
+  <data name="Meas.Live.LiberarDepois" xml:space="preserve"><value>Permitir medición vale después de cerrar sesión y volver a entrar en Windows.</value></data>
+  <data name="Meas.Live.MedirAdmin" xml:space="preserve"><value>Medir como administrador ahora</value></data>
+  <data name="Meas.Live.MedirAdminDica" xml:space="preserve"><value>Reinicia la medición de este juego pidiendo permiso a Windows ahora (PresentMon se ejecuta como administrador solo en esta partida).</value></data>
+  <data name="Meas.Live.EscolherProcesso" xml:space="preserve"><value>Elegir el proceso del juego</value></data>
+  <data name="Meas.Live.EscolherProcessoDica" xml:space="preserve"><value>Mira durante 3 s qué programas están dibujando fotogramas y te deja elegir cuál medir.</value></data>
+  <data name="Meas.Live.ProcurandoQuemDesenha" xml:space="preserve"><value>Buscando quién está dibujando fotogramas (3 s)…</value></data>
+  <data name="Meas.Live.NinguemDesenhando" xml:space="preserve"><value>Ningún programa está dibujando fotogramas ahora. Deja el juego abierto y en pantalla e inténtalo de nuevo.</value></data>
+  <data name="Meas.Live.EscolhaProcesso" xml:space="preserve"><value>Programas dibujando fotogramas ahora. Elige el juego:</value></data>
+  <data name="Meas.Live.PresenterN" xml:space="preserve"><value>{0} · {1:0} fotogramas/s · PID {2}</value></data>
+  <data name="Meas.Live.MedirEste" xml:space="preserve"><value>Medir este</value></data>
+  <data name="Meas.Live.ProcessoUsuario" xml:space="preserve"><value>elegido por ti</value></data>
   <data name="Meas.AjustesMedicao" xml:space="preserve"><value>Ajustes de la medición</value></data>
   <data name="Meas.AlemBibliotecasListasTrata" xml:space="preserve"><value>Además de las bibliotecas y las listas, trata como juego cualquier programa en pantalla completa (excepto navegadores y reproductores conocidos).</value></data>
   <data name="Meas.AmbarAgora" xml:space="preserve"><value>Ámbar: ahora.</value></data>

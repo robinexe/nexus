@@ -49,6 +49,7 @@ internal sealed class OverlayWindow : Window
     private readonly TextBlock _low = Line(13, Color.FromRgb(0xE6, 0xEA, 0xF2), false);
     private readonly TextBlock _ft = Line(13, Color.FromRgb(0x6F, 0xD8, 0xF0), false);
     private readonly TextBlock _sys = Line(12, Color.FromRgb(0x9A, 0xA3, 0xB5), false);
+    private readonly TextBlock _status = Line(11, Color.FromRgb(0x9A, 0xA3, 0xB5), false);
 
     public OverlayWindow()
     {
@@ -68,6 +69,9 @@ internal sealed class OverlayWindow : Window
         stack.Children.Add(_low);
         stack.Children.Add(_ft);
         stack.Children.Add(_sys);
+        stack.Children.Add(_status);
+        _status.MaxWidth = 320;
+        _status.TextWrapping = TextWrapping.Wrap;
         Content = new Border
         {
             Background = new SolidColorBrush(Color.FromArgb(0xB0, 0x0E, 0x13, 0x20)),
@@ -92,13 +96,23 @@ internal sealed class OverlayWindow : Window
         Effect = new System.Windows.Media.Effects.DropShadowEffect { BlurRadius = 3, ShadowDepth = 0, Opacity = 0.9, Color = Colors.Black },
     };
 
+    /// <summary>
+    /// Sem quadros: a primeira linha diz o que está acontecendo de verdade (procurando o jogo, aguardando a permissão do Windows,
+    /// sem permissão, jogo sem desenhar) e os números somem; com quadros: FPS grande e, embaixo, "medindo X" (o processo medido).
+    /// </summary>
     public void Render(OverlayContent c)
     {
-        _fps.Text = c.Waiting ? Loc.T("Meas.AguardandoQuadros") : c.Fps;
+        var status = c.Status ?? (c.Waiting ? Loc.T("Meas.Live.Procurando") : null);
+        var lines = status?.Split('\n', 2) ?? [];
+        _fps.Text = c.Waiting ? lines.ElementAtOrDefault(0) ?? "" : c.Fps;
+        _fps.FontSize = c.Waiting ? 15 : 22;
         _low.Text = c.Low1;
         _ft.Text = c.Frametime;
+        _low.Visibility = _ft.Visibility = c.Waiting ? Visibility.Collapsed : Visibility.Visible;
         _sys.Text = c.System ?? "";
         _sys.Visibility = c.System is null ? Visibility.Collapsed : Visibility.Visible;
+        _status.Text = c.Waiting ? lines.ElementAtOrDefault(1) ?? "" : status ?? "";
+        _status.Visibility = _status.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
         KeepOnTop();
     }
 

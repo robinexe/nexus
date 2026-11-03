@@ -1482,7 +1482,31 @@ It's the same change as Settings &gt; Display &gt; Refresh rate, only with a mod
   <data name="Meas.AbrirAjustes" xml:space="preserve"><value>Open settings</value></data>
   <data name="Meas.AbrirPastaSessoes" xml:space="preserve"><value>Open the sessions folder</value></data>
   <data name="Meas.Adicionar" xml:space="preserve"><value>Add</value></data>
-  <data name="Meas.AguardandoQuadros" xml:space="preserve"><value>waiting for frames…</value></data>
+  <data name="Meas.Live.Procurando" xml:space="preserve"><value>looking for the game…</value></data>
+  <data name="Meas.Live.AguardandoPermissao" xml:space="preserve"><value>waiting for Windows permission…</value></data>
+  <data name="Meas.Live.SemPermissao" xml:space="preserve"><value>no permission to measure</value></data>
+  <data name="Meas.Live.NaoDesenhando" xml:space="preserve"><value>game isn't drawing (minimized?)</value></data>
+  <data name="Meas.Live.MedindoN" xml:space="preserve"><value>measuring {0}</value></data>
+  <data name="Meas.Live.MedindoOutroN" xml:space="preserve"><value>The detected process wasn't drawing frames: NEXUS is measuring the one drawing for the game ({0}).</value></data>
+  <data name="Meas.Live.Falhou" xml:space="preserve"><value>PresentMon stopped</value></data>
+  <data name="Meas.Live.DicaTimeout" xml:space="preserve"><value>open NEXUS › Measure to see what to do</value></data>
+  <data name="Meas.Live.TimeoutProcurando" xml:space="preserve"><value>No game frames for 15 s. With the game open and on screen, click "Pick the game process" and choose the one that is drawing.</value></data>
+  <data name="Meas.Live.TimeoutPermissao" xml:space="preserve"><value>Windows asked for permission for PresentMon to measure, and the prompt may be blinking on the taskbar (behind the game). Accept it, or use "Allow measuring" so it isn't needed anymore.</value></data>
+  <data name="Meas.Live.TimeoutNaoDesenhando" xml:space="preserve"><value>The game is open but hasn't presented frames for 15 s: minimized, in the background or on a loading screen. Go back to the game.</value></data>
+  <data name="Meas.Live.SemPermissaoTexto" xml:space="preserve"><value>Your account isn't allowed to trace frames: Windows requires administrator rights or the "Performance Log Users" group. Choose an option below.</value></data>
+  <data name="Meas.Live.AvisoRecusado" xml:space="preserve"><value>The Windows prompt was declined or closed.</value></data>
+  <data name="Meas.Live.LiberarMedicao" xml:space="preserve"><value>Allow measuring (asks Windows permission once)</value></data>
+  <data name="Meas.Live.LiberarDepois" xml:space="preserve"><value>Allowing measuring takes effect after you sign out and back in to Windows.</value></data>
+  <data name="Meas.Live.MedirAdmin" xml:space="preserve"><value>Measure as administrator now</value></data>
+  <data name="Meas.Live.MedirAdminDica" xml:space="preserve"><value>Restarts measuring this game asking Windows for permission now (PresentMon runs as administrator for this match only).</value></data>
+  <data name="Meas.Live.EscolherProcesso" xml:space="preserve"><value>Pick the game process</value></data>
+  <data name="Meas.Live.EscolherProcessoDica" xml:space="preserve"><value>Looks for 3 s at which programs are drawing frames and lets you choose which one to measure.</value></data>
+  <data name="Meas.Live.ProcurandoQuemDesenha" xml:space="preserve"><value>Looking for what is drawing frames (3 s)…</value></data>
+  <data name="Meas.Live.NinguemDesenhando" xml:space="preserve"><value>No program is drawing frames right now. Keep the game open and on screen and try again.</value></data>
+  <data name="Meas.Live.EscolhaProcesso" xml:space="preserve"><value>Programs drawing frames right now. Choose the game:</value></data>
+  <data name="Meas.Live.PresenterN" xml:space="preserve"><value>{0} · {1:0} frames/s · PID {2}</value></data>
+  <data name="Meas.Live.MedirEste" xml:space="preserve"><value>Measure this</value></data>
+  <data name="Meas.Live.ProcessoUsuario" xml:space="preserve"><value>picked by you</value></data>
   <data name="Meas.AjustesMedicao" xml:space="preserve"><value>Measurement settings</value></data>
   <data name="Meas.AlemBibliotecasListasTrata" xml:space="preserve"><value>Besides the libraries and lists, treats any fullscreen program as a game (except known browsers and players).</value></data>
   <data name="Meas.AmbarAgora" xml:space="preserve"><value>Amber: now.</value></data>

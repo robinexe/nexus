@@ -317,7 +317,24 @@
                 <TextBlock Text="{Binding HeroDetail}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,8,0,0"
                            MaxHeight="42" TextTrimming="CharacterEllipsis" ToolTip="{Binding HeroDetail}"/>
                 <TextBlock Text="{Binding CaptureNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="0,4,0,0"
+                           TextWrapping="Wrap" MaxWidth="560" HorizontalAlignment="Left"
                            Visibility="{Binding CaptureNote, Converter={StaticResource M.Has}}"/>
+                <!-- Sem permissão de rastrear quadros: as duas saídas, sem esperar calado -->
+                <Border Style="{StaticResource Panel.Notice}" Margin="0,8,0,0" HorizontalAlignment="Left" MaxWidth="560"
+                        Visibility="{Binding ShowPermissionActions, Converter={StaticResource M.Vis}}">
+                  <StackPanel>
+                    <WrapPanel>
+                      <Button Style="{StaticResource Button.Primary}" Command="{Binding JoinPerfLogCommand}" Content="{l:T Meas.Live.LiberarMedicao}" Margin="0,0,8,4"
+                              Visibility="{Binding ShowPerfLogOffer, Converter={StaticResource M.Vis}}" ToolTip="{l:T Meas.ColocaSuaContaGrupo}"/>
+                      <Button Style="{StaticResource Button.Secondary}" Command="{Binding MeasureAsAdminCommand}" Content="{l:T Meas.Live.MedirAdmin}" Margin="0,0,8,4"
+                              ToolTip="{l:T Meas.Live.MedirAdminDica}"/>
+                    </WrapPanel>
+                    <TextBlock Text="{l:T Meas.Live.LiberarDepois}" Style="{StaticResource Text.Small}" TextWrapping="Wrap"
+                               Visibility="{Binding ShowPerfLogOffer, Converter={StaticResource M.Vis}}"/>
+                    <TextBlock Text="{Binding PerfLogText}" Style="{StaticResource Text.Small}" TextWrapping="Wrap"
+                               Visibility="{Binding PerfLogPendingLogon, Converter={StaticResource M.Vis}}"/>
+                  </StackPanel>
+                </Border>
 
                 <WrapPanel Margin="0,14,0,0">
                   <Button Style="{StaticResource Button.Primary}" Command="{Binding StartCaptureCommand}" Margin="0,4,8,0"
@@ -338,9 +355,27 @@
                   </Button>
                   <Button Style="{StaticResource Button.Ghost}" Command="{Binding AddCurrentGameCommand}" Content="{l:T Meas.JogoLembrar}" Margin="0,4,4,0"
                           Visibility="{Binding IsPlaying, Converter={StaticResource M.Vis}}" ToolTip="{l:T Meas.ColocaEsteExecutavelSua}"/>
-                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding ExcludeCurrentCommand}" Content="{l:T Meas.NaoJogo}" Margin="0,4,0,0"
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding ExcludeCurrentCommand}" Content="{l:T Meas.NaoJogo}" Margin="0,4,4,0"
                           Visibility="{Binding IsPlaying, Converter={StaticResource M.Vis}}" ToolTip="{l:T Meas.NexusDeixaTratarEste}"/>
+                  <Button Style="{StaticResource Button.Ghost}" Command="{Binding PickProcessCommand}" Content="{l:T Meas.Live.EscolherProcesso}" Margin="0,4,0,0"
+                          ToolTip="{l:T Meas.Live.EscolherProcessoDica}"/>
                 </WrapPanel>
+                <!-- Quem está desenhando agora (escolha à mão) -->
+                <StackPanel Margin="0,8,0,0" Visibility="{Binding PresentersText, Converter={StaticResource M.Has}}">
+                  <TextBlock Text="{Binding PresentersText}" Style="{StaticResource Text.Small}" TextWrapping="Wrap" MaxWidth="560" HorizontalAlignment="Left"/>
+                  <ItemsControl ItemsSource="{Binding Presenters}" Tag="{Binding UsePresenterCommand}" Focusable="False" Margin="0,4,0,0">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <DockPanel Margin="0,2" MaxWidth="560" HorizontalAlignment="Left">
+                          <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Content="{l:T Meas.Live.MedirEste}" Margin="8,0,0,0" Padding="8,2"
+                                  Command="{Binding Tag, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding PidText}"
+                                  AutomationProperties.Name="{Binding Text}"/>
+                          <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Body}" FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPlaying, Converter={StaticResource M.VisNot}}">
                   <TextBlock Text="{l:T Meas.SemJogoDetectadoExecutavel}" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                   <TextBox Text="{Binding ManualExe, UpdateSourceTrigger=PropertyChanged}" Width="170" Padding="6,3"
@@ -898,7 +933,7 @@
                   <c:ExplainToggle Header="{l:T Meas.PermissaoWindows}" Content="{Binding RightsText}" Margin="24,0,0,8"/>
                   <StackPanel Margin="24,0,0,10">
                     <WrapPanel>
-                      <Button Style="{StaticResource Button.Secondary}" Command="{Binding JoinPerfLogCommand}" Content="{l:T Meas.MedirSemPedirPermissao}" Margin="0,0,8,4"
+                      <Button Style="{StaticResource Button.Secondary}" Command="{Binding JoinPerfLogCommand}" Content="{l:T Meas.Live.LiberarMedicao}" Margin="0,0,8,4"
                               Visibility="{Binding ShowPerfLogOffer, Converter={StaticResource M.Vis}}"
                               ToolTip="{l:T Meas.ColocaSuaContaGrupo}"/>
                       <Button Style="{StaticResource Button.Ghost}" Command="{Binding UndoPerfLogCommand}" Content="{l:T Shell.Desfazer}" Margin="0,0,8,4"

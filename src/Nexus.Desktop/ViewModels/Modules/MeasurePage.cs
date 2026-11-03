@@ -67,6 +67,9 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private PresentMonLocation? _pm;
     private bool? _perfLogMember;
     private Guid? _perfLogRun;
+    private bool _elevateOnce, _probing, _probeNoPermission;
+    private string _presentersText = "";
+    private LiveCaptureState? _lastLoggedState;
 
     public MeasurePage()
     {
@@ -110,6 +113,9 @@ public sealed class MeasurePage : ModulePage, IDisposable
         OpenFolderCommand = new RelayCommand(OpenFolder);
         JoinPerfLogCommand = new RelayCommand(() => _ = JoinPerfLogAsync(), () => ShowPerfLogOffer && !Busy);
         UndoPerfLogCommand = new RelayCommand(() => _ = UndoPerfLogAsync(), () => _perfLogRun is not null && !Busy);
+        MeasureAsAdminCommand = new RelayCommand(() => _ = MeasureAsAdminAsync(), () => HasPresentMon && !CanTraceSilently && (_detected is not null || _engine?.Session is not null));
+        PickProcessCommand = new RelayCommand(() => _ = ProbePresentersAsync(), () => HasPresentMon && !_probing);
+        UsePresenterCommand = new TextCommand(pid => _ = UsePresenterAsync(pid));
         _ = InitialLoadAsync();
     }
 
@@ -362,6 +368,19 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public RelayCommand OpenFolderCommand { get; }
     public RelayCommand JoinPerfLogCommand { get; }
     public RelayCommand UndoPerfLogCommand { get; }
+    /// <summary>"Medir como administrador agora": recomeça a captura pedindo elevação ao PresentMon (--restart_as_admin) uma vez.</summary>
+    public RelayCommand MeasureAsAdminCommand { get; }
+    /// <summary>"Escolher o processo do jogo": PresentMon sem filtro por 3 s e a lista de quem está desenhando.</summary>
+    public RelayCommand PickProcessCommand { get; }
+    /// <summary>Medir o processo escolhido na lista (parâmetro: PID).</summary>
+    public TextCommand UsePresenterCommand { get; }
+
+    /// <summary>Processos que estavam desenhando quadros na última procura.</summary>
+    public ObservableCollection<PresenterRow> Presenters { get; } = [];
+    public string PresentersText { get => _presentersText; private set => Set(ref _presentersText, value); }
+
+    /// <summary>A captura parou por falta de permissão (ou a procura de processos): mostrar "Liberar medição" e "Medir como administrador".</summary>
+    public bool ShowPermissionActions => !CanTraceSilently && (_probeNoPermission || _engine?.Capture?.Status.State == LiveCaptureState.NoPermission);
 
     /// <summary>Um jogo acabou de abrir (nome do jogo). A janela usa para o aviso de notebook na bateria (checagens do PC).</summary>
     public event EventHandler<string>? GameStarted;
@@ -391,8 +410,9 @@ public sealed class MeasurePage : ModulePage, IDisposable
         try
         {
             _probe = new WindowsProcessProbe();
-            _engine = new AutoMeasureEngine(_probe, new PresentMonLiveStarter(() => _prefs.PresentMonPath, () => _prefs.RequestElevation && !CanTraceSilently,
-                verify: p => PresentMonTrust.Verify(p, _trust)), activity: StartActivity);
+            _engine = new AutoMeasureEngine(_probe, new PresentMonLiveStarter(() => _prefs.PresentMonPath,
+                () => (_prefs.RequestElevation || _elevateOnce) && !CanTraceSilently,
+                verify: p => PresentMonTrust.Verify(p, _trust), diag: Diag), activity: StartActivity);
             _ = RefreshPerfLogAsync();
             _pollTimer.Start();
             RegisterHotkey();
@@ -468,8 +488,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
                     if (ev.Finished is { } finished) await SaveAsync(finished);
                     break;
             }
-            if (_engine.Capture is { Ended: true } c && _engine.Session is { Frames: 0 } && c.Log.Length > 0)
-                CaptureNote = Loc.T("Meas.PresentmonParouSemEnviar") + Shorten(c.Log);
+            RefreshCaptureStatus();
             UpdateHero();
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
@@ -550,7 +569,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
         var from = Math.Max(0, end - 60);
         LiveTrace = trace.Where(p => p.Seconds >= from).Select(p => new TracePoint(p.Seconds - from, p.FrametimeMs)).ToList();
         ReferenceTrace = LiveComparison.ReferenceWindow(_liveReference, from, end).Select(p => new TracePoint(p.Seconds - from, p.FrametimeMs)).ToList();
-        _overlay.Update(r, _load);
+        _overlay.Update(r, _load, DescribeCapture().Overlay);
         if (DateTimeOffset.Now - _systemReadAt >= TimeSpan.FromSeconds(1)) _ = ReadSystemLoadAsync();
     }
 
@@ -683,6 +702,145 @@ public sealed class MeasurePage : ModulePage, IDisposable
         UpdateHero();
         System.Windows.Input.CommandManager.InvalidateRequerySuggested();
                                     }
+
+    // ------------------------------------------------------------------ estado da captura (verdadeiro, nunca "aguardando" calado)
+
+    /// <summary>Linha para o suporte em %LocalAppData%\NEXUS\desktop-diag.log (linha de comando, erros e código de saída do PresentMon).</summary>
+    private static void Diag(string text) => Nexus.Desktop.Services.Shell.UiWatchdog.Note("medir: " + text);
+
+    /// <summary>
+    /// O que dizer agora: no mostrador (curto) e na página (o que fazer). Procurando o jogo, aguardando a permissão do Windows, sem
+    /// permissão, jogo sem desenhar (minimizado?), medindo X, PresentMon parou — e, depois de 15 s sem quadros, a explicação.
+    /// </summary>
+    private (string Overlay, string Page) DescribeCapture()
+    {
+        if (_engine?.Session is not { } session || _engine.Capture is not { } capture)
+            return (_detected is not null && !HasPresentMon ? Loc.T("Meas.PresentmonNaoEncontrado") : Loc.T("Meas.Live.Procurando"), "");
+        LiveCaptureStatus st;
+        try { st = capture.Status; }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { return (Loc.T("Meas.Live.Procurando"), ""); }
+        var target = st.Target ?? session.Game.ExeName;
+        var hint = st.TimedOut ? "\n" + Loc.T("Meas.Live.DicaTimeout") : "";
+        return st.State switch
+        {
+            LiveCaptureState.Measuring => (Loc.F("Meas.Live.MedindoN", target),
+                st.Fallback || !target.Equals(session.Game.ExeName, StringComparison.OrdinalIgnoreCase) ? Loc.F("Meas.Live.MedindoOutroN", target) : ""),
+            LiveCaptureState.WaitingPermission => (Loc.T("Meas.Live.AguardandoPermissao") + hint,
+                st.TimedOut ? Loc.T("Meas.Live.TimeoutPermissao") : Loc.T("Meas.WindowsPedirPermissaoPresentmon")),
+            LiveCaptureState.NotDrawing => (Loc.T("Meas.Live.NaoDesenhando") + hint, st.TimedOut ? Loc.T("Meas.Live.TimeoutNaoDesenhando") : ""),
+            LiveCaptureState.NoPermission => (Loc.T("Meas.Live.SemPermissao"),
+                (st.Failure == PresentMonFailure.ElevationCancelled ? Loc.T("Meas.Live.AvisoRecusado") + " " : "") + Loc.T("Meas.Live.SemPermissaoTexto")),
+            LiveCaptureState.Failed => (Loc.T("Meas.Live.Falhou") + hint,
+                Loc.T("Meas.PresentmonParouSemEnviar") + Shorten(st.Detail ?? capture.Log)),
+            LiveCaptureState.Finished => ("", ""),
+            _ => (Loc.T("Meas.Live.Procurando") + hint, st.TimedOut ? Loc.T("Meas.Live.TimeoutProcurando") : ""),
+        };
+    }
+
+    /// <summary>A cada leitura: nota da página, mostrador (também sem quadros) e diagnóstico quando o estado muda.</summary>
+    private void RefreshCaptureStatus()
+    {
+        var (overlay, page) = DescribeCapture();
+        if (_engine?.Session is not null) CaptureNote = page;
+        if (_engine?.Session is null || _engine.Session.Frames == 0) _overlay.Update(LiveReading.Empty, _load, overlay);
+        var state = _engine?.Capture?.Status.State;
+        if (state != _lastLoggedState && state is not null)
+        {
+            _lastLoggedState = state;
+            Diag($"estado: {state} ({overlay.Replace('\n', ' ')})");
+        }
+        OnPropertyChanged(nameof(ShowPermissionActions));
+    }
+
+    /// <summary>Recomeça a medição pedindo elevação ao PresentMon (o aviso do Windows aparece agora, com o NEXUS na frente).</summary>
+    private async Task MeasureAsAdminAsync()
+    {
+        if (_engine is null) return;
+        var game = _engine.Session?.Game ?? _detected;
+        if (game is null) return;
+        Diag("medir como administrador (--restart_as_admin) pedido pelo usuário");
+        _probeNoPermission = false;
+        _elevateOnce = true;
+        try
+        {
+            var ok = await Task.Run(() =>
+            {
+                lock (_engineGate)
+                {
+                    _engine.StopCapture();
+                    return _engine.StartManual(game, DateTimeOffset.Now);
+                }
+            });
+            if (ok) OnCaptureStarted(game);
+        }
+        finally { _elevateOnce = false; }
+        RefreshCaptureStatus();
+    }
+
+    /// <summary>"Quem está desenhando agora?" (3 s de PresentMon sem filtro, sessão própria) para o usuário escolher o jogo.</summary>
+    private async Task ProbePresentersAsync()
+    {
+        if (_pm is not { Usable: true } pm || _probing) return;
+        _probing = true;
+        Presenters.Clear();
+        PresentersText = Loc.T("Meas.Live.ProcurandoQuemDesenha");
+        System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        try
+        {
+            var exe = pm.Path;
+            var elevate = !CanTraceSilently;
+            var names = _engine?.LastSnapshot?.Processes ?? [];
+            var r = await Task.Run(async () =>
+            {
+                var verdict = PresentMonTrust.Verify(exe, _trust);
+                if (!verdict.Trusted) return new PresenterProbeResult([], PresentMonFailure.NotStarted, verdict.Reason);
+                return await PresenterProbe.RunAsync(exe, elevate).ConfigureAwait(false);
+            });
+            Diag($"procura de quem desenha: {r.Presenters.Count} processos, {r.Failure}{(r.Log.Length > 0 ? " — " + Shorten(r.Log) : "")}");
+            _probeNoPermission = PresentMonDiagnosis.IsPermission(r.Failure);
+            foreach (var p in r.Presenters.Where(p => !LiveTargetPicker.NeverTarget.Contains(p.Name)).Take(12))
+            {
+                var name = p.UnknownName ? names.FirstOrDefault(x => x.Pid == p.Pid)?.Name ?? p.Name : p.Name;
+                Presenters.Add(new PresenterRow(p.Pid, name, p.Fps));
+            }
+            PresentersText = _probeNoPermission ? Loc.T("Meas.Live.SemPermissaoTexto")
+                : r.Failure is PresentMonFailure.None ? (Presenters.Count > 0 ? Loc.T("Meas.Live.EscolhaProcesso") : Loc.T("Meas.Live.NinguemDesenhando"))
+                : Loc.T("Meas.PresentmonParouSemEnviar") + Shorten(r.Log);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            PresentersText = Loc.T("Meas.PresentmonParouSemEnviar") + ex.Message;
+        }
+        finally
+        {
+            _probing = false;
+            OnPropertyChanged(nameof(ShowPermissionActions));
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    /// <summary>Mede o processo escolhido na lista (travado no PID: nada de procurar outro).</summary>
+    private async Task UsePresenterAsync(string pidText)
+    {
+        if (_engine is null || !int.TryParse(pidText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var pid)) return;
+        if (Presenters.FirstOrDefault(p => p.Pid == pid) is not { } row) return;
+        var exe = row.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) || row.Name.StartsWith('<') ? row.Name : row.Name + ".exe";
+        var game = new DetectedGame(GameMatcher.Pretty(exe), exe, pid, DetectionReason.UserList, Loc.T("Meas.Live.ProcessoUsuario"));
+        Diag($"usuário escolheu {exe} (PID {pid}) entre os que desenham");
+        var (finished, ok) = await Task.Run(() =>
+        {
+            lock (_engineGate)
+            {
+                var f = _engine.StopCapture();
+                return (f, _engine.StartManual(game, DateTimeOffset.Now, lockPid: true));
+            }
+        });
+        if (finished is { Frames: > 0 }) await SaveAsync(finished);
+        Presenters.Clear();
+        PresentersText = "";
+        if (ok) OnCaptureStarted(game);
+        RefreshCaptureStatus();
+    }
 
     // ------------------------------------------------------------------ mostrador
 

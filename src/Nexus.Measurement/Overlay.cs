@@ -14,7 +14,9 @@ public interface IOverlaySurface
 public readonly record struct SystemLoad(double? CpuPercent, double? GpuPercent, double? GpuTemperatureC);
 
 /// <summary>Linhas prontas do mostrador.</summary>
-public sealed record OverlayContent(string Fps, string Low1, string Frametime, string? System, bool Waiting);
+/// <param name="Status">Sem quadros: o que está acontecendo de verdade ("procurando o jogo…", "sem permissão…", "jogo não está
+/// desenhando (minimizado?)"); com quadros: "medindo X" (o processo medido). Texto já no idioma da interface (quem chama traduz).</param>
+public sealed record OverlayContent(string Fps, string Low1, string Frametime, string? System, bool Waiting, string? Status = null);
 
 /// <summary>
 /// Estado do mostrador de FPS, sem janela (testável): ligado/desligado pelo botão ou pelo atalho, ligar sozinho ao abrir
@@ -58,10 +60,11 @@ public sealed class OverlayController(IOverlaySurface surface)
         Sync();
     }
 
-    public void Update(LiveReading reading, SystemLoad load)
+    /// <param name="status">Estado da captura em palavras (ver <see cref="OverlayContent.Status"/>); null = só os números.</param>
+    public void Update(LiveReading reading, SystemLoad load, string? status = null)
     {
         if (!_shown) return;
-        _surface.Render(Format(reading, ShowSystem ? load : default));
+        _surface.Render(Format(reading, ShowSystem ? load : default) with { Status = status });
     }
 
     private void Sync()
