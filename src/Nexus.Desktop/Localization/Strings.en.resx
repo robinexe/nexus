@@ -3965,4 +3965,36 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Mouse.Stable" xml:space="preserve"><value>Steady: the mouse is delivering movement at the right pace.</value></data>
   <data name="Mouse.Irregular" xml:space="preserve"><value>Irregular: there are hiccups in delivery. Try another USB port (preferably at the back of the PC, without a hub) or a lower rate in the mouse software.</value></data>
   <data name="Mouse.Honest" xml:space="preserve"><value>Diagnostic only. The measured time includes Windows' time to deliver each movement, and above ~2000 Hz Windows may batch reports (the rate shows lower than the real one). There is no proof that 8000 Hz is always better or worse: keep the rate that comes out steady.</value></data>
+  <data name="Dup.Title" xml:space="preserve"><value>Duplicate files</value></data>
+  <data name="Dup.Lead" xml:space="preserve"><value>Looks for identical copies (same size and same content, checked with SHA-256) from 1 MB up. Windows, program, game and app-data folders are left out. It only looks until you choose.</value></data>
+  <data name="Dup.Where" xml:space="preserve"><value>Search in: {0}</value></data>
+  <data name="Dup.Scan" xml:space="preserve"><value>Find duplicates</value></data>
+  <data name="Dup.Cancel" xml:space="preserve"><value>Stop</value></data>
+  <data name="Dup.Listing" xml:space="preserve"><value>Listing files… {0} seen</value></data>
+  <data name="Dup.Hashing" xml:space="preserve"><value>Checking content… {0:0}%</value></data>
+  <data name="Dup.None" xml:space="preserve"><value>No identical copies of 1 MB or more among {0} files.</value></data>
+  <data name="Dup.Found" xml:space="preserve"><value>{0} groups of identical copies: {1} could be freed ({2} files seen).</value></data>
+  <data name="Dup.Shown" xml:space="preserve"><value> Showing the {0} largest.</value></data>
+  <data name="Dup.Cancelled" xml:space="preserve"><value>Search stopped.</value></data>
+  <data name="Dup.Failed" xml:space="preserve"><value>Could not search: {0}</value></data>
+  <data name="Dup.NoFolder" xml:space="preserve"><value>Pick a drive or open a folder in the analyzer first.</value></data>
+  <data name="Dup.GroupHeader" xml:space="preserve"><value>{0} · {1} copies · {2} each · {3} extra</value></data>
+  <data name="Dup.Selection" xml:space="preserve"><value>{0} selected · {1}</value></data>
+  <data name="Dup.SelectExtras" xml:space="preserve"><value>Select the extra copies</value></data>
+  <data name="Dup.Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="Dup.Quarantine" xml:space="preserve"><value>Move to quarantine</value></data>
+  <data name="Dup.KeepOne" xml:space="preserve"><value>At least one copy of each group stays in place.</value></data>
+  <data name="Dup.TooMany" xml:space="preserve"><value>Select at most {0} files at a time.</value></data>
+  <data name="Dup.AndMore" xml:space="preserve"><value>and {0} more</value></data>
+  <data name="Dup.QuarantineTitle" xml:space="preserve"><value>Move duplicate copies to quarantine</value></data>
+  <data name="Dup.QuarantineConfirm" xml:space="preserve"><value>Move {0} copies ({1}) to the NEXUS quarantine?
+
+{2}
+
+Nothing is deleted: it can be undone, and the space only comes back when you empty the quarantine (Cleaning).</value></data>
+  <data name="Dup.Moved" xml:space="preserve"><value>{0} copies went to quarantine ({1}).</value></data>
+  <data name="Dup.MovedSome" xml:space="preserve"><value>{0} of {1} copies went to quarantine. {2}</value></data>
+  <data name="Dup.Undone" xml:space="preserve"><value>The copies are back in place.</value></data>
+  <data name="Dup.UndoFailed" xml:space="preserve"><value>Some copies did not come back; see History.</value></data>
+  <data name="Dup.Safety" xml:space="preserve"><value>The oldest copy of each group is the one kept when you use "Select the extra copies". NEXUS checks the SHA-256 again before moving and never follows links.</value></data>
 </root>

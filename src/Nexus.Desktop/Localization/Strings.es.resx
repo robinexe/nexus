@@ -3965,4 +3965,36 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Mouse.Stable" xml:space="preserve"><value>Estable: el mouse entrega los movimientos al ritmo correcto.</value></data>
   <data name="Mouse.Irregular" xml:space="preserve"><value>Irregular: hay saltos en la entrega. Prueba otro puerto USB (de preferencia atrás del PC, sin hub) o una tasa menor en el programa del mouse.</value></data>
   <data name="Mouse.Honest" xml:space="preserve"><value>Solo diagnóstico. El instante medido incluye el tiempo de Windows para entregar cada movimiento, y por encima de ~2000 Hz Windows puede agrupar reportes (la tasa sale menor que la real). No hay prueba de que 8000 Hz sea siempre mejor o peor: quédate con la tasa que sale estable.</value></data>
+  <data name="Dup.Title" xml:space="preserve"><value>Archivos duplicados</value></data>
+  <data name="Dup.Lead" xml:space="preserve"><value>Busca copias idénticas (mismo tamaño y mismo contenido, comprobado con SHA-256) a partir de 1 MB. Las carpetas de Windows, de programas, de juegos y de datos de aplicaciones quedan fuera. Solo mira hasta que elijas.</value></data>
+  <data name="Dup.Where" xml:space="preserve"><value>Buscar en: {0}</value></data>
+  <data name="Dup.Scan" xml:space="preserve"><value>Buscar duplicados</value></data>
+  <data name="Dup.Cancel" xml:space="preserve"><value>Detener</value></data>
+  <data name="Dup.Listing" xml:space="preserve"><value>Listando archivos… {0} vistos</value></data>
+  <data name="Dup.Hashing" xml:space="preserve"><value>Comprobando el contenido… {0:0}%</value></data>
+  <data name="Dup.None" xml:space="preserve"><value>Ninguna copia idéntica de 1 MB o más entre {0} archivos.</value></data>
+  <data name="Dup.Found" xml:space="preserve"><value>{0} grupos de copias idénticas: se podrían liberar {1} ({2} archivos vistos).</value></data>
+  <data name="Dup.Shown" xml:space="preserve"><value> Mostrando los {0} más grandes.</value></data>
+  <data name="Dup.Cancelled" xml:space="preserve"><value>Búsqueda detenida.</value></data>
+  <data name="Dup.Failed" xml:space="preserve"><value>No se pudo buscar: {0}</value></data>
+  <data name="Dup.NoFolder" xml:space="preserve"><value>Elige una unidad o abre una carpeta en el analizador primero.</value></data>
+  <data name="Dup.GroupHeader" xml:space="preserve"><value>{0} · {1} copias · {2} cada una · sobran {3}</value></data>
+  <data name="Dup.Selection" xml:space="preserve"><value>{0} marcados · {1}</value></data>
+  <data name="Dup.SelectExtras" xml:space="preserve"><value>Marcar las copias extra</value></data>
+  <data name="Dup.Clear" xml:space="preserve"><value>Desmarcar</value></data>
+  <data name="Dup.Quarantine" xml:space="preserve"><value>Mover a la cuarentena</value></data>
+  <data name="Dup.KeepOne" xml:space="preserve"><value>Al menos una copia de cada grupo se queda en su lugar.</value></data>
+  <data name="Dup.TooMany" xml:space="preserve"><value>Marca como máximo {0} archivos a la vez.</value></data>
+  <data name="Dup.AndMore" xml:space="preserve"><value>y {0} más</value></data>
+  <data name="Dup.QuarantineTitle" xml:space="preserve"><value>Mover copias duplicadas a la cuarentena</value></data>
+  <data name="Dup.QuarantineConfirm" xml:space="preserve"><value>¿Mover {0} copias ({1}) a la cuarentena de NEXUS?
+
+{2}
+
+Nada se borra: se puede deshacer, y el espacio solo vuelve cuando vacíes la cuarentena (Limpieza).</value></data>
+  <data name="Dup.Moved" xml:space="preserve"><value>{0} copias fueron a la cuarentena ({1}).</value></data>
+  <data name="Dup.MovedSome" xml:space="preserve"><value>{0} de {1} copias fueron a la cuarentena. {2}</value></data>
+  <data name="Dup.Undone" xml:space="preserve"><value>Las copias volvieron a su lugar.</value></data>
+  <data name="Dup.UndoFailed" xml:space="preserve"><value>Algunas copias no volvieron; mira el Historial.</value></data>
+  <data name="Dup.Safety" xml:space="preserve"><value>La copia más antigua de cada grupo es la que se queda al usar "Marcar las copias extra". NEXUS vuelve a comprobar el SHA-256 antes de mover y nunca sigue enlaces.</value></data>
 </root>

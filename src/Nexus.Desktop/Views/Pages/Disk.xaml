@@ -479,6 +479,77 @@
           </Grid>
         </StackPanel>
 
+        <!-- ===== Arquivos duplicados: busca só leitura; mover vai para a quarentena do NEXUS (com Desfazer), sempre fica uma cópia ===== -->
+        <Border Style="{StaticResource Panel.Card}" Padding="16,14" Margin="0,24,0,0" DataContext="{Binding Duplicates}">
+          <StackPanel>
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Dup.Cancel}" Command="{Binding CancelCommand}" Margin="0,0,8,0"
+                        Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}"/>
+                <Button Style="{StaticResource Button.Primary}" Content="{l:T Dup.Scan}" Command="{Binding ScanCommand}"/>
+              </StackPanel>
+              <c:Icon Data="{StaticResource Icon.Search}" Size="18" Foreground="{StaticResource Brush.Signal}" Margin="0,0,10,0" VerticalAlignment="Top"/>
+              <StackPanel>
+                <TextBlock Text="{l:T Dup.Title}" Style="{StaticResource Text.H2}" FontSize="15.5"/>
+                <TextBlock Text="{l:T Dup.Lead}" Style="{StaticResource Text.Small}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                <TextBlock Text="{Binding RootText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+              </StackPanel>
+            </DockPanel>
+            <TextBlock Text="{Binding Progress}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="28,8,0,0"
+                       Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}"/>
+            <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap" Margin="28,10,0,0"
+                       Visibility="{Binding HasSummary, Converter={StaticResource BoolToVis}}"/>
+            <Border Style="{StaticResource Panel.Notice}" Padding="10,8" Margin="28,8,0,0" Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Content="{l:T Shell.Desfazer}" Command="{Binding UndoCommand}" Margin="12,0,0,0"
+                        Visibility="{Binding CanUndo, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Text="{Binding Message}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap" VerticalAlignment="Center"
+                           AutomationProperties.LiveSetting="Polite"/>
+              </DockPanel>
+            </Border>
+            <StackPanel Margin="28,12,0,0" Visibility="{Binding HasGroups, Converter={StaticResource BoolToVis}}">
+              <DockPanel Margin="0,0,0,8">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                  <Button Style="{StaticResource Button.Ghost}" Content="{l:T Dup.SelectExtras}" Command="{Binding SelectExtrasCommand}" Margin="0,0,8,0"/>
+                  <Button Style="{StaticResource Button.Ghost}" Content="{l:T Dup.Clear}" Command="{Binding ClearCommand}" Margin="0,0,8,0"/>
+                  <Button Style="{StaticResource Button.Primary}" Content="{l:T Dup.Quarantine}" Command="{Binding QuarantineCommand}"/>
+                </StackPanel>
+                <TextBlock Text="{Binding SelectionText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+              </DockPanel>
+              <ItemsControl ItemsSource="{Binding Groups}" Focusable="False" MaxHeight="520">
+                <ItemsControl.Template>
+                  <ControlTemplate TargetType="ItemsControl">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                      <ItemsPresenter/>
+                    </ScrollViewer>
+                  </ControlTemplate>
+                </ItemsControl.Template>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="{x:Type vm:DupGroupRow}">
+                    <Border Style="{StaticResource Panel.Inset}" Padding="12,8" Margin="0,0,0,8">
+                      <StackPanel>
+                        <TextBlock Text="{Binding Header}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis"/>
+                        <ItemsControl ItemsSource="{Binding Files}" Focusable="False" Margin="0,6,0,0">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:DupFileRow}">
+                              <DockPanel Margin="0,2" ToolTip="{Binding Tooltip}">
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding When}" Style="{StaticResource Text.Small}" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                <CheckBox IsChecked="{Binding Selected, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,8,0" AutomationProperties.Name="{Binding Tooltip}"/>
+                                <TextBlock Text="{Binding Folder}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                              </DockPanel>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{l:T Dup.Safety}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
         <!-- ===== 5. Exclusão segura: recolhida, vermelha, irreversível ===== -->
         <Border Style="{StaticResource Panel.Card}" BorderBrush="{StaticResource Brush.Bad}" Background="{StaticResource Brush.BadSoft}" Padding="12,8,16,8" Margin="0,24,0,0">
           <StackPanel>
