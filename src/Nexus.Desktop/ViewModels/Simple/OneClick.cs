@@ -256,6 +256,9 @@ public sealed class QuickTweaksPanel : ObservableObject
     /// <summary>Recomendados que ainda mudariam algo (o cartão "N ajustes seguros" da tela Início).</summary>
     public IReadOnlyList<QuickTweakData> Pending => [.. _data.Where(d => d.Recommended && !d.IsOn)];
 
+    /// <summary>Todos os ajustes rápidos deste PC (o Laboratório A/B oferece os que ainda não estão ligados para testar).</summary>
+    public IReadOnlyList<QuickTweakData> All => _data;
+
     public void Update(IReadOnlyList<QuickTweakData> data)
     {
         _data = data ?? throw new ArgumentNullException(nameof(data));

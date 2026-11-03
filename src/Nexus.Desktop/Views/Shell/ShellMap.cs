@@ -42,6 +42,7 @@ public static class ShellMap
         ["SystemToolsPage"] = ("Icon.Tools", "Illo.Network"),
         ["DriverUpdatesPage"] = ("Icon.Drivers", "Illo.Drivers"),
         ["MeasurePage"] = ("Icon.Measure", "Illo.Measure"),
+        ["AbLabPage"] = ("Icon.AbLab", "Illo.Measure"),
         ["MonitorPage"] = ("Icon.Monitor", "Illo.Monitor"),
         ["HistoryPage"] = ("Icon.History", "Illo.History"),
         ["SettingsPage"] = ("Icon.Settings", "Illo.Settings"),

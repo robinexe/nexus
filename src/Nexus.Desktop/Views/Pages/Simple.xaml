@@ -444,6 +444,14 @@
                         <TextBlock Text="{l:T Simple.Games.Measure}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
                       </StackPanel>
                     </Button>
+                    <!-- Laboratório A/B: comparar uma partida com e sem um ajuste (só com opções para testar) -->
+                    <Button DockPanel.Dock="Right" Style="{StaticResource Button.Ghost}" Margin="8,0,0,0" Command="{Binding CompareCommand}" VerticalAlignment="Center"
+                            ToolTip="{l:T Simple.Games.CompareTip}" Visibility="{Binding HasCompare, Converter={StaticResource BoolToVis}}">
+                      <StackPanel Orientation="Horizontal">
+                        <c:Icon Data="{StaticResource Icon.AbLab}" Size="16" Margin="0,0,8,0"/>
+                        <TextBlock Text="{l:T Simple.Games.Compare}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                      </StackPanel>
+                    </Button>
                     <Border Width="48" Height="48" CornerRadius="10" Background="{StaticResource Brush.SurfaceHi}" Margin="0,0,16,0">
                       <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource Font.Display}" FontSize="22" Foreground="{StaticResource Brush.Trace}"
                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>

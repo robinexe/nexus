@@ -51,9 +51,11 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         SimpleOptimize = new SimpleOptimizePage(Assistant, Home);
         SimpleClean = new SimpleCleanPage(Cleaning);
         SimpleGames = new SimpleGamesPage(GpuLab, Measure);
+        AbLab = new AbLabPage(Measure, SimpleGames, SimpleOptimize.QuickTweaks);
+        SimpleGames.AbLab = AbLab;
         Pages = [Home, SimpleOptimize, SimpleClean, SimpleGames, SimpleProblems, SimpleHistory, Advanced,
             Overview, Hardware, Diagnostics, CpuLab, GpuLab, MemoryLab, MemoryDoctor, Assistant, Automation, Catalog, Plan, Broker, Startup, Services, Cleaning, Disk, Programs,
-            Privacy, Security, Scanner, SystemTools, DriverUpdates, Measure, Monitor, History, Settings, Capabilities];
+            Privacy, Security, Scanner, SystemTools, DriverUpdates, Measure, AbLab, Monitor, History, Settings, Capabilities];
         Broker.Candidates = Plan.Candidates;
         Broker.StatusCommand = new RelayCommand(() => _ = BrokerStatusAsync(), () => !Broker.Busy);
         Broker.PlanCommand = new RelayCommand(() => _ = BrokerPlanAsync(), () => !Broker.Busy && Broker.Connected && Chosen().Count > 0);
@@ -441,6 +443,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
     public PlanPage Plan { get; } = Make<PlanPage>();
     public BrokerPage Broker { get; } = Make<BrokerPage>();
     public MeasurePage Measure { get; } = Make<MeasurePage>();
+    /// <summary>Laboratório A/B: "comparar com e sem" um ajuste num jogo, com as partidas do Medir e o aplicador entre elas.</summary>
+    public AbLabPage AbLab { get; }
     public HistoryPage History { get; } = Make<HistoryPage>();
     public CapabilitiesPage Capabilities { get; } = Make<CapabilitiesPage>();
     public IReadOnlyList<PageViewModel> Pages { get; }

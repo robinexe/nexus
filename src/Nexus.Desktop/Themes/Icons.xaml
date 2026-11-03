@@ -37,6 +37,7 @@
   <Geometry x:Key="Icon.Network">M2,9 C7.5,3.7 16.5,3.7 22,9 M5.5,12.5 C9,9.2 15,9.2 18.5,12.5 M9,16 C10.7,14.5 13.3,14.5 15,16 M12,19.5 V19.6</Geometry>
   <Geometry x:Key="Icon.Drivers">M4,9 H14 V19 H4 Z M7,12 H11 V16 H7 Z M2,12 H4 M2,16 H4 M14,12 H16 M14,16 H16 M19,10 V2 M16,5 L19,2 L22,5</Geometry>
   <Geometry x:Key="Icon.Tools">M14.7,6.3 A4,4 0 0 1 20,3 L17,6 L18,9 L21,10 A4,4 0 0 1 17.7,15.3 L8,21 A2.1,2.1 0 0 1 3,16 Z</Geometry>
+  <Geometry x:Key="Icon.AbLab">M3,6 H10 V18 H3 Z M14,6 H21 V18 H14 Z M5,14 L7,11 L8.5,13 M16,14 L18,9 L19.5,12</Geometry>
   <Geometry x:Key="Icon.Measure">M3,17 A9,9 0 1 1 21,17 M12,17 L16,10 M3,17 H5 M19,17 H21</Geometry>
   <Geometry x:Key="Icon.Monitor">M2,4 H22 V17 H2 Z M8,21 H16 M12,17 V21 M5,12 H9 L11,8 L13,14 L15,11 H19</Geometry>
   <Geometry x:Key="Icon.Auto">M4,20 L15,9 M13,7 L17,11 M18,2 V5 M16.5,3.5 H19.5 M21,8 V10 M20,9 H22 M8,3 V5 M7,4 H9</Geometry>

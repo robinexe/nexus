@@ -188,6 +188,7 @@ public sealed partial class WiringTests
         ["ScannerPage.cs|id + \"@1\""] = nameof(Scanner_quarantine_slots_exist_with_the_right_level),
         ["SecurityPage.cs|actionId + \"@1\""] = nameof(Security_fix_actions_exist_with_the_right_level_and_arguments),
         ["SettingsPage.cs|ActionKey(editor.Kind.ActionId)"] = nameof(Schedule_kinds_point_to_valid_actions),
+        ["AbLabText.cs|a.ActionId"] = nameof(Ab_lab_candidates_only_come_from_game_option_plans_and_catalog_tweaks),
     };
 
     // ================================================================== origens dinâmicas
@@ -212,6 +213,38 @@ public sealed partial class WiringTests
                 problems.AddRange(CheckRequest($"{p.File}:{p.Line}", entry, p.Values, p.ArgKeys, false, confirmIrreversible: true, p.Level));
             }
         Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+    }
+
+    /// <summary>
+    /// Laboratório A/B: os pedidos ao aplicador são remontados de um AbCandidate (AbLabCandidates.Requests). Os candidatos nascem
+    /// só de (a) GameOptionPlans da tela Jogos, cujas chaves+níveis literais este arquivo já confere, e (b) dos ajustes rápidos
+    /// (QuickTweaksPanel.All), montados pela janela a partir do próprio catálogo (entry.Definition.Key). O ViewModel não escreve
+    /// nenhuma chave à mão.
+    /// </summary>
+    [Fact]
+    public void Ab_lab_candidates_only_come_from_game_option_plans_and_catalog_tweaks()
+    {
+        var page = File.ReadAllText(Path.Combine(Wiring.Root, "src", "Nexus.Desktop", "ViewModels", "Modules", "AbLabPage.cs"));
+        var text = File.ReadAllText(Path.Combine(Wiring.Root, "src", "Nexus.Desktop", "ViewModels", "Modules", "AbLabText.cs"));
+        Assert.DoesNotContain("new AbCandidate(", page);
+        Assert.DoesNotContain("new AbActionRef(", page);
+        Assert.Contains("AbLabCandidates.FromPlan(o.Text, o.Plan)", page);
+        Assert.Contains("AbLabCandidates.FromCatalog(t.Key, t.Title, t.Request, t.Level)", page);
+        Assert.Contains("Tweaks.All", page);
+        // Nenhuma chave de ação literal nos dois arquivos.
+        foreach (var file in new[] { page, text })
+            Assert.DoesNotMatch(@"""[a-z]+(\.[a-z0-9-]+)+@\d+""", file);
+        // Ida e volta: um plano real da tela Jogos vira pedido com a mesma chave, valor, argumento e nível.
+        var plan = Nexus.Desktop.ViewModels.Simple.GameOptionPlans.NvFpsCap("cs2.exe", "141");
+        var back = Nexus.Desktop.ViewModels.AbLabCandidates.Requests(Nexus.Desktop.ViewModels.AbLabCandidates.FromPlan("x", plan));
+        Assert.Equal(plan.Requests.Select(r => (r.Request.ActionId, r.Request.Value, r.Request.Arguments!["exe"], r.Level)),
+            back.Select(r => (r.Request.ActionId, r.Request.Value, r.Request.Arguments!["exe"], r.Level)));
+        foreach (var r in back)
+        {
+            var entry = Wiring.Entry(r.Request.ActionId);
+            Assert.NotNull(entry);
+            Assert.Empty(CheckRequest("AbLab", entry!, [r.Request.Value], r.Request.Arguments!.Keys.ToList(), false, true, r.Level.ToString()));
+        }
     }
 
     [Fact]

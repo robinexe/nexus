@@ -275,6 +275,9 @@ public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOpt
     public IReadOnlyList<GameOption> Options { get; } = options;
     public bool HasOptions => Options.Count > 0;
     public RelayCommand MeasureCommand { get; } = measure;
+    /// <summary>"Comparar com e sem": abre o Laboratório A/B com este jogo (só quando o jogo tem opções para testar).</summary>
+    public RelayCommand? CompareCommand { get; init; }
+    public bool HasCompare => CompareCommand is not null;
     /// <summary>"Por que travou?" da última partida medida, em uma linha ("12 travadas: a maioria provavelmente por…"), ou vazio.</summary>
     public string StutterVerdict { get; init; } = "";
     public bool HasStutterVerdict => StutterVerdict.Length > 0;
@@ -361,6 +364,8 @@ public sealed class SimpleGamesPage : ModulePage
     public GpuLabPage Gpu { get; }
     public MeasurePage Measure { get; }
     internal ISimpleActions? Actions { get; set; }
+    /// <summary>Laboratório A/B (a janela liga): "Comparar com e sem" ao lado de "Medir FPS" abre a página já com o jogo escolhido.</summary>
+    internal AbLabPage? AbLab { get; set; }
     /// <summary>Execuções dos diários (a janela passa as do Histórico, relidas a cada escrita); por padrão lê do disco.</summary>
     internal Func<IReadOnlyList<JournalRun>> Journal { get; set; } = SimpleHistoryPage.ReadJournal;
     /// <summary>De onde vem o estado real das opções (só leitura).</summary>
@@ -454,6 +459,10 @@ public sealed class SimpleGamesPage : ModulePage
 
     private (FortniteState State, bool Running) ReadFortnite() => (StateSource.Fortnite(), FortniteProcesses.AnyRunning());
 
+    /// <summary>Para o Laboratório A/B: os jogos da biblioteca com as opções (texto + plano) que dá para testar. Só a partir das leituras já feitas.</summary>
+    internal IReadOnlyList<(string Name, string Exe, IReadOnlyList<(string Text, GameOptionPlan Plan)> Options)> DescribeForLab() =>
+        [.. Describe().Select(g => (g.Name, g.Exe, g.Plans))];
+
     /// <summary>Um jogo e as opções que valem para ele (texto + plano: o que pede, como ler, como achar no diário).</summary>
     private sealed record GameDescription(string Name, string Exe, bool IsFortnite, IReadOnlyList<(string Text, GameOptionPlan Plan)> Plans);
 
@@ -526,6 +535,7 @@ public sealed class SimpleGamesPage : ModulePage
             var options = g.Plans.Select(p => new GameOption(p.Text, ActionFor(g, p.Text, p.Plan))).ToList();
             Games.Add(new SimpleGameRow(g.Name, g.Exe, options, new RelayCommand(() => { Measure.ManualExe = g.Exe; Host?.Navigate(Measure); }))
             {
+                CompareCommand = AbLab is { } lab && g.Plans.Count > 0 ? new RelayCommand(() => { lab.PreselectGame(g.Exe); Host?.Navigate(lab); }) : null,
                 StutterVerdict = Measure.LatestStutterVerdict(g.Exe),
                 Status = g.IsFortnite ? FortniteStatus(_fortnite.State) : "",
                 Note = g.IsFortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : "",
