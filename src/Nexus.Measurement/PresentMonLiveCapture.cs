@@ -23,9 +23,12 @@ public sealed class PresentMonLiveStarter(Func<string?> presentMonPath, Func<boo
         var exe = presentMonPath() ?? throw new InvalidOperationException("PresentMon não encontrado.");
         var elevate = requestElevation();
         var file = elevate ? Path.Combine(Path.GetTempPath(), $"nexus-ao-vivo-{Guid.NewGuid():N}.csv") : null;
-        var req = new LiveCaptureRequest(exe, processName, elevate, file);
+        var verdict = customize is null ? verify?.Invoke(exe) : null;
+        // FrameType só para uma versão conhecida (hash conferido): uma 2.x antiga recusaria a opção.
+        var known = verdict is { Trusted: true, Sha256: { } h } && PresentMonTrust.KnownSha256.Contains(h);
+        var req = new LiveCaptureRequest(exe, processName, elevate, file, TrackFrameType: known);
         var capture = new PresentMonLiveCapture(req, PresentMonCli.LiveArguments(req, PresentMonCli.GenerationOf(exe)), onFrame, customize);
-        LastRefusal = customize is null && verify?.Invoke(exe) is { Trusted: false } refused ? refused.Reason : null;
+        LastRefusal = verdict is { Trusted: false } refused ? refused.Reason : null;
         if (LastRefusal is { } reason) capture.Refuse(reason);
         else capture.Begin();
         return capture;

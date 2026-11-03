@@ -45,6 +45,8 @@ public sealed record MeasuredSession(
     public IReadOnlyList<AppliedChange> Applied { get; init; } = [];
     /// <summary>Resumo por trechos de 30 s (para comparar trechos equivalentes de duas partidas).</summary>
     public IReadOnlyList<SegmentSummary> Segments { get; init; } = [];
+    /// <summary>"Por que travou?": travadas e causa provável de cada uma (null em sessões gravadas antes desta função).</summary>
+    public StutterReport? Stutters { get; init; }
 
     /// <summary>Chave do jogo (executável em minúsculas): agrupa as sessões do mesmo jogo.</summary>
     [JsonIgnore] public string Game => GameKey.Of(Application);
@@ -84,10 +86,14 @@ public static class SessionAnalyzer
             throw new InvalidDataException($"Só {ft.Count} frames de {app}: são precisos pelo menos 100 (capture por mais tempo).");
         var summary = FrametimeMetrics.Summarize(ft);
         var mode = frames.Where(f => !string.IsNullOrWhiteSpace(f.PresentMode)).GroupBy(f => f.PresentMode!).MaxBy(g => g.Count())?.Key;
+        StutterReport? stutters = null;
+        try { stutters = StutterAnalyzer.Analyze(StutterAnalyzer.ReadCsv(csvFile, app)); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException) { } // sem análise, o resto vale
         return new MeasuredSession(id, name, app, capturedAt, source, SessionTag.None, Path.GetFileName(csvFile), summary,
             Downsample(frames), Histogram(ft), capture.SkippedRows, capture.MetricsFlavor)
         {
             Segments = Segment(ft),
+            Stutters = stutters,
             Conditions = mode is null ? null : new SessionConditions { PresentMode = mode },
         };
     }

@@ -4,7 +4,29 @@ using System.Text.RegularExpressions;
 namespace Nexus.Measurement;
 
 /// <summary>Um quadro lido ao vivo. <see cref="FrametimeMs"/> é o intervalo entre apresentações (o "frametime" de sempre).</summary>
-public readonly record struct LiveFrame(string Application, int ProcessId, double FrametimeMs, double? CpuBusyMs, double? GpuBusyMs, string? PresentMode);
+public readonly record struct LiveFrame(string Application, int ProcessId, double FrametimeMs, double? CpuBusyMs, double? GpuBusyMs, string? PresentMode)
+{
+    /// <summary>CPUWait (2.1+) / MsCPUWait (2.0 e <c>--v2_metrics</c>): o jogo esperando antes de começar o próximo quadro.</summary>
+    public double? CpuWaitMs { get; init; }
+    /// <summary>GPUWait / MsGPUWait: a GPU parada durante este quadro.</summary>
+    public double? GpuWaitMs { get; init; }
+    /// <summary>DisplayLatency / MsDisplayLatency: do começo do quadro até aparecer na tela ("NA" quando não foi mostrado).</summary>
+    public double? DisplayLatencyMs { get; init; }
+    /// <summary>AnimationError / MsAnimationError: diferença entre o ritmo da CPU e o da tela (movimento irregular).</summary>
+    public double? AnimationErrorMs { get; init; }
+    /// <summary>FrameType (só com <c>--track_frame_type</c>): "Application" ou um tipo gerado (geração de quadros do driver/SDK).</summary>
+    public string? FrameType { get; init; }
+
+    /// <summary>Quadro gerado pela geração de quadros (não foi o jogo que desenhou): qualquer FrameType diferente de vazio/NA/NotSet/Unspecified/Application.</summary>
+    public bool IsGenerated => IsGeneratedType(FrameType);
+
+    public static bool IsGeneratedType(string? frameType) =>
+        !string.IsNullOrWhiteSpace(frameType) && !(frameType.Equals("NA", StringComparison.OrdinalIgnoreCase) ||
+            frameType.Equals("NotSet", StringComparison.OrdinalIgnoreCase) || frameType.Equals("Unspecified", StringComparison.OrdinalIgnoreCase) ||
+            frameType.Equals("Application", StringComparison.OrdinalIgnoreCase));
+
+    public StutterFrame ToStutterFrame() => new(FrametimeMs, CpuBusyMs, CpuWaitMs, GpuBusyMs, GpuWaitMs, DisplayLatencyMs, AnimationErrorMs, IsGenerated);
+}
 
 /// <summary>Geração da linha de comando do PresentMon: a 1.x usa opções com um traço; a 2.x, com dois.</summary>
 public enum PresentMonGeneration { V1, V2 }
@@ -22,6 +44,7 @@ public enum PresentMonGeneration { V1, V2 }
 public sealed class PresentMonLineParser
 {
     private int _app = -1, _pid = -1, _frameTime = -1, _cpu = -1, _gpu = -1, _mode = -1, _columns;
+    private int _cpuWait = -1, _gpuWait = -1, _display = -1, _animation = -1, _frameType = -1;
 
     public bool HasHeader => _frameTime >= 0;
     public int Skipped { get; private set; }
@@ -45,7 +68,14 @@ public sealed class PresentMonLineParser
             ms,
             _cpu >= 0 ? Num(f[_cpu]) : null,
             _gpu >= 0 ? Num(f[_gpu]) : null,
-            _mode >= 0 && f[_mode].Length > 0 ? f[_mode] : null);
+            _mode >= 0 && f[_mode].Length > 0 ? f[_mode] : null)
+        {
+            CpuWaitMs = _cpuWait >= 0 ? Num(f[_cpuWait]) : null,
+            GpuWaitMs = _gpuWait >= 0 ? Num(f[_gpuWait]) : null,
+            DisplayLatencyMs = _display >= 0 ? Num(f[_display]) : null,
+            AnimationErrorMs = _animation >= 0 ? Num(f[_animation]) : null,
+            FrameType = _frameType >= 0 && f[_frameType].Length > 0 ? f[_frameType] : null,
+        };
         return true;
     }
 
@@ -71,6 +101,12 @@ public sealed class PresentMonLineParser
         _cpu = Col("CPUBusy", "MsCPUBusy");
         _gpu = Col("GPUBusy", "MsGPUBusy");
         _mode = Col("PresentMode");
+        // PresentMon 2.6: nomes sem "Ms" no conjunto padrão; com "Ms" em --v2_metrics (conferido nas strings do executável 2.6.0).
+        _cpuWait = Col("CPUWait", "MsCPUWait");
+        _gpuWait = Col("GPUWait", "MsGPUWait");
+        _display = Col("DisplayLatency", "MsDisplayLatency");
+        _animation = Col("AnimationError", "MsAnimationError");
+        _frameType = Col("FrameType");
     }
 
     private static double? Num(string s) =>
@@ -102,7 +138,9 @@ public sealed class PresentMonLineParser
 /// <summary>Captura ao vivo: qual PresentMon, qual processo, e se o próprio PresentMon pede permissão ao Windows.</summary>
 /// <param name="OutputCsv">Com elevação, o PresentMon elevado grava neste arquivo e o NEXUS o lê enquanto cresce (a saída
 /// padrão de um processo elevado não chega ao NEXUS). Sem elevação, null = lê a saída padrão (<c>--output_stdout</c>).</param>
-public sealed record LiveCaptureRequest(string PresentMonExe, string ProcessName, bool RequestElevation, string? OutputCsv, int MaxMinutes = 240);
+/// <param name="TrackFrameType">Pede a coluna FrameType (<c>--track_frame_type</c>, 2.x): só para um PresentMon de versão conhecida
+/// (hash conferido), porque uma 2.x antiga que não conheça a opção recusaria a linha de comando inteira.</param>
+public sealed record LiveCaptureRequest(string PresentMonExe, string ProcessName, bool RequestElevation, string? OutputCsv, int MaxMinutes = 240, bool TrackFrameType = false);
 
 public static partial class PresentMonCli
 {
@@ -156,6 +194,7 @@ public static partial class PresentMonCli
         else
         {
             args.Add("--no_console_stats");
+            if (r.TrackFrameType) args.Add("--track_frame_type");
             if (r.RequestElevation) args.Add("--restart_as_admin");
         }
         return args;
