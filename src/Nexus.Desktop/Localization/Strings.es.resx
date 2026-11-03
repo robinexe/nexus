@@ -4216,4 +4216,143 @@ Nada se borra: se puede deshacer, y el espacio solo vuelve cuando vacíes la cua
   <data name="Dup.Undone" xml:space="preserve"><value>Las copias volvieron a su lugar.</value></data>
   <data name="Dup.UndoFailed" xml:space="preserve"><value>Algunas copias no volvieron; mira el Historial.</value></data>
   <data name="Dup.Safety" xml:space="preserve"><value>La copia más antigua de cada grupo es la que se queda al usar "Marcar las copias extra". NEXUS vuelve a comprobar el SHA-256 antes de mover y nunca sigue enlaces.</value></data>
+  <data name="Ab.Title" xml:space="preserve"><value>Laboratorio A/B</value></data>
+  <data name="Ab.Subtitle" xml:space="preserve"><value>Comparar un juego con y sin un ajuste, en este PC</value></data>
+  <data name="Ab.Hero.Title" xml:space="preserve"><value>Comparar con y sin</value></data>
+  <data name="Ab.Hero.Value" xml:space="preserve"><value>Prueba en tu PC</value></data>
+  <data name="Ab.Hero.Caption" xml:space="preserve"><value>Juegas sin el ajuste, NEXUS lo aplica, juegas de nuevo. Solo queda lo que mejora de verdad.</value></data>
+  <data name="Ab.Hero.Chip" xml:space="preserve"><value>Mide, no promete</value></data>
+  <data name="Ab.Hero.Note" xml:space="preserve"><value>Las partidas se miden con PresentMon, como en Medir. La comparación empareja tramos de 30 s y solo llama "mejora" a lo que supera la variación normal.</value></data>
+  <data name="Ab.NoPresentMon" xml:space="preserve"><value>Falta PresentMon: sin él, Medir no graba partidas y la prueba no tiene con qué comparar.</value></data>
+  <data name="Ab.OpenMeasure" xml:space="preserve"><value>Abrir Medir</value></data>
+  <data name="Ab.Setup.Title" xml:space="preserve"><value>Elige el juego y qué probar</value></data>
+  <data name="Ab.Setup.Reread" xml:space="preserve"><value>Releer juegos</value></data>
+  <data name="Ab.How.1" xml:space="preserve"><value>Juega</value></data>
+  <data name="Ab.How.1Text" xml:space="preserve"><value>Una partida sin el ajuste. Medir la graba solo.</value></data>
+  <data name="Ab.How.2" xml:space="preserve"><value>Aplica</value></data>
+  <data name="Ab.How.2Text" xml:space="preserve"><value>NEXUS activa el ajuste con el aplicador, con diario.</value></data>
+  <data name="Ab.How.3" xml:space="preserve"><value>Juega de nuevo</value></data>
+  <data name="Ab.How.3Text" xml:space="preserve"><value>Misma escena, mismo tiempo, con el ajuste.</value></data>
+  <data name="Ab.How.4" xml:space="preserve"><value>Decide</value></data>
+  <data name="Ab.How.4Text" xml:space="preserve"><value>Mejoró de verdad: se queda. Si no: vuelve como estaba.</value></data>
+  <data name="Ab.Setup.NoGames" xml:space="preserve"><value>Aún no hay juegos para probar</value></data>
+  <data name="Ab.Setup.NoGamesDetail" xml:space="preserve"><value>Los juegos vienen de tu biblioteca (Steam, Epic…) y de las partidas ya medidas. Mide una partida en Medir o lee las bibliotecas allí.</value></data>
+  <data name="Ab.Setup.Game" xml:space="preserve"><value>Juego</value></data>
+  <data name="Ab.Setup.Design" xml:space="preserve"><value>Cuántas partidas</value></data>
+  <data name="Ab.Setup.Aba" xml:space="preserve"><value>Más certeza: tres partidas (sin, con, sin)</value></data>
+  <data name="Ab.Setup.AbaDetail" xml:space="preserve"><value>La tercera partida muestra si el juego varió por sí solo (calentamiento, hora, escena).</value></data>
+  <data name="Ab.Setup.Ask" xml:space="preserve"><value>Preguntar al final antes de deshacer</value></data>
+  <data name="Ab.Setup.AskDetail" xml:space="preserve"><value>Por defecto, lo que no ayudó vuelve solo al estado inicial.</value></data>
+  <data name="Ab.Setup.Plays" xml:space="preserve"><value>{0} partidas de al menos {1} minutos cada una, en el mismo juego y la misma escena.</value></data>
+  <data name="Ab.Setup.Tweaks" xml:space="preserve"><value>Qué probar</value></data>
+  <data name="Ab.Setup.NoTweaks" xml:space="preserve"><value>Este juego no tiene opciones para probar en este PC.</value></data>
+  <data name="Ab.Setup.OneAtATime" xml:space="preserve"><value>Marca más de uno: se prueban de uno en uno, en orden.</value></data>
+  <data name="Ab.Start" xml:space="preserve"><value>Empezar la prueba</value></data>
+  <data name="Ab.Confirm.Start" xml:space="preserve"><value>¿Probar {0} en {1}?
+
+Son {2} partidas de al menos 3 minutos. Entre ellas, NEXUS aplica el ajuste con el aplicador (con diario y deshacer). {3}</value></data>
+  <data name="Ab.Confirm.NTweaks" xml:space="preserve"><value>{0} ajustes</value></data>
+  <data name="Ab.Confirm.AutoUndo" xml:space="preserve"><value>Si no ayuda, vuelve solo al estado inicial.</value></data>
+  <data name="Ab.Confirm.AskAtEnd" xml:space="preserve"><value>Al final, NEXUS pregunta si quieres mantenerlo.</value></data>
+  <data name="Ab.Active.Headline" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="Ab.Step.PlayWithout" xml:space="preserve"><value>Partida {0} de {1}: juega SIN el ajuste</value></data>
+  <data name="Ab.Step.PlayWith" xml:space="preserve"><value>Partida {0} de {1}: juega CON el ajuste</value></data>
+  <data name="Ab.Step.PlayWithoutAgain" xml:space="preserve"><value>Partida {0} de {1}: juega SIN el ajuste otra vez</value></data>
+  <data name="Ab.Step.PlayDetail" xml:space="preserve"><value>Juega al menos {0} minutos en la misma escena que las otras partidas. Cuando el juego se cierre, la partida entra sola en la prueba.</value></data>
+  <data name="Ab.Step.Applying" xml:space="preserve"><value>Aplicando el ajuste…</value></data>
+  <data name="Ab.Step.Reverting" xml:space="preserve"><value>Volviendo al estado inicial…</value></data>
+  <data name="Ab.Step.Deciding" xml:space="preserve"><value>Comparando las partidas…</value></data>
+  <data name="Ab.Step.Ask" xml:space="preserve"><value>¿Mantenerlo igualmente?</value></data>
+  <data name="Ab.Step.Done" xml:space="preserve"><value>Prueba terminada</value></data>
+  <data name="Ab.Step.WorkingDetail" xml:space="preserve"><value>El aplicador está trabajando. Los cambios de sistema piden un aviso de Windows.</value></data>
+  <data name="Ab.Step.DecidingDetail" xml:space="preserve"><value>Tramos de 30 s emparejados e intervalo de confianza: solo cuenta lo que supera la variación normal.</value></data>
+  <data name="Ab.Step.AskDetail" xml:space="preserve"><value>La prueba no demostró mejora. Tú decides.</value></data>
+  <data name="Ab.Ask.Ab" xml:space="preserve"><value>El ajuste sigue aplicado. ¿Mantenerlo así o deshacer?</value></data>
+  <data name="Ab.Ask.Aba" xml:space="preserve"><value>El ajuste ya se deshizo para la última partida. ¿Aplicarlo de nuevo igualmente o dejarlo como estaba?</value></data>
+  <data name="Ab.Keep" xml:space="preserve"><value>Mantener igualmente</value></data>
+  <data name="Ab.Undo" xml:space="preserve"><value>Dejar como estaba</value></data>
+  <data name="Ab.Cancel" xml:space="preserve"><value>Cancelar la prueba</value></data>
+  <data name="Ab.Cancel.Confirm" xml:space="preserve"><value>¿Cancelar la prueba? No se cambió nada.</value></data>
+  <data name="Ab.Cancel.ConfirmApplied" xml:space="preserve"><value>¿Cancelar la prueba? El ajuste aplicado vuelve al estado inicial, como se acordó.</value></data>
+  <data name="Ab.Hint.Measuring" xml:space="preserve"><value>Midiendo ahora. Sigue jugando.</value></data>
+  <data name="Ab.Hint.Open" xml:space="preserve"><value>Juego abierto: la medición empieza en un momento.</value></data>
+  <data name="Ab.Hint.OpenGame" xml:space="preserve"><value>Abre el juego. NEXUS lo detecta y mide solo.</value></data>
+  <data name="Ab.AutoMeasureOff" xml:space="preserve"><value>La medición automática está apagada en Medir: actívala para que la partida entre en la prueba.</value></data>
+  <data name="Ab.SameSceneTip" xml:space="preserve"><value>Consejo: misma fase, misma resolución, mismo tiempo. Portátil: siempre enchufado.</value></data>
+  <data name="Ab.Accepted" xml:space="preserve"><value>Partida {0} aceptada: {1} FPS de media, 1% low {2}.</value></data>
+  <data name="Ab.Queue" xml:space="preserve"><value>Después de este: {0} más en la cola.</value></data>
+  <data name="Ab.NextInQueue" xml:space="preserve"><value>Siguiente en la cola: {0}.</value></data>
+  <data name="Ab.ApplyFailedNote" xml:space="preserve"><value>El aplicador no pudo aplicar el ajuste. La prueba se detuvo.</value></data>
+  <data name="Ab.AlreadyOnNote" xml:space="preserve"><value>El ajuste ya estaba así: no hay nada que comparar.</value></data>
+  <data name="Ab.ApplyTitle" xml:space="preserve"><value>Laboratorio A/B: {0}</value></data>
+  <data name="Ab.SessionMissing" xml:space="preserve"><value>Una partida de la prueba se borró en Medir: no se puede comparar.</value></data>
+  <data name="Ab.SaveFailed" xml:space="preserve"><value>No se pudo guardar la prueba: {0}</value></data>
+  <data name="Ab.Finished" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="Ab.Reject.NotWaiting" xml:space="preserve"><value>La partida terminó mientras el aplicador trabajaba: no entró en la prueba.</value></data>
+  <data name="Ab.Reject.StartedBefore" xml:space="preserve"><value>La partida empezó antes de este paso: no entró en la prueba. Juega otra.</value></data>
+  <data name="Ab.Reject.Excluded" xml:space="preserve"><value>La partida está marcada como atípica en Medir: no entró en la prueba.</value></data>
+  <data name="Ab.Reject.TooShort" xml:space="preserve"><value>La partida fue demasiado corta: hacen falta al menos {0} minutos. Juega otra.</value></data>
+  <data name="Ab.Reject.TooFewFrames" xml:space="preserve"><value>La partida tuvo pocos cuadros medidos. Juega otra.</value></data>
+  <data name="Ab.Reject.Resolution" xml:space="preserve"><value>La resolución cambió respecto a la primera partida: no entró en la prueba.</value></data>
+  <data name="Ab.Reject.Battery" xml:space="preserve"><value>Enchufe x batería cambió respecto a la primera partida: no entró en la prueba.</value></data>
+  <data name="Ab.Reject.Driver" xml:space="preserve"><value>El controlador de vídeo cambió respecto a la primera partida: no entró en la prueba.</value></data>
+  <data name="Ab.Metric.Fps" xml:space="preserve"><value>FPS medio</value></data>
+  <data name="Ab.Metric.Low1" xml:space="preserve"><value>1% low</value></data>
+  <data name="Ab.Metric.P99" xml:space="preserve"><value>Peores momentos</value></data>
+  <data name="Ab.Metric.Stutter" xml:space="preserve"><value>Tirones</value></data>
+  <data name="Ab.Metric.Variance" xml:space="preserve"><value>Regularidad</value></data>
+  <data name="Ab.Unit.Fps" xml:space="preserve"><value>{0} FPS</value></data>
+  <data name="Ab.Unit.Ms" xml:space="preserve"><value>{0} ms</value></data>
+  <data name="Ab.Unit.PerMinute" xml:space="preserve"><value>{0}/min</value></data>
+  <data name="Ab.Verdict.Improved" xml:space="preserve"><value>Mejoró</value></data>
+  <data name="Ab.Verdict.Regressed" xml:space="preserve"><value>Empeoró</value></data>
+  <data name="Ab.Verdict.Same" xml:space="preserve"><value>Igual en la práctica</value></data>
+  <data name="Ab.Verdict.WithinNoise" xml:space="preserve"><value>Dentro de la variación</value></data>
+  <data name="Ab.Verdict.NotEnough" xml:space="preserve"><value>Datos insuficientes</value></data>
+  <data name="Ab.Verdict.Noisy" xml:space="preserve"><value>El juego varió por sí solo</value></data>
+  <data name="Ab.Verdict.LooksBetter" xml:space="preserve"><value>Parece mejor (sin prueba)</value></data>
+  <data name="Ab.Verdict.LooksWorse" xml:space="preserve"><value>Parece peor (sin prueba)</value></data>
+  <data name="Ab.Highlight" xml:space="preserve"><value>{0} en {1}</value></data>
+  <data name="Ab.Result.Headline" xml:space="preserve"><value>{0} en {1}</value></data>
+  <data name="Ab.Result.Helped" xml:space="preserve"><value>Ayudó</value></data>
+  <data name="Ab.Result.HelpedDetail" xml:space="preserve"><value>Mejora comprobada más allá de la variación normal: {0}. Ninguna métrica empeoró.</value></data>
+  <data name="Ab.Result.HelpedPlain" xml:space="preserve"><value>Mejora comprobada más allá de la variación normal. Ninguna métrica empeoró.</value></data>
+  <data name="Ab.Result.Hurt" xml:space="preserve"><value>No ayudó: empeoró</value></data>
+  <data name="Ab.Result.HurtDetail" xml:space="preserve"><value>Empeoramiento comprobado: {0}.</value></data>
+  <data name="Ab.Result.HurtPlain" xml:space="preserve"><value>Empeoramiento comprobado en al menos una métrica.</value></data>
+  <data name="Ab.Result.Mixed" xml:space="preserve"><value>No ayudó: resultado mixto</value></data>
+  <data name="Ab.Result.MixedDetail" xml:space="preserve"><value>Una métrica mejoró y otra empeoró. Sin ganancia clara, el ajuste no se queda.</value></data>
+  <data name="Ab.Result.NoChange" xml:space="preserve"><value>No ayudó: igual en la práctica</value></data>
+  <data name="Ab.Result.NoChangeDetail" xml:space="preserve"><value>Las partidas con y sin quedaron iguales dentro del margen de error.</value></data>
+  <data name="Ab.Result.Inconclusive" xml:space="preserve"><value>No concluyente</value></data>
+  <data name="Ab.Result.InconclusiveDetail" xml:space="preserve"><value>La diferencia quedó dentro de la variación normal entre partidas. No se puede decir que ayudó.</value></data>
+  <data name="Ab.Result.NoisyDetail" xml:space="preserve"><value>Las dos partidas sin el ajuste ya fueron distintas entre sí: el juego varió por sí solo. Repite con la misma escena.</value></data>
+  <data name="Ab.Result.InsufficientDetail" xml:space="preserve"><value>Faltaron tramos comparables. Partidas más largas, en la misma escena, dan un veredicto.</value></data>
+  <data name="Ab.Outcome.Kept" xml:space="preserve"><value>mantenido</value></data>
+  <data name="Ab.Outcome.KeptByUser" xml:space="preserve"><value>mantenido por ti</value></data>
+  <data name="Ab.Outcome.Undone" xml:space="preserve"><value>deshecho</value></data>
+  <data name="Ab.Outcome.AlreadyOn" xml:space="preserve"><value>ya estaba así</value></data>
+  <data name="Ab.Outcome.AlreadyOnDetail" xml:space="preserve"><value>El ajuste ya estaba activo antes de la prueba: no hubo nada que comparar.</value></data>
+  <data name="Ab.Outcome.Cancelled" xml:space="preserve"><value>cancelado</value></data>
+  <data name="Ab.Outcome.Failed" xml:space="preserve"><value>se detuvo</value></data>
+  <data name="Ab.Outcome.ApplyFailed" xml:space="preserve"><value>no se pudo aplicar</value></data>
+  <data name="Ab.Outcome.RevertFailed" xml:space="preserve"><value>no se pudo deshacer: mira el Historial</value></data>
+  <data name="Ab.Outcome.ReapplyFailed" xml:space="preserve"><value>no se pudo aplicar de nuevo</value></data>
+  <data name="Ab.Outcome.Interrupted" xml:space="preserve"><value>interrumpido al cerrar NEXUS: revisa el Historial</value></data>
+  <data name="Ab.Warn.Duration" xml:space="preserve"><value>Las partidas tuvieron duraciones muy distintas: compara con cautela.</value></data>
+  <data name="Ab.Warn.PresentMode" xml:space="preserve"><value>El modo de presentación cambió ({0} → {1}): eso solo ya cambia los FPS.</value></data>
+  <data name="Ab.Warn.Drift" xml:space="preserve"><value>Las dos partidas sin el ajuste fueron distintas entre sí: parte de lo que cambió no fue el ajuste.</value></data>
+  <data name="Ab.Warn.SameScene" xml:space="preserve"><value>NEXUS no ve la escena: el resultado solo vale si las partidas fueron parecidas.</value></data>
+  <data name="Ab.With" xml:space="preserve"><value>Con</value></data>
+  <data name="Ab.Without" xml:space="preserve"><value>Sin</value></data>
+  <data name="Ab.Method.Ab" xml:space="preserve"><value>Método: partida sin × partida con, {0} tramos de 30 s emparejados por posición, intervalo del 95% por bootstrap.</value></data>
+  <data name="Ab.Method.Aba" xml:space="preserve"><value>Método: la partida con el ajuste se comparó con las DOS sin ({0} tramos de 30 s emparejados); solo cuenta lo que aparece contra las dos.</value></data>
+  <data name="Ab.Method.Explain" xml:space="preserve"><value>Se queda solo con mejora comprobada en FPS medio, 1% low, peores momentos o tirones, y ningún empeoramiento. La regularidad es solo indicativa.</value></data>
+  <data name="Ab.NewTest" xml:space="preserve"><value>Nueva prueba</value></data>
+  <data name="Ab.History.Title" xml:space="preserve"><value>Comparaciones anteriores</value></data>
+  <data name="Ab.History.Line" xml:space="preserve"><value>{0} — {1}: {2} — {3}</value></data>
+  <data name="Ab.Candidate.Tested" xml:space="preserve"><value>Probado aquí: {0} ({1})</value></data>
+  <data name="Ab.Candidate.TestedPlain" xml:space="preserve"><value>Probado aquí: {0}</value></data>
+  <data name="Simple.Games.Compare" xml:space="preserve"><value>Comparar con y sin</value></data>
+  <data name="Simple.Games.CompareTip" xml:space="preserve"><value>Laboratorio A/B: juega una partida sin y otra con un ajuste; solo queda lo que mejora de verdad.</value></data>
 </root>

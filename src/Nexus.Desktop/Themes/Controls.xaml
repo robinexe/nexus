@@ -15,7 +15,7 @@
   Design system v2 (docs/10-design-system.md — leia antes de redesenhar uma página):
     Ícones ..... Themes/Icons.xaml: Geometry "Icon.*" em grade 24 (Icon.Cpu, Icon.Gpu, Icon.Ram, Icon.Disk, Icon.Clean, Icon.Programs,
                  Icon.Startup, Icon.Services, Icon.Privacy, Icon.Security, Icon.Scan, Icon.Network, Icon.Drivers, Icon.Measure,
-                 Icon.Monitor, Icon.Auto, Icon.Assistant, Icon.MemoryDoctor, Icon.Settings, Icon.Check, Icon.Warning, Icon.Error,
+                 Icon.Monitor, Icon.Auto, Icon.Assistant, Icon.MemoryDoctor, Icon.AbLab, Icon.Settings, Icon.Check, Icon.Warning, Icon.Error,
                  Icon.Info, Icon.Undo, Icon.Refresh, Icon.Export, Icon.Lock, Icon.Trash, Icon.Quarantine…). Desenhe com c:Icon.
     Ilustrações  Assets/Illustrations/*.xaml: DrawingImage "Illo.*" 160×120 (Illo.Pc, Illo.Cpu, Illo.Gpu, Illo.Ram, Illo.Disk,
                  Illo.Cleaning, Illo.Programs, Illo.Startup, Illo.Services, Illo.Privacy, Illo.Security, Illo.Scanner, Illo.Network,
