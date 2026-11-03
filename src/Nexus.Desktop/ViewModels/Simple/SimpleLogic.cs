@@ -360,6 +360,22 @@ public static class PlainFindings
 
 // ================================================================== Histórico em palavras simples
 
+/// <summary>
+/// O diagnóstico é lido ao abrir/reler o PC; depois de aplicar, só o catálogo é relido (Detect). Um achado de atenção cuja ação do
+/// catálogo já está como ela deixa ("same") não volta como pendente em Início/Problemas: vira "está bem" até a próxima leitura.
+/// </summary>
+public static class ResolvedFindings
+{
+    public static IReadOnlyList<DiagnosticFinding> Apply(IReadOnlyList<DiagnosticFinding> findings, Func<string, string?> catalogReadState)
+    {
+        ArgumentNullException.ThrowIfNull(findings);
+        ArgumentNullException.ThrowIfNull(catalogReadState);
+        return [.. findings.Select(f => f.Severity == DiagnosticSeverity.Attention && f.RelatedActionId is { } id && catalogReadState(id) == "same"
+            ? f with { Severity = DiagnosticSeverity.Ok }
+            : f)];
+    }
+}
+
 /// <summary>"Hoje 14:30 — Limpeza: 12 itens limpos" a partir do diário (lógica pura, testada): nunca chave de ação nem estado cru.</summary>
 public static class SimpleHistoryText
 {

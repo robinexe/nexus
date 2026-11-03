@@ -87,6 +87,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         SimpleGames.Actions = this;
         SimpleOptimize.QuickTweaks.Host = this;
         SimpleOptimize.QuickTweaks.FindRun = SimpleHistory.FindSingleActionRun;
+        // Jogos: o que desfaz uma opção já ligada vem do diário (relido a cada escrita; antes da primeira leitura, direto do disco).
+        SimpleGames.Journal = () => SimpleHistory.JournalRuns is { Count: > 0 } runs ? runs : SimpleHistoryPage.ReadJournal();
         if (startup.SaveSimple) SaveSimple();
         _selectedPage = Home;
 
@@ -181,9 +183,11 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         SimpleOptimize.QuickTweaks.Update(BuildQuickTweaks());
         int? pending = Catalog.Rows.Count == 0 || Automation.ActionableRecommendations.Count == 0 ? null : SimpleOptimize.QuickTweaks.Pending.Count;
         var gpu = SimpleHealth.MainGpu(f.Gpus);
+        // O que já foi aplicado (releitura do catálogo) não volta como pendente antes da próxima leitura do PC.
+        var findings = ResolvedFindings.Apply(_findings, CatalogReadState);
         Home.Update(new HealthInputs
         {
-            Findings = _findings,
+            Findings = findings,
             Plain = Checks.Plain,
             RecoverableBytes = Cleaning.SafeBytes,
             PendingRecommendations = pending,
@@ -191,10 +195,15 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
             MemoryModules = f.MemoryModules.Count(m => m.SizeBytes is not null),
             MemorySlots = f.MemoryModules.Count,
         });
-        SimpleProblems.Update(_findings, Assistant.PendingUserActions);
+        SimpleProblems.Update(findings, Assistant.PendingUserActions);
         var gm = _findings.FirstOrDefault(x => x.Id == "win.gamemode");
-        SimpleGames.SetGameMode(gm is null || gm.Basis == FactStatus.Unavailable ? null : gm.Severity != DiagnosticSeverity.Attention, gm?.RelatedActionId);
+        SimpleGames.SetGameMode(gm is null || gm.Basis == FactStatus.Unavailable ? null : gm.Severity != DiagnosticSeverity.Attention, gm?.RelatedActionId,
+            gm?.RelatedActionId is { } gmAction ? CatalogReadState(gmAction) : null);
     }
+
+    /// <summary>Releitura (Detect) da ação no catálogo: "same" = já está como a ação deixa; null = ação não lida/não existe.</summary>
+    private string? CatalogReadState(string idOrKey) =>
+        Catalog.Rows.FirstOrDefault(r => r.Entry.Definition.Id == idOrKey || r.Entry.Definition.Key == idOrKey)?.ReadState;
 
     // ------------------------------------------------------------------ pedidos das telas simples (ISimpleActions)
 

@@ -3955,7 +3955,6 @@ Solo entra lo que es de bajo riesgo y se puede deshacer en Historial. Windows pe
   <data name="Simple.Games.MaxPower" xml:space="preserve"><value>Tarjeta gráfica siempre al máximo</value></data>
   <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Limitar los FPS para que vaya más estable ({0} FPS)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Juego en ventana más fluido</value></data>
-  <data name="Simple.Games.WindowedOn" xml:space="preserve"><value>Juego en ventana más fluido: ya activado</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problemas</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>Lo que necesita de ti y cómo resolverlo.</value></data>
   <data name="Simple.Problems.Count1" xml:space="preserve"><value>1 cosa necesita de ti.</value></data>
@@ -4025,6 +4024,9 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.One.Already" xml:space="preserve"><value>Ya estaba así</value></data>
   <data name="Simple.One.Failed" xml:space="preserve"><value>No funcionó</value></data>
   <data name="Simple.One.Undo" xml:space="preserve"><value>Deshacer</value></data>
+  <data name="Simple.One.On" xml:space="preserve"><value>Activado</value></data>
+  <data name="Simple.One.Different" xml:space="preserve"><value>Tiene otro valor</value></data>
+  <data name="Simple.One.InHistory" xml:space="preserve"><value>Deshacer en Historial</value></data>
   <data name="Simple.One.Undone" xml:space="preserve"><value>Deshecho</value></data>
   <data name="Simple.One.UndoFailed" xml:space="preserve"><value>No se pudo deshacer: mira en Historial</value></data>
   <data name="Simple.One.ConfirmClean" xml:space="preserve"><value>¿Limpiar {0} de archivos inútiles? Van a la papelera de NEXUS y se puede deshacer.</value></data>

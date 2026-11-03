@@ -69,6 +69,10 @@
         <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Body}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource Brush.Good}" VerticalAlignment="Center"/>
         <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.One.Undo}" Command="{Binding UndoCommand}" Margin="8,0,0,0"
                 Visibility="{Binding CanUndo, Converter={StaticResource BoolToVis}}"/>
+        <!-- Ligada junto com outras coisas: o desfazer fica no Histórico -->
+        <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.One.InHistory}" Margin="8,0,0,0"
+                Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SimpleHistoryPage"
+                Visibility="{Binding ShowHistory, Converter={StaticResource BoolToVis}}"/>
       </StackPanel>
     </Grid>
   </DataTemplate>
@@ -466,8 +470,6 @@
                             Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
                     <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap"/>
                   </DockPanel>
-                  <c:StatusChip Tone="Good" Text="{l:T Simple.Games.WindowedOn}" HorizontalAlignment="Left" Margin="64,10,0,0"
-                                Visibility="{Binding WindowedOn, Converter={StaticResource BoolToVis}}"/>
                   <!-- Por que travou? (última partida medida deste jogo) -->
                   <DockPanel Margin="64,10,0,0" Visibility="{Binding HasStutterVerdict, Converter={StaticResource BoolToVis}}">
                     <c:Icon Data="{StaticResource Icon.Warning}" Size="15" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,8,0" VerticalAlignment="Top"

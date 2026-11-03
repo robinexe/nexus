@@ -3955,7 +3955,6 @@ Começar agora?</value></data>
   <data name="Simple.Games.MaxPower" xml:space="preserve"><value>Placa de vídeo sempre no máximo</value></data>
   <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Limitar FPS para ficar mais estável ({0} FPS)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Jogo em janela mais fluido</value></data>
-  <data name="Simple.Games.WindowedOn" xml:space="preserve"><value>Jogo em janela mais fluido: já ligado</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problemas</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>O que precisa de você e como resolver.</value></data>
   <data name="Simple.Problems.Count1" xml:space="preserve"><value>1 coisa precisa de você.</value></data>
@@ -4025,6 +4024,9 @@ Cada coisa volta como era antes. O que é do sistema pede permissão de administ
   <data name="Simple.One.Already" xml:space="preserve"><value>Já estava assim</value></data>
   <data name="Simple.One.Failed" xml:space="preserve"><value>Não deu certo</value></data>
   <data name="Simple.One.Undo" xml:space="preserve"><value>Desfazer</value></data>
+  <data name="Simple.One.On" xml:space="preserve"><value>Ligado</value></data>
+  <data name="Simple.One.Different" xml:space="preserve"><value>Está com outro valor</value></data>
+  <data name="Simple.One.InHistory" xml:space="preserve"><value>Desfazer no Histórico</value></data>
   <data name="Simple.One.Undone" xml:space="preserve"><value>Desfeito</value></data>
   <data name="Simple.One.UndoFailed" xml:space="preserve"><value>Não deu para desfazer: veja em Histórico</value></data>
   <data name="Simple.One.ConfirmClean" xml:space="preserve"><value>Limpar {0} de arquivos inúteis? Vão para a lixeira do NEXUS e dá para desfazer.</value></data>

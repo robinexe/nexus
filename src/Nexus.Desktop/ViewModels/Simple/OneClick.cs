@@ -85,6 +85,7 @@ public sealed class OneClickAction : ObservableObject
     private Phase _phase;
     private string _note = "";
     private IReadOnlyList<(Guid Run, BrokerLevel Level)> _runs = [];
+    private bool _inHistory;
 
     public OneClickAction(string actionText, Func<QuickApplier?> applier, Func<QuickApplier, Task<OneClickResult?>> apply, Action? after = null)
     {
@@ -103,6 +104,8 @@ public sealed class OneClickAction : ObservableObject
     public bool IsWorking => _phase == Phase.Working;
     public bool IsDone => _phase == Phase.Done;
     public bool CanUndo => _phase == Phase.Done && _runs.Count > 0;
+    /// <summary>Ligada, mas feita junto com outras coisas: o desfazer fica no Histórico (o botão leva até lá).</summary>
+    public bool ShowHistory => _phase == Phase.Done && _runs.Count == 0 && _inHistory;
     /// <summary>"Feito", "Já estava assim", "Não deu certo", "Desfeito".</summary>
     public string Note { get => _note; private set { if (Set(ref _note, value)) OnPropertyChanged(nameof(HasNote)); } }
     public bool HasNote => _note.Length > 0;
@@ -110,8 +113,36 @@ public sealed class OneClickAction : ObservableObject
     private void Go(Phase p)
     {
         _phase = p;
-        foreach (var n in new[] { nameof(IsReady), nameof(IsWorking), nameof(IsDone), nameof(CanUndo) }) OnPropertyChanged(n);
+        foreach (var n in new[] { nameof(IsReady), nameof(IsWorking), nameof(IsDone), nameof(CanUndo), nameof(ShowHistory) }) OnPropertyChanged(n);
         System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+    }
+
+    /// <summary>
+    /// Estado REAL lido do PC (a cada abertura da tela e depois de aplicar/desfazer): ligada → "✓ Ligado — Desfazer" (ou o botão
+    /// do Histórico quando foi feita junto com outras coisas); desligada → o botão de ligar. Não mexe enquanto trabalha.
+    /// </summary>
+    public void ShowState(OptionStatus status)
+    {
+        ArgumentNullException.ThrowIfNull(status);
+        if (_phase == Phase.Working) return;
+        switch (status.State)
+        {
+            case OptionState.On:
+                // Execuções desta sessão valem mais (o diário pode ainda não ter a mais nova); senão, as do diário.
+                if (_phase != Phase.Done || _runs.Count == 0) _runs = status.Undo.Kind == UndoKind.Runs ? status.Undo.Runs : [];
+                _inHistory = status.Undo.Kind == UndoKind.History;
+                if (_phase != Phase.Done || !HasNote) Note = Loc.T("Simple.One.On");
+                Go(Phase.Done);
+                break;
+            case OptionState.Off or OptionState.Different:
+                if (_phase == Phase.Done) { _runs = []; _inHistory = false; Note = ""; }
+                if (status.State == OptionState.Different) Note = Loc.T("Simple.One.Different");
+                else if (Note == Loc.T("Simple.One.Different")) Note = "";
+                Go(Phase.Ready);
+                break;
+            default: // sem leitura: mostra o que já mostrava
+                break;
+        }
     }
 
     private async Task ApplyAsync()
@@ -125,7 +156,7 @@ public sealed class OneClickAction : ObservableObject
             _runs = r.Runs;
             Note = !r.Ok ? Loc.T("Simple.One.Failed") : r.Already ? Loc.T("Simple.One.Already") : Loc.T("Simple.One.Done");
             Go(r.Ok ? Phase.Done : Phase.Failed);
-            if (r.Runs.Count > 0) _after?.Invoke();
+            _after?.Invoke(); // relê o estado (mudou, já estava assim ou falhou no meio: a tela mostra o que ficou)
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {

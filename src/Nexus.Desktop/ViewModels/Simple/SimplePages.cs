@@ -260,26 +260,27 @@ public sealed class SimpleCleanPage : ModulePage
     public override Task OnShownAsync() => Cleaning.OnShownAsync();
 }
 
-/// <summary>Uma opção de um jogo, em palavras simples, com o botão de um clique ("Ligar" → "Feito ✓ — Desfazer").</summary>
+/// <summary>Uma opção de um jogo, em palavras simples, com o botão de um clique ("Ligar" → "Feito ✓ — Desfazer"; já ligada: "✓ Ligado — Desfazer").</summary>
 public sealed record GameOption(string Text, OneClickAction Action);
 
 /// <summary>Um jogo na tela Jogos: nome, inicial (no lugar do ícone), as opções que valem para ele e "Medir FPS".</summary>
-public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOption> options, bool windowedOn, RelayCommand measure)
+public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOption> options, RelayCommand measure) : ObservableObject
 {
+    private string _status = "";
+
     public string Name { get; } = name;
     /// <summary>Nome do executável (ex.: cs2.exe), só para Medir.</summary>
     public string Exe { get; } = exe;
     public string Initial => Name.Length > 0 ? char.ToUpper(Name[0], Loc.Culture).ToString() : "?";
     public IReadOnlyList<GameOption> Options { get; } = options;
     public bool HasOptions => Options.Count > 0;
-    public bool WindowedOn { get; } = windowedOn;
     public RelayCommand MeasureCommand { get; } = measure;
     /// <summary>"Por que travou?" da última partida medida, em uma linha ("12 travadas: a maioria provavelmente por…"), ou vazio.</summary>
     public string StutterVerdict { get; init; } = "";
     public bool HasStutterVerdict => StutterVerdict.Length > 0;
-    /// <summary>Estado atual lido do jogo (Fortnite: "Agora: Modo desempenho · limite 141 FPS · Reflex ligado"), ou vazio.</summary>
-    public string Status { get; init; } = "";
-    public bool HasStatus => Status.Length > 0;
+    /// <summary>Estado atual lido do jogo (Fortnite: "Agora: Modo desempenho · limite 141 FPS · Reflex ligado"), ou vazio. Relido depois de aplicar.</summary>
+    public string Status { get => _status; set { if (Set(ref _status, value)) OnPropertyChanged(nameof(HasStatus)); } }
+    public bool HasStatus => _status.Length > 0;
     /// <summary>Aviso fixo do jogo (Fortnite: "feche o Fortnite antes"), ou vazio.</summary>
     public string Note { get; init; } = "";
     public bool HasNote => Note.Length > 0;
@@ -287,16 +288,44 @@ public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOpt
     public bool IsRunning { get; init; }
 }
 
+/// <summary>Leitura real no Windows (só leitura): banco de perfis NVIDIA, UserGpuPreferences do DirectX e o arquivo do Fortnite.</summary>
+internal sealed class WindowsGameStateSource : IGameStateSource
+{
+    public INvidiaDrsReader Nvidia { get; } = NvidiaDrsFactory.Reader();
+
+    public int? WindowedToken(string exePath)
+    {
+        if (!OperatingSystem.IsWindows()) return null;
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\DirectX\UserGpuPreferences");
+            return GameLibraries.ParseToken(key?.GetValue(exePath) as string, GameOptionStates.WindowedToken);
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException) { return null; }
+    }
+
+    public FortniteState Fortnite()
+    {
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        return string.IsNullOrEmpty(local) ? FortniteState.NotFound : FortniteState.Read(local);
+    }
+}
+
 /// <summary>
 /// Jogos: os jogos achados nas lojas (Steam, Epic…) em cartões; para cada um, "Medir FPS" e só as opções que valem para ele, em
 /// palavras simples, cada uma com um clique (as mesmas ações do driver NVIDIA por jogo e de "jogos em janela" da página Placa de
 /// vídeo), e um resumo do Modo de jogo do Windows com "Ligar" de um clique. Tudo pelo aplicador, com uma frase de confirmação.
+/// Cada opção mostra o estado REAL (lido do driver, do registro e do arquivo do jogo a cada abertura e depois de aplicar):
+/// ligada → "✓ Ligado — Desfazer" (desfaz pela execução do diário que só mexeu nela; feita junto com outras → Histórico).
 /// </summary>
 public sealed class SimpleGamesPage : ModulePage
 {
     private bool _loading = true;
     private bool? _gameModeOn;
     private OneClickAction? _gameModeAction;
+    // O botão de cada opção é o mesmo entre aberturas da tela (o "Feito ✓ — Desfazer" desta sessão não se perde ao navegar).
+    private readonly Dictionary<string, OneClickAction> _actions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, OptionStatus> _states = new(StringComparer.OrdinalIgnoreCase);
 
     public SimpleGamesPage(GpuLabPage gpu, MeasurePage measure)
     {
@@ -332,11 +361,15 @@ public sealed class SimpleGamesPage : ModulePage
     public GpuLabPage Gpu { get; }
     public MeasurePage Measure { get; }
     internal ISimpleActions? Actions { get; set; }
+    /// <summary>Execuções dos diários (a janela passa as do Histórico, relidas a cada escrita); por padrão lê do disco.</summary>
+    internal Func<IReadOnlyList<JournalRun>> Journal { get; set; } = SimpleHistoryPage.ReadJournal;
+    /// <summary>De onde vem o estado real das opções (só leitura).</summary>
+    internal IGameStateSource StateSource { get; set; } = new WindowsGameStateSource();
     public ObservableCollection<SimpleGameRow> Games { get; } = [];
     public bool IsLoading { get => _loading; private set { if (Set(ref _loading, value)) { OnPropertyChanged(nameof(NoGames)); OnPropertyChanged(nameof(HasGames)); } } }
     public bool HasGames => !_loading && Games.Count > 0;
     public bool NoGames => !_loading && Games.Count == 0;
-    /// <summary>"Modo de jogo do Windows: ligado" (do diagnóstico; null = não deu para ler).</summary>
+    /// <summary>"Modo de jogo do Windows: ligado" (do registro; null = não deu para ler).</summary>
     public string GameModeText => _gameModeOn switch
     {
         true => Loc.T("Simple.Games.GameModeOn"),
@@ -344,86 +377,118 @@ public sealed class SimpleGamesPage : ModulePage
         _ => Loc.T("Simple.Games.GameModeUnknown"),
     };
     public Tone GameModeTone => _gameModeOn switch { true => Tone.Good, false => Tone.Warn, _ => Tone.Neutral };
-    /// <summary>Ligar o Modo de jogo com um clique (só quando está desligado e o catálogo tem a ação).</summary>
+    /// <summary>Ligar o Modo de jogo com um clique; ligado: "✓ Ligado — Desfazer" quando foi o NEXUS que ligou.</summary>
     public OneClickAction? GameModeAction { get => _gameModeAction; private set { if (Set(ref _gameModeAction, value)) OnPropertyChanged(nameof(HasGameModeAction)); } }
     public bool HasGameModeAction => _gameModeAction is not null;
 
-    /// <summary>A janela informa o Modo de jogo a cada leitura (achado win.gamemode do diagnóstico).</summary>
-    public void SetGameMode(bool? on, string? fixActionId)
+    /// <summary>
+    /// A janela informa o Modo de jogo a cada leitura: o achado win.gamemode do diagnóstico e a releitura do catálogo (que é refeita
+    /// depois de cada escrita, então vale mais).
+    /// </summary>
+    public void SetGameMode(bool? fromDiagnosis, string? fixActionId, string? catalogReadState)
     {
-        _gameModeOn = on;
-        if (on == false && Actions is { } a && fixActionId is not null && a.LowRiskRequest(fixActionId) is { } req)
-            GameModeAction ??= new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier,
+        var state = GameOptionStates.GameMode(fromDiagnosis, catalogReadState);
+        _gameModeOn = state switch { OptionState.On => true, OptionState.Off => false, _ => null };
+        if (_gameModeAction is null && Actions is { } a && fixActionId is not null && a.LowRiskRequest(fixActionId) is { } req)
+            GameModeAction = new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier,
                 q => q.ApplyAsync(Loc.T("Simple.Games.GameModeOff"), Loc.T("Simple.Games.ConfirmGameMode"), [req]));
-        else if (_gameModeAction is not { HasNote: true }) GameModeAction = null; // depois de ligar, o "Feito ✓ — Desfazer" fica
+        if (_gameModeAction is { } action && state != OptionState.Unknown)
+        {
+            var key = Actions?.LowRiskRequest(fixActionId ?? "") is { } r ? r.Request.ActionId : GameOptionStates.GameModeAction;
+            action.ShowState(new OptionStatus(state, state == OptionState.On ? OptionJournal.Find(SafeJournal(), [new OptionPart(key)]) : OptionUndo.None));
+        }
         OnPropertyChanged(nameof(GameModeText));
         OnPropertyChanged(nameof(GameModeTone));
+    }
+
+    private IReadOnlyList<JournalRun> SafeJournal()
+    {
+        try { return Journal(); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { return []; }
     }
 
     private QuickApplier? Applier() => Host is null ? null : new QuickApplier(Host);
 
     public override async Task OnShownAsync()
     {
-        IsLoading = true;
+        IsLoading = Games.Count == 0;
         try
         {
             await Gpu.OnShownAsync(); // leitura da placa e da biblioteca de jogos (só leitura)
-            _fortnite = await Task.Run(ReadFortnite);
-            Build();
+            var games = Describe();
+            var source = StateSource;
+            var (fortnite, states) = await Task.Run(() => (ReadFortnite(), GameStateReader.Read(games.SelectMany(g => g.Plans.Select(p => p.Plan)), source, SafeJournal())));
+            _fortnite = fortnite;
+            foreach (var (id, status) in states) _states[id] = status;
+            Build(games);
         }
         finally { IsLoading = false; }
+    }
+
+    /// <summary>Depois de aplicar/desfazer uma opção: relê só aquele jogo (não o PC inteiro) e atualiza os botões dele.</summary>
+    private async Task RefreshGameAsync(string exe)
+    {
+        try
+        {
+            var game = Describe().FirstOrDefault(g => string.Equals(g.Exe, exe, StringComparison.OrdinalIgnoreCase));
+            if (game is null) return;
+            var source = StateSource;
+            var fortnite = game.IsFortnite;
+            var (fn, states) = await Task.Run(() => (fortnite ? ReadFortnite() : _fortnite, GameStateReader.Read(game.Plans.Select(p => p.Plan), source, SafeJournal())));
+            foreach (var (id, status) in states)
+            {
+                _states[id] = status;
+                if (_actions.TryGetValue(id, out var action)) action.ShowState(status);
+            }
+            if (fortnite)
+            {
+                _fortnite = fn;
+                if (Games.FirstOrDefault(g => string.Equals(g.Exe, exe, StringComparison.OrdinalIgnoreCase)) is { } row) row.Status = FortniteStatus(fn.State);
+            }
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = ex.Message; } // a releitura falhou: o botão fica como estava
     }
 
     /// <summary>Fortnite: configurações atuais (GameUserSettings.ini do seu perfil) e se o jogo está aberto. Só leitura.</summary>
     private (FortniteState State, bool Running) _fortnite = (FortniteState.NotFound, false);
 
-    private static (FortniteState, bool) ReadFortnite()
-    {
-        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        return (string.IsNullOrEmpty(local) ? FortniteState.NotFound : FortniteState.Read(local), FortniteProcesses.AnyRunning());
-    }
+    private (FortniteState State, bool Running) ReadFortnite() => (StateSource.Fortnite(), FortniteProcesses.AnyRunning());
 
-    private void Build()
+    /// <summary>Um jogo e as opções que valem para ele (texto + plano: o que pede, como ler, como achar no diário).</summary>
+    private sealed record GameDescription(string Name, string Exe, bool IsFortnite, IReadOnlyList<(string Text, GameOptionPlan Plan)> Plans);
+
+    /// <summary>Os jogos da biblioteca (jogos em janela + driver NVIDIA) com as opções de cada um. Só a partir das leituras já feitas.</summary>
+    private List<GameDescription> Describe()
     {
-        Games.Clear();
+        var list = new List<GameDescription>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var nv = Gpu.NvAvailable ? Gpu.NvGames.ToDictionary(g => g.Exe, StringComparer.OrdinalIgnoreCase) : [];
         foreach (var w in Gpu.WindowedGames)
         {
             var exe = Path.GetFileName(w.ExePath);
             if (string.IsNullOrEmpty(exe) || !seen.Add(exe)) continue;
-            Games.Add(Make(w.Name, exe, nv.ContainsKey(exe), w.IsOn ? null : w.ExePath, w.IsOn));
+            list.Add(Describe(w.Name, exe, nv.ContainsKey(exe), w.ExePath));
         }
         foreach (var g in nv.Values)
-            if (seen.Add(g.Exe)) Games.Add(Make(g.Name, g.Exe, true, null, false));
-        OnPropertyChanged(nameof(HasGames));
-        OnPropertyChanged(nameof(NoGames));
+            if (seen.Add(g.Exe)) list.Add(Describe(g.Name, g.Exe, true, null));
+        return list;
     }
 
-    /// <summary>As opções que valem para o jogo: driver NVIDIA (administrador) e jogos em janela (sua conta).</summary>
-    private SimpleGameRow Make(string name, string exe, bool nvidia, string? windowedPath, bool windowedOn)
+    /// <summary>As opções que valem para o jogo: Fortnite (arquivo do jogo), driver NVIDIA (administrador) e jogos em janela (sua conta).</summary>
+    private GameDescription Describe(string name, string exe, bool nvidia, string? windowedPath)
     {
-        var options = new List<GameOption>();
+        var options = new List<(string, GameOptionPlan)>();
+        var fortnite = string.Equals(exe, FortniteSettings.GameExe, StringComparison.OrdinalIgnoreCase);
+        if (fortnite) options.AddRange(FortniteOptions());
         if (nvidia)
         {
-            var args = new Dictionary<string, string> { ["exe"] = exe };
-            options.Add(Option(name, Loc.T("Simple.Games.LowLatency"), new ActionRequest(NvidiaDrsActions.LowLatency, null, args), BrokerLevel.Admin));
-            options.Add(Option(name, Loc.T("Simple.Games.MaxPower"), new ActionRequest(NvidiaDrsActions.MaxPower, null, args), BrokerLevel.Admin));
+            options.Add((Loc.T("Simple.Games.LowLatency"), GameOptionPlans.NvLowLatency(exe)));
+            options.Add((Loc.T("Simple.Games.MaxPower"), GameOptionPlans.NvMaxPower(exe)));
             if (Gpu.SelectedNvFps is { } fps && NvidiaDrsActions.FpsCaps.Contains(fps))
-                options.Add(Option(name, Loc.F("Simple.Games.FpsCap", fps), new ActionRequest(NvidiaDrsActions.FpsCap, fps, args), BrokerLevel.Admin));
+                options.Add((Loc.F("Simple.Games.FpsCap", fps), GameOptionPlans.NvFpsCap(exe, fps)));
         }
-        if (windowedPath is not null)
-            options.Add(Option(name, Loc.T("Simple.Games.Windowed"),
-                new ActionRequest(GpuLabPage.WindowedPerAppAction, null, new Dictionary<string, string> { ["gameExePath"] = windowedPath }), BrokerLevel.User));
-        var fortnite = string.Equals(exe, FortniteSettings.GameExe, StringComparison.OrdinalIgnoreCase);
-        if (fortnite) options.InsertRange(0, FortniteOptions());
-        return new SimpleGameRow(name, exe, options, windowedOn, new RelayCommand(() => { Measure.ManualExe = exe; Host?.Navigate(Measure); }))
-        {
-            StutterVerdict = Measure.LatestStutterVerdict(exe),
-            Status = fortnite ? FortniteStatus(_fortnite.State) : "",
-            Note = fortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : "",
-            IsRunning = fortnite && _fortnite.Running,
-        };
+        if (windowedPath is not null) options.Add((Loc.T("Simple.Games.Windowed"), GameOptionPlans.Windowed(exe, windowedPath)));
+        return new GameDescription(name, exe, fortnite, options);
     }
 
     /// <summary>
@@ -431,22 +496,15 @@ public sealed class SimpleGamesPage : ModulePage
     /// Reflex nas placas NVIDIA); imagem nítida (sem desfoque). A "mira sem aceleração" não entra: no Windows o jogo já lê o mouse
     /// direto, e a chave bDisableMouseAcceleration não faz nada (mito no catálogo).
     /// </summary>
-    private List<GameOption> FortniteOptions()
+    private List<(string, GameOptionPlan)> FortniteOptions()
     {
-        var list = new List<GameOption>
-        {
-            FortniteOption(Loc.T("Simple.Games.Fn.Perf"),
-                [(new ActionRequest(FortniteSettings.RhiDx12Action, null), BrokerLevel.User), (new ActionRequest(FortniteSettings.PerformanceModeAction, null), BrokerLevel.User)]),
-        };
+        var list = new List<(string, GameOptionPlan)> { (Loc.T("Simple.Games.Fn.Perf"), GameOptionPlans.FortnitePerformance()) };
         var report = Gpu.Report;
         var monitors = report?.Monitors ?? [];
         var monitor = monitors.FirstOrDefault(m => m.Primary) ?? (monitors.Count > 0 ? monitors[0] : null);
         var cap = monitor is null ? null : FortniteSettings.SuggestedFpsLimit(monitor.Current.Hz);
         var nvidia = report?.Primary?.Vendor == GpuVendor.Nvidia;
-        var latency = new List<(ActionRequest, BrokerLevel)>();
-        if (cap is not null) latency.Add((new ActionRequest(FortniteSettings.FpsLimitAction, cap), BrokerLevel.User));
-        if (nvidia) latency.Add((new ActionRequest(FortniteSettings.ReflexAction, FortniteSettings.ReflexOn), BrokerLevel.User));
-        if (latency.Count > 0)
+        if (GameOptionPlans.FortniteLatency(cap, nvidia) is { } latency)
         {
             var text = (cap, nvidia) switch
             {
@@ -454,14 +512,46 @@ public sealed class SimpleGamesPage : ModulePage
                 ({ } c, false) => Loc.F("Simple.Games.Fn.LatencyCap", FortniteSettings.FpsLabel(c)),
                 _ => Loc.T("Simple.Games.Fn.LatencyReflexOnly"),
             };
-            list.Add(FortniteOption(text, latency));
+            list.Add((text, latency));
         }
-        list.Add(FortniteOption(Loc.T("Simple.Games.Fn.Clear"), [(new ActionRequest(FortniteSettings.MotionBlurOffAction, null), BrokerLevel.User)]));
+        list.Add((Loc.T("Simple.Games.Fn.Clear"), GameOptionPlans.FortniteClear()));
         return list;
     }
 
-    private GameOption FortniteOption(string text, IReadOnlyList<(ActionRequest Request, BrokerLevel Level)> requests) =>
-        new(text, new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier, q => q.ApplyAsync("Fortnite", Loc.F("Simple.Games.Fn.Confirm", text), requests)));
+    private void Build(IReadOnlyList<GameDescription> games)
+    {
+        Games.Clear();
+        foreach (var g in games)
+        {
+            var options = g.Plans.Select(p => new GameOption(p.Text, ActionFor(g, p.Text, p.Plan))).ToList();
+            Games.Add(new SimpleGameRow(g.Name, g.Exe, options, new RelayCommand(() => { Measure.ManualExe = g.Exe; Host?.Navigate(Measure); }))
+            {
+                StutterVerdict = Measure.LatestStutterVerdict(g.Exe),
+                Status = g.IsFortnite ? FortniteStatus(_fortnite.State) : "",
+                Note = g.IsFortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : "",
+                IsRunning = g.IsFortnite && _fortnite.Running,
+            });
+        }
+        OnPropertyChanged(nameof(HasGames));
+        OnPropertyChanged(nameof(NoGames));
+    }
+
+    /// <summary>O botão da opção (o mesmo da última abertura, se houver), já mostrando o estado lido.</summary>
+    private OneClickAction ActionFor(GameDescription game, string text, GameOptionPlan plan)
+    {
+        if (!_actions.TryGetValue(plan.Id, out var action))
+        {
+            var title = game.IsFortnite ? "Fortnite" : game.Name;
+            var admin = plan.Requests.Any(r => r.Level == BrokerLevel.Admin);
+            var sentence = game.IsFortnite && !admin ? Loc.F("Simple.Games.Fn.Confirm", text)
+                : admin ? Loc.F("Simple.Games.ConfirmAdmin", game.Name, text) : Loc.F("Simple.Games.Confirm", game.Name, text);
+            var exe = game.Exe;
+            action = new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier, q => q.ApplyAsync(title, sentence, plan.Requests), () => _ = RefreshGameAsync(exe));
+            _actions[plan.Id] = action;
+        }
+        action.ShowState(_states.GetValueOrDefault(plan.Id, OptionStatus.Unread));
+        return action;
+    }
 
     /// <summary>"Agora: Modo desempenho · limite 141 FPS · Reflex ligado" (ou "abra o jogo uma vez").</summary>
     private static string FortniteStatus(FortniteState s)
@@ -472,10 +562,6 @@ public sealed class SimpleGamesPage : ModulePage
         if (s.Reflex is { } r) parts.Add(r == "0" ? Loc.T("Simple.Games.Fn.ReflexOff") : Loc.T("Simple.Games.Fn.ReflexOn"));
         return Loc.F("Simple.Games.Fn.Now", string.Join(" · ", parts));
     }
-
-    private GameOption Option(string game, string text, ActionRequest request, BrokerLevel level) =>
-        new(text, new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier, q => q.ApplyAsync(game,
-            level == BrokerLevel.Admin ? Loc.F("Simple.Games.ConfirmAdmin", game, text) : Loc.F("Simple.Games.Confirm", game, text), [(request, level)])));
 }
 
 /// <summary>Um problema que precisa do usuário: uma frase, o que fazer (1–2 frases) e, quando o NEXUS resolve, um botão de um clique.</summary>
@@ -610,36 +696,44 @@ public sealed class SimpleHistoryPage : ModulePage
     public bool NoRows => _loaded && _rows.Count == 0;
     public RelayCommand UndoAllCommand { get; }
 
+    /// <summary>As execuções dos dois diários na última leitura (para as telas acharem o que desfaz uma opção já ligada).</summary>
+    public IReadOnlyList<JournalRun> JournalRuns { get; private set; } = [];
+
     /// <summary>
     /// A execução que ligou só este ajuste e ainda vale (a mais nova), para desligar nos Ajustes rápidos sem desfazer outras coisas
     /// junto. Null se ele foi feito junto com outros (aí, Desfazer aqui no Histórico).
     /// </summary>
     public (Guid Run, BrokerLevel Level)? FindSingleActionRun(string actionKey) =>
-        _rows.Where(r => r.Active && r.Keys.Count == 1 && r.Keys[0] == actionKey).OrderByDescending(r => r.Started)
-            .Select(r => ((Guid, BrokerLevel)?)(r.RunId, r.Level)).FirstOrDefault();
+        OptionJournal.Find(JournalRuns, [new OptionPart(actionKey)]) is { Kind: UndoKind.Runs, Runs: [.., var newest] } ? newest : null;
 
     public override Task OnShownAsync() => LoadAsync();
 
     /// <summary>Relê os dois diários (fora da thread da interface).</summary>
     public async Task LoadAsync()
     {
-        var read = await Task.Run(() => Read(BrokerLevel.User).Concat(Read(BrokerLevel.Admin)).ToList());
+        var runs = await Task.Run(ReadJournal);
+        JournalRuns = runs;
         var now = DateTime.Now;
-        Rows = read.OrderByDescending(r => r.Started)
-            .Select(r => r with
+        Rows = runs.Where(r => r.Active || r.Items.Any(i => i.Reverted))
+            .OrderByDescending(r => r.Started)
+            .Select(r =>
             {
-                When = SimpleHistoryText.When(r.Started.LocalDateTime, now),
-                UndoCommand = r.Active ? new RelayCommand(() => _ = RunAsync(() => UndoAsync(r)), () => !Busy && Host is not null) : null,
+                var row = new SimpleHistoryRow(r.RunId, r.Level, r.Started, SimpleHistoryText.When(r.Started.LocalDateTime, now),
+                    SimpleHistoryText.Describe([.. r.Items.Select(i => i.Key)]), r.Active, [.. r.Items.Select(i => i.Key)]);
+                return row with { UndoCommand = r.Active ? new RelayCommand(() => _ = RunAsync(() => UndoAsync(row)), () => !Busy && Host is not null) : null };
             }).ToList();
         _loaded = true;
         OnPropertyChanged(nameof(HasRows));
         OnPropertyChanged(nameof(NoRows));
     }
 
-    private static List<SimpleHistoryRow> Read(BrokerLevel level)
+    /// <summary>Lê os dois diários do disco (sua conta e sistema), só leitura. Diário ilegível: fica sem as execuções dele.</summary>
+    public static IReadOnlyList<JournalRun> ReadJournal() => [.. Read(BrokerLevel.User), .. Read(BrokerLevel.Admin)];
+
+    private static List<JournalRun> Read(BrokerLevel level)
     {
         var path = LocalBroker.JournalPath(level);
-        var list = new List<SimpleHistoryRow>();
+        var list = new List<JournalRun>();
         if (!File.Exists(path)) return list;
         try
         {
@@ -648,11 +742,8 @@ public sealed class SimpleHistoryPage : ModulePage
             {
                 var entries = journal.Entries(run.RunId);
                 if (entries.Count == 0) continue;
-                var keys = entries.Select(e => e.Action.Definition.Key).ToList();
-                var active = entries.Any(e => e.State is JournalState.Applied or JournalState.Verified);
-                // Só o que mudou algo de verdade (execução recusada ou já igual não é "o que o NEXUS mudou").
-                if (!active && !entries.Any(e => e.State == JournalState.Reverted)) continue;
-                list.Add(new SimpleHistoryRow(run.RunId, level, run.StartedAt, "", SimpleHistoryText.Describe(keys), active, keys));
+                list.Add(new JournalRun(run.RunId, level, run.StartedAt, [.. entries.Select(e => new JournalItem(e.Action.Definition.Key, e.Action.Target,
+                    e.State is JournalState.Applied or JournalState.Verified) { Reverted = e.State == JournalState.Reverted })]));
             }
         }
         catch (Exception ex) when (ex is not OutOfMemoryException) { } // diário ilegível: a tela só fica sem as linhas dele

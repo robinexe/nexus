@@ -429,7 +429,9 @@ public sealed class FortniteTests : IDisposable
     [Fact]
     public void Every_fortnite_action_is_reachable_from_the_screens()
     {
-        var simple = File.ReadAllText(Path.Combine(Wiring.Root, "src/Nexus.Desktop/ViewModels/Simple/SimplePages.cs"));
+        // Jogos (simples): os pedidos ficam nos planos de GameOptionStates.cs (mesma fonte para pedir e para ler o estado).
+        var simple = File.ReadAllText(Path.Combine(Wiring.Root, "src/Nexus.Desktop/ViewModels/Simple/SimplePages.cs")) +
+                     File.ReadAllText(Path.Combine(Wiring.Root, "src/Nexus.Desktop/ViewModels/Simple/GameOptionStates.cs"));
         var advanced = File.ReadAllText(Path.Combine(Wiring.Root, "src/Nexus.Desktop/ViewModels/Modules/GpuLabPage.Fortnite.cs"));
         var names = typeof(FortniteSettings).GetFields().Where(f => f.IsLiteral && f.Name.EndsWith("Action", StringComparison.Ordinal)).ToList();
         Assert.Equal(Wiring.Catalog.Actions.Count(a => a.Definition.Id.StartsWith("fortnite.", StringComparison.Ordinal)), names.Count);

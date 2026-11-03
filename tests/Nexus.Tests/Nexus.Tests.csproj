@@ -51,6 +51,9 @@
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\KeepChangeCountdown.cs" Link="Shell\KeepChangeCountdown.cs" />
     <!-- Modo simples: modos da navegação, nota de saúde, "o que dá para melhorar", achados em palavras simples (SimpleModeTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\SimpleLogic.cs" Link="Shell\SimpleLogic.cs" />
+    <!-- Jogos: estado real de cada opção e o que a desfaz no diário (GameOptionStateTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameOptionStates.cs" Link="Shell\GameOptionStates.cs" />
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameSessionStore.cs" Link="Shell\GameSessionStore.cs" />
     <!-- Medir: "Por que travou?" em palavras simples (MeasureStutterTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Modules\MeasureStutter.cs" Link="Shell\MeasureStutter.cs" />
     <!-- Checagens do PC: achados em palavras simples com os números da leitura (PcChecksDesktopTests). -->

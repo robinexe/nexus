@@ -3955,7 +3955,6 @@ Start now?</value></data>
   <data name="Simple.Games.MaxPower" xml:space="preserve"><value>Graphics card always at full power</value></data>
   <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Cap FPS for a steadier game ({0} FPS)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Smoother windowed game</value></data>
-  <data name="Simple.Games.WindowedOn" xml:space="preserve"><value>Smoother windowed game: already on</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problems</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>What needs you and how to fix it.</value></data>
   <data name="Simple.Problems.Count1" xml:space="preserve"><value>1 thing needs you.</value></data>
@@ -4025,6 +4024,9 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.One.Already" xml:space="preserve"><value>It was already like that</value></data>
   <data name="Simple.One.Failed" xml:space="preserve"><value>That didn't work</value></data>
   <data name="Simple.One.Undo" xml:space="preserve"><value>Undo</value></data>
+  <data name="Simple.One.On" xml:space="preserve"><value>On</value></data>
+  <data name="Simple.One.Different" xml:space="preserve"><value>Set to another value</value></data>
+  <data name="Simple.One.InHistory" xml:space="preserve"><value>Undo in History</value></data>
   <data name="Simple.One.Undone" xml:space="preserve"><value>Undone</value></data>
   <data name="Simple.One.UndoFailed" xml:space="preserve"><value>Couldn't undo: check History</value></data>
   <data name="Simple.One.ConfirmClean" xml:space="preserve"><value>Clean {0} of junk files? They go to the NEXUS bin and you can undo it.</value></data>
