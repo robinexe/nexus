@@ -118,6 +118,9 @@ public static class GpuLabScanner
         };
     }
 
+    /// <summary>Só os monitores (taxa atual x máxima, HDR), sem DXGI/NVML: leitura leve para a checagem do monitor da tela Início.</summary>
+    public static IReadOnlyList<MonitorReport> MonitorsOnly() => Monitors([]);
+
     private static List<MonitorReport> Monitors(IReadOnlyList<GpuAdapter> adapters)
     {
         var paths = WindowsDisplay.ActivePaths();

@@ -9,5 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
     <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <!-- Checagens do PC (Checks/): os leitores devolvem os registros e as regras de Nexus.HardwareDiscovery.PcChecks. -->
+    <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
   </ItemGroup>
 </Project>
