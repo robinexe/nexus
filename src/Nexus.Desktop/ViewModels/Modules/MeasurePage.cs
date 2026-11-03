@@ -252,6 +252,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public ObservableCollection<SessionRow> Sessions { get; } = [];
     public SessionRow? Selected { get => _selected; set => Set(ref _selected, value); }
     public bool HasSessions => _all.Count > 0;
+    /// <summary>Uma partida guardada, pelo id (o Laboratório A/B compara as partidas do teste); null se foi apagada.</summary>
+    public MeasuredSession? FindSession(string? id) => id is null ? null : _all.FirstOrDefault(s => s.Id == id);
     public bool HasGames => Games.Count > 0;
 
     public string ManualHeadline => _manual?.Headline ?? "";
@@ -384,6 +386,9 @@ public sealed class MeasurePage : ModulePage, IDisposable
 
     /// <summary>Um jogo acabou de abrir (nome do jogo). A janela usa para o aviso de notebook na bateria (checagens do PC).</summary>
     public event EventHandler<string>? GameStarted;
+
+    /// <summary>Uma partida medida acabou de ser guardada (automática ou à mão). O Laboratório A/B oferece cada uma ao teste em andamento.</summary>
+    public event EventHandler<MeasuredSession>? SessionSaved;
 
     // ------------------------------------------------------------------ ciclo de vida
 
@@ -620,6 +625,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
             });
             Reload(saved.Game);
             Compare(saved);
+            SessionSaved?.Invoke(this, saved);
             Status = Comparison is { } c && c.Current.Id == saved.Id
                 ? Loc.F("Meas.PartidaNGuardadaAntes", saved.DisplayName, c.Verdict)
                 : Loc.F("Meas.PartidaNGuardadaN", saved.DisplayName, saved.Summary.AverageFps, saved.Summary.OnePercentLowAverageFps);
