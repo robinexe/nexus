@@ -43,13 +43,20 @@
       "nexus.gameprofiles": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
         }
       },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Data.Sqlite": "[10.0.14, )",
+          "Nexus.Core": "[1.0.0, )"
+        }
+      },
+      "nexus.windowsactions": {
+        "type": "Project",
+        "dependencies": {
           "Nexus.Core": "[1.0.0, )"
         }
       },

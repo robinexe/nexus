@@ -213,7 +213,8 @@
       "nexus.gameprofiles": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
         }
       },
       "nexus.hardwarediscovery": {

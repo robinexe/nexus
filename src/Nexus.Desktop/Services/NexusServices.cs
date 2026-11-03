@@ -54,6 +54,7 @@ public sealed class NexusServices
             Nexus.Security.Scanner.ScannerHandlers.Create,
             Nexus.Monitoring.MonitoringHandlers.Create, Nexus.SystemTools.SystemToolsHandlers.Create, Nexus.DriverUpdates.DriverUpdatesHandlers.Create, Nexus.Automation.AutomationHandlers.Create, Nexus.Measurement.MeasureHandlers.Create,
             Nexus.Lab.Cpu.CpuLabHandlers.Create, Nexus.Lab.Gpu.GpuLabHandlers.Create, Nexus.Lab.Memory.MemoryLabHandlers.Create,
+            Nexus.GameProfiles.GameProfilesHandlers.Create,
         ];
         var kinds = new HashSet<string>(StringComparer.Ordinal);
         foreach (var create in modules)

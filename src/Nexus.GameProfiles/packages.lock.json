@@ -4,6 +4,12 @@
     "net10.0": {
       "nexus.core": {
         "type": "Project"
+      },
+      "nexus.windowsactions": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )"
+        }
       }
     }
   }

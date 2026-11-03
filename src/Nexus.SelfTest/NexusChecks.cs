@@ -151,7 +151,7 @@ public static class NexusChecks
             ("Ferramentas do sistema", Nexus.SystemTools.SystemToolsHandlers.Create), ("Atualizar drivers", Nexus.DriverUpdates.DriverUpdatesHandlers.Create),
             ("Automático", Nexus.Automation.AutomationHandlers.Create), ("Lab CPU", Nexus.Lab.Cpu.CpuLabHandlers.Create),
             ("Lab GPU", Nexus.Lab.Gpu.GpuLabHandlers.Create), ("Lab memória", Nexus.Lab.Memory.MemoryLabHandlers.Create),
-            ("Medir", Nexus.Measurement.MeasureHandlers.Create),
+            ("Medir", Nexus.Measurement.MeasureHandlers.Create), ("Jogos (Fortnite)", Nexus.GameProfiles.GameProfilesHandlers.Create),
         ];
         foreach (var (name, create) in modules)
         {
