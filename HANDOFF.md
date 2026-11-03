@@ -258,7 +258,14 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     ZIP + minidumps por jogo opcional), tempo de boot com antes/depois, sessão de jogo (teto temporário da Otimização de
     Entrega), teste do mouse (Raw Input), arquivos duplicados (quarentena), 6 mitos novos. docs/modules/pc-checks.md,
     utilidades.md, measure.md. 2320 testes; VM 2022/2025 verde (pt/en/es). Instalador 1.0.0-ci.23.
-23. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
+23. **03/11 madrugada:** mostrador de FPS preso em "aguardando quadros" — causas: processo errado (lançador/antitrapaça em vez
+    do -Shipping que desenha), permissão do PresentMon silenciosa (código 6/2), --track_frame_type sem nova tentativa.
+    Corrigido: mapa lançador→jogo (GameAliases), captura sem filtro após 8 s travando no processo em primeiro plano, estados
+    honestos + botões "Liberar medição"/"Medir como administrador", "Escolher o processo do jogo", log "medir:" no
+    desktop-diag.log. Fortnite: handler FortniteIniValue (GameUserSettings.ini, só com o jogo fechado, desfazer byte a byte),
+    catalog/fortnite.v1.json (9 ações, 8 mitos), cartão no Jogos e em Placa de vídeo; docs/modules/fortnite.md.
+    2384 testes; VM verde. Instalador 1.0.0-ci.24.
+24. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
     diagnósticos, idiomas), rodar _claude\Configurar-Atualizacoes.cmd, certificado de assinatura de código, publicar a
     1.0.0 (tag v1.0.0) e subir VersionPrefix para 1.0.1. Depois: VALORANT, investigador de travadinhas, A/B automático, IA. NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
