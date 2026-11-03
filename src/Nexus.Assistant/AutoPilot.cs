@@ -43,10 +43,23 @@ public static class AutoPilot
         return c.Undoable || c.Request.ActionId == StepPlanners.RestorePointAction;
     }
 
+    /// <summary>
+    /// Entra no automático neste PC? <see cref="IsAutomatic(ProposedChange)"/> e, com o perfil de hardware, nunca o que
+    /// <see cref="HardwareRules"/> marca como "não recomendado para este PC" (ex.: desempenho máximo em notebook na bateria).
+    /// </summary>
+    public static bool IsAutomatic(ProposedChange c, HardwareProfile? profile)
+    {
+        if (!IsAutomatic(c)) return false;
+        return profile is null || !HardwareRules.ForAction(profile, c.Request.ActionId).IsNotRecommended;
+    }
+
     /// <summary>O que aplicar de uma etapa, sem duplicatas, na ordem proposta.</summary>
-    public static IReadOnlyList<ProposedChange> Select(IEnumerable<ProposedChange> changes)
+    public static IReadOnlyList<ProposedChange> Select(IEnumerable<ProposedChange> changes) => Select(changes, null);
+
+    /// <summary>O que aplicar de uma etapa neste PC (perfil de hardware), sem duplicatas, na ordem proposta.</summary>
+    public static IReadOnlyList<ProposedChange> Select(IEnumerable<ProposedChange> changes, HardwareProfile? profile)
     {
         ArgumentNullException.ThrowIfNull(changes);
-        return ChangeSelection.Sanitize(changes.Where(IsAutomatic));
+        return ChangeSelection.Sanitize(changes.Where(c => IsAutomatic(c, profile)));
     }
 }

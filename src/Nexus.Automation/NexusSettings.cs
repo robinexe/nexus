@@ -37,6 +37,8 @@ public sealed record NexusSettings
     public string? UiMode { get; init; }
     /// <summary>Avisar "Na bateria o FPS cai bastante; ligue na tomada" quando um jogo abre com o notebook na bateria. Padrão: ligado.</summary>
     public bool GameBatteryNotice { get; init; } = true;
+    /// <summary>Ajustes › Perfil do PC: "Prefiro menos atraso a imagem bonita" (competitivo). Não é hardware: é escolha do usuário. Padrão: desligado.</summary>
+    public bool PreferLowLatency { get; init; }
 
     public static NexusSettings Defaults { get; } = new();
 
