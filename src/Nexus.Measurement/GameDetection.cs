@@ -77,7 +77,8 @@ public static class GameMatcher
         var fg = snapshot.Foreground;
         if (candidates.Count > 0)
             return candidates.FirstOrDefault(c => fg is not null && c.Pid == fg.Pid)
-                   ?? candidates.OrderBy(c => c.Reason).ThenBy(c => c.Pid).First();
+                   ?? candidates.OrderBy(c => GameAliases.IsBootstrapper(c.ExeName)) // ..._EAC_EOS.exe/lançador só abre o jogo: quem desenha vence
+                       .ThenBy(c => c.Reason).ThenBy(c => c.Pid).First();
 
         // Tela cheia: só com a regra ligada, só a janela em primeiro plano, só se cobrir o monitor e não for algo sabido como não-jogo.
         if (rules.DetectFullscreen && fg is { CoversMonitor: true } && fg.Width >= 640 && fg.Height >= 480)
