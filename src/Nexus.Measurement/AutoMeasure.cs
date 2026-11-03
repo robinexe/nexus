@@ -18,6 +18,15 @@ public interface ILiveCapture : IDisposable
     /// <summary>A captura terminou sozinha (PresentMon fechou ou falhou).</summary>
     bool Ended { get; }
     void Finish();
+
+    /// <summary>Em que pé está a captura (para a página e o mostrador dizerem a verdade: procurando, sem permissão, medindo…).</summary>
+    LiveCaptureStatus Status => Ended ? new(LiveCaptureState.Failed) : new(LiveCaptureState.Searching);
+
+    /// <summary>Chamado a cada leitura do motor (2 s): prazos (fallback, permissão, "não está desenhando") e escolha do processo.</summary>
+    void Tick(DateTimeOffset now, ProcessSnapshot? snapshot) { }
+
+    /// <summary>Processos que estão apresentando quadros agora (só na captura sem filtro; senão, vazio).</summary>
+    IReadOnlyList<PresenterInfo> Presenters => [];
 }
 
 /// <summary>Inicia capturas. <paramref name="onFrame"/> é chamado em outra thread, um quadro por vez.</summary>
@@ -25,7 +34,51 @@ public interface ILiveCaptureStarter
 {
     bool Available { get; }
     ILiveCapture Start(string processName, Action<LiveFrame> onFrame);
+
+    /// <summary>Começa a medir um jogo: nomes aceitos (lançador + processo que desenha) e o PID visto pelo detector.</summary>
+    ILiveCapture Start(LiveTarget target, Action<LiveFrame> onFrame) => Start(target?.ExeName ?? throw new ArgumentNullException(nameof(target)), onFrame);
 }
+
+/// <summary>O que medir.</summary>
+/// <param name="ExeName">Executável do jogo (detectado ou escolhido).</param>
+/// <param name="Pid">PID do processo detectado (0 = desconhecido).</param>
+/// <param name="Names">Nomes aceitos (o próprio + os que desenham por ele, <see cref="GameAliases.CaptureNames"/>).</param>
+/// <param name="Excluded">Executáveis que o usuário excluiu (nunca escolhidos na captura sem filtro).</param>
+/// <param name="Locked">Escolhido pelo usuário entre os que desenham: medir só este PID, sem procurar outro.</param>
+public sealed record LiveTarget(string ExeName, int Pid, IReadOnlyList<string> Names, IReadOnlyCollection<string>? Excluded = null, bool Locked = false)
+{
+    public static LiveTarget For(DetectedGame game, IReadOnlyCollection<string>? excluded = null)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        return new LiveTarget(game.ExeName, game.Pid, GameAliases.CaptureNames(game.ExeName), excluded);
+    }
+}
+
+/// <summary>Estado da captura ao vivo, do ponto de vista do usuário.</summary>
+public enum LiveCaptureState
+{
+    /// <summary>PresentMon iniciando / ainda procurando o processo do jogo.</summary>
+    Searching,
+    /// <summary>Esperando o usuário aceitar o aviso do Windows (PresentMon com --restart_as_admin).</summary>
+    WaitingPermission,
+    /// <summary>Recebendo quadros do jogo.</summary>
+    Measuring,
+    /// <summary>O processo do jogo existe mas parou de apresentar quadros (minimizado, em segundo plano, tela de carregamento).</summary>
+    NotDrawing,
+    /// <summary>Sem permissão de rastreamento (conta fora do grupo e sem administrador, ou aviso do Windows recusado).</summary>
+    NoPermission,
+    /// <summary>O PresentMon parou com erro.</summary>
+    Failed,
+    /// <summary>Terminou normalmente (o jogo fechou).</summary>
+    Finished,
+}
+
+/// <param name="Target">Executável que está sendo medido (pode ser diferente do detectado: o processo que desenha).</param>
+/// <param name="TimedOut">15 s sem quadros: a interface explica o que fazer.</param>
+/// <param name="Fallback">A captura passou para "sem filtro de processo" (o processo detectado não desenhava).</param>
+/// <param name="Detail">Última linha de erro do PresentMon, quando houver.</param>
+public sealed record LiveCaptureStatus(LiveCaptureState State, string? Target = null, int Pid = 0, bool TimedOut = false,
+    PresentMonFailure Failure = PresentMonFailure.None, bool Fallback = false, string? Detail = null);
 
 /// <summary>
 /// Os quadros de UMA partida: estatística ao vivo + todos os frametimes (4 bytes cada; 2 h a 300 FPS ≈ 9 MB) para salvar
@@ -72,9 +125,18 @@ public sealed class LiveSession
     public void Add(LiveFrame f)
     {
         if (!f.Application.Equals(Game.ExeName, StringComparison.OrdinalIgnoreCase)) return;
+        AddFromCapture(f);
+    }
+
+    /// <summary>
+    /// Quadro já escolhido pela captura (ela trava num processo: o que desenha pelo jogo, que pode ter outro nome ou aparecer como
+    /// "&lt;unknown&gt;" quando o PresentMon não consegue abrir o processo). Sem filtro por nome aqui.
+    /// </summary>
+    public void AddFromCapture(LiveFrame f)
+    {
         lock (_gate)
         {
-            if (_pid == 0) _pid = f.ProcessId;
+            if (_pid == 0 || f.ProcessId != 0) _pid = f.ProcessId;
             _firstFrameAt ??= _clock();
             _stats.Add(f.FrametimeMs);
             _cpuWait.Add(H(f.CpuWaitMs));
@@ -180,6 +242,7 @@ public sealed class AutoMeasureEngine(IProcessProbe probe, ILiveCaptureStarter s
     private readonly ILiveCaptureStarter _starter = starter ?? throw new ArgumentNullException(nameof(starter));
     private readonly GameSessionTracker _tracker = tracker ?? new GameSessionTracker();
     private ILiveCapture? _capture;
+    private IReadOnlyCollection<string> _excluded = [];
 
     public DetectedGame? CurrentGame => _tracker.Current;
     public LiveSession? Session { get; private set; }
@@ -191,8 +254,13 @@ public sealed class AutoMeasureEngine(IProcessProbe probe, ILiveCaptureStarter s
         ArgumentNullException.ThrowIfNull(rules);
         var snap = _probe.Read();
         LastSnapshot = snap;
+        _excluded = rules.Excluded;
+        TickCapture(now, snap);
         var seen = GameMatcher.Find(snap, rules);
-        var alive = _tracker.Current is { } cur && _probe.IsAlive(cur.Pid);
+        // O jogo continua aberto enquanto o processo detectado OU o que está sendo medido (o que desenha, se for outro) existir:
+        // o inicializador do anticheat pode fechar depois de abrir o jogo.
+        var alive = _tracker.Current is { } cur && (_probe.IsAlive(cur.Pid) ||
+            (Session is { } s && s.ProcessId > 0 && s.ProcessId != cur.Pid && _probe.IsAlive(s.ProcessId)));
         var ev = _tracker.Update(seen, alive, now);
         switch (ev.Kind)
         {
@@ -208,7 +276,15 @@ public sealed class AutoMeasureEngine(IProcessProbe probe, ILiveCaptureStarter s
     }
 
     /// <summary>Começa a medir agora o jogo detectado (ou o que o usuário indicou).</summary>
-    public bool StartManual(DetectedGame game, DateTimeOffset now) => Session is null && StartCapture(game, now, automatic: false);
+    /// <param name="lockPid">O usuário escolheu este processo entre os que estão desenhando: mede só ele.</param>
+    public bool StartManual(DetectedGame game, DateTimeOffset now, bool lockPid = false) => Session is null && StartCapture(game, now, automatic: false, lockPid);
+
+    /// <summary>Repassa o relógio para a captura (prazos e escolha do processo). Falha aqui nunca derruba a leitura.</summary>
+    public void TickCapture(DateTimeOffset now, ProcessSnapshot? snapshot)
+    {
+        try { _capture?.Tick(now, snapshot); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { }
+    }
 
     /// <summary>Para a captura e devolve a partida (ou null se não havia).</summary>
     public LiveSession? StopCapture()
@@ -229,11 +305,21 @@ public sealed class AutoMeasureEngine(IProcessProbe probe, ILiveCaptureStarter s
         return s;
     }
 
-    private bool StartCapture(DetectedGame game, DateTimeOffset now, bool automatic)
+    private bool StartCapture(DetectedGame game, DateTimeOffset now, bool automatic, bool lockPid = false)
     {
         if (Session is not null) return false;
+        // Detectou o lançador/inicializador (FortniteLauncher, ..._EAC_EOS.exe) e o processo que desenha já está aberto: a partida
+        // fica com o nome de quem desenha (as partidas do jogo se agrupam sempre pelo mesmo executável).
+        if (!lockPid && GameAliases.IsBootstrapper(game.ExeName) && LastSnapshot is { } snap &&
+            GameAliases.RunningRenderProcess(game.ExeName, snap.Processes) is { } render)
+        {
+            var exe = render.Path is { Length: > 0 } path ? GameLibrary.WinFileName(path) : render.Name;
+            if (!exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) exe += ".exe";
+            game = game with { ExeName = exe, Pid = render.Pid };
+        }
         var session = new LiveSession(game, now, automatic);
-        _capture = _starter.Start(game.ExeName, session.Add);
+        var target = LiveTarget.For(game, _excluded) with { Locked = lockPid };
+        _capture = _starter.Start(target, session.AddFromCapture);
         Session = session;
         try { _activity = activity?.Invoke(session); }
         catch (Exception ex) when (ex is not OutOfMemoryException) { _activity = null; } // sem amostras: a análise diz "sem dados de atividade"

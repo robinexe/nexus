@@ -140,7 +140,19 @@ public sealed class PresentMonLineParser
 /// padrão de um processo elevado não chega ao NEXUS). Sem elevação, null = lê a saída padrão (<c>--output_stdout</c>).</param>
 /// <param name="TrackFrameType">Pede a coluna FrameType (<c>--track_frame_type</c>, 2.x): só para um PresentMon de versão conhecida
 /// (hash conferido), porque uma 2.x antiga que não conheça a opção recusaria a linha de comando inteira.</param>
-public sealed record LiveCaptureRequest(string PresentMonExe, string ProcessName, bool RequestElevation, string? OutputCsv, int MaxMinutes = 240, bool TrackFrameType = false);
+public sealed record LiveCaptureRequest(string PresentMonExe, string ProcessName, bool RequestElevation, string? OutputCsv, int MaxMinutes = 240, bool TrackFrameType = false)
+{
+    /// <summary>Outros executáveis aceitos além de <see cref="ProcessName"/> (o PresentMon aceita <c>--process_name</c> repetido):
+    /// o processo que desenha quando o detectado é o lançador (<see cref="GameAliases"/>).</summary>
+    public IReadOnlyList<string> ExtraProcessNames { get; init; } = [];
+    /// <summary>Sem filtro de processo (todos que apresentam quadros, menos <see cref="Exclude"/>): o NEXUS escolhe o processo pelos
+    /// quadros (<see cref="LiveTargetPicker"/>). Sem <c>--terminate_on_proc_exit</c> (não há alvo): quem para é o NEXUS. Só 2.x.</summary>
+    public bool AllProcesses { get; init; }
+    /// <summary>Executáveis ignorados (<c>--exclude</c>), usados na captura sem filtro.</summary>
+    public IReadOnlyList<string> Exclude { get; init; } = [];
+    /// <summary>Nome da sessão ETW (<c>--session_name</c>).</summary>
+    public string SessionName { get; init; } = PresentMonCli.LiveSessionName;
+}
 
 public static partial class PresentMonCli
 {
@@ -151,6 +163,9 @@ public static partial class PresentMonCli
 
     [GeneratedRegex(@"\A[A-Za-z0-9 ._()\[\]+\-]{1,120}\.exe\z", RegexOptions.CultureInvariant)]
     private static partial Regex ExeNameRegex();
+
+    [GeneratedRegex(@"\A[A-Za-z0-9_]{1,64}\z", RegexOptions.CultureInvariant)]
+    private static partial Regex SessionNameRegex();
 
     /// <summary>Nome de executável aceito (sem pasta, sem aspas, sem curingas). Mesmo critério para a lista de jogos do usuário.</summary>
     public static bool IsValidExeName(string? name) => name is not null && ExeNameRegex().IsMatch(name) && !name.Contains("..", StringComparison.Ordinal);
@@ -173,19 +188,34 @@ public static partial class PresentMonCli
     public static IReadOnlyList<string> LiveArguments(LiveCaptureRequest r, PresentMonGeneration generation)
     {
         ArgumentNullException.ThrowIfNull(r);
-        if (!IsValidExeName(r.ProcessName)) throw new ArgumentException("Nome de executável inválido (ex.: cs2.exe).", nameof(r));
+        var all = r.AllProcesses && generation == PresentMonGeneration.V2;
+        if (!all && !IsValidExeName(r.ProcessName)) throw new ArgumentException("Nome de executável inválido (ex.: cs2.exe).", nameof(r));
+        if (r.ExtraProcessNames.Concat(r.Exclude).Any(n => !IsValidExeName(n))) throw new ArgumentException("Nome de executável inválido na lista.", nameof(r));
+        if (!SessionNameRegex().IsMatch(r.SessionName)) throw new ArgumentException("Nome de sessão inválido.", nameof(r));
         if (r.MaxMinutes is < 1 or > 24 * 60) throw new ArgumentOutOfRangeException(nameof(r), "Limite entre 1 minuto e 24 horas.");
         var d = generation == PresentMonGeneration.V1 ? "-" : "--";
-        var args = new List<string> { d + "process_name", r.ProcessName };
+        var args = new List<string>();
+        if (!all)
+            foreach (var name in new[] { r.ProcessName }.Concat(r.ExtraProcessNames).Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                args.Add(d + "process_name");
+                args.Add(name);
+            }
         if (r.OutputCsv is { } file) { args.Add(d + "output_file"); args.Add(file); }
         else args.Add(d + "output_stdout");
-        args.Add(d + "terminate_on_proc_exit");
+        if (!all) args.Add(d + "terminate_on_proc_exit");
         args.Add(d + "timed");
         args.Add((r.MaxMinutes * 60).ToString(CultureInfo.InvariantCulture));
         args.Add(d + "terminate_after_timed");
         args.Add(d + "stop_existing_session");
         args.Add(d + "session_name");
-        args.Add(LiveSessionName);
+        args.Add(r.SessionName);
+        if (all)
+            foreach (var name in r.Exclude.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                args.Add(d + "exclude");
+                args.Add(name);
+            }
         if (generation == PresentMonGeneration.V1)
         {
             args.Add("-no_top");
