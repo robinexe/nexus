@@ -96,6 +96,68 @@ desinstalador tira do grupo só as contas com a marca.
   diferente (tela cheia exclusiva / sem bordas otimizada / janela), Windows atualizado, duração muito diferente, nenhuma
   mudança do NEXUS entre as partidas, e sempre: "o NEXUS não sabe o mapa nem a cena".
 
+## Por que travou? (análise de travadas, nível de usuário)
+
+Depois de cada partida medida (e de cada CSV importado), o NEXUS acha as travadas e dá a **causa provável** de cada uma. Aparece
+em Medir (cartão da partida: frase, contagem por causa, as piores travadas, "como foi calculado") e em uma linha na tela simples
+**Jogos**, no cartão do jogo ("12 travadas: a maioria provavelmente por compilação de shader ou carregamento — normal nos primeiros
+minutos de um jogo novo"). A tela sempre diz "provável"/"provavelmente": é inferência sobre contadores, não prova.
+
+**Colunas do PresentMon 2.6** (conferidas no README do console e nas strings do `PresentMon-2.6.0-x64.exe` embutido): o conjunto
+padrão do 2.6 já traz `FrameTime, CPUBusy, CPUWait, GPULatency, GPUTime, GPUBusy, GPUWait, DisplayLatency, DisplayedTime,
+AnimationError, AnimationTime, PresentMode`; com `--v2_metrics` os nomes ganham "Ms" (`MsBetweenAppStart, MsCPUBusy, MsCPUWait,
+MsGPUBusy, MsGPUWait, MsAnimationError`). O parser aceita os dois. `FrameType` só existe com `--track_frame_type` (beta; precisa de
+instrumentação do app/driver): o NEXUS pede essa opção **só** quando o PresentMon é uma versão de hash conhecido (hoje a 2.6.0
+embutida), porque uma 2.x antiga recusaria a linha de comando inteira. Quadros gerados (FrameType diferente de vazio/NA/NotSet/
+Unspecified/Application, ex.: geração de quadros do driver) ficam fora da análise. O CSV normalizado da partida passou a guardar
+`CPUWait, GPUWait, DisplayLatency, AnimationError, FrameType` (colunas a mais; leitores antigos ignoram).
+
+**Pico** (`StutterAnalyzer`, `src/Nexus.Measurement/Stutter.cs`): frametime > max(2 × mediana dos 30 quadros anteriores,
+mediana + 8 ms). Picos a menos de 250 ms um do outro são **uma** travada (vale o pior quadro).
+
+**Causa provável do pior quadro**, nesta ordem:
+
+| Causa | Regra |
+|---|---|
+| Sem dados | o quadro não tem CPUBusy/GPUBusy (PresentMon 1.x, CSV de outra ferramenta); vira "outro programa" se houver um com ≥ 10% da CPU naquele momento |
+| Placa de vídeo | o que GPUBusy cresceu sobre a mediana cobre ≥ metade do excesso do quadro e é ≥ o que CPUBusy cresceu |
+| Outro programa | do lado da CPU, com outro processo usando ≥ 10% da CPU da máquina na amostra mais próxima (até 2,5 s) e o jogo **sem** ler ≥ 8 MB/s; a tela diz qual |
+| Shader ou carregamento | do lado da CPU e (jogo lendo ≥ 8 MB/s) ou (primeiros 3 min da partida e — quando há dado de disco — o jogo lendo algo) |
+| Processador/jogo | o resto do lado da CPU (inclui o jogo esperando com a GPU parada: CPUWait alto, GPUBusy normal) |
+
+**Amostras durante a captura** (`CaptureActivitySampler`, a cada 2 s numa thread do pool): CPU por processo pela lista de
+processos do Monitor (`WindowsProcessSource` + `ProcessCpuTracker`, o mesmo cálculo do Gerenciador de Tarefas; os 3 maiores com
+≥ 3%, sem o jogo e o Ocioso) e leituras do jogo por `GetProcessIoCounters` (ReadTransferCount, com
+PROCESS_QUERY_LIMITED_INFORMATION — o acesso do Gerenciador de Tarefas; inclui disco e outras E/S). Nada é injetado nem lido da
+memória do jogo. Jogo protegido que negue até esse acesso: sem dado de disco, e a tela avisa.
+
+**O que o modo administrador acrescentaria (não feito):** um rastreamento ETW do kernel (FileIo/DiskIo, DPC, CSwitch) diria quais
+arquivos o jogo leu e qual driver/thread segurou o processador em cada travada. Exige administrador (sessão do kernel); o NEXUS não
+pede elevação a cada partida, por isso fica no nível de usuário e diz "provável".
+
+## Atraso de drivers (DPC/ISR, aproximação de nível de usuário)
+
+Cartão em Medir: teste de 1, 2 ou 3 minutos. Lê uma vez por segundo os contadores **documentados** do Windows
+`\Processor Information(*)\% DPC Time`, `% Interrupt Time`, `DPCs Queued/sec` e `Interrupts/sec` por núcleo (PDH com nomes em
+inglês, funciona em qualquer idioma; `src/Nexus.Measurement/Windows/WindowsDpcCounters.cs`). Sem administrador, sem mudar nada —
+**nunca** mexe na resolução do timer (há teste que procura `timeBeginPeriod`/`NtSetTimerResolution` na dll).
+
+| Veredito | Regra (limites do NEXUS, heurística declarada na tela, não norma) |
+|---|---|
+| Ruim | algum segundo com DPC + interrupção ≥ 20% de um núcleo, ou média do teste ≥ 3% |
+| Pode causar engasgos | algum segundo ≥ 5%, ou média ≥ 1% |
+| Bom | abaixo disso |
+
+Mostra também o pior momento (núcleo, %, segundo), a média e a **duração média** de cada DPC/ISR (% do tempo × 1 s ÷ chamadas
+por segundo; só com ≥ 20 chamadas/s). Fora de "Bom", lista os culpados típicos com o que fazer (Wi-Fi, áudio, rede, vídeo →
+"Abrir Atualizar drivers").
+
+**Por que aproximação e não ETW:** o LatencyMon usa o NT Kernel Logger (eventos DPC/ISR com o endereço da rotina, mapeado para o
+módulo do driver). Isso exige administrador; fazer pelo aplicador elevado pediria um pedido "de leitura" novo no protocolo do broker
+(Core/Broker fora do escopo deste módulo) ou um executável auxiliar elevado (empacotamento novo). Os contadores mostram QUANTO os
+drivers seguram o processador, não QUAL driver, e uma chamada isolada longa (ex.: 2 ms uma vez) some na média do segundo. A tela
+diz isso em "Como foi medido".
+
 ## Segurança e anticheat
 
 * Processos: `OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)` + `QueryFullProcessImageName` (o mesmo acesso do Gerenciador
@@ -126,16 +188,19 @@ desinstalador tira do grupo só as contas com a marca.
 
 ## Arquivos
 
-* `src/Nexus.Measurement/`: `PresentMonTrust.cs` (localizador com o embutido primeiro, conferência hash/assinatura),
+* `src/Nexus.Measurement/`: `Stutter.cs` (Por que travou?), `CaptureActivity.cs` (amostras durante a captura),
+  `DriverLatency.cs` + `Windows/WindowsDpcCounters.cs` (Atraso de drivers), `Windows/WindowsProcessIo.cs`, `PresentMonTrust.cs` (localizador com o embutido primeiro, conferência hash/assinatura),
   `PresentMonSmokeTest.cs` (captura curta do autoteste), `PerfLogGroup.cs` (ação do grupo), `Windows/WindowsPresentMonTrustProbe.cs`
   (WinVerifyTrust + assinante), `Windows/WindowsLocalGroupBackend.cs` (NetLocalGroup* + marca), `GameLibrary.cs` (bibliotecas), `GameDetection.cs` (regras e máquina de estados), `PresentMonLive.cs`
   (parser em tempo real, linha de comando, localização), `PresentMonLiveCapture.cs` (processo + leitura do arquivo),
   `LiveStats.cs`, `AutoCompare.cs` (diário → mudanças, referência, avisos, trechos, veredito, biblioteca/CSV/relatório),
   `AutoMeasure.cs` (motor), `MeasurePreferences.cs` (preferências, atalho), `Overlay.cs` (estado do mostrador),
   `Windows/WindowsProcessProbe.cs`, `Windows/OverlayNative.cs`.
-* `src/Nexus.Desktop/ViewModels/Modules/MeasurePage.cs`, `MeasureRows.cs`, `Views/Pages/Measure.xaml`,
+* `src/Nexus.Desktop/ViewModels/Modules/MeasurePage.cs`, `MeasureRows.cs`, `MeasureStutter.cs` (frases), `MeasureDriverLatency.cs`,
+  `MeasureActivitySource.cs`, `Views/Pages/Measure.xaml`,
   `Views/Modules/Measure/OverlayWindow.cs` (mostrador + atalho), `Sparkline.cs`.
-* Testes: `tests/Nexus.Tests/Modules/MeasureTests.cs`, `MeasurePresentMonTests.cs` (localização, conferência com falsos, recusa
+* Testes: `tests/Nexus.Tests/Modules/MeasureStutterTests.cs` (CSVs sintéticos do 2.6, causas, amostrador, DPC sintético),
+  `tests/Nexus.Tests/Modules/MeasureTests.cs`, `MeasurePresentMonTests.cs` (localização, conferência com falsos, recusa
   antes de executar, handler do grupo com backend falso, catálogo, interface sem escrita direta) e `MeasurementTests.cs`.
 * Autoteste: "Medir · PresentMon encontrado?" mostra origem (embutido/configurado/achado), conferido e assinante; "Medir ·
   PresentMon executa" (captura de 5 s do dwm.exe, CSV temporário apagado em seguida) só com `--with-benchmarks`, porque é a única
@@ -159,3 +224,8 @@ desinstalador tira do grupo só as contas com a marca.
 4. Feche o jogo depois de 2+ minutos: a partida aparece em "Jogos medidos". Aplique algo pelo NEXUS (ex.: Otimizar agora),
    volte em Medir: o convite aparece. Jogue de novo: o cartão "Antes x depois" mostra o veredito, as mudanças e os avisos.
 5. Teste em tela cheia exclusiva: o mostrador não aparece (esperado, documentado).
+6. Por que travou?: jogue 3+ minutos de um jogo novo (ou com o cache de shaders apagado); no cartão da partida, "Por que travou?"
+   deve apontar "shader ou carregamento" nos primeiros minutos. Rode uma verificação do Defender durante uma partida: as travadas
+   devem apontar "outro programa (MsMpEng)". Na tela Jogos, o cartão do jogo mostra a frase de uma linha.
+7. Atraso de drivers: Medir → "Atraso de drivers" → 1 min. Num PC calmo, "Bom"; com Wi-Fi baixando muito ou áudio estalando,
+   compare com o LatencyMon (que diz o driver) para calibrar os limites de 5%/20%.
