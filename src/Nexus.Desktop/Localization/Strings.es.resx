@@ -4216,4 +4216,50 @@ Nada se borra: se puede deshacer, y el espacio solo vuelve cuando vacíes la cua
   <data name="Dup.Undone" xml:space="preserve"><value>Las copias volvieron a su lugar.</value></data>
   <data name="Dup.UndoFailed" xml:space="preserve"><value>Algunas copias no volvieron; mira el Historial.</value></data>
   <data name="Dup.Safety" xml:space="preserve"><value>La copia más antigua de cada grupo es la que se queda al usar "Marcar las copias extra". NEXUS vuelve a comprobar el SHA-256 antes de mover y nunca sigue enlaces.</value></data>
+  <data name="Fit.LaptopHeat" xml:space="preserve"><value>No indicado para portátil: calienta más y el procesador termina bajando la velocidad</value></data>
+  <data name="Fit.OnBattery" xml:space="preserve"><value>No indicado en batería: Windows limita la potencia y esto solo gasta batería</value></data>
+  <data name="Fit.IntegratedGpu" xml:space="preserve"><value>No indicado sin tarjeta gráfica dedicada</value></data>
+  <data name="Fit.WeakGpuRelief" xml:space="preserve"><value>Recomendado para tu PC: alivia la tarjeta gráfica</value></data>
+  <data name="Fit.StrongGpuNoNeed" xml:space="preserve"><value>No indicado: tu tarjeta es potente y esto quita calidad sin necesidad</value></data>
+  <data name="Fit.StrongGpuUse" xml:space="preserve"><value>Recomendado para tu PC: aprovecha la tarjeta gráfica potente</value></data>
+  <data name="Fit.LowRamRelief" xml:space="preserve"><value>Recomendado para tu PC: libera memoria RAM (8 GB o menos)</value></data>
+  <data name="Fit.SysMainHelpsHere" xml:space="preserve"><value>No indicado: con disco duro o poca memoria, SysMain ayuda a abrir programas</value></data>
+  <data name="Fit.HddFewerWrites" xml:space="preserve"><value>Recomendado para tu PC: menos escrituras en el disco duro</value></data>
+  <data name="Fit.NotNvidia" xml:space="preserve"><value>No indicado: solo funciona en tarjetas NVIDIA</value></data>
+  <data name="Fit.NotAmd" xml:space="preserve"><value>No indicado: solo funciona en tarjetas AMD</value></data>
+  <data name="Fit.NotIntel" xml:space="preserve"><value>No indicado: solo funciona en tarjetas Intel</value></data>
+  <data name="Fit.NvidiaGpu" xml:space="preserve"><value>Recomendado para tu PC: es un ajuste del controlador NVIDIA</value></data>
+  <data name="Fit.AmdGpu" xml:space="preserve"><value>Recomendado para tu PC: es un ajuste para tarjetas AMD</value></data>
+  <data name="Fit.IntelGpu" xml:space="preserve"><value>Recomendado para tu PC: es un ajuste para tarjetas Intel</value></data>
+  <data name="Fit.Competitive" xml:space="preserve"><value>Recomendado para ti: menos retraso en los comandos</value></data>
+  <data name="Fit.LaptopWifi" xml:space="preserve"><value>Recomendado para portátil: el Wi-Fi no se duerme entre paquetes y el ping queda estable</value></data>
+  <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recomendado para portátil: menos calor y ruido</value></data>
+  <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recomendado para tu PC: la grabación en segundo plano ocupa la tarjeta gráfica</value></data>
+  <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Aplicar lo recomendado</value></data>
+  <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Aplicar lo recomendado para este PC (las opciones marcadas arriba, de una vez)</value></data>
+  <data name="Simple.Games.ConfirmRecommended" xml:space="preserve"><value>{0}: ¿activar lo recomendado para este PC ({1})? Se puede deshacer.</value></data>
+  <data name="Simple.Games.ConfirmRecommendedAdmin" xml:space="preserve"><value>{0}: ¿activar lo recomendado para este PC ({1})? Windows pedirá permiso de administrador. Se puede deshacer.</value></data>
+  <data name="Profile.Title" xml:space="preserve"><value>Perfil del PC</value></data>
+  <data name="Profile.Lead" xml:space="preserve"><value>NEXUS usa este perfil para marcar lo recomendado para tu PC en Ajustes rápidos, Automático y Juegos.</value></data>
+  <data name="Profile.Reading" xml:space="preserve"><value>Leyendo tu PC…</value></data>
+  <data name="Profile.PreferLowLatency" xml:space="preserve"><value>Prefiero menos retraso a una imagen bonita (juego competitivo)</value></data>
+  <data name="Profile.PreferLowLatencyWhy" xml:space="preserve"><value>Esto no es hardware, es tu elección: con la opción activada, ajustes como Reflex, baja latencia del controlador y sombras apagadas aparecen como recomendados. Nada se aplica solo.</value></data>
+  <data name="Profile.Laptop" xml:space="preserve"><value>Portátil</value></data>
+  <data name="Profile.Desktop" xml:space="preserve"><value>PC de escritorio</value></data>
+  <data name="Profile.Pc" xml:space="preserve"><value>PC</value></data>
+  <data name="Profile.GpuIntegrated" xml:space="preserve"><value>gráficos integrados</value></data>
+  <data name="Profile.GpuEntry" xml:space="preserve"><value>tarjeta gráfica de entrada</value></data>
+  <data name="Profile.GpuMid" xml:space="preserve"><value>tarjeta gráfica intermedia</value></data>
+  <data name="Profile.GpuStrong" xml:space="preserve"><value>tarjeta gráfica potente</value></data>
+  <data name="Profile.FormWithGpu" xml:space="preserve"><value>{0} con {1}</value></data>
+  <data name="Profile.Gb" xml:space="preserve"><value>{0} GB</value></data>
+  <data name="Profile.Ram" xml:space="preserve"><value>{0} GB de RAM</value></data>
+  <data name="Profile.Ssd" xml:space="preserve"><value>SSD</value></data>
+  <data name="Profile.Hdd" xml:space="preserve"><value>disco duro (HDD)</value></data>
+  <data name="Profile.OnBattery" xml:space="preserve"><value>en batería ahora</value></data>
+  <data name="Profile.Unknown.Gpu" xml:space="preserve"><value>tarjeta gráfica</value></data>
+  <data name="Profile.Unknown.Ram" xml:space="preserve"><value>memoria RAM</value></data>
+  <data name="Profile.Unknown.Form" xml:space="preserve"><value>portátil o escritorio</value></data>
+  <data name="Profile.Unknown.Disk" xml:space="preserve"><value>tipo de disco</value></data>
+  <data name="Profile.Unknown.List" xml:space="preserve"><value>No se pudo leer: {0}. Sin esa lectura, NEXUS no recomienda ni desaconseja nada por ella.</value></data>
 </root>

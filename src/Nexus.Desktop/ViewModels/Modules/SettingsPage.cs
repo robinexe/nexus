@@ -254,6 +254,29 @@ public sealed class SettingsPage : ModulePage
     /// <summary>Aviso de notebook na bateria quando um jogo abre (checagens do PC).</summary>
     public bool GameBatteryNotice { get => UiSettings.Current.GameBatteryNotice; set => Change(s => s with { GameBatteryNotice = value }); }
 
+    // ----- Perfil do PC (recomendação automática por hardware; a preferência é do usuário, não é hardware)
+
+    /// <summary>"Prefiro menos atraso a imagem bonita" (competitivo): opções de latência passam a "recomendadas para o seu PC".</summary>
+    public bool PreferLowLatency
+    {
+        get => UiSettings.Current.PreferLowLatency;
+        set { Change(s => s with { PreferLowLatency = value }); OnPropertyChanged(nameof(ProfileHeadline)); }
+    }
+
+    /// <summary>O perfil detectado em palavras simples ("Notebook com placa de entrada (GTX 1650, 4 GB), 16 GB de RAM, SSD").</summary>
+    public string ProfileHeadline => Host?.HardwareProfile is { } h ? Simple.HardwareProfileText.Headline(h) : Loc.T("Profile.Reading");
+    /// <summary>O que não deu para ler, ou vazio.</summary>
+    public string ProfileUnknowns => Host?.HardwareProfile is { } h ? Simple.HardwareProfileText.Unknowns(h) : "";
+    public bool HasProfileUnknowns => ProfileUnknowns.Length > 0;
+
+    public override Task OnFactsReadyAsync(Nexus.HardwareDiscovery.SystemFacts facts)
+    {
+        OnPropertyChanged(nameof(ProfileHeadline));
+        OnPropertyChanged(nameof(ProfileUnknowns));
+        OnPropertyChanged(nameof(HasProfileUnknowns));
+        return Task.CompletedTask;
+    }
+
     private void Change(Func<NexusSettings, NexusSettings> change)
     {
         SettingsProblem = UiSettings.Update(change) ?? "";
@@ -263,6 +286,7 @@ public sealed class SettingsPage : ModulePage
         OnPropertyChanged(nameof(MinimizeToTray));
         OnPropertyChanged(nameof(CloseToTray));
         OnPropertyChanged(nameof(GameBatteryNotice));
+        OnPropertyChanged(nameof(PreferLowLatency));
         OnPropertyChanged(nameof(NotificationsTone));
         OnPropertyChanged(nameof(NotificationsChip));
     }
@@ -290,7 +314,13 @@ public sealed class SettingsPage : ModulePage
 
     // ------------------------------------------------------------------ leitura
 
-    public override Task OnShownAsync() => RunAsync(RefreshAsync);
+    public override Task OnShownAsync()
+    {
+        OnPropertyChanged(nameof(ProfileHeadline));
+        OnPropertyChanged(nameof(ProfileUnknowns));
+        OnPropertyChanged(nameof(HasProfileUnknowns));
+        return RunAsync(RefreshAsync);
+    }
 
     private async Task RefreshAsync()
     {

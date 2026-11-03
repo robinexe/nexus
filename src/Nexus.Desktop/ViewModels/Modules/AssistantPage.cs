@@ -136,14 +136,20 @@ public static class AssistantVisuals
 }
 
 /// <summary>Uma mudança proposta, com a marcação do usuário.</summary>
-public sealed class ChangeRow(ProposedChange change) : ObservableObject
+public sealed class ChangeRow(ProposedChange change, Fit? fit = null) : ObservableObject
 {
-    private bool _isSelected = change.SelectedByDefault;
+    /// <summary>Veredito do hardware para esta mudança (neutro sem perfil): "não recomendado" desmarca por padrão.</summary>
+    public Fit Fit { get; } = fit ?? Fit.Neutral;
+    private bool _isSelected = Simple.QuickTweakSelection.IsRecommended(change.SelectedByDefault, fit ?? Fit.Neutral);
 
     public ProposedChange Change { get; } = change;
     public bool IsSelected { get => _isSelected; set => Set(ref _isSelected, value); }
     public string Title => Change.Title;
     public string Detail => Change.Detail;
+    /// <summary>"Recomendado para o seu PC: …" / "Não indicado para notebook: …", ou vazio.</summary>
+    public string FitNote => Simple.FitText.Sentence(Fit);
+    public bool HasFitNote => FitNote.Length > 0;
+    public Views.Controls.Tone FitTone => Fit.IsRecommended ? Views.Controls.Tone.Good : Views.Controls.Tone.Warn;
     public string BeforeAfter => Change.BeforeAfter;
     public bool HasBeforeAfter => Change.BeforeAfter.Length > 0;
     public string Meta => Loc.F("Asst.RiscoNN", Change.RiskText, Change.LevelText) + (Change.Undoable ? Loc.T("Asst.Desfazer") : Loc.T("Asst.EfeitoImediato")) +
@@ -155,7 +161,7 @@ public sealed class ChangeRow(ProposedChange change) : ObservableObject
     public string RiskChip => Loc.F("Asst.RiscoN", Change.RiskText);
     public string LevelChip => Change.LevelText;
     public bool Undoable => Change.Undoable;
-    public void Reset() => IsSelected = Change.SelectedByDefault;
+    public void Reset() => IsSelected = Simple.QuickTweakSelection.IsRecommended(Change.SelectedByDefault, Fit);
 }
 
 /// <summary>Ação de usuário com link (abre só https, depois de confirmar).</summary>
@@ -570,7 +576,8 @@ public sealed class AssistantPage : ModulePage
         Facts = scan.Facts;
         Recommendation = scan.Recommendation;
         Changes.Clear();
-        foreach (var c in scan.Changes) Changes.Add(new ChangeRow(c));
+        var hardware = Host?.HardwareProfile;
+        foreach (var c in scan.Changes) Changes.Add(new ChangeRow(c, hardware is null ? null : HardwareRules.ForAction(hardware, c.Request.ActionId)));
         OnPropertyChanged(nameof(HasChanges));
         OnPropertyChanged(nameof(NoChanges));
         OnPropertyChanged(nameof(ChangesSummary));
@@ -1029,7 +1036,7 @@ public sealed class AssistantPage : ModulePage
                 _scan = null; // leitura que falhar não pode reaplicar o que a etapa anterior propôs
                 await ScanAsync(step);
                 var scan = _scan;
-                var chosen = scan is null ? [] : AutoPilot.Select(scan.Changes);
+                var chosen = scan is null ? [] : AutoPilot.Select(scan.Changes, host.HardwareProfile);
                 var summary = scan is null ? Loc.T("Asst.Verificada") : scan.Recommendation;
                 if (chosen.Count > 0)
                 {

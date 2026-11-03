@@ -212,6 +212,25 @@
           <ContentControl Content="{Binding Updates}" Focusable="False"/>
         </Border>
 
+        <!-- ===== Perfil do PC (recomendação automática por hardware; só leitura + a preferência "menos atraso") ===== -->
+        <Border Style="{StaticResource Panel.Card}" Margin="0,14,0,0">
+          <DockPanel>
+            <Grid Width="38" Height="38" Margin="0,0,12,0" DockPanel.Dock="Left" VerticalAlignment="Top">
+              <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
+              <c:Icon Data="{StaticResource Icon.Cpu}" Size="19" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+            </Grid>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="{l:T Profile.Title}" Style="{StaticResource Text.H2}"/>
+              <TextBlock Text="{Binding ProfileHeadline}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+              <TextBlock Text="{Binding ProfileUnknowns}" Style="{StaticResource Text.Small}" Margin="0,2,0,0" TextWrapping="Wrap"
+                         Visibility="{Binding HasProfileUnknowns, Converter={StaticResource BoolToVis}}"/>
+              <TextBlock Text="{l:T Profile.Lead}" Style="{StaticResource Text.Small}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+              <CheckBox Content="{l:T Profile.PreferLowLatency}" IsChecked="{Binding PreferLowLatency}" Margin="0,12,0,0"/>
+              <c:ExplainToggle Margin="0,8,0,0" Content="{l:T Profile.PreferLowLatencyWhy}"/>
+            </StackPanel>
+          </DockPanel>
+        </Border>
+
         <!-- ===== Idioma (settings.json; vale ao reabrir: os textos são carregados uma vez) ===== -->
         <Border Style="{StaticResource Panel.Card}" Margin="0,14,0,0">
           <DockPanel>
