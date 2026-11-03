@@ -77,6 +77,38 @@ desinstalador tira do grupo só as contas com a marca.
   `MsBetweenPresents` (1.x e `--v1_metrics`). O relógio ao vivo é a soma dos frametimes (a unidade da coluna de tempo muda com
   as opções). A partida é guardada num CSV normalizado (formato 2.x) lido pelo mesmo analisador das importações.
 
+## Captura ao vivo robusta (03/11: "aguardando quadros" para sempre no PC real)
+
+Relato: Acer Nitro, Windows 11, 1.0.0-ci.23, conta **fora** do grupo Usuários do log de desempenho; o mostrador e a medição ficavam
+em "aguardando quadros" com qualquer jogo, inclusive Fortnite. Causas encontradas (todas tratadas):
+
+| Causa | Por que travava | Correção |
+|---|---|---|
+| Processo errado | O PresentMon era filtrado por `--process_name` do executável detectado. O Fortnite abre por `FortniteLauncher.exe` → `FortniteClient-Win64-Shipping_EAC_EOS.exe` (inicializador do anticheat) → `FortniteClient-Win64-Shipping.exe` (o que desenha). Os três ficam na pasta da Epic; com dois candidatos da mesma regra e nenhum em primeiro plano, vencia o de menor PID (o inicializador), que nunca apresenta quadros. Igual em jogos Unreal (`Jogo.exe` → `Jogo-Win64-Shipping.exe`), Riot, Rockstar, FromSoftware, BattlEye (`_BE.exe`). | `GameAliases` (lista conhecida + regra genérica de sufixos `_EAC_EOS/_EAC/_EOS/_BE` e `-Win64-Shipping`); o detector prefere quem desenha; o PresentMon recebe `--process_name` repetido (detectado + quem desenha); a partida fica com o nome de quem desenha. |
+| Nenhum nome bate | Jogo fora da lista, ou processo que o PresentMon sem SeDebugPrivilege vê como `<unknown>` (jogo elevado/de outra conta: o filtro por nome nunca casa — aviso do próprio PresentMon). | Sem quadros em **8 s** (ou o processo filtrado fechou sem desenhar), recomeça **sem filtro de processo** (`--exclude` para dwm, Explorer, o próprio NEXUS, navegadores) e trava num processo pelo PID (`LiveTargetPicker`): o PID do jogo → um nome esperado → o dono da janela em primeiro plano que esteja desenhando → o que mais desenha (≥ 10 quadros/s), nunca compositor, Explorer, navegador, lançador, o NEXUS ou um excluído pelo usuário. O mostrador diz "medindo X". |
+| Permissão | Sem administrador e fora do grupo, o ETW recusa: `error: failed to start trace session: access denied.` + "PresentMon requires either administrative privileges or to be run by a user in the "Performance Log Users" user group" (código 6). Com "pedir permissão" ligado, o PresentMon chama o aviso do Windows (`runas`) a partir de um processo em segundo plano — durante o jogo o aviso costuma só piscar na barra de tarefas. Em ambos o NEXUS esperava calado (até 2 min, depois nada). | `PresentMonDiagnosis` lê código de saída + texto (fonte: MainThread.cpp/Privilege.cpp/CommandLine.cpp da tag v2.6.0). Sem permissão ou aviso recusado (`failed to elevate privilege: cancelled.`, código 2): estado "sem permissão" com **Liberar medição (pede permissão do Windows uma vez)** (= `measure.perflog-group.join@1`, vale depois de sair e entrar na conta) e **Medir como administrador agora** (recomeça com `--restart_as_admin`, o aviso aparece com o NEXUS na frente). Aviso ainda não respondido: "aguardando a permissão do Windows…" e, depois de 15 s, "o aviso pode estar piscando na barra de tarefas". |
+| `--track_frame_type` | Opção nova da rodada anterior; uma 2.x que não a conheça imprime `error: unrecognized option` e sai (código 1). | Recusada (ou linha de comando inválida) → tenta de novo **sem** a opção, uma vez. O recomeço sem filtro também vai sem ela. Sessão ETW presa com o mesmo nome → tenta com `NEXUS_Live_<pid>`. |
+
+**Estados** (`LiveCaptureState`, página e mostrador): procurando o jogo… · aguardando a permissão do Windows… · sem permissão para medir ·
+jogo não está desenhando (minimizado?) (processo vivo, sem quadros há 3 s) · medindo X · o PresentMon parou (com a última linha de erro).
+Depois de **15 s** sem quadros o mostrador acrescenta "abra o NEXUS › Medir para ver o que fazer" e a página explica o que fazer.
+Processo travado que fechou: volta a procurar (jogo que reabre com outro PID); tela de abertura que para e outro processo esperado
+desenhando: troca para ele.
+
+**PresentMon elevado** (o NEXUS não consegue encerrá-lo): o recomeço não é sem filtro — é filtrado também pelo processo em primeiro plano e
+por quem desenha pelo jogo, para o PresentMon continuar terminando sozinho com o jogo (`--terminate_on_proc_exit`); a nova sessão
+(`--stop_existing_session`, mesmo nome) encerra a anterior. O Windows pede permissão de novo nesse caso.
+
+**Escolher o processo do jogo** (botão em Medir): 3 s de PresentMon sem filtro numa sessão própria (`NEXUS_Probe`, não atrapalha a
+captura em andamento) e a lista de quem desenhou (nome, quadros/s, PID). "Medir este" mede só aquele PID (`LiveTarget.Locked`), mesmo com
+nome `<unknown>`, sem procurar outro.
+
+**Diagnóstico para o suporte**: `%LocalAppData%\NEXUS\desktop-diag.log`, linhas `nota: medir: …` com a linha de comando do PresentMon,
+cada linha de erro dele, código de saída e classificação, recomeços, o processo escolhido e cada mudança de estado.
+
+Código: `GameAliases.cs`, `PresentMonDiagnosis.cs`, `LiveTargeting.cs` (escolha, janela de quadros por processo, procura de quem desenha),
+`PresentMonLiveCapture.cs` (supervisor + executor real), testes em `tests/Nexus.Tests/Modules/MeasureLiveCaptureTests.cs` (PresentMon falso).
+
 ## Estatística e veredito
 
 * **Ao vivo**: 1% low = 1000 ÷ média dos ⌈1%⌉ maiores frametimes (mesma fórmula do resumo). Janela deslizante numa lista
