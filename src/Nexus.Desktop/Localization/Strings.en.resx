@@ -4156,20 +4156,6 @@ Continue?</value></data>
   <data name="Crash.GameLine1" xml:space="preserve"><value>once · last on {1}</value></data>
   <data name="Crash.GameLineN" xml:space="preserve"><value>{0} times · last on {1}</value></data>
   <data name="Crash.WhatToDo" xml:space="preserve"><value>What to do:</value></data>
-  <data name="Session.Title" xml:space="preserve"><value>Gaming session</value></data>
-  <data name="Session.Lead" xml:space="preserve"><value>While a game is open, Microsoft Store and Windows downloads use at most 20% of the internet. It goes back to normal by itself when the game closes.</value></data>
-  <data name="Session.Honest" xml:space="preserve"><value>Small gain: it only helps if a Microsoft download is running during the game. Game Mode already holds back updates and notifications. Steam, Epic and OneDrive are not limited (NEXUS only warns). Windows asks for administrator permission when the game opens, unless NEXUS is running as administrator.</value></data>
-  <data name="Session.TurnOn" xml:space="preserve"><value>Turn on</value></data>
-  <data name="Session.TurnOff" xml:space="preserve"><value>Turn off</value></data>
-  <data name="Session.ConfirmOn" xml:space="preserve"><value>Turn on the gaming session? When a game opens, NEXUS limits Microsoft downloads to 20% and undoes it by itself when the game closes. The gain is small, and Windows will ask for administrator permission for each game.</value></data>
-  <data name="Session.Off" xml:space="preserve"><value>Off.</value></data>
-  <data name="Session.Waiting" xml:space="preserve"><value>On: waiting for a game to open.</value></data>
-  <data name="Session.Active" xml:space="preserve"><value>Active while {0} is open: Microsoft downloads limited to 20%.</value></data>
-  <data name="Session.Restoring" xml:space="preserve"><value>The game closed: putting downloads back to normal…</value></data>
-  <data name="Session.NotApplied" xml:space="preserve"><value>Not applied this time (Windows did not grant permission or the applier refused). It will try again with the next game.</value></data>
-  <data name="Session.Error" xml:space="preserve"><value>Gaming session: {0}</value></data>
-  <data name="Session.Busy" xml:space="preserve"><value>{0} is downloading or syncing now ({1} MB/s): pause it if the game stutters or the ping goes up.</value></data>
-  <data name="Session.WindowsBackup" xml:space="preserve"><value>Windows Backup</value></data>
   <data name="Mouse.Title" xml:space="preserve"><value>Mouse test</value></data>
   <data name="Mouse.CardLead" xml:space="preserve"><value>Measures the mouse's real rate (Hz) and whether it is steady. It only looks: nothing changes.</value></data>
   <data name="Mouse.Open" xml:space="preserve"><value>Test</value></data>
@@ -4401,4 +4387,46 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Profile.Unknown.Form" xml:space="preserve"><value>laptop or desktop</value></data>
   <data name="Profile.Unknown.Disk" xml:space="preserve"><value>disk type</value></data>
   <data name="Profile.Unknown.List" xml:space="preserve"><value>Could not read: {0}. Without it, NEXUS neither recommends nor advises against anything based on it.</value></data>
+  <data name="GameAuto.Title" xml:space="preserve"><value>Automatic game mode</value></data>
+  <data name="GameAuto.Lead" xml:space="preserve"><value>When a game opens, NEXUS applies the set below; when the game closes, it undoes everything by itself. Nothing stays after the match.</value></data>
+  <data name="GameAuto.Honest" xml:space="preserve"><value>Only quick, reversible actions, with no restart and no permission prompt for each game. Small gain: Windows Game Mode already holds back updates; this covers the rest (power, pop-ups over the game). If NEXUS closes with the game open, it undoes on the next start.</value></data>
+  <data name="GameAuto.TurnOn" xml:space="preserve"><value>Turn on</value></data>
+  <data name="GameAuto.TurnOff" xml:space="preserve"><value>Turn off</value></data>
+  <data name="GameAuto.ConfirmOn" xml:space="preserve"><value>Turn on automatic game mode? When a game opens, NEXUS will:
+{0}
+
+When the game has been closed for {1} seconds, it undoes everything by itself. You can turn it off whenever you want.</value></data>
+  <data name="GameAuto.ConfirmNothing" xml:space="preserve"><value>(nothing checked yet: check what it should do under "What it does")</value></data>
+  <data name="GameAuto.WhatItDoes" xml:space="preserve"><value>What it does</value></data>
+  <data name="GameAuto.NothingChosen" xml:space="preserve"><value>Nothing checked: with the mode on, nothing is applied. Check at least one option.</value></data>
+  <data name="GameAuto.NeedsAdmin" xml:space="preserve"><value>Only with NEXUS running as administrator (so it does not ask for permission for each game).</value></data>
+  <data name="GameAuto.Act.PowerPlan" xml:space="preserve"><value>High performance power plan only while the game is open</value></data>
+  <data name="GameAuto.Act.Notifications" xml:space="preserve"><value>No pop-up notifications over the game</value></data>
+  <data name="GameAuto.Act.Capture" xml:space="preserve"><value>Xbox Game Bar background recording off during the match</value></data>
+  <data name="GameAuto.Act.DeliveryCap" xml:space="preserve"><value>Microsoft Store and Windows downloads using at most 20% of the internet</value></data>
+  <data name="GameAuto.StopDelay" xml:space="preserve"><value>Undo when the game has been closed for</value></data>
+  <data name="GameAuto.Seconds" xml:space="preserve"><value>{0} seconds</value></data>
+  <data name="GameAuto.Off" xml:space="preserve"><value>Off.</value></data>
+  <data name="GameAuto.PendingUndo" xml:space="preserve"><value>Off. The last match still needs to be undone: undoing now.</value></data>
+  <data name="GameAuto.Waiting" xml:space="preserve"><value>On: waiting for a game to open.</value></data>
+  <data name="GameAuto.WaitingNothing" xml:space="preserve"><value>On, but nothing checked: nothing will be applied.</value></data>
+  <data name="GameAuto.ActiveNow" xml:space="preserve"><value>Active now: {0}</value></data>
+  <data name="GameAuto.Active" xml:space="preserve"><value>Applied while {0} is open. Undone by itself when the game closes.</value></data>
+  <data name="GameAuto.Closing" xml:space="preserve"><value>The game closed: undoing in {0} s (if it reopens, it stays).</value></data>
+  <data name="GameAuto.Restoring" xml:space="preserve"><value>Undoing…</value></data>
+  <data name="GameAuto.UndoFailed" xml:space="preserve"><value>Could not undo by itself (3 attempts). See History or try again.</value></data>
+  <data name="GameAuto.RetryUndo" xml:space="preserve"><value>Try undoing again</value></data>
+  <data name="GameAuto.NotApplied" xml:space="preserve"><value>Not applied this time (the applier refused). It will try again with the next game.</value></data>
+  <data name="GameAuto.Error" xml:space="preserve"><value>Automatic game mode: {0}</value></data>
+  <data name="GameAuto.Busy" xml:space="preserve"><value>{0} is downloading or syncing now ({1} MB/s): pause it if the game stutters or the ping goes up.</value></data>
+  <data name="GameAuto.WindowsBackup" xml:space="preserve"><value>Windows Backup</value></data>
+  <data name="GameAuto.Tray.On" xml:space="preserve"><value>On. When a game opens, NEXUS applies the set and undoes it when the game closes.</value></data>
+  <data name="GameAuto.Tray.Off" xml:space="preserve"><value>Off. If anything was applied, it is being undone.</value></data>
+  <data name="GameAuto.Tray.Applied" xml:space="preserve"><value>Applied for {0}. Back to normal when the game closes.</value></data>
+  <data name="GameAuto.Tray.Partial" xml:space="preserve"><value>Part of the set was not applied this time; the rest will be undone as usual.</value></data>
+  <data name="GameAuto.Tray.Restored" xml:space="preserve"><value>The game closed: everything is back to normal.</value></data>
+  <data name="GameAuto.Tray.UndoFailed" xml:space="preserve"><value>Could not undo by itself. Open NEXUS: Problems or History.</value></data>
+  <data name="GameAuto.Problem.Title" xml:space="preserve"><value>Automatic game mode could not undo the last match</value></data>
+  <data name="GameAuto.Problem.WhatToDo" xml:space="preserve"><value>Open History and click Undo on the automatic game mode change. If that fails, restart the PC and try again.</value></data>
+  <data name="GameAuto.Problem.Action" xml:space="preserve"><value>Open History</value></data>
 </root>

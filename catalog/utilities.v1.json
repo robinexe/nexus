@@ -72,7 +72,7 @@
       "title": "Durante o jogo: downloads da Microsoft Store e do Windows usando no máximo 20% da internet",
       "i18n": { "en": { "title": "While gaming: Microsoft Store and Windows downloads using at most 20% of the internet" }, "es": { "title": "Mientras juegas: descargas de Microsoft Store y Windows usando como máximo el 20% de internet" } },
       "classification": "Conditional",
-      "condition": "Só com a \"sessão de jogo\" ligada na tela Jogos: aplicada quando um jogo abre e desfeita quando ele fecha.",
+      "condition": "Só com o \"modo jogo automático\" ligado na tela Jogos e esta opção marcada (exige o NEXUS aberto como administrador): aplicada quando um jogo abre e desfeita quando ele fecha.",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
         "hive": "HKLM",

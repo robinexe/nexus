@@ -4156,20 +4156,6 @@ Usa hasta ~{0} MB de datos. Si tu internet tiene límite de datos, omite esta pr
   <data name="Crash.GameLine1" xml:space="preserve"><value>1 vez · la última el {1}</value></data>
   <data name="Crash.GameLineN" xml:space="preserve"><value>{0} veces · la última el {1}</value></data>
   <data name="Crash.WhatToDo" xml:space="preserve"><value>Qué hacer:</value></data>
-  <data name="Session.Title" xml:space="preserve"><value>Sesión de juego</value></data>
-  <data name="Session.Lead" xml:space="preserve"><value>Mientras un juego esté abierto, las descargas de Microsoft Store y Windows usan como máximo el 20% de internet. Vuelve a la normalidad sola cuando el juego se cierra.</value></data>
-  <data name="Session.Honest" xml:space="preserve"><value>Ganancia pequeña: solo ayuda si una descarga de Microsoft está en curso durante el juego. El Modo de juego ya retiene actualizaciones y avisos. Steam, Epic y OneDrive no se limitan (NEXUS solo avisa). Windows pide permiso de administrador cuando el juego se abre, salvo que NEXUS esté abierto como administrador.</value></data>
-  <data name="Session.TurnOn" xml:space="preserve"><value>Activar</value></data>
-  <data name="Session.TurnOff" xml:space="preserve"><value>Desactivar</value></data>
-  <data name="Session.ConfirmOn" xml:space="preserve"><value>¿Activar la sesión de juego? Cuando un juego se abra, NEXUS limita las descargas de Microsoft al 20% y lo deshace solo cuando se cierre. La ganancia es pequeña y Windows pedirá permiso de administrador en cada juego.</value></data>
-  <data name="Session.Off" xml:space="preserve"><value>Desactivada.</value></data>
-  <data name="Session.Waiting" xml:space="preserve"><value>Activada: esperando a que se abra un juego.</value></data>
-  <data name="Session.Active" xml:space="preserve"><value>Activa mientras {0} está abierto: descargas de Microsoft limitadas al 20%.</value></data>
-  <data name="Session.Restoring" xml:space="preserve"><value>El juego se cerró: devolviendo las descargas a la normalidad…</value></data>
-  <data name="Session.NotApplied" xml:space="preserve"><value>No aplicada en esta partida (Windows no dio permiso o el aplicador lo rechazó). Lo intentará de nuevo en el próximo juego.</value></data>
-  <data name="Session.Error" xml:space="preserve"><value>Sesión de juego: {0}</value></data>
-  <data name="Session.Busy" xml:space="preserve"><value>{0} está descargando o sincronizando ahora ({1} MB/s): pausa si el juego se traba o sube el ping.</value></data>
-  <data name="Session.WindowsBackup" xml:space="preserve"><value>Copia de seguridad de Windows</value></data>
   <data name="Mouse.Title" xml:space="preserve"><value>Prueba del mouse</value></data>
   <data name="Mouse.CardLead" xml:space="preserve"><value>Mide la tasa real del mouse (Hz) y si es estable. Solo mira: no cambia nada.</value></data>
   <data name="Mouse.Open" xml:space="preserve"><value>Probar</value></data>
@@ -4401,4 +4387,46 @@ Son {2} partidas de al menos 3 minutos. Entre ellas, NEXUS aplica el ajuste con 
   <data name="Profile.Unknown.Form" xml:space="preserve"><value>portátil o escritorio</value></data>
   <data name="Profile.Unknown.Disk" xml:space="preserve"><value>tipo de disco</value></data>
   <data name="Profile.Unknown.List" xml:space="preserve"><value>No se pudo leer: {0}. Sin esa lectura, NEXUS no recomienda ni desaconseja nada por ella.</value></data>
+  <data name="GameAuto.Title" xml:space="preserve"><value>Modo juego automático</value></data>
+  <data name="GameAuto.Lead" xml:space="preserve"><value>Cuando se abre un juego, NEXUS aplica el conjunto de abajo; cuando el juego se cierra, lo deshace todo solo. Nada queda después de la partida.</value></data>
+  <data name="GameAuto.Honest" xml:space="preserve"><value>Solo acciones rápidas y reversibles, sin reinicio y sin pedir permiso en cada juego. Ganancia pequeña: el Modo de juego de Windows ya retiene actualizaciones; esto cubre el resto (energía, avisos sobre el juego). Si NEXUS se cierra con el juego abierto, lo deshace en la próxima apertura.</value></data>
+  <data name="GameAuto.TurnOn" xml:space="preserve"><value>Activar</value></data>
+  <data name="GameAuto.TurnOff" xml:space="preserve"><value>Desactivar</value></data>
+  <data name="GameAuto.ConfirmOn" xml:space="preserve"><value>¿Activar el modo juego automático? Cuando se abra un juego, NEXUS hará:
+{0}
+
+Cuando el juego lleve {1} segundos cerrado, lo deshace todo solo. Puedes desactivarlo cuando quieras.</value></data>
+  <data name="GameAuto.ConfirmNothing" xml:space="preserve"><value>(nada marcado todavía: marca lo que debe hacer en "Qué hace")</value></data>
+  <data name="GameAuto.WhatItDoes" xml:space="preserve"><value>Qué hace</value></data>
+  <data name="GameAuto.NothingChosen" xml:space="preserve"><value>Nada marcado: con el modo activado, no se aplica nada. Marca al menos una opción.</value></data>
+  <data name="GameAuto.NeedsAdmin" xml:space="preserve"><value>Solo con NEXUS abierto como administrador (para no pedir permiso en cada juego).</value></data>
+  <data name="GameAuto.Act.PowerPlan" xml:space="preserve"><value>Plan de energía Alto rendimiento solo mientras el juego está abierto</value></data>
+  <data name="GameAuto.Act.Notifications" xml:space="preserve"><value>Ninguna notificación emergente sobre el juego</value></data>
+  <data name="GameAuto.Act.Capture" xml:space="preserve"><value>Grabación en segundo plano de Xbox Game Bar desactivada durante la partida</value></data>
+  <data name="GameAuto.Act.DeliveryCap" xml:space="preserve"><value>Descargas de Microsoft Store y Windows usando como máximo el 20% de internet</value></data>
+  <data name="GameAuto.StopDelay" xml:space="preserve"><value>Deshacer cuando el juego lleve cerrado</value></data>
+  <data name="GameAuto.Seconds" xml:space="preserve"><value>{0} segundos</value></data>
+  <data name="GameAuto.Off" xml:space="preserve"><value>Desactivado.</value></data>
+  <data name="GameAuto.PendingUndo" xml:space="preserve"><value>Desactivado. Aún falta deshacer la última partida: se deshace ahora.</value></data>
+  <data name="GameAuto.Waiting" xml:space="preserve"><value>Activado: esperando a que se abra un juego.</value></data>
+  <data name="GameAuto.WaitingNothing" xml:space="preserve"><value>Activado, pero nada marcado: no se aplicará nada.</value></data>
+  <data name="GameAuto.ActiveNow" xml:space="preserve"><value>Activo ahora: {0}</value></data>
+  <data name="GameAuto.Active" xml:space="preserve"><value>Aplicado mientras {0} está abierto. Se deshace solo cuando el juego se cierre.</value></data>
+  <data name="GameAuto.Closing" xml:space="preserve"><value>El juego se cerró: deshaciendo en {0} s (si se vuelve a abrir, continúa).</value></data>
+  <data name="GameAuto.Restoring" xml:space="preserve"><value>Deshaciendo…</value></data>
+  <data name="GameAuto.UndoFailed" xml:space="preserve"><value>No se pudo deshacer solo (3 intentos). Mira el Historial o inténtalo de nuevo.</value></data>
+  <data name="GameAuto.RetryUndo" xml:space="preserve"><value>Intentar deshacer de nuevo</value></data>
+  <data name="GameAuto.NotApplied" xml:space="preserve"><value>No aplicado en esta partida (el aplicador lo rechazó). Lo intentará de nuevo en el próximo juego.</value></data>
+  <data name="GameAuto.Error" xml:space="preserve"><value>Modo juego automático: {0}</value></data>
+  <data name="GameAuto.Busy" xml:space="preserve"><value>{0} está descargando o sincronizando ahora ({1} MB/s): pausa si el juego se traba o sube el ping.</value></data>
+  <data name="GameAuto.WindowsBackup" xml:space="preserve"><value>Copia de seguridad de Windows</value></data>
+  <data name="GameAuto.Tray.On" xml:space="preserve"><value>Activado. Cuando se abra un juego, NEXUS aplica el conjunto y lo deshace cuando se cierre.</value></data>
+  <data name="GameAuto.Tray.Off" xml:space="preserve"><value>Desactivado. Si algo estaba aplicado, se está deshaciendo.</value></data>
+  <data name="GameAuto.Tray.Applied" xml:space="preserve"><value>Aplicado para {0}. Vuelve a la normalidad cuando el juego se cierre.</value></data>
+  <data name="GameAuto.Tray.Partial" xml:space="preserve"><value>Parte del conjunto no se aplicó en esta partida; el resto se deshará normalmente.</value></data>
+  <data name="GameAuto.Tray.Restored" xml:space="preserve"><value>El juego se cerró: todo volvió a la normalidad.</value></data>
+  <data name="GameAuto.Tray.UndoFailed" xml:space="preserve"><value>No se pudo deshacer solo. Abre NEXUS: Problemas o Historial.</value></data>
+  <data name="GameAuto.Problem.Title" xml:space="preserve"><value>El modo juego automático no pudo deshacer la última partida</value></data>
+  <data name="GameAuto.Problem.WhatToDo" xml:space="preserve"><value>Abre el Historial y pulsa Deshacer en el cambio del modo juego automático. Si no funciona, reinicia el PC e inténtalo de nuevo.</value></data>
+  <data name="GameAuto.Problem.Action" xml:space="preserve"><value>Abrir Historial</value></data>
 </root>

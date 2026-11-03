@@ -382,21 +382,26 @@
           </DockPanel>
         </Border>
 
-        <!-- Sessão de jogo (desligada por padrão): limite temporário dos downloads da Microsoft enquanto o jogo está aberto. -->
-        <Border Style="{StaticResource S.Card}" DataContext="{Binding Session}">
+        <!-- Modo jogo automático (desligado por padrão): aplica o conjunto escolhido quando um jogo abre e desfaz quando ele fecha. -->
+        <Border Style="{StaticResource S.Card}" DataContext="{Binding GameMode}">
           <StackPanel>
             <DockPanel>
-              <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" MinWidth="110" VerticalAlignment="Center"
+              <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" MinWidth="110" VerticalAlignment="Top"
                       Content="{Binding ToggleText}" Command="{Binding ToggleCommand}"/>
               <Grid Width="44" Height="44" Margin="0,0,16,0" VerticalAlignment="Top">
                 <Ellipse Fill="{StaticResource Brush.TraceSoft}"/>
                 <c:Icon Data="{StaticResource Icon.Games}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
               </Grid>
               <StackPanel>
-                <TextBlock Text="{l:T Session.Title}" Style="{StaticResource S.Item}" FontWeight="SemiBold"/>
-                <TextBlock Text="{l:T Session.Lead}" Style="{StaticResource S.Lead}" FontSize="15" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                <TextBlock Text="{l:T GameAuto.Title}" Style="{StaticResource S.Item}" FontWeight="SemiBold"/>
+                <TextBlock Text="{l:T GameAuto.Lead}" Style="{StaticResource S.Lead}" FontSize="15" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                <!-- "Ativo agora: <jogo>" enquanto um jogo está aberto -->
+                <c:StatusChip Tone="Good" Text="{Binding ActiveText}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                              Visibility="{Binding ActiveNow, Converter={StaticResource BoolToVis}}"/>
                 <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Signal}" Margin="0,8,0,0"
                            TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+                <Button Style="{StaticResource Button.Ghost}" Content="{l:T GameAuto.RetryUndo}" Command="{Binding RetryUndoCommand}" HorizontalAlignment="Left" Margin="-8,4,0,0"
+                        Visibility="{Binding UndoFailed, Converter={StaticResource BoolToVis}}"/>
                 <ItemsControl ItemsSource="{Binding Warnings}" Focusable="False" Margin="0,6,0,0" Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVis}}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -407,7 +412,34 @@
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <TextBlock Text="{l:T Session.Honest}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+
+                <!-- O que ele faz: cada ação do conjunto com caixa de marcar (a escolha vale a partir da próxima partida) -->
+                <TextBlock Text="{l:T GameAuto.WhatItDoes}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}" FontWeight="SemiBold" Margin="0,14,0,2"/>
+                <ItemsControl ItemsSource="{Binding Items}" Focusable="False">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type sv:GameModeActionRow}">
+                      <DockPanel Margin="0,4">
+                        <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsOn, Mode=TwoWay}" IsEnabled="{Binding Available}" VerticalAlignment="Top" Margin="0,2,10,0"
+                                  AutomationProperties.Name="{Binding Text}"/>
+                        <StackPanel>
+                          <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap"/>
+                          <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap"
+                                     Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                      </DockPanel>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="{l:T GameAuto.NothingChosen}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Trace}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Visibility="{Binding NothingChosen, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Folga antes de desfazer (relançamentos e telas de carregamento) -->
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                  <TextBlock Text="{l:T GameAuto.StopDelay}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                  <ComboBox ItemsSource="{Binding StopDelayOptions}" SelectedItem="{Binding StopDelay}" DisplayMemberPath="Label" MinWidth="130"
+                            AutomationProperties.Name="{l:T GameAuto.StopDelay}"/>
+                </StackPanel>
+                <TextBlock Text="{l:T GameAuto.Honest}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,10,0,0" TextWrapping="Wrap"/>
               </StackPanel>
             </DockPanel>
           </StackPanel>

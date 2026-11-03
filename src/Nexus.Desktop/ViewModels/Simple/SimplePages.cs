@@ -343,12 +343,12 @@ public sealed class SimpleGamesPage : ModulePage
     {
         Gpu = gpu ?? throw new ArgumentNullException(nameof(gpu));
         Measure = measure ?? throw new ArgumentNullException(nameof(measure));
-        Session = new GameSessionPanel(() => Host, () => Measure);
+        GameMode = new GameModeAutoPanel(() => Host, () => Measure);
         TestMouseCommand = new RelayCommand(OpenMouseTest);
     }
 
-    /// <summary>Sessão de jogo (desligada por padrão): limite temporário dos downloads da Microsoft enquanto um jogo está aberto.</summary>
-    public GameSessionPanel Session { get; }
+    /// <summary>Modo jogo automático (desligado por padrão): aplica o conjunto escolhido quando um jogo abre e desfaz quando ele fecha.</summary>
+    public GameModeAutoPanel GameMode { get; }
     /// <summary>Teste do mouse (taxa real e irregularidade; só diagnóstico).</summary>
     public RelayCommand TestMouseCommand { get; }
 
@@ -359,10 +359,10 @@ public sealed class SimpleGamesPage : ModulePage
         window.ShowDialog();
     }
 
-    /// <summary>A cada leitura do PC: retoma a sessão de jogo (ligada, ou com um limite para desfazer depois de reabrir o NEXUS).</summary>
+    /// <summary>A cada leitura do PC: retoma o modo jogo automático (ligado, ou com execuções para desfazer depois de reabrir o NEXUS).</summary>
     public override Task OnFactsReadyAsync(SystemFacts facts)
     {
-        Session.Start();
+        GameMode.Start();
         return Task.CompletedTask;
     }
 
@@ -664,6 +664,20 @@ public sealed class SimpleProblemsPage : ModulePage
 
     private QuickApplier? Applier() => Host is null ? null : new QuickApplier(Host);
 
+    /// <summary>Linhas que não vêm da leitura do PC (ex.: o modo jogo automático não conseguiu desfazer), por chave; ficam até serem retiradas.</summary>
+    private readonly Dictionary<string, ProblemRow> _extras = new(StringComparer.Ordinal);
+
+    /// <summary>Põe (ou tira, com null) uma linha avulsa, sem esperar a próxima leitura do PC.</summary>
+    public void SetExtra(string key, ProblemRow? row)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        if (row is null) _extras.Remove(key); else _extras[key] = row;
+        var rows = _items.Where(r => r.Key != key).ToList();
+        if (row is not null) rows.Add(row);
+        Items = [.. rows.OrderByDescending(r => r.Impact)];
+        foreach (var n in new[] { nameof(HasItems), nameof(NoItems), nameof(CountText) }) OnPropertyChanged(n);
+    }
+
     /// <summary>A janela chama a cada leitura (achados do diagnóstico e do "só você pode fazer"; ações anotadas pelo Assistente).</summary>
     public void Update(IReadOnlyList<DiagnosticFinding> findings, IReadOnlyList<UserAction> userActions)
     {
@@ -672,6 +686,7 @@ public sealed class SimpleProblemsPage : ModulePage
         // Linha em que o usuário acabou de clicar fica (com "Feito ✓ — Desfazer") mesmo que o problema tenha sumido da leitura.
         var kept = _items.Where(r => r.Fix is { IsReady: false } || r.Fix is { HasNote: true }).ToList();
         var rows = new List<ProblemRow>(kept);
+        rows.AddRange(_extras.Values.Where(e => kept.All(k => k.Key != e.Key)));
         var plain = Checks?.Plain;
         foreach (var f in findings.Where(f => f.Severity == DiagnosticSeverity.Attention && kept.All(k => k.Key != f.Id)))
         {

@@ -108,6 +108,9 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         // Notebook na bateria: um jogo começou (detecção do Medir) → aviso, se ligado em Ajustes.
         Measure.GameStarted += (_, game) => Checks.OnGameStarted(game, UiSettings.Current.GameBatteryNotice, DateTimeOffset.Now);
         Checks.Notice += (_, n) => System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => { Status = n.Text; GameNotice?.Invoke(this, n); });
+        // Modo jogo automático: aviso discreto na bandeja ao ligar/aplicar/desfazer; desfazer que desistiu vira linha em Problemas.
+        SimpleGames.GameMode.Notice += (_, n) => GameNotice?.Invoke(this, n);
+        SimpleGames.GameMode.ProblemChanged += (_, row) => SimpleProblems.SetExtra(GameModeAutoPanel.ProblemKey, row);
         // Ajustes › Perfil do PC: a preferência "menos atraso" muda o que é recomendado (sem reler o PC).
         UiSettings.Changed += (_, _) =>
         {
