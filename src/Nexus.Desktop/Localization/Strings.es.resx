@@ -4039,4 +4039,103 @@ Usa hasta ~{0} MB de datos. Si tu internet tiene límite de datos, omite esta pr
   <data name="Pc.Battery.Title" xml:space="preserve"><value>Portátil con batería</value></data>
   <data name="Pc.Battery.Text" xml:space="preserve"><value>Con batería los FPS bajan mucho; conéctalo a la corriente.</value></data>
   <data name="Pc.Battery.Setting" xml:space="preserve"><value>Avisarme cuando abra un juego con el portátil en batería</value></data>
+  <data name="Boot.TrendFaster" xml:space="preserve"><value>Tendencia: los últimos {0} arranques son {1} más rápidos, en promedio, que los {2} anteriores.</value></data>
+  <data name="Boot.TrendSlower" xml:space="preserve"><value>Tendencia: los últimos {0} arranques son {1} más lentos, en promedio, que los {2} anteriores.</value></data>
+  <data name="Boot.TrendStable" xml:space="preserve"><value>Tendencia: estable (promedio de {0} en los últimos arranques).</value></data>
+  <data name="Boot.CompareWaiting" xml:space="preserve"><value>Cambiaste el inicio con NEXUS el {0}. Reinicia el PC para ver el antes y después.</value></data>
+  <data name="Boot.CompareFaster" xml:space="preserve"><value>Antes y después del cambio en el inicio el {0}: {1} → {2} (promedio de {3} arranques antes y {4} después). Quedó más rápido.</value></data>
+  <data name="Boot.CompareSlower" xml:space="preserve"><value>Antes y después del cambio en el inicio el {0}: {1} → {2} (promedio de {3} arranques antes y {4} después). Quedó más lento: mira si algo nuevo empezó a abrir con Windows.</value></data>
+  <data name="Boot.CompareSame" xml:space="preserve"><value>Antes y después del cambio en el inicio el {0}: {1} → {2} ({3} arranques antes, {4} después). La diferencia está dentro de la variación normal entre arranques.</value></data>
+  <data name="Crash.Section" xml:space="preserve"><value>¿El juego se cerró solo?</value></data>
+  <data name="Crash.Title" xml:space="preserve"><value>Reunir información del cierre</value></data>
+  <data name="Crash.Lead" xml:space="preserve"><value>Lee lo que Windows registró cuando un juego se cerró o el controlador de video se reinició, lo explica con palabras simples y guarda un archivo ZIP para quien te ayude. Nada cambia en el PC.</value></data>
+  <data name="Crash.Read" xml:space="preserve"><value>Reunir información</value></data>
+  <data name="Crash.Reading" xml:space="preserve"><value>Leyendo los registros de Windows…</value></data>
+  <data name="Crash.Save" xml:space="preserve"><value>Guardar ZIP…</value></data>
+  <data name="Crash.OpenFolder" xml:space="preserve"><value>Abrir carpeta</value></data>
+  <data name="Crash.Privacy" xml:space="preserve"><value>El ZIP solo lleva registros de Windows y un resumen de las piezas del PC. No lleva documentos, fotos, volcados de memoria ni el nombre de tu cuenta.</value></data>
+  <data name="Crash.DumpsNote" xml:space="preserve"><value>"Guardar detalles" pide a Windows un archivo pequeño (minivolcado) de los próximos 3 cierres de ese juego, para que el soporte lo analice. Requiere administrador; se puede deshacer.</value></data>
+  <data name="Crash.KeepDumps" xml:space="preserve"><value>Guardar detalles</value></data>
+  <data name="Crash.KeepDumpsTitle" xml:space="preserve"><value>Guardar detalles de los próximos cierres</value></data>
+  <data name="Crash.KeepDumpsConfirm" xml:space="preserve"><value>¿Pedir a Windows que guarde un minivolcado de los próximos cierres de {0}? Windows pedirá permiso de administrador. Se puede deshacer.</value></data>
+  <data name="Crash.SaveTitle" xml:space="preserve"><value>Guardar información del cierre</value></data>
+  <data name="Crash.ZipFilter" xml:space="preserve"><value>Archivo ZIP (*.zip)|*.zip</value></data>
+  <data name="Crash.Saved" xml:space="preserve"><value>Guardado en {0}</value></data>
+  <data name="Crash.SaveFailed" xml:space="preserve"><value>No se pudo guardar: {0}</value></data>
+  <data name="Crash.ReadFailed" xml:space="preserve"><value>No se pudieron leer los registros: {0}</value></data>
+  <data name="Crash.GameClosed1" xml:space="preserve"><value>{0} se cerró solo 1 vez en los últimos 7 días</value></data>
+  <data name="Crash.GameClosedN" xml:space="preserve"><value>{0} se cerró solo {1} veces en los últimos 7 días</value></data>
+  <data name="Crash.MoreGames" xml:space="preserve"><value>{0} juego(s) más también se cerraron</value></data>
+  <data name="Crash.Hangs1" xml:space="preserve"><value>un juego dejó de responder 1 vez</value></data>
+  <data name="Crash.HangsN" xml:space="preserve"><value>los juegos dejaron de responder {0} veces</value></data>
+  <data name="Crash.VideoReset1" xml:space="preserve"><value>el controlador de video se detuvo y reinició 1 vez</value></data>
+  <data name="Crash.VideoResetN" xml:space="preserve"><value>el controlador de video se detuvo y reinició {0} veces</value></data>
+  <data name="Crash.Advice.UpdateGpuDriver" xml:space="preserve"><value>actualiza el controlador de video (de preferencia con instalación limpia, en Herramientas avanzadas › Actualizar controladores)</value></data>
+  <data name="Crash.Advice.VerifyGameFiles" xml:space="preserve"><value>verifica los archivos del juego en la tienda (Steam: Propiedades › Archivos instalados › Verificar integridad)</value></data>
+  <data name="Crash.Advice.CheckOverclockAndTemps" xml:space="preserve"><value>si la tarjeta gráfica, el procesador o la memoria (XMP/EXPO) tienen overclock, vuelve a los valores de fábrica y revisa la temperatura</value></data>
+  <data name="Crash.Advice.TestMemory" xml:space="preserve"><value>prueba la memoria RAM (Diagnóstico de memoria de Windows: tecla Windows, escribe mdsched)</value></data>
+  <data name="Crash.Nothing" xml:space="preserve"><value>Ningún juego se cerró solo y el controlador de video no se reinició en los últimos 7 días (según lo que registró Windows). Si el juego se cerró sin aviso, guarda el ZIP igualmente para quien te ayude.</value></data>
+  <data name="Crash.GameLine1" xml:space="preserve"><value>1 vez · la última el {1}</value></data>
+  <data name="Crash.GameLineN" xml:space="preserve"><value>{0} veces · la última el {1}</value></data>
+  <data name="Crash.WhatToDo" xml:space="preserve"><value>Qué hacer:</value></data>
+  <data name="Session.Title" xml:space="preserve"><value>Sesión de juego</value></data>
+  <data name="Session.Lead" xml:space="preserve"><value>Mientras un juego esté abierto, las descargas de Microsoft Store y Windows usan como máximo el 20% de internet. Vuelve a la normalidad sola cuando el juego se cierra.</value></data>
+  <data name="Session.Honest" xml:space="preserve"><value>Ganancia pequeña: solo ayuda si una descarga de Microsoft está en curso durante el juego. El Modo de juego ya retiene actualizaciones y avisos. Steam, Epic y OneDrive no se limitan (NEXUS solo avisa). Windows pide permiso de administrador cuando el juego se abre, salvo que NEXUS esté abierto como administrador.</value></data>
+  <data name="Session.TurnOn" xml:space="preserve"><value>Activar</value></data>
+  <data name="Session.TurnOff" xml:space="preserve"><value>Desactivar</value></data>
+  <data name="Session.ConfirmOn" xml:space="preserve"><value>¿Activar la sesión de juego? Cuando un juego se abra, NEXUS limita las descargas de Microsoft al 20% y lo deshace solo cuando se cierre. La ganancia es pequeña y Windows pedirá permiso de administrador en cada juego.</value></data>
+  <data name="Session.Off" xml:space="preserve"><value>Desactivada.</value></data>
+  <data name="Session.Waiting" xml:space="preserve"><value>Activada: esperando a que se abra un juego.</value></data>
+  <data name="Session.Active" xml:space="preserve"><value>Activa mientras {0} está abierto: descargas de Microsoft limitadas al 20%.</value></data>
+  <data name="Session.Restoring" xml:space="preserve"><value>El juego se cerró: devolviendo las descargas a la normalidad…</value></data>
+  <data name="Session.NotApplied" xml:space="preserve"><value>No aplicada en esta partida (Windows no dio permiso o el aplicador lo rechazó). Lo intentará de nuevo en el próximo juego.</value></data>
+  <data name="Session.Error" xml:space="preserve"><value>Sesión de juego: {0}</value></data>
+  <data name="Session.Busy" xml:space="preserve"><value>{0} está descargando o sincronizando ahora ({1} MB/s): pausa si el juego se traba o sube el ping.</value></data>
+  <data name="Session.WindowsBackup" xml:space="preserve"><value>Copia de seguridad de Windows</value></data>
+  <data name="Mouse.Title" xml:space="preserve"><value>Prueba del mouse</value></data>
+  <data name="Mouse.CardLead" xml:space="preserve"><value>Mide la tasa real del mouse (Hz) y si es estable. Solo mira: no cambia nada.</value></data>
+  <data name="Mouse.Open" xml:space="preserve"><value>Probar</value></data>
+  <data name="Mouse.Lead" xml:space="preserve"><value>Haz clic en Empezar y mueve el mouse en círculos, sin parar, durante 5 segundos, con esta ventana al frente.</value></data>
+  <data name="Mouse.Start" xml:space="preserve"><value>Empezar</value></data>
+  <data name="Mouse.Again" xml:space="preserve"><value>Probar de nuevo</value></data>
+  <data name="Mouse.Unavailable" xml:space="preserve"><value>Windows no permitió leer el mouse mediante Raw Input en esta ventana.</value></data>
+  <data name="Mouse.NotEnough" xml:space="preserve"><value>Pocos movimientos para medir. Mueve el mouse sin parar durante los 5 segundos y prueba de nuevo.</value></data>
+  <data name="Mouse.Rate" xml:space="preserve"><value>Tasa medida: {0} Hz</value></data>
+  <data name="Mouse.RateNominal" xml:space="preserve"><value>Tasa medida: {0} Hz (ajuste de {1} Hz)</value></data>
+  <data name="Mouse.Jitter" xml:space="preserve"><value>Irregularidad: {0} ms (99% de los intervalos por debajo de {1} ms)</value></data>
+  <data name="Mouse.Stable" xml:space="preserve"><value>Estable: el mouse entrega los movimientos al ritmo correcto.</value></data>
+  <data name="Mouse.Irregular" xml:space="preserve"><value>Irregular: hay saltos en la entrega. Prueba otro puerto USB (de preferencia atrás del PC, sin hub) o una tasa menor en el programa del mouse.</value></data>
+  <data name="Mouse.Honest" xml:space="preserve"><value>Solo diagnóstico. El instante medido incluye el tiempo de Windows para entregar cada movimiento, y por encima de ~2000 Hz Windows puede agrupar reportes (la tasa sale menor que la real). No hay prueba de que 8000 Hz sea siempre mejor o peor: quédate con la tasa que sale estable.</value></data>
+  <data name="Dup.Title" xml:space="preserve"><value>Archivos duplicados</value></data>
+  <data name="Dup.Lead" xml:space="preserve"><value>Busca copias idénticas (mismo tamaño y mismo contenido, comprobado con SHA-256) a partir de 1 MB. Las carpetas de Windows, de programas, de juegos y de datos de aplicaciones quedan fuera. Solo mira hasta que elijas.</value></data>
+  <data name="Dup.Where" xml:space="preserve"><value>Buscar en: {0}</value></data>
+  <data name="Dup.Scan" xml:space="preserve"><value>Buscar duplicados</value></data>
+  <data name="Dup.Cancel" xml:space="preserve"><value>Detener</value></data>
+  <data name="Dup.Listing" xml:space="preserve"><value>Listando archivos… {0} vistos</value></data>
+  <data name="Dup.Hashing" xml:space="preserve"><value>Comprobando el contenido… {0:0}%</value></data>
+  <data name="Dup.None" xml:space="preserve"><value>Ninguna copia idéntica de 1 MB o más entre {0} archivos.</value></data>
+  <data name="Dup.Found" xml:space="preserve"><value>{0} grupos de copias idénticas: se podrían liberar {1} ({2} archivos vistos).</value></data>
+  <data name="Dup.Shown" xml:space="preserve"><value> Mostrando los {0} más grandes.</value></data>
+  <data name="Dup.Cancelled" xml:space="preserve"><value>Búsqueda detenida.</value></data>
+  <data name="Dup.Failed" xml:space="preserve"><value>No se pudo buscar: {0}</value></data>
+  <data name="Dup.NoFolder" xml:space="preserve"><value>Elige una unidad o abre una carpeta en el analizador primero.</value></data>
+  <data name="Dup.GroupHeader" xml:space="preserve"><value>{0} · {1} copias · {2} cada una · sobran {3}</value></data>
+  <data name="Dup.Selection" xml:space="preserve"><value>{0} marcados · {1}</value></data>
+  <data name="Dup.SelectExtras" xml:space="preserve"><value>Marcar las copias extra</value></data>
+  <data name="Dup.Clear" xml:space="preserve"><value>Desmarcar</value></data>
+  <data name="Dup.Quarantine" xml:space="preserve"><value>Mover a la cuarentena</value></data>
+  <data name="Dup.KeepOne" xml:space="preserve"><value>Al menos una copia de cada grupo se queda en su lugar.</value></data>
+  <data name="Dup.TooMany" xml:space="preserve"><value>Marca como máximo {0} archivos a la vez.</value></data>
+  <data name="Dup.AndMore" xml:space="preserve"><value>y {0} más</value></data>
+  <data name="Dup.QuarantineTitle" xml:space="preserve"><value>Mover copias duplicadas a la cuarentena</value></data>
+  <data name="Dup.QuarantineConfirm" xml:space="preserve"><value>¿Mover {0} copias ({1}) a la cuarentena de NEXUS?
+
+{2}
+
+Nada se borra: se puede deshacer, y el espacio solo vuelve cuando vacíes la cuarentena (Limpieza).</value></data>
+  <data name="Dup.Moved" xml:space="preserve"><value>{0} copias fueron a la cuarentena ({1}).</value></data>
+  <data name="Dup.MovedSome" xml:space="preserve"><value>{0} de {1} copias fueron a la cuarentena. {2}</value></data>
+  <data name="Dup.Undone" xml:space="preserve"><value>Las copias volvieron a su lugar.</value></data>
+  <data name="Dup.UndoFailed" xml:space="preserve"><value>Algunas copias no volvieron; mira el Historial.</value></data>
+  <data name="Dup.Safety" xml:space="preserve"><value>La copia más antigua de cada grupo es la que se queda al usar "Marcar las copias extra". NEXUS vuelve a comprobar el SHA-256 antes de mover y nunca sigue enlaces.</value></data>
 </root>

@@ -241,6 +241,15 @@
                              BeforeLabel="{l:T Boot.MediaBoots}" AfterLabel="{l:T Boot.UltimoBoot}"/>
               <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,10,0,0"
                          Text="{l:T Boot.MudancasAquiSoAparecem}"/>
+              <TextBlock Text="{Binding TrendText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,10,0,0"
+                         TextWrapping="Wrap" Visibility="{Binding HasTrend, Converter={StaticResource BoolToVis}}"/>
+              <Border Background="{Binding CompareTone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}" CornerRadius="{StaticResource Radius.Control}"
+                      Padding="10,8" Margin="0,10,0,0" Visibility="{Binding HasCompare, Converter={StaticResource BoolToVis}}">
+                <DockPanel>
+                  <c:Icon Data="{StaticResource Icon.History}" Size="15" Foreground="{Binding CompareTone, Converter={StaticResource ToneBrush}}" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                  <TextBlock Text="{Binding CompareText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap"/>
+                </DockPanel>
+              </Border>
               <c:ExplainToggle Margin="0,2,0,0">
                 <StackPanel>
                   <TextBlock Text="{Binding HeroDetail}" Style="{StaticResource Text.Small}"/>

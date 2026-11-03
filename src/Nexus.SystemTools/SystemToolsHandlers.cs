@@ -1,5 +1,6 @@
 using Nexus.Core;
 using Nexus.SystemTools.Appx;
+using Nexus.SystemTools.Crash;
 using Nexus.SystemTools.Drivers;
 using Nexus.SystemTools.Network;
 using Nexus.SystemTools.Restore;
@@ -42,6 +43,7 @@ public static class SystemToolsHandlers
             new DriverBackupAllHandler(drivers, data),
             new RestorePointHandler(restore),
             new AppxPackageHandler(appx, data, environment.OtherAccount),
+            new LocalDumpsHandler(environment.Registry),
         ];
     }
 

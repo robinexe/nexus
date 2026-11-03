@@ -1,0 +1,142 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Utilidades (02/11/2026): travamentos de jogo (minidespejo por jogo), arquivos duplicados (quarentena do NEXUS), sessão de jogo (limite temporário da Otimização de Entrega) e mitos com fonte. Ver docs/modules/utilidades.md.",
+  "actions": [
+    {
+      "id": "system.crash.localdumps",
+      "version": 1,
+      "title": "Guardar detalhes dos próximos travamentos deste jogo (minidespejo)",
+      "i18n": { "en": { "title": "Keep details of this game's next crashes (minidump)" }, "es": { "title": "Guardar detalles de los próximos cierres de este juego (minivolcado)" } },
+      "classification": "SupportedDocumented",
+      "condition": "Só para um jogo que fechou sozinho, escolhido pelo usuário na tela Problemas.",
+      "handlerKind": "SystemCrashLocalDumps",
+      "target": {
+        "exe": "{gameExe}"
+      },
+      "desiredValue": "on",
+      "desiredType": "WerLocalDumps",
+      "userParameters": {
+        "gameExe": "[A-Za-z0-9][A-Za-z0-9 ._()+\\-]{0,100}\\.[Ee][Xx][Ee]"
+      },
+      "mechanism": "Cria HKLM\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\<jogo.exe> com DumpType=1 (minidespejo) e DumpCount=3. Quando o jogo travar de novo, o Relatório de Erros do Windows guarda um arquivo pequeno em %LOCALAPPDATA%\\CrashDumps que o suporte do jogo ou do driver consegue analisar. Não muda desempenho.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/wer/collecting-user-mode-dumps"
+        }
+      ],
+      "risks": "Cada minidespejo ocupa alguns MB (no máximo 3 guardados). Ele contém um pedaço da memória do jogo no momento do erro: só compartilhe com quem vai analisar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura de DumpType e DumpCount na chave do jogo.",
+      "revert": "Volta os valores anteriores; o que o NEXUS criou é removido (inclusive a chave do jogo, se ficou vazia). Os despejos já gravados ficam em %LOCALAPPDATA%\\CrashDumps para você apagar quando quiser."
+    },
+    {
+      "id": "files.duplicate.quarantine",
+      "version": 1,
+      "title": "Mover arquivo duplicado para a quarentena do NEXUS",
+      "i18n": { "en": { "title": "Move duplicate file to the NEXUS quarantine" }, "es": { "title": "Mover archivo duplicado a la cuarentena de NEXUS" } },
+      "classification": "Conditional",
+      "condition": "Só para uma cópia escolhida pelo usuário na busca de duplicados do analisador de disco, com o mesmo SHA-256 que a busca viu; pelo menos uma cópia de cada grupo fica no lugar.",
+      "handlerKind": "ScannerQuarantine",
+      "target": {
+        "scope": "HKCU",
+        "path": "{path}",
+        "sha256": "{sha256}"
+      },
+      "desiredValue": "quarantined",
+      "desiredType": "ScannerQuarantine",
+      "userParameters": {
+        "path": "[A-Za-z]:\\\\(?:(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}\\\\){0,15}(?!\\.\\.?(?:\\\\|$))[^\\\\/:*?\"<>|\\x00-\\x1F]{1,120}",
+        "sha256": "[0-9a-f]{64}"
+      },
+      "mechanism": "Mesma quarentena do Verificar arquivos: o arquivo vai para DataDirectory\\quarantine\\scanner\\<id> (renomeação no mesmo disco; em outro disco, cópia conferida por SHA-256 e só então remoção), com manifesto. O aplicador revalida: pasta do Windows, Arquivos de Programas, ProgramData, perfis de outras contas e dados do NEXUS nunca; nunca links/junções; o SHA-256 precisa ser o da busca. Nada é apagado de verdade.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "Dois arquivos com o mesmo tamanho e o mesmo SHA-256 têm o mesmo conteúdo (colisão de SHA-256 não é conhecida). Mover para a quarentena libera o espaço no lugar original e o Desfazer devolve byte a byte."
+        }
+      ],
+      "risks": "Algum programa pode esperar a cópia naquele caminho (ex.: uma pasta de projeto): ele reclama até você desfazer. O espaço só volta de verdade quando você esvaziar a quarentena do NEXUS.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura: o arquivo saiu do caminho e a quarentena (manifesto + conteúdo com o mesmo SHA-256) existe.",
+      "revert": "Devolve o arquivo ao caminho original, conferindo o SHA-256; se algo novo ocupar o lugar, restaura ao lado com o sufixo '(restaurado pelo NEXUS)', sem sobrescrever."
+    },
+    {
+      "id": "game.session.do-foreground-cap",
+      "version": 1,
+      "title": "Durante o jogo: downloads da Microsoft Store e do Windows usando no máximo 20% da internet",
+      "i18n": { "en": { "title": "While gaming: Microsoft Store and Windows downloads using at most 20% of the internet" }, "es": { "title": "Mientras juegas: descargas de Microsoft Store y Windows usando como máximo el 20% de internet" } },
+      "classification": "Conditional",
+      "condition": "Só com a \"sessão de jogo\" ligada na tela Jogos: aplicada quando um jogo abre e desfeita quando ele fecha.",
+      "handlerKind": "PrivacyPolicyValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+        "name": "DOPercentageMaxForegroundBandwidth",
+        "type": "DWord"
+      },
+      "desiredValue": 20,
+      "desiredType": "DWord",
+      "mechanism": "Política documentada da Otimização de Entrega: limita a banda dos downloads em primeiro plano (Microsoft Store, Xbox, \"Verificar atualizações\") a 20% enquanto você joga. O Modo de Jogo já segura instalações de driver e avisos de reinício; isto cobre o download que você mesmo começou.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/deployment/do/waas-delivery-optimization-reference"
+        },
+        {
+          "level": "Community",
+          "source": "https://www.pcgamer.com/latest-windows-10-update-stops-future-updates-interrupting-your-game"
+        }
+      ],
+      "risks": "Ganho pequeno: só ajuda se um download da Microsoft estiver rodando durante o jogo. Não limita Steam, Epic, OneDrive nem navegador. Downloads da Store ficam mais lentos enquanto o jogo está aberto.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura da política.",
+      "revert": "Ao fechar o jogo o NEXUS desfaz sozinho: volta o valor anterior ou remove a política (padrão do Windows)."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "myth.util.interrupt-moderation-off",
+      "classification": "Ineffective",
+      "reason": "Desligar a moderação de interrupções da placa de rede não \"tira o lag\": a latência que você sente no jogo vem da internet e do servidor (dezenas de ms), e a moderação soma microssegundos. Sem ela a CPU recebe uma interrupção por pacote; nas medições publicadas o padrão (Médio/adaptativo) foi o melhor equilíbrio.",
+      "source": "https://github.com/djdallmann/GamingPCSetup"
+    },
+    {
+      "id": "myth.util.faster-plan-fixes-lag-under-load",
+      "classification": "Ineffective",
+      "reason": "Ping que sobe quando alguém baixa ou assiste vídeo é bufferbloat (fila cheia no roteador/modem), não falta de velocidade: um plano mais rápido enche a fila do mesmo jeito. O que resolve é SQM/gerência de fila no roteador (fq_codel, CAKE) ou limitar o download um pouco abaixo do contratado.",
+      "source": "https://blog.oppedahl.com/do-you-have-bufferbloat/"
+    },
+    {
+      "id": "myth.util.raise-tdrdelay",
+      "classification": "Rejected",
+      "reason": "Aumentar TdrDelay só faz o Windows esperar mais antes de reiniciar o driver de vídeo travado: o \"o driver parou de responder\" (evento 4101) some da tela, mas o travamento continua (a imagem congela por mais tempo ou vira tela azul). A causa é driver, overclock, temperatura ou fonte.",
+      "source": "https://learn.microsoft.com/en-us/archive/technet-wiki/1462.event-id-4101-display-driver-timeout-detection-and-recovery"
+    },
+    {
+      "id": "myth.util.event-37-overheating",
+      "classification": "Ineffective",
+      "reason": "O evento 37 (Kernel-Processor-Power, \"velocidade limitada pelo firmware\") não quer dizer superaquecimento: o firmware limita por temperatura, por energia (PL1/PL2, bateria, plano de energia) ou por corrente. Veja a temperatura e o contador \"% Limite de desempenho\" antes de concluir.",
+      "source": "https://www.intel.com/content/www/us/en/support/articles/000090904.html"
+    },
+    {
+      "id": "myth.util.8000hz-always-better-or-worse",
+      "classification": "Ineffective",
+      "reason": "Não há medição publicada que mostre 8000 Hz sempre melhor (ou sempre pior) que 1000 Hz: depende do mouse, da porta USB, do jogo e de quanto a CPU aguenta as interrupções extras. Meça no seu PC (Jogos › Testar o mouse: taxa real e irregularidade) e fique com a taxa que sai estável.",
+      "source": "https://learn.microsoft.com/en-us/windows/win32/inputdev/raw-input"
+    },
+    {
+      "id": "myth.util.priority-affinity-fps-everywhere",
+      "classification": "Ineffective",
+      "reason": "Programas de prioridade/afinidade (Process Lasso e parecidos) não dão FPS em qualquer PC: o agendador do Windows já prioriza a janela em primeiro plano, e prender o jogo a núcleos pode piorar. A única evidência (fraca) é em processadores Ryzen X3D de dois CCDs, onde o próprio driver da AMD já direciona o jogo.",
+      "source": "https://learn.microsoft.com/en-us/windows/win32/procthread/scheduling-priorities"
+    }
+  ]
+}

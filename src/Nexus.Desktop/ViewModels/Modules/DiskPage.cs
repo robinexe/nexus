@@ -67,13 +67,18 @@ public sealed class DiskPage : ModulePage, IDisposable
         });
         ShowInExplorerCommand = new DiskCommand(p => ShowInExplorer(p as string));
         SecureDeleteCommand = new RelayCommand(() => _ = SecureDeleteAsync(), () => !Busy && !Scanning && Host is not null);
+        Duplicates = new DuplicatesPanel(() => Host, () => _folder?.FullPath ?? SelectedVolume?.Volume.RootPath);
     }
+
+    /// <summary>Arquivos duplicados na pasta aberta (ou na unidade escolhida); mover vai para a quarentena, com Desfazer.</summary>
+    public DuplicatesPanel Duplicates { get; }
 
     public void Dispose()
     {
         _scan?.Cancel();
         _scan?.Dispose();
         _scan = null;
+        Duplicates.Dispose();
     }
 
     public override string Title => Loc.T("Disk.NavTitle");
@@ -92,6 +97,7 @@ public sealed class DiskPage : ModulePage, IDisposable
             OnPropertyChanged(nameof(FreeBytes));
             OnPropertyChanged(nameof(UsedPercentValue));
             OnPropertyChanged(nameof(HeroTitle));
+            Duplicates.RootChanged();
         }
     }
 
@@ -259,6 +265,7 @@ public sealed class DiskPage : ModulePage, IDisposable
     private void Show(DirNode folder)
     {
         _folder = folder;
+        Duplicates.RootChanged();
         FolderTitle = $"{folder.FullPath} · {Format.Bytes(folder.Size)}" + (folder.Incomplete ? Loc.T("Disk.MinimoParteSemAcesso") : "");
         var tiles = folder.Tiles();
         if (tiles.Count > MaxTiles)

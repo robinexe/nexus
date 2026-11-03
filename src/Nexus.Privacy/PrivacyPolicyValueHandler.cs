@@ -57,6 +57,8 @@ public static class PrivacyPolicyAllowlist
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR"),
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization", "DODownloadMode"),
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization", "DOPercentageMaxBackgroundBandwidth"),
+        // catalog/utilities.v1.json (sessão de jogo): limite temporário dos downloads em primeiro plano, desfeito quando o jogo fecha.
+        (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization", "DOPercentageMaxForegroundBandwidth"),
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "AllowRecallEnablement"),
         (RegHive.HKLM, @"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "DisableClickToDo"),
     ];
