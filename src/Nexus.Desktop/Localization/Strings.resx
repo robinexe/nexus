@@ -3937,4 +3937,32 @@ Cada coisa volta como era antes. O que é do sistema pede permissão de administ
   <data name="Crash.GameLine1" xml:space="preserve"><value>1 vez · última em {1}</value></data>
   <data name="Crash.GameLineN" xml:space="preserve"><value>{0} vezes · última em {1}</value></data>
   <data name="Crash.WhatToDo" xml:space="preserve"><value>O que fazer:</value></data>
+  <data name="Session.Title" xml:space="preserve"><value>Sessão de jogo</value></data>
+  <data name="Session.Lead" xml:space="preserve"><value>Enquanto um jogo estiver aberto, os downloads da Microsoft Store e do Windows usam no máximo 20% da internet. Volta ao normal sozinho quando o jogo fecha.</value></data>
+  <data name="Session.Honest" xml:space="preserve"><value>Ganho pequeno: só ajuda se um download da Microsoft estiver rodando durante o jogo. O Modo de jogo já segura atualizações e avisos. Steam, Epic e OneDrive não são limitados (o NEXUS só avisa). O Windows pede permissão de administrador quando o jogo abre, a menos que o NEXUS esteja aberto como administrador.</value></data>
+  <data name="Session.TurnOn" xml:space="preserve"><value>Ligar</value></data>
+  <data name="Session.TurnOff" xml:space="preserve"><value>Desligar</value></data>
+  <data name="Session.ConfirmOn" xml:space="preserve"><value>Ligar a sessão de jogo? Quando um jogo abrir, o NEXUS limita os downloads da Microsoft a 20% e desfaz sozinho quando ele fechar. O ganho é pequeno, e o Windows vai pedir permissão de administrador a cada jogo.</value></data>
+  <data name="Session.Off" xml:space="preserve"><value>Desligada.</value></data>
+  <data name="Session.Waiting" xml:space="preserve"><value>Ligada: esperando um jogo abrir.</value></data>
+  <data name="Session.Active" xml:space="preserve"><value>Ativa enquanto {0} está aberto: downloads da Microsoft limitados a 20%.</value></data>
+  <data name="Session.Restoring" xml:space="preserve"><value>O jogo fechou: voltando os downloads ao normal…</value></data>
+  <data name="Session.NotApplied" xml:space="preserve"><value>Não aplicada nesta partida (o Windows não deu permissão ou o aplicador recusou). Tenta de novo no próximo jogo.</value></data>
+  <data name="Session.Error" xml:space="preserve"><value>Sessão de jogo: {0}</value></data>
+  <data name="Session.Busy" xml:space="preserve"><value>{0} está baixando ou sincronizando agora ({1} MB/s): pause se o jogo travar ou o ping subir.</value></data>
+  <data name="Session.WindowsBackup" xml:space="preserve"><value>Backup do Windows</value></data>
+  <data name="Mouse.Title" xml:space="preserve"><value>Teste do mouse</value></data>
+  <data name="Mouse.CardLead" xml:space="preserve"><value>Mede a taxa real do mouse (Hz) e se ela é estável. Só olha: não muda nada.</value></data>
+  <data name="Mouse.Open" xml:space="preserve"><value>Testar</value></data>
+  <data name="Mouse.Lead" xml:space="preserve"><value>Clique em Começar e mexa o mouse em círculos, sem parar, por 5 segundos, com esta janela na frente.</value></data>
+  <data name="Mouse.Start" xml:space="preserve"><value>Começar</value></data>
+  <data name="Mouse.Again" xml:space="preserve"><value>Testar de novo</value></data>
+  <data name="Mouse.Unavailable" xml:space="preserve"><value>O Windows não deixou ler o mouse por Raw Input nesta janela.</value></data>
+  <data name="Mouse.NotEnough" xml:space="preserve"><value>Poucos movimentos para medir. Mexa o mouse sem parar durante os 5 segundos e teste de novo.</value></data>
+  <data name="Mouse.Rate" xml:space="preserve"><value>Taxa medida: {0} Hz</value></data>
+  <data name="Mouse.RateNominal" xml:space="preserve"><value>Taxa medida: {0} Hz (padrão de {1} Hz)</value></data>
+  <data name="Mouse.Jitter" xml:space="preserve"><value>Irregularidade: {0} ms (99% dos intervalos abaixo de {1} ms)</value></data>
+  <data name="Mouse.Stable" xml:space="preserve"><value>Estável: o mouse está entregando os movimentos no ritmo certo.</value></data>
+  <data name="Mouse.Irregular" xml:space="preserve"><value>Irregular: há soluços na entrega. Teste outra porta USB (de preferência atrás do PC, sem hub) ou uma taxa menor no programa do mouse.</value></data>
+  <data name="Mouse.Honest" xml:space="preserve"><value>Só diagnóstico. O instante medido inclui o tempo do Windows para entregar cada movimento, e acima de ~2000 Hz o Windows pode juntar relatórios (a taxa sai menor que a real). Não há prova de que 8000 Hz seja sempre melhor ou pior: fique com a taxa que sai estável.</value></data>
 </root>

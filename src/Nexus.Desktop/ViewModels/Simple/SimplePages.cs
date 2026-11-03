@@ -285,6 +285,27 @@ public sealed class SimpleGamesPage : ModulePage
     {
         Gpu = gpu ?? throw new ArgumentNullException(nameof(gpu));
         Measure = measure ?? throw new ArgumentNullException(nameof(measure));
+        Session = new GameSessionPanel(() => Host, () => Measure);
+        TestMouseCommand = new RelayCommand(OpenMouseTest);
+    }
+
+    /// <summary>Sessão de jogo (desligada por padrão): limite temporário dos downloads da Microsoft enquanto um jogo está aberto.</summary>
+    public GameSessionPanel Session { get; }
+    /// <summary>Teste do mouse (taxa real e irregularidade; só diagnóstico).</summary>
+    public RelayCommand TestMouseCommand { get; }
+
+    private static void OpenMouseTest()
+    {
+        var window = new Views.Modules.Mouse.MouseTestWindow();
+        if (System.Windows.Application.Current?.MainWindow is { IsVisible: true } main) window.Owner = main;
+        window.ShowDialog();
+    }
+
+    /// <summary>A cada leitura do PC: retoma a sessão de jogo (ligada, ou com um limite para desfazer depois de reabrir o NEXUS).</summary>
+    public override Task OnFactsReadyAsync(SystemFacts facts)
+    {
+        Session.Start();
+        return Task.CompletedTask;
     }
 
     public override string Title => Loc.T("Simple.Nav.Games");

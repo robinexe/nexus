@@ -3937,4 +3937,32 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Crash.GameLine1" xml:space="preserve"><value>once · last on {1}</value></data>
   <data name="Crash.GameLineN" xml:space="preserve"><value>{0} times · last on {1}</value></data>
   <data name="Crash.WhatToDo" xml:space="preserve"><value>What to do:</value></data>
+  <data name="Session.Title" xml:space="preserve"><value>Gaming session</value></data>
+  <data name="Session.Lead" xml:space="preserve"><value>While a game is open, Microsoft Store and Windows downloads use at most 20% of the internet. It goes back to normal by itself when the game closes.</value></data>
+  <data name="Session.Honest" xml:space="preserve"><value>Small gain: it only helps if a Microsoft download is running during the game. Game Mode already holds back updates and notifications. Steam, Epic and OneDrive are not limited (NEXUS only warns). Windows asks for administrator permission when the game opens, unless NEXUS is running as administrator.</value></data>
+  <data name="Session.TurnOn" xml:space="preserve"><value>Turn on</value></data>
+  <data name="Session.TurnOff" xml:space="preserve"><value>Turn off</value></data>
+  <data name="Session.ConfirmOn" xml:space="preserve"><value>Turn on the gaming session? When a game opens, NEXUS limits Microsoft downloads to 20% and undoes it by itself when the game closes. The gain is small, and Windows will ask for administrator permission for each game.</value></data>
+  <data name="Session.Off" xml:space="preserve"><value>Off.</value></data>
+  <data name="Session.Waiting" xml:space="preserve"><value>On: waiting for a game to open.</value></data>
+  <data name="Session.Active" xml:space="preserve"><value>Active while {0} is open: Microsoft downloads limited to 20%.</value></data>
+  <data name="Session.Restoring" xml:space="preserve"><value>The game closed: putting downloads back to normal…</value></data>
+  <data name="Session.NotApplied" xml:space="preserve"><value>Not applied this time (Windows did not grant permission or the applier refused). It will try again with the next game.</value></data>
+  <data name="Session.Error" xml:space="preserve"><value>Gaming session: {0}</value></data>
+  <data name="Session.Busy" xml:space="preserve"><value>{0} is downloading or syncing now ({1} MB/s): pause it if the game stutters or the ping goes up.</value></data>
+  <data name="Session.WindowsBackup" xml:space="preserve"><value>Windows Backup</value></data>
+  <data name="Mouse.Title" xml:space="preserve"><value>Mouse test</value></data>
+  <data name="Mouse.CardLead" xml:space="preserve"><value>Measures the mouse's real rate (Hz) and whether it is steady. It only looks: nothing changes.</value></data>
+  <data name="Mouse.Open" xml:space="preserve"><value>Test</value></data>
+  <data name="Mouse.Lead" xml:space="preserve"><value>Click Start and move the mouse in circles, without stopping, for 5 seconds, with this window in front.</value></data>
+  <data name="Mouse.Start" xml:space="preserve"><value>Start</value></data>
+  <data name="Mouse.Again" xml:space="preserve"><value>Test again</value></data>
+  <data name="Mouse.Unavailable" xml:space="preserve"><value>Windows did not allow reading the mouse through Raw Input in this window.</value></data>
+  <data name="Mouse.NotEnough" xml:space="preserve"><value>Not enough movement to measure. Keep moving the mouse during the 5 seconds and test again.</value></data>
+  <data name="Mouse.Rate" xml:space="preserve"><value>Measured rate: {0} Hz</value></data>
+  <data name="Mouse.RateNominal" xml:space="preserve"><value>Measured rate: {0} Hz ({1} Hz setting)</value></data>
+  <data name="Mouse.Jitter" xml:space="preserve"><value>Irregularity: {0} ms (99% of intervals below {1} ms)</value></data>
+  <data name="Mouse.Stable" xml:space="preserve"><value>Steady: the mouse is delivering movement at the right pace.</value></data>
+  <data name="Mouse.Irregular" xml:space="preserve"><value>Irregular: there are hiccups in delivery. Try another USB port (preferably at the back of the PC, without a hub) or a lower rate in the mouse software.</value></data>
+  <data name="Mouse.Honest" xml:space="preserve"><value>Diagnostic only. The measured time includes Windows' time to deliver each movement, and above ~2000 Hz Windows may batch reports (the rate shows lower than the real one). There is no proof that 8000 Hz is always better or worse: keep the rate that comes out steady.</value></data>
 </root>

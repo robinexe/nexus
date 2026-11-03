@@ -376,6 +376,53 @@
           </DockPanel>
         </Border>
 
+        <!-- Sessão de jogo (desligada por padrão): limite temporário dos downloads da Microsoft enquanto o jogo está aberto. -->
+        <Border Style="{StaticResource S.Card}" DataContext="{Binding Session}">
+          <StackPanel>
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" MinWidth="110" VerticalAlignment="Center"
+                      Content="{Binding ToggleText}" Command="{Binding ToggleCommand}"/>
+              <Grid Width="44" Height="44" Margin="0,0,16,0" VerticalAlignment="Top">
+                <Ellipse Fill="{StaticResource Brush.TraceSoft}"/>
+                <c:Icon Data="{StaticResource Icon.Games}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+              </Grid>
+              <StackPanel>
+                <TextBlock Text="{l:T Session.Title}" Style="{StaticResource S.Item}" FontWeight="SemiBold"/>
+                <TextBlock Text="{l:T Session.Lead}" Style="{StaticResource S.Lead}" FontSize="15" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Signal}" Margin="0,8,0,0"
+                           TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+                <ItemsControl ItemsSource="{Binding Warnings}" Focusable="False" Margin="0,6,0,0" Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVis}}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <DockPanel Margin="0,2">
+                        <c:Icon Data="{StaticResource Icon.Warning}" Size="14" Foreground="{StaticResource Brush.Trace}" Margin="0,0,6,0" VerticalAlignment="Top"/>
+                        <TextBlock Text="{Binding}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap"/>
+                      </DockPanel>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="{l:T Session.Honest}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+              </StackPanel>
+            </DockPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Teste do mouse (só diagnóstico) -->
+        <Border Style="{StaticResource S.Card}" Margin="0,0,0,24">
+          <DockPanel>
+            <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" MinWidth="110" VerticalAlignment="Center"
+                    Content="{l:T Mouse.Open}" Command="{Binding TestMouseCommand}"/>
+            <Grid Width="44" Height="44" Margin="0,0,16,0" VerticalAlignment="Top">
+              <Ellipse Fill="{StaticResource Brush.TraceSoft}"/>
+              <c:Icon Data="{StaticResource Icon.Measure}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+            </Grid>
+            <StackPanel>
+              <TextBlock Text="{l:T Mouse.Title}" Style="{StaticResource S.Item}" FontWeight="SemiBold"/>
+              <TextBlock Text="{l:T Mouse.CardLead}" Style="{StaticResource S.Lead}" FontSize="15" Margin="0,6,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+          </DockPanel>
+        </Border>
+
         <c:SkeletonLoader Shape="Lines" Lines="5" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         <c:EmptyState Illustration="{StaticResource Illo.Measure}" Text="{l:T Simple.Games.None}" Detail="{l:T Simple.Games.NoneDetail}"
                       ActionText="{l:T Simple.Games.Measure}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="MeasurePage"

@@ -155,6 +155,10 @@ public sealed class MeasurePage : ModulePage, IDisposable
     public string HeroTitle { get => _heroTitle; private set => Set(ref _heroTitle, value); }
     public string HeroDetail { get => _heroDetail; private set => Set(ref _heroDetail, value); }
     public bool IsPlaying => _detected is not null;
+    /// <summary>Jogo aberto agora pela detecção do Medir (a sessão de jogo da tela Jogos usa a mesma detecção).</summary>
+    public DetectedGame? CurrentGame => _detected;
+    /// <summary>Começa a acompanhar processos sem abrir a página (sessão de jogo ligada).</summary>
+    public void StartWatching() => EnsureStarted();
     public bool IsCapturing => _engine?.Session is not null;
     public string CaptureNote { get => _captureNote; private set => Set(ref _captureNote, value); }
     public string ManualExe { get => _manualExe; set => Set(ref _manualExe, value); }
