@@ -265,7 +265,11 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     desktop-diag.log. Fortnite: handler FortniteIniValue (GameUserSettings.ini, só com o jogo fechado, desfazer byte a byte),
     catalog/fortnite.v1.json (9 ações, 8 mitos), cartão no Jogos e em Placa de vídeo; docs/modules/fortnite.md.
     2384 testes; VM verde. Instalador 1.0.0-ci.24.
-24. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
+24. **03/11 madrugada (2):** Jogos lê o estado real de cada opção (NVIDIA DRS, DirectX por jogo, Fortnite, Modo de jogo) e
+    lembra o que foi feito (GameOptionStates.cs); instalador 1.0.0-ci.25. Contrato comum dos cartões de jogo
+    (src/Nexus.GameProfiles/Cards/GameCards.cs, IGameCardProvider com registro automático) e lógica do laboratório A/B
+    (src/Nexus.Measurement/AbLab: veredito A/B e A/B/A, máquina de estados, histórico; sem tela ainda). 2436 testes.
+25. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
     diagnósticos, idiomas), rodar _claude\Configurar-Atualizacoes.cmd, certificado de assinatura de código, publicar a
     1.0.0 (tag v1.0.0) e subir VersionPrefix para 1.0.1. Depois: VALORANT, investigador de travadinhas, A/B automático, IA. NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.
