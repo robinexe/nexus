@@ -86,6 +86,7 @@ public static class NexusChecks
         new("Medir", "Bibliotecas de jogos", GameLibraries),
         new("Medir", "PresentMon encontrado?", PresentMon) { WindowsOnly = false },
         new("Medir", "PresentMon executa (captura de 5 s do dwm.exe)", PresentMonRunsAsync) { Timeout = TimeSpan.FromSeconds(60) },
+        new("Laboratório A/B", "Arquivo do laboratório (teste em andamento, fila, histórico)", AbLabFile) { WindowsOnly = false },
         new("Automático", "Perfil do PC e recomendações", Recommendations) { WindowsOnly = false },
         new("Automático", "Tarefas agendadas do NEXUS", ScheduledTasks),
         new("Ajustes", "settings.json", Settings) { WindowsOnly = false },
@@ -633,6 +634,18 @@ public static class NexusChecks
         c.Count("jogos", games.Count);
         c.Count("lojas com jogos", games.Select(g => g.Store).Distinct().Count());
         foreach (var n in notes.Take(3)) c.Warn(n);
+    }
+
+    /// <summary>Laboratório A/B: lê %LocalAppData%\NEXUS\ab-lab.json como a página faz (arquivo ilegível vira vazio + .bad). Só leitura.</summary>
+    private static void AbLabFile(CheckContext c)
+    {
+        var store = new Nexus.Measurement.AbLab.AbLabStore(Nexus.Measurement.AbLab.AbLabStore.DefaultPath);
+        c.Flag("existe", File.Exists(store.FilePath));
+        var data = store.Load();
+        c.Flag("teste em andamento", data.Active is { Step: not Nexus.Measurement.AbLab.AbStep.Done });
+        c.Count("na fila", data.Queue.Count);
+        c.Count("no histórico", data.History.Count);
+        if (File.Exists(store.FilePath + ".bad")) c.Warn("o arquivo anterior estava ilegível e foi guardado como .bad");
     }
 
     /// <summary>

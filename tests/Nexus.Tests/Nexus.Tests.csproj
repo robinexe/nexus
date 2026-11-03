@@ -54,6 +54,8 @@
     <!-- Jogos: estado real de cada opção e o que a desfaz no diário (GameOptionStateTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameOptionStates.cs" Link="Shell\GameOptionStates.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameSessionStore.cs" Link="Shell\GameSessionStore.cs" />
+    <!-- Laboratório A/B: candidatos, pedidos e frases do veredito (AbLabPageTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Modules\AbLabText.cs" Link="Shell\AbLabText.cs" />
     <!-- Medir: "Por que travou?" em palavras simples (MeasureStutterTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Modules\MeasureStutter.cs" Link="Shell\MeasureStutter.cs" />
     <!-- Checagens do PC: achados em palavras simples com os números da leitura (PcChecksDesktopTests). -->

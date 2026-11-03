@@ -441,6 +441,8 @@ pelo aplicador. O cartão/linha em que o usuário clicou fica à vista mesmo dep
   - Ligada: "✓ Ligado — Desfazer" quando o diário tem a execução que só mexeu nela (chave da ação + alvo do jogo); feita junto
     com outras coisas: "Desfazer no Histórico"; ligada por fora do NEXUS: só "✓ Ligado". Valor diferente: "Está com outro valor".
   - Os botões são os mesmos entre aberturas da tela; a cada abertura e depois de aplicar/desfazer, relê só aquele jogo.
+  - "Comparar com e sem" (jogos com opções): abre o **Laboratório A/B** já com o jogo escolhido — uma partida sem, o NEXUS aplica,
+    uma partida com; só fica o que melhorar de verdade (`docs/modules/ablab.md`).
 - **Início/Problemas depois de aplicar**: o diagnóstico só é refeito na próxima leitura do PC; até lá, um achado cuja ação do
   catálogo já está como ela deixa (releitura "same") conta como resolvido (`ResolvedFindings`) e não volta como pendente.
 - **Problemas**: achados em palavras simples (`PlainFindings`), "O que fazer" em 1–2 frases e "Resolver" de um clique quando há
