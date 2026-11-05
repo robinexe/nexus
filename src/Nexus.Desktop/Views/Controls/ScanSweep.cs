@@ -69,9 +69,9 @@ public class ScanSweep : FrameworkElement
         double.IsFinite(availableSize.Width) ? Math.Min(availableSize.Width, 560) : 520,
         double.IsFinite(availableSize.Height) ? Math.Min(availableSize.Height, 420) : 400);
 
-    protected override void OnRender(DrawingContext dc)
+    protected override void OnRender(DrawingContext drawingContext)
     {
-        ArgumentNullException.ThrowIfNull(dc);
+        ArgumentNullException.ThrowIfNull(drawingContext);
         var nodes = Items?.OfType<ISweepNode>().ToList() ?? [];
         var w = ActualWidth;
         var h = ActualHeight;
@@ -82,13 +82,13 @@ public class ScanSweep : FrameworkElement
         // Fundo: disco fundo, dois anéis finos.
         var disc = new RadialGradientBrush(Color.FromRgb(0x11, 0x17, 0x26), Color.FromRgb(0x0A, 0x0E, 0x18));
         disc.Freeze();
-        dc.DrawEllipse(disc, null, c, r + 34, r + 34);
+        drawingContext.DrawEllipse(disc, null, c, r + 34, r + 34);
         var ring = new Pen(Theme.Find("Brush.Line"), 1);
         ring.Freeze();
         var soft = new Pen(Theme.Find("Brush.LineSoft"), 1);
         soft.Freeze();
-        dc.DrawEllipse(null, ring, c, r, r);
-        dc.DrawEllipse(null, soft, c, r * 0.55, r * 0.55);
+        drawingContext.DrawEllipse(null, ring, c, r, r);
+        drawingContext.DrawEllipse(null, soft, c, r * 0.55, r * 0.55);
 
         // Ponteiro com rastro (só girando).
         if (IsActive && ShellMotion.Enabled)
@@ -100,13 +100,13 @@ public class ScanSweep : FrameworkElement
                 var a = (angle - i * 3.5) * Math.PI / 180;
                 var p = new Pen(new SolidColorBrush(Color.FromArgb((byte)(48 * (1 - i / 15d)), trace.R, trace.G, trace.B)), 3);
                 p.Freeze();
-                dc.DrawLine(p, c, new Point(c.X + r * Math.Sin(a), c.Y - r * Math.Cos(a)));
+                drawingContext.DrawLine(p, c, new Point(c.X + r * Math.Sin(a), c.Y - r * Math.Cos(a)));
             }
             var ha = angle * Math.PI / 180;
             var hand = new Pen(new LinearGradientBrush(Color.FromArgb(0, trace.R, trace.G, trace.B), trace,
                 new Point(0.5 - 0.5 * Math.Sin(ha), 0.5 + 0.5 * Math.Cos(ha)), new Point(0.5 + 0.5 * Math.Sin(ha), 0.5 - 0.5 * Math.Cos(ha))), 2);
             hand.Freeze();
-            dc.DrawLine(hand, c, new Point(c.X + r * Math.Sin(ha), c.Y - r * Math.Cos(ha)));
+            drawingContext.DrawLine(hand, c, new Point(c.X + r * Math.Sin(ha), c.Y - r * Math.Cos(ha)));
         }
 
         // Pontos e nomes.
@@ -120,7 +120,7 @@ public class ScanSweep : FrameworkElement
             var p = new Point(c.X + r * Math.Sin(a), c.Y - r * Math.Cos(a));
             if (n.IsDone)
             {
-                dc.DrawEllipse(Theme.Find("Brush.Good"), null, p, 9, 9);
+                drawingContext.DrawEllipse(Theme.Find("Brush.Good"), null, p, 9, 9);
                 var tick = new Pen(Theme.Find("Brush.Ground"), 2) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round };
                 tick.Freeze();
                 var g = new StreamGeometry();
@@ -131,20 +131,20 @@ public class ScanSweep : FrameworkElement
                     ctx.LineTo(new Point(p.X + 4.5, p.Y - 3), true, true);
                 }
                 g.Freeze();
-                dc.DrawGeometry(null, tick, g);
+                drawingContext.DrawGeometry(null, tick, g);
             }
             else if (n.IsCurrent)
             {
-                dc.DrawEllipse(Theme.Find("Brush.SignalSoft"), null, p, 15, 15);
+                drawingContext.DrawEllipse(Theme.Find("Brush.SignalSoft"), null, p, 15, 15);
                 var cur = new Pen(Theme.Find("Brush.Signal"), 2);
                 cur.Freeze();
-                dc.DrawEllipse(Theme.Find("Brush.Ground"), cur, p, 9, 9);
+                drawingContext.DrawEllipse(Theme.Find("Brush.Ground"), cur, p, 9, 9);
             }
             else
             {
                 var pend = new Pen(Theme.Find("Brush.Line"), 1.5);
                 pend.Freeze();
-                dc.DrawEllipse(Theme.Find("Brush.Ground"), pend, p, 8, 8);
+                drawingContext.DrawEllipse(Theme.Find("Brush.Ground"), pend, p, 8, 8);
             }
 
             var color = n.IsDone ? Theme.Find("Brush.Text") : n.IsCurrent ? Theme.Find("Brush.Signal") : Theme.Find("Brush.TextDim");
@@ -164,7 +164,7 @@ public class ScanSweep : FrameworkElement
             }
             else if (sin > 0) at = new Point(p.X + 20, p.Y - text.Height / 2);                       // direita
             else { text.TextAlignment = TextAlignment.Right; at = new Point(p.X - 20 - text.MaxTextWidth, p.Y - text.Height / 2); } // esquerda
-            dc.DrawText(text, at);
+            drawingContext.DrawText(text, at);
         }
     }
 

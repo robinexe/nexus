@@ -113,7 +113,7 @@ public sealed class HomeLive : ObservableObject
         CpuDetail = TelemetryText.Ghz(s.Cpu.EffectiveMhz);
         CpuSentence = TelemetryText.Cpu(s.Cpu.TotalPercent);
 
-        double? temp = _gpuIsNvidia ? tick.Nvidia.FirstOrDefault()?.TemperatureC : null;
+        double? temp = _gpuIsNvidia && tick.Nvidia.Count > 0 ? tick.Nvidia[0].TemperatureC : null;
         var gpu = s.Gpu?.OverallPercent ?? double.NaN;
         GpuPercent = gpu;
         GpuText = double.IsFinite(gpu) ? Math.Round(gpu).ToString("0", Loc.Culture) : "—";
