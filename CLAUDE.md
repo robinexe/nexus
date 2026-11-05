@@ -61,8 +61,8 @@ design-critique) trazem **tokens de exemplo `--sds-*` de um tema claro**. Eles n
 | `aria-*` | `AutomationProperties.Name` / `HelpText` / `LiveSetting` |
 
 Contraste medido (WCAG, 05/11/2026): `Text` 15,7:1 · `TextMuted` 6,3:1 · `Trace` 10,6:1 · `Signal` 10,3:1 · `Good` 11,7:1 ·
-`Bad` 6,7:1 sobre `Bg`. **`TextDim` = 3,3:1 sobre `Bg` e 2,6:1 sobre `SurfaceHi`: reprova para texto normal** — usar só em
-texto grande ou decorativo, ou ajustar o token no redesign.
+`Bad` 6,7:1 sobre `Bg`. `TextDim` foi clareado para #7C88A8 no redesign: 5,3:1 sobre `Bg`, 4,8:1 sobre `Surface`, **4,1:1 sobre
+`SurfaceHi`** (evite texto pequeno em `TextDim` sobre `SurfaceHi`). Sistema visual atual: `docs/10-design-system.md` §10.
 
 ## 4. Skills instaladas (`.claude/skills/`, origem e versão em `.claude/skills/README.md`)
 

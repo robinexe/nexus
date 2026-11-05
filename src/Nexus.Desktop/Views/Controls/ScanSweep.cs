@@ -157,8 +157,9 @@ public class ScanSweep : FrameworkElement
             var sin = Math.Sin(a);
             var cos = Math.Cos(a);
             Point at;
-            if (Math.Abs(sin) < 0.3) // em cima ou embaixo: centralizado
+            if (Math.Abs(sin) < 0.3) // em cima ou embaixo: centralizado, com mais largura
             {
+                text.MaxTextWidth = LabelRoom * 1.8;
                 text.TextAlignment = TextAlignment.Center;
                 at = cos > 0 ? new Point(p.X - text.MaxTextWidth / 2, p.Y - 22 - text.Height) : new Point(p.X - text.MaxTextWidth / 2, p.Y + 20);
             }
