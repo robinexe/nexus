@@ -1,0 +1,23 @@
+{
+  "skill_name": "design-pipeline",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I want to design a new data classification workflow for our product. We need users to be able to tag sensitive data fields across multiple data sources. I want to run the full design pipeline automated — don't stop and ask me anything, just run it end to end. The target users are data stewards and security admins. The market is data security and governance, and our main competitors are BigID, OneTrust, and Securiti. The problem is that users currently classify data manually field by field which is slow and error-prone at scale.",
+      "expected_output": "Should ask for running mode at the start (or recognize 'automated' from the prompt), then ask the 3 research setup questions (or recognize answers from the prompt), then run all 9 stages sequentially without pausing, using auto-fix defaults. Should produce: research report HTML, journey map HTML, IA flows, design concept (1 complete prototype for all flows), critique/heuristic findings, accessibility findings, research evaluation, and component gap report. Should present a final summary of all outputs.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "I want to start the design pipeline in guided mode. I already have research from our last round of user interviews — here's what we found: Data engineers spend 40% of their time on access request workflows. The current approval process requires 3-5 manual handoffs across teams. Users described it as 'death by email chain.' Top pain points: no visibility into request status, duplicate requests, and approvals getting lost. Key personas: Data Engineer (requestor), Data Owner (approver), Security Admin (auditor). The main opportunity is a self-service access request portal with automated routing.",
+      "expected_output": "Should ask for running mode (or recognize 'guided' from the prompt), recognize user has existing research, skip to Stage 2 to build the research report from the provided findings, then pause and check in before each subsequent stage. Should NOT re-run research since the user already provided it.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "run the design pipeline for me. I need to explore a new feature area — we're thinking about adding data lineage visualization to our product. I don't have any research yet and I'd like to start with market research to understand the competitive landscape before we do user research. The market is data observability and governance. Target customers are mid-to-large enterprises with complex data ecosystems.",
+      "expected_output": "Should ask for running mode first, then proceed with the 3 research setup questions. Should recognize: needs new research, wants market research specifically, and has provided the problem space. Should invoke user-researcher skill focused on market/competitive analysis methods (not user interviews). Should produce competitive analysis, market sizing context, and trend analysis before moving to Stage 2.",
+      "files": []
+    }
+  ]
+}

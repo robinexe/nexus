@@ -76,6 +76,15 @@ Rodam só na VM descartável do GitHub (`windows-latest`); não entram no build 
 
 A Etapa 3 (broker, kit de VM) não adicionou pacotes.
 
+## Skills do Claude para design (adicionado em 2026-11-05, aviso ao responsável na conversa de 05/11)
+
+Ferramenta de desenvolvimento em `.claude/skills/` (instruções em Markdown para o assistente). **Não entra na solução,
+no build, no instalador nem no ZIP**; nenhum pacote NuGet ou npm foi adicionado. Fontes, commits e licenças em
+`.claude/skills/README.md`: MIT (ui-ux-pro-max, frontend-ui-engineering, 18 Skills de design, 8 Skills GSAP) e Apache-2.0
+(frontend-design), com o texto da licença dentro de cada pasta. `animation-forge` não tem licença publicada: fica só na
+máquina local, fora do git. O script opcional `ui-ux-pro-max/scripts/search.py` usa Python 3 (só biblioteca padrão) na
+máquina de quem desenvolve. Obrigação para a distribuição: nenhuma.
+
 ## Ferramentas fora da solução
 
 `tools/Nexus.SmokeJournal` (gerador do diário de teste), `tools/Nexus.Discover` (relatório de texto da descoberta) e

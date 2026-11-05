@@ -1,0 +1,57 @@
+{
+  "skill_name": "journey-map",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Create an interactive customer journey map for a SaaS onboarding experience with 4 phases: Awareness (landing page, pricing page), Sign Up (registration, email verification), Onboarding (product tour, first project, invite team), and Adoption (daily usage, feature discovery). Include emotion scores showing excitement during sign up dropping to frustration during onboarding then recovering. Add pain points and opportunities for each phase.",
+      "expected_output": "A standalone HTML file with D3.js rendering a grid-based journey map with 4 phase columns, emotion curve SVG showing the dip during onboarding, pain points in red-accented cells, opportunities in green-accented cells, and interactive hover/click behaviors.",
+      "files": [],
+      "assertions": [
+        {"type": "file_exists", "name": "HTML file exists", "pattern": "*.html"},
+        {"type": "contains", "name": "Uses D3.js from CDN", "text": "d3@7"},
+        {"type": "contains", "name": "Standalone (no external CSS)", "text": "<style"},
+        {"type": "contains", "name": "Has 4 phases", "text": "Awareness", "also_contains": ["Sign Up", "Onboarding", "Adoption"]},
+        {"type": "contains", "name": "Emotion curve present", "text": "curveMonotone"},
+        {"type": "contains", "name": "Grid/table layout", "text": "grid"},
+        {"type": "contains", "name": "Pain points section", "text": "pain"},
+        {"type": "contains", "name": "Opportunities section", "text": "opportunit"},
+        {"type": "contains", "name": "SVG element for chart", "text": "<svg"},
+        {"type": "contains", "name": "Interactive behavior", "text": "addEventListener"}
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Build me a customer journey map for an e-commerce purchase experience: Browse → Compare → Purchase → Delivery → Post-Purchase. Include touchpoints (website, mobile app, email, phone), role badges for the teams involved (Marketing, Product, Support, Logistics), and a sentiment curve. Show pain points around checkout friction and delivery delays.",
+      "expected_output": "A standalone HTML file with 5 phases, touchpoint row with channel icons, role badge pills for 4 teams, emotion curve with data points, pain points highlighted in red, and proper grid layout with sticky headers.",
+      "files": [],
+      "assertions": [
+        {"type": "file_exists", "name": "HTML file exists", "pattern": "*.html"},
+        {"type": "contains", "name": "Uses D3.js from CDN", "text": "d3@7"},
+        {"type": "contains", "name": "Has 5 phases", "text": "Browse", "also_contains": ["Compare", "Purchase", "Delivery", "Post-Purchase"]},
+        {"type": "contains", "name": "Role badges present", "text": "Marketing", "also_contains": ["Support", "Logistics"]},
+        {"type": "contains", "name": "Touchpoints present", "text": "touchpoint"},
+        {"type": "contains", "name": "Emotion/sentiment curve", "text": "curve"},
+        {"type": "contains", "name": "Pain points for checkout", "text": "checkout"},
+        {"type": "contains", "name": "Pain points for delivery", "text": "delay"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a journey map from this data:\n\nPhase: Discovery\n- Steps: Google Search, Read Reviews, Visit Website\n- Emotion: 0.5, 0.6, 0.7\n- Pain: Too many options, hard to trust reviews\n- Opportunity: Add comparison tool\n\nPhase: Evaluation\n- Steps: Free Trial, Demo Call, Internal Discussion\n- Emotion: 0.8, 0.7, 0.4\n- Pain: Trial too short, demo scheduling friction\n- Opportunity: Extend trial, self-serve demo\n\nPhase: Purchase\n- Steps: Procurement, Contract, Payment\n- Emotion: 0.3, 0.2, 0.5\n- Pain: Complex procurement process, legal review delays\n- Opportunity: Streamline contract templates\n\nPhase: Implementation\n- Steps: Setup, Training, Go-Live\n- Emotion: 0.6, 0.7, 0.9\n- Pain: Integration complexity\n- Opportunity: Pre-built integrations",
+      "expected_output": "A standalone HTML file accurately rendering the provided structured data as a journey map with 4 phases and 12 steps, emotion curve matching the scores (dip during Purchase phase), pain points and opportunities correctly placed in their cells.",
+      "files": [],
+      "assertions": [
+        {"type": "file_exists", "name": "HTML file exists", "pattern": "*.html"},
+        {"type": "contains", "name": "Uses D3.js from CDN", "text": "d3@7"},
+        {"type": "contains", "name": "All 4 phases present", "text": "Discovery", "also_contains": ["Evaluation", "Purchase", "Implementation"]},
+        {"type": "contains", "name": "All 12 steps present", "text": "Google Search", "also_contains": ["Free Trial", "Procurement", "Go-Live"]},
+        {"type": "contains", "name": "Emotion scores in data", "text": "0.2"},
+        {"type": "contains", "name": "Pain point: trust reviews", "text": "trust reviews"},
+        {"type": "contains", "name": "Opportunity: comparison tool", "text": "comparison tool"},
+        {"type": "contains", "name": "Pain point: procurement", "text": "procurement"},
+        {"type": "contains", "name": "Opportunity: pre-built integrations", "text": "integrations"},
+        {"type": "contains", "name": "Emotion curve SVG", "text": "<svg"}
+      ]
+    }
+  ]
+}
