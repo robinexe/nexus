@@ -138,6 +138,14 @@
           "Nexus.WindowsActions": "[1.0.0, )"
         }
       },
+      "nexus.netroute": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.Security": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {
@@ -191,6 +199,7 @@
           "Nexus.Lab.Memory": "[1.0.0, )",
           "Nexus.Measurement": "[1.0.0, )",
           "Nexus.Monitoring": "[1.0.0, )",
+          "Nexus.NetRoute": "[1.0.0, )",
           "Nexus.Privacy": "[1.0.0, )",
           "Nexus.Programs": "[1.0.0, )",
           "Nexus.Security": "[1.0.0, )",

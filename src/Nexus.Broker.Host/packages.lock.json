@@ -152,6 +152,14 @@
           "Nexus.WindowsActions": "[1.0.0, )"
         }
       },
+      "nexus.netroute": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.Security": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {

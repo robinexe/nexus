@@ -7,6 +7,7 @@
     <Project Path="src/Nexus.TraceAnalysis/Nexus.TraceAnalysis.csproj" />
     <Project Path="src/Nexus.Experimentation/Nexus.Experimentation.csproj" />
     <Project Path="src/Nexus.Measurement/Nexus.Measurement.csproj" />
+    <Project Path="src/Nexus.NetRoute/Nexus.NetRoute.csproj" />
     <Project Path="src/Nexus.Recovery.Cli/Nexus.Recovery.Cli.csproj" />
     <Project Path="src/Nexus.HardwareDiscovery/Nexus.HardwareDiscovery.csproj" />
     <Project Path="src/Nexus.Cleaning/Nexus.Cleaning.csproj" />

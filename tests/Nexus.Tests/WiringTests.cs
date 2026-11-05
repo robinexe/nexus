@@ -497,6 +497,7 @@ public sealed partial class WiringTests
             typeof(Nexus.DriverUpdates.DriverUpdatesHandlers), typeof(Nexus.Automation.AutomationHandlers), typeof(Nexus.Lab.Cpu.CpuLabHandlers),
             typeof(Nexus.Lab.Gpu.GpuLabHandlers), typeof(Nexus.Lab.Memory.MemoryLabHandlers), typeof(Nexus.GameProfiles.SourceCfg.SourceCfgConvarHandler),
             typeof(Nexus.WindowsActions.Registry.RegistryValueHandler),
+            typeof(Nexus.NetRoute.NetRouteHandlers),
         ];
         return anchors.Select(t => t.Assembly)
             .Concat(AppDomain.CurrentDomain.GetAssemblies().Where(a => a.GetName().Name?.StartsWith("Nexus.", StringComparison.Ordinal) == true))

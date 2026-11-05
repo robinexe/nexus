@@ -1,0 +1,195 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Rota de jogo (05/11/2026): cliente WireGuard oficial, chave do PC, relays do usuário e o túnel só com os blocos do jogo. O túnel só deve ser ligado quando o teste A/B (nexus rota testar / tela Rota de jogo) mostrar ganho. Ver docs/modules/netroute.md.",
+  "actions": [
+    {
+      "id": "netroute.client.install",
+      "version": 1,
+      "title": "Instalar o cliente WireGuard oficial (para a rota de jogo)",
+      "i18n": {
+        "en": {
+          "title": "Install the official WireGuard client (for game routing)"
+        },
+        "es": {
+          "title": "Instalar el cliente oficial de WireGuard (para la ruta de juego)"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "Só quando o usuário vai usar um relay. Baixa o instalador MSI de download.wireguard.com.",
+      "handlerKind": "NetRouteWireGuardClient",
+      "target": {
+        "client": "wireguard-official"
+      },
+      "desiredValue": "installed",
+      "desiredType": "NetRouteClient",
+      "mechanism": "Baixa a lista oficial latest.sig da WireGuard LLC, escolhe o MSI da arquitetura do PC, confere o SHA-256 publicado e a assinatura Authenticode da WireGuard LLC, e instala em silêncio (msiexec /qn DO_NOT_LAUNCH=1). O túnel do NEXUS usa este cliente; nenhum driver próprio é instalado.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.wireguard.com/install/"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md"
+        }
+      ],
+      "risks": "Instala um programa e um driver de rede assinados pela WireGuard LLC. Antivírus raramente reclamam (é software de VPN amplamente usado).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "wireguard.exe presente em Arquivos de Programas com assinatura válida da WireGuard LLC.",
+      "revert": "Desinstala o WireGuard só se foi o NEXUS que instalou e não houver rota ligada."
+    },
+    {
+      "id": "netroute.identity.create",
+      "version": 1,
+      "title": "Criar a chave da rota de jogo deste PC",
+      "i18n": {
+        "en": {
+          "title": "Create this PC's game-route key"
+        },
+        "es": {
+          "title": "Crear la clave de ruta de juego de este PC"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "Uma vez por PC, antes de cadastrar um relay.",
+      "handlerKind": "NetRouteIdentity",
+      "target": {
+        "identity": "pc"
+      },
+      "desiredValue": "present",
+      "desiredType": "NetRouteIdentity",
+      "mechanism": "Gera um par de chaves X25519 (as chaves do WireGuard) dentro do aplicador. A chave privada fica em %ProgramData%\\NEXUS\\netroute\\identity.json com acesso só de Administradores e SYSTEM; a pública vai para client.pub, para levar ao relay.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.wireguard.com/protocol/"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.rfc-editor.org/rfc/rfc7748"
+        }
+      ],
+      "risks": "Nenhum para o sistema. Apagar a chave invalida os links de relay gerados para ela.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "identity.json legível pelo aplicador e coerente (a pública confere com a privada).",
+      "revert": "Apaga a chave (só se não houver rota ligada)."
+    },
+    {
+      "id": "netroute.relay.add",
+      "version": 1,
+      "title": "Cadastrar um relay da rota de jogo",
+      "i18n": {
+        "en": {
+          "title": "Add a game-route relay"
+        },
+        "es": {
+          "title": "Registrar un relay de ruta de juego"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "Link nexus-relay://v1/ impresso pelo script do relay (nexus_relay.py add) com o código deste PC.",
+      "handlerKind": "NetRouteRelay",
+      "target": {
+        "link": "{link}"
+      },
+      "userParameters": {
+        "link": "nexus-relay://v1/[A-Za-z0-9_\\-]{60,243}"
+      },
+      "desiredValue": "registered",
+      "desiredType": "NetRouteRelay",
+      "mechanism": "Confere o link (chave do relay, endereço público, endereço do PC e do agente dentro do túnel, cidade) e se ele foi gerado para a chave deste PC; grava em %ProgramData%\\NEXUS\\netroute\\relays. Nada é ligado ainda.",
+      "evidence": [
+        {
+          "level": "Mechanistic",
+          "source": "docs/modules/netroute.md (formato do link e validações)"
+        }
+      ],
+      "risks": "Nenhum: só guarda o cadastro.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Arquivo do relay igual ao link pedido.",
+      "revert": "Apaga o cadastro do relay."
+    },
+    {
+      "id": "netroute.tunnel.on",
+      "version": 1,
+      "title": "Ligar a rota de jogo pelo relay",
+      "i18n": {
+        "en": {
+          "title": "Turn on the game route through the relay"
+        },
+        "es": {
+          "title": "Activar la ruta de juego por el relay"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Só quando o teste A/B mostrar que o relay ganha da rota direta (ou com blocos \"-\" para o modo medição). Ligar ANTES da partida: trocar a rota no meio de uma partida derruba a conexão.",
+      "handlerKind": "NetRouteTunnel",
+      "target": {
+        "relay": "{relay}",
+        "game": "{game}",
+        "prefixes": "{prefixes}"
+      },
+      "userParameters": {
+        "relay": "r[0-9a-f]{10}",
+        "game": "[a-z][a-z0-9\\-]{0,45}",
+        "prefixes": "-|[0-9]{1,3}(?:\\.[0-9]{1,3}){3}/[0-9]{1,2}(?:,[0-9]{1,3}(?:\\.[0-9]{1,3}){3}/[0-9]{1,2}){0,15}"
+      },
+      "desiredValue": "on",
+      "desiredType": "NetRouteTunnel",
+      "mechanism": "Monta a configuração do WireGuard (AllowedIPs = agente do relay + blocos do jogo; nunca 0.0.0.0/0, sem trocar DNS) e liga o serviço WireGuardTunnel$NexusRota com wireguard.exe /installtunnelservice. Só o tráfego para os servidores do jogo passa pelo relay; o resto do PC continua na rota normal.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md"
+        },
+        {
+          "level": "Observed",
+          "source": "https://ar5iv.labs.arxiv.org/html/1710.04422 (relays em data centers venceram a rota direta em ~76% dos pares; mediana de ganho ~12 ms)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://technology.riotgames.com/node/25 (provedores escolhem a rota mais barata, não a mais rápida)"
+        }
+      ],
+      "risks": "Se o relay cair, o jogo perde conexão até a rota ser desligada (o NEXUS vigia e avisa). O relay vê o endereço dos servidores do jogo e o volume de tráfego (o conteúdo do jogo segue cifrado pelo WireGuard até o relay). Compatibilidade com antitrapaça não é declarada pelos fabricantes: o túnel é uma VPN comum, sem injeção nem manipulação de pacotes.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Serviço do túnel em execução com a impressão digital da configuração pedida.",
+      "revert": "Desliga e remove o serviço do túnel e apaga a configuração; o jogo volta à rota direta."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "netroute.myth.ping-for-every-game",
+      "classification": "Ineffective",
+      "reason": "Nenhum redutor de ping melhora todos os jogos: se a rota do provedor já está perto do mínimo físico (~1 ms a cada 100 km), o relay só acrescenta um salto. Estudos mostram ganho em parte dos pares, não em todos.",
+      "source": "https://homes.cs.washington.edu/~tom/pubs/sigcomm99.html"
+    },
+    {
+      "id": "netroute.myth.below-physics",
+      "classification": "Ineffective",
+      "reason": "Nenhuma tecnologia baixa o ping abaixo do tempo da luz na fibra: São Paulo–Miami tem ~65 ms de piso e já se mede ~74 ms.",
+      "source": "https://hatsnet.io/docs/network/latency/pairs/gru-mia-rtt"
+    },
+    {
+      "id": "netroute.myth.app-panel-ping",
+      "classification": "Ineffective",
+      "reason": "O ping mostrado no painel de um acelerador pode deixar de fora o trecho até o servidor dele; a prova é o ping dentro do jogo, com e sem, no mesmo horário.",
+      "source": "https://forums.mudfish.net/t/no-change-in-ping-after-using-mudfish-same-ping-as-isp/60115"
+    },
+    {
+      "id": "netroute.rejected.packet-injection",
+      "classification": "Rejected",
+      "reason": "Injeção em processo, hook de socket ou manipulação de pacotes do jogo (estilo 'lag switch') pode causar banimento: o NEXUS só usa uma VPN comum por destino.",
+      "source": "https://valhalla.nextron-systems.com/info/sigma-rule/36424781-4211-47bb-99de-bd52e6a0a5ec"
+    }
+  ]
+}

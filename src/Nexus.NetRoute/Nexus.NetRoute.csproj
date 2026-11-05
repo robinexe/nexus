@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Rota de jogo (docs/modules/netroute.md): diagnóstico da rota até o servidor da partida (ETW + traceroute + piso físico),
+       túnel WireGuard até um relay e decisão A/B honesta (o túnel só liga quando vence a rota direta). A lógica roda nos testes
+       em qualquer SO; o que é do Windows (ETW, WireGuard, serviço do túnel) fica em Windows/*, com [SupportedOSPlatform("windows")].
+       Sem pacote NuGet novo: X25519 é implementado aqui (RFC 7748) e o cliente WireGuard é o oficial, baixado e conferido
+       (Authenticode "WireGuard LLC") só quando o usuário pede. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Nexus.NetRoute</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nexus.Core\Nexus.Core.csproj" />
+    <ProjectReference Include="..\Nexus.WindowsActions\Nexus.WindowsActions.csproj" />
+    <!-- Authenticode (assinatura do instalador oficial do WireGuard). -->
+    <ProjectReference Include="..\Nexus.Security\Nexus.Security.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexus.Tests" />
+    <InternalsVisibleTo Include="Nexus.IntegrationTests" />
+  </ItemGroup>
+</Project>

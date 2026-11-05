@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "nexus.core": {
+        "type": "Project"
+      },
+      "nexus.security": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )",
+          "Nexus.WindowsActions": "[1.0.0, )"
+        }
+      },
+      "nexus.windowsactions": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Core": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

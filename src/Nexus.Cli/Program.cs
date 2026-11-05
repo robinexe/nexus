@@ -27,6 +27,8 @@ Console.OutputEncoding = Encoding.UTF8;
 if (args.Length > 0 && args[0] == "selftest") return await Nexus.Cli.SelfTestCommand.RunAsync(args[1..]);
 // Atualização do programa (procurar / conferir manifesto assinado); docs/11-atualizacao.md.
 if (args.Length > 0 && args[0] == "update") return await Nexus.Cli.UpdateCommand.RunAsync(args[1..]);
+// Rota de jogo (diagnóstico, relay, teste A/B, túnel); docs/modules/netroute.md.
+if (args.Length > 0 && args[0] == "rota") return await Nexus.Cli.RouteCommand.RunAsync(args[1..]);
 var parsed = CliParser.Parse(args);
 // Tarefa agendada: o Agendador abre um console para o nexus.exe; solta-o já (a janela some) e a saída vai para os relatórios.
 if (parsed.Command is { } scheduledCommand && scheduledCommand.Has("--scheduled")) ConsoleDetach.Detach();
@@ -34,6 +36,7 @@ if (parsed.Help)
 {
     Console.WriteLine(CliParser.HelpFor(parsed.HelpTopic));
     if (parsed.HelpTopic is null) Console.WriteLine("Atualização:\n  update --check     Procura versão nova do NEXUS (não baixa nem instala). 'nexus update --help' mostra o resto.");
+    if (parsed.HelpTopic is null) Console.WriteLine("Rota de jogo:\n  rota               Diagnóstico da rota até o servidor do jogo, relay e túnel. 'nexus rota --help' mostra os comandos.");
     if (parsed.HelpTopic is null) Console.WriteLine("Autoteste:\n  selftest           Roda as leituras de todos os módulos no PC real e diz OK/AVISO/FALHA (nada é alterado).\n                     'nexus selftest --help' mostra as opções (--json, --html, --with-benchmarks...).");
     return CliExit.Ok;
 }
