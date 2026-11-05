@@ -3,16 +3,16 @@ using System.Text.RegularExpressions;
 
 namespace Nexus.NetRoute.WireGuard;
 
-/// <summary>Instalador MSI oficial do WireGuard para Windows, com o SHA-256 publicado pela WireGuard LLC.</summary>
-public sealed record WireGuardMsi(string FileName, string Architecture, Version Version, string Sha256)
+/// <summary>Instalador MSI oficial do WireGuard para Windows, com o hash BLAKE2b-256 publicado pela WireGuard LLC.</summary>
+public sealed record WireGuardMsi(string FileName, string Architecture, Version Version, string Blake2b256)
 {
     public Uri Url => new(WireGuardRelease.BaseUrl + FileName);
 }
 
 /// <summary>
 /// A WireGuard LLC publica em <c>https://download.wireguard.com/windows-client/latest.sig</c> a lista assinada dos instaladores
-/// atuais ("&lt;sha256&gt;  wireguard-&lt;arq&gt;-&lt;versão&gt;.msi"; é o que o próprio instalador oficial lê). O NEXUS escolhe o MSI da
-/// arquitetura do PC, baixa do mesmo servidor, confere o SHA-256 da lista E a assinatura Authenticode "WireGuard LLC" antes de
+/// atuais ("&lt;blake2b-256&gt;  wireguard-&lt;arq&gt;-&lt;versão&gt;.msi"; é o que o próprio instalador oficial lê e confere). O NEXUS escolhe o MSI da
+/// arquitetura do PC, baixa do mesmo servidor, confere o BLAKE2b-256 da lista E a assinatura Authenticode "WireGuard LLC" antes de
 /// executar. Qualquer divergência = não instala.
 /// </summary>
 public static partial class WireGuardRelease

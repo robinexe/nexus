@@ -23,7 +23,7 @@
       },
       "desiredValue": "installed",
       "desiredType": "NetRouteClient",
-      "mechanism": "Baixa a lista oficial latest.sig da WireGuard LLC, escolhe o MSI da arquitetura do PC, confere o SHA-256 publicado e a assinatura Authenticode da WireGuard LLC, e instala em silêncio (msiexec /qn DO_NOT_LAUNCH=1). O túnel do NEXUS usa este cliente; nenhum driver próprio é instalado.",
+      "mechanism": "Baixa a lista oficial latest.sig da WireGuard LLC, escolhe o MSI da arquitetura do PC, confere o hash BLAKE2b-256 publicado e a assinatura Authenticode da WireGuard LLC, e instala em silêncio (msiexec /qn DO_NOT_LAUNCH=1). O túnel do NEXUS usa este cliente; nenhum driver próprio é instalado.",
       "evidence": [
         {
           "level": "VendorDocumented",

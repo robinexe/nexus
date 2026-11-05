@@ -38,7 +38,10 @@ internal static class RouteCommand
         "nexus rota ligar [--jogo <id>] [--relay <id>] [--sem-teste]\n" +
         "  Liga o túnel com os blocos do jogo (ligue ANTES da partida). Por padrão, só liga se o teste A/B mostrar ganho.\n" +
         "nexus rota desligar\n" +
-        "  Desliga o túnel (desfaz a execução que o ligou).";
+        "  Desliga o túnel (desfaz a execução que o ligou).\n" +
+        "nexus rota vigiar [--desligar-sozinho]\n" +
+        "  Durante a partida: mede o relay pelo túnel a cada 10 s e avisa se ele piorar (perda ou +30 ms por 3 janelas seguidas).\n" +
+        "  Com --desligar-sozinho, desliga o túnel nesse caso (a próxima partida volta à rota direta). Ctrl+C para parar.";
 
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
@@ -59,6 +62,7 @@ internal static class RouteCommand
                 "testar" => await TestAsync(opts).ConfigureAwait(false),
                 "ligar" => await OnAsync(opts).ConfigureAwait(false),
                 "desligar" => Off(opts),
+                "vigiar" => await WatchAsync(opts).ConfigureAwait(false),
                 _ => UsageError(),
             };
         }
@@ -354,6 +358,37 @@ internal static class RouteCommand
         if (r is not { Ok: true }) return Fail(r, "Não foi possível desligar.");
         (settings with { TunnelRunId = null, TunnelGame = null, TunnelSince = null }).Save(NetRouteSettings.DefaultPath);
         Console.WriteLine("Rota desligada: o jogo voltou à rota direta.");
+        return CliExit.Ok;
+    }
+
+    private static async Task<int> WatchAsync(Dictionary<string, string> o)
+    {
+        if (!OperatingSystem.IsWindows()) return Unsupported();
+        var settings = NetRouteSettings.Load(NetRouteSettings.DefaultPath);
+        if (settings.TunnelRunId is null) { Console.Error.WriteLine("O túnel não está ligado (nexus rota ligar)."); return CliExit.Usage; }
+        var relay = PickRelay(o);
+        if (relay is null) { Console.Error.WriteLine("Relay do túnel não encontrado."); return CliExit.NotFound; }
+        var prober = new IcmpPathProber();
+        using var cts = new CancellationTokenSource();
+        Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
+        var baseline = Nexus.NetRoute.Stats.LatencyStats.From(await prober.PingAsync(relay.AgentAddress, 10, TimeSpan.FromMilliseconds(200), TimeSpan.FromSeconds(1)).ConfigureAwait(false));
+        if (baseline.P50Ms is not { } base50) { Console.Error.WriteLine("O relay não responde pelo túnel agora. Desligue a rota (nexus rota desligar)."); return CliExit.Partial; }
+        var monitor = new Nexus.NetRoute.Decision.TunnelHealthMonitor(base50);
+        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Vigiando o túnel até {relay.Name} (base {base50:0} ms). Ctrl+C para parar."));
+        try
+        {
+            while (!cts.IsCancellationRequested)
+            {
+                var window = Nexus.NetRoute.Stats.LatencyStats.From(await prober.PingAsync(relay.AgentAddress, 20, TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1), cts.Token).ConfigureAwait(false));
+                var action = monitor.Observe(window);
+                Console.WriteLine($"{DateTime.Now:HH:mm:ss}  {window.Describe()}{(monitor.BadStreak > 0 ? $"  (janela ruim {monitor.BadStreak}/{Nexus.NetRoute.Decision.TunnelHealthMonitor.BadWindowsToFallBack})" : "")}");
+                if (action != Nexus.NetRoute.Decision.HealthAction.FallBackToDirect) continue;
+                Console.WriteLine("O túnel piorou de forma consistente. A rota direta deve estar melhor agora.");
+                if (!o.ContainsKey("--desligar-sozinho")) { Console.WriteLine("Para desligar: nexus rota desligar (a partida atual pode cair; faça entre partidas)."); return CliExit.Partial; }
+                return Off(o);
+            }
+        }
+        catch (OperationCanceledException) { }
         return CliExit.Ok;
     }
 

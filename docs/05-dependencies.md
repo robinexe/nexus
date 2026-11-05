@@ -26,7 +26,7 @@ Versões centralizadas em `Directory.Packages.props`; resolução travada pelos 
 
 | Componente | Licença | Origem | Integração | Redistribuído? | Obrigação concreta |
 |---|---|---|---|---|---|
-| WireGuard para Windows (cliente oficial + driver wireguard-nt) | MIT (cliente); driver assinado pela WireGuard LLC | <https://download.wireguard.com/windows-client/> (lista `latest.sig` + MSI) | Só quando o usuário pede a rota de jogo (`netroute.client.install`): o aplicador baixa, confere o SHA-256 da lista e a assinatura Authenticode "WireGuard LLC" e instala com `msiexec /qn`. O túnel usa `wireguard.exe /installtunnelservice` | Não (instalado do site oficial no PC do usuário) | Nenhuma de redistribuição. Adicionado em 05/11/2026 e avisado ao responsável na conversa |
+| WireGuard para Windows (cliente oficial + driver wireguard-nt) | MIT (cliente); driver assinado pela WireGuard LLC | <https://download.wireguard.com/windows-client/> (lista `latest.sig` + MSI) | Só quando o usuário pede a rota de jogo (`netroute.client.install`): o aplicador baixa, confere o BLAKE2b-256 da lista e a assinatura Authenticode "WireGuard LLC" e instala com `msiexec /qn`. O túnel usa `wireguard.exe /installtunnelservice` | Não (instalado do site oficial no PC do usuário) | Nenhuma de redistribuição. Adicionado em 05/11/2026 e avisado ao responsável na conversa |
 
 A rota de jogo não traz pacote NuGet novo: X25519 (chaves do WireGuard) é implementado em `src/Nexus.NetRoute/WireGuard/Curve25519.cs`
 (RFC 7748, vetores nos testes) e o relay Linux (`tools/netroute-relay`) usa só a biblioteca padrão do Python e as ferramentas do

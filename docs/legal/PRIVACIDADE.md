@@ -40,7 +40,7 @@ Só nestes casos, e sempre direto com o serviço oficial (sem servidor do NEXUS 
 | Procurar atualizações de programas (página Programas, Assistente) | Os gerenciadores de pacote instalados no seu PC (winget, Chocolatey, Scoop, npm) | O que cada gerenciador envia aos repositórios dele; o NEXUS só os executa. |
 | Ferramentas da Microsoft que você aciona (atualizar assinaturas do Defender, Microsoft Store) | Microsoft | O que a própria ferramenta envia. |
 | Links que você clica (fontes, documentação, páginas de download) | O site do link | Abre no seu navegador, como qualquer link. |
-| Rota de jogo, só se você usar: instalar o WireGuard | WireGuard LLC (`download.wireguard.com`) | Pedido da lista de instaladores e do instalador MSI. O instalador só roda se o SHA-256 da lista e a assinatura digital da WireGuard LLC conferirem. |
+| Rota de jogo, só se você usar: instalar o WireGuard | WireGuard LLC (`download.wireguard.com`) | Pedido da lista de instaladores e do instalador MSI. O instalador só roda se o hash da lista (BLAKE2b) e a assinatura digital da WireGuard LLC conferirem. |
 | Rota de jogo, só se você usar: túnel e teste com um relay | O **seu** relay (servidor que você configurou) | Pelo túnel cifrado (WireGuard) vai só o tráfego para os servidores do jogo; o relay vê para quais servidores o jogo fala e quanto. O teste pede ao relay que meça (ping) até esses servidores. Nenhum servidor do NEXUS participa. |
 | Rota de jogo, só se você usar: túnel do CS2 | Valve (`api.steampowered.com`) | Pedido da lista pública de relays do Steam (sem identificador seu). |
 

@@ -160,7 +160,7 @@ public sealed class WindowsNetRouteSystem(string directory) : INetRouteSystem
     }
 }
 
-/// <summary>Baixa o MSI oficial e confere SHA-256 (lista da WireGuard LLC) e Authenticode "WireGuard LLC".</summary>
+/// <summary>Baixa o MSI oficial e confere o BLAKE2b-256 (lista da WireGuard LLC) e a assinatura Authenticode "WireGuard LLC".</summary>
 [SupportedOSPlatform("windows")]
 public static class WireGuardDownloader
 {
@@ -175,9 +175,8 @@ public static class WireGuardDownloader
         Directory.CreateDirectory(folder);
         var path = Path.Combine(folder, msi.FileName);
         var bytes = http.GetByteArrayAsync(msi.Url).GetAwaiter().GetResult();
-        var sha = Convert.ToHexStringLower(SHA256.HashData(bytes));
-        if (!string.Equals(sha, msi.Sha256, StringComparison.Ordinal))
-            throw new InvalidOperationException("O instalador baixado não confere com o SHA-256 publicado pela WireGuard LLC. Nada foi instalado.");
+        if (!string.Equals(Blake2b.HashHex(bytes), msi.Blake2b256, StringComparison.Ordinal))
+            throw new InvalidOperationException("O instalador baixado não confere com o hash (BLAKE2b-256) publicado pela WireGuard LLC. Nada foi instalado.");
         File.WriteAllBytes(path, bytes);
         if (!WindowsNetRouteSystem.SignedByWireGuard(path))
         {

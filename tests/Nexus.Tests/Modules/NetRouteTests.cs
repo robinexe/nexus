@@ -461,6 +461,25 @@ public sealed class NetRouteTests
         Assert.Null(WireGuardRelease.Pick(parsed, "x86"));
     }
 
+    [Theory]
+    [InlineData("abc", 1, "bddd813c634239723171ef3fee98579b94964e3bb1cb3e427262c8c068d52319")]
+    [InlineData("", 1, "0e5751c026e543b2e8ab2eb06099daa1d1e5df47778f7787faab45cdf12fe3a8")]
+    [InlineData("seq", 5, "82628cbfc9689e234b0923a531f4578fe2e7138a03e2f81ed6cde97517336650")] // 0..255 cinco vezes (vários blocos)
+    public void Blake2b_256_matches_reference_vectors(string text, int repeat, string expected)
+    {
+        var data = text == "seq" ? Enumerable.Range(0, 256 * repeat).Select(i => (byte)(i % 256)).ToArray() : System.Text.Encoding.ASCII.GetBytes(text);
+        Assert.Equal(expected, Blake2b.HashHex(data));
+    }
+
+    [Fact]
+    public void Blake2b_handles_exact_block_boundaries_and_512_bit_output()
+    {
+        Assert.Equal(Blake2b.HashHex(new byte[128]), Blake2b.HashHex(new byte[128])); // um bloco cheio = último bloco
+        Assert.NotEqual(Blake2b.HashHex(new byte[128]), Blake2b.HashHex(new byte[129]));
+        Assert.Equal("ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923",
+            Blake2b.HashHex("abc"u8, 64));
+    }
+
     [Fact]
     public void Agent_probe_response_is_parsed_defensively()
     {

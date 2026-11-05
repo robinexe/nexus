@@ -23,7 +23,7 @@ ping abaixo do tempo da luz na fibra; ele só remove o excesso que a rota do pro
 
 | id | título | classe | o que muda |
 |---|---|---|---|
-| `netroute.client.install` | Instalar o cliente WireGuard oficial | SupportedDocumented | Baixa `latest.sig` + MSI de download.wireguard.com, confere SHA-256 e Authenticode "WireGuard LLC", `msiexec /qn DO_NOT_LAUNCH=1` |
+| `netroute.client.install` | Instalar o cliente WireGuard oficial | SupportedDocumented | Baixa `latest.sig` + MSI de download.wireguard.com, confere o BLAKE2b-256 da lista e o Authenticode "WireGuard LLC", `msiexec /qn DO_NOT_LAUNCH=1` |
 | `netroute.identity.create` | Criar a chave da rota deste PC | SupportedDocumented | X25519 (RFC 7748) gerado no aplicador; `%ProgramData%\NEXUS\netroute\identity.json` só Administradores/SYSTEM; `client.pub` legível |
 | `netroute.relay.add` | Cadastrar um relay | SupportedDocumented | `relays\<id>.link` (link validado e gerado para a chave deste PC) |
 | `netroute.tunnel.on` | Ligar a rota pelo relay | Conditional | `NexusRota.conf` (só Administradores/SYSTEM) + serviço `WireGuardTunnel$NexusRota` |
