@@ -59,6 +59,7 @@ nexus rota relay codigo            # cria a chave (pede administrador) e mostra 
 nexus rota relay adicionar "nexus-relay://v1/..."
 nexus rota testar                  # A/B: diz se o relay ganha e por quanto
 nexus rota ligar                   # antes da partida (só os blocos do jogo vão pelo relay)
+nexus rota vigiar                  # durante a partida: avisa se o relay piorar (--desligar-sozinho para desligar)
 nexus rota desligar
 ```
 
@@ -97,6 +98,16 @@ UTF-8) · cidade(1+n ≤ 20). Vetor comum em `test_nexus_relay.py` e `NetRouteTe
 - SDR pode melhorar ou piorar conforme o data center (Valve): <https://partner.steamgames.com/doc/features/multiplayer/steamdatagramrelay>
 - São Paulo–Miami: ~74 ms medidos, piso ~65 ms: <https://hatsnet.io/docs/network/latency/pairs/gru-mia-rtt>
 
+## Evidência do CI (05/11/2026, workflow netroute, windows-2025 e ubuntu-24.04)
+
+- Build sem avisos; 2557 testes unitários aprovados.
+- ETW real: 40 de 40 pacotes UDP deste processo vistos com PID, endereço e porta certos.
+- WireGuard oficial 1.1.1 baixado de download.wireguard.com, BLAKE2b-256 da lista e Authenticode "WireGuard LLC" conferidos,
+  instalado; chave criada; relay cadastrado; serviço `WireGuardTunnel$NexusRota` em execução com a configuração pedida; tudo
+  desfeito (serviço removido, chave apagada, WireGuard desinstalado).
+- Relay Linux real: handshake pelo link, `/health`, `/probe` recusando alvo privado, NAT até a internet por HTTPS, destino
+  privado bloqueado, PC removido perde o acesso.
+
 ## Testes
 
 - `tests/Nexus.Tests/Modules/NetRouteTests.cs`: blocos, régua, nomes de roteador, estatística, diagnóstico, decisão A/B, vigia,
@@ -111,7 +122,8 @@ UTF-8) · cidade(1+n ≤ 20). Vetor comum em `test_nexus_relay.py` e `NetRouteTe
 ## O que falta
 
 - Tela "Rota de jogo" na interface (entra depois do merge do redesign, para não conflitar com a outra sessão).
-- Vigia durante a partida (`TunnelHealthMonitor` pronto; falta o laço que mede o agente a cada 10 s e avisa/desliga).
+- Vigia automática na interface (no CLI já existe `nexus rota vigiar`, com `TunnelHealthMonitor`: 3 janelas seguidas com perda
+  ≥ 5% ou +30 ms sobre a base).
 - Relays oficiais (infraestrutura própria por região) e banco colaborativo opt-in: só se a fase de validação com usuários
   reais provar ganho (doc de pesquisa, seção 10).
 - Testar com jogos de verdade, com cada antitrapaça, em contas de teste.
