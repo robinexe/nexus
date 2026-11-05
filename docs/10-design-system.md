@@ -454,3 +454,38 @@ pelo aplicador. O cartão/linha em que o usuário clicou fica à vista mesmo dep
 - Testes: `SimpleModeTests` (navegação, migração, nota, cartões, achados, histórico, ajustes rápidos, seleção do automático).
 - O autoteste da interface abre as 6 telas, as 2 de boas-vindas, Otimizar de demonstração, Ferramentas avançadas e cada
   ferramenta dela.
+
+---
+
+## 10. "Instrumento de precisão" (05/11/2026)
+
+Pedido do responsável (diretriz em `docs/13-diretriz-de-produto.md`, brief em `docs/14-redesign-brief.md`): aparência de
+software internacional premium, simples por fora ("abriu → entendeu → clicou → resolveu"), navegação curta, painel ao vivo,
+animação exclusiva de diagnóstico. **Lógica de aplicar, catálogo, broker e diário não mudaram.**
+
+| Parte | Como ficou |
+|---|---|
+| Tokens | `C.TextDim` #7C88A8 (5,3:1 sobre Bg; antes reprovava). Novos: `Brush.Ground` (painel de instrumento), `Brush.Highlight` (realce de 1 px no topo), `Brush.TextSoft` (frases sobre superfície), `Brush.Track` (trilho de mostrador), `Size.Hero` 56, `Space.1…8` (grade de 4 px), raios 14/10/6. `Size.Body` 14 |
+| Superfícies | `Panel.Card`, `Panel.Hero`, `HeroPanel` e `StatTile` sem contorno: separam por luminosidade + realce `0,1,0,0`. **Destaque com cor = `BorderBrush` E `BorderThickness="1"`** (sem a espessura, só a linha de cima pega a cor). `Panel.Instrument` novo (fundo `Ground`) atrás de dados ao vivo |
+| Navegação | 5 áreas na lista lateral (`ShellNavigation.Areas`): Início · Otimizar · Desempenho · Diagnóstico · Configurações. Cada página mora em exatamente uma área: como **aba** (topo do conteúdo, sublinhado âmbar) ou em **Avançado ▾** (menu com ícone, nome e uma linha). Clicar numa área volta à última página aberta nela. A antiga barra "Voltar ao início" e o link "Ferramentas avançadas" do pé saíram (a página de ladrilhos fica em Configurações › Avançado). Pé da lista: a promessa "Nada muda sem você confirmar" |
+| Início | Saúde (anel + palavra + frase) e 3 ações: **Otimizar meu PC** (primária), **Preparar para jogar** (abre Desempenho › Jogos), **Desfazer o que o NEXUS mudou** (Histórico). Ao lado, **Seu PC agora** (`HomeLive`): mostradores `c:Gauge` de processador e placa de vídeo, memória e disco em barra, cada um com uma frase simples (`TelemetryText`). Faixa **Situação** (`StatusStrip`): driver de vídeo, o que pede atenção, espaço a liberar, pentes de memória — cada célula abre a página que explica. Melhorias: no máximo 3, numa lista só |
+| Otimizar | **NEXUS Optimize**. Antes: 4 etapas, promessa de segurança, "Começar" e a Varredura parada. Durante: **a Varredura** (`c:ScanSweep`) — ponteiro âmbar girando, um ponto por etapa que só acende quando a etapa termina de verdade, % no centro. Depois: resumo, saúde, **Medir uma partida** (nunca promessa de FPS), detalhes, desfazer. Ajustes rápidos: risco sempre à vista ("Risco baixo" ou a palavra de risco), "Desmarque para desfazer" e o estado atual ("Ligado agora") |
+| Layout | `c:TwoUpPanel`: dois blocos lado a lado, empilha abaixo de `StackBelow` px (janela no mínimo de 980 px) |
+
+### Honestidade do painel ao vivo
+
+- Temperatura do processador: o Windows não informa com segurança → o painel diz isso e **não mostra número**.
+- Temperatura da placa de vídeo: só NVIDIA (`nvidia-smi`), e só quando a placa principal é NVIDIA.
+- Coleta a 1 Hz só com o Início aberto e a janela à vista (minimizada/bandeja: para). Mesmos contadores do Monitor, sem lista de processos.
+- Sem leitura: "—" e a frase de espera, nunca um número inventado.
+
+### Movimento
+
+`c:Gauge`: primeira entrada assenta como agulha (BackEase 0,3, 600 ms); leituras seguintes deslizam (CubicEase, 450 ms).
+`c:ScanSweep`: volta em 3,2 s, só enquanto ativo e visível. Abas: sublinhado cresce do centro (220 ms). Com "Efeitos de
+animação" desligado no Windows: mostradores vão direto ao valor, a Varredura não gira (os pontos acendem em sequência).
+
+### Testes
+
+`SimpleModeTests`: 5 áreas em ordem fixa, toda página em exatamente uma área, telas simples são abas, `Pick` mantém a ordem,
+frases do painel ao vivo, faixa Situação só com o que foi lido. `DesignSystemTests`: geometria do mostrador de 270°.

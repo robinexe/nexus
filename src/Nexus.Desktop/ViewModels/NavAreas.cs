@@ -28,6 +28,8 @@ public sealed class AreaTabItem(PageViewModel page, bool isSelected, Action<Page
     public string Title => Page.Title;
     public string Subtitle => Page.Subtitle;
     public bool IsSelected { get; } = isSelected;
+    /// <summary>"on" na aba aberta (o modelo do botão compara texto).</summary>
+    public string State => IsSelected ? "on" : "off";
     public RelayCommand OpenCommand { get; } = new(() => open(page));
 }
 

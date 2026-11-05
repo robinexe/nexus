@@ -151,7 +151,7 @@
               <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
               </Trigger>
-              <Trigger Property="Tag" Value="True">
+              <Trigger Property="Tag" Value="on">
                 <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
                 <Setter TargetName="Underline" Property="Opacity" Value="1"/>
                 <Trigger.EnterActions>
@@ -229,7 +229,7 @@
 
     <!-- ============ Cabeçalho: marca, selo de segurança, ações de leitura ============ -->
     <Border x:Name="HeaderBar" Grid.ColumnSpan="2" Background="{StaticResource Brush.SurfaceLow}"
-            BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,0,0,1">
+            BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1">
       <Grid>
         <Grid Margin="0,11,20,11">
           <Grid.ColumnDefinitions>
@@ -406,7 +406,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate DataType="{x:Type vm:AreaTabItem}">
-                <Button Style="{StaticResource Area.TabButton}" Command="{Binding OpenCommand}" Tag="{Binding IsSelected}"
+                <Button Style="{StaticResource Area.TabButton}" Command="{Binding OpenCommand}" Tag="{Binding State}"
                         AutomationProperties.Name="{Binding Title}" AutomationProperties.HelpText="{Binding Subtitle}" ToolTip="{Binding Subtitle}"
                         ToolTipService.InitialShowDelay="900">
                   <TextBlock Text="{Binding Title}" TextWrapping="NoWrap"/>
@@ -641,7 +641,7 @@
     </Grid>
 
     <!-- ============ Rodapé: status, legenda das cores e ocupado ============ -->
-    <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.Line}"
+    <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.LineSoft}"
             BorderThickness="0,1,0,0" Padding="22,6,20,7">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">

@@ -265,7 +265,13 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     desktop-diag.log. Fortnite: handler FortniteIniValue (GameUserSettings.ini, só com o jogo fechado, desfazer byte a byte),
     catalog/fortnite.v1.json (9 ações, 8 mitos), cartão no Jogos e em Placa de vídeo; docs/modules/fortnite.md.
     2384 testes; VM verde. Instalador 1.0.0-ci.24.
-24. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
+24. **05/11 madrugada — redesign "Instrumento de precisão"** (branch `design/ambiente-skills`, checkpoint antes na tag
+    `checkpoint/antes-skills-design`): ambiente de Skills de design + `CLAUDE.md`; diretriz de produto (`docs/13`), brief
+    (`docs/14`); tokens e superfícies sem contorno; navegação em 5 áreas com abas e "Avançado"; Início com painel ao vivo
+    (mostradores, frases simples, faixa Situação); Otimizar com a Varredura; 71 textos novos em pt/en/es. Ver
+    `docs/10-design-system.md` §10. Compilado e testado no PC do responsável (`_claude\validar-redesign.cmd`): 0 erros; os testes
+    que falham ali são de link simbólico sem privilégio e do verificador de arquivos (antivírus), alheios à interface.
+25. **Próximos (dependem do responsável):** testar no PC (NVIDIA por jogo, drivers no app, progresso, inicialização em massa,
     diagnósticos, idiomas), rodar _claude\Configurar-Atualizacoes.cmd, certificado de assinatura de código, publicar a
     1.0.0 (tag v1.0.0) e subir VersionPrefix para 1.0.1. Depois: VALORANT, investigador de travadinhas, A/B automático, IA. NVIDIA DRS, VALORANT, investigador de stutters, laboratório A/B guiado (alternar antes/depois automaticamente),
    relatórios e, por último, a IA.

@@ -4281,4 +4281,5 @@ Nada se borra: se puede deshacer, y el espacio solo vuelve cuando vacíes la cua
   <data name="Opt.Row.On" xml:space="preserve"><value>Activado ahora</value></data>
   <data name="Opt.Row.Off" xml:space="preserve"><value>Desactivado ahora</value></data>
   <data name="Opt.Row.Undo" xml:space="preserve"><value>Desmarca para deshacer</value></data>
+  <data name="Home.OptimizeShort" xml:space="preserve"><value>Optimizar mi PC</value></data>
 </root>

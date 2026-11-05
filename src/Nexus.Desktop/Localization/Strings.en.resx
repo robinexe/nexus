@@ -4281,4 +4281,5 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Opt.Row.On" xml:space="preserve"><value>On now</value></data>
   <data name="Opt.Row.Off" xml:space="preserve"><value>Off now</value></data>
   <data name="Opt.Row.Undo" xml:space="preserve"><value>Uncheck to undo</value></data>
+  <data name="Home.OptimizeShort" xml:space="preserve"><value>Optimize my PC</value></data>
 </root>

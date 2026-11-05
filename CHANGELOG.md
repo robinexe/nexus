@@ -3,6 +3,18 @@
 Cada versão tem um resumo de uma linha (a linha que começa com `>`): é o texto do aviso de atualização dentro do NEXUS.
 O resto da seção vai para a página de download (GitHub Releases).
 
+## Próxima versão (em desenvolvimento)
+
+> Visual novo: Início com o seu PC ao vivo, navegação em 5 áreas e a Varredura do NEXUS Optimize.
+
+- **Início ao vivo**: processador, placa de vídeo, memória e disco em tempo real, explicados em frases simples ("Seu processador
+  está trabalhando intensamente"). Temperatura só quando o Windows informa de verdade.
+- **Navegação em 5 áreas**: Início, Otimizar, Desempenho, Diagnóstico e Configurações. As ferramentas completas ficam em
+  "Avançado" dentro de cada área.
+- **NEXUS Optimize**: um clique, com a Varredura mostrando cada etapa terminando de verdade. Cada ajuste mostra o risco, o
+  estado atual e como desfazer.
+- Contraste melhor nos textos de apoio e um visual mais limpo, sem contornos em tudo.
+
 ## 1.0.0
 
 > Primeira versão estável: Assistente, limpeza, drivers, ajustes de desempenho explicados, medição de FPS e desfazer de tudo.

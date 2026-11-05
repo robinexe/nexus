@@ -35,7 +35,7 @@ public class ScanSweep : FrameworkElement
     private static readonly DependencyProperty AngleProperty = DependencyProperty.Register("Angle", typeof(double), typeof(ScanSweep),
         new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    private const double LabelRoom = 120;
+    private const double LabelRoom = 150;
 
     public ScanSweep()
     {
@@ -100,13 +100,13 @@ public class ScanSweep : FrameworkElement
                 var a = (angle - i * 3.5) * Math.PI / 180;
                 var p = new Pen(new SolidColorBrush(Color.FromArgb((byte)(48 * (1 - i / 15d)), trace.R, trace.G, trace.B)), 3);
                 p.Freeze();
-                drawingContext.DrawLine(p, c, new Point(c.X + r * Math.Sin(a), c.Y - r * Math.Cos(a)));
+                drawingContext.DrawLine(p, new Point(c.X + r * 0.58 * Math.Sin(a), c.Y - r * 0.58 * Math.Cos(a)), new Point(c.X + r * Math.Sin(a), c.Y - r * Math.Cos(a)));
             }
             var ha = angle * Math.PI / 180;
             var hand = new Pen(new LinearGradientBrush(Color.FromArgb(0, trace.R, trace.G, trace.B), trace,
                 new Point(0.5 - 0.5 * Math.Sin(ha), 0.5 + 0.5 * Math.Cos(ha)), new Point(0.5 + 0.5 * Math.Sin(ha), 0.5 - 0.5 * Math.Cos(ha))), 2);
             hand.Freeze();
-            drawingContext.DrawLine(hand, c, new Point(c.X + r * Math.Sin(ha), c.Y - r * Math.Cos(ha)));
+            drawingContext.DrawLine(hand, new Point(c.X + r * 0.58 * Math.Sin(ha), c.Y - r * 0.58 * Math.Cos(ha)), new Point(c.X + r * Math.Sin(ha), c.Y - r * Math.Cos(ha)));
         }
 
         // Pontos e nomes.
@@ -150,7 +150,7 @@ public class ScanSweep : FrameworkElement
             var color = n.IsDone ? Theme.Find("Brush.Text") : n.IsCurrent ? Theme.Find("Brush.Signal") : Theme.Find("Brush.TextDim");
             var text = new FormattedText(n.Title, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, face, 13.5, color, dpi)
             {
-                MaxTextWidth = LabelRoom + 30,
+                MaxTextWidth = LabelRoom - 28,
                 MaxLineCount = 2,
                 Trimming = TextTrimming.CharacterEllipsis,
             };
