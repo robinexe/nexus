@@ -691,7 +691,7 @@ public sealed class NetRouteTests
     {
         public bool Stopped { get; private set; }
         public void Start(Action<FlowEvent> onEvent) { foreach (var e in events) onEvent(e); }
-        public void Stop() => Stopped = true;
-        public void Dispose() => Stop();
+        public void StopObserving() => Stopped = true;
+        public void Dispose() => StopObserving();
     }
 }

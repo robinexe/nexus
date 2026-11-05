@@ -61,6 +61,12 @@ jobs:
           [System.IO.File]::WriteAllText($marker, $env:COMPUTERNAME, (New-Object System.Text.UTF8Encoding($false)))
           icacls $marker /setowner '*S-1-5-32-544'
           icacls $marker /inheritance:r /grant:r '*S-1-5-32-544:F' '*S-1-5-18:F' '*S-1-5-32-545:R'
+      - name: Lista oficial de instaladores do WireGuard (diagnóstico)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          curl.exe -sS -D - https://download.wireguard.com/windows-client/latest.sig | Select-Object -First 25
+          curl.exe -sS https://download.wireguard.com/windows-client/ | Select-String 'msi|sig' | Select-Object -First 20
       - name: Integração da rota de jogo (ETW real, WireGuard oficial, túnel)
         shell: pwsh
         run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter "FullyQualifiedName~NetRoute" --logger "console;verbosity=detailed" --logger "trx;LogFileName=netroute.trx" --results-directory saida

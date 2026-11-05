@@ -81,6 +81,7 @@ public sealed class FileNetRouteStore(string directory, Action<string>? protectS
 
     public void DeleteIdentity()
     {
+        if (!System.IO.Directory.Exists(Directory)) return;
         File.Delete(Path.Combine(Directory, IdentityFile));
         File.Delete(Path.Combine(Directory, PublicKeyFile));
     }
@@ -129,6 +130,7 @@ public sealed class FileNetRouteStore(string directory, Action<string>? protectS
     public void DeleteRelay(string id)
     {
         if (!IsRelayId(id)) throw new ArgumentException("Id de relay inválido.", nameof(id));
+        if (!System.IO.Directory.Exists(Path.Combine(Directory, RelaysFolder))) return;
         File.Delete(Path.Combine(Directory, RelaysFolder, id + ".link"));
     }
 
@@ -139,7 +141,7 @@ public sealed class FileNetRouteStore(string directory, Action<string>? protectS
         {
             var path = Path.Combine(Directory, MarkerFile);
             if (value) { EnsureDirectory(); File.WriteAllText(path, DateTimeOffset.UtcNow.ToString("O", System.Globalization.CultureInfo.InvariantCulture)); }
-            else File.Delete(path);
+            else if (File.Exists(path)) File.Delete(path);
         }
     }
 

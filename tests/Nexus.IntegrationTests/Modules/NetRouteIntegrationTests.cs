@@ -42,7 +42,7 @@ public sealed class NetRouteIntegrationTests(Xunit.Abstractions.ITestOutputHelpe
             }
             Thread.Sleep(2500);
         }
-        finally { observer.Stop(); }
+        finally { observer.StopObserving(); }
         output.WriteLine($"eventos lidos: {observer.Parsed}, ignorados: {observer.Ignored}, total na contagem: {tally.EventsSeen}");
         var mine = tally.Flows(pid => pid == Environment.ProcessId);
         foreach (var f in mine.Take(10)) output.WriteLine($"{f.Protocol} {f.Remote}:{f.RemotePort} pacotes={f.Packets} saída={f.OutboundPackets}");
@@ -77,11 +77,14 @@ public sealed class NetRouteIntegrationTests(Xunit.Abstractions.ITestOutputHelpe
         var clientBefore = hc.Detect(client);
         var identityBefore = hi.Detect(identity);
         StateSnapshot? relayBefore = null, tunnelBefore = null;
+        var cleanup = new List<string>();
         ActionInstance? relay = null, tunnel = null;
         try
         {
             Assert.Equal(ApplicabilityKind.Applicable, hc.Assess(client, ctx).Kind);
+            output.WriteLine($"WireGuard antes: {clientBefore.Describe()}; baixando e instalando o oficial...");
             hc.Apply(client);
+            output.WriteLine("WireGuard instalado.");
             Assert.True(hc.Detect(client).SameValueAs(client.Desired), "WireGuard não ficou instalado/assinado");
             Assert.True(WindowsNetRouteSystem.SignedByWireGuard(WindowsNetRouteSystem.WireGuardExe));
 
@@ -107,15 +110,31 @@ public sealed class NetRouteIntegrationTests(Xunit.Abstractions.ITestOutputHelpe
             Assert.Equal(ServiceControl.Running, ServiceControl.State(WindowsNetRouteSystem.ServiceName));
             Assert.Contains("AllowedIPs = 10.66.0.1/32, 1.0.0.0/24", File.ReadAllText(sys.ConfigPath), StringComparison.Ordinal);
         }
+        catch (Exception ex)
+        {
+            output.WriteLine("FALHA: " + ex);
+            throw;
+        }
         finally
         {
-            if (tunnel is not null && tunnelBefore is not null) ht.Restore(tunnel, tunnelBefore);
-            Assert.Null(ServiceControl.State(WindowsNetRouteSystem.ServiceName));
-            if (relay is not null && relayBefore is not null) hr.Restore(relay, relayBefore);
-            hi.Restore(identity, identityBefore);
-            hc.Restore(client, clientBefore);
+            // A limpeza nunca esconde a falha original: cada passo é tentado e o erro dele só aparece no log.
+            void Undo(string what, Action step)
+            {
+                try { step(); }
+                catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException or TimeoutException)
+                {
+                    cleanup.Add($"{what}: {ex.Message}");
+                    output.WriteLine($"limpeza ({what}): {ex}");
+                }
+            }
+            if (tunnel is not null && tunnelBefore is not null) Undo("túnel", () => ht.Restore(tunnel, tunnelBefore));
+            if (relay is not null && relayBefore is not null) Undo("relay", () => hr.Restore(relay, relayBefore));
+            Undo("chave", () => hi.Restore(identity, identityBefore));
+            Undo("cliente", () => hc.Restore(client, clientBefore));
             try { Directory.Delete(dir, recursive: true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
         }
+        Assert.Empty(cleanup);
+        Assert.Null(ServiceControl.State(WindowsNetRouteSystem.ServiceName));
         Assert.Null(store.ReadIdentity());
         Assert.False(File.Exists(WindowsNetRouteSystem.WireGuardExe) && !clientBefore.Exists, "desfazer não removeu o WireGuard instalado pelo teste");
     }

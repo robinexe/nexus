@@ -98,5 +98,5 @@ public interface IConnectionObserver : IDisposable
     /// <summary>Começa a observar. Lança <see cref="UnauthorizedAccessException"/> sem permissão para sessões de rastreamento.</summary>
     void Start(Action<FlowEvent> onEvent);
 
-    void Stop();
+    void StopObserving();
 }

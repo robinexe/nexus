@@ -22,6 +22,16 @@ Versões centralizadas em `Directory.Packages.props`; resolução travada pelos 
 |---|---|---|---|---|---|---|
 | PresentMon (Intel) | 2.6.0 (x64) | MIT, Copyright (C) 2017-2024 Intel Corporation | <https://github.com/GameTechDev/PresentMon> release v2.6.0, arquivo `PresentMon-2.6.0-x64.exe` sem alteração; assinatura Authenticode de **Intel Corporation** (cadeia Sectigo Public Code Signing CA R36); SHA-256 `b2a706bc6ad475749e3b7e3409263aa1e6906d45bdcf993f6dbc0f660188f1af` | `tools/presentmon/` no repositório; o build da interface e da CLI copia para `<saída>\tools\PresentMon\PresentMon.exe` + `LICENSE.txt`; `publish.py` confere o hash; o instalador põe em `%ProgramFiles%\NEXUS\tools\PresentMon`. O Medir executa só depois de conferir hash conhecido ou assinatura válida da Intel (`PresentMonTrust`) | Sim | Aviso de copyright e texto MIT: `tools\PresentMon\LICENSE.txt` e `THIRD-PARTY-NOTICES.txt` (raiz, copiado para a saída e para o instalador) |
 
+## Baixados sob demanda (não redistribuídos)
+
+| Componente | Licença | Origem | Integração | Redistribuído? | Obrigação concreta |
+|---|---|---|---|---|---|
+| WireGuard para Windows (cliente oficial + driver wireguard-nt) | MIT (cliente); driver assinado pela WireGuard LLC | <https://download.wireguard.com/windows-client/> (lista `latest.sig` + MSI) | Só quando o usuário pede a rota de jogo (`netroute.client.install`): o aplicador baixa, confere o SHA-256 da lista e a assinatura Authenticode "WireGuard LLC" e instala com `msiexec /qn`. O túnel usa `wireguard.exe /installtunnelservice` | Não (instalado do site oficial no PC do usuário) | Nenhuma de redistribuição. Adicionado em 05/11/2026 e avisado ao responsável na conversa |
+
+A rota de jogo não traz pacote NuGet novo: X25519 (chaves do WireGuard) é implementado em `src/Nexus.NetRoute/WireGuard/Curve25519.cs`
+(RFC 7748, vetores nos testes) e o relay Linux (`tools/netroute-relay`) usa só a biblioteca padrão do Python e as ferramentas do
+sistema (wireguard-tools, nftables, iproute2, ping), instaladas pelo dono do servidor.
+
 Por que embutido (e não "o usuário baixa"): o pedido do responsável foi deixar o Medir pronto automaticamente; o NEXUS não pode
 baixar nada sozinho (regra 8); e um PresentMon baixado pelo usuário numa pasta do perfil é um executável que se eleva
 (`--restart_as_admin`) numa pasta gravável por qualquer programa da conta. Embutido na pasta protegida do instalador e conferido
@@ -46,6 +56,7 @@ interface e da CLI copia para a saída; vai no ZIP e no instalador (com atalho "
 | 2026-10-30 | Microsoft.Data.Sqlite 10.0.0 → **10.0.14** | NU1903 / GHSA-2m69-gcr7-jv3q / CVE-2025-6965 (SQLite < 3.50.2, CVSS 7.2) em SQLitePCLRaw.lib.e_sqlite3 ≤ 2.1.11. A 10.0.14 é o patch mais recente da mesma linha e puxa a 2.1.13. Não é dependência nova: mesmo pacote, mesma licença. |
 | 2026-10-30 | Evidência do NU1903 sem supressão | Ver `06-build-log.md` (restore com 10.0.0 vs 10.0.14; SQLite nativo carregado 3.53.3). |
 | 2026-11-01 | **PresentMon 2.6.0** (Intel, MIT) embutido em `tools/presentmon` | Pedido do responsável: Medir pronto para usar sem baixar nada. SHA-256 `b2a706bc6ad4…`, assinado por Intel Corporation. Avisado ao responsável na conversa. Sem pacote NuGet novo. |
+| 2026-11-05 | **WireGuard para Windows** (oficial) baixado sob demanda pela rota de jogo | Pedido do responsável: túnel completo. Sem NuGet novo; não redistribuído. Avisado na conversa. |
 | 2026-10-30 | Demais versões confirmadas | As versões fixadas originalmente restauraram sem NU1102; nenhuma troca foi necessária. |
 
 ## Frameworks do .NET (não são pacotes NuGet)

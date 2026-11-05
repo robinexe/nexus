@@ -75,7 +75,7 @@ public static class TunnelDecision
         return new TunnelVerdict(TunnelChoice.StayDirect, gain50, gain95, lossDirect, lossRelay, valid.Count, favoring, $"A rota direta é melhor: {why}. O túnel não liga.");
     }
 
-    private static double Median(IReadOnlyList<double> sorted) =>
+    private static double Median(List<double> sorted) =>
         sorted.Count % 2 == 1 ? sorted[sorted.Count / 2] : (sorted[sorted.Count / 2 - 1] + sorted[sorted.Count / 2]) / 2.0;
 }
 

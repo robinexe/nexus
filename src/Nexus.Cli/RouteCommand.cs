@@ -361,6 +361,7 @@ internal static class RouteCommand
 
     private static BrokerSession? Admin(Dictionary<string, string> o)
     {
+        if (!OperatingSystem.IsWindows()) return null;
         var sid = System.Security.Principal.WindowsIdentity.GetCurrent().User?.Value;
         return sid is null ? null : BrokerSession.ForThisPc(BrokerLevel.Admin, AppContext.BaseDirectory, sid, o.ContainsKey("--quiet") ? null : m => Console.Error.WriteLine(m));
     }

@@ -59,7 +59,7 @@ public sealed class NetRouteEngine(IPathProber prober)
         var tally = new ConnectionTally();
         observer.Start(tally.Add);
         try { await Task.Delay(duration, cancellationToken).ConfigureAwait(false); }
-        finally { observer.Stop(); }
+        finally { observer.StopObserving(); }
         return tally.GameServers(processFilter);
     }
 

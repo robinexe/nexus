@@ -40,6 +40,9 @@ Só nestes casos, e sempre direto com o serviço oficial (sem servidor do NEXUS 
 | Procurar atualizações de programas (página Programas, Assistente) | Os gerenciadores de pacote instalados no seu PC (winget, Chocolatey, Scoop, npm) | O que cada gerenciador envia aos repositórios dele; o NEXUS só os executa. |
 | Ferramentas da Microsoft que você aciona (atualizar assinaturas do Defender, Microsoft Store) | Microsoft | O que a própria ferramenta envia. |
 | Links que você clica (fontes, documentação, páginas de download) | O site do link | Abre no seu navegador, como qualquer link. |
+| Rota de jogo, só se você usar: instalar o WireGuard | WireGuard LLC (`download.wireguard.com`) | Pedido da lista de instaladores e do instalador MSI. O instalador só roda se o SHA-256 da lista e a assinatura digital da WireGuard LLC conferirem. |
+| Rota de jogo, só se você usar: túnel e teste com um relay | O **seu** relay (servidor que você configurou) | Pelo túnel cifrado (WireGuard) vai só o tráfego para os servidores do jogo; o relay vê para quais servidores o jogo fala e quanto. O teste pede ao relay que meça (ping) até esses servidores. Nenhum servidor do NEXUS participa. |
+| Rota de jogo, só se você usar: túnel do CS2 | Valve (`api.steampowered.com`) | Pedido da lista pública de relays do Steam (sem identificador seu). |
 
 O NEXUS **não** envia estatísticas de uso, relatórios de erro, leituras do PC nem qualquer identificador para o autor ou para
 terceiros. Não há anúncios nem rastreadores.
@@ -49,13 +52,19 @@ terceiros. Não há anúncios nem rastreadores.
 A medição usa o PresentMon oficial da Intel (licença MIT), que acompanha o NEXUS e roda **só no seu computador**, lendo
 eventos do Windows sobre a apresentação de quadros. Nada da medição é enviado.
 
-## 5. Seus direitos (LGPD)
+## 5. Rota de jogo (diagnóstico de rede)
+
+O diagnóstico da rota lê, no seu computador, os endereços e portas dos pacotes do processo do jogo (eventos de rede do Windows)
+para achar o servidor da partida, e faz ping e traceroute até ele. Os servidores vistos ficam em `%LocalAppData%\NEXUS\netroute`
+para montar o túnel do jogo. Nada disso é enviado a ninguém.
+
+## 6. Seus direitos (LGPD)
 
 Como o NEXUS não coleta nem recebe dados pessoais, o autor não tem dados seus para mostrar, corrigir ou apagar. Tudo o que o
 NEXUS guarda está nas pastas da seção 2, sob o seu controle: você pode abrir, copiar ou apagar quando quiser (lembrando que
 apagar o histórico impede o NEXUS de desfazer as mudanças).
 
-## 6. Mudanças nesta política
+## 7. Mudanças nesta política
 
 Se uma versão futura passar a acessar a internet de outro jeito, esta política será atualizada **antes**, e a mudança
 aparecerá nas novidades da versão. A versão que vale é a que acompanha a versão instalada.

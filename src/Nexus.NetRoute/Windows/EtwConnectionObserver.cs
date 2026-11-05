@@ -70,7 +70,7 @@ public sealed unsafe class EtwConnectionObserver : IConnectionObserver
         }
         catch
         {
-            Stop();
+            StopObserving();
             throw;
         }
     }
@@ -161,7 +161,7 @@ public sealed unsafe class EtwConnectionObserver : IConnectionObserver
         _onEvent?.Invoke(parsed);
     }
 
-    public void Stop()
+    public void StopObserving()
     {
         if (_properties != IntPtr.Zero)
         {
@@ -178,7 +178,7 @@ public sealed unsafe class EtwConnectionObserver : IConnectionObserver
         Interlocked.CompareExchange(ref _current, null, this);
     }
 
-    public void Dispose() => Stop();
+    public void Dispose() => StopObserving();
 
     private static HashSet<IPAddress> LocalAddresses()
     {
