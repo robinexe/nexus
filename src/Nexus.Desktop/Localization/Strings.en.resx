@@ -4282,4 +4282,189 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Opt.Row.Off" xml:space="preserve"><value>Off now</value></data>
   <data name="Opt.Row.Undo" xml:space="preserve"><value>Uncheck to undo</value></data>
   <data name="Home.OptimizeShort" xml:space="preserve"><value>Optimize my PC</value></data>
+  <data name="Ab.Title" xml:space="preserve"><value>A/B Lab</value></data>
+  <data name="Ab.Subtitle" xml:space="preserve"><value>Compare a game with and without a tweak, on this PC</value></data>
+  <data name="Ab.Hero.Title" xml:space="preserve"><value>Compare with and without</value></data>
+  <data name="Ab.Hero.Value" xml:space="preserve"><value>Proof on your PC</value></data>
+  <data name="Ab.Hero.Caption" xml:space="preserve"><value>You play without the tweak, NEXUS applies it, you play again. Only what really helps stays.</value></data>
+  <data name="Ab.Hero.Chip" xml:space="preserve"><value>Measures, never promises</value></data>
+  <data name="Ab.Hero.Note" xml:space="preserve"><value>Rounds are measured with PresentMon, as in Measure. The comparison pairs 30-second slices and only calls "better" what exceeds natural variation.</value></data>
+  <data name="Ab.NoPresentMon" xml:space="preserve"><value>PresentMon is missing: without it, Measure records no rounds and the test has nothing to compare.</value></data>
+  <data name="Ab.OpenMeasure" xml:space="preserve"><value>Open Measure</value></data>
+  <data name="Ab.Setup.Title" xml:space="preserve"><value>Choose the game and what to test</value></data>
+  <data name="Ab.Setup.Reread" xml:space="preserve"><value>Reread games</value></data>
+  <data name="Ab.How.1" xml:space="preserve"><value>Play</value></data>
+  <data name="Ab.How.1Text" xml:space="preserve"><value>One round without the tweak. Measure records it.</value></data>
+  <data name="Ab.How.2" xml:space="preserve"><value>Apply</value></data>
+  <data name="Ab.How.2Text" xml:space="preserve"><value>NEXUS turns the tweak on through the applier, journaled.</value></data>
+  <data name="Ab.How.3" xml:space="preserve"><value>Play again</value></data>
+  <data name="Ab.How.3Text" xml:space="preserve"><value>Same scene, same length, with the tweak.</value></data>
+  <data name="Ab.How.4" xml:space="preserve"><value>Decide</value></data>
+  <data name="Ab.How.4Text" xml:space="preserve"><value>Really better: it stays. Otherwise: back as it was.</value></data>
+  <data name="Ab.Setup.NoGames" xml:space="preserve"><value>No game to test yet</value></data>
+  <data name="Ab.Setup.NoGamesDetail" xml:space="preserve"><value>Games come from your library (Steam, Epic…) and from rounds already measured. Measure a round in Measure or read your libraries there.</value></data>
+  <data name="Ab.Setup.Game" xml:space="preserve"><value>Game</value></data>
+  <data name="Ab.Setup.Design" xml:space="preserve"><value>How many rounds</value></data>
+  <data name="Ab.Setup.Aba" xml:space="preserve"><value>More certainty: three rounds (without, with, without)</value></data>
+  <data name="Ab.Setup.AbaDetail" xml:space="preserve"><value>The third round shows whether the game varied on its own (warm-up, time of day, scene).</value></data>
+  <data name="Ab.Setup.Ask" xml:space="preserve"><value>Ask at the end before undoing</value></data>
+  <data name="Ab.Setup.AskDetail" xml:space="preserve"><value>By default, what did not help goes back to the initial state by itself.</value></data>
+  <data name="Ab.Setup.Plays" xml:space="preserve"><value>{0} rounds of at least {1} minutes each, same game and same scene.</value></data>
+  <data name="Ab.Setup.Tweaks" xml:space="preserve"><value>What to test</value></data>
+  <data name="Ab.Setup.NoTweaks" xml:space="preserve"><value>This game has no option to test on this PC.</value></data>
+  <data name="Ab.Setup.OneAtATime" xml:space="preserve"><value>Check more than one: they are tested one at a time, in order.</value></data>
+  <data name="Ab.Start" xml:space="preserve"><value>Start the test</value></data>
+  <data name="Ab.Confirm.Start" xml:space="preserve"><value>Test {0} in {1}?
+
+{2} rounds of at least 3 minutes. Between them, NEXUS applies the tweak through the applier (journaled, undoable). {3}</value></data>
+  <data name="Ab.Confirm.NTweaks" xml:space="preserve"><value>{0} tweaks</value></data>
+  <data name="Ab.Confirm.AutoUndo" xml:space="preserve"><value>If it does not help, it goes back to the initial state by itself.</value></data>
+  <data name="Ab.Confirm.AskAtEnd" xml:space="preserve"><value>At the end, NEXUS asks whether you want to keep it.</value></data>
+  <data name="Ab.Active.Headline" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="Ab.Step.PlayWithout" xml:space="preserve"><value>Round {0} of {1}: play WITHOUT the tweak</value></data>
+  <data name="Ab.Step.PlayWith" xml:space="preserve"><value>Round {0} of {1}: play WITH the tweak</value></data>
+  <data name="Ab.Step.PlayWithoutAgain" xml:space="preserve"><value>Round {0} of {1}: play WITHOUT the tweak again</value></data>
+  <data name="Ab.Step.PlayDetail" xml:space="preserve"><value>Play at least {0} minutes in the same scene as the other rounds. When the game closes, the round joins the test by itself.</value></data>
+  <data name="Ab.Step.Applying" xml:space="preserve"><value>Applying the tweak…</value></data>
+  <data name="Ab.Step.Reverting" xml:space="preserve"><value>Going back to the initial state…</value></data>
+  <data name="Ab.Step.Deciding" xml:space="preserve"><value>Comparing the rounds…</value></data>
+  <data name="Ab.Step.Ask" xml:space="preserve"><value>Keep it anyway?</value></data>
+  <data name="Ab.Step.Done" xml:space="preserve"><value>Test finished</value></data>
+  <data name="Ab.Step.WorkingDetail" xml:space="preserve"><value>The applier is working. System changes ask for a Windows prompt.</value></data>
+  <data name="Ab.Step.DecidingDetail" xml:space="preserve"><value>Paired 30-second slices and a confidence interval: only what exceeds natural variation counts.</value></data>
+  <data name="Ab.Step.AskDetail" xml:space="preserve"><value>The test did not prove an improvement. You decide.</value></data>
+  <data name="Ab.Ask.Ab" xml:space="preserve"><value>The tweak is still applied. Keep it as is or undo?</value></data>
+  <data name="Ab.Ask.Aba" xml:space="preserve"><value>The tweak was already undone for the last round. Apply it again anyway or leave it as it was?</value></data>
+  <data name="Ab.Keep" xml:space="preserve"><value>Keep anyway</value></data>
+  <data name="Ab.Undo" xml:space="preserve"><value>Leave as it was</value></data>
+  <data name="Ab.Cancel" xml:space="preserve"><value>Cancel the test</value></data>
+  <data name="Ab.Cancel.Confirm" xml:space="preserve"><value>Cancel the test? Nothing was changed.</value></data>
+  <data name="Ab.Cancel.ConfirmApplied" xml:space="preserve"><value>Cancel the test? The applied tweak goes back to the initial state, as agreed.</value></data>
+  <data name="Ab.Hint.Measuring" xml:space="preserve"><value>Measuring now. Keep playing.</value></data>
+  <data name="Ab.Hint.Open" xml:space="preserve"><value>Game open: measuring starts in a moment.</value></data>
+  <data name="Ab.Hint.OpenGame" xml:space="preserve"><value>Open the game. NEXUS notices and measures by itself.</value></data>
+  <data name="Ab.AutoMeasureOff" xml:space="preserve"><value>Automatic measuring is off in Measure: turn it on so the round joins the test.</value></data>
+  <data name="Ab.SameSceneTip" xml:space="preserve"><value>Tip: same level, same resolution, same length. Laptop: always plugged in.</value></data>
+  <data name="Ab.Accepted" xml:space="preserve"><value>Round {0} accepted: {1} FPS on average, 1% low {2}.</value></data>
+  <data name="Ab.Queue" xml:space="preserve"><value>After this one: {0} more in the queue.</value></data>
+  <data name="Ab.NextInQueue" xml:space="preserve"><value>Next in the queue: {0}.</value></data>
+  <data name="Ab.ApplyFailedNote" xml:space="preserve"><value>The applier could not apply the tweak. The test stopped.</value></data>
+  <data name="Ab.AlreadyOnNote" xml:space="preserve"><value>The tweak was already like this: nothing to compare.</value></data>
+  <data name="Ab.ApplyTitle" xml:space="preserve"><value>A/B Lab: {0}</value></data>
+  <data name="Ab.SessionMissing" xml:space="preserve"><value>A round of the test was deleted in Measure: cannot compare.</value></data>
+  <data name="Ab.SaveFailed" xml:space="preserve"><value>Could not save the test: {0}</value></data>
+  <data name="Ab.Finished" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="Ab.Reject.NotWaiting" xml:space="preserve"><value>The round ended while the applier was working: it did not join the test.</value></data>
+  <data name="Ab.Reject.StartedBefore" xml:space="preserve"><value>The round started before this step: it did not join the test. Play another.</value></data>
+  <data name="Ab.Reject.Excluded" xml:space="preserve"><value>The round is marked as atypical in Measure: it did not join the test.</value></data>
+  <data name="Ab.Reject.TooShort" xml:space="preserve"><value>The round was too short: at least {0} minutes are needed. Play another.</value></data>
+  <data name="Ab.Reject.TooFewFrames" xml:space="preserve"><value>The round had too few measured frames. Play another.</value></data>
+  <data name="Ab.Reject.Resolution" xml:space="preserve"><value>The resolution changed since the first round: it did not join the test.</value></data>
+  <data name="Ab.Reject.Battery" xml:space="preserve"><value>Plugged in vs battery changed since the first round: it did not join the test.</value></data>
+  <data name="Ab.Reject.Driver" xml:space="preserve"><value>The graphics driver changed since the first round: it did not join the test.</value></data>
+  <data name="Ab.Metric.Fps" xml:space="preserve"><value>Average FPS</value></data>
+  <data name="Ab.Metric.Low1" xml:space="preserve"><value>1% low</value></data>
+  <data name="Ab.Metric.P99" xml:space="preserve"><value>Worst moments</value></data>
+  <data name="Ab.Metric.Stutter" xml:space="preserve"><value>Stutters</value></data>
+  <data name="Ab.Metric.Variance" xml:space="preserve"><value>Smoothness</value></data>
+  <data name="Ab.Unit.Fps" xml:space="preserve"><value>{0} FPS</value></data>
+  <data name="Ab.Unit.Ms" xml:space="preserve"><value>{0} ms</value></data>
+  <data name="Ab.Unit.PerMinute" xml:space="preserve"><value>{0}/min</value></data>
+  <data name="Ab.Verdict.Improved" xml:space="preserve"><value>Improved</value></data>
+  <data name="Ab.Verdict.Regressed" xml:space="preserve"><value>Got worse</value></data>
+  <data name="Ab.Verdict.Same" xml:space="preserve"><value>Same in practice</value></data>
+  <data name="Ab.Verdict.WithinNoise" xml:space="preserve"><value>Within variation</value></data>
+  <data name="Ab.Verdict.NotEnough" xml:space="preserve"><value>Not enough data</value></data>
+  <data name="Ab.Verdict.Noisy" xml:space="preserve"><value>The game varied on its own</value></data>
+  <data name="Ab.Verdict.LooksBetter" xml:space="preserve"><value>Looks better (no proof)</value></data>
+  <data name="Ab.Verdict.LooksWorse" xml:space="preserve"><value>Looks worse (no proof)</value></data>
+  <data name="Ab.Highlight" xml:space="preserve"><value>{0} in {1}</value></data>
+  <data name="Ab.Result.Headline" xml:space="preserve"><value>{0} in {1}</value></data>
+  <data name="Ab.Result.Helped" xml:space="preserve"><value>It helped</value></data>
+  <data name="Ab.Result.HelpedDetail" xml:space="preserve"><value>Proven improvement beyond natural variation: {0}. No metric got worse.</value></data>
+  <data name="Ab.Result.HelpedPlain" xml:space="preserve"><value>Proven improvement beyond natural variation. No metric got worse.</value></data>
+  <data name="Ab.Result.Hurt" xml:space="preserve"><value>Did not help: got worse</value></data>
+  <data name="Ab.Result.HurtDetail" xml:space="preserve"><value>Proven regression: {0}.</value></data>
+  <data name="Ab.Result.HurtPlain" xml:space="preserve"><value>Proven regression in at least one metric.</value></data>
+  <data name="Ab.Result.Mixed" xml:space="preserve"><value>Did not help: mixed result</value></data>
+  <data name="Ab.Result.MixedDetail" xml:space="preserve"><value>One metric improved and another got worse. With no clear gain, the tweak does not stay.</value></data>
+  <data name="Ab.Result.NoChange" xml:space="preserve"><value>Did not help: same in practice</value></data>
+  <data name="Ab.Result.NoChangeDetail" xml:space="preserve"><value>The rounds with and without were the same within the margin of error.</value></data>
+  <data name="Ab.Result.Inconclusive" xml:space="preserve"><value>Inconclusive</value></data>
+  <data name="Ab.Result.InconclusiveDetail" xml:space="preserve"><value>The difference stayed within the natural variation between rounds. It cannot be said that it helped.</value></data>
+  <data name="Ab.Result.NoisyDetail" xml:space="preserve"><value>The two rounds without the tweak already differed from each other: the game varied on its own. Repeat with the same scene.</value></data>
+  <data name="Ab.Result.InsufficientDetail" xml:space="preserve"><value>Not enough comparable slices. Longer rounds in the same scene give a verdict.</value></data>
+  <data name="Ab.Outcome.Kept" xml:space="preserve"><value>kept</value></data>
+  <data name="Ab.Outcome.KeptByUser" xml:space="preserve"><value>kept by you</value></data>
+  <data name="Ab.Outcome.Undone" xml:space="preserve"><value>undone</value></data>
+  <data name="Ab.Outcome.AlreadyOn" xml:space="preserve"><value>already like this</value></data>
+  <data name="Ab.Outcome.AlreadyOnDetail" xml:space="preserve"><value>The tweak was already on before the test: there was nothing to compare.</value></data>
+  <data name="Ab.Outcome.Cancelled" xml:space="preserve"><value>cancelled</value></data>
+  <data name="Ab.Outcome.Failed" xml:space="preserve"><value>stopped</value></data>
+  <data name="Ab.Outcome.ApplyFailed" xml:space="preserve"><value>could not apply</value></data>
+  <data name="Ab.Outcome.RevertFailed" xml:space="preserve"><value>could not undo: see History</value></data>
+  <data name="Ab.Outcome.ReapplyFailed" xml:space="preserve"><value>could not apply again</value></data>
+  <data name="Ab.Outcome.Interrupted" xml:space="preserve"><value>interrupted when NEXUS closed: check History</value></data>
+  <data name="Ab.Warn.Duration" xml:space="preserve"><value>The rounds had very different lengths: compare with care.</value></data>
+  <data name="Ab.Warn.PresentMode" xml:space="preserve"><value>The present mode changed ({0} → {1}): that alone changes FPS.</value></data>
+  <data name="Ab.Warn.Drift" xml:space="preserve"><value>The two rounds without the tweak differed from each other: part of what changed was not the tweak.</value></data>
+  <data name="Ab.Warn.SameScene" xml:space="preserve"><value>NEXUS cannot see the scene: the result only holds if the rounds were alike.</value></data>
+  <data name="Ab.With" xml:space="preserve"><value>With</value></data>
+  <data name="Ab.Without" xml:space="preserve"><value>Without</value></data>
+  <data name="Ab.Method.Ab" xml:space="preserve"><value>Method: round without × round with, {0} 30-second slices paired by position, 95% bootstrap interval.</value></data>
+  <data name="Ab.Method.Aba" xml:space="preserve"><value>Method: the round with the tweak was compared with BOTH rounds without ({0} paired 30-second slices); only what shows against both counts.</value></data>
+  <data name="Ab.Method.Explain" xml:space="preserve"><value>It stays only with a proven improvement in average FPS, 1% low, worst moments or stutters, and no regression. Smoothness is indicative only.</value></data>
+  <data name="Ab.NewTest" xml:space="preserve"><value>New test</value></data>
+  <data name="Ab.History.Title" xml:space="preserve"><value>Previous comparisons</value></data>
+  <data name="Ab.History.Line" xml:space="preserve"><value>{0} — {1}: {2} — {3}</value></data>
+  <data name="Ab.Candidate.Tested" xml:space="preserve"><value>Tested here: {0} ({1})</value></data>
+  <data name="Ab.Candidate.TestedPlain" xml:space="preserve"><value>Tested here: {0}</value></data>
+  <data name="Simple.Games.Compare" xml:space="preserve"><value>Compare with and without</value></data>
+  <data name="Simple.Games.CompareTip" xml:space="preserve"><value>A/B Lab: play one round without and one with a tweak; only what really helps stays.</value></data>
+  <data name="Fit.LaptopHeat" xml:space="preserve"><value>Not for laptops: runs hotter and the processor ends up slowing down</value></data>
+  <data name="Fit.OnBattery" xml:space="preserve"><value>Not while on battery: Windows limits power and this only drains the battery</value></data>
+  <data name="Fit.IntegratedGpu" xml:space="preserve"><value>Not for PCs without a dedicated graphics card</value></data>
+  <data name="Fit.WeakGpuRelief" xml:space="preserve"><value>Recommended for your PC: eases the load on the graphics card</value></data>
+  <data name="Fit.StrongGpuNoNeed" xml:space="preserve"><value>Not needed: your card is strong and this lowers quality for nothing</value></data>
+  <data name="Fit.StrongGpuUse" xml:space="preserve"><value>Recommended for your PC: makes use of the strong graphics card</value></data>
+  <data name="Fit.LowRamRelief" xml:space="preserve"><value>Recommended for your PC: frees up RAM (8 GB or less)</value></data>
+  <data name="Fit.SysMainHelpsHere" xml:space="preserve"><value>Not recommended: with an HDD or little memory, SysMain helps programs open faster</value></data>
+  <data name="Fit.HddFewerWrites" xml:space="preserve"><value>Recommended for your PC: fewer writes to the hard disk</value></data>
+  <data name="Fit.NotNvidia" xml:space="preserve"><value>Not applicable: only works on NVIDIA cards</value></data>
+  <data name="Fit.NotAmd" xml:space="preserve"><value>Not applicable: only works on AMD cards</value></data>
+  <data name="Fit.NotIntel" xml:space="preserve"><value>Not applicable: only works on Intel cards</value></data>
+  <data name="Fit.NvidiaGpu" xml:space="preserve"><value>Recommended for your PC: it is an NVIDIA driver setting</value></data>
+  <data name="Fit.AmdGpu" xml:space="preserve"><value>Recommended for your PC: it is a setting for AMD cards</value></data>
+  <data name="Fit.IntelGpu" xml:space="preserve"><value>Recommended for your PC: it is a setting for Intel cards</value></data>
+  <data name="Fit.Competitive" xml:space="preserve"><value>Recommended for you: less input delay</value></data>
+  <data name="Fit.LaptopWifi" xml:space="preserve"><value>Recommended for laptops: Wi-Fi stops dozing between packets and ping stays steady</value></data>
+  <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recommended for laptops: less heat and noise</value></data>
+  <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recommended for your PC: background recording keeps the graphics card busy</value></data>
+  <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Apply recommended</value></data>
+  <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Apply what is recommended for this PC (the options flagged above, all at once)</value></data>
+  <data name="Simple.Games.ConfirmRecommended" xml:space="preserve"><value>{0}: turn on what is recommended for this PC ({1})? This can be undone.</value></data>
+  <data name="Simple.Games.ConfirmRecommendedAdmin" xml:space="preserve"><value>{0}: turn on what is recommended for this PC ({1})? Windows will ask for administrator permission. This can be undone.</value></data>
+  <data name="Profile.Title" xml:space="preserve"><value>PC profile</value></data>
+  <data name="Profile.Lead" xml:space="preserve"><value>NEXUS uses this profile to flag what is recommended for your PC in Quick tweaks, Automatic and Games.</value></data>
+  <data name="Profile.Reading" xml:space="preserve"><value>Reading your PC…</value></data>
+  <data name="Profile.PreferLowLatency" xml:space="preserve"><value>I prefer less input delay over pretty graphics (competitive play)</value></data>
+  <data name="Profile.PreferLowLatencyWhy" xml:space="preserve"><value>This is not about hardware, it is your choice: with it on, settings such as Reflex, driver low latency and shadows off show up as recommended. Nothing is applied on its own.</value></data>
+  <data name="Profile.Laptop" xml:space="preserve"><value>Laptop</value></data>
+  <data name="Profile.Desktop" xml:space="preserve"><value>Desktop</value></data>
+  <data name="Profile.Pc" xml:space="preserve"><value>PC</value></data>
+  <data name="Profile.GpuIntegrated" xml:space="preserve"><value>integrated graphics</value></data>
+  <data name="Profile.GpuEntry" xml:space="preserve"><value>entry-level graphics card</value></data>
+  <data name="Profile.GpuMid" xml:space="preserve"><value>mid-range graphics card</value></data>
+  <data name="Profile.GpuStrong" xml:space="preserve"><value>strong graphics card</value></data>
+  <data name="Profile.FormWithGpu" xml:space="preserve"><value>{0} with {1}</value></data>
+  <data name="Profile.Gb" xml:space="preserve"><value>{0} GB</value></data>
+  <data name="Profile.Ram" xml:space="preserve"><value>{0} GB of RAM</value></data>
+  <data name="Profile.Ssd" xml:space="preserve"><value>SSD</value></data>
+  <data name="Profile.Hdd" xml:space="preserve"><value>hard disk (HDD)</value></data>
+  <data name="Profile.OnBattery" xml:space="preserve"><value>on battery right now</value></data>
+  <data name="Profile.Unknown.Gpu" xml:space="preserve"><value>graphics card</value></data>
+  <data name="Profile.Unknown.Ram" xml:space="preserve"><value>RAM</value></data>
+  <data name="Profile.Unknown.Form" xml:space="preserve"><value>laptop or desktop</value></data>
+  <data name="Profile.Unknown.Disk" xml:space="preserve"><value>disk type</value></data>
+  <data name="Profile.Unknown.List" xml:space="preserve"><value>Could not read: {0}. Without it, NEXUS neither recommends nor advises against anything based on it.</value></data>
 </root>

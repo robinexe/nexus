@@ -148,6 +148,7 @@
           "Nexus.Cleaning": "[1.0.0, )",
           "Nexus.Core": "[1.0.0, )",
           "Nexus.DriverUpdates": "[1.0.0, )",
+          "Nexus.GameProfiles": "[1.0.0, )",
           "Nexus.HardwareDiscovery": "[1.0.0, )",
           "Nexus.Lab.Cpu": "[1.0.0, )",
           "Nexus.Lab.Gpu": "[1.0.0, )",

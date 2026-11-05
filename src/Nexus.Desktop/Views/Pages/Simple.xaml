@@ -508,6 +508,8 @@
                                 <c:StatusChip Tone="Info" Text="{l:T Opt.Row.Undo}" Margin="0,0,8,0"/>
                                 <TextBlock Text="{Binding StateText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center"/>
                               </WrapPanel>
+                              <!-- Recomendação por hardware: "Recomendado para o seu PC: …" (discreto) -->
+                              <c:StatusChip Tone="Good" Text="{Binding FitNote}" HorizontalAlignment="Left" Margin="0,6,0,0" Visibility="{Binding HasFitNote, Converter={StaticResource BoolToVis}}"/>
                             </StackPanel>
                           </DockPanel>
                         </DataTemplate>
@@ -672,6 +674,14 @@
                         <TextBlock Text="{l:T Simple.Games.Measure}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
                       </StackPanel>
                     </Button>
+                    <!-- Laboratório A/B: comparar uma partida com e sem um ajuste (só com opções para testar) -->
+                    <Button DockPanel.Dock="Right" Style="{StaticResource Button.Ghost}" Margin="8,0,0,0" Command="{Binding CompareCommand}" VerticalAlignment="Center"
+                            ToolTip="{l:T Simple.Games.CompareTip}" Visibility="{Binding HasCompare, Converter={StaticResource BoolToVis}}">
+                      <StackPanel Orientation="Horizontal">
+                        <c:Icon Data="{StaticResource Icon.AbLab}" Size="16" Margin="0,0,8,0"/>
+                        <TextBlock Text="{l:T Simple.Games.Compare}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                      </StackPanel>
+                    </Button>
                     <Border Width="48" Height="48" CornerRadius="10" Background="{StaticResource Brush.SurfaceHi}" Margin="0,0,16,0">
                       <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource Font.Display}" FontSize="22" Foreground="{StaticResource Brush.Trace}"
                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -683,11 +693,21 @@
                       <DataTemplate DataType="{x:Type sv:GameOption}">
                         <DockPanel Margin="0,6">
                           <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding Action}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"/>
-                          <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}"/>
+                            <!-- Selo discreto da recomendação por hardware ("Recomendado para o seu PC: …") -->
+                            <c:StatusChip Tone="{Binding FitTone}" Text="{Binding FitNote}" HorizontalAlignment="Left" Margin="0,4,0,0"
+                                          Visibility="{Binding HasFitNote, Converter={StaticResource BoolToVis}}"/>
+                          </StackPanel>
                         </DockPanel>
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
+                  <!-- "Aplicar o recomendado para este PC": um clique, confirmação, desfazer (só quando há opção recomendada ainda desligada) -->
+                  <DockPanel Margin="64,10,0,0" Visibility="{Binding HasApplyRecommended, Converter={StaticResource BoolToVis}}">
+                    <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding ApplyRecommended}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"/>
+                    <TextBlock Text="{l:T Simple.Games.RecommendedLead}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                  </DockPanel>
                   <!-- Estado atual lido do jogo e aviso (Fortnite: "Agora: Modo desempenho · limite 141 FPS"; "feche o Fortnite antes") -->
                   <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.Signal}" Margin="64,10,0,0"
                              TextWrapping="Wrap" Visibility="{Binding HasStatus, Converter={StaticResource BoolToVis}}"/>

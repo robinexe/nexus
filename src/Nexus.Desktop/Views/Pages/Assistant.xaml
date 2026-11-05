@@ -80,6 +80,9 @@
               <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
               <TextBlock Text="{Binding BeforeAfter}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" FontFamily="{StaticResource Font.Numbers}"
                          Margin="0,2,0,0" Visibility="{Binding HasBeforeAfter, Converter={StaticResource BoolToVis}}"/>
+              <!-- Recomendação por hardware ("Recomendado para o seu PC" / "Não indicado para notebook") -->
+              <c:StatusChip Tone="{Binding FitTone}" Text="{Binding FitNote}" HorizontalAlignment="Left" Margin="0,4,0,0"
+                            Visibility="{Binding HasFitNote, Converter={StaticResource BoolToVis}}"/>
               <c:ExplainToggle Margin="0,2,0,0">
                 <StackPanel>
                   <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}"/>

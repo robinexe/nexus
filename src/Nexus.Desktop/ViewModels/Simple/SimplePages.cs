@@ -278,7 +278,13 @@ public sealed class SimpleCleanPage : ModulePage
 }
 
 /// <summary>Uma opção de um jogo, em palavras simples, com o botão de um clique ("Ligar" → "Feito ✓ — Desfazer"; já ligada: "✓ Ligado — Desfazer").</summary>
-public sealed record GameOption(string Text, OneClickAction Action);
+/// <param name="Fit">Veredito do hardware (selo discreto "Recomendado para o seu PC" / "Não indicado…"); neutro = sem selo.</param>
+public sealed record GameOption(string Text, OneClickAction Action, Fit Fit)
+{
+    public string FitNote => FitText.Sentence(Fit);
+    public bool HasFitNote => FitNote.Length > 0;
+    public Views.Controls.Tone FitTone => Fit.IsRecommended ? Views.Controls.Tone.Good : Views.Controls.Tone.Warn;
+}
 
 /// <summary>Um jogo na tela Jogos: nome, inicial (no lugar do ícone), as opções que valem para ele e "Medir FPS".</summary>
 public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOption> options, RelayCommand measure) : ObservableObject
@@ -292,6 +298,12 @@ public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOpt
     public IReadOnlyList<GameOption> Options { get; } = options;
     public bool HasOptions => Options.Count > 0;
     public RelayCommand MeasureCommand { get; } = measure;
+    /// <summary>"Comparar com e sem": abre o Laboratório A/B com este jogo (só quando o jogo tem opções para testar).</summary>
+    public RelayCommand? CompareCommand { get; init; }
+    public bool HasCompare => CompareCommand is not null;
+    /// <summary>"Aplicar o recomendado para este PC": as opções recomendadas pelo hardware que ainda não estão ligadas (um clique, confirmação, desfazer). Null = nada a aplicar.</summary>
+    public OneClickAction? ApplyRecommended { get; init; }
+    public bool HasApplyRecommended => ApplyRecommended is not null;
     /// <summary>"Por que travou?" da última partida medida, em uma linha ("12 travadas: a maioria provavelmente por…"), ou vazio.</summary>
     public string StutterVerdict { get; init; } = "";
     public bool HasStutterVerdict => StutterVerdict.Length > 0;
@@ -378,6 +390,8 @@ public sealed class SimpleGamesPage : ModulePage
     public GpuLabPage Gpu { get; }
     public MeasurePage Measure { get; }
     internal ISimpleActions? Actions { get; set; }
+    /// <summary>Laboratório A/B (a janela liga): "Comparar com e sem" ao lado de "Medir FPS" abre a página já com o jogo escolhido.</summary>
+    internal AbLabPage? AbLab { get; set; }
     /// <summary>Execuções dos diários (a janela passa as do Histórico, relidas a cada escrita); por padrão lê do disco.</summary>
     internal Func<IReadOnlyList<JournalRun>> Journal { get; set; } = SimpleHistoryPage.ReadJournal;
     /// <summary>De onde vem o estado real das opções (só leitura).</summary>
@@ -471,8 +485,20 @@ public sealed class SimpleGamesPage : ModulePage
 
     private (FortniteState State, bool Running) ReadFortnite() => (StateSource.Fortnite(), FortniteProcesses.AnyRunning());
 
+    /// <summary>Para o Laboratório A/B: os jogos da biblioteca com as opções (texto + plano) que dá para testar. Só a partir das leituras já feitas.</summary>
+    internal IReadOnlyList<(string Name, string Exe, IReadOnlyList<(string Text, GameOptionPlan Plan)> Options)> DescribeForLab() =>
+        [.. Describe().Select(g => (g.Name, g.Exe, g.Plans))];
+
     /// <summary>Um jogo e as opções que valem para ele (texto + plano: o que pede, como ler, como achar no diário).</summary>
     private sealed record GameDescription(string Name, string Exe, bool IsFortnite, IReadOnlyList<(string Text, GameOptionPlan Plan)> Plans);
+
+    /// <summary>Veredito do hardware para um plano: o pior entre as ações que ele pede (uma "não recomendada" pesa mais que uma "recomendada").</summary>
+    private Fit FitOf(GameOptionPlan plan)
+    {
+        if (Host?.HardwareProfile is not { } hw) return Fit.Neutral;
+        var fits = plan.Requests.Select(r => HardwareRules.ForAction(hw, r.Request.ActionId)).ToList();
+        return fits.FirstOrDefault(f => f.IsNotRecommended) ?? fits.FirstOrDefault(f => f.IsRecommended) ?? Fit.Neutral;
+    }
 
     /// <summary>Os jogos da biblioteca (jogos em janela + driver NVIDIA) com as opções de cada um. Só a partir das leituras já feitas.</summary>
     private List<GameDescription> Describe()
@@ -540,9 +566,11 @@ public sealed class SimpleGamesPage : ModulePage
         Games.Clear();
         foreach (var g in games)
         {
-            var options = g.Plans.Select(p => new GameOption(p.Text, ActionFor(g, p.Text, p.Plan))).ToList();
+            var options = g.Plans.Select(p => new GameOption(p.Text, ActionFor(g, p.Text, p.Plan), FitOf(p.Plan))).ToList();
             Games.Add(new SimpleGameRow(g.Name, g.Exe, options, new RelayCommand(() => { Measure.ManualExe = g.Exe; Host?.Navigate(Measure); }))
             {
+                CompareCommand = AbLab is { } lab && g.Plans.Count > 0 ? new RelayCommand(() => { lab.PreselectGame(g.Exe); Host?.Navigate(lab); }) : null,
+                ApplyRecommended = ApplyRecommendedFor(g),
                 StutterVerdict = Measure.LatestStutterVerdict(g.Exe),
                 Status = g.IsFortnite ? FortniteStatus(_fortnite.State) : "",
                 Note = g.IsFortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : "",
@@ -551,6 +579,31 @@ public sealed class SimpleGamesPage : ModulePage
         }
         OnPropertyChanged(nameof(HasGames));
         OnPropertyChanged(nameof(NoGames));
+    }
+
+    /// <summary>
+    /// "Aplicar o recomendado para este PC": junta os pedidos das opções recomendadas pelo hardware que ainda não estão ligadas
+    /// (estado lido) num clique só, com uma confirmação; o desfazer volta todas. Null quando não há nada recomendado pendente.
+    /// O botão é o mesmo entre aberturas (chave "<exe>|recommended").
+    /// </summary>
+    private OneClickAction? ApplyRecommendedFor(GameDescription game)
+    {
+        var pending = game.Plans.Where(p => FitOf(p.Plan).IsRecommended && _states.GetValueOrDefault(p.Plan.Id, OptionStatus.Unread).State != OptionState.On).ToList();
+        var id = game.Exe + "|recommended";
+        if (pending.Count == 0) { _actions.Remove(id); return null; }
+        var requests = pending.SelectMany(p => p.Plan.Requests).ToList();
+        var names = string.Join(", ", pending.Select(p => p.Text));
+        if (!_actions.TryGetValue(id, out var action))
+        {
+            var exe = game.Exe;
+            var title = game.IsFortnite ? "Fortnite" : game.Name;
+            var admin = requests.Any(r => r.Level == BrokerLevel.Admin);
+            action = new OneClickAction(Loc.T("Simple.Games.ApplyRecommended"), Applier,
+                q => q.ApplyAsync(title, admin ? Loc.F("Simple.Games.ConfirmRecommendedAdmin", title, names) : Loc.F("Simple.Games.ConfirmRecommended", title, names), requests),
+                () => _ = RefreshGameAsync(exe));
+            _actions[id] = action;
+        }
+        return action;
     }
 
     /// <summary>O botão da opção (o mesmo da última abertura, se houver), já mostrando o estado lido.</summary>

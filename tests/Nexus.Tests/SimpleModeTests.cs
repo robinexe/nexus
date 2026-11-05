@@ -20,7 +20,7 @@ public sealed class SimpleModeTests
     [
         "OverviewPage", "HardwarePage", "DiagnosticsPage", "CpuLabPage", "GpuLabPage", "MemoryLabPage", "MemoryDoctorPage", "AssistantPage",
         "AutomationPage", "CatalogPage", "PlanPage", "BrokerPage", "StartupPage", "ServicesPage", "CleaningPage", "DiskPage", "ProgramsPage",
-        "PrivacyPage", "SecurityPage", "ScannerPage", "SystemToolsPage", "DriverUpdatesPage", "MeasurePage", "MonitorPage", "HistoryPage",
+        "PrivacyPage", "SecurityPage", "ScannerPage", "SystemToolsPage", "DriverUpdatesPage", "MeasurePage", "AbLabPage", "MonitorPage", "HistoryPage",
         "SettingsPage", "CapabilitiesPage",
     ];
 

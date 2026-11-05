@@ -55,6 +55,7 @@ Cada verificação chama **as mesmas leituras que a página faz**, direto na bib
 | Laboratórios | CPU (CPUID, topologia, energia); GPU (DXGI, PCIe, NVML, monitores); memória (SMBIOS, estado); medições curtas só com `--with-benchmarks` |
 | Memória: diagnóstico | Uma amostra (`WindowsDoctorReader.Read`) |
 | Medir | Bibliotecas de jogos; PresentMon encontrado? |
+| Laboratório A/B | `ab-lab.json` (teste em andamento, fila, histórico), como a página lê |
 | Automático | Perfil + recomendações + candidatas do "Otimizar agora"; tarefas agendadas do NEXUS |
 | Ajustes | `settings.json` (validação própria: o `NexusSettings.Load` copia arquivo corrompido, o autoteste não) |
 

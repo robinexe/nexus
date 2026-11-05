@@ -16,6 +16,12 @@ public interface IModuleHost
     /// <summary>SID de quem usa a interface (para ações no perfil do usuário).</summary>
     string UserSid { get; }
 
+    /// <summary>
+    /// Perfil de hardware para as recomendações (classe da placa, RAM, notebook, bateria, SSD e a preferência "menos atraso");
+    /// null até a primeira leitura terminar. Lógica pura em <see cref="Nexus.Assistant.HardwareProfiler"/>.
+    /// </summary>
+    Nexus.Assistant.HardwareProfile? HardwareProfile => null;
+
     /// <summary>Simula no aplicador: mostra o que mudaria, sem escrever.</summary>
     Task<BrokerCallResult> PlanAsync(IReadOnlyList<ActionRequest> requests, BrokerLevel level);
 

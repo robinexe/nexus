@@ -38,7 +38,7 @@ public static class ShellNavigation
         new("home", "Icon.Home", ["HomePage"], []),
         new("optimize", "Icon.Bolt", ["SimpleOptimizePage", "SimpleCleanPage"],
             ["CleaningPage", "StartupPage", "ProgramsPage", "ServicesPage", "PrivacyPage", "DiskPage", "CatalogPage", "AssistantPage", "PlanPage", "BrokerPage"]),
-        new("performance", "Icon.Measure", ["SimpleGamesPage", "MeasurePage", "MonitorPage"],
+        new("performance", "Icon.Measure", ["SimpleGamesPage", "MeasurePage", "AbLabPage", "MonitorPage"],
             ["CpuLabPage", "GpuLabPage", "MemoryLabPage", "MemoryDoctorPage", "HardwarePage", "OverviewPage"]),
         new("diagnostics", "Icon.Diagnostics", ["SimpleProblemsPage", "DriverUpdatesPage", "SecurityPage"],
             ["DiagnosticsPage", "ScannerPage", "SystemToolsPage", "CapabilitiesPage"]),

@@ -190,7 +190,11 @@ public sealed class OneClickAction : ObservableObject
 
 /// <summary>Um ajuste rápido lido do catálogo + recomendações deste PC. Ligado = o Windows já está como o ajuste deixa (Detect).</summary>
 public sealed record QuickTweakData(string Key, string Title, string Sentence, QuickCategory Category, bool IsOn, bool Recommended, string RiskWord,
-    ActionRequest Request, BrokerLevel Level);
+    ActionRequest Request, BrokerLevel Level)
+{
+    /// <summary>"Recomendado para o seu PC: …" quando o perfil de hardware pede este ajuste (vazio quando é neutro).</summary>
+    public string FitNote { get; init; } = "";
+}
 
 /// <summary>Uma linha dos ajustes rápidos: caixa de ligar/desligar, uma frase e (em "Mostrar mais opções") a palavra de risco.</summary>
 public sealed class QuickTweakRow : ObservableObject
@@ -211,12 +215,15 @@ public sealed class QuickTweakRow : ObservableObject
     public string Sentence => Data.Sentence;
     public bool HasSentence => Data.Sentence.Length > 0;
     public bool IsOn => Data.IsOn;
-    public bool ShowRisk => !Data.Recommended;
+    public bool ShowRisk => !Data.Recommended && Data.RiskWord.Length > 0;
     public string RiskWord => Data.RiskWord;
     /// <summary>Risco sempre à vista (diretriz: cada otimização mostra o risco): "Risco baixo" ou a palavra de risco do ajuste.</summary>
     public string RiskText => Data.Recommended ? Loc.T("Opt.Row.LowRisk") : Data.RiskWord;
     /// <summary>Estado atual lido do PC ("Ligado agora" / "Desligado agora").</summary>
     public string StateText => Data.IsOn ? Loc.T("Opt.Row.On") : Loc.T("Opt.Row.Off");
+    /// <summary>Selo discreto "recomendado para o seu PC" com o motivo.</summary>
+    public string FitNote => Data.FitNote;
+    public bool HasFitNote => Data.FitNote.Length > 0;
     public bool Busy { get => _busy; internal set => Set(ref _busy, value); }
     public string Note { get => _note; internal set { if (Set(ref _note, value)) OnPropertyChanged(nameof(HasNote)); } }
     public bool HasNote => _note.Length > 0;
@@ -259,6 +266,9 @@ public sealed class QuickTweaksPanel : ObservableObject
 
     /// <summary>Recomendados que ainda mudariam algo (o cartão "N ajustes seguros" da tela Início).</summary>
     public IReadOnlyList<QuickTweakData> Pending => [.. _data.Where(d => d.Recommended && !d.IsOn)];
+
+    /// <summary>Todos os ajustes rápidos deste PC (o Laboratório A/B oferece os que ainda não estão ligados para testar).</summary>
+    public IReadOnlyList<QuickTweakData> All => _data;
 
     public void Update(IReadOnlyList<QuickTweakData> data)
     {
