@@ -3,7 +3,7 @@
 
   Contrato (nomes fixos, use nas páginas):
     Texto ...... Text.Display, Text.H1, Text.H2, Text.Body, Text.Small, Text.Metric, Text.MetricLabel (+ Text.Readout, Text.Label)
-    Painéis .... Panel.Card, Panel.Hero, Panel.Inset, Panel.Notice
+    Painéis .... Panel.Card, Panel.Hero, Panel.Inset, Panel.Notice, Panel.Instrument
     Botões ..... Button.Primary (âmbar, a ação principal da tela), Button.Secondary, Button.Ghost (ciano, links), Button.Danger
     Selo ....... DataTemplate "Chip" (ContentPresenter Content={Binding Status} ContentTemplate={StaticResource Chip})
     Foco ....... Focus.Ring (anel ciano só no foco por teclado), Focus.Inset
@@ -143,20 +143,22 @@
   <Style x:Key="Small" TargetType="TextBlock" BasedOn="{StaticResource Text.Small}"/>
 
   <!-- ===== Painéis ===== -->
+  <!-- "Instrumento de precisão": superfícies separadas por luminosidade e um realce de 1 px no topo (luz de cima), sem contorno.
+       Quem quer destacar um cartão com cor passa BorderBrush E BorderThickness="1". -->
   <Style x:Key="Panel.Card" TargetType="Border">
     <Setter Property="Background" Value="{StaticResource Brush.Surface}"/>
-    <Setter Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
-    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Highlight}"/>
+    <Setter Property="BorderThickness" Value="0,1,0,0"/>
     <Setter Property="CornerRadius" Value="{StaticResource Radius.Card}"/>
     <Setter Property="Padding" Value="18,16"/>
     <Setter Property="SnapsToDevicePixels" Value="True"/>
   </Style>
   <Style x:Key="Panel.Hero" TargetType="Border">
-    <Setter Property="Background" Value="{StaticResource Brush.SurfaceHi}"/>
-    <Setter Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
-    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Background" Value="{StaticResource Brush.Surface}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Highlight}"/>
+    <Setter Property="BorderThickness" Value="0,1,0,0"/>
     <Setter Property="CornerRadius" Value="{StaticResource Radius.Panel}"/>
-    <Setter Property="Padding" Value="28,24"/>
+    <Setter Property="Padding" Value="32,28"/>
     <Setter Property="SnapsToDevicePixels" Value="True"/>
   </Style>
   <Style x:Key="Panel.Inset" TargetType="Border">
@@ -165,6 +167,15 @@
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="CornerRadius" Value="{StaticResource Radius.Control}"/>
     <Setter Property="Padding" Value="12"/>
+    <Setter Property="SnapsToDevicePixels" Value="True"/>
+  </Style>
+  <!-- Painel de instrumento (novo, 05/11/2026): o degrau mais fundo, atrás de mostradores ao vivo (Início, Varredura). -->
+  <Style x:Key="Panel.Instrument" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource Brush.Ground}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.LineSoft}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius" Value="{StaticResource Radius.Panel}"/>
+    <Setter Property="Padding" Value="28,24"/>
     <Setter Property="SnapsToDevicePixels" Value="True"/>
   </Style>
   <!-- Aviso: fundo âmbar escuro. Use para "nada é aplicado aqui", limites, cuidados. -->
@@ -262,7 +273,7 @@
     <Setter Property="BorderBrush" Value="{StaticResource Brush.Trace}"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
-    <Setter Property="Padding" Value="18,9"/>
+    <Setter Property="Padding" Value="20,10"/>
     <Setter Property="Margin" Value="0,0,8,0"/>
   </Style>
   <Style x:Key="Button.Secondary" TargetType="Button" BasedOn="{StaticResource Button.Base}">

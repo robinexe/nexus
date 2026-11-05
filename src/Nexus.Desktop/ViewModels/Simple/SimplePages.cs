@@ -68,6 +68,21 @@ public sealed class HomePage : ModulePage
 
     public HomePage() => OptimizeCommand = new RelayCommand(StartOptimize, () => Host?.Facts is not null);
 
+    /// <summary>Painel "Seu PC agora" (ao vivo só com o Início aberto).</summary>
+    public HomeLive Live { get; } = new();
+
+    /// <summary>A janela liga quando o Início abre e desliga quando sai.</summary>
+    public void SetLive(bool on) => Live.SetActive(on);
+
+    public override Task OnFactsReadyAsync(SystemFacts facts)
+    {
+        Live.SetHardware(facts);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Faixa "Situação": drivers, o que pede atenção, espaço a liberar, memória.</summary>
+    public IReadOnlyList<StatusItem> Strip => HasData ? StatusStrip.Build(_inputs) : [];
+
     public override string Title => Loc.T("Simple.Nav.Home");
     public override string Group => Loc.T("Simple.Nav.Group");
     public override string Subtitle => Loc.T("Simple.Home.Subtitle");
@@ -92,7 +107,7 @@ public sealed class HomePage : ModulePage
             Cards = [.. kept, .. fresh];
         }
         foreach (var n in new[] { nameof(IsLoading), nameof(HasData), nameof(Score), nameof(Level), nameof(Headline), nameof(Word), nameof(Tone),
-                     nameof(HasCards), nameof(NoCards) })
+                     nameof(HasCards), nameof(NoCards), nameof(Strip), nameof(ScoreText) })
             OnPropertyChanged(n);
     }
 
@@ -140,6 +155,8 @@ public sealed class HomePage : ModulePage
     public bool HasData => _inputs.HasData;
     /// <summary>0–100 (NaN antes da primeira leitura): enche o anel.</summary>
     public double Score => _result.Score;
+    /// <summary>A nota no centro do anel ("83"); antes da leitura, vazio.</summary>
+    public string ScoreText => double.IsFinite(_result.Score) ? Math.Round(_result.Score).ToString("0", Loc.Culture) : "";
     public HealthLevel Level => _result.Level;
     public string Headline => HasData ? SimpleHealth.Headline(_result.Level) : Loc.T("Simple.Home.Reading");
     public string Word => HasData ? SimpleHealth.Word(_result.Level) : "";
@@ -158,7 +175,7 @@ public sealed class HomePage : ModulePage
 }
 
 /// <summary>Um dos 4 itens da tela Otimizar ("Limpar arquivos temporários"…), com o estado da rodada automática.</summary>
-public sealed record OptimizePhaseRow(string Title, string IconKey, bool IsDone, bool IsCurrent)
+public sealed record OptimizePhaseRow(string Title, string IconKey, bool IsDone, bool IsCurrent) : ISweepNode
 {
     public Tone Tone => IsDone ? Tone.Good : IsCurrent ? Tone.Warn : Tone.Neutral;
     public string StateIcon => IsDone ? "Icon.Check" : IconKey;

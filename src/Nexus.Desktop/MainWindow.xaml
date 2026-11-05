@@ -127,6 +127,79 @@
       </Setter>
     </Style>
 
+    <!-- Aba de área (topo do conteúdo): texto e sublinhado âmbar na aba aberta (Tag = está aberta). -->
+    <Style x:Key="Area.TabButton" TargetType="Button">
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+      <Setter Property="FontFamily" Value="{StaticResource Font.Display}"/>
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Margin" Value="0,0,28,0"/>
+      <Setter Property="FocusVisualStyle" Value="{StaticResource Focus.Ring}"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Grid Background="Transparent">
+              <ContentPresenter Margin="0,6,0,14" HorizontalAlignment="Center"/>
+              <Border x:Name="Underline" Height="2" VerticalAlignment="Bottom" Background="{StaticResource Brush.Trace}" CornerRadius="1" Opacity="0"
+                      RenderTransformOrigin="0.5,0.5" Margin="0,0,0,-1">
+                <Border.RenderTransform>
+                  <ScaleTransform ScaleX="1"/>
+                </Border.RenderTransform>
+              </Border>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+              </Trigger>
+              <Trigger Property="Tag" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+                <Setter TargetName="Underline" Property="Opacity" Value="1"/>
+                <Trigger.EnterActions>
+                  <BeginStoryboard>
+                    <Storyboard>
+                      <DoubleAnimation Storyboard.TargetName="Underline" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                       From="0.3" To="1" Duration="{x:Static shell:ShellMotion.Normal}">
+                        <DoubleAnimation.EasingFunction>
+                          <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                      </DoubleAnimation>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.EnterActions>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- "Avançado ▾": discreto; marcado (menu aberto ou página avançada aberta) fica em âmbar. -->
+    <Style x:Key="Area.AdvancedButton" TargetType="ToggleButton" BasedOn="{StaticResource Button.Base}">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="12,7"/>
+      <Style.Triggers>
+        <Trigger Property="IsChecked" Value="True">
+          <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+          <Setter Property="Background" Value="{StaticResource Brush.Surface}"/>
+        </Trigger>
+        <DataTrigger Binding="{Binding IsInAreaAdvanced}" Value="True">
+          <Setter Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- Linha do menu "Avançado": ocupa a largura, lavagem leve no hover. -->
+    <Style x:Key="Area.LinkButton" TargetType="Button" BasedOn="{StaticResource Button.Base}">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="10,8"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+
     <!-- Botões do cabeçalho: secundários compactos. -->
     <Style x:Key="Header.Button" TargetType="Button" BasedOn="{StaticResource Button.Secondary}">
       <Setter Property="Padding" Value="12,7"/>
@@ -233,42 +306,32 @@
       </Grid>
     </Border>
 
-    <!-- ============ Navegação lateral agrupada, com ícone por página ============ -->
+    <!-- ============ Navegação lateral: 5 áreas (Início, Otimizar, Desempenho, Diagnóstico, Configurações) ============
+         Cada página do NEXUS mora numa área (ViewModels/Simple/SimpleLogic.cs, ShellNavigation.Areas): como aba no topo do
+         conteúdo ou recolhida em "Avançado". A lista marca a área da página aberta. -->
     <Border Grid.Row="1" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,1,0">
       <DockPanel>
-      <!-- Pé da navegação: um link discreto para todas as outras ferramentas (a lista lateral fica sempre com 6 itens). -->
-      <Button DockPanel.Dock="Bottom" Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="14,6,14,14"
-              Foreground="{StaticResource Brush.TextMuted}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="AdvancedToolsPage"
-              ToolTip="{l:T Simple.Adv.Tip}">
-        <StackPanel Orientation="Horizontal">
-          <c:Icon Data="{StaticResource Icon.Apps}" Size="15" Margin="0,0,8,0"/>
-          <TextBlock Text="{l:T Simple.Adv.Link}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-        </StackPanel>
-      </Button>
-      <ListBox x:Name="Nav" Margin="0,6,0,8" ItemContainerStyle="{StaticResource Nav.Item}"
-               SelectedItem="{Binding SelectedPage, Mode=OneWay}" IsSynchronizedWithCurrentItem="False"
+      <!-- Pé da navegação: a promessa de segurança, sempre à vista. -->
+      <Border DockPanel.Dock="Bottom" Margin="14,8,14,16" Padding="12,10" Background="{StaticResource Brush.Bg}" CornerRadius="{StaticResource Radius.Card}">
+        <DockPanel>
+          <c:Icon DockPanel.Dock="Left" Data="{StaticResource Icon.Security}" Size="16" Foreground="{StaticResource Brush.Good}" Margin="0,1,10,0" VerticalAlignment="Top"/>
+          <TextBlock Text="{l:T Nav.Promise}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}"/>
+        </DockPanel>
+      </Border>
+      <ListBox x:Name="Nav" Margin="0,14,0,8" ItemContainerStyle="{StaticResource Nav.Item}"
+               SelectedItem="{Binding SelectedArea, Mode=OneWay}" IsSynchronizedWithCurrentItem="False"
                Background="Transparent" BorderThickness="0" KeyboardNavigation.TabNavigation="Once"
                ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel"
                AutomationProperties.Name="{l:T Shell.Navegacao}">
-        <ListBox.GroupStyle>
-          <GroupStyle>
-            <GroupStyle.HeaderTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Name}" Margin="24,16,12,5" Style="{StaticResource Text.Label}" FontSize="12"
-                           Foreground="{StaticResource Brush.TextDim}"/>
-              </DataTemplate>
-            </GroupStyle.HeaderTemplate>
-          </GroupStyle>
-        </ListBox.GroupStyle>
         <ListBox.ItemTemplate>
-          <DataTemplate>
+          <DataTemplate DataType="{x:Type vm:NavAreaItem}">
             <Grid ToolTip="{Binding Subtitle}" ToolTipService.InitialShowDelay="900">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
               </Grid.ColumnDefinitions>
-              <c:Icon x:Name="Ico" Data="{Binding Converter={StaticResource PageIcon}}" Size="24" Margin="0,10,14,10"/>
-              <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="17" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+              <c:Icon x:Name="Ico" Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Margin="0,11,14,11"/>
+              <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
             </Grid>
             <DataTemplate.Triggers>
               <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
@@ -281,26 +344,77 @@
       </DockPanel>
     </Border>
 
-    <!-- ============ Conteúdo: a página escolhida (com a transição de entrada) ============ -->
+    <!-- ============ Conteúdo: abas da área + a página escolhida (com a transição de entrada) ============ -->
     <DockPanel Grid.Row="1" Grid.Column="1">
-      <!-- Página fora da lista lateral (ferramentas avançadas ou aberta por um botão): o caminho de volta, sempre à vista. -->
-      <Border DockPanel.Dock="Top" Background="{StaticResource Brush.SurfaceLow}" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1"
-              Padding="20,6" Visibility="{Binding ShowBackBar, Converter={StaticResource BoolToVis}}">
-        <StackPanel Orientation="Horizontal">
-          <Button Style="{StaticResource Button.Ghost}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HomePage">
+      <!-- Abas da área (o dia a dia) e "Avançado" (as ferramentas completas da área, num menu). -->
+      <Border DockPanel.Dock="Top" Padding="40,14,40,0" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,0,0,1"
+              Visibility="{Binding HasAreaBar, Converter={StaticResource BoolToVis}}">
+        <DockPanel LastChildFill="False">
+          <ToggleButton x:Name="AdvancedToggle" DockPanel.Dock="Right" Style="{StaticResource Area.AdvancedButton}" Margin="0,0,0,8"
+                        Visibility="{Binding HasAreaAdvanced, Converter={StaticResource BoolToVis}}"
+                        IsHitTestVisible="{Binding IsOpen, ElementName=AdvancedPopup, Converter={StaticResource InvertBool}}"
+                        AutomationProperties.Name="{l:T Nav.Area.Advanced}" ToolTip="{l:T Nav.Area.AdvancedTip}">
             <StackPanel Orientation="Horizontal">
-              <c:Icon Data="{StaticResource Icon.ArrowRight}" Size="15" Margin="0,0,8,0" RenderTransformOrigin="0.5,0.5">
-                <c:Icon.RenderTransform>
-                  <ScaleTransform ScaleX="-1"/>
-                </c:Icon.RenderTransform>
-              </c:Icon>
-              <TextBlock Text="{l:T Simple.Adv.Back}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+              <c:Icon Data="{StaticResource Icon.Apps}" Size="15" Margin="0,0,8,0"/>
+              <TextBlock Text="{Binding AreaAdvancedText}" TextWrapping="NoWrap" VerticalAlignment="Center" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
+              <Path Data="M0,0 L4,4 L8,0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" StrokeThickness="1.6"
+                    Margin="10,2,0,0" VerticalAlignment="Center" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
             </StackPanel>
-          </Button>
-          <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Adv.Link}" Margin="8,0,0,0"
-                  Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="AdvancedToolsPage"
-                  Visibility="{Binding ShowAdvancedCrumb, Converter={StaticResource BoolToVis}}"/>
-        </StackPanel>
+          </ToggleButton>
+          <Popup x:Name="AdvancedPopup" PlacementTarget="{Binding ElementName=AdvancedToggle}" Placement="Bottom" HorizontalOffset="-180" VerticalOffset="6"
+                 StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade"
+                 IsOpen="{Binding IsChecked, ElementName=AdvancedToggle, Mode=TwoWay}">
+            <Border Background="{StaticResource Brush.SurfaceHi}" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Card}" Padding="8" Width="380" Margin="0,0,10,10">
+              <Border.Effect>
+                <DropShadowEffect BlurRadius="22" ShadowDepth="6" Opacity="0.5" Color="#000000"/>
+              </Border.Effect>
+              <StackPanel>
+                <TextBlock Text="{l:T Nav.Area.AdvancedLead}" Style="{StaticResource Text.Small}" Margin="10,6,10,8"/>
+                <ItemsControl ItemsSource="{Binding AreaAdvanced}" Focusable="False">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:AreaLinkItem}">
+                      <Button Style="{StaticResource Area.LinkButton}" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Title}"
+                              AutomationProperties.HelpText="{Binding Subtitle}">
+                        <DockPanel>
+                          <Grid Width="34" Height="34" DockPanel.Dock="Left" Margin="0,0,12,0" VerticalAlignment="Top">
+                            <Border CornerRadius="8" Background="{StaticResource Brush.SignalSoft}"/>
+                            <c:Icon Data="{Binding Page, Converter={StaticResource PageIcon}}" Size="17" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+                          </Grid>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="T" Text="{Binding Title}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Small}" MaxHeight="34" TextTrimming="CharacterEllipsis"/>
+                          </StackPanel>
+                        </DockPanel>
+                      </Button>
+                      <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                          <Setter TargetName="T" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+                        </DataTrigger>
+                      </DataTemplate.Triggers>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </Popup>
+          <ItemsControl ItemsSource="{Binding AreaTabs}" Focusable="False" DockPanel.Dock="Left">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type vm:AreaTabItem}">
+                <Button Style="{StaticResource Area.TabButton}" Command="{Binding OpenCommand}" Tag="{Binding IsSelected}"
+                        AutomationProperties.Name="{Binding Title}" AutomationProperties.HelpText="{Binding Subtitle}" ToolTip="{Binding Subtitle}"
+                        ToolTipService.InitialShowDelay="900">
+                  <TextBlock Text="{Binding Title}" TextWrapping="NoWrap"/>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </DockPanel>
       </Border>
       <ContentControl x:Name="PageHost" Content="{Binding SelectedPage}" Focusable="False" IsTabStop="False"/>
     </DockPanel>

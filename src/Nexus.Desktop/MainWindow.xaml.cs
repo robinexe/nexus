@@ -25,7 +25,7 @@ public partial class MainWindow : Window
         using (UiWatchdog.Phase("janela: InitializeComponent", logAboveMs: 30)) InitializeComponent();
         using (UiWatchdog.Phase("janela: MainViewModel (27 páginas)")) _vm = new MainViewModel();
 
-        // Navegação: as 6 telas simples. A lista vai antes do DataContext para o SelectedItem já achar a página.
+        // Navegação: as 5 áreas. A lista vai antes do DataContext para o SelectedItem já achar a área.
         BuildNavigation();
         Nav.SelectionChanged += KeepSelection;
 
@@ -41,6 +41,7 @@ public partial class MainWindow : Window
             using (UiWatchdog.Phase("ícone da bandeja", logAboveMs: 30)) ApplyTray();
             if (StartInTray && _tray?.Visible == true) Hide();
             ShellMotion.SweepOnce(SweepBeam, SweepLayer.ActualWidth);
+            _vm.Home.SetLive(ReferenceEquals(_vm.SelectedPage, _vm.Home));
             await _vm.LoadAsync();
         };
         StateChanged += OnStateChanged;
@@ -56,17 +57,19 @@ public partial class MainWindow : Window
 
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MainViewModel.SelectedPage)) ShellMotion.EnterPage(PageHost);
-        if (e.PropertyName == nameof(MainViewModel.NavPages)) BuildNavigation();
+        if (e.PropertyName == nameof(MainViewModel.SelectedPage))
+        {
+            ShellMotion.EnterPage(PageHost);
+            AdvancedToggle.IsChecked = false; // escolheu uma ferramenta do menu "Avançado": o menu fecha
+        }
     }
 
-    /// <summary>Monta a lista lateral: as 6 telas simples, sem grupos (as outras ficam em Ferramentas avançadas).</summary>
+    /// <summary>Monta a lista lateral: as 5 áreas (cada página do NEXUS mora numa delas).</summary>
     private void BuildNavigation()
     {
-        var pages = _vm.NavPages;
-        Nav.ItemsSource = pages.ToList();
-        // SetCurrentValue (e não atribuição): atribuir apagaria a ligação SelectedItem ← SelectedPage do XAML.
-        Nav.SetCurrentValue(System.Windows.Controls.Primitives.Selector.SelectedItemProperty, pages.Contains(_vm.SelectedPage) ? _vm.SelectedPage : null);
+        Nav.ItemsSource = _vm.NavAreas;
+        // SetCurrentValue (e não atribuição): atribuir apagaria a ligação SelectedItem ← SelectedArea do XAML.
+        Nav.SetCurrentValue(System.Windows.Controls.Primitives.Selector.SelectedItemProperty, _vm.SelectedArea);
     }
 
     // ------------------------------------------------------------------ navegação pelas páginas (ShellCommands.Navigate)
@@ -93,19 +96,19 @@ public partial class MainWindow : Window
     };
 
     /// <summary>
-    /// Ctrl+clique desmarcaria o item ativo e deixaria a área de conteúdo vazia: volta para a página anterior. Abrir uma página que
-    /// não está na lista do modo (ex.: do modo simples para "Atualizar drivers") também tira a seleção — essa fica.
+    /// Clique numa área: abre a última página aberta nela (ou a primeira aba). Ctrl+clique desmarcaria o item ativo e deixaria a
+    /// lista sem marca: volta a marcar a área da página aberta.
     /// </summary>
     private void KeepSelection(object sender, SelectionChangedEventArgs e)
     {
         // A seleção vai da janela para a lista (OneWay); o clique do usuário volta para a janela aqui.
-        if (Nav.SelectedItem is PageViewModel page)
+        if (Nav.SelectedItem is NavAreaItem area)
         {
-            if (!ReferenceEquals(page, _vm.SelectedPage)) _vm.SelectedPage = page;
+            if (!ReferenceEquals(area, _vm.SelectedArea)) _vm.OpenArea(area);
             return;
         }
-        if (e.RemovedItems.Count > 0 && _vm.NavPages.Contains(_vm.SelectedPage))
-            Nav.SetCurrentValue(System.Windows.Controls.Primitives.Selector.SelectedItemProperty, _vm.SelectedPage);
+        if (e.RemovedItems.Count > 0)
+            Nav.SetCurrentValue(System.Windows.Controls.Primitives.Selector.SelectedItemProperty, _vm.SelectedArea);
     }
 
     // ------------------------------------------------------------------ bandeja

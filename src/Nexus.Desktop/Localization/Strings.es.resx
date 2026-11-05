@@ -3910,13 +3910,10 @@ Solo entra lo que es de bajo riesgo y se puede deshacer en Historial. Windows pe
   <data name="Simple.Nav.Group" xml:space="preserve"><value>Esencial</value></data>
   <data name="Simple.Home.Subtitle" xml:space="preserve"><value>Cómo está tu PC y qué se puede mejorar.</value></data>
   <data name="Simple.Home.Reading" xml:space="preserve"><value>Revisando tu PC…</value></data>
-  <data name="Simple.Home.Caption" xml:space="preserve"><value>Revisado ahora, sin cambiar nada.</value></data>
   <data name="Simple.Home.Optimize" xml:space="preserve"><value>Optimizar mi PC con seguridad</value></data>
   <data name="Simple.Home.Improve" xml:space="preserve"><value>Qué se puede mejorar</value></data>
   <data name="Simple.Home.NothingToDo" xml:space="preserve"><value>Nada que mejorar ahora.</value></data>
   <data name="Simple.Home.NothingToDoDetail" xml:space="preserve"><value>NEXUS vuelve a revisar cada vez que lo abres.</value></data>
-  <data name="Simple.Home.Undoable" xml:space="preserve"><value>Todo lo que hace NEXUS se puede deshacer.</value></data>
-  <data name="Simple.Home.SeeHistory" xml:space="preserve"><value>Ver el historial</value></data>
   <data name="Simple.Opt.Subtitle" xml:space="preserve"><value>Lo hace todo solo, solo lo seguro.</value></data>
   <data name="Simple.Opt.Lead" xml:space="preserve"><value>NEXUS lo hace todo solo, en pocos minutos:</value></data>
   <data name="Simple.Opt.PhaseClean" xml:space="preserve"><value>Limpiar archivos temporales</value></data>
@@ -3995,9 +3992,6 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Adv.Title" xml:space="preserve"><value>Herramientas avanzadas</value></data>
   <data name="Simple.Adv.Subtitle" xml:space="preserve"><value>Todas las herramientas de NEXUS, para quien quiere detalles.</value></data>
   <data name="Simple.Adv.Lead" xml:space="preserve"><value>Para quien quiere detalles. El uso diario está en las pantallas de la izquierda.</value></data>
-  <data name="Simple.Adv.Link" xml:space="preserve"><value>Herramientas avanzadas</value></data>
-  <data name="Simple.Adv.Tip" xml:space="preserve"><value>Todas las demás herramientas: hardware, laboratorios, programas, servicios, Ajustes…</value></data>
-  <data name="Simple.Adv.Back" xml:space="preserve"><value>Volver al inicio</value></data>
   <data name="Simple.Games.TurnOn" xml:space="preserve"><value>Activar</value></data>
   <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: ¿activar "{1}"? Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ¿activar "{1}"? Windows pide permiso de administrador. Se puede deshacer.</value></data>
@@ -4216,4 +4210,75 @@ Nada se borra: se puede deshacer, y el espacio solo vuelve cuando vacíes la cua
   <data name="Dup.Undone" xml:space="preserve"><value>Las copias volvieron a su lugar.</value></data>
   <data name="Dup.UndoFailed" xml:space="preserve"><value>Algunas copias no volvieron; mira el Historial.</value></data>
   <data name="Dup.Safety" xml:space="preserve"><value>La copia más antigua de cada grupo es la que se queda al usar "Marcar las copias extra". NEXUS vuelve a comprobar el SHA-256 antes de mover y nunca sigue enlaces.</value></data>
+  <data name="Nav.Area.Home" xml:space="preserve"><value>Inicio</value></data>
+  <data name="Nav.Area.Optimize" xml:space="preserve"><value>Optimizar</value></data>
+  <data name="Nav.Area.Performance" xml:space="preserve"><value>Rendimiento</value></data>
+  <data name="Nav.Area.Diagnostics" xml:space="preserve"><value>Diagnóstico</value></data>
+  <data name="Nav.Area.Settings" xml:space="preserve"><value>Configuración</value></data>
+  <data name="Nav.Area.Advanced" xml:space="preserve"><value>Avanzado</value></data>
+  <data name="Nav.Area.AdvancedTip" xml:space="preserve"><value>Herramientas completas de esta área, para quien disfruta de los detalles.</value></data>
+  <data name="Nav.Area.AdvancedLead" xml:space="preserve"><value>Herramientas completas de esta área</value></data>
+  <data name="Nav.Promise" xml:space="preserve"><value>Nada cambia sin tu confirmación. Todo se puede deshacer.</value></data>
+  <data name="Live.Title" xml:space="preserve"><value>Tu PC ahora</value></data>
+  <data name="Live.Health" xml:space="preserve"><value>Salud del PC</value></data>
+  <data name="Live.Cpu" xml:space="preserve"><value>Procesador</value></data>
+  <data name="Live.Gpu" xml:space="preserve"><value>Tarjeta gráfica</value></data>
+  <data name="Live.Ram" xml:space="preserve"><value>Memoria RAM</value></data>
+  <data name="Live.Disk" xml:space="preserve"><value>Almacenamiento</value></data>
+  <data name="Live.Disk.FreeUnit" xml:space="preserve"><value>GB libres</value></data>
+  <data name="Live.Disk.Of" xml:space="preserve"><value>de {0}</value></data>
+  <data name="Live.Ram.Of" xml:space="preserve"><value>/ {0} GB</value></data>
+  <data name="Live.Details" xml:space="preserve"><value>Ver en vivo</value></data>
+  <data name="Live.Unavailable" xml:space="preserve"><value>Windows no entregó las lecturas en vivo ahora. El resto de NEXUS funciona con normalidad.</value></data>
+  <data name="Live.CpuTempNote" xml:space="preserve"><value>Temperatura del procesador: Windows no la informa con seguridad, así que NEXUS no muestra un número.</value></data>
+  <data name="Live.NoData" xml:space="preserve"><value>Sin lectura todavía.</value></data>
+  <data name="Live.Cpu.Calm" xml:space="preserve"><value>Trabajando tranquilo.</value></data>
+  <data name="Live.Cpu.Normal" xml:space="preserve"><value>Trabajando a ritmo normal.</value></data>
+  <data name="Live.Cpu.Busy" xml:space="preserve"><value>Trabajando bastante.</value></data>
+  <data name="Live.Cpu.Intense" xml:space="preserve"><value>Tu procesador está trabajando intensamente.</value></data>
+  <data name="Live.Gpu.Idle" xml:space="preserve"><value>En reposo.</value></data>
+  <data name="Live.Gpu.Normal" xml:space="preserve"><value>En uso.</value></data>
+  <data name="Live.Gpu.Busy" xml:space="preserve"><value>Trabajando fuerte: normal durante los juegos.</value></data>
+  <data name="Live.Gpu.Hot" xml:space="preserve"><value>Caliente: puede reducir el rendimiento para protegerse.</value></data>
+  <data name="Live.Gpu.NoData" xml:space="preserve"><value>Windows no muestra el uso de esta tarjeta.</value></data>
+  <data name="Live.Ram.Plenty" xml:space="preserve"><value>Con margen.</value></data>
+  <data name="Live.Ram.Normal" xml:space="preserve"><value>Uso normal.</value></data>
+  <data name="Live.Ram.Near" xml:space="preserve"><value>Tu memoria RAM está cerca del límite.</value></data>
+  <data name="Live.Disk.Plenty" xml:space="preserve"><value>Espacio de sobra.</value></data>
+  <data name="Live.Disk.Low" xml:space="preserve"><value>Poco espacio libre. Liberar espacio ayuda.</value></data>
+  <data name="Live.Strip.Title" xml:space="preserve"><value>Situación</value></data>
+  <data name="Live.Strip.Drivers" xml:space="preserve"><value>Controlador de video</value></data>
+  <data name="Live.Strip.DriversNoData" xml:space="preserve"><value>Aún sin lectura.</value></data>
+  <data name="Live.Strip.DriverFrom" xml:space="preserve"><value>De {0}</value></data>
+  <data name="Live.Strip.DriverOld" xml:space="preserve"><value>Vale la pena buscar una versión nueva.</value></data>
+  <data name="Live.Strip.DriverOk" xml:space="preserve"><value>Reciente</value></data>
+  <data name="Live.Strip.DriverOkDetail" xml:space="preserve"><value>Controlador de video con menos de un año.</value></data>
+  <data name="Live.Strip.Attention" xml:space="preserve"><value>Requiere atención</value></data>
+  <data name="Live.Strip.AttentionNone" xml:space="preserve"><value>Nada</value></data>
+  <data name="Live.Strip.AttentionNoneDetail" xml:space="preserve"><value>Nada pendiente en el diagnóstico.</value></data>
+  <data name="Live.Strip.AttentionOne" xml:space="preserve"><value>{0} punto</value></data>
+  <data name="Live.Strip.AttentionMany" xml:space="preserve"><value>{0} puntos</value></data>
+  <data name="Live.Strip.AttentionDetail" xml:space="preserve"><value>Míralo en Diagnóstico, en palabras simples.</value></data>
+  <data name="Live.Strip.Space" xml:space="preserve"><value>Espacio para liberar</value></data>
+  <data name="Live.Strip.SpaceDetail" xml:space="preserve"><value>Archivos que pueden irse con seguridad.</value></data>
+  <data name="Live.Strip.SpaceMeasuring" xml:space="preserve"><value>Midiendo lo que se puede limpiar.</value></data>
+  <data name="Live.Strip.Memory" xml:space="preserve"><value>Módulos de memoria</value></data>
+  <data name="Live.Strip.MemoryNoData" xml:space="preserve"><value>Aún sin lectura.</value></data>
+  <data name="Live.Strip.MemoryOne" xml:space="preserve"><value>Un solo módulo</value></data>
+  <data name="Live.Strip.MemoryOneDetail" xml:space="preserve"><value>Un segundo módulo igual suele ayudar en los juegos.</value></data>
+  <data name="Live.Strip.MemoryMany" xml:space="preserve"><value>{0} módulos</value></data>
+  <data name="Live.Strip.MemoryManyDetail" xml:space="preserve"><value>Módulos de memoria instalados.</value></data>
+  <data name="Home.PlayReady" xml:space="preserve"><value>Preparar para jugar</value></data>
+  <data name="Home.PlayReadyTip" xml:space="preserve"><value>Modo de juego, sesión de juego y las opciones de cada juego.</value></data>
+  <data name="Home.UndoChanges" xml:space="preserve"><value>Deshacer lo que NEXUS cambió</value></data>
+  <data name="Opt.Brand" xml:space="preserve"><value>NEXUS Optimize</value></data>
+  <data name="Opt.SweepName" xml:space="preserve"><value>Barrido de NEXUS Optimize</value></data>
+  <data name="Opt.Happening" xml:space="preserve"><value>Qué está pasando</value></data>
+  <data name="Opt.NoInterrupt" xml:space="preserve"><value>No cierres NEXUS a mitad. Todo queda anotado para poder deshacerse.</value></data>
+  <data name="Opt.MeasureInvite" xml:space="preserve"><value>¿Quieres saber si el juego mejoró? Mide una partida antes y después en tu PC.</value></data>
+  <data name="Opt.MeasureNow" xml:space="preserve"><value>Medir una partida</value></data>
+  <data name="Opt.Row.LowRisk" xml:space="preserve"><value>Riesgo bajo</value></data>
+  <data name="Opt.Row.On" xml:space="preserve"><value>Activado ahora</value></data>
+  <data name="Opt.Row.Off" xml:space="preserve"><value>Desactivado ahora</value></data>
+  <data name="Opt.Row.Undo" xml:space="preserve"><value>Desmarca para deshacer</value></data>
 </root>

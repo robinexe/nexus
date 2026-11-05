@@ -213,6 +213,10 @@ public sealed class QuickTweakRow : ObservableObject
     public bool IsOn => Data.IsOn;
     public bool ShowRisk => !Data.Recommended;
     public string RiskWord => Data.RiskWord;
+    /// <summary>Risco sempre à vista (diretriz: cada otimização mostra o risco): "Risco baixo" ou a palavra de risco do ajuste.</summary>
+    public string RiskText => Data.Recommended ? Loc.T("Opt.Row.LowRisk") : Data.RiskWord;
+    /// <summary>Estado atual lido do PC ("Ligado agora" / "Desligado agora").</summary>
+    public string StateText => Data.IsOn ? Loc.T("Opt.Row.On") : Loc.T("Opt.Row.Off");
     public bool Busy { get => _busy; internal set => Set(ref _busy, value); }
     public string Note { get => _note; internal set { if (Set(ref _note, value)) OnPropertyChanged(nameof(HasNote)); } }
     public bool HasNote => _note.Length > 0;

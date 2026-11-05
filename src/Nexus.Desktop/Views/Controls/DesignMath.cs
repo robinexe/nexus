@@ -170,6 +170,24 @@ public static class DesignMath
         return (centerX + radius * Math.Sin(angle), centerY - radius * Math.Cos(angle), f > 0.5);
     }
 
+    /// <summary>Abertura do mostrador (Gauge): 270° de arco, com a boca para baixo.</summary>
+    public const double GaugeSweepDegrees = 270;
+
+    /// <summary>Ângulo inicial do mostrador em graus, medido a partir das 12 h no sentido horário (−135° = 7h30).</summary>
+    public const double GaugeStartDegrees = -135;
+
+    /// <summary>
+    /// Ponto do mostrador (Gauge) para a fração <paramref name="fraction"/> (0 = início, embaixo à esquerda; 1 = fim, embaixo à
+    /// direita) e se o arco desde o início passa de meia volta (IsLargeArc). Mesma convenção de <see cref="ArcEnd"/>.
+    /// </summary>
+    public static (double X, double Y, bool IsLargeArc) GaugePoint(double fraction, double radius, double centerX, double centerY)
+    {
+        var f = double.IsFinite(fraction) ? Math.Clamp(fraction, 0, 1) : 0;
+        var degrees = GaugeStartDegrees + f * GaugeSweepDegrees;
+        var angle = degrees * Math.PI / 180;
+        return (centerX + radius * Math.Sin(angle), centerY - radius * Math.Cos(angle), f * GaugeSweepDegrees > 180);
+    }
+
     /// <summary>Curva de entrada (cúbica, desacelera no fim), para a contagem do número: 0 → 0, 1 → 1.</summary>
     public static double EaseOutCubic(double t)
     {

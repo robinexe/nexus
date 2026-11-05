@@ -5,44 +5,89 @@ using Nexus.HardwareDiscovery;
 namespace Nexus.Desktop.ViewModels.Simple;
 
 /// <summary>
-/// Navegação da interface (lógica pura, testada em SimpleModeTests). Por decisão do responsável ("quero que o modo simples seja
-/// para todos"), a interface é uma só: 6 telas simples na lista lateral. As outras páginas continuam existindo e abrem pela
-/// página "Ferramentas avançadas" (um link discreto no pé da navegação) ou por um botão de uma tela simples.
+/// Uma das 5 áreas da navegação lateral ("Instrumento de precisão", docs/14-redesign-brief.md): o nome e o ícone na lista, as
+/// abas que aparecem no topo do conteúdo (a primeira é a que a lista abre) e as ferramentas recolhidas em "Avançado".
+/// </summary>
+public sealed record NavArea(string Key, string IconKey, IReadOnlyList<string> Tabs, IReadOnlyList<string> Advanced)
+{
+    public string Entry => Tabs[0];
+    public bool Contains(string pageTypeName) => Tabs.Contains(pageTypeName, StringComparer.Ordinal) || Advanced.Contains(pageTypeName, StringComparer.Ordinal);
+}
+
+/// <summary>
+/// Navegação da interface (lógica pura, testada em SimpleModeTests). A interface é uma só (decisão do responsável de 02/11). Desde
+/// 05/11 (diretriz de produto, docs/13): 5 áreas na lista lateral — Início, Otimizar, Desempenho, Diagnóstico, Configurações. Cada
+/// página do NEXUS pertence a exatamente uma área: como aba (o dia a dia) ou em "Avançado" (recolhida). As páginas continuam as
+/// mesmas; muda só onde cada uma fica.
 /// </summary>
 public static class ShellNavigation
 {
-    /// <summary>Lista lateral, nesta ordem (no máximo 6 itens).</summary>
+    /// <summary>As 6 telas simples (vitrines sobre as páginas completas). Não são mais a lista lateral: viraram abas das áreas.</summary>
     public static readonly IReadOnlyList<string> SimplePages =
         ["HomePage", "SimpleOptimizePage", "SimpleCleanPage", "SimpleGamesPage", "SimpleProblemsPage", "SimpleHistoryPage"];
 
-    /// <summary>A página que lista as ferramentas avançadas (fora da lista lateral).</summary>
+    /// <summary>A página que lista todas as ferramentas em ladrilhos (Configurações › Avançado).</summary>
     public const string AdvancedPage = "AdvancedToolsPage";
 
     /// <summary>Página aberta ao iniciar.</summary>
     public const string StartPage = "HomePage";
 
-    public static bool IsInNavigation(string pageTypeName) => SimplePages.Contains(pageTypeName, StringComparer.Ordinal);
+    /// <summary>As 5 áreas, na ordem da lista lateral.</summary>
+    public static readonly IReadOnlyList<NavArea> Areas =
+    [
+        new("home", "Icon.Home", ["HomePage"], []),
+        new("optimize", "Icon.Bolt", ["SimpleOptimizePage", "SimpleCleanPage"],
+            ["StartupPage", "ProgramsPage", "ServicesPage", "PrivacyPage", "DiskPage", "CatalogPage", "AssistantPage", "PlanPage", "BrokerPage"]),
+        new("performance", "Icon.Measure", ["SimpleGamesPage", "MeasurePage", "MonitorPage"],
+            ["CpuLabPage", "GpuLabPage", "MemoryLabPage", "MemoryDoctorPage", "HardwarePage", "OverviewPage"]),
+        new("diagnostics", "Icon.Diagnostics", ["SimpleProblemsPage", "DriverUpdatesPage", "SecurityPage"],
+            ["DiagnosticsPage", "ScannerPage", "SystemToolsPage", "CapabilitiesPage"]),
+        new("settings", "Icon.Settings", ["SettingsPage", "AutomationPage", "SimpleHistoryPage"],
+            ["HistoryPage", AdvancedPage]),
+    ];
 
-    /// <summary>As páginas da lista lateral, na ordem de <see cref="SimplePages"/>.</summary>
+    /// <summary>O que a lista lateral abre: a primeira aba de cada área.</summary>
+    public static IReadOnlyList<string> SidebarPages { get; } = [.. Areas.Select(a => a.Entry)];
+
+    public static bool IsInNavigation(string pageTypeName) => SidebarPages.Contains(pageTypeName, StringComparer.Ordinal);
+
+    /// <summary>Índice da área da página (aba ou avançado). Página desconhecida: Início (0).</summary>
+    public static int AreaIndexOf(string? pageTypeName)
+    {
+        if (pageTypeName is null) return 0;
+        for (var i = 0; i < Areas.Count; i++) if (Areas[i].Contains(pageTypeName)) return i;
+        return 0;
+    }
+
+    /// <summary>As páginas que a lista lateral abre, na ordem das áreas.</summary>
     public static IReadOnlyList<T> Navigation<T>(IEnumerable<T> pages, Func<T, string> typeName)
     {
         ArgumentNullException.ThrowIfNull(pages);
         ArgumentNullException.ThrowIfNull(typeName);
-        return [.. pages.Where(p => IsInNavigation(typeName(p))).OrderBy(p => IndexOf(typeName(p)))];
+        return [.. pages.Where(p => IsInNavigation(typeName(p))).OrderBy(p => IndexIn(SidebarPages, typeName(p)))];
     }
 
-    /// <summary>As ferramentas avançadas: todas as outras páginas, menos a própria página que as lista.</summary>
+    /// <summary>As páginas de uma lista de nomes (abas ou avançado de uma área), na ordem da lista.</summary>
+    public static IReadOnlyList<T> Pick<T>(IEnumerable<T> pages, Func<T, string> typeName, IReadOnlyList<string> names)
+    {
+        ArgumentNullException.ThrowIfNull(pages);
+        ArgumentNullException.ThrowIfNull(typeName);
+        ArgumentNullException.ThrowIfNull(names);
+        return [.. pages.Where(p => names.Contains(typeName(p), StringComparer.Ordinal)).OrderBy(p => IndexIn(names, typeName(p)))];
+    }
+
+    /// <summary>Todas as ferramentas completas (a página "Ferramentas avançadas"): tudo menos as telas simples e ela mesma.</summary>
     public static IReadOnlyList<T> Advanced<T>(IEnumerable<T> pages, Func<T, string> typeName)
     {
         ArgumentNullException.ThrowIfNull(pages);
         ArgumentNullException.ThrowIfNull(typeName);
-        return [.. pages.Where(p => !IsInNavigation(typeName(p)) && typeName(p) != AdvancedPage)];
+        return [.. pages.Where(p => !SimplePages.Contains(typeName(p), StringComparer.Ordinal) && typeName(p) != AdvancedPage)];
     }
 
-    private static int IndexOf(string name)
+    private static int IndexIn(IReadOnlyList<string> list, string name)
     {
-        for (var i = 0; i < SimplePages.Count; i++) if (SimplePages[i] == name) return i;
-        return SimplePages.Count;
+        for (var i = 0; i < list.Count; i++) if (list[i] == name) return i;
+        return list.Count;
     }
 
     /// <summary>Valor gravado em settings.json depois da primeira abertura desta versão.</summary>
@@ -518,5 +563,119 @@ public static class QuickTweakText
             if (t[i] is '.' or '!' or '?' && t[i + 1] == ' ') { end = i; break; }
         var first = end >= 0 ? t[..(end + 1)] : t;
         return first.Length <= 140 ? first : first[..137].TrimEnd() + "…";
+    }
+}
+
+/// <summary>Faixa de esforço de uma peça (uso em %): tranquila, normal, forte, intensa.</summary>
+public enum LoadBand { Calm, Normal, Busy, Intense }
+
+/// <summary>
+/// Painel "Seu PC agora" do Início (lógica pura, testada em SimpleModeTests): as leituras ao vivo em frases de quem só joga
+/// ("Seu processador está trabalhando intensamente", não "CPU 87%"). Nunca inventa um número: sem leitura, diz que não há.
+/// </summary>
+public static class TelemetryText
+{
+    /// <summary>GPU a partir desta temperatura reduz o desempenho para se proteger (GeForce: limite típico de 87–93 °C).</summary>
+    public const double GpuHotC = 87;
+
+    public static LoadBand Band(double percent) =>
+        !double.IsFinite(percent) || percent < 30 ? LoadBand.Calm : percent < 70 ? LoadBand.Normal : percent < 90 ? LoadBand.Busy : LoadBand.Intense;
+
+    public static string Cpu(double percent) => Band(percent) switch
+    {
+        LoadBand.Calm => Loc.T("Live.Cpu.Calm"),
+        LoadBand.Normal => Loc.T("Live.Cpu.Normal"),
+        LoadBand.Busy => Loc.T("Live.Cpu.Busy"),
+        _ => Loc.T("Live.Cpu.Intense"),
+    };
+
+    public static string Gpu(double percent, double? temperatureC)
+    {
+        if (temperatureC is { } t && double.IsFinite(t) && t >= GpuHotC) return Loc.T("Live.Gpu.Hot");
+        if (!double.IsFinite(percent)) return Loc.T("Live.Gpu.NoData");
+        return Band(percent) switch
+        {
+            LoadBand.Calm => Loc.T("Live.Gpu.Idle"),
+            LoadBand.Normal => Loc.T("Live.Gpu.Normal"),
+            _ => Loc.T("Live.Gpu.Busy"),
+        };
+    }
+
+    /// <summary>Memória em uso (fração 0–1): frase e se merece atenção (perto do limite).</summary>
+    public static (string Text, bool Warn) Ram(double usedFraction)
+    {
+        if (!double.IsFinite(usedFraction)) return (Loc.T("Live.NoData"), false);
+        if (usedFraction >= 0.85) return (Loc.T("Live.Ram.Near"), true);
+        return usedFraction >= 0.6 ? (Loc.T("Live.Ram.Normal"), false) : (Loc.T("Live.Ram.Plenty"), false);
+    }
+
+    /// <summary>Disco do Windows: pouco espaço = menos de 10 % ou menos de 15 GB livres.</summary>
+    public static (string Text, bool Warn) Disk(double freeBytes, double totalBytes)
+    {
+        if (!double.IsFinite(freeBytes) || !(totalBytes > 0)) return (Loc.T("Live.NoData"), false);
+        var low = freeBytes / totalBytes < 0.10 || freeBytes < 15d * 1024 * 1024 * 1024;
+        return low ? (Loc.T("Live.Disk.Low"), true) : (Loc.T("Live.Disk.Plenty"), false);
+    }
+
+    /// <summary>"3,3 GHz" no idioma da interface; sem leitura, vazio.</summary>
+    public static string Ghz(double? mhz) =>
+        mhz is { } m && double.IsFinite(m) && m > 0 ? (m / 1000).ToString("0.0", Loc.Culture) + " GHz" : "";
+
+    /// <summary>"47 °C"; sem leitura, vazio.</summary>
+    public static string Celsius(double? c) =>
+        c is { } v && double.IsFinite(v) && v > 0 ? Math.Round(v).ToString("0", Loc.Culture) + " °C" : "";
+
+    /// <summary>Gigabytes com uma casa até 100 ("6,1"), sem casa acima ("134").</summary>
+    public static string Gigabytes(double bytes)
+    {
+        if (!double.IsFinite(bytes) || bytes < 0) return "—";
+        var gb = bytes / (1024d * 1024 * 1024);
+        return gb.ToString(gb >= 100 ? "0" : "0.0", Loc.Culture);
+    }
+}
+
+/// <summary>Um item da faixa "Situação" do Início: rótulo, valor curto, uma frase e a página que explica. Nível: 0 neutro, 1 bom, 2 atenção.</summary>
+public sealed record StatusItem(string Label, string Value, string Detail, int Level, string Page)
+{
+    public bool IsGood => Level == 1;
+    public bool IsWarn => Level == 2;
+}
+
+/// <summary>
+/// Faixa "Situação" do Início (lógica pura, testada): drivers de vídeo, o que pede atenção, espaço a liberar e memória. Só o que
+/// já foi lido; sem leitura, diz "—" e a frase de espera (nunca um número inventado).
+/// </summary>
+public static class StatusStrip
+{
+    public static IReadOnlyList<StatusItem> Build(HealthInputs i)
+    {
+        ArgumentNullException.ThrowIfNull(i);
+        var list = new List<StatusItem>(4);
+
+        list.Add(i.DriverAgeYears switch
+        {
+            null => new StatusItem(Loc.T("Live.Strip.Drivers"), "—", Loc.T("Live.Strip.DriversNoData"), 0, "DriverUpdatesPage"),
+            >= 1 when i.GpuDriverDate is { } d => new StatusItem(Loc.T("Live.Strip.Drivers"), Loc.F("Live.Strip.DriverFrom", d.Year), Loc.T("Live.Strip.DriverOld"), 2, "DriverUpdatesPage"),
+            _ => new StatusItem(Loc.T("Live.Strip.Drivers"), Loc.T("Live.Strip.DriverOk"), Loc.T("Live.Strip.DriverOkDetail"), 1, "DriverUpdatesPage"),
+        });
+
+        var attention = i.AttentionCount;
+        list.Add(attention == 0
+            ? new StatusItem(Loc.T("Live.Strip.Attention"), Loc.T("Live.Strip.AttentionNone"), Loc.T("Live.Strip.AttentionNoneDetail"), 1, "SimpleProblemsPage")
+            : new StatusItem(Loc.T("Live.Strip.Attention"), attention == 1 ? Loc.F("Live.Strip.AttentionOne", attention) : Loc.F("Live.Strip.AttentionMany", attention),
+                Loc.T("Live.Strip.AttentionDetail"), 2, "SimpleProblemsPage"));
+
+        list.Add(double.IsFinite(i.RecoverableBytes)
+            ? new StatusItem(Loc.T("Live.Strip.Space"), Nexus.Desktop.Views.Controls.DesignMath.Bytes(i.RecoverableBytes), Loc.T("Live.Strip.SpaceDetail"),
+                i.RecoverableBytes >= 1024d * 1024 * 1024 ? 2 : 0, "SimpleCleanPage")
+            : new StatusItem(Loc.T("Live.Strip.Space"), "—", Loc.T("Live.Strip.SpaceMeasuring"), 0, "SimpleCleanPage"));
+
+        list.Add(i.MemoryModules switch
+        {
+            0 => new StatusItem(Loc.T("Live.Strip.Memory"), "—", Loc.T("Live.Strip.MemoryNoData"), 0, "MemoryLabPage"),
+            1 => new StatusItem(Loc.T("Live.Strip.Memory"), Loc.T("Live.Strip.MemoryOne"), Loc.T("Live.Strip.MemoryOneDetail"), 2, "MemoryLabPage"),
+            var n => new StatusItem(Loc.T("Live.Strip.Memory"), Loc.F("Live.Strip.MemoryMany", n), Loc.T("Live.Strip.MemoryManyDetail"), 1, "MemoryLabPage"),
+        });
+        return list;
     }
 }

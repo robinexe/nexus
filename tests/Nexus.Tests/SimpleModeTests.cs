@@ -30,20 +30,51 @@ public sealed class SimpleModeTests
 
     // ------------------------------------------------------------------ navegação (interface simples para todos)
 
+    // Requisito mudou em 05/11/2026 (diretriz de produto, docs/13 e docs/14): a lista lateral deixou de ser as 6 telas simples e
+    // passou a ser 5 áreas; as telas simples viraram abas das áreas e as ferramentas completas ficam em "Avançado" de cada área.
+
     [Fact]
-    public void Sidebar_always_has_the_six_simple_screens_in_a_fixed_order()
+    public void Sidebar_has_the_five_areas_in_a_fixed_order()
     {
+        Assert.Equal(["home", "optimize", "performance", "diagnostics", "settings"], ShellNavigation.Areas.Select(a => a.Key));
         var nav = ShellNavigation.Navigation(AllPages.Reverse().Append(ShellNavigation.AdvancedPage), p => p);
-        Assert.Equal(["HomePage", "SimpleOptimizePage", "SimpleCleanPage", "SimpleGamesPage", "SimpleProblemsPage", "SimpleHistoryPage"], nav);
+        Assert.Equal(["HomePage", "SimpleOptimizePage", "SimpleGamesPage", "SimpleProblemsPage", "SettingsPage"], nav);
         Assert.Equal("HomePage", ShellNavigation.StartPage);
     }
 
     [Fact]
-    public void Advanced_tools_list_every_other_page_and_never_reach_the_sidebar()
+    public void Every_page_lives_in_exactly_one_area()
+    {
+        foreach (var page in AllPages.Append(ShellNavigation.AdvancedPage))
+            Assert.Single(ShellNavigation.Areas, a => a.Contains(page));
+        // e nenhuma área aponta para página que não existe
+        var known = AllPages.Append(ShellNavigation.AdvancedPage).ToHashSet();
+        Assert.All(ShellNavigation.Areas.SelectMany(a => a.Tabs.Concat(a.Advanced)), p => Assert.Contains(p, known));
+    }
+
+    [Fact]
+    public void Simple_screens_are_tabs_not_hidden_in_advanced()
+    {
+        foreach (var page in ShellNavigation.SimplePages)
+            Assert.Contains(ShellNavigation.Areas, a => a.Tabs.Contains(page));
+        Assert.Equal(1, ShellNavigation.AreaIndexOf("SimpleCleanPage"));
+        Assert.Equal(4, ShellNavigation.AreaIndexOf("SimpleHistoryPage"));
+        Assert.Equal(0, ShellNavigation.AreaIndexOf("PaginaQueNaoExiste"));
+    }
+
+    [Fact]
+    public void Pick_keeps_the_order_of_the_names()
+    {
+        var area = ShellNavigation.Areas[2];
+        Assert.Equal(area.Tabs, ShellNavigation.Pick(AllPages.Reverse(), p => p, area.Tabs));
+    }
+
+    [Fact]
+    public void Advanced_tools_list_every_full_page_and_never_the_simple_screens()
     {
         var advanced = ShellNavigation.Advanced(AllPages.Append(ShellNavigation.AdvancedPage), p => p);
         Assert.Equal(FullPages, advanced);
-        Assert.All(FullPages, p => Assert.False(ShellNavigation.IsInNavigation(p)));
+        Assert.All(ShellNavigation.SimplePages, p => Assert.DoesNotContain(p, advanced));
         Assert.False(ShellNavigation.IsInNavigation(ShellNavigation.AdvancedPage));
     }
 
@@ -421,5 +452,69 @@ public sealed class SimpleModeTests
         }));
         Assert.Equal("win.gamemode", card.FindingId);
         Assert.Equal("win.gamemode.enable", card.FixActionId);
+    }
+
+    // ------------------------------------------------------------------ Início: "Seu PC agora" e a faixa "Situação" (05/11/2026)
+
+    [Theory]
+    [InlineData(5, "Trabalhando tranquilo.")]
+    [InlineData(50, "Trabalhando em ritmo normal.")]
+    [InlineData(80, "Trabalhando bastante.")]
+    [InlineData(95, "Seu processador está trabalhando intensamente.")]
+    public void Live_cpu_speaks_plain_language(double percent, string expected) => Assert.Equal(expected, TelemetryText.Cpu(percent));
+
+    [Fact]
+    public void Live_gpu_warns_when_hot_and_never_invents_usage()
+    {
+        Assert.Equal("Quente: pode reduzir o desempenho para se proteger.", TelemetryText.Gpu(20, 90));
+        Assert.Equal("Em repouso.", TelemetryText.Gpu(3, 45));
+        Assert.Equal("O Windows não mostra o uso desta placa.", TelemetryText.Gpu(double.NaN, null));
+        Assert.Equal("", TelemetryText.Celsius(null));
+        Assert.Equal("47 °C", TelemetryText.Celsius(46.6));
+        Assert.Equal("3,3 GHz", TelemetryText.Ghz(3290));
+        Assert.Equal("", TelemetryText.Ghz(null));
+    }
+
+    [Fact]
+    public void Live_memory_and_disk_flag_only_real_limits()
+    {
+        Assert.False(TelemetryText.Ram(0.4).Warn);
+        Assert.Equal("Sua memória RAM está próxima do limite.", TelemetryText.Ram(0.9).Text);
+        Assert.True(TelemetryText.Ram(0.9).Warn);
+        const double Gb = 1024d * 1024 * 1024;
+        Assert.False(TelemetryText.Disk(134 * Gb, 476 * Gb).Warn);
+        Assert.True(TelemetryText.Disk(10 * Gb, 476 * Gb).Warn);   // menos de 15 GB
+        Assert.True(TelemetryText.Disk(90 * Gb, 1000 * Gb).Warn);  // menos de 10 %
+        Assert.False(TelemetryText.Disk(double.NaN, 0).Warn);
+        Assert.Equal("6,1", TelemetryText.Gigabytes(6.1 * Gb));
+        Assert.Equal("134", TelemetryText.Gigabytes(134 * Gb));
+    }
+
+    [Fact]
+    public void Status_strip_reads_only_what_was_measured()
+    {
+        var empty = StatusStrip.Build(new HealthInputs());
+        Assert.Equal(4, empty.Count);
+        Assert.Equal("—", empty[0].Value);   // driver sem leitura
+        Assert.Equal("—", empty[2].Value);   // limpeza ainda medindo
+        Assert.Equal("—", empty[3].Value);   // memória sem leitura
+
+        var now = new DateTime(2026, 11, 5);
+        var strip = StatusStrip.Build(new HealthInputs
+        {
+            Now = now,
+            GpuDriverDate = new DateTime(2023, 3, 1),
+            Findings = [new DiagnosticFinding("win.gamemode", "x", DiagnosticSeverity.Attention, FactStatus.Detected, "x")],
+            RecoverableBytes = 4.2 * 1024 * 1024 * 1024,
+            MemoryModules = 1,
+            MemorySlots = 2,
+        });
+        Assert.Equal("De 2023", strip[0].Value);
+        Assert.True(strip[0].IsWarn);
+        Assert.Equal("1 ponto", strip[1].Value);
+        Assert.Equal("SimpleProblemsPage", strip[1].Page);
+        Assert.True(strip[2].IsWarn);
+        Assert.Equal("Um pente só", strip[3].Value);
+        Assert.Equal("MemoryLabPage", strip[3].Page);
     }
 }

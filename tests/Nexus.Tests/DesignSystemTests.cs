@@ -149,6 +149,24 @@ public sealed partial class DesignSystemTests
     }
 
     [Fact]
+    public void Gauge_opens_downward_over_270_degrees()
+    {
+        static void Near((double X, double Y, bool L) a, double x, double y, bool large)
+        {
+            Assert.Equal(x, a.X, 6);
+            Assert.Equal(y, a.Y, 6);
+            Assert.Equal(large, a.L);
+        }
+        var d = 10 / Math.Sqrt(2);
+        Near(DesignMath.GaugePoint(0, 10, 50, 50), 50 - d, 50 + d, false);     // 7h30
+        Near(DesignMath.GaugePoint(0.5, 10, 50, 50), 50, 40, false);           // 12 h (135° ainda não é meia volta)
+        Near(DesignMath.GaugePoint(1, 10, 50, 50), 50 + d, 50 + d, true);      // 4h30
+        Near(DesignMath.GaugePoint(double.NaN, 10, 50, 50), 50 - d, 50 + d, false);
+        Assert.True(DesignMath.GaugePoint(0.7, 10, 50, 50).IsLargeArc);         // 189° > 180°
+        Assert.Equal(270, DesignMath.GaugeSweepDegrees);
+    }
+
+    [Fact]
     public void Count_easing_starts_at_zero_ends_at_one_and_decelerates()
     {
         Assert.Equal(0, DesignMath.EaseOutCubic(0), 9);

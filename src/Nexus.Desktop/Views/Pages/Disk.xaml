@@ -554,7 +554,7 @@
         </Border>
 
         <!-- ===== 5. Exclusão segura: recolhida, vermelha, irreversível ===== -->
-        <Border Style="{StaticResource Panel.Card}" BorderBrush="{StaticResource Brush.Bad}" Background="{StaticResource Brush.BadSoft}" Padding="12,8,16,8" Margin="0,24,0,0">
+        <Border Style="{StaticResource Panel.Card}" BorderBrush="{StaticResource Brush.Bad}" BorderThickness="1" Background="{StaticResource Brush.BadSoft}" Padding="12,8,16,8" Margin="0,24,0,0">
           <StackPanel>
             <Expander Margin="0" AutomationProperties.Name="{l:T Disk.ExclusaoSeguraIrreversivel}">
               <Expander.Header>

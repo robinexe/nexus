@@ -216,7 +216,7 @@
           <!-- ===== Execução e respostas ===== -->
           <StackPanel Grid.Column="2">
             <!-- Última execução: Desfazer sempre visível depois de aplicar -->
-            <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,16" BorderBrush="{StaticResource Brush.TraceLine}"
+            <Border Style="{StaticResource Panel.Card}" Margin="0,0,0,16" BorderBrush="{StaticResource Brush.TraceLine}" BorderThickness="1"
                     Visibility="{Binding HasLastRun, Converter={StaticResource BoolToVis}}">
               <StackPanel>
                 <DockPanel>

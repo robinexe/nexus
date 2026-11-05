@@ -143,11 +143,44 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
     public AdvancedToolsPage Advanced { get; } = Make<AdvancedToolsPage>();
     public WelcomeFlow Welcome { get; }
 
-    /// <summary>A lista lateral: sempre as 6 telas simples.</summary>
+    /// <summary>O que a lista lateral abre: a primeira aba de cada uma das 5 áreas (o autoteste visita estas).</summary>
     public IReadOnlyList<PageViewModel> NavPages => ShellNavigation.Navigation(Pages, p => p.GetType().Name);
-    /// <summary>Uma página fora da lista lateral está aberta: mostra "Voltar ao início" (e o caminho para as ferramentas avançadas).</summary>
-    public bool ShowBackBar => !ShellNavigation.IsInNavigation(SelectedPage.GetType().Name);
-    public bool ShowAdvancedCrumb => ShowBackBar && SelectedPage is not AdvancedToolsPage;
+
+    // ------------------------------------------------------------------ 5 áreas: lista lateral, abas e "Avançado"
+
+    private IReadOnlyList<NavAreaItem>? _navAreas;
+    private readonly Dictionary<int, PageViewModel> _lastInArea = [];
+
+    /// <summary>A lista lateral: Início, Otimizar, Desempenho, Diagnóstico, Configurações.</summary>
+    public IReadOnlyList<NavAreaItem> NavAreas => _navAreas ??= [.. ShellNavigation.Areas.Select((a, i) =>
+        new NavAreaItem(i, a, PageByName(a.Entry) ?? Home)
+        {
+            Subtitle = string.Join(" · ", ShellNavigation.Pick(Pages, p => p.GetType().Name, a.Tabs).Select(p => p.Title)),
+        })];
+
+    /// <summary>A área da página aberta (marca o item da lista lateral).</summary>
+    public NavAreaItem SelectedArea => NavAreas[ShellNavigation.AreaIndexOf(SelectedPage.GetType().Name)];
+
+    /// <summary>As abas da área atual, no topo do conteúdo (some quando a área tem uma tela só, como o Início).</summary>
+    public IReadOnlyList<AreaTabItem> AreaTabs => [.. ShellNavigation.Pick(Pages, p => p.GetType().Name, SelectedArea.Area.Tabs)
+        .Select(p => new AreaTabItem(p, ReferenceEquals(p, SelectedPage), Navigate))];
+
+    /// <summary>As ferramentas recolhidas em "Avançado" na área atual.</summary>
+    public IReadOnlyList<AreaLinkItem> AreaAdvanced => [.. ShellNavigation.Pick(Pages, p => p.GetType().Name, SelectedArea.Area.Advanced)
+        .Select(p => new AreaLinkItem(p, ReferenceEquals(p, SelectedPage), Navigate))];
+
+    public bool HasAreaBar => SelectedArea.Area.Tabs.Count > 1 || SelectedArea.Area.Advanced.Count > 0;
+    public bool HasAreaAdvanced => SelectedArea.Area.Advanced.Count > 0;
+    /// <summary>A página aberta está recolhida em "Avançado" (o botão fica marcado e mostra o nome dela).</summary>
+    public bool IsInAreaAdvanced => SelectedArea.Area.Advanced.Contains(SelectedPage.GetType().Name, StringComparer.Ordinal);
+    public string AreaAdvancedText => IsInAreaAdvanced ? SelectedPage.Title : Loc.T("Nav.Area.Advanced");
+
+    /// <summary>Clique numa área da lista lateral: volta para a última página aberta nela (ou a primeira aba).</summary>
+    public void OpenArea(NavAreaItem area)
+    {
+        ArgumentNullException.ThrowIfNull(area);
+        SelectedPage = _lastInArea.TryGetValue(area.Index, out var last) ? last : area.Entry;
+    }
 
     /// <summary>Grava "simple" (a boas-vindas terminou, ou migração do antigo modo completo). Fora do autoteste.</summary>
     private void SaveSimple()
@@ -481,8 +514,11 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         {
             if (!Set(ref _selectedPage, value)) return;
             Nexus.Desktop.Services.Shell.UiWatchdog.Step($"abrindo página {value?.Title}");
-            OnPropertyChanged(nameof(ShowBackBar));
-            OnPropertyChanged(nameof(ShowAdvancedCrumb));
+            if (value is not null) _lastInArea[ShellNavigation.AreaIndexOf(value.GetType().Name)] = value;
+            foreach (var n in new[] { nameof(SelectedArea), nameof(AreaTabs), nameof(AreaAdvanced), nameof(HasAreaBar), nameof(HasAreaAdvanced),
+                         nameof(IsInAreaAdvanced), nameof(AreaAdvancedText) })
+                OnPropertyChanged(n);
+            Home.SetLive(ReferenceEquals(value, Home));
             LastShownTask = value is ModulePage m ? m.OnShownAsync() : null;
         }
     }

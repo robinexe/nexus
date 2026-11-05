@@ -53,6 +53,17 @@
     <Setter Property="Margin" Value="0,0,0,18"/>
   </Style>
 
+  <!-- Célula clicável da faixa "Situação" do Início: ocupa a célula, lavagem leve no hover, divisória fina à direita. -->
+  <Style x:Key="S.StripButton" TargetType="Button" BasedOn="{StaticResource Button.Base}">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.LineSoft}"/>
+    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    <Setter Property="Padding" Value="24,18"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Top"/>
+  </Style>
+
   <!-- Botão de um clique com o resultado no lugar: [Ação] → "Aplicando…" → "✓ Feito — Desfazer". -->
   <DataTemplate x:Key="S.OneClick" DataType="{x:Type sv:OneClickAction}">
     <Grid VerticalAlignment="Center">
@@ -77,143 +88,347 @@
     </Grid>
   </DataTemplate>
 
-  <!-- ================================================================== INÍCIO -->
+  <!-- ================================================================== INÍCIO
+       "Instrumento de precisão" (docs/14-redesign-brief.md): à esquerda a saúde em uma palavra e as 3 ações (Otimizar, Preparar
+       para jogar, Desfazer); à direita o painel "Seu PC agora" ao vivo (ViewModels/Simple/HomeLive.cs); embaixo a faixa
+       "Situação" e no máximo 3 melhorias numa lista só. -->
   <DataTemplate DataType="{x:Type sv:HomePage}">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="940" HorizontalAlignment="Stretch">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
 
-        <!-- O elemento marcante: o anel da saúde com a palavra. -->
-        <Grid Margin="0,8,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-          </Grid.ColumnDefinitions>
-          <Grid Width="264" Height="264" VerticalAlignment="Center" AutomationProperties.Name="{Binding Headline}">
-            <c:SkeletonLoader Shape="Hero" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
-            <Grid Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
-              <c:ProcessRing Value="{Binding Score}" IsActive="False" Tone="{Binding Tone}" Thickness="14"/>
-              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="170">
-                <TextBlock Text="{Binding Word}" FontFamily="{StaticResource Font.Display}" FontSize="30" TextAlignment="Center"
-                           Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}" TextWrapping="Wrap"/>
-              </StackPanel>
-            </Grid>
-          </Grid>
-          <StackPanel Grid.Column="1" Margin="40,0,0,0" VerticalAlignment="Center">
-            <TextBlock Text="{Binding Headline}" Style="{StaticResource S.Title}" AutomationProperties.LiveSetting="Polite"/>
-            <TextBlock Text="{l:T Simple.Home.Caption}" Style="{StaticResource S.Lead}" Margin="0,8,0,26"/>
-            <Button Style="{StaticResource S.Big}" Command="{Binding OptimizeCommand}" AutomationProperties.Name="{l:T Simple.Home.Optimize}">
-              <StackPanel Orientation="Horizontal">
-                <c:Icon Data="{StaticResource Icon.Bolt}" Size="19" Margin="0,0,10,0"/>
-                <TextBlock Text="{l:T Simple.Home.Optimize}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-              </StackPanel>
-            </Button>
-          </StackPanel>
-        </Grid>
-
-        <!-- O que dá para melhorar: no máximo 3, uma frase e um botão. -->
-        <TextBlock Text="{l:T Simple.Home.Improve}" Style="{StaticResource S.Section}" Visibility="{Binding HasCards, Converter={StaticResource BoolToVis}}"/>
-        <ItemsControl ItemsSource="{Binding Cards}" Focusable="False">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type sv:ImproveCardRow}">
-              <Border Style="{StaticResource S.Card}">
-                <StackPanel>
-                  <DockPanel>
-                    <Grid Width="44" Height="44" DockPanel.Dock="Left" Margin="0,0,16,0">
-                      <Ellipse Fill="{StaticResource Brush.TraceSoft}"/>
-                      <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
-                    </Grid>
-                    <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0">
-                      <ContentControl Content="{Binding OneClick}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"
-                                      Visibility="{Binding IsOneClick, Converter={StaticResource BoolToVis}}"/>
-                      <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
-                              Command="{Binding OpenCommand}" Visibility="{Binding IsOpen, Converter={StaticResource BoolToVis}}"/>
-                      <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
-                              Command="{Binding ToggleHowToCommand}" Visibility="{Binding IsHowTo, Converter={StaticResource BoolToVis}}"/>
-                    </StackPanel>
-                    <TextBlock Text="{Binding Text}" Style="{StaticResource S.Item}"/>
-                  </DockPanel>
-                  <TextBlock Text="{Binding HowTo}" Style="{StaticResource S.Lead}" FontSize="15" Margin="60,12,0,0"
-                             Visibility="{Binding ShowHowTo, Converter={StaticResource BoolToVis}}"/>
+        <c:TwoUpPanel Ratio="0.40" Gap="24" StackBelow="880">
+          <!-- Saúde e ações -->
+          <Border Style="{StaticResource Panel.Card}" Padding="32,28">
+            <StackPanel>
+              <DockPanel>
+                <Grid Width="112" Height="112" DockPanel.Dock="Left" Margin="0,0,22,0" AutomationProperties.Name="{Binding Headline}">
+                  <Ellipse Stroke="{StaticResource Brush.Track}" StrokeThickness="8" Margin="4" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+                  <Grid Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+                    <c:ProcessRing Value="{Binding Score}" IsActive="False" Tone="{Binding Tone}" Thickness="8"/>
+                    <TextBlock Text="{Binding ScoreText}" FontFamily="{StaticResource Font.Numbers}" FontSize="30" Foreground="{StaticResource Brush.Text}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="NoWrap"/>
+                  </Grid>
+                </Grid>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="{l:T Live.Health}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.TextDim}"/>
+                  <TextBlock Text="{Binding Word}" FontFamily="{StaticResource Font.Display}" FontSize="40" Margin="0,2,0,0" TextWrapping="Wrap"
+                             Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}"/>
                 </StackPanel>
-              </Border>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+              </DockPanel>
+              <TextBlock Text="{Binding Headline}" Style="{StaticResource Text.Body}" FontSize="16" LineHeight="24" Foreground="{StaticResource Brush.TextSoft}"
+                         Margin="0,22,0,24" AutomationProperties.LiveSetting="Polite"/>
+              <WrapPanel>
+                <Button Style="{StaticResource S.Big}" Command="{Binding OptimizeCommand}" Margin="0,0,12,12" AutomationProperties.Name="{l:T Simple.Home.Optimize}">
+                  <StackPanel Orientation="Horizontal">
+                    <c:Icon Data="{StaticResource Icon.Bolt}" Size="18" Margin="0,0,10,0"/>
+                    <TextBlock Text="{l:T Simple.Home.Optimize}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </Button>
+                <Button Style="{StaticResource Button.Secondary}" Padding="18,13" Margin="0,0,12,12"
+                        Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SimpleGamesPage" ToolTip="{l:T Home.PlayReadyTip}">
+                  <StackPanel Orientation="Horizontal">
+                    <c:Icon Data="{StaticResource Icon.Games}" Size="18" Margin="0,0,10,0"/>
+                    <TextBlock Text="{l:T Home.PlayReady}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </Button>
+              </WrapPanel>
+              <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Margin="-8,0,0,0"
+                      Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SimpleHistoryPage">
+                <StackPanel Orientation="Horizontal">
+                  <c:Icon Data="{StaticResource Icon.Undo}" Size="15" Margin="0,0,8,0"/>
+                  <TextBlock Text="{l:T Home.UndoChanges}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+
+          <!-- Seu PC agora (ao vivo) -->
+          <Border Style="{StaticResource Panel.Instrument}" DataContext="{Binding Live}">
+            <StackPanel>
+              <DockPanel Margin="0,0,0,14">
+                <Button DockPanel.Dock="Right" Style="{StaticResource Button.Ghost}" Content="{l:T Live.Details}" Margin="0,-6,-8,0"
+                        Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="MonitorPage"/>
+                <StackPanel Orientation="Horizontal">
+                  <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Good}" VerticalAlignment="Center" Margin="0,1,9,0"
+                           c:Pulse.IsOn="{Binding IsReady}" Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}"/>
+                  <TextBlock Text="{l:T Live.Title}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center"/>
+                </StackPanel>
+              </DockPanel>
+
+              <TextBlock Text="{l:T Live.Unavailable}" Style="{StaticResource Text.Small}" Margin="0,0,0,12"
+                         Visibility="{Binding IsUnavailable, Converter={StaticResource BoolToVis}}"/>
+
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="1.1*"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Processador -->
+                <StackPanel HorizontalAlignment="Center">
+                  <Grid Width="156" Height="156">
+                    <c:Gauge Value="{Binding CpuPercent}" Thickness="9" Label="{l:T Live.Cpu}"/>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <c:SkeletonLoader Shape="Lines" Lines="1" Width="56" Visibility="{Binding IsWarmingUp, Converter={StaticResource BoolToVis}}"/>
+                      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding CpuText}" FontFamily="{StaticResource Font.Numbers}" FontSize="40" Foreground="{StaticResource Brush.Text}" TextWrapping="NoWrap"/>
+                        <TextBlock Text="%" FontFamily="{StaticResource Font.Numbers}" FontSize="18" Foreground="{StaticResource Brush.TextMuted}" Margin="2,0,0,7" VerticalAlignment="Bottom"/>
+                      </StackPanel>
+                      <TextBlock Text="{Binding CpuDetail}" FontFamily="{StaticResource Font.Numbers}" FontSize="13.5" Foreground="{StaticResource Brush.TextMuted}" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                  </Grid>
+                  <TextBlock Text="{l:T Live.Cpu}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                  <TextBlock Text="{Binding CpuName}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="170" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding CpuName}"/>
+                  <TextBlock Text="{Binding CpuSentence}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextSoft}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="170" Margin="0,6,0,0"
+                             AutomationProperties.LiveSetting="Off"/>
+                </StackPanel>
+
+                <!-- Memória e disco -->
+                <StackPanel Grid.Column="1" Margin="12,8,12,0" VerticalAlignment="Center">
+                  <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                      <TextBlock Text="{Binding RamUsed}" FontFamily="{StaticResource Font.Numbers}" FontSize="26" Foreground="{StaticResource Brush.Text}" TextWrapping="NoWrap"/>
+                      <TextBlock Text="{Binding RamTotal}" FontFamily="{StaticResource Font.Numbers}" FontSize="14" Foreground="{StaticResource Brush.TextMuted}" Margin="4,0,0,4" VerticalAlignment="Bottom" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                    <TextBlock Text="{l:T Live.Ram}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                  </DockPanel>
+                  <Grid Height="6" Margin="0,8,0,8">
+                    <Border Background="{StaticResource Brush.Track}" CornerRadius="3"/>
+                    <Border x:Name="RamBar" CornerRadius="3" RenderTransformOrigin="0,0.5"
+                            RenderTransform="{Binding RamFraction, Converter={StaticResource FractionScale}}">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="{StaticResource Brush.Signal}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding RamWarn}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Brush.Trace}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+                  </Grid>
+                  <TextBlock x:Name="RamSentence" Text="{Binding RamSentence}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextSoft}"/>
+                  <Border Height="1" Background="{StaticResource Brush.LineSoft}" Margin="0,16"/>
+                  <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                      <TextBlock Text="{Binding DiskFree}" FontFamily="{StaticResource Font.Numbers}" FontSize="26" Foreground="{StaticResource Brush.Text}" TextWrapping="NoWrap"/>
+                      <TextBlock Text="{l:T Live.Disk.FreeUnit}" FontFamily="{StaticResource Font.Numbers}" FontSize="14" Foreground="{StaticResource Brush.TextMuted}" Margin="4,0,0,4" VerticalAlignment="Bottom" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                    <TextBlock Text="{l:T Live.Disk}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                  </DockPanel>
+                  <Grid Height="6" Margin="0,8,0,8">
+                    <Border Background="{StaticResource Brush.Track}" CornerRadius="3"/>
+                    <Border x:Name="DiskBar" CornerRadius="3" RenderTransformOrigin="0,0.5"
+                            RenderTransform="{Binding DiskUsedFraction, Converter={StaticResource FractionScale}}">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="{StaticResource Brush.Signal}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding DiskWarn}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Brush.Trace}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+                  </Grid>
+                  <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextSoft}">
+                    <Run Text="{Binding DiskSentence, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding DiskTotal, Mode=OneWay}" Foreground="{StaticResource Brush.TextMuted}"/>
+                  </TextBlock>
+                </StackPanel>
+
+                <!-- Placa de vídeo -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                  <Grid Width="156" Height="156">
+                    <c:Gauge Value="{Binding GpuPercent}" Thickness="9" Label="{l:T Live.Gpu}"/>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <c:SkeletonLoader Shape="Lines" Lines="1" Width="56" Visibility="{Binding IsWarmingUp, Converter={StaticResource BoolToVis}}"/>
+                      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding GpuText}" FontFamily="{StaticResource Font.Numbers}" FontSize="40" Foreground="{StaticResource Brush.Text}" TextWrapping="NoWrap"/>
+                        <TextBlock Text="%" FontFamily="{StaticResource Font.Numbers}" FontSize="18" Foreground="{StaticResource Brush.TextMuted}" Margin="2,0,0,7" VerticalAlignment="Bottom"/>
+                      </StackPanel>
+                      <TextBlock Text="{Binding GpuDetail}" FontFamily="{StaticResource Font.Numbers}" FontSize="13.5" Foreground="{StaticResource Brush.TextMuted}" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                  </Grid>
+                  <TextBlock Text="{l:T Live.Gpu}" Style="{StaticResource Text.Body}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                  <TextBlock Text="{Binding GpuName}" Style="{StaticResource Text.Small}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="170" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding GpuName}"/>
+                  <TextBlock Text="{Binding GpuSentence}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextSoft}" HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="170" Margin="0,6,0,0"/>
+                </StackPanel>
+              </Grid>
+
+              <DockPanel Margin="0,18,0,0">
+                <c:Icon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Size="14" Foreground="{StaticResource Brush.TextDim}" Margin="0,1,8,0" VerticalAlignment="Top"/>
+                <TextBlock Text="{l:T Live.CpuTempNote}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}"/>
+              </DockPanel>
+            </StackPanel>
+          </Border>
+        </c:TwoUpPanel>
+
+        <!-- Situação: 4 leituras curtas, cada uma abre a página que explica -->
+        <Border Style="{StaticResource Panel.Card}" Padding="0" Margin="0,24,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}"
+                AutomationProperties.Name="{l:T Live.Strip.Title}">
+          <ItemsControl ItemsSource="{Binding Strip}" Focusable="False">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Rows="1"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type sv:StatusItem}">
+                <Button Style="{StaticResource S.StripButton}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="{Binding Page}"
+                        AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding Detail}">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Label}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.TextDim}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock x:Name="V" Text="{Binding Value}" FontFamily="{StaticResource Font.Display}" FontSize="16" Foreground="{StaticResource Brush.Text}" Margin="0,6,0,4"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}" MaxHeight="34" TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                </Button>
+                <DataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding IsGood}" Value="True">
+                    <Setter TargetName="V" Property="Foreground" Value="{StaticResource Brush.Good}"/>
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding IsWarn}" Value="True">
+                    <Setter TargetName="V" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+                  </DataTrigger>
+                </DataTemplate.Triggers>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Border>
+
+        <!-- O que pode melhorar: no máximo 3, numa lista só (uma frase e um botão por linha). -->
+        <TextBlock Text="{l:T Simple.Home.Improve}" Style="{StaticResource S.Section}" Visibility="{Binding HasCards, Converter={StaticResource BoolToVis}}"/>
+        <Border Style="{StaticResource Panel.Card}" Padding="0" Visibility="{Binding HasCards, Converter={StaticResource BoolToVis}}">
+          <ItemsControl ItemsSource="{Binding Cards}" Focusable="False" AlternationCount="100">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type sv:ImproveCardRow}">
+                <Border x:Name="Row" Padding="24,18" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0">
+                  <StackPanel>
+                    <DockPanel>
+                      <Grid Width="40" Height="40" DockPanel.Dock="Left" Margin="0,0,18,0">
+                        <Border CornerRadius="10" Background="{StaticResource Brush.TraceSoft}"/>
+                        <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="19" Foreground="{StaticResource Brush.Trace}" HorizontalAlignment="Center"/>
+                      </Grid>
+                      <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Margin="16,0,0,0">
+                        <ContentControl Content="{Binding OneClick}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"
+                                        Visibility="{Binding IsOneClick, Converter={StaticResource BoolToVis}}"/>
+                        <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
+                                Command="{Binding OpenCommand}" Visibility="{Binding IsOpen, Converter={StaticResource BoolToVis}}"/>
+                        <Button Style="{StaticResource Button.Secondary}" Margin="0" Content="{Binding ActionText}" MinWidth="110"
+                                Command="{Binding ToggleHowToCommand}" Visibility="{Binding IsHowTo, Converter={StaticResource BoolToVis}}"/>
+                      </StackPanel>
+                      <TextBlock Text="{Binding Text}" Style="{StaticResource S.Item}" FontSize="15.5" FontWeight="SemiBold"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding HowTo}" Style="{StaticResource S.Lead}" FontSize="14" Margin="58,10,0,0"
+                               Visibility="{Binding ShowHowTo, Converter={StaticResource BoolToVis}}"/>
+                  </StackPanel>
+                </Border>
+                <DataTemplate.Triggers>
+                  <Trigger SourceName="Row" Property="ItemsControl.AlternationIndex" Value="0">
+                    <Setter TargetName="Row" Property="BorderThickness" Value="0"/>
+                  </Trigger>
+                </DataTemplate.Triggers>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Border>
         <c:EmptyState Illustration="{StaticResource Illo.Security}" Text="{l:T Simple.Home.NothingToDo}" Detail="{l:T Simple.Home.NothingToDoDetail}"
                       Margin="0,30,0,0" Visibility="{Binding NoCards, Converter={StaticResource BoolToVis}}"/>
-
-        <!-- Confiança: tudo se desfaz. -->
-        <StackPanel Orientation="Horizontal" Margin="0,30,0,0">
-          <c:Icon Data="{StaticResource Icon.Undo}" Size="17" Foreground="{StaticResource Brush.Good}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-          <TextBlock Text="{l:T Simple.Home.Undoable}" Style="{StaticResource S.Lead}" FontSize="15" VerticalAlignment="Center"/>
-          <Button Style="{StaticResource Button.Ghost}" Content="{l:T Simple.Home.SeeHistory}" Margin="6,0,0,0"
-                  Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="SimpleHistoryPage"/>
-        </StackPanel>
       </StackPanel>
     </ScrollViewer>
   </DataTemplate>
 
-  <!-- ================================================================== OTIMIZAR -->
+  <!-- ================================================================== OTIMIZAR (NEXUS Optimize)
+       Antes: o que vai acontecer (4 etapas), a promessa de segurança e "Começar"; a Varredura parada ao lado.
+       Durante: a Varredura girando (c:ScanSweep) — cada ponto só acende quando a etapa termina — e a lista do que acontece.
+       Depois: o resumo, a saúde nova, "Ver detalhes", "Desfazer tudo" e o convite para medir (nunca uma promessa de FPS). -->
   <DataTemplate DataType="{x:Type sv:SimpleOptimizePage}">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="860" HorizontalAlignment="Stretch">
+      <StackPanel Margin="{StaticResource Space.Page}" MaxWidth="1180" HorizontalAlignment="Stretch">
         <Border Style="{StaticResource S.Message}" Visibility="{Binding Assistant.Message, Converter={StaticResource NullToCollapsed}}">
           <TextBlock Text="{Binding Assistant.Message}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}" AutomationProperties.LiveSetting="Polite"/>
         </Border>
 
-        <!-- Antes: o que vai acontecer -->
-        <StackPanel Visibility="{Binding Assistant.AutoIdle, Converter={StaticResource BoolToVis}}">
-          <TextBlock Text="{l:T Simple.Home.Optimize}" Style="{StaticResource S.Title}"/>
-          <TextBlock Text="{l:T Simple.Opt.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,26"/>
-          <ItemsControl ItemsSource="{Binding Phases}" Focusable="False">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate DataType="{x:Type sv:OptimizePhaseRow}">
-                <DockPanel Margin="0,0,0,16">
-                  <Grid Width="44" Height="44" Margin="0,0,16,0">
-                    <Ellipse Fill="{StaticResource Brush.SignalSoft}"/>
-                    <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="21" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
-                  </Grid>
-                  <TextBlock Text="{Binding Title}" Style="{StaticResource S.Item}"/>
-                </DockPanel>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          <StackPanel Orientation="Horizontal" Margin="0,8,0,28">
-            <c:Icon Data="{StaticResource Icon.Lock}" Size="16" Foreground="{StaticResource Brush.Good}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-            <TextBlock Text="{l:T Simple.Opt.Safe}" Style="{StaticResource S.Lead}" FontSize="15" VerticalAlignment="Center"/>
-          </StackPanel>
-          <Button Style="{StaticResource S.Big}" Content="{l:T Simple.Opt.Start}" MinWidth="200" Command="{Binding Assistant.StartAutoCommand}"/>
-        </StackPanel>
+        <TextBlock Text="{l:T Opt.Brand}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.Trace}" Margin="0,0,0,6"/>
 
-        <!-- Durante: anel do andamento e o item atual -->
+        <!-- Antes -->
+        <c:TwoUpPanel Ratio="0.48" Gap="32" StackBelow="900" Visibility="{Binding Assistant.AutoIdle, Converter={StaticResource BoolToVis}}">
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="{l:T Simple.Home.Optimize}" Style="{StaticResource S.Title}"/>
+            <TextBlock Text="{l:T Simple.Opt.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,24"/>
+            <Border Style="{StaticResource Panel.Card}" Padding="0" Margin="0,0,0,20">
+              <ItemsControl ItemsSource="{Binding Phases}" Focusable="False" AlternationCount="100">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="{x:Type sv:OptimizePhaseRow}">
+                    <Border x:Name="Row" Padding="20,14" BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0">
+                      <DockPanel>
+                        <Grid Width="36" Height="36" Margin="0,0,16,0">
+                          <Border CornerRadius="9" Background="{StaticResource Brush.SignalSoft}"/>
+                          <c:Icon Data="{Binding IconKey, Converter={StaticResource ResourceByKey}}" Size="18" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource S.Item}" FontSize="15.5"/>
+                      </DockPanel>
+                    </Border>
+                    <DataTemplate.Triggers>
+                      <Trigger SourceName="Row" Property="ItemsControl.AlternationIndex" Value="0">
+                        <Setter TargetName="Row" Property="BorderThickness" Value="0"/>
+                      </Trigger>
+                    </DataTemplate.Triggers>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Border>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,22">
+              <c:Icon Data="{StaticResource Icon.Lock}" Size="16" Foreground="{StaticResource Brush.Good}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+              <TextBlock Text="{l:T Simple.Opt.Safe}" Style="{StaticResource S.Lead}" FontSize="14" VerticalAlignment="Center"/>
+            </StackPanel>
+            <Button Style="{StaticResource S.Big}" MinWidth="220" Command="{Binding Assistant.StartAutoCommand}" AutomationProperties.Name="{l:T Simple.Opt.Start}">
+              <StackPanel Orientation="Horizontal">
+                <c:Icon Data="{StaticResource Icon.Bolt}" Size="18" Margin="0,0,10,0"/>
+                <TextBlock Text="{l:T Simple.Opt.Start}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+          <Border Style="{StaticResource Panel.Instrument}" Padding="12,24">
+            <c:ScanSweep Items="{Binding Phases}" IsActive="False" Height="380" AutomationProperties.Name="{l:T Opt.SweepName}"/>
+          </Border>
+        </c:TwoUpPanel>
+
+        <!-- Durante: a Varredura -->
         <StackPanel Visibility="{Binding Running, Converter={StaticResource BoolToVis}}">
           <TextBlock Text="{l:T Simple.Opt.Working}" Style="{StaticResource S.Title}"/>
-          <TextBlock Text="{l:T Simple.Opt.WorkingLead}" Style="{StaticResource S.Lead}" Margin="0,8,0,26"/>
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto"/>
-              <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid Width="220" Height="220" VerticalAlignment="Top">
-              <c:ProcessRing Value="{Binding Percent}" IsActive="{Binding Running}" Tone="Warn" Thickness="13"/>
-              <c:AnimatedNumber Value="{Binding Percent}" Kind="Percent" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="50"
-                                Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Grid>
-            <StackPanel Grid.Column="1" Margin="40,6,0,0">
+          <TextBlock Text="{l:T Simple.Opt.WorkingLead}" Style="{StaticResource S.Lead}" Margin="0,8,0,24"/>
+          <c:TwoUpPanel Ratio="0.58" Gap="32" StackBelow="900">
+            <Border Style="{StaticResource Panel.Instrument}" Padding="12,24">
+              <Grid>
+                <c:ScanSweep Items="{Binding Phases}" IsActive="{Binding Running}" Height="400" AutomationProperties.Name="{l:T Opt.SweepName}"/>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                  <c:AnimatedNumber Value="{Binding Percent}" Kind="Percent" Decimals="0" FontFamily="{StaticResource Font.Numbers}" FontSize="56"
+                                    Foreground="{StaticResource Brush.Text}" HorizontalAlignment="Center"/>
+                  <TextBlock Text="{Binding CurrentText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Signal}" HorizontalAlignment="Center"
+                             TextAlignment="Center" MaxWidth="160" AutomationProperties.LiveSetting="Polite"/>
+                </StackPanel>
+              </Grid>
+            </Border>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="{l:T Opt.Happening}" Style="{StaticResource Text.Label}" Foreground="{StaticResource Brush.TextDim}" Margin="0,0,0,10"/>
               <ItemsControl ItemsSource="{Binding Phases}" Focusable="False">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="{x:Type sv:OptimizePhaseRow}">
-                    <DockPanel Margin="0,0,0,18">
-                      <Grid Width="36" Height="36" Margin="0,0,14,0" c:Pulse.IsOn="{Binding IsCurrent}">
+                    <DockPanel Margin="0,0,0,16">
+                      <Grid Width="32" Height="32" Margin="0,0,14,0" c:Pulse.IsOn="{Binding IsCurrent}">
                         <Ellipse Fill="{Binding Tone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
-                        <c:Icon Data="{Binding StateIcon, Converter={StaticResource ResourceByKey}}" Size="17" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}"
+                        <c:Icon Data="{Binding StateIcon, Converter={StaticResource ResourceByKey}}" Size="16" Foreground="{Binding Tone, Converter={StaticResource ToneBrush}}"
                                 HorizontalAlignment="Center"/>
                       </Grid>
-                      <TextBlock x:Name="T" Text="{Binding Title}" Style="{StaticResource S.Item}" Foreground="{StaticResource Brush.TextMuted}"/>
+                      <TextBlock x:Name="T" Text="{Binding Title}" Style="{StaticResource S.Item}" FontSize="15.5" Foreground="{StaticResource Brush.TextDim}"/>
                     </DockPanel>
                     <DataTemplate.Triggers>
                       <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                        <Setter TargetName="T" Property="Foreground" Value="{StaticResource Brush.Trace}"/>
+                        <Setter TargetName="T" Property="Foreground" Value="{StaticResource Brush.Signal}"/>
                       </DataTrigger>
                       <DataTrigger Binding="{Binding IsDone}" Value="True">
                         <Setter TargetName="T" Property="Foreground" Value="{StaticResource Brush.Text}"/>
@@ -225,31 +440,42 @@
               <Border Style="{StaticResource Panel.Notice}" Margin="0,6,0,0" Visibility="{Binding Assistant.ProcessView.IsWaiting, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="{l:T Simple.Opt.AnswerWindows}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
               </Border>
+              <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <c:Icon Data="{StaticResource Icon.Lock}" Size="14" Foreground="{StaticResource Brush.TextDim}" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{l:T Opt.NoInterrupt}" Style="{StaticResource Text.Small}" VerticalAlignment="Center"/>
+              </StackPanel>
             </StackPanel>
-          </Grid>
+          </c:TwoUpPanel>
         </StackPanel>
 
         <!-- Depois: resumo curto -->
-        <StackPanel Visibility="{Binding Assistant.AutoDone, Converter={StaticResource BoolToVis}}">
-          <Grid Width="72" Height="72" HorizontalAlignment="Left" Margin="0,0,0,20">
-            <Ellipse Fill="{StaticResource Brush.GoodSoft}"/>
-            <c:Icon Data="{StaticResource Icon.Check}" Size="34" Foreground="{StaticResource Brush.Good}" HorizontalAlignment="Center"/>
-          </Grid>
-          <TextBlock Text="{Binding Assistant.AutoSummary}" Style="{StaticResource S.Title}" AutomationProperties.LiveSetting="Assertive"/>
-          <TextBlock Text="{Binding Home.Headline}" FontFamily="{StaticResource Font.Display}" FontSize="22" Margin="0,10,0,30"
-                     Foreground="{Binding Home.Tone, Converter={StaticResource ToneBrush}}"/>
-          <WrapPanel>
-            <Button Style="{StaticResource S.Big}" Content="{l:T Simple.Opt.BackHome}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HomePage"
-                    Margin="0,0,10,10"/>
-            <Button Style="{StaticResource Button.Secondary}" Content="{l:T Simple.Opt.Details}" Command="{Binding Assistant.OpenReportCommand}" Padding="18,12" Margin="0,0,10,10"/>
-            <Button Style="{StaticResource Button.Secondary}" Command="{Binding Assistant.UndoAllCommand}" Padding="18,12" Margin="0,0,10,10">
-              <StackPanel Orientation="Horizontal">
-                <c:Icon Data="{StaticResource Icon.Undo}" Size="16" Margin="0,0,8,0"/>
-                <TextBlock Text="{l:T Simple.Opt.UndoAll}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-              </StackPanel>
-            </Button>
-          </WrapPanel>
-        </StackPanel>
+        <Border Style="{StaticResource Panel.Card}" Padding="32,28" Visibility="{Binding Assistant.AutoDone, Converter={StaticResource BoolToVis}}">
+          <DockPanel>
+            <Grid Width="72" Height="72" DockPanel.Dock="Left" VerticalAlignment="Top" Margin="0,0,24,0">
+              <Ellipse Fill="{StaticResource Brush.GoodSoft}"/>
+              <c:Icon Data="{StaticResource Icon.Check}" Size="32" Foreground="{StaticResource Brush.Good}" HorizontalAlignment="Center"/>
+            </Grid>
+            <StackPanel>
+              <TextBlock Text="{Binding Assistant.AutoSummary}" Style="{StaticResource S.Title}" FontSize="30" AutomationProperties.LiveSetting="Assertive"/>
+              <TextBlock Text="{Binding Home.Headline}" FontFamily="{StaticResource Font.Display}" FontSize="20" Margin="0,8,0,12"
+                         Foreground="{Binding Home.Tone, Converter={StaticResource ToneBrush}}"/>
+              <TextBlock Text="{l:T Opt.MeasureInvite}" Style="{StaticResource S.Lead}" FontSize="14" Margin="0,0,0,24"/>
+              <WrapPanel>
+                <Button Style="{StaticResource S.Big}" Content="{l:T Simple.Opt.BackHome}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HomePage"
+                        Margin="0,0,10,10"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Opt.MeasureNow}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="MeasurePage"
+                        Padding="18,12" Margin="0,0,10,10"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Simple.Opt.Details}" Command="{Binding Assistant.OpenReportCommand}" Padding="18,12" Margin="0,0,10,10"/>
+                <Button Style="{StaticResource Button.Ghost}" Command="{Binding Assistant.UndoAllCommand}" Padding="12,12" Margin="0,0,10,10">
+                  <StackPanel Orientation="Horizontal">
+                    <c:Icon Data="{StaticResource Icon.Undo}" Size="16" Margin="0,0,8,0"/>
+                    <TextBlock Text="{l:T Simple.Opt.UndoAll}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </Button>
+              </WrapPanel>
+            </StackPanel>
+          </DockPanel>
+        </Border>
 
         <!-- Ajustes rápidos: um a um, ligar aplica e desligar desfaz (some enquanto a rodada automática trabalha). -->
         <StackPanel DataContext="{Binding QuickTweaks}" Margin="0,8,0,0"
@@ -277,9 +503,14 @@
                                         AutomationProperties.Name="{Binding Title}"/>
                             </StackPanel>
                             <StackPanel>
-                              <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" FontSize="15.5" Foreground="{StaticResource Brush.Text}"/>
+                              <TextBlock Text="{Binding Title}" Style="{StaticResource Text.Body}" FontSize="15.5" FontWeight="SemiBold" Foreground="{StaticResource Brush.Text}"/>
                               <TextBlock Text="{Binding Sentence}" Style="{StaticResource Text.Small}" Margin="0,2,0,0" Visibility="{Binding HasSentence, Converter={StaticResource BoolToVis}}"/>
-                              <c:StatusChip Tone="Warn" Text="{Binding RiskWord}" HorizontalAlignment="Left" Margin="0,6,0,0" Visibility="{Binding ShowRisk, Converter={StaticResource BoolToVis}}"/>
+                              <WrapPanel Margin="0,8,0,0">
+                                <c:StatusChip Tone="Good" Text="{Binding RiskText}" Margin="0,0,8,0" Visibility="{Binding ShowRisk, Converter={StaticResource FalseToVisible}}"/>
+                                <c:StatusChip Tone="Warn" Text="{Binding RiskText}" Margin="0,0,8,0" Visibility="{Binding ShowRisk, Converter={StaticResource BoolToVis}}"/>
+                                <c:StatusChip Tone="Info" Text="{l:T Opt.Row.Undo}" Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding StateText}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center"/>
+                              </WrapPanel>
                             </StackPanel>
                           </DockPanel>
                         </DataTemplate>

@@ -430,7 +430,7 @@
               <ItemsControl ItemsSource="{Binding UserActions}" ItemTemplate="{StaticResource As.UserAction}" Focusable="False"/>
 
               <!-- Recomendação + ação principal -->
-              <Border Style="{StaticResource Panel.Card}" Margin="0,6,0,0" Padding="22,18" BorderBrush="{StaticResource Brush.TraceLine}">
+              <Border Style="{StaticResource Panel.Card}" Margin="0,6,0,0" Padding="22,18" BorderBrush="{StaticResource Brush.TraceLine}" BorderThickness="1">
                 <StackPanel>
                   <DockPanel>
                     <Grid Width="38" Height="38" Margin="0,0,12,0" VerticalAlignment="Top">
@@ -552,7 +552,7 @@
 
               <ItemsControl ItemsSource="{Binding UserActions}" ItemTemplate="{StaticResource As.UserAction}" Focusable="False" Margin="0,6,0,0"/>
 
-              <Border Style="{StaticResource Panel.Card}" Margin="0,6,0,0" Padding="22,18" BorderBrush="{StaticResource Brush.TraceLine}">
+              <Border Style="{StaticResource Panel.Card}" Margin="0,6,0,0" Padding="22,18" BorderBrush="{StaticResource Brush.TraceLine}" BorderThickness="1">
                 <StackPanel>
                   <DockPanel>
                     <Grid Width="38" Height="38" Margin="0,0,12,0" VerticalAlignment="Top">

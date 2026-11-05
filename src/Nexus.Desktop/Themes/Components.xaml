@@ -70,10 +70,10 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="c:HeroPanel">
-          <Border Background="{StaticResource Brush.SurfaceHi}" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+          <Border Background="{StaticResource Brush.Surface}" BorderBrush="{StaticResource Brush.Highlight}" BorderThickness="0,1,0,0"
                   CornerRadius="{StaticResource Radius.Panel}" SnapsToDevicePixels="True">
             <Grid>
-              <Rectangle Fill="{StaticResource Brush.Graticule}" Opacity="0.28" IsHitTestVisible="False" RadiusX="10" RadiusY="10"/>
+              <Rectangle Fill="{StaticResource Brush.Graticule}" Opacity="0.12" IsHitTestVisible="False" RadiusX="14" RadiusY="14"/>
               <Grid Margin="22,18,28,22">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="Auto"/>
@@ -242,7 +242,7 @@
       <Setter.Value>
         <ControlTemplate TargetType="c:StatTile">
           <Grid SnapsToDevicePixels="True">
-            <Border x:Name="Bd" Background="{StaticResource Brush.Surface}" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+            <Border x:Name="Bd" Background="{StaticResource Brush.Surface}" BorderBrush="{StaticResource Brush.Highlight}" BorderThickness="0,1,0,0"
                     CornerRadius="{StaticResource Radius.Card}"/>
             <Border x:Name="Wash" Background="{StaticResource Brush.Text}" CornerRadius="{StaticResource Radius.Card}" Opacity="0" IsHitTestVisible="False"/>
             <Grid Margin="18,14,18,16">
@@ -291,6 +291,7 @@
                 <Condition Property="Focusable" Value="True"/>
               </MultiTrigger.Conditions>
               <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Brush.TraceLine}"/>
+              <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
               <MultiTrigger.EnterActions>
                 <BeginStoryboard>
                   <Storyboard>

@@ -6,11 +6,14 @@
   Chaves novas (acréscimos, podem ser usadas por qualquer página): C.SurfaceLow, C.LineSoft, Brush.SurfaceLow, Brush.LineSoft,
   Brush.Hover, Brush.TraceSoft, Brush.SignalSoft, Brush.GoodSoft, Brush.BadSoft, Brush.TraceLine, Brush.Graticule, Size.Readout,
   Radius.Chip, Space.Page.
+  05/11/2026 ("Instrumento de precisão", docs/14-redesign-brief.md): C.Ground, Brush.Ground, Brush.Highlight, Brush.TextSoft,
+  Brush.Track, Size.Hero, Space.1…8. C.TextDim clareado para #7C88A8 (5,3:1 sobre Bg; antes 3,3:1 reprovava WCAG AA).
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <!-- Cores -->
+  <Color x:Key="C.Ground">#0A0E18</Color>
   <Color x:Key="C.Bg">#0E1320</Color>
   <Color x:Key="C.SurfaceLow">#111726</Color>
   <Color x:Key="C.Surface">#161D2E</Color>
@@ -19,13 +22,14 @@
   <Color x:Key="C.LineSoft">#1E2638</Color>
   <Color x:Key="C.Text">#E8ECF5</Color>
   <Color x:Key="C.TextMuted">#8A96B3</Color>
-  <Color x:Key="C.TextDim">#5C6785</Color>
+  <Color x:Key="C.TextDim">#7C88A8</Color>
   <Color x:Key="C.Trace">#FFB547</Color>
   <Color x:Key="C.Signal">#4FD1E8</Color>
   <Color x:Key="C.Good">#5EE6A0</Color>
   <Color x:Key="C.Bad">#FF6B7A</Color>
   <Color x:Key="C.WarnBg">#251F12</Color>
 
+  <SolidColorBrush x:Key="Brush.Ground" Color="{StaticResource C.Ground}"/>
   <SolidColorBrush x:Key="Brush.Bg" Color="{StaticResource C.Bg}"/>
   <SolidColorBrush x:Key="Brush.SurfaceLow" Color="{StaticResource C.SurfaceLow}"/>
   <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource C.Surface}"/>
@@ -50,6 +54,11 @@
   <SolidColorBrush x:Key="Brush.SignalSoft" Color="#1A4FD1E8"/>
   <SolidColorBrush x:Key="Brush.GoodSoft" Color="#1A5EE6A0"/>
   <SolidColorBrush x:Key="Brush.BadSoft" Color="#1FFF6B7A"/>
+  <!-- "Instrumento de precisão" (05/11/2026): profundidade por luz, não por borda. Realce de 1 px no topo das superfícies,
+       texto de apoio claro sobre superfície (frases dos mostradores) e trilho dos mostradores. -->
+  <SolidColorBrush x:Key="Brush.Highlight" Color="#0DFFFFFF"/>
+  <SolidColorBrush x:Key="Brush.TextSoft" Color="#C9D1E3"/>
+  <SolidColorBrush x:Key="Brush.Track" Color="{StaticResource C.LineSoft}"/>
 
   <!-- Retícula de osciloscópio: grade fina para áreas de instrumento (use com Opacity baixa) -->
   <DrawingBrush x:Key="Brush.Graticule" TileMode="Tile" Stretch="None"
@@ -68,23 +77,33 @@
   <FontFamily x:Key="Font.Numbers">Bahnschrift SemiCondensed</FontFamily>
   <FontFamily x:Key="Font.Body">Segoe UI Variable Text, Segoe UI</FontFamily>
 
-  <!-- Escala (px): 12 · 13.5 · 17 · 24 · 32 · 44 (números grandes); 28 para leituras de instrumento -->
+  <!-- Escala (px): 12 · 14 · 17 · 24 · 32 · 44 (números grandes); 28 para leituras de instrumento; 56 para o número herói -->
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Small">12</system:Double>
-  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Body">13.5</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Body">14</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.H2">17</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.H1">24</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Display">32</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Metric">44</system:Double>
   <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Readout">28</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Size.Hero">56</system:Double>
 
-  <!-- Raios por hierarquia: painel grande 10, cartão 8, controle 6, selo 10 -->
-  <CornerRadius x:Key="Radius.Panel">10</CornerRadius>
-  <CornerRadius x:Key="Radius.Card">8</CornerRadius>
+  <!-- Raios por hierarquia: painel grande 14, cartão 10, controle 6, selo 10 -->
+  <CornerRadius x:Key="Radius.Panel">14</CornerRadius>
+  <CornerRadius x:Key="Radius.Card">10</CornerRadius>
   <CornerRadius x:Key="Radius.Control">6</CornerRadius>
   <CornerRadius x:Key="Radius.Chip">10</CornerRadius>
 
   <!-- Margem padrão de página -->
-  <Thickness x:Key="Space.Page">32,28,32,32</Thickness>
+  <Thickness x:Key="Space.Page">40,28,40,40</Thickness>
+  <!-- Grade de 4 px (espaços entre blocos): 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 -->
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.1">4</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.2">8</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.3">12</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.4">16</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.5">24</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.6">32</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.7">48</system:Double>
+  <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Space.8">64</system:Double>
 
   <!-- Durações de movimento (respeitar SystemParameters.ClientAreaAnimation: sem animação quando desligada).
        Os modelos de controle usam Views/Shell/ShellMotion (x:Static), que já zera as durações quando o Windows desliga animações. -->

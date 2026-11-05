@@ -181,10 +181,10 @@ internal sealed class UiSelfTestRunner
             startup = Swap();
             Progress($"leitura do PC: {(initialDone ? "concluída" : "não concluiu")} em {initialSeconds:0.0} s");
 
-            // 2) As 6 telas da lista lateral, as 2 telas da boas-vindas e a tela Otimizar trabalhando e no fim (dados de
+            // 2) As 6 telas simples (abas das 5 áreas), as 2 telas da boas-vindas e a tela Otimizar trabalhando e no fim (dados de
             //    demonstração). Depois "Ferramentas avançadas" e cada ferramenta dela (qualquer página nova entra sozinha).
             var index = 0;
-            foreach (var page in vm.NavPages.ToList())
+            foreach (var page in ShellNavigation.Pick(vm.Pages, p => p.GetType().Name, ShellNavigation.SimplePages).ToList())
             {
                 if (watchdog.IsCancellationRequested) { abort = $"tempo total de {TotalTimeout.TotalMinutes:0} min excedido"; break; }
                 pages.Add(await VisitAsync(vm, page, ++index));
