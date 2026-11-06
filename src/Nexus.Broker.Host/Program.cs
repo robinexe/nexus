@@ -10,6 +10,7 @@ using Nexus.HardwareDiscovery;
 using Nexus.Persistence;
 using Nexus.WindowsActions;
 using Nexus.WindowsActions.Power;
+using Nexus.WindowsActions.Network;
 using Nexus.WindowsActions.Registry;
 using Nexus.WindowsActions.Services;
 using Nexus.WindowsActions.Startup;
@@ -130,7 +131,7 @@ namespace Nexus.Broker.Host
             var registry = new WindowsRegistryBackend(requireUserProfileForHkcu: asSystem);
             var handlers = new HandlerRegistry()
                 .Add(new RegistryValueHandler(registry))
-                .Add(new Nexus.WindowsActions.Network.QosGamePolicyHandler(registry))
+                .Add(new QosGamePolicyHandler(registry))
                 .Add(new DirectXUserGpuPreferenceHandler(registry))
                 .Add(new StartupApprovedHandler(registry))
                 .Add(new PowerActiveSchemeHandler(new WindowsPowerBackend()))

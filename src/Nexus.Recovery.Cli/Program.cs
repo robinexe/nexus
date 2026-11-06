@@ -5,6 +5,7 @@ using Nexus.WindowsActions;
 using Nexus.GameProfiles.SourceCfg;
 using Nexus.Persistence;
 using Nexus.WindowsActions.Power;
+using Nexus.WindowsActions.Network;
 using Nexus.WindowsActions.Registry;
 using Nexus.WindowsActions.Services;
 using Nexus.WindowsActions.Startup;
@@ -186,7 +187,7 @@ static HandlerRegistry BuildHandlers()
     {
         var registry = new WindowsRegistryBackend();
         reg.Add(new RegistryValueHandler(registry))
-           .Add(new Nexus.WindowsActions.Network.QosGamePolicyHandler(registry))
+           .Add(new QosGamePolicyHandler(registry))
            .Add(new DirectXUserGpuPreferenceHandler(registry))
            .Add(new StartupApprovedHandler(registry))
            .Add(new PowerActiveSchemeHandler(new WindowsPowerBackend()))

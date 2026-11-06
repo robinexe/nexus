@@ -2900,7 +2900,7 @@
       "revert": "Restaurar o valor original ou remover se não existia."
     },
     {
-      "id": "cpulab.sched.prefer-performant.ac",
+      "id": "fps.lab.sched.prefer-performant.ac",
       "version": 1,
       "title": "Laboratório: threads preferem os núcleos de desempenho (Intel híbrido)",
       "i18n": {
@@ -2935,7 +2935,7 @@
       "revert": "Restaurar o índice anterior do mesmo esquema."
     },
     {
-      "id": "cpulab.sched-short.prefer-performant.ac",
+      "id": "fps.lab.sched-short.prefer-performant.ac",
       "version": 1,
       "title": "Laboratório: threads curtas preferem os núcleos de desempenho (Intel híbrido)",
       "i18n": {

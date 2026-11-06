@@ -5,6 +5,7 @@ using Nexus.HardwareDiscovery;
 using Nexus.Persistence;
 using Nexus.WindowsActions;
 using Nexus.WindowsActions.Power;
+using Nexus.WindowsActions.Network;
 using Nexus.WindowsActions.Registry;
 using Nexus.WindowsActions.Services;
 using Nexus.WindowsActions.Startup;
@@ -31,7 +32,7 @@ public sealed class NexusServices
         return SimulationOnlyHandler.Wrap(
         [
             new RegistryValueHandler(registry),
-            new Nexus.WindowsActions.Network.QosGamePolicyHandler(registry),
+            new QosGamePolicyHandler(registry),
             new DirectXUserGpuPreferenceHandler(registry),
             new StartupApprovedHandler(registry),
             new PowerActiveSchemeHandler(new WindowsPowerBackend()),

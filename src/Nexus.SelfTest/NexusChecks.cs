@@ -33,6 +33,7 @@ using Nexus.Security.Scanner;
 using Nexus.SystemTools;
 using Nexus.WindowsActions;
 using Nexus.WindowsActions.Power;
+using Nexus.WindowsActions.Network;
 using Nexus.WindowsActions.Registry;
 using Nexus.WindowsActions.Services;
 using Nexus.WindowsActions.Startup;
@@ -138,7 +139,7 @@ public static class NexusChecks
         var env = new HandlerEnvironment(registry, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NEXUS"), OtherAccount: false, Elevated: false);
         var all = new List<IActionHandler>
         {
-            new RegistryValueHandler(registry), new Nexus.WindowsActions.Network.QosGamePolicyHandler(registry), new DirectXUserGpuPreferenceHandler(registry), new StartupApprovedHandler(registry),
+            new RegistryValueHandler(registry), new QosGamePolicyHandler(registry), new DirectXUserGpuPreferenceHandler(registry), new StartupApprovedHandler(registry),
             new PowerActiveSchemeHandler(new WindowsPowerBackend()), new PowerSettingValueHandler(new WindowsPowerBackend()), new PowerOverlaySchemeHandler(new WindowsPowerBackend()),
             new ServiceStartTypeHandler(new WindowsServiceBackend()), new SourceCfgConvarHandler(() => null),
         };

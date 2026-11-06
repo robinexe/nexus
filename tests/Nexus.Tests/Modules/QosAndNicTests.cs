@@ -44,7 +44,7 @@ public sealed class QosAndNicTests
         var h = new QosGamePolicyHandler(reg);
         Assert.Equal(ApplicabilityKind.Blocked, h.Assess(Qos("cs2.exe"), T.Ctx).Kind);
         var e = Wiring.Entry("net.qos.game@1")!;
-        Assert.Null(e.TryInstantiate(new Dictionary<string, string> { ["qosExe"] = @"C:\x\cs2.exe" }, out _));
+        Assert.Null(e.ValidateUserArguments(new Dictionary<string, string> { ["qosExe"] = @"C:\x\cs2.exe" }, out _));
     }
 
     [Fact]
@@ -52,8 +52,8 @@ public sealed class QosAndNicTests
     {
         var e = Wiring.Entry("net.nic.eee.off@1")!;
         const string ok = @"SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}\0007";
-        Assert.NotNull(e.TryInstantiate(new Dictionary<string, string> { ["nicPath"] = ok }, out _));
+        Assert.NotNull(e.ValidateUserArguments(new Dictionary<string, string> { ["nicPath"] = ok }, out _));
         foreach (var bad in new[] { @"SYSTEM\CurrentControlSet\Services\Tcpip", ok + @"\..\0001", @"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0000" })
-            Assert.Null(e.TryInstantiate(new Dictionary<string, string> { ["nicPath"] = bad }, out _));
+            Assert.Null(e.ValidateUserArguments(new Dictionary<string, string> { ["nicPath"] = bad }, out _));
     }
 }

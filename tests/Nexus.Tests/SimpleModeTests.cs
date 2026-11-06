@@ -425,7 +425,7 @@ public sealed class SimpleModeTests
     [InlineData("cleaning.steam-shadercache@1", null)]
     [InlineData("security.defender.realtime@1", null)]
     [InlineData("memorylab.standby.purge@1", null)]
-    [InlineData("cpulab.sched.prefer-performant.ac@1", null)]
+    [InlineData("fps.lab.sched.prefer-performant.ac@1", null)]
     public void Max_performance_never_caps_fps_breaks_features_or_touches_protection(string action, string? value) =>
         Assert.False(AutoPilot.IsMaxPerformance(Cx(action, value, optIn: true), Hw()));
 
