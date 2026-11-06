@@ -54,6 +54,8 @@
   <SolidColorBrush x:Key="Brush.SignalSoft" Color="#1A4FD1E8"/>
   <SolidColorBrush x:Key="Brush.GoodSoft" Color="#1A5EE6A0"/>
   <SolidColorBrush x:Key="Brush.BadSoft" Color="#1FFF6B7A"/>
+  <!-- Véu por trás dos avisos do NEXUS (Views/Shell/NexusDialog): Bg a 85 %. -->
+  <SolidColorBrush x:Key="Brush.Scrim" Color="#D90E1320"/>
   <!-- "Instrumento de precisão" (05/11/2026): profundidade por luz, não por borda. Realce de 1 px no topo das superfícies,
        texto de apoio claro sobre superfície (frases dos mostradores) e trilho dos mostradores. -->
   <SolidColorBrush x:Key="Brush.Highlight" Color="#0DFFFFFF"/>

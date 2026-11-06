@@ -474,9 +474,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
 
     public void Notify(string message) => Status = message;
 
-    public bool Confirm(string title, string message) => !SelfTestMode &&
-        System.Windows.MessageBox.Show(message, title, System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning,
-            System.Windows.MessageBoxResult.No) == System.Windows.MessageBoxResult.Yes;
+    /// <summary>Aviso do NEXUS (Views/Shell/NexusDialog), nunca a caixa de mensagem do Windows. Autoteste: sempre "não".</summary>
+    public bool Confirm(string title, string message) => !SelfTestMode && Views.Shell.NexusDialog.Confirm(title, message);
 
     public void Navigate(PageViewModel page) => SelectedPage = page;
 
@@ -846,8 +845,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         var level = LevelFor(chosen);
         var requests = BrokerSession.RequestsFor(chosen);
         var own = ApplyView.Begin(Loc.T("Shell.AplicarAjustesMarcados"), chosen.Select(c => (c.Entry.Definition.Key, c.Entry.Definition.Title)).ToList(), level, name: ActionName);
-        var r = await ExecuteWithProgressAsync(() => System.Windows.MessageBox.Show(BrokerSession.ConfirmationText(chosen), Loc.T("Shell.ConfirmarAplicacao"),
-                System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning, System.Windows.MessageBoxResult.No) == System.Windows.MessageBoxResult.Yes,
+        var r = await ExecuteWithProgressAsync(() => Confirm(Loc.T("Shell.ConfirmarAplicacao"), BrokerSession.ConfirmationText(chosen)),
             level, b => b.Execute(requests), null, own, revert: false);
         if (r is null) Broker.LastMessage = Broker.LastSummary = Loc.T("Shell.AplicacaoCanceladaNadaFoi");
     }
@@ -857,9 +855,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
     private async Task BrokerRevertAsync()
     {
         if (Broker.LastRun is not { } run) return;
-        var answer = System.Windows.MessageBox.Show(Loc.T("Shell.DesfazerUltimaAplicacaoNexus"),
-            Loc.T("Shell.ConfirmarReversao"), System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
-        if (answer != System.Windows.MessageBoxResult.Yes) return;
+        if (!Confirm(Loc.T("Shell.ConfirmarReversao"), Loc.T("Shell.DesfazerUltimaAplicacaoNexus"))) return;
         var own = ApplyView.Begin(Loc.T("Shell.ReverterUltimaExecucao"), [], _lastLevel, revert: true, name: ActionName);
         // Aplicação grande = vários lotes: desfaz todos, do último para o primeiro.
         var runs = _lastRuns.Contains(run) ? _lastRuns.Reverse().ToList() : [run];
@@ -883,9 +879,7 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
 
     private async Task BrokerRecoverAsync()
     {
-        var answer = System.Windows.MessageBox.Show(Loc.T("Shell.DesfazerAlteracoesFicaramPela"), Loc.T("Shell.Recuperar"),
-            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No);
-        if (answer != System.Windows.MessageBoxResult.Yes) return;
+        if (!Confirm(Loc.T("Shell.Recuperar"), Loc.T("Shell.DesfazerAlteracoesFicaramPela"))) return;
         var (user, machine) = PendingRecovery();
         if (user > 0 || machine == 0) await CallBrokerAsync(BrokerLevel.User, b => b.Recover());
         if (machine > 0) await CallBrokerAsync(BrokerLevel.Admin, b => b.Recover());

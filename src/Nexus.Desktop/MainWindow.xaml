@@ -668,5 +668,8 @@
                    TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" AutomationProperties.LiveSetting="Polite"/>
       </DockPanel>
     </Border>
+
+    <!-- ============ Avisos do NEXUS (Views/Shell/NexusDialog): por cima de tudo, no lugar da caixa do Windows ============ -->
+    <Grid x:Name="DialogLayer" Grid.RowSpan="3" Grid.ColumnSpan="2" Panel.ZIndex="100" Visibility="Collapsed"/>
   </Grid>
 </Window>

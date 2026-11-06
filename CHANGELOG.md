@@ -14,6 +14,8 @@ O resto da seção vai para a página de download (GitHub Releases).
 - **NEXUS Optimize**: um clique, com a Varredura mostrando cada etapa terminando de verdade. Cada ajuste mostra o risco, o
   estado atual e como desfazer.
 - Contraste melhor nos textos de apoio e um visual mais limpo, sem contornos em tudo.
+- **Avisos do NEXUS**: as confirmações deixaram de usar a caixa antiga do Windows. Agora são avisos no visual do NEXUS, com a
+  lista organizada, texto que rola quando é longo e os botões sempre à vista.
 - **FPS sem limite**: o NEXUS nunca mais limita o FPS. Em Jogos, cada jogo com placa NVIDIA ganha "FPS sem limite" (tira o
   limite de FPS e o V-Sync forçado do driver), o Fortnite ganha "FPS máximo e menos atraso" (sem limite + Reflex), e um
   cartão novo mostra se o driver NVIDIA está limitando todos os jogos, com "Liberar FPS" em um clique. Quem usou o antigo

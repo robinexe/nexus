@@ -4472,4 +4472,9 @@ São {2} partidas de pelo menos 3 minutos. Entre elas, o NEXUS aplica o ajuste p
   <data name="Profile.Unknown.Form" xml:space="preserve"><value>notebook ou desktop</value></data>
   <data name="Profile.Unknown.Disk" xml:space="preserve"><value>tipo do disco</value></data>
   <data name="Profile.Unknown.List" xml:space="preserve"><value>Não deu para ler: {0}. Sem essa leitura, o NEXUS não recomenda nem desaconselha por ela.</value></data>
+  <data name="Dialog.Continue" xml:space="preserve"><value>Continuar</value></data>
+  <data name="Dialog.Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Dialog.Ok" xml:space="preserve"><value>Entendi</value></data>
+  <data name="Dialog.Close" xml:space="preserve"><value>Fechar aviso</value></data>
+  <data name="Dialog.ErrorFooter" xml:space="preserve"><value>Se repetir, não aparece de novo nesta sessão. Detalhes em %LocalAppData%\NEXUS\desktop-erros.log.</value></data>
 </root>

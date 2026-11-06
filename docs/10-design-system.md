@@ -237,6 +237,23 @@ nada na página. Uma página com tela própria (o Assistente) passa `IProgress<A
 `ProcessRing`: 72 marcas que acendem com o %, arco com brilho, ponto na ponta e um arco ciano girando por dentro; `Tone`
 Warn (aplicando), Info (lendo), Good (concluído), Bad (falhou). Leitor de tela: "Andamento: 45%".
 
+### Aviso — `NexusDialog` (no lugar da caixa do Windows)
+
+`Views/Shell/NexusDialog.cs`. Toda confirmação passa por `IModuleHost.Confirm(título, texto)` → `NexusDialog.Confirm`; erro
+inesperado → `NexusDialog.Alert`. **Nunca `MessageBox.Show`** (há teste). Aparece na camada `DialogLayer` do `MainWindow`
+(véu `Brush.Scrim` + cartão `Brush.Surface`, `Radius.Panel`); sem janela principal, o mesmo cartão numa janela sem moldura.
+
+- **Cabe sempre na página:** cabeçalho e rodapé fixos, o texto rola no meio; o cartão nunca passa da altura da janela
+  (margem de 32). Os botões ficam sempre à vista.
+- **Texto em blocos** (`DialogText.Parse`, puro e testado): parágrafos, itens com "•" numa caixa `Brush.SurfaceLow`, o
+  "[administrador; persistente]" do fim de um item em letra menor e a pergunta final em destaque. A partir de
+  `DialogText.CompactFrom` itens a lista fica compacta.
+- **Tom:** aviso (âmbar, `Button.Primary`); ação sem volta (`DialogText.ToneFor`: "irreversível", "não tem volta"…) em
+  vermelho, `Button.Danger`, com o foco começando em "Cancelar"; erro com `Icon.Error`.
+- **Teclado e Narrador:** Esc cancela, Tab circula dentro do aviso, clique no véu não fecha; o cartão leva o título como
+  `AutomationProperties.Name` e o texto como `HelpText`. Entrada com `ShellMotion` (nada com animações desligadas).
+- Seletores de arquivo/pasta continuam os do Windows (são o padrão do sistema, não avisos).
+
 ### Abas — `Tab.Underline`
 `RadioButton` com sublinhado âmbar; ícone + nome com um `ContentTemplate` local (veja `C.TabHeader` em Cleaning.xaml):
 

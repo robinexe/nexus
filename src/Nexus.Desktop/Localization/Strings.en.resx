@@ -4472,4 +4472,9 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Profile.Unknown.Form" xml:space="preserve"><value>laptop or desktop</value></data>
   <data name="Profile.Unknown.Disk" xml:space="preserve"><value>disk type</value></data>
   <data name="Profile.Unknown.List" xml:space="preserve"><value>Could not read: {0}. Without it, NEXUS neither recommends nor advises against anything based on it.</value></data>
+  <data name="Dialog.Continue" xml:space="preserve"><value>Continue</value></data>
+  <data name="Dialog.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Dialog.Ok" xml:space="preserve"><value>Got it</value></data>
+  <data name="Dialog.Close" xml:space="preserve"><value>Close notice</value></data>
+  <data name="Dialog.ErrorFooter" xml:space="preserve"><value>If it happens again, it won't show up again this session. Details in %LocalAppData%\NEXUS\desktop-erros.log.</value></data>
 </root>

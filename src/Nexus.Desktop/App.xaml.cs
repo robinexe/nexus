@@ -137,8 +137,8 @@ public partial class App : Application
         _showingError = true;
         try
         {
-            MessageBox.Show(e.Exception.Message + "\n\nSe repetir, não aparece de novo nesta sessão. Detalhes em %LocalAppData%\\NEXUS\\desktop-erros.log.",
-                Loc.T("Shell.NexusErroInesperadoNada"), MessageBoxButton.OK, MessageBoxImage.Error);
+            Views.Shell.NexusDialog.Alert(Loc.T("Shell.NexusErroInesperadoNada"),
+                e.Exception.Message + "\n\n" + Loc.T("Dialog.ErrorFooter"));
         }
         finally { _showingError = false; }
     }
