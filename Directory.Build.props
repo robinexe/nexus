@@ -16,7 +16,7 @@
        Pré-lançamento: -p:VersionSuffix=rc.1 (ou a tag v1.0.0-rc.1). Depois de publicar a estável, suba para 1.0.1
        (docs/08-packaging.md, "Lançar uma versão"). -->
   <PropertyGroup>
-    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionPrefix>1.1.1</VersionPrefix>
     <Product>NEXUS</Product>
     <Company>NEXUS</Company>
     <Authors>robinexe</Authors>

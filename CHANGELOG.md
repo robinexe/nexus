@@ -3,6 +3,15 @@
 Cada versão tem um resumo de uma linha (a linha que começa com `>`): é o texto do aviso de atualização dentro do NEXUS.
 O resto da seção vai para a página de download (GitHub Releases).
 
+## 1.1.1
+
+> "Otimizar meu PC" mostra a conta completa: o que aplicou agora, o que já estava no máximo e o que não serve para o seu PC.
+
+- **Resumo completo do "Otimizar meu PC"**: além do que mudou na rodada, mostra quantos ajustes já estavam no máximo, quantos
+  não servem para este PC (placa de outra marca, jogo não instalado) e se algum deu problema.
+- **Navegadores fechados não seguram o PC**: o "Otimizar meu PC" também impede o Edge e o Chrome de continuarem rodando depois
+  de fechados e desliga a Inicialização rápida do Edge.
+
 ## 1.1.0
 
 > Desempenho máximo de verdade: o "Otimizar meu PC" agora aplica tudo o que dá FPS (Windows, processador, placa, memória, disco, rede e jogos), o NEXUS nunca limita o FPS e há visual novo.
