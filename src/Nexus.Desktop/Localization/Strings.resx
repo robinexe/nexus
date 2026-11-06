@@ -4479,4 +4479,5 @@ São {2} partidas de pelo menos 3 minutos. Entre elas, o NEXUS aplica o ajuste p
   <data name="Dialog.Ok" xml:space="preserve"><value>Entendi</value></data>
   <data name="Dialog.Close" xml:space="preserve"><value>Fechar aviso</value></data>
   <data name="Dialog.ErrorFooter" xml:space="preserve"><value>Se repetir, não aparece de novo nesta sessão. Detalhes em %LocalAppData%\NEXUS\desktop-erros.log.</value></data>
+  <data name="Simple.Opt.PendingRecovery" xml:space="preserve"><value>Uma alteração anterior do NEXUS ficou pela metade (o PC pode ter desligado no meio). Use "Recuperar" no Histórico antes de otimizar de novo.</value></data>
 </root>

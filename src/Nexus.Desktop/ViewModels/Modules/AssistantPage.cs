@@ -1000,6 +1000,12 @@ public sealed class AssistantPage : ModulePage
     {
         var host = Host;
         if (host?.Facts is null) return;
+        // Alteração anterior interrompida (PC desligou no meio): primeiro recuperar; aplicar mais coisas por cima confundiria o desfazer.
+        if (await Task.Run(PendingRecovery) > 0)
+        {
+            Message = Loc.T("Simple.Opt.PendingRecovery");
+            return;
+        }
         if (!host.Confirm(Loc.T("Simple.Opt.ConfirmTitle"), Loc.T("Simple.Opt.ConfirmText")))
         {
             Message = Loc.T("Shell.CanceladoNadaFoiAlterado");

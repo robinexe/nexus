@@ -4479,4 +4479,5 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Dialog.Ok" xml:space="preserve"><value>Got it</value></data>
   <data name="Dialog.Close" xml:space="preserve"><value>Close notice</value></data>
   <data name="Dialog.ErrorFooter" xml:space="preserve"><value>If it happens again, it won't show up again this session. Details in %LocalAppData%\NEXUS\desktop-erros.log.</value></data>
+  <data name="Simple.Opt.PendingRecovery" xml:space="preserve"><value>A previous NEXUS change was interrupted (the PC may have shut down midway). Use "Recover" in History before optimizing again.</value></data>
 </root>

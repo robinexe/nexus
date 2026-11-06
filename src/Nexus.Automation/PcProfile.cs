@@ -99,7 +99,7 @@ public static partial class PcProfiler
         else if (facts.TotalMemoryBytes is { } total) memGb = (int)Math.Round((double)total / Gb);
         if (memGb is { } gb)
         {
-            if (gb < 8) tags.Add(LowRam);
+            if (gb <= 8) tags.Add(LowRam); // mesmo limite do HardwareProfile (8 GB ou menos)
             if (gb >= 16) tags.Add(Ram16);
         }
 
