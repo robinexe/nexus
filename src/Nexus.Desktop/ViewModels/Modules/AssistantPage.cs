@@ -534,6 +534,7 @@ public sealed class AssistantPage : ModulePage
         var catalog = _catalog!;
         var dir = NexusServices.CatalogDirectory;
         var build = facts.WindowsBuild ?? 0;
+        var auto = _auto; // "Otimizar meu PC": leitura do Desempenho máximo
         return step switch
         {
             AssistantStepId.Welcome => Task.Run(() => AssistantReaders.Welcome(catalog, facts.SystemDrive, PendingRecovery()), ct),
@@ -550,11 +551,11 @@ public sealed class AssistantPage : ModulePage
             }, ct),
             AssistantStepId.Programs => Task.Run(() => AssistantReaders.ProgramsAsync(checkUpdates: false, ct), ct),
             AssistantStepId.Startup => Task.Run(() => AssistantReaders.Startup(catalog, StartupToggle, dir), ct),
-            AssistantStepId.Privacy => Task.Run(() => AssistantReaders.Privacy(catalog, dir, build), ct),
+            AssistantStepId.Privacy => Task.Run(() => AssistantReaders.Privacy(catalog, dir, build, maxPerformance: auto), ct),
             AssistantStepId.Security => Task.Run(AssistantReaders.Security, ct),
             AssistantStepId.Drivers => Task.Run(() => AssistantReaders.Drivers(catalog, searchWindowsUpdate: false, ct), ct),
             AssistantStepId.Memory => Task.Run(() => AssistantReaders.Memory(catalog, facts), ct),
-            AssistantStepId.Performance => Task.Run(() => AssistantReaders.Performance(catalog, facts, NexusServices.ParametersFrom(facts)), ct),
+            AssistantStepId.Performance => Task.Run(() => AssistantReaders.Performance(catalog, facts, NexusServices.ParametersFrom(facts), maxPerformance: auto), ct),
             AssistantStepId.Measurement => Task.FromResult(MeasurementScan()),
             AssistantStepId.Schedules => Task.Run(() => AssistantReaders.Schedules(catalog), ct),
             _ => Task.FromResult(StepScan.Empty("")),
@@ -1036,7 +1037,8 @@ public sealed class AssistantPage : ModulePage
                 _scan = null; // leitura que falhar não pode reaplicar o que a etapa anterior propôs
                 await ScanAsync(step);
                 var scan = _scan;
-                var chosen = scan is null ? [] : AutoPilot.Select(scan.Changes, host.HardwareProfile);
+                // "Otimizar meu PC" = Desempenho máximo: tudo o que dá desempenho e pode ser desfeito, em qualquer PC (AutoPilot).
+                var chosen = scan is null ? [] : AutoPilot.SelectMaxPerformance(scan.Changes, host.HardwareProfile);
                 var summary = scan is null ? Loc.T("Asst.Verificada") : scan.Recommendation;
                 if (chosen.Count > 0)
                 {
@@ -1052,7 +1054,7 @@ public sealed class AssistantPage : ModulePage
                     _autoApplied += result.Applied;
                     summary = result.Summary;
                 }
-                if (scan is not null) AssistantRunner.RecordUnselected(_state, scan.Changes.Where(c => !chosen.Contains(c)));
+                if (scan is not null) AssistantRunner.RecordUnselected(_state, scan.Changes.Where(c => !chosen.Contains(c)), host.HardwareProfile, maxPerformance: true);
                 _flow.Advance(summary, scan?.Facts);
                 Save();
             }

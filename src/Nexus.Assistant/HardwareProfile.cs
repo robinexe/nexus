@@ -56,6 +56,16 @@ public sealed record HardwareProfile(
     public bool StrongGpu => GpuClass is GpuClass.Mid or GpuClass.Strong;
 
     public bool Hdd => Ssd == false;
+
+    /// <summary>Nome do processador como o Windows informa ("AMD Ryzen 9 7950X3D 16-Core Processor"), ou null.</summary>
+    public string? CpuModel { get; init; }
+
+    /// <summary>
+    /// Ryzen X3D com dois CCDs (7900X3D, 7950X3D, 9900X3D, 9950X3D): o driver de chipset da AMD estaciona o CCD sem o cache extra
+    /// durante o jogo. Plano Alto desempenho e "núcleos sempre acordados" desfazem isso e DIMINUEM o FPS (orientação da AMD:
+    /// plano Equilibrado + Game Bar). X3D de um CCD (5800X3D, 7800X3D, 9800X3D) não tem o problema.
+    /// </summary>
+    public bool DualCcdX3d => CpuModel is not null && HardwareProfiler.DualCcdX3dName().IsMatch(CpuModel);
 }
 
 /// <summary>Classificação PURA do PC (testável em qualquer SO). A tabela da classe da placa está documentada em docs/modules/recommendation.md.</summary>
@@ -88,7 +98,10 @@ public static partial class HardwareProfiler
 
         bool? ssd = traits.SystemDriveIsSsd ?? facts.SystemDiskMedia switch { DiskMedia.Ssd => true, DiskMedia.Hdd => false, _ => null };
 
-        return new HardwareProfile(cls, maker, main is null ? null : PcProfiler.ShortGpuName(main.Name ?? ""), vram, source, memGb, laptop, onBattery, ssd, competitive);
+        return new HardwareProfile(cls, maker, main is null ? null : PcProfiler.ShortGpuName(main.Name ?? ""), vram, source, memGb, laptop, onBattery, ssd, competitive)
+        {
+            CpuModel = facts.CpuModel,
+        };
     }
 
     public static GpuMaker MakerOf(GpuInfo? gpu)
@@ -101,6 +114,9 @@ public static partial class HardwareProfiler
         if (v.Equals("Intel", StringComparison.OrdinalIgnoreCase) || n.Contains("Intel", StringComparison.OrdinalIgnoreCase) || n.Contains("Arc", StringComparison.Ordinal)) return GpuMaker.Intel;
         return GpuMaker.Unknown;
     }
+
+    [GeneratedRegex(@"\b(7900|7950|9900|9950)X3D\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    internal static partial Regex DualCcdX3dName();
 
     [GeneratedRegex(@"\b(GTX|RTX)\s*(\d{2})(\d{2})\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex NvidiaFamily();

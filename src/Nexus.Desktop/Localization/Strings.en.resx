@@ -3889,15 +3889,16 @@ Requires administrator.</value></data>
   <data name="Simple.Opt.DoneN" xml:space="preserve"><value>Done! We adjusted {0} things.</value></data>
   <data name="Simple.Opt.Done1" xml:space="preserve"><value>Done! We adjusted 1 thing.</value></data>
   <data name="Simple.Opt.DoneNothing" xml:space="preserve"><value>Done! Your PC was already up to date: nothing needed changing.</value></data>
-  <data name="Simple.Opt.ConfirmTitle" xml:space="preserve"><value>Optimize my PC safely</value></data>
-  <data name="Simple.Opt.ConfirmText" xml:space="preserve"><value>NEXUS will:
+  <data name="Simple.Opt.ConfirmTitle" xml:space="preserve"><value>Optimize my PC: maximum performance</value></data>
+  <data name="Simple.Opt.ConfirmText" xml:space="preserve"><value>NEXUS will set your PC to maximum performance:
 
+• Windows, processor and power at maximum performance (no power saving)
+• Graphics card, memory and disk without power-saving modes
+• Heavy programs out of startup and background work turned off
 • Clean temporary files (they go to quarantine and can come back)
-• Tune Windows for gaming
-• Turn off programs that slow down startup
 • Check security and drivers
 
-Only low-risk changes that can be undone in History are included. Windows will ask for administrator permission once, and NEXUS creates a restore point first.
+Your PC will run hotter, fans will spin more and battery will last less: that is the price of maximum performance. Windows protections (antivirus, firewall) are not touched. Everything goes to History and can be undone. Windows asks for administrator permission once and NEXUS creates a restore point first.
 
 Start now?</value></data>
   <data name="Simple.Opt.SkippedAuto" xml:space="preserve"><value>Left for the step-by-step Assistant, in Advanced tools.</value></data>
@@ -4444,6 +4445,7 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Fit.LaptopWifi" xml:space="preserve"><value>Recommended for laptops: Wi-Fi stops dozing between packets and ping stays steady</value></data>
   <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recommended for laptops: less heat and noise</value></data>
   <data name="Fit.Uncapped" xml:space="preserve"><value>Recommended: removes the cap so the game runs at max FPS</value></data>
+  <data name="Fit.X3dParking" xml:space="preserve"><value>Not for dual-chiplet Ryzen X3D: it moves games off the cache chiplet and FPS drops</value></data>
   <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recommended for your PC: background recording keeps the graphics card busy</value></data>
   <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Apply recommended</value></data>
   <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Apply what is recommended for this PC (the options flagged above, all at once)</value></data>

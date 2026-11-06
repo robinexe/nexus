@@ -3889,15 +3889,16 @@ Requiere administrador.</value></data>
   <data name="Simple.Opt.DoneN" xml:space="preserve"><value>¡Listo! Ajustamos {0} cosas.</value></data>
   <data name="Simple.Opt.Done1" xml:space="preserve"><value>¡Listo! Ajustamos 1 cosa.</value></data>
   <data name="Simple.Opt.DoneNothing" xml:space="preserve"><value>¡Listo! Tu PC ya estaba al día: no hizo falta cambiar nada.</value></data>
-  <data name="Simple.Opt.ConfirmTitle" xml:space="preserve"><value>Optimizar mi PC con seguridad</value></data>
-  <data name="Simple.Opt.ConfirmText" xml:space="preserve"><value>NEXUS va a:
+  <data name="Simple.Opt.ConfirmTitle" xml:space="preserve"><value>Optimizar mi PC: rendimiento máximo</value></data>
+  <data name="Simple.Opt.ConfirmText" xml:space="preserve"><value>NEXUS va a dejar el PC al máximo rendimiento:
 
+• Windows, procesador y energía al máximo rendimiento (sin ahorro de energía)
+• Tarjeta gráfica, memoria y disco sin modos de ahorro
+• Programas pesados fuera del inicio y trabajo de fondo desactivado
 • Limpiar archivos temporales (van a la cuarentena y pueden volver)
-• Ajustar Windows para juegos
-• Desactivar programas que retrasan el inicio
 • Revisar seguridad y drivers
 
-Solo entra lo que es de bajo riesgo y se puede deshacer en Historial. Windows pedirá permiso de administrador una vez y NEXUS crea un punto de restauración antes.
+El PC se calentará más, el ventilador girará más y la batería durará menos: es el precio del rendimiento máximo. Las protecciones de Windows (antivirus, firewall) no se tocan. Todo queda en el Historial y se puede deshacer. Windows pide permiso de administrador una vez y NEXUS crea un punto de restauración antes.
 
 ¿Empezar ahora?</value></data>
   <data name="Simple.Opt.SkippedAuto" xml:space="preserve"><value>Queda para el Asistente paso a paso, en Herramientas avanzadas.</value></data>
@@ -4444,6 +4445,7 @@ Son {2} partidas de al menos 3 minutos. Entre ellas, NEXUS aplica el ajuste con 
   <data name="Fit.LaptopWifi" xml:space="preserve"><value>Recomendado para portátil: el Wi-Fi no se duerme entre paquetes y el ping queda estable</value></data>
   <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recomendado para portátil: menos calor y ruido</value></data>
   <data name="Fit.Uncapped" xml:space="preserve"><value>Recomendado: quita el límite y el juego va al máximo de FPS</value></data>
+  <data name="Fit.X3dParking" xml:space="preserve"><value>No indicado para Ryzen X3D de dos chiplets: saca el juego del chiplet con caché y bajan los FPS</value></data>
   <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recomendado para tu PC: la grabación en segundo plano ocupa la tarjeta gráfica</value></data>
   <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Aplicar lo recomendado</value></data>
   <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Aplicar lo recomendado para este PC (las opciones marcadas arriba, de una vez)</value></data>

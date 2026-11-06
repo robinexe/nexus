@@ -240,6 +240,16 @@ public static class AssistantRunner
     }
 
     /// <summary>Registra o que o usuário deixou desmarcado (vai para "pulado e por quê").</summary>
+    /// <summary>"Otimizar meu PC": o motivo real de cada item que ficou fora do Desempenho máximo (ninguém desmarcou nada).</summary>
+    public static void RecordUnselected(AssistantState state, IEnumerable<ProposedChange> unselected, HardwareProfile? profile, bool maxPerformance)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(unselected);
+        if (!maxPerformance) { RecordUnselected(state, unselected); return; }
+        foreach (var c in unselected)
+            state.Skipped.Add(new SkipRecord(c.Step, c.Title, AutoPilot.MaxExclusionReason(c, profile)));
+    }
+
     public static void RecordUnselected(AssistantState state, IEnumerable<ProposedChange> unselected)
     {
         ArgumentNullException.ThrowIfNull(state);

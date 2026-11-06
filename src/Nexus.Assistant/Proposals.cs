@@ -36,6 +36,10 @@ public sealed record ProposedChange(
     /// <summary>Marcada por padrão? Só risco baixo, documentada, reversível e que não seja opt-in.</summary>
     public bool SelectedByDefault => ChangeSelection.IsSelectedByDefault(this);
 
+    /// <summary>Classificação do catálogo (o "Experimental" acima junta Experimental com Rejeitado/Obsoleto/Inútil; o modo
+    /// "Desempenho máximo" precisa separar: experimental entra, mito nunca).</summary>
+    public Nexus.Core.Classification Classification { get; init; } = Nexus.Core.Classification.SupportedDocumented;
+
     public string LevelText => Level == BrokerLevel.Admin ? "administrador" : "sua conta";
     public string RiskText => Experimental ? "experimental" : RiskModel.Text(Risk);
     public string BeforeAfter => Before is null && After is null ? "" : $"{Before ?? "?"} → {After ?? "?"}";
@@ -151,7 +155,7 @@ public sealed class AssistantCatalog
             Undoable: !d.Irreversible && d.Persistence != PersistenceKind.Ephemeral,
             Before: before,
             After: after,
-            OptIn: optIn);
+            OptIn: optIn) { Classification = d.Classification };
         return ChangeSelection.IsAllowed(change) ? change : null;
     }
 }

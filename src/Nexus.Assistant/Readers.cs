@@ -234,13 +234,16 @@ public static class AssistantReaders
 
     // ------------------------------------------------------------------ 6
 
-    public static StepScan Privacy(AssistantCatalog catalog, string catalogDirectory, int windowsBuild)
+    public static StepScan Privacy(AssistantCatalog catalog, string catalogDirectory, int windowsBuild) =>
+        Privacy(catalog, catalogDirectory, windowsBuild, maxPerformance: false);
+
+    public static StepScan Privacy(AssistantCatalog catalog, string catalogDirectory, int windowsBuild, bool maxPerformance)
     {
         try
         {
             var c = PrivacyCatalog.LoadFromDirectory(catalogDirectory);
             var states = new PrivacyScanner(new WindowsRegistryBackend()).Scan(c, windowsBuild);
-            return StepPlanners.Privacy(catalog, states);
+            return StepPlanners.Privacy(catalog, states, maxPerformance);
         }
         catch (Exception ex) when (Expected(ex)) { return StepScan.Unavailable("Privacidade", ex.Message); }
     }
@@ -301,7 +304,10 @@ public static class AssistantReaders
 
     // ------------------------------------------------------------------ 10
 
-    public static StepScan Performance(AssistantCatalog catalog, SystemFacts facts, IReadOnlyDictionary<string, string> parameters)
+    public static StepScan Performance(AssistantCatalog catalog, SystemFacts facts, IReadOnlyDictionary<string, string> parameters) =>
+        Performance(catalog, facts, parameters, maxPerformance: false);
+
+    public static StepScan Performance(AssistantCatalog catalog, SystemFacts facts, IReadOnlyDictionary<string, string> parameters, bool maxPerformance)
     {
         ArgumentNullException.ThrowIfNull(facts);
         try
@@ -309,7 +315,7 @@ public static class AssistantReaders
             var traits = PcTraitsProbe.Read(facts.SystemDrive);
             var profile = PcProfiler.Classify(facts, traits, DiagnosticRules.Evaluate(facts));
             var set = RecommendationEngine.Default().Evaluate(profile, catalog.Document, catalog.DeclaredRisk, parameters);
-            return StepPlanners.Performance(catalog, set, parameters);
+            return StepPlanners.Performance(catalog, set, parameters, maxPerformance);
         }
         catch (Exception ex) when (Expected(ex)) { return StepScan.Unavailable("Desempenho", ex.Message); }
     }

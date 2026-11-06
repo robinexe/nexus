@@ -362,6 +362,108 @@ public sealed class SimpleModeTests
         Assert.Equal(Enum.GetValues<AutoPilot.Phase>().Order(), AutoPilot.Steps.Select(AutoPilot.PhaseOf).Distinct().Order());
     }
 
+    // ------------------------------------------------------------------ "Otimizar meu PC" = Desempenho máximo (06/11/2026)
+
+    private static ProposedChange Cx(string action, string? value = null, Nexus.Core.Classification cls = Nexus.Core.Classification.SupportedDocumented,
+        ActionRisk risk = ActionRisk.Low, bool optIn = false, bool undoable = true, bool irreversible = false) =>
+        new("id:" + action + value, AssistantStepId.Performance, "t", "d", new ActionRequest(action, value), BrokerLevel.Admin, risk,
+            cls is not Nexus.Core.Classification.SupportedDocumented and not Nexus.Core.Classification.Conditional, irreversible, undoable, OptIn: optIn)
+        { Classification = cls };
+
+    private static HardwareProfile Hw(bool laptop = false, bool? battery = null, GpuMaker maker = GpuMaker.Nvidia, GpuClass gpu = GpuClass.Mid,
+        int ram = 16, bool ssd = true, string? cpu = null) =>
+        new(gpu, maker, "GPU", 8, "teste", ram, laptop, battery, ssd, false) { CpuModel = cpu };
+
+    [Fact]
+    public void Max_performance_takes_advanced_optional_experimental_and_medium_risk_changes()
+    {
+        // Diretriz do responsável: o clique aplica TUDO o que dá desempenho e pode ser desfeito, em qualquer PC.
+        Assert.True(AutoPilot.IsMaxPerformance(Cx("fps.power.min-processor-state.100.ac@1", risk: ActionRisk.Medium, optIn: true), Hw()));
+        Assert.True(AutoPilot.IsMaxPerformance(Cx("hw.nvme.latency-tolerance.ac@1", cls: Nexus.Core.Classification.Experimental, risk: ActionRisk.High, optIn: true), Hw()));
+        Assert.True(AutoPilot.IsMaxPerformance(Cx("gpu.nv.fps-cap.off.global@1", optIn: true), Hw()));
+        Assert.True(AutoPilot.IsMaxPerformance(Cx(StepPlanners.RestorePointAction, undoable: false), Hw()));
+        Assert.True(AutoPilot.IsMaxPerformance(Cx("fortnite.fps.limit@1", "0.000000"), Hw()));
+        Assert.True(AutoPilot.IsMaxPerformance(Cx("cs2.cfg.fps_max@1", "0"), Hw()));
+    }
+
+    [Fact]
+    public void Max_performance_ignores_laptop_battery_heat_and_noise_on_every_kind_of_pc()
+    {
+        var profiles = new[]
+        {
+            Hw(laptop: true, battery: false, maker: GpuMaker.Nvidia, gpu: GpuClass.Entry, ram: 8, cpu: "AMD Ryzen 5 5600H"),
+            Hw(laptop: true, battery: true, maker: GpuMaker.Intel, gpu: GpuClass.Integrated, ram: 8),
+            Hw(), Hw(gpu: GpuClass.Strong), Hw(maker: GpuMaker.Amd, gpu: GpuClass.Strong), Hw(ssd: false, ram: 4, gpu: GpuClass.Entry),
+        };
+        foreach (var p in profiles)
+            foreach (var id in new[] { "fps.power.min-processor-state.100.ac@1", "fps.power.epp.performance.ac@1", "fps.power.pcie-aspm.off.ac@1",
+                                       "fps.power.throttling.off@1", "power.processor.min-cores-parking@1", "hw.nvme.latency-tolerance.ac@1" })
+                Assert.True(AutoPilot.IsMaxPerformance(Cx(id, optIn: true), p), $"{id} ficou fora em {p}");
+        // Em notebook na tomada o modo seguro antigo vetava; o máximo não.
+        Assert.False(AutoPilot.IsAutomatic(Cx("fps.power.epp.performance.ac@1"), profiles[0]));
+    }
+
+    [Fact]
+    public void Max_performance_keeps_vendor_and_worse_here_vetoes()
+    {
+        Assert.False(AutoPilot.IsMaxPerformance(Cx("gpu.nv.lowlatency.on.per-app@1"), Hw(maker: GpuMaker.Amd)));      // NVIDIA numa AMD
+        Assert.False(AutoPilot.IsMaxPerformance(Cx("svc.sysmain.manual.lab@1"), Hw(ssd: false)));                     // SysMain ajuda no HD
+        Assert.False(AutoPilot.IsMaxPerformance(Cx("power.processor.min-cores-parking@1"), Hw(cpu: "AMD Ryzen 9 7950X3D 16-Core Processor")));
+        Assert.True(AutoPilot.IsMaxPerformance(Cx("power.processor.min-cores-parking@1"), Hw(cpu: "AMD Ryzen 7 7800X3D 8-Core Processor"))); // um CCD só
+    }
+
+    [Theory]
+    [InlineData("gpu.nv.fps-cap.per-app@1", "141")]
+    [InlineData("gpu.nv.vsync.force-on.per-app@1", null)]
+    [InlineData("fortnite.fps.limit@1", "141.000000")]
+    [InlineData("cs2.cfg.fps_max@1", "400")]
+    [InlineData("fps.mouse.acceleration.off.speed@1", null)]
+    [InlineData("sched.win32priorityseparation.lab@1", "38")]
+    [InlineData("boot.service.xblauthmanager.disabled@1", null)]
+    [InlineData("boot.service.spooler.disabled@1", null)]
+    [InlineData("cleaning.shader-nvidia@1", null)]
+    [InlineData("security.defender.realtime@1", null)]
+    [InlineData("memorylab.standby.purge@1", null)]
+    public void Max_performance_never_caps_fps_breaks_features_or_touches_protection(string action, string? value) =>
+        Assert.False(AutoPilot.IsMaxPerformance(Cx(action, value, optIn: true), Hw()));
+
+    [Fact]
+    public void Max_performance_never_takes_myths_irreversible_or_momentary_changes()
+    {
+        foreach (var cls in new[] { Nexus.Core.Classification.Rejected, Nexus.Core.Classification.Obsolete, Nexus.Core.Classification.Ineffective, Nexus.Core.Classification.Incompatible })
+            Assert.False(AutoPilot.IsMaxPerformance(Cx("fps.some.myth@1", cls: cls), Hw()));
+        Assert.False(AutoPilot.IsMaxPerformance(Cx("x.y@1", irreversible: true, undoable: false), Hw()));
+        Assert.False(AutoPilot.IsMaxPerformance(Cx("x.z@1", undoable: false), Hw()));
+        Assert.False(AutoPilot.IsMaxPerformance(Cx(StepPlanners.DriverInstallAction), Hw()));
+    }
+
+    [Fact]
+    public void Max_performance_security_guard_matches_every_protection_term_and_no_catalog_action_needs_it()
+    {
+        foreach (var id in new[] { "x.defender.off", "x.firewall.off", "x.uac.off", "x.smartscreen.off", "x.vbs.off", "x.hvci.off", "x.memory-integrity.off",
+                                   "x.mitigation.off", "x.spectre.off", "x.windowsupdate.pause", "x.smart-app-control.off" })
+            Assert.True(AutoPilot.TouchesSecurity(id), id);
+        Assert.False(AutoPilot.TouchesSecurity("fps.power.epp.performance.ac"));
+        // Nenhuma ação de desempenho do catálogo esbarra na trava (senão a trava esconderia um ajuste legítimo, ou o catálogo teria um problema).
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Nexus.slnx"))) dir = dir.Parent;
+        var doc = Nexus.Core.CatalogLoader.LoadDirectory(Path.Combine(dir!.FullName, "catalog"));
+        var hits = doc.Actions.Select(a => a.Definition.Id)
+            .Where(id => !id.StartsWith("security.", StringComparison.Ordinal) && !id.StartsWith("scanner.", StringComparison.Ordinal) && AutoPilot.TouchesSecurity(id)).ToList();
+        Assert.True(hits.Count == 0, "Ações que a trava de segurança bloqueia: " + string.Join(", ", hits));
+    }
+
+    [Fact]
+    public void Max_performance_report_says_the_real_reason_never_unchecked_by_you()
+    {
+        Assert.Contains("nunca limita", AutoPilot.MaxExclusionReason(Cx("gpu.nv.fps-cap.per-app@1", "141"), Hw()), StringComparison.Ordinal);
+        Assert.Contains("placa de vídeo", AutoPilot.MaxExclusionReason(Cx("gpu.nv.lowlatency.on.per-app@1"), Hw(maker: GpuMaker.Amd)), StringComparison.Ordinal);
+        Assert.Contains("X3D", AutoPilot.MaxExclusionReason(Cx("power.processor.min-cores-parking@1"), Hw(cpu: "Ryzen 9 9950X3D")), StringComparison.Ordinal);
+        var state = new AssistantState();
+        AssistantRunner.RecordUnselected(state, [Cx("fps.mouse.acceleration.off.speed@1")], Hw(), maxPerformance: true);
+        Assert.DoesNotContain("Desmarcado por você", Assert.Single(state.Skipped).Why, StringComparison.Ordinal);
+    }
+
     private static readonly string[] TestCatalogKeys = ["t.user.low@1", "t.admin.low@1", "t.user.medium@1", "t.exp@1", "t.ephemeral@1"];
 
     [Fact]

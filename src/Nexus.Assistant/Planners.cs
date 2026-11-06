@@ -301,7 +301,8 @@ public static class StepPlanners
         ArgumentNullException.ThrowIfNull(presets);
         ArgumentNullException.ThrowIfNull(serviceStartTypes);
         var third = items.Where(i => !i.IsMicrosoft).ToList();
-        var high = third.Where(i => i.Enabled && !i.IsOrphan && i.Impact.Level == ImpactLevel.High).ToList();
+        // Anticheat e antivírus nunca saem do boot: sem eles o jogo não abre (Vanguard, FACEIT…) ou o PC fica sem proteção.
+        var high = third.Where(i => i.Enabled && !i.IsOrphan && i.Impact.Level == ImpactLevel.High && !IsProtectedStartup(i)).ToList();
         var changes = new List<ProposedChange>();
         foreach (var i in high)
         {
@@ -339,14 +340,44 @@ public static class StepPlanners
         };
     }
 
+    /// <summary>Termos de anticheat e antivírus: entradas de inicialização que o NEXUS nunca propõe desligar.</summary>
+    private static readonly string[] ProtectedStartupTerms =
+    [
+        "vanguard", "vgtray", "vgc", "riot", "easyanticheat", "eac", "battleye", "beservice", "faceit", "esea", "gamersclub",
+        "ricochet", "punkbuster", "xigncode", "nprotect", "gameguard", "mcafee", "norton", "avast", "avg", "kaspersky",
+        "bitdefender", "eset", "malwarebytes", "sophos", "trend micro", "panda", "defender", "securityhealth",
+    ];
+
+    /// <summary>Entrada de anticheat/antivírus (nome, entrada ou caminho com um dos termos)?</summary>
+    public static bool IsProtectedStartup(BootStartupItem item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        var text = $"{item.Name} {item.EntryName} {item.ExecutablePath} {item.Command}".ToLowerInvariant();
+        return ProtectedStartupTerms.Any(t => System.Text.RegularExpressions.Regex.IsMatch(text, $@"(^|[^a-z]){System.Text.RegularExpressions.Regex.Escape(t)}([^a-z]|$)"));
+    }
+
     // ------------------------------------------------------------------ 6. privacidade
 
-    public static StepScan Privacy(AssistantCatalog catalog, IReadOnlyList<PrivacyItemState> states)
+    /// <summary>
+    /// Itens do perfil Rígido que tiram trabalho de fundo do PC (widgets, notícias, Copilot, capturas do Recall, apps em segundo
+    /// plano): o "Desempenho máximo" também aplica. Os outros itens do Rígido são só privacidade e continuam na página.
+    /// </summary>
+    public static IReadOnlySet<string> PerformancePrivacyActions { get; } = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "privacy.widgets.off", "privacy.news-interests.off", "privacy.copilot.off", "privacy.recall.snapshots.off", "privacy.background-apps.deny",
+    };
+
+    public static StepScan Privacy(AssistantCatalog catalog, IReadOnlyList<PrivacyItemState> states) => Privacy(catalog, states, maxPerformance: false);
+
+    public static StepScan Privacy(AssistantCatalog catalog, IReadOnlyList<PrivacyItemState> states, bool maxPerformance)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(states);
         var score = PrivacyPlanner.Score(states);
-        var missing = PrivacyPlanner.MissingFor(states, PrivacyProfile.Recommended);
+        var missing = PrivacyPlanner.MissingFor(states, PrivacyProfile.Recommended).ToList();
+        if (maxPerformance)
+            missing.AddRange(PrivacyPlanner.MissingFor(states, PrivacyProfile.Strict)
+                .Where(m => !missing.Contains(m) && m.Pending.Any(a => PerformancePrivacyActions.Contains(a.Key.Split('@')[0]))));
         var changes = new List<ProposedChange>();
         foreach (var item in missing)
             foreach (var a in item.Pending)
@@ -494,7 +525,27 @@ public static class StepPlanners
 
     /// <param name="parameters">Parâmetros deste PC (ex.: activeScheme). Com eles, o resto dos ajustes do catálogo entra como
     /// "avançado", desmarcado: o mesmo que a página Aplicar lista, sem precisar sair do assistente.</param>
-    public static StepScan Performance(AssistantCatalog catalog, RecommendationSet set, IReadOnlyDictionary<string, string>? parameters)
+    public static StepScan Performance(AssistantCatalog catalog, RecommendationSet set, IReadOnlyDictionary<string, string>? parameters) =>
+        Performance(catalog, set, parameters, maxPerformance: false);
+
+    /// <summary>
+    /// Valores para os ajustes do catálogo que só oferecem escolha (allowedValues) e que o "Desempenho máximo" aplica:
+    /// HAGS ligado, turbo do processador "agressivo", cache de shader do driver NVIDIA 100 GB.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> MaxPerformanceValues { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["gpu.hags.lab@1"] = "2",
+        ["cpulab.power.boost-mode.ac@1"] = "2",
+        ["gpu.nv.shadercache.max@1"] = "102400",
+    };
+
+    /// <summary>Regras "não fazer" que valem só por calor/bateria de notebook: o "Desempenho máximo" ignora (máquina virtual continua valendo).</summary>
+    private static readonly HashSet<string> LaptopOnlyAvoids = new(StringComparer.Ordinal)
+        { "avoid.core-parking.laptop", "avoid.high-performance.laptop", "avoid.high-performance.on-battery" };
+
+    /// <param name="maxPerformance">"Otimizar meu PC" (Desempenho máximo): inclui o laboratório do processador, aplica os valores de
+    /// <see cref="MaxPerformanceValues"/> e ignora os "não fazer" que só existem por calor/bateria de notebook.</param>
+    public static StepScan Performance(AssistantCatalog catalog, RecommendationSet set, IReadOnlyDictionary<string, string>? parameters, bool maxPerformance)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(set);
@@ -513,13 +564,17 @@ public static class StepPlanners
         if (parameters is not null)
         {
             var proposed = changes.Select(c => c.Request.ActionId).ToHashSet(StringComparer.Ordinal);
-            var avoid = set.Avoid.Where(a => a.ActionKey is not null).Select(a => a.ActionKey!).ToHashSet(StringComparer.Ordinal);
+            var vm = set.Profile.Has(PcProfiler.Vm);
+            var avoid = set.Avoid.Where(a => a.ActionKey is not null && !(maxPerformance && !vm && LaptopOnlyAvoids.Contains(a.RuleId)))
+                .Select(a => a.ActionKey!).ToHashSet(StringComparer.Ordinal);
+            string[] prefixes = maxPerformance ? [.. AdvancedPrefixes, "cpulab."] : AdvancedPrefixes;
             foreach (var e in catalog.Document.Actions)
             {
                 var d = e.Definition;
-                if (!AdvancedPrefixes.Any(p => d.Id.StartsWith(p, StringComparison.Ordinal)) || e.UserParameters.Count > 0 ||
-                    proposed.Contains(d.Key) || avoid.Contains(d.Key) || e.TryInstantiate(parameters, out _) is null) continue;
-                Add(changes, catalog.Change(AssistantStepId.Performance, new ActionRequest(d.Key), "Avançado: " + d.Title,
+                var value = maxPerformance ? MaxPerformanceValues.GetValueOrDefault(d.Key) : null;
+                if (!prefixes.Any(p => d.Id.StartsWith(p, StringComparison.Ordinal)) || e.UserParameters.Count > 0 ||
+                    proposed.Contains(d.Key) || avoid.Contains(d.Key) || !CanInstantiate(e, parameters, value)) continue;
+                Add(changes, catalog.Change(AssistantStepId.Performance, new ActionRequest(d.Key, value), "Avançado: " + d.Title,
                     d.Mechanism + (d.Classification == Nexus.Core.Classification.Experimental ? " Experimental: meça antes e depois." : ""), optIn: true));
             }
         }
@@ -533,6 +588,16 @@ public static class StepPlanners
         var notes = set.Avoid.Take(5).Select(a => $"Não fazer: {a.Title}. {a.Reason}").ToList();
         return new StepScan(facts, changes, [], notes,
             changes.Count == 0 ? "Nada a mudar para o perfil do seu PC." : "Aplicar as recomendações de risco baixo (já marcadas). As de risco médio ficam para você decidir.");
+    }
+
+    /// <summary>A ação monta com os parâmetros deste PC (e, quando o catálogo só oferece escolha, com o valor escolhido)?</summary>
+    private static bool CanInstantiate(CatalogEntry e, IReadOnlyDictionary<string, string> parameters, string? value)
+    {
+        if (value is null) return e.TryInstantiate(parameters, out _) is not null;
+        // Só falta o valor: o motivo é "Requer escolha de valor" (parâmetros e esquema de energia já resolvidos).
+        if (e.Definition.AllowedValues is not { } allowed || !allowed.Contains(value, StringComparer.Ordinal)) return false;
+        return e.TryInstantiate(parameters, out var reason) is not null ||
+               reason?.StartsWith("Requer escolha de valor", StringComparison.Ordinal) == true;
     }
 
     // ------------------------------------------------------------------ 11. medição

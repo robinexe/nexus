@@ -53,6 +53,119 @@ public static class AutoPilot
         return profile is null || !HardwareRules.ForAction(profile, c.Request.ActionId).IsNotRecommended;
     }
 
+    // ------------------------------------------------------------------ Desempenho máximo (o "Otimizar meu PC")
+
+    /// <summary>
+    /// Nunca entram no "Desempenho máximo", mesmo podendo desfazer: limitam o FPS (diretriz: o NEXUS nunca limita), são só
+    /// correção de defeito ou preferência pessoal, quebram recursos que o jogador usa (Game Pass/Xbox, impressora), deixam o
+    /// jogo travando (apagar cache de shader obriga a recompilar) ou não têm evidência (prioridade do agendador).
+    /// </summary>
+    public static IReadOnlySet<string> MaxExcludedIds { get; } = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "gpu.nv.fps-cap.per-app", "gpu.nv.vsync.force-on.per-app",           // põem limite
+        "fps.dwm.mpo.disable", "fps.dwm.overlay-minfps.zero",                // correções de defeito, não ganho
+        "net.ipv6.prefer-ipv4", "sys.notifications.toasts.off",              // preferência, não ganho
+        "memorylab.standby.purge",                                           // momentâneo, não desfaz
+    };
+
+    /// <summary>Prefixos fora do "Desempenho máximo" (mesmos motivos de <see cref="MaxExcludedIds"/>).</summary>
+    public static IReadOnlyList<string> MaxExcludedPrefixes { get; } =
+    [
+        "fps.mouse.",                         // muda a sensação da mira: escolha da pessoa
+        "sched.",                             // prioridade do agendador: sem evidência de ganho (mito no catálogo)
+        "boot.service.xbl", "boot.service.xbox", // quebram Game Pass, login Xbox e a detecção de jogo dos Ryzen X3D
+        "boot.service.spooler", "boot.service.fax",
+        "cleaning.shader",                    // apagar cache de shader = travadas na próxima partida
+        "security.", "scanner.",              // proteção do Windows: nunca mexer por desempenho
+        "power.active-scheme.",               // plano "de sessão" (segura o aplicador); a tela de sessão cuida
+    ];
+
+    /// <summary>
+    /// Proteção do Windows: nada que contenha estes termos entra no automático por desempenho (regra do produto, HANDOFF §2:
+    /// nunca desligar proteção por suposto ganho). Nenhuma ação do catálogo bate hoje; é a segunda tranca, com teste.
+    /// </summary>
+    public static IReadOnlyList<string> SecurityTerms { get; } =
+    [
+        "defender", "firewall", "uac", "smartscreen", "vbs", "hvci", "memory-integrity", "core-isolation", "mitigation",
+        "spectre", "meltdown", "windowsupdate", "windows-update", "wuauserv", "update.pause", "smart-app-control", "antivirus",
+    ];
+
+    /// <summary>Vetos do hardware que valem mesmo no máximo: fabricante errado, coisa que PIORA neste PC. Calor/bateria/ruído não.</summary>
+    private static readonly HashSet<FitReason> MaxKeptVetoes =
+    [
+        FitReason.NotNvidia, FitReason.NotAmd, FitReason.NotIntel, FitReason.IntegratedGpu, FitReason.SysMainHelpsHere,
+        FitReason.WeakGpuRelief, FitReason.StrongGpuNoNeed, FitReason.X3dParking,
+    ];
+
+    /// <summary>A ação toca em proteção do Windows (id com um dos <see cref="SecurityTerms"/>)?</summary>
+    public static bool TouchesSecurity(string actionId)
+    {
+        ArgumentNullException.ThrowIfNull(actionId);
+        var id = actionId.ToLowerInvariant();
+        return SecurityTerms.Any(t => id.Contains(t, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// "Desempenho máximo": entra tudo o que pode ser desfeito e dá desempenho, inclusive avançado, opcional, experimental e de
+    /// risco médio, em qualquer PC (notebook, na bateria, desktop, gamer). Ficam de fora: irreversível, momentâneo (menos o
+    /// ponto de restauração), mito (rejeitado/obsoleto/inútil/incompatível), <see cref="NeverAutomatic"/>, a lista de exclusão,
+    /// proteção do Windows, limite de FPS e os vetos de hardware de <see cref="MaxKeptVetoes"/>.
+    /// </summary>
+    public static bool IsMaxPerformance(ProposedChange c, HardwareProfile? profile)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        var id = c.Request.ActionId;
+        if (id == StepPlanners.RestorePointAction) return true;
+        if (!ChangeSelection.IsAllowed(c) || !c.Undoable || NeverAutomatic.Contains(id)) return false;
+        if (c.Classification is Nexus.Core.Classification.Rejected or Nexus.Core.Classification.Obsolete
+            or Nexus.Core.Classification.Incompatible or Nexus.Core.Classification.Ineffective) return false;
+        var bare = id.Split('@')[0];
+        if (MaxExcludedIds.Contains(bare) || MaxExcludedPrefixes.Any(p => bare.StartsWith(p, StringComparison.Ordinal)) || TouchesSecurity(bare)) return false;
+        if (PutsFpsCap(bare, c.Request.Value)) return false;
+        if (profile is not null && HardwareRules.ForAction(profile, id) is { IsNotRecommended: true } fit && MaxKeptVetoes.Contains(fit.Reason)) return false;
+        return true;
+    }
+
+    /// <summary>Por que um item ficou fora do Desempenho máximo (texto do relatório).</summary>
+    public static string MaxExclusionReason(ProposedChange c, HardwareProfile? profile)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        var bare = c.Request.ActionId.Split('@')[0];
+        if (!ChangeSelection.IsAllowed(c)) return "Não tem volta: o NEXUS nunca faz sozinho.";
+        if (!c.Undoable) return "Momentâneo: não fica registrado para desfazer, fica na página dele.";
+        if (NeverAutomatic.Contains(c.Request.ActionId)) return "Pede a sua decisão (instalar driver, trocar o modo do monitor).";
+        if (TouchesSecurity(bare) || bare.StartsWith("security.", StringComparison.Ordinal) || bare.StartsWith("scanner.", StringComparison.Ordinal))
+            return "Proteção do Windows: o NEXUS nunca mexe por desempenho.";
+        if (c.Classification is Nexus.Core.Classification.Rejected or Nexus.Core.Classification.Obsolete
+            or Nexus.Core.Classification.Incompatible or Nexus.Core.Classification.Ineffective)
+            return "Mito ou sem efeito nos testes: não entra.";
+        if (PutsFpsCap(bare, c.Request.Value) || bare is "gpu.nv.fps-cap.per-app" or "gpu.nv.vsync.force-on.per-app")
+            return "Limitaria o FPS: o NEXUS nunca limita.";
+        if (profile is not null && HardwareRules.ForAction(profile, c.Request.ActionId) is { IsNotRecommended: true } fit && MaxKeptVetoes.Contains(fit.Reason))
+            return fit.Reason switch
+            {
+                FitReason.NotNvidia or FitReason.NotAmd or FitReason.NotIntel => "Não serve para a placa de vídeo deste PC.",
+                FitReason.X3dParking => "Neste Ryzen X3D, diminuiria o FPS.",
+                _ => "Neste PC, pioraria o desempenho.",
+            };
+        return "Correção de defeito, preferência pessoal ou recurso que você usa (Xbox, impressora, mira): fica na página dele.";
+    }
+
+    /// <summary>Pedido que limitaria o FPS (Fortnite/CS2 com valor diferente de "sem limite").</summary>
+    public static bool PutsFpsCap(string bareId, string? value) => bareId switch
+    {
+        "fortnite.fps.limit" => value is not null && value != "0.000000",
+        "cs2.cfg.fps_max" => value is not null && value != "0",
+        _ => false,
+    };
+
+    /// <summary>O que o "Desempenho máximo" aplica de uma etapa, sem duplicatas, na ordem proposta.</summary>
+    public static IReadOnlyList<ProposedChange> SelectMaxPerformance(IEnumerable<ProposedChange> changes, HardwareProfile? profile)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+        return ChangeSelection.Sanitize(changes.Where(c => IsMaxPerformance(c, profile)));
+    }
+
     /// <summary>O que aplicar de uma etapa, sem duplicatas, na ordem proposta.</summary>
     public static IReadOnlyList<ProposedChange> Select(IEnumerable<ProposedChange> changes) => Select(changes, null);
 

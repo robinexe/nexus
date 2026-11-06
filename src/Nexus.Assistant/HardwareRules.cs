@@ -52,6 +52,8 @@ public enum FitReason
     BackgroundCapture,
     /// <summary>Tira um limite de FPS (driver, V-Sync forçado): o jogo roda no máximo que o PC entrega.</summary>
     Uncapped,
+    /// <summary>Ryzen X3D de dois CCDs: o estacionamento de núcleos é o que põe o jogo no CCD com cache; desfazer DIMINUI o FPS.</summary>
+    X3dParking,
 }
 
 /// <summary>Veredito + motivo. <see cref="Neutral"/> quando não há regra com mecanismo claro para este PC.</summary>
@@ -93,6 +95,11 @@ public static class HardwareRules
         ArgumentNullException.ThrowIfNull(actionIdOrKey);
         var at = actionIdOrKey.IndexOf('@', StringComparison.Ordinal);
         var id = at < 0 ? actionIdOrKey : actionIdOrKey[..at];
+
+        // ---- Ryzen X3D de dois CCDs: o plano Equilibrado + estacionamento manda o jogo para o CCD com cache (orientação da AMD)
+        if (profile.DualCcdX3d && id is "power.active-scheme.high-performance.session" or "power.processor.min-cores-parking"
+                or "fps.power.min-cores-parking1.100.ac" or "fps.power.latency-hint-unpark.100.ac")
+            return Fit.No(FitReason.X3dParking);
 
         // ---- energia: notebook (na bateria pesa mais que o formato)
         if (AlwaysOnPowerActions.Contains(id))
