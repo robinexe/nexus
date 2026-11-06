@@ -62,9 +62,9 @@ public sealed class PowerOverlaySchemeHandler : IActionHandler, IRestoreValidato
         if (common.Kind != ApplicabilityKind.Applicable) return common;
         if (TargetProblem(action) is { } p) return Applicability.Blocked(p);
         if (Parse(action.Desired) is null) return Applicability.Blocked("Desejado deve ser um modo de energia conhecido (Guid 'D' minúsculo).");
-        if (_power.GetEffectiveOverlay() is null) return Applicability.NotApplicable("Esta versão do Windows não tem o "Modo de energia".");
+        if (_power.GetEffectiveOverlay() is null) return Applicability.NotApplicable("Esta versão do Windows não tem o \"Modo de energia\".");
         if (_power.GetActiveScheme() != Balanced)
-            return Applicability.NotApplicable("O "Modo de energia" só vale com o plano Equilibrado; este PC usa outro plano de energia.");
+            return Applicability.NotApplicable("O \"Modo de energia\" só vale com o plano Equilibrado; este PC usa outro plano de energia.");
         return Applicability.Ok;
     }
 
