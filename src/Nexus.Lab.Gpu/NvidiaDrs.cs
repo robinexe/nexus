@@ -158,6 +158,8 @@ public static partial class NvidiaDrsSettings
     public const uint FrameRateLimit = 0x10835002;       // FRL_FPS_ID "Frame Rate Limiter" (Taxa máxima de quadros)
     public const uint VsyncMode = 0x00A879CF;            // VSYNCMODE_ID "Vertical Sync"
     public const uint ShaderCacheMaxSize = 0x00AC8497;   // PS_SHADERDISKCACHE_MAX_SIZE_ID "Shader disk cache maximum size" (MB)
+    public const uint VkGlPresent = 0x20D690F8;          // OGL_CPL_PREFER_DXPRESENT_ID "Vulkan/OpenGL present method"
+    public const uint VkGlPresentDxgi = 1;               // OGL_CPL_PREFER_DXPRESENT_PREFER_ENABLED (camada DXGI: flip, VRR em janela)
 
     public const uint PstatePreferMax = 1;               // PREFERRED_PSTATE_PREFER_MAX
     public const uint PstateOptimalPower = 5;            // PREFERRED_PSTATE_OPTIMAL_POWER (padrão)
@@ -182,7 +184,9 @@ public static partial class NvidiaDrsSettings
             {
                 0 => "adaptável", 1 => "preferir desempenho máximo", 2 => "controlado pelo driver", 3 => "desempenho consistente",
                 4 => "preferir mínimo", 5 => "ideal (padrão)", _ => Hex(v),
-            }),
+            }, v => v == PstatePreferMax), // global: só "desempenho máximo" (decisão do responsável, 06/11/2026: desempenho acima de consumo)
+        [VkGlPresent] = new(VkGlPresent, "Método de apresentação Vulkan/OpenGL", DrsProfileKind.Base,
+            v => v == VkGlPresentDxgi, v => v <= 2, v => v switch { 0 => "nativo", 1 => "camada DXGI", 2 => "automático (padrão)", _ => Hex(v) }),
         [PrerenderLimit] = new(PrerenderLimit, "Modo de baixa latência (quadros pré-renderizados)", DrsProfileKind.App,
             v => v == LowLatencyOn, v => v <= 0xFF, v => v switch { 0 => "o jogo decide (padrão)", 1 => "ligado (1 quadro)", _ => $"{v} quadros" }),
         [FrameRateLimit] = new(FrameRateLimit, "Taxa máxima de quadros", DrsProfileKind.App,
@@ -371,6 +375,10 @@ public static class NvidiaDrsActions
     public const string VsyncOff = "gpu.nv.vsync.off.per-app@1";
     /// <summary>Tira a "Taxa máxima de quadros" do perfil GLOBAL do driver (posta pelo NVIDIA App/Painel, vale para todo jogo).</summary>
     public const string FpsCapOffGlobal = "gpu.nv.fps-cap.off.global@1";
+    /// <summary>"Preferir desempenho máximo" no perfil GLOBAL (todo jogo, mesmo sem perfil próprio).</summary>
+    public const string MaxPowerGlobal = "gpu.nv.power.max.global@1";
+    /// <summary>Vulkan/OpenGL apresentados pela DXGI (flip model, VRR em janela sem bordas).</summary>
+    public const string VkGlPresentGlobal = "gpu.nv.vkgl-present.dxgi.global@1";
     /// <summary>V-Sync desligado no perfil GLOBAL do driver (quando alguém forçou "Ligado" para todos os jogos).</summary>
     public const string VsyncOffGlobal = "gpu.nv.vsync.off.global@1";
 

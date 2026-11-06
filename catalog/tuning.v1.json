@@ -2420,6 +2420,242 @@
       "reboot": "None",
       "verification": "Leitura do valor AC no esquema ativo.",
       "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.shadercache.d3d.keep",
+      "version": 1,
+      "title": "Não apagar o cache de shaders do DirectX automaticamente",
+      "i18n": {
+        "en": {
+          "title": "Don't auto-delete the DirectX shader cache"
+        },
+        "es": {
+          "title": "No borrar automáticamente la caché de shaders de DirectX"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VolumeCaches\\D3D Shader Cache",
+        "name": "Autorun",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": "0",
+      "mechanism": "O Sensor de Armazenamento e a Limpeza de Disco deixam de apagar o D3DSCache sozinhos. Sem o cache, cada jogo recompila os shaders e trava nas primeiras partidas.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://github.com/stephenh678/TrayTrigger/wiki/Keep-the-DirectX-Shader-Cache"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/lwef/disk-cleanup"
+        }
+      ],
+      "risks": "O cache continua ocupando espaço (normalmente menos de 1 GB). Dá para limpar à mão quando quiser.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.fth.disable",
+      "version": 1,
+      "title": "Desligar o Fault Tolerant Heap (correção automática que deixa jogos mais lentos)",
+      "i18n": {
+        "en": {
+          "title": "Turn off Fault Tolerant Heap (automatic fix that slows games down)"
+        },
+        "es": {
+          "title": "Desactivar Fault Tolerant Heap (corrección automática que hace los juegos más lentos)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\FTH",
+        "name": "Enabled",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": "0",
+      "mechanism": "Depois de algumas falhas, o Windows passa a aplicar \"mitigações de heap\" em um programa (inclusive jogos), deixando a memória dele mais lenta para sempre. Desligado, nenhum jogo recebe essa correção automática daqui para frente.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/win7appqual/fault-tolerant-heap"
+        },
+        {
+          "level": "Observed",
+          "source": "https://github.com/Atlas-OS/Atlas"
+        }
+      ],
+      "risks": "Um programa com defeito de memória pode fechar sozinho em vez de ser remendado pelo Windows. Não é proteção de segurança.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "sys.search.respect-power-modes",
+      "version": 1,
+      "title": "Indexador de busca recua quando o PC está ocupado",
+      "i18n": {
+        "en": {
+          "title": "Search indexer backs off when the PC is busy"
+        },
+        "es": {
+          "title": "El indexador de búsqueda se retira cuando el PC está ocupado"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows Search\\Gather\\Windows\\SystemIndex",
+        "name": "RespectPowerModes",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "desiredValue": "1",
+      "mechanism": "O indexador do Windows Search passa a respeitar os modos de energia e a pausar sob carga, em vez de indexar no meio do jogo (menos quedas de 1% low).",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://github.com/Atlas-OS/Atlas"
+        }
+      ],
+      "risks": "A indexação de arquivos novos pode demorar mais.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.input.stickykeys-hotkey.off",
+      "version": 1,
+      "title": "Shift 5 vezes não abre as Teclas de Aderência no jogo",
+      "i18n": {
+        "en": {
+          "title": "Pressing Shift 5 times doesn't open Sticky Keys in-game"
+        },
+        "es": {
+          "title": "Pulsar Shift 5 veces no abre las Teclas especiales en el juego"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Accessibility\\StickyKeys",
+        "name": "Flags",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "506",
+      "mechanism": "Desliga só o atalho (Shift 5 vezes) que tira você do jogo com a janela das Teclas de Aderência. O recurso continua disponível nas Configurações.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-stickykeys"
+        },
+        {
+          "level": "Observed",
+          "source": "https://github.com/ChrisTitusTech/winutil"
+        }
+      ],
+      "risks": "Quem usa o atalho de acessibilidade precisa ligar pelas Configurações.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.input.filterkeys-hotkey.off",
+      "version": 1,
+      "title": "Segurar Shift não abre as Teclas de Filtragem no jogo",
+      "i18n": {
+        "en": {
+          "title": "Holding Shift doesn't open Filter Keys in-game"
+        },
+        "es": {
+          "title": "Mantener Shift no abre las Teclas filtro en el juego"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Accessibility\\Keyboard Response",
+        "name": "Flags",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "122",
+      "mechanism": "Desliga só o atalho (segurar Shift direito 8 s) das Teclas de Filtragem, que interrompe o jogo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-filterkeys"
+        },
+        {
+          "level": "Observed",
+          "source": "https://github.com/ChrisTitusTech/winutil"
+        }
+      ],
+      "risks": "Quem usa o atalho de acessibilidade precisa ligar pelas Configurações.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.input.togglekeys-hotkey.off",
+      "version": 1,
+      "title": "Segurar Num Lock não abre as Teclas de Alternância no jogo",
+      "i18n": {
+        "en": {
+          "title": "Holding Num Lock doesn't open Toggle Keys in-game"
+        },
+        "es": {
+          "title": "Mantener Bloq Num no abre las Teclas de alternancia en el juego"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKCU",
+        "path": "Control Panel\\Accessibility\\ToggleKeys",
+        "name": "Flags",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "58",
+      "mechanism": "Desliga só o atalho (segurar Num Lock 5 s) das Teclas de Alternância.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-togglekeys"
+        },
+        {
+          "level": "Observed",
+          "source": "https://github.com/ChrisTitusTech/winutil"
+        }
+      ],
+      "risks": "Quem usa o atalho de acessibilidade precisa ligar pelas Configurações.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "NextLogon",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
     }
   ],
   "rejected": [

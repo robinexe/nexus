@@ -397,6 +397,84 @@
       "reboot": "GameRestart",
       "verification": "NvAPI_DRS_GetSetting relido no perfil: valor do usuário igual ao pedido.",
       "revert": "Devolve o valor que o perfil global tinha (o limite anterior volta) ou tira o ajuste se ele não existia."
+    },
+    {
+      "id": "gpu.nv.power.max.global",
+      "version": 1,
+      "title": "Placa NVIDIA sempre em desempenho máximo (todos os jogos)",
+      "i18n": {
+        "en": {
+          "title": "NVIDIA card always at maximum performance (every game)"
+        },
+        "es": {
+          "title": "Tarjeta NVIDIA siempre al máximo rendimiento (todos los juegos)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Quem quer desempenho máximo em todo jogo, inclusive os sem perfil no driver. Diretriz do responsável (06/11/2026): desempenho acima de consumo.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "base",
+        "setting": "0x1057EB71"
+      },
+      "desiredValue": "1",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Modo de gerenciamento de energia\" = Preferir desempenho máximo (PREFERRED_PSTATE_ID 0x1057EB71, PREFER_MAX 1; padrão OPTIMAL_POWER 5) no perfil global: a placa não reduz o clock entre cenas leves e pesadas, sem quedas de clock no meio do jogo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (PREFERRED_PSTATE_ID 0x1057EB71; PREFER_MAX 1)"
+        },
+        {
+          "level": "Observed",
+          "source": "https://github.com/valleyofdoom/PC-Tuning/blob/main/docs/configure-nvidia.md"
+        }
+      ],
+      "risks": "A placa fica com clock alto também em apps 3D fora de jogos: mais consumo, calor e ruído. Perfis de jogo com valor próprio continuam valendo.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil global: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil global tinha ou tira o ajuste se ele não existia."
+    },
+    {
+      "id": "gpu.nv.vkgl-present.dxgi.global",
+      "version": 1,
+      "title": "Jogos Vulkan e OpenGL pelo caminho moderno do Windows (DXGI)",
+      "i18n": {
+        "en": {
+          "title": "Vulkan and OpenGL games through the modern Windows path (DXGI)"
+        },
+        "es": {
+          "title": "Juegos Vulkan y OpenGL por el camino moderno de Windows (DXGI)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Jogos OpenGL/Vulkan (Minecraft Java, emuladores, jogos antigos em OpenGL) em janela sem bordas.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "base",
+        "setting": "0x20D690F8"
+      },
+      "desiredValue": "1",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Método de apresentação Vulkan/OpenGL\" = Preferir camada no DXGI (OGL_CPL_PREFER_DXPRESENT_ID 0x20D690F8, PREFER_ENABLED 1; padrão AUTO 2): esses jogos ganham o flip model do Windows, VRR em janela sem bordas e menos travadas.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (OGL_CPL_PREFER_DXPRESENT_ID 0x20D690F8; PREFER_ENABLED 1)"
+        },
+        {
+          "level": "Observed",
+          "source": "https://forums.developer.nvidia.com/t/use-of-dxgi-swapchain-vulkan-opengl-present-method/329070"
+        }
+      ],
+      "risks": "Algumas sobreposições (overlays) feitas para Vulkan podem não aparecer. Desfazer volta ao automático.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil global: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil global tinha ou tira o ajuste se ele não existia."
     }
   ],
   "rejected": [
@@ -404,12 +482,6 @@
       "id": "gpu.nv.lowlatency.ultra",
       "classification": "Rejected",
       "reason": "O modo \"Ultra\" do painel não tem id público em NvApiDriverSettings.h; gravar id não documentado está fora da regra do NEXUS. Use NVIDIA Reflex no jogo, quando houver.",
-      "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h"
-    },
-    {
-      "id": "gpu.nv.power.max.global",
-      "classification": "Rejected",
-      "reason": "\"Preferir desempenho máximo\" no perfil global deixa a placa sem descansar fora dos jogos (calor, consumo, bateria) sem ganho; o NEXUS só aplica por jogo.",
       "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h"
     }
   ]

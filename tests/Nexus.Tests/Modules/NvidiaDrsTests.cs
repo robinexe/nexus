@@ -274,7 +274,9 @@ public sealed class NvidiaDrsTests
     [InlineData("0x12345678", "app", 1u)]       // id fora da lista
     [InlineData("0x1057eb7", "app", 1u)]        // id malformado
     [InlineData("1057EB71", "app", 1u)]         // sem 0x
-    [InlineData("0x1057EB71", "base", 1u)]      // energia máxima no global: recusado
+    [InlineData("0x1057EB71", "base", 0u)]      // global: só "desempenho máximo" (1), nenhum outro modo
+    [InlineData("0x20D690F8", "app", 1u)]       // Vulkan/OpenGL: só no global
+    [InlineData("0x20D690F8", "base", 0u)]      // Vulkan/OpenGL: só a camada DXGI (1)
     [InlineData("0x1057EB71", "app", 4u)]       // valor que o NEXUS não aplica
     [InlineData("0x007BA09E", "app", 3u)]       // só "ligado" (1)
     [InlineData("0x10835002", "app", 1024u)]    // acima de FRL_FPS_MAX
@@ -417,7 +419,7 @@ public sealed class NvidiaDrsTests
     {
         var all = Catalog();
         var mine = all.Actions.Where(a => a.Definition.Id.StartsWith("gpu.nv.", StringComparison.Ordinal)).ToList();
-        Assert.Equal(9, mine.Count); // 5 + as 4 que TIRAM limite de FPS (por jogo e global), diretriz de 06/11/2026
+        Assert.Equal(11, mine.Count); // 5 + 4 que TIRAM limite de FPS + desempenho máximo e Vulkan/OpenGL no global (06/11/2026)
         var handlerKinds = GpuLabHandlers.Create(new HandlerEnvironment(new InMemoryRegistryBackend(), Path.GetTempPath(), false, false))
             .Select(h => h.HandlerKind).ToHashSet(StringComparer.Ordinal);
         var handler = new NvidiaDrsHandler(new FakeDrs());
@@ -449,7 +451,10 @@ public sealed class NvidiaDrsTests
                                     NvidiaDrsActions.FpsCapOff, NvidiaDrsActions.VsyncOff, NvidiaDrsActions.FpsCapOffGlobal, NvidiaDrsActions.VsyncOffGlobal })
             Assert.Contains(mine, e => e.Definition.Key == key);
         Assert.Contains(all.Rejected, r => r.Id == "gpu.nv.lowlatency.ultra");
-        Assert.Contains(all.Rejected, r => r.Id == "gpu.nv.power.max.global");
+        // Decisão do responsável (06/11/2026): desempenho acima de consumo; o global "desempenho máximo" virou ação.
+        Assert.DoesNotContain(all.Rejected, r => r.Id == "gpu.nv.power.max.global");
+        Assert.Contains(mine, e => e.Definition.Key == NvidiaDrsActions.MaxPowerGlobal);
+        Assert.Contains(mine, e => e.Definition.Key == NvidiaDrsActions.VkGlPresentGlobal);
     }
 
     [Fact]
