@@ -192,6 +192,19 @@ jobs:
           foreach ($f in 'Nexus.Desktop.exe','nexus-broker.exe','nexus.exe','nexus-task.exe','nexus-recover.exe','catalog\actions.v1.json','legal\TERMOS-DE-USO.txt','legal\PRIVACIDADE.html','unins000.exe','tools\Remove-NexusTasks.ps1','tools\service\Uninstall-Broker.ps1') {
             if (-not (Test-Path (Join-Path $app $f))) { Write-Error "Falta $f em $app"; exit 1 }
           }
+          # Todo o catálogo do repositório está no instalado, idêntico (inclui jogos, AMD/Intel, energia, rede).
+          foreach ($c in Get-ChildItem catalog -Filter *.json) {
+            $inst = Join-Path $app "catalog\$($c.Name)"
+            if (-not (Test-Path $inst)) { Write-Error "Falta catalog\$($c.Name) no instalado"; exit 1 }
+            if ((Get-FileHash $inst).Hash -ne (Get-FileHash $c.FullName).Hash) { Write-Error "catalog\$($c.Name) diferente do repositório"; exit 1 }
+          }
+          "Catálogo instalado: $((Get-ChildItem (Join-Path $app 'catalog') -Filter *.json).Count) arquivos, iguais ao repositório"
+          # Processo separado da AMD/Intel: responde uma linha e nunca derruba (nesta VM não há placa AMD/Intel: "unsupported").
+          foreach ($v in 'amd/antilag','intel/lowlatency') {
+            $line = & (Join-Path $app 'nexus-broker.exe') --gpu-vendor-tool get $v
+            "gpu-vendor-tool get $v -> $line (saída $LASTEXITCODE)"
+            if ($line -notmatch '^(ok|unsupported):') { Write-Error "gpu-vendor-tool deveria responder ok/unsupported para $v; deu: $line"; exit 1 }
+          }
           "Atalho no Menu Iniciar: $(Test-Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\NEXUS.lnk")"
           icacls $app
           powershell -NoProfile -ExecutionPolicy Bypass -File "$app\tools\Test-NexusFolderSafety.ps1" -Path $app
