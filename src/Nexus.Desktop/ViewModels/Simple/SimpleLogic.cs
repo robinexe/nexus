@@ -499,6 +499,32 @@ public static class SimpleOptimizeText
     }
 }
 
+/// <summary>
+/// A conta completa de uma rodada do "Otimizar meu PC" (lógica pura, testada): o número grande do resumo é só o que mudou
+/// AGORA; o que já estava no máximo de uma rodada anterior também está valendo, e o que não serve para este PC (placa de outra
+/// marca, jogo não instalado, opção que o driver não tem) nunca entra. Assim fica claro que tudo foi conferido.
+/// </summary>
+/// <param name="Applied">Mudou agora (aplicado e conferido pelo aplicador).</param>
+/// <param name="Already">O aplicador conferiu: já estava no valor do NEXUS.</param>
+/// <param name="NotHere">Não se aplica a este PC.</param>
+/// <param name="LeftOut">Fora de propósito: proteção do Windows, limite de FPS, Xbox/impressora, mira, sem volta.</param>
+/// <param name="Failed">O aplicador recusou (motivo no relatório).</param>
+public sealed record OptimizeTally(int Applied, int Already, int NotHere, int LeftOut, int Failed)
+{
+    public static OptimizeTally Empty { get; } = new(0, 0, 0, 0, 0);
+
+    /// <summary>Ajustes valendo neste PC depois da rodada (os de agora e os que já estavam).</summary>
+    public int Active => Applied + Already;
+    /// <summary>Tudo o que a rodada conferiu.</summary>
+    public int Checked => Applied + Already + NotHere + LeftOut + Failed;
+    public bool HasFailed => Failed > 0;
+
+    /// <summary>"214 ajustes do NEXUS estão valendo neste PC: 46 agora e 168 que já estavam no máximo."</summary>
+    public string Headline => Checked == 0 ? "" : Loc.F("Simple.Opt.TallyActive", Active, Applied, Already);
+    /// <summary>"Conferimos 312 ajustes. 61 não servem para este PC (outra marca de placa, jogo não instalado) e 37 ficam de fora de propósito…"</summary>
+    public string Detail => Checked == 0 ? "" : Loc.F("Simple.Opt.TallyChecked", Checked, NotHere, LeftOut);
+}
+
 // ================================================================== Ajustes rápidos (ligar/desligar em palavras simples)
 
 /// <summary>Os grupos dos ajustes rápidos, na ordem da tela.</summary>

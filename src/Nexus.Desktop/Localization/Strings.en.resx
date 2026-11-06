@@ -3889,6 +3889,12 @@ Requires administrator.</value></data>
   <data name="Simple.Opt.DoneN" xml:space="preserve"><value>Done! We adjusted {0} things.</value></data>
   <data name="Simple.Opt.Done1" xml:space="preserve"><value>Done! We adjusted 1 thing.</value></data>
   <data name="Simple.Opt.DoneNothing" xml:space="preserve"><value>Done! Your PC was already up to date: nothing needed changing.</value></data>
+  <data name="Simple.Opt.TallyActive" xml:space="preserve"><value>{0} NEXUS tweaks are active on this PC: {1} now and {2} that were already at maximum.</value></data>
+  <data name="Simple.Opt.TallyChecked" xml:space="preserve"><value>We checked {0} tweaks. {1} don't fit this PC (another GPU brand, game not installed) and {2} are left out on purpose (Windows protection, FPS caps, Xbox).</value></data>
+  <data name="Simple.Opt.TallyNow" xml:space="preserve"><value>applied now</value></data>
+  <data name="Simple.Opt.TallyAlready" xml:space="preserve"><value>already at maximum</value></data>
+  <data name="Simple.Opt.TallyNotHere" xml:space="preserve"><value>don't fit this PC</value></data>
+  <data name="Simple.Opt.TallyFailed" xml:space="preserve"><value>had a problem (see details)</value></data>
   <data name="Simple.Opt.ConfirmTitle" xml:space="preserve"><value>Optimize my PC: maximum performance</value></data>
   <data name="Simple.Opt.ConfirmText" xml:space="preserve"><value>NEXUS will set your PC to maximum performance:
 

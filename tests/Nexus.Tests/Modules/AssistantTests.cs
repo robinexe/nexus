@@ -586,6 +586,26 @@ public sealed class AssistantPlannerTests
     }
 
     [Fact]
+    public void Max_performance_also_stops_browsers_running_after_closed_but_keeps_the_persons_choices()
+    {
+        // "Otimizar meu PC" tem que fazer tudo o que dá desempenho: Edge/Chrome rodando fechados seguram RAM durante o jogo.
+        var c = AssistantFakes.Real();
+        var traits = new PcTraits(ChassisType: 3, HasSystemBattery: false, OnAcPower: true, BatteryPercent: null);
+        var set = AutoFakes.Recommend(AutoFakes.Facts(), traits, c.Document);
+        var p = new Dictionary<string, string> { ["activeScheme"] = "381b4222-f694-41f0-9685-ff5bb260df2e" };
+        var max = StepPlanners.Performance(c, set, p, maxPerformance: true).Changes.Select(x => x.Request.ActionId.Split('@')[0]).ToHashSet();
+        foreach (var id in StepPlanners.MaxPerformanceExtraIds)
+        {
+            Assert.NotNull(c.Entry(id + "@1"));
+            Assert.Contains(id, max);
+        }
+        Assert.DoesNotContain("memorylab.browser.edge-sleepingtabs-on", max); // tira a escolha da pessoa
+        Assert.DoesNotContain("memorylab.standby.purge", max);                  // momentâneo
+        var normal = StepPlanners.Performance(c, set, p).Changes.Select(x => x.Request.ActionId.Split('@')[0]).ToHashSet();
+        Assert.DoesNotContain("memorylab.browser.edge-background-off", normal);  // o passo a passo continua como era
+    }
+
+    [Fact]
     public void Welcome_proposes_the_restore_point_unless_a_recovery_is_pending()
     {
         var c = AssistantFakes.Real();

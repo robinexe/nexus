@@ -498,6 +498,8 @@ public sealed class AssistantPage : ModulePage
                 var asked = changes.Count;
                 var (keep, dropped, problem) = await StepPlanners.PlanAsync(changes, q => host.PlanAsync(q, BrokerLevel.User));
                 changes = [.. keep];
+                _scanAlready = dropped.Count(d => d.Why == StepPlanners.AlreadyWhy);
+                _scanNotHere = dropped.Count - _scanAlready;
                 if (dropped.Count > 0) notes.Insert(0, Loc.F("Asst.NItemNsJa", dropped.Count));
                 if (problem is not null) notes.Insert(0, Loc.F("Asst.AplicadorIndisponivelConferirAgora", problem));
                 tracker.Finish(plan, problem is null ? ProcessTaskStatus.Done : ProcessTaskStatus.Skipped,
@@ -953,12 +955,17 @@ public sealed class AssistantPage : ModulePage
     private string _autoSummary = "";
     private double _autoBytes;
     private int _autoApplied;
+    private OptimizeTally _autoTally = OptimizeTally.Empty;
+    // Da última leitura: o que o aplicador conferiu e tirou da lista (já no valor pedido / não se aplica a este PC).
+    private int _scanAlready, _scanNotHere;
 
     /// <summary>Roda todas as etapas sozinho, aplicando só o que é de risco baixo e recomendado (<see cref="AutoPilot"/>).</summary>
     public RelayCommand StartAutoCommand { get; }
     public bool AutoRunning { get => _autoRunning; private set { if (Set(ref _autoRunning, value)) RaiseAuto(); } }
     /// <summary>"Pronto! Liberamos 9,3 GB e ajustamos 12 coisas." (vazio até terminar uma rodada automática).</summary>
     public string AutoSummary { get => _autoSummary; private set { if (Set(ref _autoSummary, value)) RaiseAuto(); } }
+    /// <summary>A conta completa da última rodada: aplicados agora, já no máximo, não servem para este PC, fora por regra, com problema.</summary>
+    public OptimizeTally AutoTally { get => _autoTally; private set => Set(ref _autoTally, value); }
     public bool AutoDone => !_autoRunning && _autoSummary.Length > 0;
     public bool AutoIdle => !_autoRunning && _autoSummary.Length == 0;
     /// <summary>Andamento da rodada inteira (0–100): cada etapa vale uma parte igual (metade lendo, metade aplicando) e o relatório a última.</summary>
@@ -1022,6 +1029,7 @@ public sealed class AssistantPage : ModulePage
         _report = null;
         _autoBytes = 0;
         _autoApplied = 0;
+        AutoTally = OptimizeTally.Empty;
         _autoIndex = 0;
         _autoApplying = false;
         AutoSummary = "";
@@ -1041,6 +1049,7 @@ public sealed class AssistantPage : ModulePage
                 _autoApplying = false;
                 RaiseAuto();
                 _scan = null; // leitura que falhar não pode reaplicar o que a etapa anterior propôs
+                _scanAlready = _scanNotHere = 0;
                 await ScanAsync(step);
                 var scan = _scan;
                 // "Otimizar meu PC" = Desempenho máximo: tudo o que dá desempenho e pode ser desfeito, em qualquer PC (AutoPilot).
@@ -1049,6 +1058,12 @@ public sealed class AssistantPage : ModulePage
                 if (scan is not null && step == AssistantStepId.Performance) proposed.AddRange(await GameChangesAsync());
                 var chosen = AutoPilot.SelectMaxPerformance(proposed, host.HardwareProfile);
                 var summary = scan is null ? Loc.T("Asst.Verificada") : scan.Recommendation;
+                var tally = _autoTally with
+                {
+                    Already = _autoTally.Already + (scan is null ? 0 : _scanAlready),
+                    NotHere = _autoTally.NotHere + (scan is null ? 0 : _scanNotHere),
+                    LeftOut = _autoTally.LeftOut + proposed.Count - chosen.Count,
+                };
                 if (chosen.Count > 0)
                 {
                     _autoApplying = true;
@@ -1058,11 +1073,23 @@ public sealed class AssistantPage : ModulePage
                         ? tracker.Add("restore-lookup", Loc.T("Asst.ProcurandoPontoRestauracaoRecente"), ProcessTimeModel.RestorePointLookup) : null;
                     ProcessView.Observer!.Planned(ApplyGrouping.Group(step, chosen));
                     var recent = lookup is null ? null : await RecentRestorePointAsync(tracker, lookup);
+                    var mark = _state.Changes.Count;
                     var result = await AssistantRunner.ApplyAsync(_state, step, chosen, new ConfirmedWriter(host), ProcessView.Observer, recent);
+                    // Recusa "não se aplica" (jogo não instalado, placa sem a opção) não é problema: conta como "não serve para este PC".
+                    var notHere = _state.Changes.Skip(mark).Count(c => c.Outcome == ChangeOutcome.Refused &&
+                        c.Detail?.StartsWith(AssistantRunner.OutcomeText("NotApplicable"), StringComparison.Ordinal) == true);
                     _autoBytes += ProcessView.Observer.MovedBytes;
                     _autoApplied += result.Applied;
                     summary = result.Summary;
+                    tally = tally with
+                    {
+                        Applied = tally.Applied + result.Applied,
+                        Already = tally.Already + result.Already + result.NotNeeded,
+                        NotHere = tally.NotHere + notHere,
+                        Failed = tally.Failed + result.Refused - notHere,
+                    };
                 }
+                AutoTally = tally;
                 if (scan is not null) AssistantRunner.RecordUnselected(_state, proposed.Where(c => !chosen.Contains(c)), host.HardwareProfile, maxPerformance: true);
                 _flow.Advance(summary, scan?.Facts);
                 Save();

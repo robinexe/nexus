@@ -542,6 +542,17 @@ public static class StepPlanners
     /// <summary>Ajustes de arquivo de configuração de jogos (catalog/games.v1.json): sem o jogo, o aplicador responde "não se aplica" e nada muda.</summary>
     private static readonly string[] GameConfigPrefixes = ["minecraft.", "r6.", "ow2.", "apex.", "cs2.video.", "cs2.convars."];
 
+    /// <summary>
+    /// Ajustes do laboratório de memória que o "Desempenho máximo" também aplica: navegador que continua rodando depois de
+    /// fechado (Edge/Chrome) e a Inicialização rápida do Edge seguram RAM e processador durante o jogo. Políticas documentadas,
+    /// desfazíveis. Ficam fora: guias suspensas (tira a escolha da pessoa), compressão (depende do SysMain) e esvaziar a lista
+    /// de espera (momentâneo).
+    /// </summary>
+    public static IReadOnlySet<string> MaxPerformanceExtraIds { get; } = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "memorylab.browser.edge-startupboost-off", "memorylab.browser.edge-background-off", "memorylab.browser.chrome-background-off",
+    };
+
     /// <summary>Regras "não fazer" que valem só por calor/bateria de notebook: o "Desempenho máximo" ignora (máquina virtual continua valendo).</summary>
     private static readonly HashSet<string> LaptopOnlyAvoids = new(StringComparer.Ordinal)
         { "avoid.core-parking.laptop", "avoid.high-performance.laptop", "avoid.high-performance.on-battery" };
@@ -575,7 +586,8 @@ public static class StepPlanners
             {
                 var d = e.Definition;
                 var value = maxPerformance ? MaxPerformanceValues.GetValueOrDefault(d.Key) : null;
-                if (!prefixes.Any(p => d.Id.StartsWith(p, StringComparison.Ordinal)) || e.UserParameters.Count > 0 ||
+                var listed = prefixes.Any(p => d.Id.StartsWith(p, StringComparison.Ordinal)) || (maxPerformance && MaxPerformanceExtraIds.Contains(d.Id));
+                if (!listed || e.UserParameters.Count > 0 ||
                     proposed.Contains(d.Key) || avoid.Contains(d.Key) || !CanInstantiate(e, parameters, value)) continue;
                 Add(changes, catalog.Change(AssistantStepId.Performance, new ActionRequest(d.Key, value), "Avançado: " + d.Title,
                     d.Mechanism + (d.Classification == Nexus.Core.Classification.Experimental ? " Experimental: meça antes e depois." : ""), optIn: true));
@@ -655,6 +667,9 @@ public static class StepPlanners
     /// administrador que o aplicador do usuário não pode simular; o resto vira "já está assim"/"não se aplica" com o motivo.
     /// Sem aplicador: devolve tudo (o aplicador confere de novo antes de escrever) e o problema.
     /// </summary>
+    /// <summary>Motivo de <see cref="PlanAsync"/> para o que o aplicador conferiu e já está no valor pedido.</summary>
+    public const string AlreadyWhy = "Já está assim neste PC.";
+
     public static async Task<(IReadOnlyList<ProposedChange> Keep, IReadOnlyList<(ProposedChange Change, string Why)> Dropped, string? Problem)> PlanAsync(
         IReadOnlyList<ProposedChange> changes, Func<IReadOnlyList<ActionRequest>, Task<BrokerCallResult>> plan)
     {
@@ -675,7 +690,7 @@ public static class StepPlanners
                     case null: keep.Add(c); break;
                     case { Outcome: "Pending" } r: keep.Add(c with { Before = c.Before ?? r.Observed, After = c.After ?? r.Desired }); break;
                     case { Outcome: "Blocked" } r when c.Level == BrokerLevel.Admin && r.Detail == OneClickPlanner.NeedsElevation: keep.Add(c); break;
-                    case { Outcome: "AlreadyConfigured" }: dropped.Add((c, "Já está assim neste PC.")); break;
+                    case { Outcome: "AlreadyConfigured" }: dropped.Add((c, AlreadyWhy)); break;
                     case { Outcome: "NotApplicable" } r: dropped.Add((c, $"Não se aplica: {r.Detail}")); break;
                     case var r: dropped.Add((c, $"{r.Outcome}: {r.Detail}")); break;
                 }

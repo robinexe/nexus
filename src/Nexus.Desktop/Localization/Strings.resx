@@ -3889,6 +3889,12 @@ Exige administrador.</value></data>
   <data name="Simple.Opt.DoneN" xml:space="preserve"><value>Pronto! Ajustamos {0} coisas.</value></data>
   <data name="Simple.Opt.Done1" xml:space="preserve"><value>Pronto! Ajustamos 1 coisa.</value></data>
   <data name="Simple.Opt.DoneNothing" xml:space="preserve"><value>Pronto! Seu PC já estava em dia: nada precisou mudar.</value></data>
+  <data name="Simple.Opt.TallyActive" xml:space="preserve"><value>{0} ajustes do NEXUS estão valendo neste PC: {1} agora e {2} que já estavam no máximo.</value></data>
+  <data name="Simple.Opt.TallyChecked" xml:space="preserve"><value>Conferimos {0} ajustes. {1} não servem para este PC (placa de outra marca, jogo não instalado) e {2} ficam de fora de propósito (proteção do Windows, limite de FPS, Xbox).</value></data>
+  <data name="Simple.Opt.TallyNow" xml:space="preserve"><value>aplicados agora</value></data>
+  <data name="Simple.Opt.TallyAlready" xml:space="preserve"><value>já estavam no máximo</value></data>
+  <data name="Simple.Opt.TallyNotHere" xml:space="preserve"><value>não servem para este PC</value></data>
+  <data name="Simple.Opt.TallyFailed" xml:space="preserve"><value>deram problema (veja os detalhes)</value></data>
   <data name="Simple.Opt.ConfirmTitle" xml:space="preserve"><value>Otimizar meu PC: desempenho máximo</value></data>
   <data name="Simple.Opt.ConfirmText" xml:space="preserve"><value>O NEXUS vai deixar o PC no máximo de desempenho:
 

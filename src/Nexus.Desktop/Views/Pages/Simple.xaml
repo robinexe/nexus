@@ -456,6 +456,39 @@
               <TextBlock Text="{Binding Assistant.AutoSummary}" Style="{StaticResource S.Title}" FontSize="30" AutomationProperties.LiveSetting="Assertive"/>
               <TextBlock Text="{Binding Home.Headline}" FontFamily="{StaticResource Font.Display}" FontSize="20" Margin="0,8,0,12"
                          Foreground="{Binding Home.Tone, Converter={StaticResource ToneBrush}}"/>
+              <!-- A conta completa: o número grande é só o que mudou agora; aqui fica claro que tudo foi conferido. -->
+              <StackPanel DataContext="{Binding Assistant.AutoTally}" Margin="0,0,0,20"
+                          Visibility="{Binding Checked, Converter={StaticResource ZeroToVisible}, ConverterParameter=invert}">
+                <WrapPanel Margin="0,0,0,12">
+                  <Border Style="{StaticResource Panel.Inset}" Padding="16,12" Margin="0,0,10,10" MinWidth="150">
+                    <StackPanel>
+                      <TextBlock Text="{Binding Applied}" Style="{StaticResource Text.Metric}" Foreground="{StaticResource Brush.Good}"/>
+                      <TextBlock Text="{l:T Simple.Opt.TallyNow}" Style="{StaticResource Text.MetricLabel}"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Style="{StaticResource Panel.Inset}" Padding="16,12" Margin="0,0,10,10" MinWidth="150">
+                    <StackPanel>
+                      <TextBlock Text="{Binding Already}" Style="{StaticResource Text.Metric}"/>
+                      <TextBlock Text="{l:T Simple.Opt.TallyAlready}" Style="{StaticResource Text.MetricLabel}"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Style="{StaticResource Panel.Inset}" Padding="16,12" Margin="0,0,10,10" MinWidth="150">
+                    <StackPanel>
+                      <TextBlock Text="{Binding NotHere}" Style="{StaticResource Text.Metric}" Foreground="{StaticResource Brush.TextMuted}"/>
+                      <TextBlock Text="{l:T Simple.Opt.TallyNotHere}" Style="{StaticResource Text.MetricLabel}"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Style="{StaticResource Panel.Inset}" Padding="16,12" Margin="0,0,10,10" MinWidth="150"
+                          Visibility="{Binding HasFailed, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                      <TextBlock Text="{Binding Failed}" Style="{StaticResource Text.Metric}" Foreground="{StaticResource Brush.Bad}"/>
+                      <TextBlock Text="{l:T Simple.Opt.TallyFailed}" Style="{StaticResource Text.MetricLabel}"/>
+                    </StackPanel>
+                  </Border>
+                </WrapPanel>
+                <TextBlock Text="{Binding Headline}" Style="{StaticResource S.Lead}" FontSize="14" Foreground="{StaticResource Brush.Text}"/>
+                <TextBlock Text="{Binding Detail}" Style="{StaticResource S.Lead}" FontSize="14" Margin="0,4,0,0"/>
+              </StackPanel>
               <TextBlock Text="{l:T Opt.MeasureInvite}" Style="{StaticResource S.Lead}" FontSize="14" Margin="0,0,0,24"/>
               <WrapPanel>
                 <Button Style="{StaticResource S.Big}" Content="{l:T Simple.Opt.BackHome}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="HomePage"

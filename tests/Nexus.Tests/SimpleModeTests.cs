@@ -509,6 +509,22 @@ public sealed class SimpleModeTests
         Assert.Equal("Pronto! Seu PC já estava em dia: nada precisou mudar.", SimpleOptimizeText.Summary(0, 0));
     }
 
+    [Fact]
+    public void Optimize_tally_explains_that_everything_was_checked_not_only_what_changed_now()
+    {
+        // Pedido do responsável: "ajustamos 46 coisas" parecia pouco; a conta mostra o que já estava no máximo e o que não serve.
+        var t = new OptimizeTally(Applied: 46, Already: 168, NotHere: 61, LeftOut: 37, Failed: 0);
+        Assert.Equal(214, t.Active);
+        Assert.Equal(312, t.Checked);
+        Assert.False(t.HasFailed);
+        Assert.Equal("214 ajustes do NEXUS estão valendo neste PC: 46 agora e 168 que já estavam no máximo.", t.Headline);
+        Assert.StartsWith("Conferimos 312 ajustes. 61 não servem para este PC", t.Detail, StringComparison.Ordinal);
+        Assert.Contains("37 ficam de fora de propósito", t.Detail, StringComparison.Ordinal);
+        Assert.True((t with { Failed = 2 }).HasFailed);
+        Assert.Equal("", OptimizeTally.Empty.Headline);
+        Assert.Equal("", OptimizeTally.Empty.Detail);
+    }
+
     // ------------------------------------------------------------------ Ajustes rápidos e um clique
 
     [Theory]
