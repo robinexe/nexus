@@ -3,9 +3,20 @@
 Cada versão tem um resumo de uma linha (a linha que começa com `>`): é o texto do aviso de atualização dentro do NEXUS.
 O resto da seção vai para a página de download (GitHub Releases).
 
-## Próxima versão (em desenvolvimento)
+## 1.1.0
 
-> Visual novo: Início com o seu PC ao vivo, navegação em 5 áreas e a Varredura do NEXUS Optimize.
+> Desempenho máximo de verdade: o "Otimizar meu PC" agora aplica tudo o que dá FPS (Windows, processador, placa, memória, disco, rede e jogos), o NEXUS nunca limita o FPS e há visual novo.
+
+- **"Otimizar meu PC" = Desempenho máximo**: aplica todos os ajustes de desempenho que podem ser desfeitos, em qualquer PC
+  (notebook, desktop, gamer), sem economia de energia. Nunca desliga proteções do Windows nem limita o FPS.
+- **Mais de 60 ajustes novos**: modo de energia "Melhor desempenho", processador e núcleos de eficiência no máximo, SSD/NVMe/SATA
+  sem economia, gráficos Intel/AMD de notebook no máximo, placa NVIDIA no máximo em todos os jogos, AMD Anti-Lag e Chill/limite
+  desligados, Intel baixa latência e Endurance desligado, placa de rede sem economia, prioridade de rede para jogos online.
+- **Jogos**: VALORANT, CS2 e Fortnite com FPS máximo (driver, arquivos do jogo e guia do que mudar no menu); Minecraft, Rainbow
+  Six Siege, Overwatch 2 e Apex com os arquivos de configuração no máximo de FPS; placa de vídeo dedicada em cada jogo.
+- **Reiniciar na BIOS**: para ligar XMP/EXPO, Resizable BAR e MUX, o NEXUS reinicia direto na tela da placa-mãe e explica o que
+  mudar.
+- **Túnel de rotas** (linha de comando `nexus rota`): rota alternativa para os servidores de jogo por um relay próprio.
 
 - **Início ao vivo**: processador, placa de vídeo, memória e disco em tempo real, explicados em frases simples ("Seu processador
   está trabalhando intensamente"). Temperatura só quando o Windows informa de verdade.
