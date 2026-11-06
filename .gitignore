@@ -27,3 +27,4 @@ vm-saida/
 
 # Publicação (tools/packaging/publish.py)
 artifacts/
+__pycache__/
