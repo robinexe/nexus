@@ -16,6 +16,83 @@ public interface IPowerBackend
     void WriteDcValue(Guid scheme, Guid subgroup, Guid setting, uint value);
 }
 
+/// <summary>Modo de energia do Windows (o controle "Modo de energia" das Configurações): overlay sobre o plano Equilibrado.</summary>
+public interface IPowerOverlayBackend
+{
+    /// <summary>Overlay em vigor; null = recurso inexistente nesta versão do Windows.</summary>
+    Guid? GetEffectiveOverlay();
+    void SetActiveOverlay(Guid overlay);
+    Guid GetActiveScheme();
+}
+
+/// <summary>
+/// Handler "PowerOverlayScheme": o "Modo de energia" do Windows 10/11 (Melhor eficiência … Melhor desempenho), a forma que a
+/// Intel recomenda para Core Ultra e que funciona nos notebooks Modern Standby que escondem o plano Alto desempenho. Alvo:
+/// <c>setting</c>=<c>powerMode</c>. Desejado: Type "Guid", um dos overlays conhecidos. Só vale com o plano Equilibrado ativo
+/// (em outro plano o Windows ignora o modo): fora disso, "não se aplica". Desfazer devolve o modo anterior.
+/// </summary>
+public sealed class PowerOverlaySchemeHandler : IActionHandler, IRestoreValidator
+{
+    public const string Kind = "PowerOverlayScheme";
+    public static readonly Guid Balanced = new("381b4222-f694-41f0-9685-ff5bb260df2e");
+    public static readonly Guid BestPerformance = new("ded574b5-45a0-4f42-8737-46345c09c238");
+
+    /// <summary>Overlays documentados (Microsoft Learn, "Customize the Windows performance power slider").</summary>
+    public static readonly IReadOnlySet<Guid> Known = new HashSet<Guid>
+    {
+        Guid.Empty,                                            // Equilibrado / "Recomendado"
+        BestPerformance,                                       // Melhor desempenho
+        new("961cc777-2547-4f9d-8174-7d86181b8a7a"),           // Melhor eficiência de energia
+        new("3af9b8d9-7c97-431d-ad78-34a8bfea439f"),           // Melhor bateria / economia
+    };
+
+    private readonly IPowerOverlayBackend _power;
+    public PowerOverlaySchemeHandler(IPowerOverlayBackend power) => _power = power ?? throw new ArgumentNullException(nameof(power));
+    public string HandlerKind => Kind;
+
+    private static string? TargetProblem(ActionInstance a) =>
+        a.Target.Count == 1 && a.Target.TryGetValue("setting", out var s) && s == "powerMode" ? null : "Alvo do modo de energia inválido.";
+
+    private static Guid? Parse(StateSnapshot s) =>
+        s.Exists && s.Type == "Guid" && Guid.TryParse(s.Value, out var g) && s.Value == g.ToString("D") && Known.Contains(g) ? g : null;
+
+    public Applicability Assess(ActionInstance action, SystemContext context)
+    {
+        var common = CommonAssessment.Check(action, context);
+        if (common.Kind != ApplicabilityKind.Applicable) return common;
+        if (TargetProblem(action) is { } p) return Applicability.Blocked(p);
+        if (Parse(action.Desired) is null) return Applicability.Blocked("Desejado deve ser um modo de energia conhecido (Guid 'D' minúsculo).");
+        if (_power.GetEffectiveOverlay() is null) return Applicability.NotApplicable("Esta versão do Windows não tem o "Modo de energia".");
+        if (_power.GetActiveScheme() != Balanced)
+            return Applicability.NotApplicable("O "Modo de energia" só vale com o plano Equilibrado; este PC usa outro plano de energia.");
+        return Applicability.Ok;
+    }
+
+    public string? CheckRestore(ActionInstance action, StateSnapshot original)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        return TargetProblem(action) ?? (Parse(original) is null ? "Modo de energia original inválido no diário." : null);
+    }
+
+    public StateSnapshot Detect(ActionInstance action)
+    {
+        var g = _power.GetEffectiveOverlay() ?? throw new InvalidOperationException("Modo de energia indisponível.");
+        return StateSnapshot.Of("Guid", g.ToString("D"), ValueOrigin.Explicit);
+    }
+
+    public void Apply(ActionInstance action)
+    {
+        if (TargetProblem(action) is { } p) throw new InvalidOperationException(p);
+        _power.SetActiveOverlay(Parse(action.Desired) ?? throw new InvalidOperationException("Modo de energia desconhecido."));
+    }
+
+    public void Restore(ActionInstance action, StateSnapshot original)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        _power.SetActiveOverlay(Parse(original) ?? throw new InvalidOperationException("Modo de energia original inválido."));
+    }
+}
+
 /// <summary>Handler "PowerActiveScheme". Alvo: schemeGuid. Desejado: Type "Guid".</summary>
 public sealed class PowerActiveSchemeHandler : IActionHandler, IRestoreValidator
 {
@@ -119,8 +196,34 @@ public sealed class PowerSettingValueHandler : IActionHandler, IRestoreValidator
 }
 
 [SupportedOSPlatform("windows")]
-public sealed partial class WindowsPowerBackend : IPowerBackend
+public sealed partial class WindowsPowerBackend : IPowerBackend, IPowerOverlayBackend
 {
+    // PowerGetEffectiveOverlayScheme / PowerSetActiveOverlayScheme (powrprof, Windows 10 1709+): procurados em tempo de execução;
+    // ausentes = recurso inexistente (o handler responde "não se aplica").
+    private static readonly Lazy<(IntPtr Get, IntPtr Set)> Overlay = new(() =>
+    {
+        if (!NativeLibrary.TryLoad("powrprof.dll", out var lib)) return (IntPtr.Zero, IntPtr.Zero);
+        NativeLibrary.TryGetExport(lib, "PowerGetEffectiveOverlayScheme", out var get);
+        NativeLibrary.TryGetExport(lib, "PowerSetActiveOverlayScheme", out var set);
+        return (get, set);
+    });
+
+    public unsafe Guid? GetEffectiveOverlay()
+    {
+        var get = Overlay.Value.Get;
+        if (get == IntPtr.Zero) return null;
+        Guid g;
+        var rc = ((delegate* unmanaged[Stdcall]<Guid*, uint>)get)(&g);
+        return rc == 0 ? g : null;
+    }
+
+    public unsafe void SetActiveOverlay(Guid overlay)
+    {
+        var set = Overlay.Value.Set;
+        if (set == IntPtr.Zero) throw new InvalidOperationException("PowerSetActiveOverlayScheme indisponível nesta versão do Windows.");
+        Check(((delegate* unmanaged[Stdcall]<Guid, uint>)set)(overlay), "PowerSetActiveOverlayScheme");
+    }
+
     private const uint AccessScheme = 16;
 
     public Guid GetActiveScheme()

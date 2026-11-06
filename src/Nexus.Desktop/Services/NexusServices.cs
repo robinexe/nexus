@@ -35,6 +35,7 @@ public sealed class NexusServices
             new StartupApprovedHandler(registry),
             new PowerActiveSchemeHandler(new WindowsPowerBackend()),
             new PowerSettingValueHandler(new WindowsPowerBackend()),
+            new PowerOverlaySchemeHandler(new WindowsPowerBackend()),
             new ServiceStartTypeHandler(new WindowsServiceBackend()),
             new SourceCfgConvarHandler(() => null),
             .. ModuleHandlersForPreview(registry),

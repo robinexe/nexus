@@ -109,7 +109,8 @@ public static class HardwareRules
 
         // ---- Ryzen X3D de dois CCDs: o plano Equilibrado + estacionamento manda o jogo para o CCD com cache (orientação da AMD)
         if (profile.DualCcdX3d && (id is "power.active-scheme.high-performance.session" or "power.processor.min-cores-parking" ||
-                id.StartsWith("fps.power.min-cores-parking", StringComparison.Ordinal) || id.StartsWith("fps.power.latency-hint-unpark", StringComparison.Ordinal)))
+                id.StartsWith("fps.power.min-cores-parking", StringComparison.Ordinal) || id.StartsWith("fps.power.latency-hint-unpark", StringComparison.Ordinal) ||
+                id.StartsWith("fps.power.mode.", StringComparison.Ordinal)))
             return Fit.No(FitReason.X3dParking);
 
         // ---- energia: notebook (na bateria pesa mais que o formato)

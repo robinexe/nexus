@@ -2656,6 +2656,44 @@
       "reboot": "NextLogon",
       "verification": "Releitura do valor.",
       "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "fps.power.mode.best-performance",
+      "version": 1,
+      "title": "Modo de energia do Windows: Melhor desempenho",
+      "i18n": {
+        "en": {
+          "title": "Windows power mode: Best performance"
+        },
+        "es": {
+          "title": "Modo de energía de Windows: Mejor rendimiento"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "Plano Equilibrado ativo (padrão do Windows e dos notebooks Modern Standby, que escondem o Alto desempenho).",
+      "handlerKind": "PowerOverlayScheme",
+      "target": {
+        "setting": "powerMode"
+      },
+      "desiredValue": "ded574b5-45a0-4f42-8737-46345c09c238",
+      "desiredType": "Guid",
+      "mechanism": "Muda o \"Modo de energia\" das Configurações para Melhor desempenho (overlay ded574b5 sobre o plano Equilibrado): o Windows sobe o processador e a placa mais rápido e corta a economia de energia. A Intel recomenda este modo para os Core Ultra 200S (até 55% mais rápido que o Equilibrado em núcleo único, medição PCWorld).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/customize-power-slider"
+        },
+        {
+          "level": "Observed",
+          "source": "https://www.pcworld.com/article/2500721/warning-most-windows-power-settings-slow-intels-new-cpus-to-a-crawl.html"
+        }
+      ],
+      "risks": "Mais consumo, calor, ruído e bateria durando menos. Com outro plano ativo (Alto desempenho), o Windows ignora o modo e o NEXUS pula.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "PowerGetEffectiveOverlayScheme relido.",
+      "revert": "Volta ao modo de energia anterior."
     }
   ],
   "rejected": [
