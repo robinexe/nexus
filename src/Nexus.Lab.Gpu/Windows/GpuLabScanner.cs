@@ -103,6 +103,8 @@ public static class GpuLabScanner
                 if (GraphicsState.SteamPath() is { } steam && Directory.Exists(steam)) list.AddRange(GameLibraries.SteamGames(steam));
                 var epic = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Epic", "EpicGamesLauncher", "Data", "Manifests");
                 list.AddRange(GameLibraries.EpicGames(epic));
+                var riot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Riot Games", "Metadata");
+                list.AddRange(GameLibraries.RiotGames(riot));
                 return (IReadOnlyList<GameEntry>)list.OrderBy(g => g.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
             }, []);
 

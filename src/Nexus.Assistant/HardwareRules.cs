@@ -157,7 +157,7 @@ public static class HardwareRules
         }
 
         // ---- arquivos de configuração de jogos: Reflex é da NVIDIA
-        if (id.EndsWith(".cfg.reflex.boost", StringComparison.Ordinal))
+        if (id.EndsWith(".cfg.reflex.boost", StringComparison.Ordinal) || id == "cs2.video.reflex.on")
             return Maker(profile, GpuMaker.Nvidia, FitReason.NvidiaGpu, FitReason.NotNvidia) ?? Fit.Neutral;
 
         // ---- Fortnite (GameUserSettings.ini)

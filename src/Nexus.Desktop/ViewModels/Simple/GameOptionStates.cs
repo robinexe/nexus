@@ -84,6 +84,8 @@ public interface IGameStateSource
     int? WindowedToken(string exePath);
     /// <summary>GameUserSettings.ini do Fortnite.</summary>
     FortniteState Fortnite();
+    /// <summary>Token GpuPreference do jogo em UserGpuPreferences (2 = placa de alto desempenho; null = ausente).</summary>
+    int? GpuPreferenceToken(string exePath) => null;
 }
 
 /// <summary>O estado real de cada opção da tela Jogos, a partir do que a ação escreve.</summary>
@@ -230,6 +232,16 @@ public static class GameOptionStates
         return string.Equals(s.Rhi, "dx12", StringComparison.OrdinalIgnoreCase) && s.IsPerformanceMode ? OptionState.On : OptionState.Off;
     }
 
+    /// <summary>Fortnite "efeitos leves": todas as chaves no valor mais leve (sombras 0, sem grama, efeitos/pós/folhagem 0).</summary>
+    public static OptionState FortniteLowFx(FortniteState s)
+    {
+        ArgumentNullException.ThrowIfNull(s);
+        if (!s.FileFound) return OptionState.Unknown;
+        static bool Zero(string? v) => v is null || v == "0";
+        return Zero(s.Shadows) && Zero(s.Effects) && Zero(s.PostProcess) && Zero(s.Foliage) &&
+               !string.Equals(s.Grass, "True", StringComparison.OrdinalIgnoreCase) ? OptionState.On : OptionState.Off;
+    }
+
     /// <summary>Fortnite "FPS máximo e menos atraso": FPS sem limite, V-Sync do jogo desligado e o Reflex ligado (nas placas NVIDIA).</summary>
     public static OptionState FortniteLatency(FortniteState s, bool nvidia)
     {
@@ -332,9 +344,26 @@ public static class GameOptionPlans
             (new ActionRequest(FortniteSettings.VSyncOffAction, null), BrokerLevel.User),
         };
         var parts = new List<OptionPart> { new(FortniteSettings.FpsLimitAction), new(FortniteSettings.VSyncOffAction) };
-        if (nvidia) { requests.Add((new ActionRequest(FortniteSettings.ReflexAction, FortniteSettings.ReflexOn), BrokerLevel.User)); parts.Add(new(FortniteSettings.ReflexAction)); }
+        // Reflex "Ligado + boost": segura o clock da placa no alto (diretriz: desempenho máximo, consumo não importa).
+        if (nvidia) { requests.Add((new ActionRequest(FortniteSettings.ReflexAction, FortniteSettings.ReflexOnBoost), BrokerLevel.User)); parts.Add(new(FortniteSettings.ReflexAction)); }
         return new("fortnite|latency|uncapped" + (nvidia ? "|reflex" : ""), requests, parts, s => GameOptionStates.FortniteLatency(s.Fortnite(), nvidia));
     }
+
+    /// <summary>Fortnite "efeitos leves": sombras desligadas, sem grama e efeitos, pós-processamento e folhagem no baixo (valores do menu).</summary>
+    public static GameOptionPlan FortniteLowFx()
+    {
+        string[] actions = [FortniteSettings.ShadowsOffAction, FortniteSettings.GrassOffAction, FortniteSettings.EffectsLowAction,
+                            FortniteSettings.PostProcessLowAction, FortniteSettings.FoliageLowAction];
+        return new("fortnite|lowfx", [.. actions.Select(a => (new ActionRequest(a, null), BrokerLevel.User))], [.. actions.Select(a => new OptionPart(a))],
+            s => GameOptionStates.FortniteLowFx(s.Fortnite()));
+    }
+
+    /// <summary>Windows usa a placa de vídeo de alto desempenho (dedicada) neste jogo: essencial em notebook com duas placas.</summary>
+    public static GameOptionPlan HighPerformanceGpu(string exe, string exePath) =>
+        new(exe + "|gpu-high", [(new ActionRequest(GpuPreferenceAction, null, new Dictionary<string, string> { ["exePath"] = exePath }), BrokerLevel.User)],
+            [new OptionPart(GpuPreferenceAction, exePath)], s => s.GpuPreferenceToken(exePath) == 2 ? OptionState.On : OptionState.Off);
+
+    public const string GpuPreferenceAction = "gpulab.app.gpu-preference@1";
 
     public static GameOptionPlan FortniteClear() =>
         new("fortnite|clear", [(new ActionRequest(FortniteSettings.MotionBlurOffAction, null), BrokerLevel.User)],

@@ -722,6 +722,294 @@
       "reboot": "GameRestart",
       "verification": "Releitura da linha no videoconfig.txt.",
       "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.video.vsync.off",
+      "version": 1,
+      "title": "Counter-Strike 2: V-Sync desligado",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: V-Sync off"
+        },
+        "es": {
+          "title": "Counter-Strike 2: V-Sync desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_video.txt existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2video",
+        "key": "setting.mat_vsync"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_video.txt (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): \"Aguardar a sincronização vertical\" desligado: o jogo não espera a tela; mais FPS e menos atraso. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_video.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.video.reflex.on",
+      "version": 1,
+      "title": "Counter-Strike 2: NVIDIA Reflex ligado",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: NVIDIA Reflex on"
+        },
+        "es": {
+          "title": "Counter-Strike 2: NVIDIA Reflex activado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_video.txt existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2video",
+        "key": "setting.r_low_latency"
+      },
+      "desiredValue": "1",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_video.txt (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): NVIDIA Reflex \"Ativado\": a fila de quadros fica vazia e o clique chega mais rápido na tela. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Só tem efeito em placas NVIDIA. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_video.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.video.shadows.low",
+      "version": 1,
+      "title": "Counter-Strike 2: Sombras globais no baixo",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: Global shadows on low"
+        },
+        "es": {
+          "title": "Counter-Strike 2: Sombras globales en bajo"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_video.txt existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2video",
+        "key": "setting.videocfg_shadow_quality"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_video.txt (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): Qualidade das sombras globais \"Baixa\" (valor do menu). Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Sombras menos detalhadas. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_video.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.video.particles.low",
+      "version": 1,
+      "title": "Counter-Strike 2: Partículas no baixo",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: Particles on low"
+        },
+        "es": {
+          "title": "Counter-Strike 2: Partículas en bajo"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_video.txt existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2video",
+        "key": "setting.videocfg_particle_detail"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_video.txt (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): Detalhe de partículas \"Baixo\": fumaça, molotov e explosões mais leves. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Efeitos mais simples. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_video.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.video.ao.off",
+      "version": 1,
+      "title": "Counter-Strike 2: Oclusão de ambiente desligada",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: Ambient occlusion off"
+        },
+        "es": {
+          "title": "Counter-Strike 2: Oclusión ambiental desactivada"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_video.txt existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2video",
+        "key": "setting.videocfg_ao_detail"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_video.txt (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): Oclusão de ambiente desativada: um dos efeitos mais caros. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Visual mais plano. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_video.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.video.shaders.low",
+      "version": 1,
+      "title": "Counter-Strike 2: Detalhe de shaders no baixo",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: Shader detail low"
+        },
+        "es": {
+          "title": "Counter-Strike 2: Detalle de shaders bajo"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_video.txt existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2video",
+        "key": "setting.shaderquality"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_video.txt (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): Detalhe de shader \"Baixo\". Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Superfícies (inclusive skins) com menos brilho. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_video.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.video.msaa.off",
+      "version": 1,
+      "title": "Counter-Strike 2: Sem MSAA",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: No MSAA"
+        },
+        "es": {
+          "title": "Counter-Strike 2: Sin MSAA"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_video.txt existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2video",
+        "key": "setting.msaa_samples"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_video.txt (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): MSAA desligado: o 4x MSAA custa 10–20% do FPS (CMAA2, se ligado, continua). Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Bordas mais serrilhadas. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_video.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "cs2.convars.fps-max.unlimited",
+      "version": 1,
+      "title": "Counter-Strike 2: FPS sem limite (fps_max 0)",
+      "i18n": {
+        "en": {
+          "title": "Counter-Strike 2: Uncapped FPS (fps_max 0)"
+        },
+        "es": {
+          "title": "Counter-Strike 2: FPS sin límite (fps_max 0)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "CS2 instalado pela Steam e aberto pelo menos uma vez (o cs2_machine_convars.vcfg existe na pasta local da conta), com o jogo fechado; com várias contas Steam no PC, o NEXUS não escolhe.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "cs2convars",
+        "key": "fps_max"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "cs2_machine_convars.vcfg (Steam\\userdata\\<conta>\\730\\local\\cfg, pasta da máquina, fora do Steam Cloud): fps_max 0 nas configurações da máquina (cs2_machine_convars.vcfg): tira o limite padrão de 400 FPS. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://csdb.gg/guides/fps-optimization-guide/"
+        }
+      ],
+      "risks": "Mais calor e consumo. Com o CS2 aberto, o NEXUS recusa (o jogo regravaria o arquivo). Mexer nas opções de vídeo do jogo não dá VAC.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no cs2_machine_convars.vcfg.",
+      "revert": "Devolve o valor anterior exato da linha."
     }
   ]
 }

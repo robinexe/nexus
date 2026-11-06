@@ -7,17 +7,34 @@
       "id": "fortnite.render.rhi.dx12",
       "version": 1,
       "title": "Fortnite: renderizador DirectX 12 (base dos dois modos atuais)",
-      "i18n": { "en": { "title": "Fortnite: DirectX 12 renderer (base of both current modes)" }, "es": { "title": "Fortnite: renderizador DirectX 12 (base de los dos modos actuales)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: DirectX 12 renderer (base of both current modes)"
+        },
+        "es": {
+          "title": "Fortnite: renderizador DirectX 12 (base de los dos modos actuales)"
+        }
+      },
       "classification": "SupportedDocumented",
       "condition": "Fortnite aberto ao menos uma vez neste perfil e fechado na hora de aplicar.",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "D3DRHIPreference", "key": "PreferredRHI" },
+      "target": {
+        "scope": "User",
+        "section": "D3DRHIPreference",
+        "key": "PreferredRHI"
+      },
       "desiredValue": "dx12",
       "desiredType": "IniValue",
       "mechanism": "O Unreal lê [D3DRHIPreference] PreferredRHI do GameUserSettings.ini ao abrir e escolhe o DirectX. Desde a versão 40.10 (abril de 2026) o menu do Fortnite só oferece 'Desempenho' e 'DirectX 12', e os dois usam o DirectX 12; a opção DirectX 11 saiu do menu. Sozinho não muda o visual: é a base para os modos abaixo.",
       "evidence": [
-        { "level": "Mechanistic", "source": "Código do Unreal Engine 5: WindowsDynamicRHI.cpp lê D3DRHIPreference/PreferredRHI (dx11, dx12) do GameUserSettings.ini." },
-        { "level": "VendorDocumented", "source": "https://www.epicgames.com/help/fortnite-battle-royale-c-202300000001636/gameplay-c-202300000001721/has-the-directx-11-option-been-permanently-removed-from-rendering-mode-in-fortnite-a202300000083887" }
+        {
+          "level": "Mechanistic",
+          "source": "Código do Unreal Engine 5: WindowsDynamicRHI.cpp lê D3DRHIPreference/PreferredRHI (dx11, dx12) do GameUserSettings.ini."
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.epicgames.com/help/fortnite-battle-royale-c-202300000001636/gameplay-c-202300000001721/has-the-directx-11-option-been-permanently-removed-from-rendering-mode-in-fortnite-a202300000083887"
+        }
       ],
       "risks": "Nenhum além do DirectX 12 em si: depois de atualizar o driver, a primeira partida carrega mais devagar enquanto os sombreadores são preparados.",
       "privileges": "User",
@@ -30,21 +47,48 @@
       "id": "fortnite.render.performance-mode",
       "version": 1,
       "title": "Fortnite: Modo desempenho (mais FPS em PC fraco)",
-      "i18n": { "en": { "title": "Fortnite: Performance mode (more FPS on weak PCs)" }, "es": { "title": "Fortnite: Modo rendimiento (más FPS en PC débil)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: Performance mode (more FPS on weak PCs)"
+        },
+        "es": {
+          "title": "Fortnite: Modo rendimiento (más FPS en PC débil)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Placa de vídeo fraca ou de notebook (integrada, GTX 1650, 4 GB de VRAM), ou quem quer o máximo de FPS e aceita um visual bem mais simples.",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "D3DRHIPreference", "key": "PreferredFeatureLevel" },
+      "target": {
+        "scope": "User",
+        "section": "D3DRHIPreference",
+        "key": "PreferredFeatureLevel"
+      },
       "desiredValue": "es31",
       "desiredType": "IniValue",
-      "dependsOn": ["fortnite.render.rhi.dx12"],
-      "conflictsWith": ["fortnite.render.dx12-full"],
+      "dependsOn": [
+        "fortnite.render.rhi.dx12"
+      ],
+      "conflictsWith": [
+        "fortnite.render.dx12-full"
+      ],
       "mechanism": "É a opção 'Renderização: Desempenho' do menu. O Unreal lê PreferredFeatureLevel=es31 e roda o caminho de recursos ES 3.1 (o mesmo dos celulares): modelos e efeitos mais simples, menos memória e menos trabalho para CPU e placa. A Epic diz que troca qualidade visual por menos memória e menos carga; no anúncio, mais de 100% de FPS em gráficos integrados a 720p.",
       "evidence": [
-        { "level": "VendorDocumented", "source": "https://www.techpowerup.com/275970/fortnites-new-performance-mode-significantly-boosts-performance-on-low-end-hardware (anúncio da Epic: menos memória e carga de CPU/GPU; para PCs no requisito mínimo)" },
-        { "level": "Observed", "source": "https://www.pcgamer.com/fortnites-new-performance-mode-gives-a-huge-boost-in-frames-for-low-end-gaming-pcs (medido: Radeon HD 8610G a 720p, 18 → 45 FPS)" },
-        { "level": "Mechanistic", "source": "Código do Unreal Engine 5: WindowsDynamicRHI.cpp, D3DRHIPreference/PreferredFeatureLevel = es31 → ERHIFeatureLevel::ES3_1." },
-        { "level": "Community", "source": "https://www.reddit.com/r/FortniteCompetitive/s/UPAScT9vmc (relatos: em alguns PCs AMD, mínimos de FPS piores que no DirectX 12; meça com o Medir do NEXUS)" }
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.techpowerup.com/275970/fortnites-new-performance-mode-significantly-boosts-performance-on-low-end-hardware (anúncio da Epic: menos memória e carga de CPU/GPU; para PCs no requisito mínimo)"
+        },
+        {
+          "level": "Observed",
+          "source": "https://www.pcgamer.com/fortnites-new-performance-mode-gives-a-huge-boost-in-frames-for-low-end-gaming-pcs (medido: Radeon HD 8610G a 720p, 18 → 45 FPS)"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Código do Unreal Engine 5: WindowsDynamicRHI.cpp, D3DRHIPreference/PreferredFeatureLevel = es31 → ERHIFeatureLevel::ES3_1."
+        },
+        {
+          "level": "Community",
+          "source": "https://www.reddit.com/r/FortniteCompetitive/s/UPAScT9vmc (relatos: em alguns PCs AMD, mínimos de FPS piores que no DirectX 12; meça com o Medir do NEXUS)"
+        }
       ],
       "risks": "Visual bem mais simples (sem Nanite, Lumen nem sombras dinâmicas). Em alguns PCs os mínimos de FPS ficam piores que no DirectX 12 mesmo com média maior: meça antes e depois.",
       "privileges": "User",
@@ -57,20 +101,44 @@
       "id": "fortnite.render.dx12-full",
       "version": 1,
       "title": "Fortnite: DirectX 12 completo com pré-compilação de sombreadores (placas fortes)",
-      "i18n": { "en": { "title": "Fortnite: full DirectX 12 with shader precompilation (strong GPUs)" }, "es": { "title": "Fortnite: DirectX 12 completo con precompilación de sombreadores (tarjetas potentes)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: full DirectX 12 with shader precompilation (strong GPUs)"
+        },
+        "es": {
+          "title": "Fortnite: DirectX 12 completo con precompilación de sombreadores (tarjetas potentes)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Placa com 8 GB ou mais e geração recente (a Epic recomenda RTX 2080 / RX 5700 ou melhor para os recursos do Unreal Engine 5).",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "D3DRHIPreference", "key": "PreferredFeatureLevel" },
+      "target": {
+        "scope": "User",
+        "section": "D3DRHIPreference",
+        "key": "PreferredFeatureLevel"
+      },
       "desiredValue": "sm6",
       "desiredType": "IniValue",
-      "dependsOn": ["fortnite.render.rhi.dx12"],
-      "conflictsWith": ["fortnite.render.performance-mode"],
+      "dependsOn": [
+        "fortnite.render.rhi.dx12"
+      ],
+      "conflictsWith": [
+        "fortnite.render.performance-mode"
+      ],
       "mechanism": "É a opção 'Renderização: DirectX 12' do menu (nível de recursos SM6). Libera Nanite, Lumen, sombras virtuais e o TSR. A pré-compilação de sombreadores é automática: o jogo prepara os estados de pipeline (PSO) enquanto carrega — a Epic conta cerca de 30 mil compilados por partida —, o que acaba com as travadinhas de compilação de materiais. Não existe chave para 'ligar' isso: o que o NEXUS faz é escolher o modo.",
       "evidence": [
-        { "level": "VendorDocumented", "source": "https://www.unrealengine.com/en-US/tech-blog/game-engines-and-shader-stuttering-unreal-engines-solution-to-the-problem (PSO precaching; Fortnite compila ~30.000 PSOs por partida; cache vazio do driver = 20-30 s a mais para carregar)" },
-        { "level": "VendorDocumented", "source": "https://www.fortnite.com/news/drop-into-the-next-generation-of-fortnite-battle-royale-powered-by-unreal-engine-5-1 (requisitos: DirectX 12; recomendado RTX 2080 / RX 5700)" },
-        { "level": "Mechanistic", "source": "Código do Unreal Engine 5: WindowsDynamicRHI.cpp, PreferredFeatureLevel = sm6 → ERHIFeatureLevel::SM6." }
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.unrealengine.com/en-US/tech-blog/game-engines-and-shader-stuttering-unreal-engines-solution-to-the-problem (PSO precaching; Fortnite compila ~30.000 PSOs por partida; cache vazio do driver = 20-30 s a mais para carregar)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.fortnite.com/news/drop-into-the-next-generation-of-fortnite-battle-royale-powered-by-unreal-engine-5-1 (requisitos: DirectX 12; recomendado RTX 2080 / RX 5700)"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "Código do Unreal Engine 5: WindowsDynamicRHI.cpp, PreferredFeatureLevel = sm6 → ERHIFeatureLevel::SM6."
+        }
       ],
       "risks": "Em placa fraca o FPS cai muito em relação ao Modo desempenho. Depois de atualizar o driver ou o jogo, a primeira partida demora mais para carregar e pode ter algumas travadinhas enquanto o cache é refeito. Não apague o cache de sombreadores.",
       "privileges": "User",
@@ -83,18 +151,60 @@
       "id": "fortnite.fps.limit",
       "version": 1,
       "title": "Fortnite: limite de FPS (3 abaixo da taxa do monitor)",
-      "i18n": { "en": { "title": "Fortnite: FPS limit (3 below the monitor refresh rate)" }, "es": { "title": "Fortnite: límite de FPS (3 por debajo de la frecuencia del monitor)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: FPS limit (3 below the monitor refresh rate)"
+        },
+        "es": {
+          "title": "Fortnite: límite de FPS (3 por debajo de la frecuencia del monitor)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Monitor com G-SYNC/FreeSync, placa sempre a 99% (com fila de quadros) ou notebook esquentando. Sem nada disso, 'sem limite' dá o menor atraso.",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "/Script/FortniteGame.FortGameUserSettings", "key": "FrameRateLimit" },
-      "allowedValues": ["0.000000", "30.000000", "57.000000", "60.000000", "72.000000", "75.000000", "87.000000", "90.000000", "97.000000", "117.000000", "120.000000", "141.000000", "144.000000", "162.000000", "165.000000", "177.000000", "197.000000", "237.000000", "240.000000", "357.000000", "360.000000"],
+      "target": {
+        "scope": "User",
+        "section": "/Script/FortniteGame.FortGameUserSettings",
+        "key": "FrameRateLimit"
+      },
+      "allowedValues": [
+        "0.000000",
+        "30.000000",
+        "57.000000",
+        "60.000000",
+        "72.000000",
+        "75.000000",
+        "87.000000",
+        "90.000000",
+        "97.000000",
+        "117.000000",
+        "120.000000",
+        "141.000000",
+        "144.000000",
+        "162.000000",
+        "165.000000",
+        "177.000000",
+        "197.000000",
+        "237.000000",
+        "240.000000",
+        "357.000000",
+        "360.000000"
+      ],
       "desiredType": "IniValue",
       "mechanism": "FrameRateLimit é o 'Limite de taxa de quadros' do menu (o Unreal aplica como t.MaxFPS). Limitar um pouco abaixo da taxa do monitor mantém o jogo dentro da faixa do G-SYNC/FreeSync (sem rasgar nem cair no V-Sync) e evita a fila de quadros quando a placa está no limite; no notebook, também reduz calor e ruído. 0 = sem limite.",
       "evidence": [
-        { "level": "Observed", "source": "https://blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/ (G-SYNC: limitar ~3 FPS abaixo da taxa máxima para ficar na faixa do VRR)" },
-        { "level": "Mechanistic", "source": "UGameUserSettings::FrameRateLimit (Unreal Engine) → GEngine->SetMaxFPS." },
-        { "level": "Community", "source": "Valores fora da lista do menu (ex.: 141, 237) são usados há anos na comunidade; confira no jogo que o limite aparece." }
+        {
+          "level": "Observed",
+          "source": "https://blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/ (G-SYNC: limitar ~3 FPS abaixo da taxa máxima para ficar na faixa do VRR)"
+        },
+        {
+          "level": "Mechanistic",
+          "source": "UGameUserSettings::FrameRateLimit (Unreal Engine) → GEngine->SetMaxFPS."
+        },
+        {
+          "level": "Community",
+          "source": "Valores fora da lista do menu (ex.: 141, 237) são usados há anos na comunidade; confira no jogo que o limite aparece."
+        }
       ],
       "risks": "Sem monitor VRR e com placa sobrando, limitar aumenta um pouco o atraso em relação a 'sem limite'. Se você mudar o limite no menu do jogo depois, vale o do menu.",
       "privileges": "User",
@@ -107,17 +217,38 @@
       "id": "fortnite.latency.reflex",
       "version": 1,
       "title": "Fortnite: NVIDIA Reflex (menos atraso entre clique e tela)",
-      "i18n": { "en": { "title": "Fortnite: NVIDIA Reflex (less click-to-screen latency)" }, "es": { "title": "Fortnite: NVIDIA Reflex (menos retraso entre clic y pantalla)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: NVIDIA Reflex (less click-to-screen latency)"
+        },
+        "es": {
+          "title": "Fortnite: NVIDIA Reflex (menos retraso entre clic y pantalla)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Placa NVIDIA GeForce GTX 900 ou mais nova. Em AMD/Intel o jogo não oferece o Reflex e ignora a chave.",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "/Script/FortniteGame.FortGameUserSettings", "key": "LatencyTweak2" },
-      "allowedValues": ["0", "1", "2"],
+      "target": {
+        "scope": "User",
+        "section": "/Script/FortniteGame.FortGameUserSettings",
+        "key": "LatencyTweak2"
+      },
+      "allowedValues": [
+        "0",
+        "1",
+        "2"
+      ],
       "desiredType": "IniValue",
       "mechanism": "LatencyTweak2 é a opção 'NVIDIA Reflex: baixa latência' do menu: 0 = desligado, 1 = ligado, 2 = ligado + boost. O Reflex faz a CPU entregar o quadro 'na hora' para a placa, sem fila, o que corta o atraso quando a placa está no limite. O boost mantém o clock da placa alto (mais consumo; bom em desktop, dispensável no notebook).",
       "evidence": [
-        { "level": "VendorDocumented", "source": "https://www.nvidia.com/en-us/geforce/news/reflex-low-latency-apex-legends-valorant-fortnite-cs2/ (Fortnite: atraso do PC até 46% menor no Battle Royale com RTX 40)" },
-        { "level": "Community", "source": "Mapeamento 0/1/2 da chave LatencyTweak2 conferido em arquivos reais do jogo e guias (ex.: r/FortNiteBR 'Ultimate optimization guide'); confira no menu depois de aplicar." }
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.nvidia.com/en-us/geforce/news/reflex-low-latency-apex-legends-valorant-fortnite-cs2/ (Fortnite: atraso do PC até 46% menor no Battle Royale com RTX 40)"
+        },
+        {
+          "level": "Community",
+          "source": "Mapeamento 0/1/2 da chave LatencyTweak2 conferido em arquivos reais do jogo e guias (ex.: r/FortNiteBR 'Ultimate optimization guide'); confira no menu depois de aplicar."
+        }
       ],
       "risks": "Nenhum conhecido; em AMD/Intel não faz nada. O boost aumenta o consumo da placa.",
       "privileges": "User",
@@ -130,16 +261,30 @@
       "id": "fortnite.display.vsync.off",
       "version": 1,
       "title": "Fortnite: V-Sync do jogo desligado",
-      "i18n": { "en": { "title": "Fortnite: in-game V-Sync off" }, "es": { "title": "Fortnite: V-Sync del juego desactivado" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: in-game V-Sync off"
+        },
+        "es": {
+          "title": "Fortnite: V-Sync del juego desactivado"
+        }
+      },
       "classification": "Conditional",
       "condition": "Quem prioriza atraso baixo. Com G-SYNC/FreeSync, o recomendado é V-Sync ligado no driver e desligado no jogo, com limite de FPS.",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "/Script/FortniteGame.FortGameUserSettings", "key": "bUseVSync" },
+      "target": {
+        "scope": "User",
+        "section": "/Script/FortniteGame.FortGameUserSettings",
+        "key": "bUseVSync"
+      },
       "desiredValue": "False",
       "desiredType": "IniValue",
       "mechanism": "bUseVSync é o 'Sincronização vertical' do menu. Com ele ligado e sem VRR, o jogo espera a tela e acumula quadros, o que soma atraso.",
       "evidence": [
-        { "level": "Observed", "source": "https://blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/ (V-Sync sem VRR soma atraso; com G-SYNC use V-Sync no driver + limite de FPS)" }
+        {
+          "level": "Observed",
+          "source": "https://blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/ (V-Sync sem VRR soma atraso; com G-SYNC use V-Sync no driver + limite de FPS)"
+        }
       ],
       "risks": "Sem monitor VRR, a imagem pode rasgar (tearing) em movimentos rápidos.",
       "privileges": "User",
@@ -152,16 +297,30 @@
       "id": "fortnite.visual.motion-blur.off",
       "version": 1,
       "title": "Fortnite: sem desfoque de movimento (imagem mais nítida ao virar)",
-      "i18n": { "en": { "title": "Fortnite: no motion blur (sharper image when turning)" }, "es": { "title": "Fortnite: sin desenfoque de movimiento (imagen más nítida al girar)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: no motion blur (sharper image when turning)"
+        },
+        "es": {
+          "title": "Fortnite: sin desenfoque de movimiento (imagen más nítida al girar)"
+        }
+      },
       "classification": "SupportedDocumented",
       "condition": "Modo DirectX 12 (no Modo desempenho o desfoque não existe).",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "/Script/FortniteGame.FortGameUserSettings", "key": "bMotionBlur" },
+      "target": {
+        "scope": "User",
+        "section": "/Script/FortniteGame.FortGameUserSettings",
+        "key": "bMotionBlur"
+      },
       "desiredValue": "False",
       "desiredType": "IniValue",
       "mechanism": "bMotionBlur é o 'Desfoque de movimento' do menu. Desligado, a imagem fica nítida ao girar a câmera, o que ajuda a enxergar alvos; o ganho de FPS é pequeno (medição antiga: 4-5%).",
       "evidence": [
-        { "level": "Observed", "source": "https://www.pcgamer.com/fortnite-system-requirements-and-settings/ (desfoque ligado: ~4-5% menos FPS; GTX 1060/RX 580)" }
+        {
+          "level": "Observed",
+          "source": "https://www.pcgamer.com/fortnite-system-requirements-and-settings/ (desfoque ligado: ~4-5% menos FPS; GTX 1060/RX 580)"
+        }
       ],
       "risks": "Só estético.",
       "privileges": "User",
@@ -174,17 +333,34 @@
       "id": "fortnite.visual.shadows.off",
       "version": 1,
       "title": "Fortnite: sombras desligadas (maior ganho no DirectX 12)",
-      "i18n": { "en": { "title": "Fortnite: shadows off (biggest gain in DirectX 12)" }, "es": { "title": "Fortnite: sombras desactivadas (mayor ganancia en DirectX 12)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: shadows off (biggest gain in DirectX 12)"
+        },
+        "es": {
+          "title": "Fortnite: sombras desactivadas (mayor ganancia en DirectX 12)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Modo DirectX 12 com FPS baixo. No Modo desempenho as sombras já são mínimas e o ganho é pequeno.",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "ScalabilityGroups", "key": "sg.ShadowQuality" },
+      "target": {
+        "scope": "User",
+        "section": "ScalabilityGroups",
+        "key": "sg.ShadowQuality"
+      },
       "desiredValue": "0",
       "desiredType": "IniValue",
       "mechanism": "sg.ShadowQuality é o grupo 'Sombras' do menu (0 = desligado ... 3 = épico). Sombras são a opção mais cara do jogo: cada luz exige desenhar a cena de novo do ponto de vista dela (no DirectX 12 com Nanite, as sombras virtuais).",
       "evidence": [
-        { "level": "Observed", "source": "https://www.pcgamer.com/fortnite-system-requirements-and-settings/ (sombras de Épico para Baixo: ~80% mais FPS; motor antigo, GTX 1060/RX 580)" },
-        { "level": "Community", "source": "https://www.reddit.com/r/OptimizedGaming/comments/121rmhp/fortnite_optimized_settings/ (2023, UE5: sombras Épico custam ~44%, Alto ~25%)" }
+        {
+          "level": "Observed",
+          "source": "https://www.pcgamer.com/fortnite-system-requirements-and-settings/ (sombras de Épico para Baixo: ~80% mais FPS; motor antigo, GTX 1060/RX 580)"
+        },
+        {
+          "level": "Community",
+          "source": "https://www.reddit.com/r/OptimizedGaming/comments/121rmhp/fortnite_optimized_settings/ (2023, UE5: sombras Épico custam ~44%, Alto ~25%)"
+        }
       ],
       "risks": "Fica mais difícil perceber profundidade e ver inimigos pela sombra. Mudar a qualidade geral no menu depois sobrescreve.",
       "privileges": "User",
@@ -197,16 +373,30 @@
       "id": "fortnite.visual.grass.off",
       "version": 1,
       "title": "Fortnite: sem grama (chave escondida, efeito não comprovado)",
-      "i18n": { "en": { "title": "Fortnite: no grass (hidden key, unproven effect)" }, "es": { "title": "Fortnite: sin hierba (clave oculta, efecto no comprobado)" } },
+      "i18n": {
+        "en": {
+          "title": "Fortnite: no grass (hidden key, unproven effect)"
+        },
+        "es": {
+          "title": "Fortnite: sin hierba (clave oculta, efecto no comprobado)"
+        }
+      },
       "classification": "Experimental",
       "condition": "Só para testar com medição (Medir do NEXUS antes e depois).",
       "handlerKind": "FortniteIniValue",
-      "target": { "scope": "User", "section": "/Script/FortniteGame.FortGameUserSettings", "key": "bShowGrass" },
+      "target": {
+        "scope": "User",
+        "section": "/Script/FortniteGame.FortGameUserSettings",
+        "key": "bShowGrass"
+      },
       "desiredValue": "False",
       "desiredType": "IniValue",
       "mechanism": "bShowGrass existe no GameUserSettings.ini (propriedade de configuração do jogo), mas não aparece no menu de vídeo do PC. Guias de desempenho mandam desligar; não há medição publicada e os relatos discordam se faz algo no Modo desempenho.",
       "evidence": [
-        { "level": "Community", "source": "Arquivos GameUserSettings.ini reais (2024-2026) e guias como r/FortNiteBR 'Ultimate optimization guide'; nenhuma medição publicada." }
+        {
+          "level": "Community",
+          "source": "Arquivos GameUserSettings.ini reais (2024-2026) e guias como r/FortNiteBR 'Ultimate optimization guide'; nenhuma medição publicada."
+        }
       ],
       "risks": "Pode não mudar nada. É uma chave do arquivo oficial de configurações (não é edição de Engine.ini), mas o jogo pode passar a ignorá-la numa atualização.",
       "privileges": "User",
@@ -214,6 +404,114 @@
       "reboot": "GameRestart",
       "verification": "Releitura da chave no GameUserSettings.ini.",
       "revert": "Devolve o valor anterior exato ou remove a linha se ela não existia."
+    },
+    {
+      "id": "fortnite.visual.effects.low",
+      "version": 1,
+      "title": "Fortnite: efeitos no baixo",
+      "i18n": {
+        "en": {
+          "title": "Fortnite: effects on low"
+        },
+        "es": {
+          "title": "Fortnite: efectos en bajo"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Quem quer FPS máximo no Fortnite (valor do menu do jogo).",
+      "handlerKind": "FortniteIniValue",
+      "target": {
+        "scope": "User",
+        "section": "ScalabilityGroups",
+        "key": "sg.EffectsQuality"
+      },
+      "desiredValue": "0",
+      "desiredType": "IniValue",
+      "mechanism": "sg.EffectsQuality 0 = Efeitos \"Baixo\" no menu: explosões, fumaça e partículas mais leves; um dos maiores ganhos em lutas cheias.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://www.epicgames.com/help/en-US/c-Category_Fortnite/c-Fortnite_TechnicalSupport/how-do-i-improve-performance-in-fortnite-a000085031"
+        }
+      ],
+      "risks": "Visual mais simples. Feche o Fortnite antes (aberto, ele regrava o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da chave no GameUserSettings.ini; no jogo, Vídeo > Sombras = Desligado.",
+      "revert": "Devolve a qualidade anterior exata ou remove a linha se ela não existia."
+    },
+    {
+      "id": "fortnite.visual.postprocess.low",
+      "version": 1,
+      "title": "Fortnite: pós-processamento no baixo",
+      "i18n": {
+        "en": {
+          "title": "Fortnite: post-processing on low"
+        },
+        "es": {
+          "title": "Fortnite: posprocesado en bajo"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Quem quer FPS máximo no Fortnite (valor do menu do jogo).",
+      "handlerKind": "FortniteIniValue",
+      "target": {
+        "scope": "User",
+        "section": "ScalabilityGroups",
+        "key": "sg.PostProcessQuality"
+      },
+      "desiredValue": "0",
+      "desiredType": "IniValue",
+      "mechanism": "sg.PostProcessQuality 0 = Pós-processamento \"Baixo\": sem bloom e efeitos de tela caros.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://www.epicgames.com/help/en-US/c-Category_Fortnite/c-Fortnite_TechnicalSupport/how-do-i-improve-performance-in-fortnite-a000085031"
+        }
+      ],
+      "risks": "Visual mais simples. Feche o Fortnite antes (aberto, ele regrava o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da chave no GameUserSettings.ini; no jogo, Vídeo > Sombras = Desligado.",
+      "revert": "Devolve a qualidade anterior exata ou remove a linha se ela não existia."
+    },
+    {
+      "id": "fortnite.visual.foliage.low",
+      "version": 1,
+      "title": "Fortnite: folhagem no baixo",
+      "i18n": {
+        "en": {
+          "title": "Fortnite: foliage on low"
+        },
+        "es": {
+          "title": "Fortnite: follaje en bajo"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Quem quer FPS máximo no Fortnite (valor do menu do jogo).",
+      "handlerKind": "FortniteIniValue",
+      "target": {
+        "scope": "User",
+        "section": "ScalabilityGroups",
+        "key": "sg.FoliageQuality"
+      },
+      "desiredValue": "0",
+      "desiredType": "IniValue",
+      "mechanism": "sg.FoliageQuality 0 = Folhagem \"Baixo\": menos vegetação desenhada (também ajuda a enxergar).",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://www.epicgames.com/help/en-US/c-Category_Fortnite/c-Fortnite_TechnicalSupport/how-do-i-improve-performance-in-fortnite-a000085031"
+        }
+      ],
+      "risks": "Visual mais simples. Feche o Fortnite antes (aberto, ele regrava o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da chave no GameUserSettings.ini; no jogo, Vídeo > Sombras = Desligado.",
+      "revert": "Devolve a qualidade anterior exata ou remove a linha se ela não existia."
     }
   ],
   "rejected": [

@@ -540,7 +540,7 @@ public static class StepPlanners
     };
 
     /// <summary>Ajustes de arquivo de configuração de jogos (catalog/games.v1.json): sem o jogo, o aplicador responde "não se aplica" e nada muda.</summary>
-    private static readonly string[] GameConfigPrefixes = ["minecraft.", "r6.", "ow2.", "apex."];
+    private static readonly string[] GameConfigPrefixes = ["minecraft.", "r6.", "ow2.", "apex.", "cs2.video.", "cs2.convars."];
 
     /// <summary>Regras "não fazer" que valem só por calor/bateria de notebook: o "Desempenho máximo" ignora (máquina virtual continua valendo).</summary>
     private static readonly HashSet<string> LaptopOnlyAvoids = new(StringComparer.Ordinal)

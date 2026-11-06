@@ -157,10 +157,36 @@ public sealed class GameConfigTests : IDisposable
     }
 
     [Fact]
+    public void Cs2_uses_only_the_machine_local_folder_of_steam_and_one_account()
+    {
+        var steam = Path.Combine(_profile, "Steam");
+        var handler = new GameConfigHandler(_ => _profile, _ => _running, otherAccount: false, () => steam);
+        var video = Path.Combine(steam, "userdata", "1001", "730", "local", "cfg", "cs2_video.txt");
+        Directory.CreateDirectory(Path.GetDirectoryName(video)!);
+        File.WriteAllText(video, "\"video.cfg\"\n{\n\t\"setting.mat_vsync\"\t\t\"1\"\n\t\"setting.r_low_latency\"\t\t\"0\"\n}\n");
+        var vsync = Instance("cs2.video.vsync.off");
+        Assert.Equal(ApplicabilityKind.Applicable, handler.Assess(vsync, T.Ctx).Kind);
+        handler.Apply(vsync);
+        Assert.Contains("\"setting.mat_vsync\"\t\t\"0\"", File.ReadAllText(video), StringComparison.Ordinal);
+        // fps_max: sem a linha no arquivo da máquina, não se aplica (nada é acrescentado).
+        var convars = Path.Combine(Path.GetDirectoryName(video)!, "cs2_machine_convars.vcfg");
+        File.WriteAllText(convars, "\"config\"\n{\n\t\"convars\"\n\t{\n\t\t\"fps_max\"\t\t\"400\"\n\t}\n}\n");
+        var fps = Instance("cs2.convars.fps-max.unlimited");
+        handler.Apply(fps);
+        Assert.Equal("0", handler.Detect(fps).Value);
+        // Sem Steam: não se aplica. Duas contas: recusa (não escolhe).
+        Assert.Equal(ApplicabilityKind.NotApplicable, new GameConfigHandler(_ => _profile, _ => false, false, () => null).Assess(vsync, T.Ctx).Kind);
+        var other = Path.Combine(steam, "userdata", "2002", "730", "local", "cfg", "cs2_video.txt");
+        Directory.CreateDirectory(Path.GetDirectoryName(other)!);
+        File.WriteAllText(other, File.ReadAllText(video));
+        Assert.Equal(ApplicabilityKind.Blocked, handler.Assess(vsync, T.Ctx).Kind);
+    }
+
+    [Fact]
     public void Catalog_never_caps_fps_and_every_value_is_in_the_handler_list()
     {
         var mine = Wiring.Catalog.Actions.Where(e => e.Definition.HandlerKind == GameConfigs.HandlerKind).ToList();
-        Assert.Equal(20, mine.Count);
+        Assert.Equal(28, mine.Count); // 20 + CS2 (7 de vídeo e o fps_max)
         foreach (var e in mine)
         {
             var t = e.TargetTemplate;

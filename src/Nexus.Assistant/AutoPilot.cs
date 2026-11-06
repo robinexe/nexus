@@ -96,7 +96,7 @@ public static class AutoPilot
     private static readonly HashSet<FitReason> MaxKeptVetoes =
     [
         FitReason.NotNvidia, FitReason.NotAmd, FitReason.NotIntel, FitReason.IntegratedGpu, FitReason.SysMainHelpsHere,
-        FitReason.WeakGpuRelief, FitReason.StrongGpuNoNeed, FitReason.X3dParking,
+        FitReason.WeakGpuRelief, FitReason.X3dParking, // modo desempenho do Fortnite entra até em placa forte: é o que dá mais FPS
     ];
 
     /// <summary>A ação toca em proteção do Windows (id com um dos <see cref="SecurityTerms"/>)?</summary>

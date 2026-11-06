@@ -322,6 +322,17 @@ internal sealed class WindowsGameStateSource : IGameStateSource
 {
     public INvidiaDrsReader Nvidia { get; } = NvidiaDrsFactory.Reader();
 
+    public int? GpuPreferenceToken(string exePath)
+    {
+        if (!OperatingSystem.IsWindows()) return null;
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\DirectX\UserGpuPreferences");
+            return GameLibraries.ParseToken(key?.GetValue(exePath) as string, "GpuPreference");
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException) { return null; }
+    }
+
     public int? WindowedToken(string exePath)
     {
         if (!OperatingSystem.IsWindows()) return null;
@@ -559,9 +570,19 @@ public sealed class SimpleGamesPage : ModulePage
     /// <summary>Planos da tela Jogos que o Desempenho máximo aplica (por identidade do plano).</summary>
     internal static bool IsMaxPerformancePlan(string planId) =>
         planId.EndsWith("|nv.uncap", StringComparison.Ordinal) || planId.EndsWith("|nv.maxpower", StringComparison.Ordinal) ||
-        planId.EndsWith("|windowed", StringComparison.Ordinal) || planId.StartsWith("fortnite|", StringComparison.Ordinal);
+        planId.EndsWith("|windowed", StringComparison.Ordinal) || planId.EndsWith("|gpu-high", StringComparison.Ordinal) ||
+        planId.StartsWith("fortnite|", StringComparison.Ordinal);
 
     /// <summary>Um jogo e as opções que valem para ele (texto + plano: o que pede, como ler, como achar no diário).</summary>
+    /// <summary>
+    /// O que só dá para mudar dentro do jogo (o NEXUS não edita o arquivo: VALORANT tem anticheat Vanguard e a configuração
+    /// sincroniza na conta Riot; o CS2 grava Reflex/V-Sync no menu). Pesquisa de 06/11/2026.
+    /// </summary>
+    private static string GuideFor(string exe) =>
+        exe.StartsWith("VALORANT", StringComparison.OrdinalIgnoreCase) ? Loc.T("Simple.Games.Guide.Valorant")
+        : string.Equals(exe, "cs2.exe", StringComparison.OrdinalIgnoreCase) ? Loc.T("Simple.Games.Guide.Cs2")
+        : "";
+
     private sealed record GameDescription(string Name, string Exe, bool IsFortnite, IReadOnlyList<(string Text, GameOptionPlan Plan)> Plans);
 
     /// <summary>Veredito do hardware para um plano: o pior entre as ações que ele pede (uma "não recomendada" pesa mais que uma "recomendada").</summary>
@@ -602,7 +623,11 @@ public sealed class SimpleGamesPage : ModulePage
             // Diretriz do responsável (06/11/2026): o NEXUS nunca LIMITA o FPS; aqui só tira limite (driver e V-Sync forçado).
             options.Add((Loc.T("Simple.Games.Uncap"), GameOptionPlans.NvUncap(exe)));
         }
-        if (windowedPath is not null) options.Add((Loc.T("Simple.Games.Windowed"), GameOptionPlans.Windowed(exe, windowedPath)));
+        if (windowedPath is not null)
+        {
+            options.Add((Loc.T("Simple.Games.Windowed"), GameOptionPlans.Windowed(exe, windowedPath)));
+            options.Add((Loc.T("Simple.Games.GpuHigh"), GameOptionPlans.HighPerformanceGpu(exe, windowedPath)));
+        }
         return new GameDescription(name, exe, fortnite, options);
     }
 
@@ -619,6 +644,7 @@ public sealed class SimpleGamesPage : ModulePage
             (Loc.T("Simple.Games.Fn.Perf"), GameOptionPlans.FortnitePerformance()),
             (nvidia ? Loc.T("Simple.Games.Fn.MaxFpsReflex") : Loc.T("Simple.Games.Fn.MaxFps"), GameOptionPlans.FortniteLatency(nvidia)),
             (Loc.T("Simple.Games.Fn.Clear"), GameOptionPlans.FortniteClear()),
+            (Loc.T("Simple.Games.Fn.LowFx"), GameOptionPlans.FortniteLowFx()),
         ];
     }
 
@@ -634,7 +660,7 @@ public sealed class SimpleGamesPage : ModulePage
                 ApplyRecommended = ApplyRecommendedFor(g),
                 StutterVerdict = Measure.LatestStutterVerdict(g.Exe),
                 Status = g.IsFortnite ? FortniteStatus(_fortnite.State) : "",
-                Note = g.IsFortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : "",
+                Note = g.IsFortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : GuideFor(g.Exe),
                 IsRunning = g.IsFortnite && _fortnite.Running,
             });
         }

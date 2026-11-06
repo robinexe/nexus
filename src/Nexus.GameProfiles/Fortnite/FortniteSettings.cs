@@ -45,6 +45,9 @@ public static class FortniteSettings
     public const string MotionBlurOffAction = "fortnite.visual.motion-blur.off@1";
     public const string ShadowsOffAction = "fortnite.visual.shadows.off@1";
     public const string GrassOffAction = "fortnite.visual.grass.off@1";
+    public const string EffectsLowAction = "fortnite.visual.effects.low@1";
+    public const string PostProcessLowAction = "fortnite.visual.postprocess.low@1";
+    public const string FoliageLowAction = "fortnite.visual.foliage.low@1";
 
     /// <summary>LatencyTweak2: 0 = Reflex desligado, 1 = ligado, 2 = ligado + boost.</summary>
     public const string ReflexOn = "1";
@@ -76,6 +79,9 @@ public static class FortniteSettings
         new(MainSection, "bMotionBlur", v => OneOf(v, Bools)),
         new(MainSection, "bShowGrass", v => OneOf(v, Bools)),
         new(ScalabilitySection, "sg.ShadowQuality", v => OneOf(v, "0", "1", "2", "3")),
+        new(ScalabilitySection, "sg.EffectsQuality", v => OneOf(v, "0", "1", "2", "3")),
+        new(ScalabilitySection, "sg.PostProcessQuality", v => OneOf(v, "0", "1", "2", "3")),
+        new(ScalabilitySection, "sg.FoliageQuality", v => OneOf(v, "0", "1", "2", "3")),
     ];
 
     public static FortniteKey? Find(string? section, string? key) =>
@@ -109,6 +115,11 @@ public sealed record FortniteState(bool FileFound, string? Rhi, string? FeatureL
 {
     public bool IsPerformanceMode => string.Equals(FeatureLevel, "es31", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>sg.EffectsQuality / sg.PostProcessQuality / sg.FoliageQuality (null = ausente no arquivo).</summary>
+    public string? Effects { get; init; }
+    public string? PostProcess { get; init; }
+    public string? Foliage { get; init; }
+
     public static FortniteState NotFound { get; } = new(false, null, null, null, null, null, null, null, null);
 
     public static FortniteState FromText(string text)
@@ -117,7 +128,12 @@ public sealed record FortniteState(bool FileFound, string? Rhi, string? FeatureL
         string? V(string s, string k) => doc.Get(s, k) is (IniKeyState.Present, var v) ? v : null;
         return new FortniteState(true, V(FortniteSettings.RhiSection, "PreferredRHI"), V(FortniteSettings.RhiSection, "PreferredFeatureLevel"),
             V(FortniteSettings.MainSection, "FrameRateLimit"), V(FortniteSettings.MainSection, "LatencyTweak2"), V(FortniteSettings.MainSection, "bUseVSync"),
-            V(FortniteSettings.MainSection, "bMotionBlur"), V(FortniteSettings.ScalabilitySection, "sg.ShadowQuality"), V(FortniteSettings.MainSection, "bShowGrass"));
+            V(FortniteSettings.MainSection, "bMotionBlur"), V(FortniteSettings.ScalabilitySection, "sg.ShadowQuality"), V(FortniteSettings.MainSection, "bShowGrass"))
+        {
+            Effects = V(FortniteSettings.ScalabilitySection, "sg.EffectsQuality"),
+            PostProcess = V(FortniteSettings.ScalabilitySection, "sg.PostProcessQuality"),
+            Foliage = V(FortniteSettings.ScalabilitySection, "sg.FoliageQuality"),
+        };
     }
 
     /// <summary>Lê o arquivo do perfil (sem seguir links). Arquivo ausente/ilegível = <see cref="NotFound"/>.</summary>

@@ -13,6 +13,22 @@ namespace Nexus.GameProfiles;
 /// </summary>
 public static class GameProfilesHandlers
 {
+    /// <summary>Pasta da Steam pelo registro da MÁQUINA (InstallPath; o usuário comum não escreve ali). Null = sem Steam.</summary>
+    public static string? SteamDir(IRegistryBackend registry)
+    {
+        ArgumentNullException.ThrowIfNull(registry);
+        foreach (var path in new[] { @"SOFTWARE\WOW6432Node\Valve\Steam", @"SOFTWARE\Valve\Steam" })
+        {
+            try
+            {
+                var r = registry.Read(new RegistryTarget(RegHive.HKLM, path, "InstallPath", RegView.Registry64));
+                if (r.ValueExists && r.Value is { } v && WindowsProfiles.IsLocalAbsolute(v) && !v.Contains("..", StringComparison.Ordinal)) return v.TrimEnd('\\', '/');
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Security.SecurityException) { }
+        }
+        return null;
+    }
+
     public static IEnumerable<IActionHandler> Create(HandlerEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(environment);
@@ -29,7 +45,7 @@ public static class GameProfilesHandlers
         return
         [
             new FortniteIniHandler(local, FortniteProcesses.AnyRunning, environment.OtherAccount),
-            new Configs.GameConfigHandler(profile, FortniteProcesses.AnyOf, environment.OtherAccount),
+            new Configs.GameConfigHandler(profile, FortniteProcesses.AnyOf, environment.OtherAccount, () => SteamDir(environment.Registry)),
         ];
     }
 }

@@ -173,6 +173,61 @@ public static partial class GameLibraries
         return games;
     }
 
+    [System.Text.RegularExpressions.GeneratedRegex(@"(?m)^\s*product_install_full_path\s*:\s*""?(?<p>[^""\r\n]+?)""?\s*$", System.Text.RegularExpressions.RegexOptions.CultureInvariant)]
+    private static partial System.Text.RegularExpressions.Regex RiotInstallPath();
+
+    /// <summary>
+    /// Riot (VALORANT, League of Legends): um *.product_settings.yaml de %ProgramData%\Riot Games\Metadata → jogo. O executável
+    /// é o que desenha (VALORANT-Win64-Shipping.exe; League of Legends.exe), para o driver NVIDIA receber o perfil certo.
+    /// </summary>
+    public static GameEntry? ParseRiotProductSettings(string yaml, string productFolderName, Func<string, bool> fileExists)
+    {
+        ArgumentNullException.ThrowIfNull(yaml);
+        ArgumentNullException.ThrowIfNull(fileExists);
+        var m = RiotInstallPath().Match(yaml);
+        if (!m.Success) return null;
+        var path = m.Groups["p"].Value.Trim().Replace('/', '\\').TrimEnd('\\');
+        if (path.Length < 4 || !char.IsAsciiLetter(path[0]) || path[1] != ':' || path[2] != '\\' || path.Contains("..", StringComparison.Ordinal)) return null;
+        var product = (productFolderName ?? "").Split('.')[0].ToLowerInvariant();
+        var (name, exes) = product switch
+        {
+            "valorant" => ("VALORANT", new[] { @"ShooterGame\Binaries\Win64\VALORANT-Win64-Shipping.exe", "VALORANT.exe" }),
+            "league_of_legends" => ("League of Legends", new[] { @"Game\League of Legends.exe" }),
+            _ => ((string?)null, Array.Empty<string>()),
+        };
+        if (name is null) return null; // só os jogos conhecidos (o resto da Riot não é jogo de FPS)
+        foreach (var rel in exes)
+        {
+            var exe = path + "\\" + rel;
+            if (IsValidExePath(exe) && fileExists(exe)) return new GameEntry(name, "Riot", path, exe, true);
+        }
+        return new GameEntry(name, "Riot", path, null, false);
+    }
+
+    /// <summary>Jogos da Riot a partir de %ProgramData%\Riot Games\Metadata (só leitura dos .yaml).</summary>
+    public static IReadOnlyList<GameEntry> RiotGames(string metadataDir)
+    {
+        var games = new List<GameEntry>();
+        if (!Directory.Exists(metadataDir)) return games;
+        try
+        {
+            foreach (var dir in Directory.EnumerateDirectories(metadataDir).Take(50))
+            {
+                foreach (var f in Directory.EnumerateFiles(dir, "*.product_settings.yaml").Take(5))
+                {
+                    try
+                    {
+                        if (ParseRiotProductSettings(File.ReadAllText(f), Path.GetFileName(dir), File.Exists) is { } g &&
+                            !games.Any(x => x.Name == g.Name)) games.Add(g);
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        return games;
+    }
+
     /// <summary>"GpuPreference=2;SwapEffectUpgradeEnable=1;" → 2. Null se o token não existir.</summary>
     public static int? ParseGpuPreference(string? raw) => ParseToken(raw, "GpuPreference");
 

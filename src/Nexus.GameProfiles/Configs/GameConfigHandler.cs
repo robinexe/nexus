@@ -22,11 +22,14 @@ public sealed class GameConfigHandler : IActionHandler, IRestoreValidator
     private readonly Func<string?, string?> _profileDir;
     private readonly Func<IReadOnlyList<string>, bool> _anyRunning;
     private readonly bool _otherAccount;
+    private readonly Func<string?> _steamDir;
 
     /// <param name="profileDirForSid">Pasta do perfil (C:\Users\nome) do SID; sem SID, a da conta do aplicador. Null = não identificado.</param>
     /// <param name="anyRunning">Algum destes processos está aberto (na dúvida, responde que sim).</param>
-    public GameConfigHandler(Func<string?, string?> profileDirForSid, Func<IReadOnlyList<string>, bool> anyRunning, bool otherAccount)
+    /// <param name="steamDir">Pasta da Steam (registro da máquina) ou null; só o CS2 usa.</param>
+    public GameConfigHandler(Func<string?, string?> profileDirForSid, Func<IReadOnlyList<string>, bool> anyRunning, bool otherAccount, Func<string?>? steamDir = null)
     {
+        _steamDir = steamDir ?? (() => null);
         _profileDir = profileDirForSid ?? throw new ArgumentNullException(nameof(profileDirForSid));
         _anyRunning = anyRunning ?? throw new ArgumentNullException(nameof(anyRunning));
         _otherAccount = otherAccount;
@@ -60,7 +63,7 @@ public sealed class GameConfigHandler : IActionHandler, IRestoreValidator
     {
         if (TargetProblem(action, out var game, out var key, out var sid) is { } problem) throw new InvalidOperationException(problem);
         var profile = _profileDir(sid) ?? throw new InvalidOperationException("Não foi possível identificar a pasta do seu perfil.");
-        return (GameConfigs.Locate(profile, game!), game!, key!);
+        return (GameConfigs.Locate(profile, game!, game!.Root == ConfigRoot.Steam ? _steamDir() : null), game!, key!);
     }
 
     private static string RunningMessage(GameConfig g) => $"Feche o {g.Name} antes: aberto, ele regrava a configuração ao sair e a mudança se perderia.";
