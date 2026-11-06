@@ -422,6 +422,7 @@ public sealed class SimpleModeTests
     [InlineData("boot.service.xblauthmanager.disabled@1", null)]
     [InlineData("boot.service.spooler.disabled@1", null)]
     [InlineData("cleaning.shader-nvidia@1", null)]
+    [InlineData("cleaning.steam-shadercache@1", null)]
     [InlineData("security.defender.realtime@1", null)]
     [InlineData("memorylab.standby.purge@1", null)]
     public void Max_performance_never_caps_fps_breaks_features_or_touches_protection(string action, string? value) =>

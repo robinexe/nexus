@@ -66,6 +66,11 @@ public static class AutoPilot
         "fps.dwm.mpo.disable", "fps.dwm.overlay-minfps.zero",                // correções de defeito, não ganho
         "net.ipv6.prefer-ipv4", "sys.notifications.toasts.off",              // preferência, não ganho
         "memorylab.standby.purge",                                           // momentâneo, não desfaz
+        // Game Pass, login Xbox e a detecção de jogo dos Ryzen X3D dependem destes; impressora é recurso que a pessoa usa.
+        "boot.service.xblauthmanager.disabled", "boot.service.xblgamesave.disabled", "boot.service.xboxnetapisvc.disabled",
+        "boot.service.spooler.disabled", "boot.service.fax.disabled",
+        // Apagar cache de shader obriga o jogo a recompilar: travadas na próxima partida.
+        "cleaning.shader-nvidia", "cleaning.shader-amd", "cleaning.shader-intel", "cleaning.shader-directx", "cleaning.steam-shadercache",
     };
 
     /// <summary>Prefixos fora do "Desempenho máximo" (mesmos motivos de <see cref="MaxExcludedIds"/>).</summary>
@@ -73,9 +78,6 @@ public static class AutoPilot
     [
         "fps.mouse.",                         // muda a sensação da mira: escolha da pessoa
         "sched.",                             // prioridade do agendador: sem evidência de ganho (mito no catálogo)
-        "boot.service.xbl", "boot.service.xbox", // quebram Game Pass, login Xbox e a detecção de jogo dos Ryzen X3D
-        "boot.service.spooler", "boot.service.fax",
-        "cleaning.shader",                    // apagar cache de shader = travadas na próxima partida
         "security.", "scanner.",              // proteção do Windows: nunca mexer por desempenho
         "power.active-scheme.",               // plano "de sessão" (segura o aplicador); a tela de sessão cuida
     ];
