@@ -417,7 +417,7 @@ public sealed class NvidiaDrsTests
     {
         var all = Catalog();
         var mine = all.Actions.Where(a => a.Definition.Id.StartsWith("gpu.nv.", StringComparison.Ordinal)).ToList();
-        Assert.Equal(5, mine.Count);
+        Assert.Equal(9, mine.Count); // 5 + as 4 que TIRAM limite de FPS (por jogo e global), diretriz de 06/11/2026
         var handlerKinds = GpuLabHandlers.Create(new HandlerEnvironment(new InMemoryRegistryBackend(), Path.GetTempPath(), false, false))
             .Select(h => h.HandlerKind).ToHashSet(StringComparer.Ordinal);
         var handler = new NvidiaDrsHandler(new FakeDrs());
@@ -445,7 +445,8 @@ public sealed class NvidiaDrsTests
         var fps = mine.Single(e => e.Definition.Key == NvidiaDrsActions.FpsCap);
         Assert.Equal(NvidiaDrsActions.FpsCaps, fps.Definition.AllowedValues);
         Assert.Equal(NvidiaDrsActions.ShaderCacheValues, mine.Single(e => e.Definition.Key == NvidiaDrsActions.ShaderCache).Definition.AllowedValues);
-        foreach (var key in new[] { NvidiaDrsActions.LowLatency, NvidiaDrsActions.MaxPower, NvidiaDrsActions.VsyncOn })
+        foreach (var key in new[] { NvidiaDrsActions.LowLatency, NvidiaDrsActions.MaxPower, NvidiaDrsActions.VsyncOn,
+                                    NvidiaDrsActions.FpsCapOff, NvidiaDrsActions.VsyncOff, NvidiaDrsActions.FpsCapOffGlobal, NvidiaDrsActions.VsyncOffGlobal })
             Assert.Contains(mine, e => e.Definition.Key == key);
         Assert.Contains(all.Rejected, r => r.Id == "gpu.nv.lowlatency.ultra");
         Assert.Contains(all.Rejected, r => r.Id == "gpu.nv.power.max.global");
