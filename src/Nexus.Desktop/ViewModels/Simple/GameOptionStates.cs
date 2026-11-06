@@ -350,13 +350,18 @@ public static class GameOptionPlans
     }
 
     /// <summary>Fortnite "efeitos leves": sombras desligadas, sem grama e efeitos, pós-processamento e folhagem no baixo (valores do menu).</summary>
-    public static GameOptionPlan FortniteLowFx()
-    {
-        string[] actions = [FortniteSettings.ShadowsOffAction, FortniteSettings.GrassOffAction, FortniteSettings.EffectsLowAction,
-                            FortniteSettings.PostProcessLowAction, FortniteSettings.FoliageLowAction];
-        return new("fortnite|lowfx", [.. actions.Select(a => (new ActionRequest(a, null), BrokerLevel.User))], [.. actions.Select(a => new OptionPart(a))],
+    public static GameOptionPlan FortniteLowFx() =>
+        new("fortnite|lowfx",
+            [
+                (new ActionRequest(FortniteSettings.ShadowsOffAction, null), BrokerLevel.User),
+                (new ActionRequest(FortniteSettings.GrassOffAction, null), BrokerLevel.User),
+                (new ActionRequest(FortniteSettings.EffectsLowAction, null), BrokerLevel.User),
+                (new ActionRequest(FortniteSettings.PostProcessLowAction, null), BrokerLevel.User),
+                (new ActionRequest(FortniteSettings.FoliageLowAction, null), BrokerLevel.User),
+            ],
+            [new OptionPart(FortniteSettings.ShadowsOffAction), new OptionPart(FortniteSettings.GrassOffAction), new OptionPart(FortniteSettings.EffectsLowAction),
+             new OptionPart(FortniteSettings.PostProcessLowAction), new OptionPart(FortniteSettings.FoliageLowAction)],
             s => GameOptionStates.FortniteLowFx(s.Fortnite()));
-    }
 
     /// <summary>Windows usa a placa de vídeo de alto desempenho (dedicada) neste jogo: essencial em notebook com duas placas.</summary>
     public static GameOptionPlan HighPerformanceGpu(string exe, string exePath) =>

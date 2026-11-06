@@ -38,6 +38,9 @@ public sealed partial class GpuLabPage
     public RelayCommand ApplyFnBlurCommand { get; private set; } = null!;
     public RelayCommand ApplyFnShadowsCommand { get; private set; } = null!;
     public RelayCommand ApplyFnGrassCommand { get; private set; } = null!;
+    public RelayCommand ApplyFnEffectsCommand { get; private set; } = null!;
+    public RelayCommand ApplyFnPostCommand { get; private set; } = null!;
+    public RelayCommand ApplyFnFoliageCommand { get; private set; } = null!;
 
     private void InitFortnite()
     {
@@ -60,6 +63,9 @@ public sealed partial class GpuLabPage
         ApplyFnBlurCommand = new RelayCommand(() => _ = ApplyFnFixedAsync(FortniteSettings.MotionBlurOffAction, Loc.T("Gpu.Fn.BlurOff"), Loc.T("Gpu.Fn.BlurOffText")), Can);
         ApplyFnShadowsCommand = new RelayCommand(() => _ = ApplyFnFixedAsync(FortniteSettings.ShadowsOffAction, Loc.T("Gpu.Fn.ShadowsOff"), Loc.T("Gpu.Fn.ShadowsOffText")), Can);
         ApplyFnGrassCommand = new RelayCommand(() => _ = ApplyFnFixedAsync(FortniteSettings.GrassOffAction, Loc.T("Gpu.Fn.GrassOff"), Loc.T("Gpu.Fn.GrassOffText")), Can);
+        ApplyFnEffectsCommand = new RelayCommand(() => _ = ApplyFnFixedAsync(FortniteSettings.EffectsLowAction, Loc.T("Gpu.Fn.EffectsLow"), Loc.T("Gpu.Fn.LowText")), Can);
+        ApplyFnPostCommand = new RelayCommand(() => _ = ApplyFnFixedAsync(FortniteSettings.PostProcessLowAction, Loc.T("Gpu.Fn.PostLow"), Loc.T("Gpu.Fn.LowText")), Can);
+        ApplyFnFoliageCommand = new RelayCommand(() => _ = ApplyFnFixedAsync(FortniteSettings.FoliageLowAction, Loc.T("Gpu.Fn.FoliageLow"), Loc.T("Gpu.Fn.LowText")), Can);
     }
 
     /// <summary>Fortnite instalado (manifesto da Epic) → lê o GameUserSettings.ini do seu perfil e se o jogo está aberto. Só leitura.</summary>
@@ -125,6 +131,9 @@ public sealed partial class GpuLabPage
         FortniteSettings.MotionBlurOffAction => new ActionRequest(FortniteSettings.MotionBlurOffAction, null),
         FortniteSettings.ShadowsOffAction => new ActionRequest(FortniteSettings.ShadowsOffAction, null),
         FortniteSettings.GrassOffAction => new ActionRequest(FortniteSettings.GrassOffAction, null),
+        FortniteSettings.EffectsLowAction => new ActionRequest(FortniteSettings.EffectsLowAction, null),
+        FortniteSettings.PostProcessLowAction => new ActionRequest(FortniteSettings.PostProcessLowAction, null),
+        FortniteSettings.FoliageLowAction => new ActionRequest(FortniteSettings.FoliageLowAction, null),
         _ => throw new ArgumentOutOfRangeException(nameof(actionKey)),
     };
 }

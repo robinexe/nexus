@@ -4484,4 +4484,8 @@ Son {2} partidas de al menos 3 minutos. Entre ellas, NEXUS aplica el ajuste con 
   <data name="Simple.Games.Fn.LowFx" xml:space="preserve"><value>Efectos ligeros para más FPS (sombras, hierba, efectos y follaje al mínimo)</value></data>
   <data name="Simple.Games.Guide.Valorant" xml:space="preserve"><value>En VALORANT, NEXUS no toca el archivo del juego (anticheat Vanguard; la configuración está en tu cuenta Riot). Dentro del juego, en Video: Modo de pantalla Pantalla completa; Limitar FPS siempre/en menú/en segundo plano desactivados; NVIDIA Reflex "Activado + Boost"; Renderizado multihilo Activado; Material, Textura y Detalle Bajo; Antialiasing Ninguno; VSync, Viñeta, Distorsión, Sombras proyectadas y Bloom desactivados.</value></data>
   <data name="Simple.Games.Guide.Cs2" xml:space="preserve"><value>En CS2, NEXUS quita el límite de FPS y activa Reflex en los archivos del juego (con el juego cerrado). En el menú Video conviene revisar: Modo de pantalla Pantalla completa, Sombras globales Bajo, Detalle de partículas Bajo, Oclusión ambiental Desactivada, FidelityFX Super Resolution desactivado (salvo en un PC muy débil).</value></data>
+  <data name="Gpu.Fn.EffectsLow" xml:space="preserve"><value>Efectos en bajo</value></data>
+  <data name="Gpu.Fn.PostLow" xml:space="preserve"><value>Posprocesado en bajo</value></data>
+  <data name="Gpu.Fn.FoliageLow" xml:space="preserve"><value>Follaje en bajo</value></data>
+  <data name="Gpu.Fn.LowText" xml:space="preserve"><value>¿Poner esta calidad en "Bajo" (el mismo valor del menú del juego)? Más FPS, imagen más simple.</value></data>
 </root>

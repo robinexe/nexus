@@ -411,6 +411,9 @@
                 <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.BlurOff}" Command="{Binding ApplyFnBlurCommand}" Margin="0,0,8,6"/>
                 <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.ShadowsOff}" Command="{Binding ApplyFnShadowsCommand}" Margin="0,0,8,6"/>
                 <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.GrassOff}" Command="{Binding ApplyFnGrassCommand}" Margin="0,0,8,6"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.EffectsLow}" Command="{Binding ApplyFnEffectsCommand}" Margin="0,0,8,6"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.PostLow}" Command="{Binding ApplyFnPostCommand}" Margin="0,0,8,6"/>
+                <Button Style="{StaticResource Button.Secondary}" Content="{l:T Gpu.Fn.FoliageLow}" Command="{Binding ApplyFnFoliageCommand}" Margin="0,0,8,6"/>
               </WrapPanel>
               <TextBlock Text="{l:T Gpu.Fn.Honest}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap" Margin="0,6,0,0"/>
             </StackPanel>

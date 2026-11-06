@@ -4484,4 +4484,8 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Simple.Games.Fn.LowFx" xml:space="preserve"><value>Light effects for more FPS (shadows, grass, effects and foliage at minimum)</value></data>
   <data name="Simple.Games.Guide.Valorant" xml:space="preserve"><value>In VALORANT, NEXUS doesn't touch the game file (Vanguard anti-cheat; settings live in your Riot account). In-game, under Video: Display mode Fullscreen; Limit FPS always/in menu/in background off; NVIDIA Reflex "On + Boost"; Multithreaded rendering On; Material, Texture and Detail Low; Anti-aliasing None; VSync, Vignette, Distortion, Cast shadows and Bloom off.</value></data>
   <data name="Simple.Games.Guide.Cs2" xml:space="preserve"><value>In CS2, NEXUS removes the FPS cap and turns on Reflex in the game files (with the game closed). In the Video menu, check: Display mode Fullscreen, Global shadows Low, Particle detail Low, Ambient occlusion Disabled, FidelityFX Super Resolution off (unless the PC is very weak).</value></data>
+  <data name="Gpu.Fn.EffectsLow" xml:space="preserve"><value>Effects on low</value></data>
+  <data name="Gpu.Fn.PostLow" xml:space="preserve"><value>Post-processing on low</value></data>
+  <data name="Gpu.Fn.FoliageLow" xml:space="preserve"><value>Foliage on low</value></data>
+  <data name="Gpu.Fn.LowText" xml:space="preserve"><value>Set this quality to "Low" (the same value as the game menu)? More FPS, simpler visuals.</value></data>
 </root>
