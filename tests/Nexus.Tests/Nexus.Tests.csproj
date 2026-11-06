@@ -49,6 +49,8 @@
     <!-- Lógica pura da casca: vigia da interface (suspensão não é travamento) e contagem "Manter esta taxa?". -->
     <Compile Include="..\..\src\Nexus.Desktop\Services\Shell\StallDetector.cs" Link="Shell\StallDetector.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\KeepChangeCountdown.cs" Link="Shell\KeepChangeCountdown.cs" />
+    <!-- Avisos do NEXUS: texto em blocos e tom (DialogTextTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\DialogText.cs" Link="Shell\DialogText.cs" />
     <!-- Modo simples: modos da navegação, nota de saúde, "o que dá para melhorar", achados em palavras simples (SimpleModeTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\SimpleLogic.cs" Link="Shell\SimpleLogic.cs" />
     <!-- Jogos: estado real de cada opção e o que a desfaz no diário (GameOptionStateTests). -->
