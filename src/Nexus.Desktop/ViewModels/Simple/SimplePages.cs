@@ -412,6 +412,52 @@ public sealed class SimpleGamesPage : ModulePage
     public OneClickAction? GameModeAction { get => _gameModeAction; private set { if (Set(ref _gameModeAction, value)) OnPropertyChanged(nameof(HasGameModeAction)); } }
     public bool HasGameModeAction => _gameModeAction is not null;
 
+    private OptionState _globalFps = OptionState.Unknown;
+    private OneClickAction? _globalFpsAction;
+    /// <summary>Placa NVIDIA lida: mostra o cartão "limite de FPS do driver em todos os jogos".</summary>
+    public bool HasGlobalFps => Gpu.NvAvailable && _globalFps != OptionState.Unknown;
+    /// <summary>"Nenhum limite de FPS no driver" ou "O driver está limitando o FPS de todos os jogos".</summary>
+    public string GlobalFpsText => _globalFps == OptionState.On ? Loc.T("Simple.Games.GlobalFpsFree") : Loc.T("Simple.Games.GlobalFpsCapped");
+    public Tone GlobalFpsTone => _globalFps == OptionState.On ? Tone.Good : Tone.Warn;
+    /// <summary>"Liberar FPS" com um clique (perfil global do driver; administrador). Ligado: "✓ — Desfazer" quando foi o NEXUS.</summary>
+    public OneClickAction? GlobalFpsAction { get => _globalFpsAction; private set { if (Set(ref _globalFpsAction, value)) OnPropertyChanged(nameof(HasGlobalFpsAction)); } }
+    public bool HasGlobalFpsAction => _globalFpsAction is not null;
+
+    private void ShowGlobalFps(OptionStatus status)
+    {
+        _globalFps = status.State;
+        if (_globalFpsAction is null && status.State != OptionState.Unknown)
+        {
+            var plan = GameOptionPlans.NvGlobalUncap();
+            GlobalFpsAction = new OneClickAction(Loc.T("Simple.Games.GlobalFpsFix"), Applier,
+                q => q.ApplyAsync(Loc.T("Simple.Games.GlobalFpsTitle"), Loc.T("Simple.Games.ConfirmGlobalFps"), plan.Requests), () => _ = RefreshGlobalFpsAsync());
+        }
+        _globalFpsAction?.ShowState(status);
+        OnPropertyChanged(nameof(HasGlobalFps));
+        OnPropertyChanged(nameof(GlobalFpsText));
+        OnPropertyChanged(nameof(GlobalFpsTone));
+    }
+
+    private async Task RefreshGlobalFpsAsync()
+    {
+        try
+        {
+            var source = StateSource;
+            var plan = GameOptionPlans.NvGlobalUncap();
+            var states = await Task.Run(() => GameStateReader.Read([plan], source, SafeJournal()));
+            ShowGlobalFps(states[plan.Id]);
+            await RefreshAllNvidiaAsync();
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { Message = ex.Message; }
+    }
+
+    /// <summary>Depois de mexer no perfil global: o "FPS sem limite" de cada jogo depende dele, então relê os jogos NVIDIA.</summary>
+    private async Task RefreshAllNvidiaAsync()
+    {
+        foreach (var g in Describe().Where(g => g.Plans.Any(p => p.Plan.Id.EndsWith("|nv.uncap", StringComparison.Ordinal))))
+            await RefreshGameAsync(g.Exe);
+    }
+
     /// <summary>
     /// A janela informa o Modo de jogo a cada leitura: o achado win.gamemode do diagnóstico e a releitura do catálogo (que é refeita
     /// depois de cada escrita, então vale mais).
@@ -448,9 +494,13 @@ public sealed class SimpleGamesPage : ModulePage
             await Gpu.OnShownAsync(); // leitura da placa e da biblioteca de jogos (só leitura)
             var games = Describe();
             var source = StateSource;
-            var (fortnite, states) = await Task.Run(() => (ReadFortnite(), GameStateReader.Read(games.SelectMany(g => g.Plans.Select(p => p.Plan)), source, SafeJournal())));
+            var global = Gpu.NvAvailable ? GameOptionPlans.NvGlobalUncap() : null;
+            IEnumerable<GameOptionPlan> plans = games.SelectMany(g => g.Plans.Select(p => p.Plan));
+            if (global is not null) plans = plans.Append(global);
+            var (fortnite, states) = await Task.Run(() => (ReadFortnite(), GameStateReader.Read(plans, source, SafeJournal())));
             _fortnite = fortnite;
             foreach (var (id, status) in states) _states[id] = status;
+            if (global is not null && states.TryGetValue(global.Id, out var globalStatus)) ShowGlobalFps(globalStatus);
             Build(games);
         }
         finally { IsLoading = false; }
@@ -527,38 +577,27 @@ public sealed class SimpleGamesPage : ModulePage
         {
             options.Add((Loc.T("Simple.Games.LowLatency"), GameOptionPlans.NvLowLatency(exe)));
             options.Add((Loc.T("Simple.Games.MaxPower"), GameOptionPlans.NvMaxPower(exe)));
-            if (Gpu.SelectedNvFps is { } fps && NvidiaDrsActions.FpsCaps.Contains(fps))
-                options.Add((Loc.F("Simple.Games.FpsCap", fps), GameOptionPlans.NvFpsCap(exe, fps)));
+            // Diretriz do responsável (06/11/2026): o NEXUS nunca LIMITA o FPS; aqui só tira limite (driver e V-Sync forçado).
+            options.Add((Loc.T("Simple.Games.Uncap"), GameOptionPlans.NvUncap(exe)));
         }
         if (windowedPath is not null) options.Add((Loc.T("Simple.Games.Windowed"), GameOptionPlans.Windowed(exe, windowedPath)));
         return new GameDescription(name, exe, fortnite, options);
     }
 
     /// <summary>
-    /// Fortnite (GameUserSettings.ini, sua conta, com o jogo fechado): Modo desempenho; menos atraso (limite 3 abaixo do monitor +
-    /// Reflex nas placas NVIDIA); imagem nítida (sem desfoque). A "mira sem aceleração" não entra: no Windows o jogo já lê o mouse
-    /// direto, e a chave bDisableMouseAcceleration não faz nada (mito no catálogo).
+    /// Fortnite (GameUserSettings.ini, sua conta, com o jogo fechado): Modo desempenho; FPS máximo e menos atraso (sem limite de
+    /// FPS, V-Sync do jogo desligado e Reflex nas placas NVIDIA); imagem nítida (sem desfoque). Nunca põe limite de FPS.
+    /// A "mira sem aceleração" não entra: no Windows o jogo já lê o mouse direto, e a chave bDisableMouseAcceleration não faz nada.
     /// </summary>
     private List<(string, GameOptionPlan)> FortniteOptions()
     {
-        var list = new List<(string, GameOptionPlan)> { (Loc.T("Simple.Games.Fn.Perf"), GameOptionPlans.FortnitePerformance()) };
-        var report = Gpu.Report;
-        var monitors = report?.Monitors ?? [];
-        var monitor = monitors.FirstOrDefault(m => m.Primary) ?? (monitors.Count > 0 ? monitors[0] : null);
-        var cap = monitor is null ? null : FortniteSettings.SuggestedFpsLimit(monitor.Current.Hz);
-        var nvidia = report?.Primary?.Vendor == GpuVendor.Nvidia;
-        if (GameOptionPlans.FortniteLatency(cap, nvidia) is { } latency)
-        {
-            var text = (cap, nvidia) switch
-            {
-                ({ } c, true) => Loc.F("Simple.Games.Fn.LatencyReflex", FortniteSettings.FpsLabel(c)),
-                ({ } c, false) => Loc.F("Simple.Games.Fn.LatencyCap", FortniteSettings.FpsLabel(c)),
-                _ => Loc.T("Simple.Games.Fn.LatencyReflexOnly"),
-            };
-            list.Add((text, latency));
-        }
-        list.Add((Loc.T("Simple.Games.Fn.Clear"), GameOptionPlans.FortniteClear()));
-        return list;
+        var nvidia = Gpu.Report?.Primary?.Vendor == GpuVendor.Nvidia;
+        return
+        [
+            (Loc.T("Simple.Games.Fn.Perf"), GameOptionPlans.FortnitePerformance()),
+            (nvidia ? Loc.T("Simple.Games.Fn.MaxFpsReflex") : Loc.T("Simple.Games.Fn.MaxFps"), GameOptionPlans.FortniteLatency(nvidia)),
+            (Loc.T("Simple.Games.Fn.Clear"), GameOptionPlans.FortniteClear()),
+        ];
     }
 
     private void Build(IReadOnlyList<GameDescription> games)

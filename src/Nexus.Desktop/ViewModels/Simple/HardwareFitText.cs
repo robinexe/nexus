@@ -32,6 +32,7 @@ public static class FitText
         FitReason.Competitive => Loc.T("Fit.Competitive"),
         FitReason.LaptopWifi => Loc.T("Fit.LaptopWifi"),
         FitReason.LaptopCooler => Loc.T("Fit.LaptopCooler"),
+        FitReason.Uncapped => Loc.T("Fit.Uncapped"),
         FitReason.BackgroundCapture => Loc.T("Fit.BackgroundCapture"),
         _ => "",
     };

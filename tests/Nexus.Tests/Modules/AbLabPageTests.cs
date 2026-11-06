@@ -41,12 +41,12 @@ public sealed class AbLabPageTests
     [Fact]
     public void Game_option_plan_becomes_a_candidate_with_the_same_actions_values_arguments_and_level()
     {
-        var plan = GameOptionPlans.NvFpsCap("FortniteLauncher.exe", "141");
-        var c = AbLabCandidates.FromPlan("Limite de 141 FPS", plan);
+        var plan = GameOptionPlans.NvUncap("FortniteLauncher.exe");
+        var c = AbLabCandidates.FromPlan("FPS sem limite", plan);
         Assert.Equal(plan.Id, c.Id);
-        Assert.Equal("Limite de 141 FPS", c.Title);
+        Assert.Equal("FPS sem limite", c.Title);
         Assert.Equal(plan.Requests.Count, c.Actions.Count);
-        Assert.All(c.Actions, a => { Assert.True(a.Admin); Assert.Equal("141", a.Value); Assert.NotNull(a.Arguments); Assert.True(a.Arguments!.ContainsKey("exe")); });
+        Assert.All(c.Actions, a => { Assert.True(a.Admin); Assert.Null(a.Value); Assert.NotNull(a.Arguments); Assert.True(a.Arguments!.ContainsKey("exe")); });
         // E volta exatamente como pedido ao aplicador.
         var back = AbLabCandidates.Requests(c);
         Assert.Equal(plan.Requests.Select(r => (r.Request.ActionId, r.Request.Value, r.Level)), back.Select(r => (r.Request.ActionId, r.Request.Value, r.Level)));

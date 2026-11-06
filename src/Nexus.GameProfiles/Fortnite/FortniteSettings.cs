@@ -50,6 +50,9 @@ public static class FortniteSettings
     public const string ReflexOn = "1";
     public const string ReflexOnBoost = "2";
 
+    /// <summary>FrameRateLimit "sem limite": o jogo roda no máximo que o PC entrega (diretriz: o NEXUS nunca limita FPS sozinho).</summary>
+    public const string FpsUnlimited = "0.000000";
+
     /// <summary>Limites de FPS aceitos (como o jogo grava: float com 6 casas). 0 = sem limite.</summary>
     public static IReadOnlyList<string> FpsLimits { get; } =
     [

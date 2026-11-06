@@ -19,14 +19,17 @@ public sealed class GameOptionStateTests
     /// <summary>Banco de perfis do driver em memória: (exe, ajuste) → leitura. Exe sem perfil = NoProfile; exe "ambíguo" lança.</summary>
     private sealed class FakeDrs : INvidiaDrsReader
     {
+        public const string BaseKey = "<global>";
         public Dictionary<(string Exe, uint Id), DrsReading> Values { get; } = [];
         public HashSet<string> Ambiguous { get; } = new(StringComparer.OrdinalIgnoreCase);
         public string? Unavailable() => null;
 
         public DrsReading Read(DrsTarget target, uint settingId)
         {
-            if (Ambiguous.Contains(target.Exe!)) throw new NvidiaDrsException("NvAPI_DRS_FindApplicationByName", NvApiStatus.ExecutablePathIsAmbiguous);
-            return Values.TryGetValue((target.Exe!.ToLowerInvariant(), settingId), out var r) ? r : DrsReading.NoProfile;
+            var key = target.Exe?.ToLowerInvariant() ?? BaseKey; // perfil global
+            if (Ambiguous.Contains(key)) throw new NvidiaDrsException("NvAPI_DRS_FindApplicationByName", NvApiStatus.ExecutablePathIsAmbiguous);
+            if (target.Exe is null) return Values.TryGetValue((key, settingId), out var b) ? b : new DrsReading(true, "Base Profile", false, null, false, null);
+            return Values.TryGetValue((key, settingId), out var r) ? r : DrsReading.NoProfile;
         }
 
         public void Set(string exe, uint id, uint value) => Values[(exe.ToLowerInvariant(), id)] = new DrsReading(true, "NEXUS - " + exe, true, value, false, value);
@@ -93,16 +96,42 @@ public sealed class GameOptionStateTests
     }
 
     [Fact]
-    public void Nvidia_fps_cap_must_match_the_value_offered()
+    public void Nvidia_uncap_is_on_only_without_fps_limit_and_with_vsync_forced_off()
+    {
+        // Diretriz do responsável (06/11/2026): "nunca limite o FPS". A opção da tela Jogos só TIRA limite.
+        var src = new FakeSource();
+        var plan = GameOptionPlans.NvUncap("cs2.exe");
+        Assert.Equal(OptionState.Off, Status(plan, src, []).State); // V-Sync ainda é "o jogo decide"
+        src.Drs.Set("cs2.exe", NvidiaDrsSettings.VsyncMode, NvidiaDrsSettings.VsyncForceOff);
+        Assert.Equal(OptionState.On, Status(plan, src, []).State);
+        src.Drs.Set("cs2.exe", NvidiaDrsSettings.FrameRateLimit, 141); // limite no perfil do jogo
+        Assert.Equal(OptionState.Off, Status(plan, src, []).State);
+        src.Drs.Set("cs2.exe", NvidiaDrsSettings.FrameRateLimit, 0);
+        Assert.Equal(OptionState.On, Status(plan, src, []).State);
+        // Sem valor próprio no perfil do jogo, vale o global: um limite lá também trava este jogo.
+        src.Drs.Values.Remove(("cs2.exe", NvidiaDrsSettings.FrameRateLimit));
+        src.Drs.Set(FakeDrs.BaseKey, NvidiaDrsSettings.FrameRateLimit, 60);
+        Assert.Equal(OptionState.Off, Status(plan, src, []).State);
+        // Pedidos: tirar o limite e desligar o V-Sync no driver, valores fixos do catálogo, como administrador.
+        Assert.Equal([NvidiaDrsActions.FpsCapOff, NvidiaDrsActions.VsyncOff], plan.Requests.Select(r => r.Request.ActionId));
+        Assert.All(plan.Requests, r => { Assert.Null(r.Request.Value); Assert.Equal(BrokerLevel.Admin, r.Level); Assert.Equal("cs2.exe", r.Request.Arguments!["exe"]); });
+    }
+
+    [Fact]
+    public void Nvidia_global_cap_or_forced_vsync_is_detected_and_the_fix_only_uncaps()
     {
         var src = new FakeSource();
-        var plan = GameOptionPlans.NvFpsCap("cs2.exe", "141");
+        var plan = GameOptionPlans.NvGlobalUncap();
+        Assert.Equal(OptionState.On, Status(plan, src, []).State); // global sem limite e V-Sync padrão
+        src.Drs.Set(FakeDrs.BaseKey, NvidiaDrsSettings.VsyncMode, NvidiaDrsSettings.VsyncForceOn);
         Assert.Equal(OptionState.Off, Status(plan, src, []).State);
-        src.Drs.Set("cs2.exe", NvidiaDrsSettings.FrameRateLimit, 60);
-        Assert.Equal(OptionState.Different, Status(plan, src, []).State);
-        src.Drs.Set("cs2.exe", NvidiaDrsSettings.FrameRateLimit, 141);
-        Assert.Equal(OptionState.On, Status(plan, src, []).State);
-        Assert.Equal("141", Assert.Single(plan.Requests).Request.Value);
+        src.Drs.Set(FakeDrs.BaseKey, NvidiaDrsSettings.VsyncMode, NvidiaDrsSettings.VsyncPassive);
+        src.Drs.Set(FakeDrs.BaseKey, NvidiaDrsSettings.FrameRateLimit, 60);
+        Assert.Equal(OptionState.Off, Status(plan, src, []).State);
+        src.Drs.Ambiguous.Add(FakeDrs.BaseKey);
+        Assert.Equal(OptionState.Unknown, Status(plan, src, []).State); // falha de leitura nunca vira "limitado"
+        Assert.Equal([NvidiaDrsActions.FpsCapOffGlobal, NvidiaDrsActions.VsyncOffGlobal], plan.Requests.Select(r => r.Request.ActionId));
+        Assert.All(plan.Requests, r => Assert.Null(r.Request.Arguments));
     }
 
     [Fact]
@@ -145,7 +174,7 @@ public sealed class GameOptionStateTests
 
     // ------------------------------------------------------------------ Fortnite (GameUserSettings.ini)
 
-    private static FortniteState Ini(string rhi = "dx11", string level = "sm5", string fps = "0.000000", string reflex = "0", string blur = "True") =>
+    private static FortniteState Ini(string rhi = "dx11", string level = "sm5", string fps = "0.000000", string reflex = "0", string blur = "True", string vsync = "False") =>
         FortniteState.FromText($"""
             [D3DRHIPreference]
             PreferredRHI={rhi}
@@ -153,6 +182,7 @@ public sealed class GameOptionStateTests
             [/Script/FortniteGame.FortGameUserSettings]
             FrameRateLimit={fps}
             LatencyTweak2={reflex}
+            bUseVSync={vsync}
             bMotionBlur={blur}
             """);
 
@@ -161,21 +191,35 @@ public sealed class GameOptionStateTests
     {
         var src = new FakeSource();
         var perf = GameOptionPlans.FortnitePerformance();
-        var latency = GameOptionPlans.FortniteLatency("141.000000", nvidia: true)!;
+        var latency = GameOptionPlans.FortniteLatency(nvidia: true);
         var clear = GameOptionPlans.FortniteClear();
         Assert.All([perf, latency, clear], p => Assert.Equal(OptionState.Unknown, Status(p, src, []).State)); // arquivo ainda não existe
 
-        src.Ini = Ini();
+        src.Ini = Ini(fps: "141.000000");
         Assert.All([perf, latency, clear], p => Assert.Equal(OptionState.Off, Status(p, src, []).State));
 
-        src.Ini = Ini(rhi: "dx12", level: "es31", fps: "141.000000", reflex: "1", blur: "False");
+        src.Ini = Ini(rhi: "dx12", level: "es31", fps: "0.000000", reflex: "1", blur: "False");
         Assert.All([perf, latency, clear], p => Assert.Equal(OptionState.On, Status(p, src, []).State));
 
-        src.Ini = Ini(rhi: "dx12", level: "sm6", fps: "60.000000", reflex: "1", blur: "False"); // DX12 completo; limite diferente
+        src.Ini = Ini(rhi: "dx12", level: "sm6", fps: "60.000000", reflex: "1", blur: "False"); // DX12 completo; com limite
         Assert.Equal(OptionState.Off, Status(perf, src, []).State);
         Assert.Equal(OptionState.Off, Status(latency, src, []).State);
-        Assert.Equal(OptionState.On, GameOptionStates.FortniteLatency(Ini(fps: "141", reflex: "2"), "141.000000", nvidia: true)); // Reflex + Boost também
-        Assert.Null(GameOptionPlans.FortniteLatency(null, nvidia: false));
+        Assert.Equal(OptionState.Off, GameOptionStates.FortniteLatency(Ini(reflex: "1", vsync: "True"), nvidia: true)); // V-Sync prende o FPS
+        Assert.Equal(OptionState.On, GameOptionStates.FortniteLatency(Ini(reflex: "2"), nvidia: true)); // Reflex + Boost também
+        Assert.Equal(OptionState.On, GameOptionStates.FortniteLatency(Ini(), nvidia: false));
+    }
+
+    [Fact]
+    public void Fortnite_one_click_never_sets_an_fps_limit()
+    {
+        foreach (var nvidia in new[] { true, false })
+        {
+            var plan = GameOptionPlans.FortniteLatency(nvidia);
+            var fps = plan.Requests.Single(r => r.Request.ActionId == FortniteSettings.FpsLimitAction);
+            Assert.Equal(FortniteSettings.FpsUnlimited, fps.Request.Value);
+            Assert.Contains(plan.Requests, r => r.Request.ActionId == FortniteSettings.VSyncOffAction);
+            Assert.Equal(nvidia, plan.Requests.Any(r => r.Request.ActionId == FortniteSettings.ReflexAction));
+        }
     }
 
     // ------------------------------------------------------------------ diário: o que desfaz

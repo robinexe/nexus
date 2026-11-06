@@ -29,11 +29,12 @@ o par.
 ### Onde aparece
 
 - **Jogos (modo simples)**: no cartão do Fortnite (aparece quando o manifesto da Epic tem o jogo), três opções de um clique
-  com "Feito ✓ — Desfazer": *Mais FPS em PC fraco (Modo desempenho)*, *Menos atraso (Reflex + limite de N FPS)* — o limite é
-  a taxa do monitor principal menos 3; o Reflex só entra com GPU principal NVIDIA — e *Imagem nítida ao virar (sem desfoque)*.
+  com "Feito ✓ — Desfazer": *Mais FPS em PC fraco (Modo desempenho)*, *FPS máximo e menos atraso* — `FrameRateLimit=0.000000`
+  (sem limite), V-Sync do jogo desligado e, com GPU principal NVIDIA, o Reflex. **Diretriz do responsável (06/11/2026): o
+  NEXUS nunca limita o FPS**; o antigo "limite = taxa do monitor − 3" saiu do um clique e da recomendação para notebook — e *Imagem nítida ao virar (sem desfoque)*.
   Mostra o estado atual ("Agora: Modo desempenho · limite 141 FPS · Reflex ligado") e "Feche o Fortnite antes" (ou "o
   Fortnite está aberto agora").
-- **Placa de vídeo › Ajustes por jogo › Fortnite (avançado)**: todas as ações, com escolha de modo, limite e Reflex, estado
+- **Placa de vídeo › Ajustes por jogo › Fortnite (avançado)**: todas as ações, com escolha de modo, limite (já vem em "sem limite"; um limite só se o usuário escolher) e Reflex, estado
   de cada chave, dica pela VRAM da GPU principal.
 - **Aplicar / Testar sem aplicar**: as ações aparecem na lista do catálogo, como as demais.
 

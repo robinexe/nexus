@@ -172,6 +172,53 @@ public static class GameOptionStates
             ? ReadNv(drs, exes, NvidiaDrsSettings.FrameRateLimit, v, 0)
             : OptionState.Unknown;
 
+    /// <summary>
+    /// "FPS sem limite" no driver para o jogo: "Taxa máxima de quadros" desligada (0 ou ausente) e V-Sync forçado desligado, no
+    /// valor que VALE para o executável (o do perfil do jogo; sem valor próprio, o do perfil global). Falha de leitura = sem leitura.
+    /// </summary>
+    public static OptionState NvUncapped(INvidiaDrsReader drs, IReadOnlyList<string> exes)
+    {
+        ArgumentNullException.ThrowIfNull(drs);
+        ArgumentNullException.ThrowIfNull(exes);
+        uint? baseFrl, baseVsync;
+        try
+        {
+            baseFrl = BaseValue(drs.Read(DrsTarget.Base, NvidiaDrsSettings.FrameRateLimit));
+            baseVsync = BaseValue(drs.Read(DrsTarget.Base, NvidiaDrsSettings.VsyncMode));
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { return OptionState.Unknown; }
+        return Combine(exes.Select(exe =>
+        {
+            try
+            {
+                var frl = NvValue(drs.Read(DrsTarget.App(exe), NvidiaDrsSettings.FrameRateLimit)) ?? baseFrl;
+                var vsync = NvValue(drs.Read(DrsTarget.App(exe), NvidiaDrsSettings.VsyncMode)) ?? baseVsync;
+                return frl is null or NvidiaDrsSettings.FpsUnlimited && vsync == NvidiaDrsSettings.VsyncForceOff ? OptionState.On : OptionState.Off;
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { return OptionState.Unknown; }
+        }));
+    }
+
+    /// <summary>
+    /// Perfil GLOBAL do driver sem limite: "Taxa máxima de quadros" desligada e V-Sync que não está forçado em "Ligado" (o padrão,
+    /// "o jogo decide", e o desligado servem). Ligado aqui limita TODOS os jogos sem perfil próprio.
+    /// </summary>
+    public static OptionState NvGlobalUncapped(INvidiaDrsReader drs)
+    {
+        ArgumentNullException.ThrowIfNull(drs);
+        try
+        {
+            if (drs.Unavailable() is not null) return OptionState.Unknown;
+            var frl = BaseValue(drs.Read(DrsTarget.Base, NvidiaDrsSettings.FrameRateLimit));
+            var vsync = BaseValue(drs.Read(DrsTarget.Base, NvidiaDrsSettings.VsyncMode));
+            return frl is null or NvidiaDrsSettings.FpsUnlimited && vsync is not (NvidiaDrsSettings.VsyncForceOn or 0x32610244 or 0x71271021 or 0x13245256)
+                ? OptionState.On : OptionState.Off;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { return OptionState.Unknown; }
+    }
+
+    private static uint? BaseValue(DrsReading r) => r.InProfile ? r.Value : r.Effective;
+
     /// <summary>Otimizações para jogos em janela: token 1 = ligado; 0 ou ausente = desligado.</summary>
     public static OptionState Windowed(int? token) => token == 1 ? OptionState.On : OptionState.Off;
 
@@ -183,14 +230,15 @@ public static class GameOptionStates
         return string.Equals(s.Rhi, "dx12", StringComparison.OrdinalIgnoreCase) && s.IsPerformanceMode ? OptionState.On : OptionState.Off;
     }
 
-    /// <summary>Fortnite "Menos atraso": o limite sugerido (quando há) e o Reflex ligado (nas placas NVIDIA).</summary>
-    public static OptionState FortniteLatency(FortniteState s, string? cap, bool nvidia)
+    /// <summary>Fortnite "FPS máximo e menos atraso": FPS sem limite, V-Sync do jogo desligado e o Reflex ligado (nas placas NVIDIA).</summary>
+    public static OptionState FortniteLatency(FortniteState s, bool nvidia)
     {
         ArgumentNullException.ThrowIfNull(s);
-        if (!s.FileFound || (cap is null && !nvidia)) return OptionState.Unknown;
-        var capOk = cap is null || SameNumber(s.FrameRateLimit, cap);
+        if (!s.FileFound) return OptionState.Unknown;
+        var uncapped = s.FrameRateLimit is null || SameNumber(s.FrameRateLimit, FortniteSettings.FpsUnlimited);
+        var vsyncOff = !string.Equals(s.VSync, "True", StringComparison.OrdinalIgnoreCase);
         var reflexOk = !nvidia || s.Reflex is FortniteSettings.ReflexOn or FortniteSettings.ReflexOnBoost;
-        return capOk && reflexOk ? OptionState.On : OptionState.Off;
+        return uncapped && vsyncOff && reflexOk ? OptionState.On : OptionState.Off;
     }
 
     /// <summary>Fortnite "Imagem nítida": desfoque de movimento desligado.</summary>
@@ -242,13 +290,28 @@ public static class GameOptionPlans
             Parts(NvidiaDrsActions.MaxPower, exes), s => GameOptionStates.NvMaxPower(s.Nvidia, exes));
     }
 
-    /// <param name="fps">Um dos <see cref="NvidiaDrsActions.FpsCaps"/> (allowedValues do catálogo).</param>
-    public static GameOptionPlan NvFpsCap(string exe, string fps)
+    /// <summary>
+    /// "FPS sem limite" no driver para o jogo: tira a "Taxa máxima de quadros" e desliga o V-Sync forçado em cada executável que
+    /// desenha. Substitui o antigo "Limitar FPS" (diretriz do responsável, 06/11/2026: o NEXUS nunca limita o FPS).
+    /// </summary>
+    public static GameOptionPlan NvUncap(string exe)
     {
         var exes = GameOptionStates.NvTargets(exe);
-        return new(exe + "|nv.fps." + fps, [.. exes.Select(e => (new ActionRequest(NvidiaDrsActions.FpsCap, fps, Exe(e)), BrokerLevel.Admin))],
-            Parts(NvidiaDrsActions.FpsCap, exes), s => GameOptionStates.NvFpsCap(s.Nvidia, exes, fps));
+        var requests = exes.SelectMany(e => new[]
+        {
+            (new ActionRequest(NvidiaDrsActions.FpsCapOff, null, Exe(e)), BrokerLevel.Admin),
+            (new ActionRequest(NvidiaDrsActions.VsyncOff, null, Exe(e)), BrokerLevel.Admin),
+        }).ToList();
+        return new(exe + "|nv.uncap", requests, [.. Parts(NvidiaDrsActions.FpsCapOff, exes), .. Parts(NvidiaDrsActions.VsyncOff, exes)],
+            s => GameOptionStates.NvUncapped(s.Nvidia, exes));
     }
+
+    /// <summary>Tira o limite de FPS e o V-Sync forçado do perfil GLOBAL do driver (vale para todos os jogos sem perfil próprio).</summary>
+    public static GameOptionPlan NvGlobalUncap() =>
+        new("global|nv.uncap",
+            [(new ActionRequest(NvidiaDrsActions.FpsCapOffGlobal, null), BrokerLevel.Admin), (new ActionRequest(NvidiaDrsActions.VsyncOffGlobal, null), BrokerLevel.Admin)],
+            [new OptionPart(NvidiaDrsActions.FpsCapOffGlobal), new OptionPart(NvidiaDrsActions.VsyncOffGlobal)],
+            s => GameOptionStates.NvGlobalUncapped(s.Nvidia));
 
     public static GameOptionPlan Windowed(string exe, string exePath) =>
         new(exe + "|windowed", [(new ActionRequest(WindowedAction, null, new Dictionary<string, string> { ["gameExePath"] = exePath }), BrokerLevel.User)],
@@ -260,15 +323,17 @@ public static class GameOptionPlans
             [new OptionPart(FortniteSettings.RhiDx12Action), new OptionPart(FortniteSettings.PerformanceModeAction)],
             s => GameOptionStates.FortnitePerformance(s.Fortnite()));
 
-    /// <summary>Null quando não há o que pedir (sem limite sugerido e placa que não é NVIDIA).</summary>
-    public static GameOptionPlan? FortniteLatency(string? cap, bool nvidia)
+    /// <summary>Fortnite "FPS máximo e menos atraso": FPS sem limite + V-Sync do jogo desligado + Reflex (nas placas NVIDIA).</summary>
+    public static GameOptionPlan FortniteLatency(bool nvidia)
     {
-        var requests = new List<(ActionRequest, BrokerLevel)>();
-        var parts = new List<OptionPart>();
-        if (cap is not null) { requests.Add((new ActionRequest(FortniteSettings.FpsLimitAction, cap), BrokerLevel.User)); parts.Add(new(FortniteSettings.FpsLimitAction)); }
+        var requests = new List<(ActionRequest, BrokerLevel)>
+        {
+            (new ActionRequest(FortniteSettings.FpsLimitAction, FortniteSettings.FpsUnlimited), BrokerLevel.User),
+            (new ActionRequest(FortniteSettings.VSyncOffAction, null), BrokerLevel.User),
+        };
+        var parts = new List<OptionPart> { new(FortniteSettings.FpsLimitAction), new(FortniteSettings.VSyncOffAction) };
         if (nvidia) { requests.Add((new ActionRequest(FortniteSettings.ReflexAction, FortniteSettings.ReflexOn), BrokerLevel.User)); parts.Add(new(FortniteSettings.ReflexAction)); }
-        return requests.Count == 0 ? null
-            : new("fortnite|latency|" + (cap ?? "-") + (nvidia ? "|reflex" : ""), requests, parts, s => GameOptionStates.FortniteLatency(s.Fortnite(), cap, nvidia));
+        return new("fortnite|latency|uncapped" + (nvidia ? "|reflex" : ""), requests, parts, s => GameOptionStates.FortniteLatency(s.Fortnite(), nvidia));
     }
 
     public static GameOptionPlan FortniteClear() =>

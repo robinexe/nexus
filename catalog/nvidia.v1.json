@@ -7,7 +7,14 @@
       "id": "gpu.nv.shadercache.max",
       "version": 1,
       "title": "Cache de sombreador do driver NVIDIA maior (100 GB ou ilimitado)",
-      "i18n": { "en": { "title": "Bigger NVIDIA driver shader cache (100 GB or unlimited)" }, "es": { "title": "Caché de sombreadores del driver NVIDIA más grande (100 GB o ilimitada)" } },
+      "i18n": {
+        "en": {
+          "title": "Bigger NVIDIA driver shader cache (100 GB or unlimited)"
+        },
+        "es": {
+          "title": "Caché de sombreadores del driver NVIDIA más grande (100 GB o ilimitada)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Placa NVIDIA e vários jogos pesados (biblioteca grande). Com poucos jogos o cache padrão já basta.",
       "handlerKind": "NvidiaDrsSetting",
@@ -46,7 +53,14 @@
       "id": "gpu.nv.lowlatency.on.per-app",
       "version": 1,
       "title": "Modo de baixa latência \"Ligado\" neste jogo (driver NVIDIA)",
-      "i18n": { "en": { "title": "Low latency mode \"On\" in this game (NVIDIA driver)" }, "es": { "title": "Modo de baja latencia \"Activado\" en este juego (driver NVIDIA)" } },
+      "i18n": {
+        "en": {
+          "title": "Low latency mode \"On\" in this game (NVIDIA driver)"
+        },
+        "es": {
+          "title": "Modo de baja latencia \"Activado\" en este juego (driver NVIDIA)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Jogo DirectX 9/11 limitado pela placa de vídeo (uso da GPU perto de 100%), sem NVIDIA Reflex. Em DirectX 12/Vulkan ou com Reflex o driver ignora.",
       "handlerKind": "NvidiaDrsSetting",
@@ -86,7 +100,14 @@
       "id": "gpu.nv.power.max.per-app",
       "version": 1,
       "title": "Preferir desempenho máximo neste jogo (driver NVIDIA)",
-      "i18n": { "en": { "title": "Prefer maximum performance in this game (NVIDIA driver)" }, "es": { "title": "Preferir rendimiento máximo en este juego (driver NVIDIA)" } },
+      "i18n": {
+        "en": {
+          "title": "Prefer maximum performance in this game (NVIDIA driver)"
+        },
+        "es": {
+          "title": "Preferir rendimiento máximo en este juego (driver NVIDIA)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Jogo leve ou limitado pela CPU em que a placa fica baixando o clock (FPS oscilando com uso de GPU baixo). Em jogo pesado a placa já fica no máximo.",
       "handlerKind": "NvidiaDrsSetting",
@@ -122,7 +143,14 @@
       "id": "gpu.nv.fps-cap.per-app",
       "version": 1,
       "title": "Limitar o FPS neste jogo pelo driver NVIDIA (taxa máxima de quadros)",
-      "i18n": { "en": { "title": "Limit FPS in this game through the NVIDIA driver (max frame rate)" }, "es": { "title": "Limitar los FPS en este juego con el driver NVIDIA (velocidad máxima de fotogramas)" } },
+      "i18n": {
+        "en": {
+          "title": "Limit FPS in this game through the NVIDIA driver (max frame rate)"
+        },
+        "es": {
+          "title": "Limitar los FPS en este juego con el driver NVIDIA (velocidad máxima de fotogramas)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Monitor G-SYNC/FreeSync (limite 3 abaixo da taxa do monitor) ou jogo que passa muito da taxa do monitor sem limitador próprio. Limitador dentro do jogo, quando existe, é melhor.",
       "handlerKind": "NvidiaDrsSetting",
@@ -183,7 +211,14 @@
       "id": "gpu.nv.vsync.force-on.per-app",
       "version": 1,
       "title": "V-Sync ligado no driver neste jogo (para G-SYNC com limite de FPS)",
-      "i18n": { "en": { "title": "V-Sync on in the driver for this game (for G-SYNC with an FPS limit)" }, "es": { "title": "V-Sync activado en el driver en este juego (para G-SYNC con límite de FPS)" } },
+      "i18n": {
+        "en": {
+          "title": "V-Sync on in the driver for this game (for G-SYNC with an FPS limit)"
+        },
+        "es": {
+          "title": "V-Sync activado en el driver en este juego (para G-SYNC con límite de FPS)"
+        }
+      },
       "classification": "Conditional",
       "condition": "SÓ com monitor G-SYNC/G-SYNC Compatible ligado E limite de FPS abaixo da taxa do monitor (desligue o V-Sync do jogo). Sem G-SYNC, V-Sync ligado aumenta o atraso.",
       "handlerKind": "NvidiaDrsSetting",
@@ -214,6 +249,154 @@
       "reboot": "GameRestart",
       "verification": "NvAPI_DRS_GetSetting relido no perfil do executável: valor do usuário igual ao pedido.",
       "revert": "Devolve o valor que o perfil tinha (do usuário ou o predefinido da NVIDIA). Se o ajuste não existia, ele é tirado do perfil; se o perfil foi criado pelo NEXUS (\"NEXUS - jogo.exe\") e ficou vazio, é removido."
+    },
+    {
+      "id": "gpu.nv.fps-cap.off.per-app",
+      "version": 1,
+      "title": "Tirar o limite de FPS do driver NVIDIA neste jogo (FPS livre)",
+      "i18n": {
+        "en": {
+          "title": "Remove the NVIDIA driver FPS limit for this game (uncapped FPS)"
+        },
+        "es": {
+          "title": "Quitar el límite de FPS del driver NVIDIA en este juego (FPS sin límite)"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "Jogo com \"Taxa máxima de quadros\" ligada no driver (pelo NEXUS antigo, pelo NVIDIA App ou pelo Painel). Sem limite, o jogo roda no máximo que a placa entrega.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "app",
+        "exe": "{exe}",
+        "setting": "0x10835002"
+      },
+      "userParameters": {
+        "exe": "(?i)[A-Za-z0-9 ._()+\\-]{1,64}\\.exe"
+      },
+      "desiredValue": "0",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Taxa máxima de quadros\" = desligada (FRL_FPS_ID 0x10835002 = 0) no perfil do jogo. Valor no perfil do jogo vale mais que o do perfil global, então o jogo fica sem limite do driver mesmo que o global tenha um.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (FRL_FPS_ID 0x10835002; FRL_FPS_DISABLED 0)"
+        }
+      ],
+      "risks": "FPS livre aquece mais a placa e faz a ventoinha girar mais. Em notebook na bateria o consumo sobe. Use o Reflex do jogo, quando houver, para manter o atraso baixo com FPS alto.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil tinha (do usuário ou o predefinido da NVIDIA). Se o ajuste não existia, ele é tirado do perfil; se o perfil foi criado pelo NEXUS (\"NEXUS - jogo.exe\") e ficou vazio, é removido."
+    },
+    {
+      "id": "gpu.nv.vsync.off.per-app",
+      "version": 1,
+      "title": "V-Sync desligado no driver neste jogo (FPS não fica preso na taxa do monitor)",
+      "i18n": {
+        "en": {
+          "title": "V-Sync off in the driver for this game (FPS no longer locked to the monitor refresh rate)"
+        },
+        "es": {
+          "title": "V-Sync desactivado en el driver en este juego (los FPS ya no quedan fijos en la frecuencia del monitor)"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "Jogo com V-Sync forçado no driver (perfil do jogo ou global). V-Sync ligado prende o FPS na taxa do monitor (60, 144...).",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "app",
+        "exe": "{exe}",
+        "setting": "0x00A879CF"
+      },
+      "userParameters": {
+        "exe": "(?i)[A-Za-z0-9 ._()+\\-]{1,64}\\.exe"
+      },
+      "desiredValue": "138504007",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Sincronização vertical\" = Desligada (VSYNCMODE_ID 0x00A879CF, VSYNCMODE_FORCEOFF 0x08416747) no perfil do jogo. O FPS deixa de ficar preso na taxa do monitor, mesmo que o jogo ou o perfil global peçam V-Sync.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (VSYNCMODE_ID 0x00A879CF; FORCEOFF 0x08416747)"
+        }
+      ],
+      "risks": "Sem V-Sync pode aparecer rasgo na imagem (tearing) quando o FPS passa da taxa do monitor. Com monitor G-SYNC/FreeSync o rasgo some dentro da faixa do monitor.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil tinha (do usuário ou o predefinido da NVIDIA). Se o ajuste não existia, ele é tirado do perfil; se o perfil foi criado pelo NEXUS (\"NEXUS - jogo.exe\") e ficou vazio, é removido."
+    },
+    {
+      "id": "gpu.nv.fps-cap.off.global",
+      "version": 1,
+      "title": "Tirar o limite de FPS global do driver NVIDIA (vale para todos os jogos)",
+      "i18n": {
+        "en": {
+          "title": "Remove the global NVIDIA driver FPS limit (applies to every game)"
+        },
+        "es": {
+          "title": "Quitar el límite de FPS global del driver NVIDIA (vale para todos los juegos)"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "\"Taxa máxima de quadros\" ligada no perfil global do driver (NVIDIA App ou Painel de Controle). Ela limita todos os jogos.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "base",
+        "setting": "0x10835002"
+      },
+      "desiredValue": "0",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Taxa máxima de quadros\" = desligada (FRL_FPS_ID 0x10835002 = 0) no perfil global. No perfil global o NEXUS só consegue TIRAR limite, nunca pôr.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (FRL_FPS_ID 0x10835002; FRL_FPS_DISABLED 0)"
+        }
+      ],
+      "risks": "FPS livre aquece mais a placa e faz a ventoinha girar mais. Em notebook na bateria o consumo sobe.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil global tinha (o limite anterior volta) ou tira o ajuste se ele não existia."
+    },
+    {
+      "id": "gpu.nv.vsync.off.global",
+      "version": 1,
+      "title": "V-Sync desligado no driver para todos os jogos",
+      "i18n": {
+        "en": {
+          "title": "V-Sync off in the driver for every game"
+        },
+        "es": {
+          "title": "V-Sync desactivado en el driver para todos los juegos"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "V-Sync forçado como \"Ligado\" no perfil global do driver. Ele prende o FPS de todos os jogos na taxa do monitor.",
+      "handlerKind": "NvidiaDrsSetting",
+      "target": {
+        "profile": "base",
+        "setting": "0x00A879CF"
+      },
+      "desiredValue": "138504007",
+      "desiredType": "UInt32",
+      "mechanism": "Grava no banco de perfis do driver (DRS, %ProgramData%\\NVIDIA Corporation\\Drs) pela NVAPI do próprio driver, o mesmo banco do Painel de Controle NVIDIA e do NVIDIA App. Grava \"Sincronização vertical\" = Desligada (VSYNCMODE_FORCEOFF 0x08416747) no perfil global. No perfil global o NEXUS só consegue desligar o V-Sync, nunca forçar.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "github.com/NVIDIA/nvapi: NvApiDriverSettings.h (VSYNCMODE_ID 0x00A879CF; FORCEOFF 0x08416747)"
+        }
+      ],
+      "risks": "Sem V-Sync pode aparecer rasgo na imagem (tearing) quando o FPS passa da taxa do monitor.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "NvAPI_DRS_GetSetting relido no perfil: valor do usuário igual ao pedido.",
+      "revert": "Devolve o valor que o perfil global tinha (o limite anterior volta) ou tira o ajuste se ele não existia."
     }
   ],
   "rejected": [

@@ -6,12 +6,23 @@ configurações 3D. O código está em `src/Nexus.Lab.Gpu/NvidiaDrs.cs` (lista f
 
 ## O que faz
 
+**Diretriz do responsável (06/11/2026): o NEXUS nunca limita o FPS.** Usuários relataram FPS "travado" depois de usar a
+opção simples "Limitar FPS" (taxa do monitor − 3, ou 60 sem leitura do monitor). Agora a tela Jogos só oferece **FPS sem
+limite** por jogo (`fps-cap.off` + `vsync.off`, recomendado em toda placa NVIDIA, entra no "Aplicar o recomendado") e um
+cartão **Driver NVIDIA (todos os jogos)** que detecta limite de FPS ou V-Sync forçado no perfil global (posto pelo NVIDIA
+App/Painel ou por versões antigas) e tira com um clique. `fps-cap.per-app` e `vsync.force-on.per-app` continuam só no
+avançado, desmarcados, sem recomendação.
+
 | Ação | Perfil | Ajuste (id) | Valor |
 |---|---|---|---|
 | `gpu.nv.lowlatency.on.per-app` | do jogo | Máximo de quadros pré-renderizados, `PRERENDERLIMIT_ID` 0x007BA09E | 1 (= "Modo de baixa latência: Ligado") |
 | `gpu.nv.power.max.per-app` | do jogo | Modo de gerenciamento de energia, `PREFERRED_PSTATE_ID` 0x1057EB71 | 1 `PREFER_MAX` (padrão 5 `OPTIMAL_POWER`) |
 | `gpu.nv.fps-cap.per-app` | do jogo | Taxa máxima de quadros, `FRL_FPS_ID` 0x10835002 | 30…240 da lista `allowedValues` (inclui "taxa − 3" de 60/75/90/100/120/144/165/180/200/240 Hz) |
 | `gpu.nv.vsync.force-on.per-app` | do jogo | Sincronização vertical, `VSYNCMODE_ID` 0x00A879CF | `FORCEON` 0x47814940 = 1199655232 (padrão `PASSIVE` 0x60925292) |
+| `gpu.nv.fps-cap.off.per-app` | do jogo | Taxa máxima de quadros, `FRL_FPS_ID` 0x10835002 | 0 (desligada: FPS sem limite) |
+| `gpu.nv.vsync.off.per-app` | do jogo | Sincronização vertical, `VSYNCMODE_ID` 0x00A879CF | `FORCEOFF` 0x08416747 = 138504007 |
+| `gpu.nv.fps-cap.off.global` | global (base) | Taxa máxima de quadros, `FRL_FPS_ID` 0x10835002 | 0 (só tirar: no global nenhum limite é aceito) |
+| `gpu.nv.vsync.off.global` | global (base) | Sincronização vertical, `VSYNCMODE_ID` 0x00A879CF | `FORCEOFF` 138504007 (só desligar: forçar no global é recusado) |
 | `gpu.nv.shadercache.max` | global (base) | Tamanho do cache de sombreador, `PS_SHADERDISKCACHE_MAX_SIZE_ID` 0x00AC8497 | 102400 (100 GB) ou 4294967295 (ilimitado); unidade MB |
 
 Todas: `privileges: Admin` (gravar no banco do driver exige administrador: NVAPI responde `NVAPI_INVALID_USER_PRIVILEGE`
@@ -19,7 +30,7 @@ sem ele), `persistence: Persistent`, `reboot: GameRestart`, `classification: Con
 escrito em `condition`). Por jogo, o usuário escolhe só o **nome do executável** (`userParameters.exe`,
 `(?i)[A-Za-z0-9 ._()+\-]{1,64}\.exe`; o handler ainda recusa `..` e espaço nas pontas). Nunca um caminho.
 
-Lista fechada (`NvidiaDrsSettings.All`): cada id tem o perfil permitido (energia, latência, FPS e V-Sync só por jogo;
+Lista fechada (`NvidiaDrsSettings.All`): cada id tem o perfil permitido (energia e latência só por jogo; FPS e V-Sync por jogo e, no global, só para tirar limite;
 cache só global), os valores que uma ação pode gravar e a faixa válida para devolver o valor antigo (do cabeçalho). Qualquer
 outro id, valor, tipo ("UInt32" decimal) ou perfil é `Blocked` no Assess e recusado no Apply/Restore.
 

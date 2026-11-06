@@ -235,7 +235,7 @@ public sealed partial class WiringTests
         foreach (var file in new[] { page, text })
             Assert.DoesNotMatch(@"""[a-z]+(\.[a-z0-9-]+)+@\d+""", file);
         // Ida e volta: um plano real da tela Jogos vira pedido com a mesma chave, valor, argumento e nível.
-        var plan = Nexus.Desktop.ViewModels.Simple.GameOptionPlans.NvFpsCap("cs2.exe", "141");
+        var plan = Nexus.Desktop.ViewModels.Simple.GameOptionPlans.NvUncap("cs2.exe");
         var back = Nexus.Desktop.ViewModels.AbLabCandidates.Requests(Nexus.Desktop.ViewModels.AbLabCandidates.FromPlan("x", plan));
         Assert.Equal(plan.Requests.Select(r => (r.Request.ActionId, r.Request.Value, r.Request.Arguments!["exe"], r.Level)),
             back.Select(r => (r.Request.ActionId, r.Request.Value, r.Request.Arguments!["exe"], r.Level)));

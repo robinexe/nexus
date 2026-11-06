@@ -247,6 +247,29 @@ public sealed class NvidiaDrsTests
 
     // ------------------------------------------------------------------ lista fechada
 
+    [Fact]
+    public void Uncapping_values_are_accepted_fps_limit_off_and_vsync_forced_off()
+    {
+        // Diretriz do responsável (06/11/2026): o NEXUS nunca limita FPS; precisa conseguir TIRAR limites do driver.
+        foreach (var (setting, value) in new[] { ("0x10835002", NvidiaDrsSettings.FpsUnlimited), ("0x00A879CF", NvidiaDrsSettings.VsyncForceOff) })
+        {
+            var drs = new FakeDrs();
+            var handler = new NvidiaDrsHandler(drs);
+            var action = Raw(new Dictionary<string, string> { ["profile"] = "app", ["exe"] = "cs2.exe", ["setting"] = setting }, value);
+            Assert.Equal(ApplicabilityKind.Applicable, handler.Assess(action, T.Ctx).Kind);
+            handler.Apply(action);
+            Assert.Equal(1, drs.Writes);
+        }
+        Assert.Equal(138504007u, NvidiaDrsSettings.VsyncForceOff);
+        // No perfil global também: tirar limite e desligar V-Sync (o que o NVIDIA App deixou ligado para todos os jogos).
+        foreach (var (setting, value) in new[] { ("0x10835002", NvidiaDrsSettings.FpsUnlimited), ("0x00A879CF", NvidiaDrsSettings.VsyncForceOff) })
+        {
+            var drs = new FakeDrs();
+            var action = Raw(new Dictionary<string, string> { ["profile"] = "base", ["setting"] = setting }, value);
+            Assert.Equal(ApplicabilityKind.Applicable, new NvidiaDrsHandler(drs).Assess(action, T.Ctx).Kind);
+        }
+    }
+
     [Theory]
     [InlineData("0x12345678", "app", 1u)]       // id fora da lista
     [InlineData("0x1057eb7", "app", 1u)]        // id malformado
@@ -256,7 +279,10 @@ public sealed class NvidiaDrsTests
     [InlineData("0x007BA09E", "app", 3u)]       // só "ligado" (1)
     [InlineData("0x10835002", "app", 1024u)]    // acima de FRL_FPS_MAX
     [InlineData("0x10835002", "app", 5u)]       // abaixo do mínimo útil
-    [InlineData("0x00A879CF", "app", 0x08416747u)] // só FORCEON
+    [InlineData("0x00A879CF", "app", 0x18888888u)] // só FORCEON ou FORCEOFF (Fast Sync, 1/2 da taxa etc. não)
+    [InlineData("0x00A879CF", "app", 0x32610244u)] // 1/2 da taxa: prende o FPS, nunca
+    [InlineData("0x10835002", "base", 60u)]     // no global só TIRAR limite (0), nunca pôr
+    [InlineData("0x00A879CF", "base", 0x47814940u)] // no global só desligar o V-Sync, nunca forçar
     [InlineData("0x00AC8497", "app", 102400u)]  // cache só no global
     [InlineData("0x00AC8497", "base", 1024u)]   // tamanho fora das opções
     public void Settings_or_values_outside_the_allowlist_are_blocked(string setting, string profile, uint value)

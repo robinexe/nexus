@@ -80,13 +80,8 @@ public sealed partial class GpuLabPage
                        Show(state.Reflex), Show(state.VSync), Show(state.MotionBlur), Show(state.Shadows), Show(state.Grass)) +
                    (running ? " " + Loc.T("Gpu.Fn.RunningNow") : "");
         if (FnModes.FirstOrDefault(m => string.Equals(m.Value, state.FeatureLevel, StringComparison.OrdinalIgnoreCase)) is { } mode) SelectedFnMode = mode;
-        if (FnFpsOptions.FirstOrDefault(o => o.Value == state.FrameRateLimit) is { } fps && fps.Value != "0.000000") SelectedFnFps = fps;
-        else
-        {
-            var monitors = r.Monitors;
-            var monitor = monitors.FirstOrDefault(m => m.Primary) ?? (monitors.Count > 0 ? monitors[0] : null);
-            if (monitor is not null && FortniteSettings.SuggestedFpsLimit(monitor.Current.Hz) is { } cap && FnFpsOptions.FirstOrDefault(o => o.Value == cap) is { } c) SelectedFnFps = c;
-        }
+        // Diretriz (06/11/2026): o NEXUS nunca sugere limite de FPS. Mostra o valor atual; sem valor, "sem limite".
+        SelectedFnFps = FnFpsOptions.FirstOrDefault(o => o.Value == state.FrameRateLimit) ?? FnFpsOptions[0];
         var gpu = r.Primary;
         var vramGb = gpu is null ? 0 : gpu.DedicatedVideoBytes / (1024.0 * 1024 * 1024);
         FnHint = gpu is null ? "" : vramGb >= 8 ? Loc.F("Gpu.Fn.HintStrong", gpu.Name, vramGb) : Loc.F("Gpu.Fn.HintWeak", gpu.Name, vramGb);

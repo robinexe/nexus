@@ -610,6 +610,19 @@
           </DockPanel>
         </Border>
 
+        <!-- Limite de FPS do driver NVIDIA em todos os jogos (perfil global): o NEXUS só tira limite, nunca põe. -->
+        <Border Style="{StaticResource S.Card}" Margin="0,0,0,24" Visibility="{Binding HasGlobalFps, Converter={StaticResource BoolToVis}}">
+          <DockPanel>
+            <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding GlobalFpsAction}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"
+                            Visibility="{Binding HasGlobalFpsAction, Converter={StaticResource BoolToVis}}"/>
+            <Grid Width="44" Height="44" Margin="0,0,16,0" VerticalAlignment="Top">
+              <Ellipse Fill="{Binding GlobalFpsTone, Converter={StaticResource ToneBrush}, ConverterParameter=soft}"/>
+              <c:Icon Data="{StaticResource Icon.Games}" Size="21" Foreground="{Binding GlobalFpsTone, Converter={StaticResource ToneBrush}}" HorizontalAlignment="Center"/>
+            </Grid>
+            <TextBlock Text="{Binding GlobalFpsText}" Style="{StaticResource S.Item}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+          </DockPanel>
+        </Border>
+
         <!-- Sessão de jogo (desligada por padrão): limite temporário dos downloads da Microsoft enquanto o jogo está aberto. -->
         <Border Style="{StaticResource S.Card}" DataContext="{Binding Session}">
           <StackPanel>

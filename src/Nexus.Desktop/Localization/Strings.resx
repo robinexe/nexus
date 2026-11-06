@@ -3950,7 +3950,7 @@ Começar agora?</value></data>
   <data name="Simple.Games.Measure" xml:space="preserve"><value>Medir FPS</value></data>
   <data name="Simple.Games.LowLatency" xml:space="preserve"><value>Menos atraso nos comandos</value></data>
   <data name="Simple.Games.MaxPower" xml:space="preserve"><value>Placa de vídeo sempre no máximo</value></data>
-  <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Limitar FPS para ficar mais estável ({0} FPS)</value></data>
+  <data name="Simple.Games.Uncap" xml:space="preserve"><value>FPS sem limite (tira limite e V-Sync forçado do driver)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Jogo em janela mais fluido</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problemas</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>O que precisa de você e como resolver.</value></data>
@@ -3997,9 +3997,13 @@ Cada coisa volta como era antes. O que é do sistema pede permissão de administ
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ligar "{1}"? O Windows pede permissão de administrador. Dá para desfazer.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>Ligar o Modo de jogo do Windows? Dá para desfazer.</value></data>
   <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>Mais FPS em PC fraco (Modo desempenho)</value></data>
-  <data name="Simple.Games.Fn.LatencyReflex" xml:space="preserve"><value>Menos atraso (Reflex + limite de {0} FPS)</value></data>
-  <data name="Simple.Games.Fn.LatencyCap" xml:space="preserve"><value>Menos atraso (limite de {0} FPS)</value></data>
-  <data name="Simple.Games.Fn.LatencyReflexOnly" xml:space="preserve"><value>Menos atraso (NVIDIA Reflex)</value></data>
+  <data name="Simple.Games.Fn.MaxFpsReflex" xml:space="preserve"><value>FPS máximo e menos atraso (sem limite de FPS + Reflex)</value></data>
+  <data name="Simple.Games.Fn.MaxFps" xml:space="preserve"><value>FPS máximo (sem limite de FPS e sem V-Sync)</value></data>
+  <data name="Simple.Games.GlobalFpsFree" xml:space="preserve"><value>Driver NVIDIA: nenhum limite de FPS para os jogos</value></data>
+  <data name="Simple.Games.GlobalFpsCapped" xml:space="preserve"><value>O driver NVIDIA está limitando o FPS de todos os jogos (limite de FPS ou V-Sync forçado). Libere para o jogo rodar no máximo que a placa entrega.</value></data>
+  <data name="Simple.Games.GlobalFpsFix" xml:space="preserve"><value>Liberar FPS</value></data>
+  <data name="Simple.Games.GlobalFpsTitle" xml:space="preserve"><value>Driver NVIDIA (todos os jogos)</value></data>
+  <data name="Simple.Games.ConfirmGlobalFps" xml:space="preserve"><value>Tirar o limite de FPS e o V-Sync forçado do driver NVIDIA para todos os jogos? A placa vai trabalhar no máximo (mais calor e ventoinha). O Windows pede permissão de administrador. Dá para desfazer.</value></data>
   <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Imagem nítida ao virar (sem desfoque de movimento)</value></data>
   <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: ligar "{0}"? Feche o Fortnite antes. Dá para desfazer.</value></data>
   <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Feche o Fortnite antes: aberto, ele regrava as configurações ao sair. A mira já não tem aceleração: o jogo lê o mouse direto.</value></data>
@@ -4439,6 +4443,7 @@ São {2} partidas de pelo menos 3 minutos. Entre elas, o NEXUS aplica o ajuste p
   <data name="Fit.Competitive" xml:space="preserve"><value>Recomendado para você: menos atraso nos comandos</value></data>
   <data name="Fit.LaptopWifi" xml:space="preserve"><value>Recomendado para notebook: o Wi-Fi não dorme entre pacotes e o ping fica estável</value></data>
   <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recomendado para notebook: menos calor e ruído</value></data>
+  <data name="Fit.Uncapped" xml:space="preserve"><value>Recomendado: tira o limite e o jogo roda no máximo de FPS</value></data>
   <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recomendado para o seu PC: a gravação em segundo plano ocupa a placa de vídeo</value></data>
   <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Aplicar o recomendado</value></data>
   <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Aplicar o recomendado para este PC (as opções marcadas acima, de uma vez)</value></data>

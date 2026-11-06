@@ -46,10 +46,12 @@ public enum FitReason
     Competitive,
     /// <summary>Notebook: economia de energia do Wi-Fi na bateria faz o ping oscilar.</summary>
     LaptopWifi,
-    /// <summary>Notebook: limitar o FPS reduz calor e ruído.</summary>
+    /// <summary>Notebook: menos calor e ruído (público "notebook" das opções de jogo; o NEXUS não limita FPS por isso).</summary>
     LaptopCooler,
     /// <summary>Notebook ou placa fraca: gravação contínua em segundo plano ocupa o codificador de vídeo.</summary>
     BackgroundCapture,
+    /// <summary>Tira um limite de FPS (driver, V-Sync forçado): o jogo roda no máximo que o PC entrega.</summary>
+    Uncapped,
 }
 
 /// <summary>Veredito + motivo. <see cref="Neutral"/> quando não há regra com mecanismo claro para este PC.</summary>
@@ -128,6 +130,9 @@ public static class HardwareRules
                 "gpu.nv.power.max.per-app" => profile.OnBattery == true ? Fit.No(FitReason.OnBattery) : profile.IsLaptop == true ? Fit.No(FitReason.LaptopHeat)
                     : profile.Competitive ? Fit.Yes(FitReason.Competitive) : Fit.Neutral,
                 "gpu.nv.lowlatency.on.per-app" => profile.Competitive ? Fit.Yes(FitReason.Competitive) : Fit.Neutral,
+                // Diretriz do responsável (06/11/2026): FPS nunca limitado. Tirar limite é recomendado em toda placa NVIDIA;
+                // pôr limite (fps-cap.per-app, vsync.force-on) fica neutro: só manual, no avançado.
+                "gpu.nv.fps-cap.off.per-app" or "gpu.nv.vsync.off.per-app" or "gpu.nv.fps-cap.off.global" or "gpu.nv.vsync.off.global" => Fit.Yes(FitReason.Uncapped),
                 _ => Fit.Neutral,
             };
         }
@@ -145,7 +150,8 @@ public static class HardwareRules
             case "fortnite.visual.shadows.off":
                 return profile.WeakGpu ? Fit.Yes(FitReason.WeakGpuRelief) : profile.Competitive ? Fit.Yes(FitReason.Competitive) : Fit.Neutral;
             case "fortnite.fps.limit":
-                return profile.IsLaptop == true ? Fit.Yes(FitReason.LaptopCooler) : Fit.Neutral;
+                // O NEXUS só usa esta ação para TIRAR o limite (0 = sem limite); nunca é recomendada como limite, nem em notebook.
+                return Fit.Neutral;
             case "fortnite.display.vsync.off" or "fortnite.visual.motion-blur.off":
                 return profile.Competitive ? Fit.Yes(FitReason.Competitive) : Fit.Neutral;
         }

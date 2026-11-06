@@ -3950,7 +3950,7 @@ Solo entra lo que es de bajo riesgo y se puede deshacer en Historial. Windows pe
   <data name="Simple.Games.Measure" xml:space="preserve"><value>Medir FPS</value></data>
   <data name="Simple.Games.LowLatency" xml:space="preserve"><value>Menos retraso en los controles</value></data>
   <data name="Simple.Games.MaxPower" xml:space="preserve"><value>Tarjeta gráfica siempre al máximo</value></data>
-  <data name="Simple.Games.FpsCap" xml:space="preserve"><value>Limitar los FPS para que vaya más estable ({0} FPS)</value></data>
+  <data name="Simple.Games.Uncap" xml:space="preserve"><value>FPS sin límite (quita el límite y el V-Sync forzado del driver)</value></data>
   <data name="Simple.Games.Windowed" xml:space="preserve"><value>Juego en ventana más fluido</value></data>
   <data name="Simple.Problems.Title" xml:space="preserve"><value>Problemas</value></data>
   <data name="Simple.Problems.Subtitle" xml:space="preserve"><value>Lo que necesita de ti y cómo resolverlo.</value></data>
@@ -3997,9 +3997,13 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ¿activar "{1}"? Windows pide permiso de administrador. Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>¿Activar el Modo de juego de Windows? Se puede deshacer.</value></data>
   <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>Más FPS en PC débil (Modo rendimiento)</value></data>
-  <data name="Simple.Games.Fn.LatencyReflex" xml:space="preserve"><value>Menos retraso (Reflex + límite de {0} FPS)</value></data>
-  <data name="Simple.Games.Fn.LatencyCap" xml:space="preserve"><value>Menos retraso (límite de {0} FPS)</value></data>
-  <data name="Simple.Games.Fn.LatencyReflexOnly" xml:space="preserve"><value>Menos retraso (NVIDIA Reflex)</value></data>
+  <data name="Simple.Games.Fn.MaxFpsReflex" xml:space="preserve"><value>FPS máximos y menos retraso (sin límite de FPS + Reflex)</value></data>
+  <data name="Simple.Games.Fn.MaxFps" xml:space="preserve"><value>FPS máximos (sin límite de FPS y sin V-Sync)</value></data>
+  <data name="Simple.Games.GlobalFpsFree" xml:space="preserve"><value>Driver NVIDIA: ningún límite de FPS para los juegos</value></data>
+  <data name="Simple.Games.GlobalFpsCapped" xml:space="preserve"><value>El driver NVIDIA está limitando los FPS de todos los juegos (límite de FPS o V-Sync forzado). Libéralos para que el juego vaya al máximo que da la tarjeta.</value></data>
+  <data name="Simple.Games.GlobalFpsFix" xml:space="preserve"><value>Liberar FPS</value></data>
+  <data name="Simple.Games.GlobalFpsTitle" xml:space="preserve"><value>Driver NVIDIA (todos los juegos)</value></data>
+  <data name="Simple.Games.ConfirmGlobalFps" xml:space="preserve"><value>¿Quitar el límite de FPS y el V-Sync forzado del driver NVIDIA para todos los juegos? La tarjeta trabajará al máximo (más calor y ventilador). Windows pide permiso de administrador. Se puede deshacer.</value></data>
   <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Imagen nítida al girar (sin desenfoque de movimiento)</value></data>
   <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: ¿activar "{0}"? Cierra Fortnite antes. Se puede deshacer.</value></data>
   <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Cierra Fortnite antes: abierto, reescribe la configuración al salir. La mira ya no tiene aceleración: el juego lee el ratón directamente.</value></data>
@@ -4439,6 +4443,7 @@ Son {2} partidas de al menos 3 minutos. Entre ellas, NEXUS aplica el ajuste con 
   <data name="Fit.Competitive" xml:space="preserve"><value>Recomendado para ti: menos retraso en los comandos</value></data>
   <data name="Fit.LaptopWifi" xml:space="preserve"><value>Recomendado para portátil: el Wi-Fi no se duerme entre paquetes y el ping queda estable</value></data>
   <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recomendado para portátil: menos calor y ruido</value></data>
+  <data name="Fit.Uncapped" xml:space="preserve"><value>Recomendado: quita el límite y el juego va al máximo de FPS</value></data>
   <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recomendado para tu PC: la grabación en segundo plano ocupa la tarjeta gráfica</value></data>
   <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Aplicar lo recomendado</value></data>
   <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Aplicar lo recomendado para este PC (las opciones marcadas arriba, de una vez)</value></data>

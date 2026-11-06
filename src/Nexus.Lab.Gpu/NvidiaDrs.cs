@@ -138,7 +138,14 @@ public sealed class NoNvidiaDrs : INvidiaDrs
 /// <param name="ApplyValue">Valores que uma ação pode gravar (o que o catálogo oferece).</param>
 /// <param name="RestoreValue">Valores válidos segundo NvApiDriverSettings.h (para devolver o que o usuário tinha).</param>
 public sealed record NvidiaDrsSettingSpec(uint Id, string Name, DrsProfileKind Scope, Func<uint, bool> ApplyValue, Func<uint, bool> RestoreValue,
-    Func<uint, string> Describe);
+    Func<uint, string> Describe, Func<uint, bool>? OtherScopeApplyValue = null)
+{
+    /// <summary>
+    /// Valor aceito para gravar neste tipo de perfil. No escopo próprio vale <see cref="ApplyValue"/>; no outro escopo só o que
+    /// <see cref="OtherScopeApplyValue"/> deixar (ex.: no perfil global, só TIRAR limite de FPS e V-Sync forçado, nunca pôr).
+    /// </summary>
+    public bool Accepts(DrsProfileKind kind, uint value) => kind == Scope ? ApplyValue(value) : OtherScopeApplyValue?.Invoke(value) == true;
+}
 
 /// <summary>
 /// Lista FECHADA de ajustes do driver que o NEXUS pode tocar. Ids e valores conferidos em NvApiDriverSettings.h (NVIDIA/nvapi,
@@ -157,6 +164,8 @@ public static partial class NvidiaDrsSettings
     public const uint LowLatencyOn = 1;                  // 1 quadro pré-renderizado = "Modo de baixa latência: Ligado"
     public const uint VsyncForceOn = 0x47814940;         // VSYNCMODE_FORCEON
     public const uint VsyncPassive = 0x60925292;         // VSYNCMODE_PASSIVE (padrão: o app decide)
+    public const uint VsyncForceOff = 0x08416747;        // VSYNCMODE_FORCEOFF (FPS livre, sem preso na taxa do monitor)
+    public const uint FpsUnlimited = 0;                  // FRL_FPS_ID desligado: sem limite de FPS no driver
     public const uint ShaderCache100Gb = 102400;         // MB
     public const uint ShaderCacheUnlimited = 0xFFFFFFFF; // PS_SHADERDISKCACHE_MAX_SIZE_MAX
     public const uint ShaderCacheDefaultMb = 0x4000;     // PS_SHADERDISKCACHE_MAX_SIZE_DEFAULT (cabeçalho atual)
@@ -177,13 +186,14 @@ public static partial class NvidiaDrsSettings
         [PrerenderLimit] = new(PrerenderLimit, "Modo de baixa latência (quadros pré-renderizados)", DrsProfileKind.App,
             v => v == LowLatencyOn, v => v <= 0xFF, v => v switch { 0 => "o jogo decide (padrão)", 1 => "ligado (1 quadro)", _ => $"{v} quadros" }),
         [FrameRateLimit] = new(FrameRateLimit, "Taxa máxima de quadros", DrsProfileKind.App,
-            v => v is >= FpsMin and <= FpsMax, v => v <= FpsMax, v => v == 0 ? "desligada" : $"{v} FPS"),
+            v => v == FpsUnlimited || v is >= FpsMin and <= FpsMax, v => v <= FpsMax, v => v == 0 ? "desligada" : $"{v} FPS",
+            v => v == FpsUnlimited),
         [VsyncMode] = new(VsyncMode, "Sincronização vertical", DrsProfileKind.App,
-            v => v == VsyncForceOn, v => VsyncValues.Contains(v), v => v switch
+            v => v is VsyncForceOn or VsyncForceOff, v => VsyncValues.Contains(v), v => v switch
             {
                 0x60925292 => "o jogo decide (padrão)", 0x08416747 => "desligada", 0x47814940 => "ligada", 0x18888888 => "rápida (Fast Sync)",
                 0x32610244 => "1/2 da taxa", 0x71271021 => "1/3 da taxa", 0x13245256 => "1/4 da taxa", _ => Hex(v),
-            }),
+            }, v => v == VsyncForceOff),
         [ShaderCacheMaxSize] = new(ShaderCacheMaxSize, "Tamanho do cache de sombreador", DrsProfileKind.Base,
             v => v is ShaderCache100Gb or ShaderCacheUnlimited, _ => true, v => v switch
             {
@@ -239,7 +249,7 @@ public static partial class NvidiaDrsSettings
             reason = "Perfil inválido (esperado base ou app).";
             return null;
         }
-        if (target.Kind != spec.Scope)
+        if (target.Kind != spec.Scope && spec.OtherScopeApplyValue is null)
         {
             reason = spec.Scope == DrsProfileKind.App ? $"{spec.Name} só é aplicado por jogo, nunca no perfil global." : $"{spec.Name} só é aplicado no perfil global.";
             return null;
@@ -286,7 +296,7 @@ public sealed class NvidiaDrsHandler : IActionHandler, IRestoreValidator
         if (NvidiaDrsSettings.ParseTarget(action.Target, out var why) is not { } parsed) return Applicability.Blocked(why!);
         if (action.Desired.Exists)
         {
-            if (NvidiaDrsSettings.ParseValue(action.Desired) is not { } v || !parsed.Spec.ApplyValue(v))
+            if (NvidiaDrsSettings.ParseValue(action.Desired) is not { } v || !parsed.Spec.Accepts(parsed.Target.Kind, v))
                 return Applicability.Blocked($"Valor {action.Desired.Describe()} não é aceito para {parsed.Spec.Name}.");
         }
         if (_drs.Unavailable() is { } reason) return Applicability.NotApplicable(reason);
@@ -314,7 +324,7 @@ public sealed class NvidiaDrsHandler : IActionHandler, IRestoreValidator
     {
         ArgumentNullException.ThrowIfNull(action);
         if (NvidiaDrsSettings.ParseTarget(action.Target, out var why) is not { } parsed) throw new InvalidOperationException(why);
-        if (NvidiaDrsSettings.ParseValue(action.Desired) is not { } v || !parsed.Spec.ApplyValue(v))
+        if (NvidiaDrsSettings.ParseValue(action.Desired) is not { } v || !parsed.Spec.Accepts(parsed.Target.Kind, v))
             throw new InvalidOperationException($"Valor {action.Desired.Describe()} não é aceito para {parsed.Spec.Name}.");
         _drs.SetUserValue(parsed.Target, parsed.Spec.Id, v);
     }
@@ -355,6 +365,14 @@ public static class NvidiaDrsActions
     public const string MaxPower = "gpu.nv.power.max.per-app@1";
     public const string FpsCap = "gpu.nv.fps-cap.per-app@1";
     public const string VsyncOn = "gpu.nv.vsync.force-on.per-app@1";
+    /// <summary>Tira o limite de FPS do driver neste jogo (FRL = 0). Diretriz: o NEXUS nunca limita FPS por conta própria.</summary>
+    public const string FpsCapOff = "gpu.nv.fps-cap.off.per-app@1";
+    /// <summary>V-Sync desligado no driver neste jogo: o FPS deixa de ficar preso na taxa do monitor.</summary>
+    public const string VsyncOff = "gpu.nv.vsync.off.per-app@1";
+    /// <summary>Tira a "Taxa máxima de quadros" do perfil GLOBAL do driver (posta pelo NVIDIA App/Painel, vale para todo jogo).</summary>
+    public const string FpsCapOffGlobal = "gpu.nv.fps-cap.off.global@1";
+    /// <summary>V-Sync desligado no perfil GLOBAL do driver (quando alguém forçou "Ligado" para todos os jogos).</summary>
+    public const string VsyncOffGlobal = "gpu.nv.vsync.off.global@1";
 
     /// <summary>allowedValues de gpu.nv.fps-cap.per-app: valores redondos e "taxa − 3" dos monitores comuns (60…240 Hz).</summary>
     public static readonly IReadOnlyList<string> FpsCaps =

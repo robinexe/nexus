@@ -215,6 +215,20 @@ public sealed class HardwareRecommendationTests
     }
 
     [Fact]
+    public void Removing_fps_caps_is_recommended_on_nvidia_and_setting_caps_never_is()
+    {
+        foreach (var id in new[] { "gpu.nv.fps-cap.off.per-app@1", "gpu.nv.vsync.off.per-app@1", "gpu.nv.fps-cap.off.global@1", "gpu.nv.vsync.off.global@1" })
+        {
+            Assert.Equal(Fit.Yes(FitReason.Uncapped), HardwareRules.ForAction(Profile(maker: GpuMaker.Nvidia), id));
+            Assert.Equal(Fit.Yes(FitReason.Uncapped), HardwareRules.ForAction(Profile(maker: GpuMaker.Nvidia, laptop: true), id));
+            Assert.Equal(Fit.No(FitReason.NotNvidia), HardwareRules.ForAction(Profile(maker: GpuMaker.Amd), id));
+        }
+        foreach (var p in new[] { Profile(), Profile(laptop: true), Profile(competitive: true), Profile(maker: GpuMaker.Nvidia, laptop: true) })
+            foreach (var cap in new[] { "gpu.nv.fps-cap.per-app@1", "gpu.nv.vsync.force-on.per-app@1", "fortnite.fps.limit@1", "cs2.cfg.fps_max@1" })
+                Assert.False(HardwareRules.ForAction(p, cap).IsRecommended, $"{cap} recomendado em {p}");
+    }
+
+    [Fact]
     public void Competitive_is_a_preference_not_hardware()
     {
         var p = Profile(competitive: true);
@@ -231,7 +245,8 @@ public sealed class HardwareRecommendationTests
     {
         var p = Profile(laptop: true);
         Assert.Equal(Fit.Yes(FitReason.LaptopWifi), HardwareRules.ForAction(p, "net.wifi.power-saving.dc-max-perf@1"));
-        Assert.Equal(Fit.Yes(FitReason.LaptopCooler), HardwareRules.ForAction(p, "fortnite.fps.limit@1"));
+        // Diretriz do responsável (06/11/2026): limite de FPS nunca é recomendado, nem em notebook.
+        Assert.Equal(Fit.Neutral, HardwareRules.ForAction(p, "fortnite.fps.limit@1"));
         Assert.Equal(Fit.Yes(FitReason.BackgroundCapture), HardwareRules.ForAction(p, "win.gamedvr.background-capture.disable@1"));
         Assert.Equal(Fit.Yes(FitReason.LaptopHeat), HardwareRules.ForAction(p, "sys.ui.transparency.off@1"));
         Assert.Equal(Fit.Neutral, HardwareRules.ForAction(Profile(), "net.wifi.power-saving.dc-max-perf@1"));

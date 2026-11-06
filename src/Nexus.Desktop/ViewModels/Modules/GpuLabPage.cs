@@ -54,7 +54,7 @@ public sealed partial class GpuLabPage : ModulePage
         ApplyWindowedCommand = new RelayCommand(() => _ = ApplyWindowedAsync(), () => !Busy && SelectedWindowedGame is { IsOn: false });
         ApplyCs2FpsCommand = new RelayCommand(() => _ = ApplyCs2FpsAsync(), () => !Busy && _cs2CfgDir is not null && SelectedCs2Fps is not null);
         foreach (var v in Cs2Install.FpsMaxValues) Cs2FpsOptions.Add(v);
-        _selectedCs2Fps = "400";
+        _selectedCs2Fps = "0"; // sem limite: o NEXUS nunca sugere limitar FPS
         foreach (var f in NvidiaDrsActions.FpsCaps) NvFpsOptions.Add(f);
         ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[0], Loc.T("Gpu.N100Gb")));
         ShaderCacheOptions.Add(new NvChoice(NvidiaDrsActions.ShaderCacheValues[1], Loc.T("Gpu.Ilimitado")));
