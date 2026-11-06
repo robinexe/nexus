@@ -66,6 +66,7 @@ public static class AutoPilot
         "fps.dwm.mpo.disable", "fps.dwm.overlay-minfps.zero",                // correções de defeito, não ganho
         "net.ipv6.prefer-ipv4", "sys.notifications.toasts.off",              // preferência, não ganho
         "memorylab.standby.purge",                                           // momentâneo, não desfaz
+        "cpulab.sched.prefer-performant.ac", "cpulab.sched-short.prefer-performant.ac", // laboratório: só com medição (pode piorar)
         // Game Pass, login Xbox e a detecção de jogo dos Ryzen X3D dependem destes; impressora é recurso que a pessoa usa.
         "boot.service.xblauthmanager.disabled", "boot.service.xblgamesave.disabled", "boot.service.xboxnetapisvc.disabled",
         "boot.service.spooler.disabled", "boot.service.fax.disabled",
