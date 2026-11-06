@@ -1,0 +1,727 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Configuração de jogos pelo handler GameConfigValue (src/Nexus.GameProfiles/Configs): lista fechada de jogos, chaves e valores do menu de cada jogo; o NEXUS só troca o valor de uma linha que o jogo já gravou, com o jogo fechado. Pesquisa de 06/11/2026; ver docs/modules/jogos-config.md.",
+  "actions": [
+    {
+      "id": "minecraft.cfg.vsync.off",
+      "version": 1,
+      "title": "Minecraft: V-Sync desligado",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: V-Sync off"
+        },
+        "es": {
+          "title": "Minecraft: V-Sync desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Minecraft instalado e aberto pelo menos uma vez (o arquivo options.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "enableVsync"
+      },
+      "desiredValue": "false",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft: O padrão do Minecraft é V-Sync LIGADO, que prende o FPS na taxa do monitor. Desligado, o jogo roda no máximo que o PC entrega (o maior ganho do arquivo). Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "minecraft.cfg.maxfps.unlimited",
+      "version": 1,
+      "title": "Minecraft: FPS máximo: Ilimitado",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: Max FPS: Unlimited"
+        },
+        "es": {
+          "title": "Minecraft: FPS máximos: Ilimitado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Minecraft instalado e aberto pelo menos uma vez (o arquivo options.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "maxFps"
+      },
+      "desiredValue": "260",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft: maxFps 260 é a posição \"Ilimitado\" do controle deslizante (padrão 120). Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Mais calor e consumo. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "minecraft.cfg.graphics.fast",
+      "version": 1,
+      "title": "Minecraft: Gráficos: Rápido",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: Graphics: Fast"
+        },
+        "es": {
+          "title": "Minecraft: Gráficos: Rápido"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Minecraft instalado e aberto pelo menos uma vez (o arquivo options.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "graphicsMode"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft: graphicsMode 0 = Rápido (padrão Elegante): menos transparências e efeitos, mais FPS. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Visual mais simples. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "minecraft.cfg.clouds.off",
+      "version": 1,
+      "title": "Minecraft: Nuvens desligadas",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: Clouds off"
+        },
+        "es": {
+          "title": "Minecraft: Nubes desactivadas"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Minecraft instalado e aberto pelo menos uma vez (o arquivo options.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "renderClouds"
+      },
+      "desiredValue": "false",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft: Nuvens desligadas tiram custo de renderização no céu. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Sem nuvens. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "minecraft.cfg.particles.minimal",
+      "version": 1,
+      "title": "Minecraft: Partículas: Mínimo",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: Particles: Minimal"
+        },
+        "es": {
+          "title": "Minecraft: Partículas: Mínimo"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Minecraft instalado e aberto pelo menos uma vez (o arquivo options.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "particles"
+      },
+      "desiredValue": "2",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft: particles 2 = Mínimo: menos efeitos de explosão, chuva e blocos quebrando. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Menos efeitos visuais. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "minecraft.cfg.entity-shadows.off",
+      "version": 1,
+      "title": "Minecraft: Sombras de entidades desligadas",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: Entity shadows off"
+        },
+        "es": {
+          "title": "Minecraft: Sombras de entidades desactivadas"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Minecraft instalado e aberto pelo menos uma vez (o arquivo options.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "entityShadows"
+      },
+      "desiredValue": "false",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft: Desliga as sombras redondas sob mobs e jogadores. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Visual mais simples. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "r6.cfg.fps-limit.off",
+      "version": 1,
+      "title": "Rainbow Six Siege: FPS sem limite",
+      "i18n": {
+        "en": {
+          "title": "Rainbow Six Siege: Uncapped FPS"
+        },
+        "es": {
+          "title": "Rainbow Six Siege: FPS sin límite"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Rainbow Six Siege instalado e aberto pelo menos uma vez (o arquivo GameSettings.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "r6",
+        "key": "FPSLimit"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "GameSettings.ini do Rainbow Six Siege: FPSLimit 0 (abaixo de 30 = sem limite, como o próprio arquivo explica). Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://siege.gg/news/how-to-increase-fps-in-rainbow-six-siege-for-max-performance"
+        }
+      ],
+      "risks": "Mais calor e consumo. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no GameSettings.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "r6.cfg.reflex.boost",
+      "version": 1,
+      "title": "Rainbow Six Siege: NVIDIA Reflex ligado + boost",
+      "i18n": {
+        "en": {
+          "title": "Rainbow Six Siege: NVIDIA Reflex on + boost"
+        },
+        "es": {
+          "title": "Rainbow Six Siege: NVIDIA Reflex activado + boost"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Rainbow Six Siege instalado e aberto pelo menos uma vez (o arquivo GameSettings.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "r6",
+        "key": "NVReflex"
+      },
+      "desiredValue": "2",
+      "desiredType": "ConfigValue",
+      "mechanism": "GameSettings.ini do Rainbow Six Siege: NVReflex 2 = ligado + boost: menos atraso entre o clique e a tela. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://siege.gg/news/how-to-increase-fps-in-rainbow-six-siege-for-max-performance"
+        }
+      ],
+      "risks": "Só tem efeito em placas NVIDIA. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no GameSettings.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "r6.cfg.vsync.off",
+      "version": 1,
+      "title": "Rainbow Six Siege: V-Sync desligado",
+      "i18n": {
+        "en": {
+          "title": "Rainbow Six Siege: V-Sync off"
+        },
+        "es": {
+          "title": "Rainbow Six Siege: V-Sync desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Rainbow Six Siege instalado e aberto pelo menos uma vez (o arquivo GameSettings.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "r6",
+        "key": "VSync"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "GameSettings.ini do Rainbow Six Siege: VSync 0: o jogo não espera a tela; mais FPS e menos atraso. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://siege.gg/news/how-to-increase-fps-in-rainbow-six-siege-for-max-performance"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no GameSettings.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "r6.cfg.gpu-buffered-frames.1",
+      "version": 1,
+      "title": "Rainbow Six Siege: Menos quadros na fila da placa (1)",
+      "i18n": {
+        "en": {
+          "title": "Rainbow Six Siege: Fewer frames queued on the GPU (1)"
+        },
+        "es": {
+          "title": "Rainbow Six Siege: Menos fotogramas en cola de la GPU (1)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Rainbow Six Siege instalado e aberto pelo menos uma vez (o arquivo GameSettings.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "r6",
+        "key": "MaxGPUBufferedFrame"
+      },
+      "desiredValue": "1",
+      "desiredType": "ConfigValue",
+      "mechanism": "GameSettings.ini do Rainbow Six Siege: MaxGPUBufferedFrame 1 (padrão 3): menos quadros esperando na fila = menos atraso. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://siege.gg/news/how-to-increase-fps-in-rainbow-six-siege-for-max-performance"
+        }
+      ],
+      "risks": "Em PCs muito fracos o FPS médio pode oscilar. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no GameSettings.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "ow2.cfg.custom-framerate.on",
+      "version": 1,
+      "title": "Overwatch 2: Limite de quadros personalizado ligado (para o máximo de 600)",
+      "i18n": {
+        "en": {
+          "title": "Overwatch 2: Custom frame rate on (for the 600 maximum)"
+        },
+        "es": {
+          "title": "Overwatch 2: Límite personalizado activado (para el máximo de 600)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Overwatch 2 instalado e aberto pelo menos uma vez (o arquivo Settings_v0.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "ow2",
+        "key": "UseCustomFrameRates"
+      },
+      "desiredValue": "1",
+      "desiredType": "ConfigValue",
+      "mechanism": "Settings_v0.ini do Overwatch 2: Liga o limite personalizado do menu, necessário para usar o máximo de 600 FPS. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://prosettings.net/guides/overwatch-2-options"
+        }
+      ],
+      "risks": "Nenhum. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no Settings_v0.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "ow2.cfg.framerate-cap.max",
+      "version": 1,
+      "title": "Overwatch 2: Limite de FPS no máximo do jogo (600)",
+      "i18n": {
+        "en": {
+          "title": "Overwatch 2: Frame rate cap at the game's maximum (600)"
+        },
+        "es": {
+          "title": "Overwatch 2: Límite de FPS al máximo del juego (600)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Overwatch 2 instalado e aberto pelo menos uma vez (o arquivo Settings_v0.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "ow2",
+        "key": "FrameRateCap"
+      },
+      "desiredValue": "600",
+      "desiredType": "ConfigValue",
+      "mechanism": "Settings_v0.ini do Overwatch 2: FrameRateCap 600: o maior valor do menu; na prática, sem limite. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://prosettings.net/guides/overwatch-2-options"
+        }
+      ],
+      "risks": "Mais calor e consumo. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no Settings_v0.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "ow2.cfg.limit-to-refresh.off",
+      "version": 1,
+      "title": "Overwatch 2: Não limitar à taxa do monitor",
+      "i18n": {
+        "en": {
+          "title": "Overwatch 2: Don't limit to the monitor refresh rate"
+        },
+        "es": {
+          "title": "Overwatch 2: No limitar a la frecuencia del monitor"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Overwatch 2 instalado e aberto pelo menos uma vez (o arquivo Settings_v0.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "ow2",
+        "key": "LimitToRefresh"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "Settings_v0.ini do Overwatch 2: LimitToRefresh 0: o FPS não fica preso na taxa do monitor. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://prosettings.net/guides/overwatch-2-options"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no Settings_v0.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "ow2.cfg.reflex.boost",
+      "version": 1,
+      "title": "Overwatch 2: NVIDIA Reflex ligado + boost",
+      "i18n": {
+        "en": {
+          "title": "Overwatch 2: NVIDIA Reflex on + boost"
+        },
+        "es": {
+          "title": "Overwatch 2: NVIDIA Reflex activado + boost"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Overwatch 2 instalado e aberto pelo menos uma vez (o arquivo Settings_v0.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "ow2",
+        "key": "ReflexMode"
+      },
+      "desiredValue": "2",
+      "desiredType": "ConfigValue",
+      "mechanism": "Settings_v0.ini do Overwatch 2: ReflexMode 2 = ligado + boost: menos atraso. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://prosettings.net/guides/overwatch-2-options"
+        }
+      ],
+      "risks": "Só tem efeito em placas NVIDIA. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no Settings_v0.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "ow2.cfg.dynamic-render-scale.off",
+      "version": 1,
+      "title": "Overwatch 2: Escala de renderização dinâmica desligada",
+      "i18n": {
+        "en": {
+          "title": "Overwatch 2: Dynamic render scale off"
+        },
+        "es": {
+          "title": "Overwatch 2: Escala de renderizado dinámica desactivada"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Overwatch 2 instalado e aberto pelo menos uma vez (o arquivo Settings_v0.ini existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "ow2",
+        "key": "DynamicRenderScale"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "Settings_v0.ini do Overwatch 2: Sem escala dinâmica, a resolução não oscila no meio da luta. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://prosettings.net/guides/overwatch-2-options"
+        }
+      ],
+      "risks": "Nenhum. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no Settings_v0.ini.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "apex.cfg.vsync.off",
+      "version": 1,
+      "title": "Apex Legends: V-Sync desligado",
+      "i18n": {
+        "en": {
+          "title": "Apex Legends: V-Sync off"
+        },
+        "es": {
+          "title": "Apex Legends: V-Sync desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Apex Legends instalado e aberto pelo menos uma vez (o arquivo videoconfig.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "apex",
+        "key": "setting.mat_vsync_mode"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "videoconfig.txt do Apex Legends: mat_vsync_mode 0: sem esperar a tela; mais FPS e menos atraso. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://help.ea.com/en/articles/apex-legends/change-and-cap-fps/"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no videoconfig.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "apex.cfg.ssao.off",
+      "version": 1,
+      "title": "Apex Legends: Oclusão de ambiente desligada",
+      "i18n": {
+        "en": {
+          "title": "Apex Legends: Ambient occlusion off"
+        },
+        "es": {
+          "title": "Apex Legends: Oclusión ambiental desactivada"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Apex Legends instalado e aberto pelo menos uma vez (o arquivo videoconfig.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "apex",
+        "key": "setting.ssao_enabled"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "videoconfig.txt do Apex Legends: SSAO desligado: um dos efeitos mais caros do jogo. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://help.ea.com/en/articles/apex-legends/change-and-cap-fps/"
+        }
+      ],
+      "risks": "Visual mais plano. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no videoconfig.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "apex.cfg.volumetric-lighting.off",
+      "version": 1,
+      "title": "Apex Legends: Iluminação volumétrica desligada",
+      "i18n": {
+        "en": {
+          "title": "Apex Legends: Volumetric lighting off"
+        },
+        "es": {
+          "title": "Apex Legends: Iluminación volumétrica desactivada"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Apex Legends instalado e aberto pelo menos uma vez (o arquivo videoconfig.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "apex",
+        "key": "setting.volumetric_lighting"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "videoconfig.txt do Apex Legends: Sem iluminação volumétrica: menos custo e menos névoa na visão. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://help.ea.com/en/articles/apex-legends/change-and-cap-fps/"
+        }
+      ],
+      "risks": "Visual mais simples. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no videoconfig.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "apex.cfg.depth-feather.off",
+      "version": 1,
+      "title": "Apex Legends: Partículas suaves desligadas",
+      "i18n": {
+        "en": {
+          "title": "Apex Legends: Soft particles off"
+        },
+        "es": {
+          "title": "Apex Legends: Partículas suaves desactivadas"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Apex Legends instalado e aberto pelo menos uma vez (o arquivo videoconfig.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "apex",
+        "key": "setting.mat_depthfeather_enable"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "videoconfig.txt do Apex Legends: Depth feather desligado: menos custo em fumaça e efeitos. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://help.ea.com/en/articles/apex-legends/change-and-cap-fps/"
+        }
+      ],
+      "risks": "Efeitos com bordas mais duras. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no videoconfig.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "apex.cfg.sun-shadows.off",
+      "version": 1,
+      "title": "Apex Legends: Sombras do sol desligadas",
+      "i18n": {
+        "en": {
+          "title": "Apex Legends: Sun shadows off"
+        },
+        "es": {
+          "title": "Apex Legends: Sombras del sol desactivadas"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Apex Legends instalado e aberto pelo menos uma vez (o arquivo videoconfig.txt existe), com o jogo fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "apex",
+        "key": "setting.csm_enabled"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "videoconfig.txt do Apex Legends: csm_enabled 0: sombras do sol desligadas (opção do menu), grande ganho de FPS. Mesmo valor que o menu do jogo grava.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://help.ea.com/en/articles/apex-legends/change-and-cap-fps/"
+        }
+      ],
+      "risks": "Sem sombras do sol. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no videoconfig.txt.",
+      "revert": "Devolve o valor anterior exato da linha."
+    }
+  ]
+}

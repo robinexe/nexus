@@ -539,6 +539,9 @@ public static class StepPlanners
         ["gpu.nv.shadercache.max@1"] = "102400",
     };
 
+    /// <summary>Ajustes de arquivo de configuração de jogos (catalog/games.v1.json): sem o jogo, o aplicador responde "não se aplica" e nada muda.</summary>
+    private static readonly string[] GameConfigPrefixes = ["minecraft.", "r6.", "ow2.", "apex."];
+
     /// <summary>Regras "não fazer" que valem só por calor/bateria de notebook: o "Desempenho máximo" ignora (máquina virtual continua valendo).</summary>
     private static readonly HashSet<string> LaptopOnlyAvoids = new(StringComparer.Ordinal)
         { "avoid.core-parking.laptop", "avoid.high-performance.laptop", "avoid.high-performance.on-battery" };
@@ -567,7 +570,7 @@ public static class StepPlanners
             var vm = set.Profile.Has(PcProfiler.Vm);
             var avoid = set.Avoid.Where(a => a.ActionKey is not null && !(maxPerformance && !vm && LaptopOnlyAvoids.Contains(a.RuleId)))
                 .Select(a => a.ActionKey!).ToHashSet(StringComparer.Ordinal);
-            string[] prefixes = maxPerformance ? [.. AdvancedPrefixes, "cpulab."] : AdvancedPrefixes;
+            string[] prefixes = maxPerformance ? [.. AdvancedPrefixes, "cpulab.", .. GameConfigPrefixes] : AdvancedPrefixes;
             foreach (var e in catalog.Document.Actions)
             {
                 var d = e.Definition;

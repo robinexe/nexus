@@ -9,7 +9,7 @@ namespace Nexus.GameProfiles;
 
 /// <summary>
 /// Handlers de configuração de jogos registrados no aplicador como módulo (o do CS2 continua embutido no Program.cs do
-/// aplicador). Hoje: Fortnite (GameUserSettings.ini). Cada handler precisa de ação correspondente no catálogo.
+/// aplicador). Hoje: Fortnite (GameUserSettings.ini) e os jogos de Configs.GameConfigs (Minecraft, R6, Overwatch 2, Apex). Cada handler precisa de ação correspondente no catálogo.
 /// </summary>
 public static class GameProfilesHandlers
 {
@@ -24,16 +24,26 @@ public static class GameProfilesHandlers
             var who = sid ?? (environment.OtherAccount ? null : WindowsProfiles.CurrentUserSid());
             return who is null ? null : WindowsProfiles.LocalAppDataForSid(environment.Registry, who);
         };
-        return [new FortniteIniHandler(local, FortniteProcesses.AnyRunning, environment.OtherAccount)];
+        // Pasta do perfil = pai de AppData\Local (mesma origem segura: ProfileList).
+        Func<string?, string?> profile = sid => local(sid) is { } l ? Path.GetDirectoryName(Path.GetDirectoryName(l)) : null;
+        return
+        [
+            new FortniteIniHandler(local, FortniteProcesses.AnyRunning, environment.OtherAccount),
+            new Configs.GameConfigHandler(profile, FortniteProcesses.AnyOf, environment.OtherAccount),
+        ];
     }
 }
 
 /// <summary>Processos do Fortnite abertos (qualquer sessão: o aplicador pode ser um serviço). Só leitura.</summary>
 public static class FortniteProcesses
 {
-    public static bool AnyRunning()
+    public static bool AnyRunning() => AnyOf(FortniteSettings.BlockingProcesses);
+
+    /// <summary>Algum destes processos está aberto (qualquer sessão)? Na dúvida (sem permissão de listar), responde que sim.</summary>
+    public static bool AnyOf(IReadOnlyList<string> names)
     {
-        foreach (var name in FortniteSettings.BlockingProcesses)
+        ArgumentNullException.ThrowIfNull(names);
+        foreach (var name in names)
         {
             Process[] found;
             try { found = Process.GetProcessesByName(name); }
