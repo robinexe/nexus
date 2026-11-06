@@ -1,0 +1,85 @@
+# NEXUS — rota de jogo (docs/modules/netroute.md): testes em máquinas descartáveis do GitHub Actions.
+#  - relay-linux: testes do script do relay e ponta a ponta REAL (WireGuard + NAT + bloqueios + agente) num runner Linux.
+#  - windows: compila a solução inteira (lock files), roda todos os testes unitários e os de integração da rota de jogo
+#    (ETW real e WireGuard oficial instalado, túnel ligado e desfeito) numa VM Windows, com o portão de VM do NEXUS.
+# Nada disto roda no PC de ninguém.
+name: netroute
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/netroute**']
+
+permissions:
+  contents: read
+
+jobs:
+  relay-linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Testes do script do relay (sem rede, sem root)
+        run: python3 -m unittest -v tools/netroute-relay/test_nexus_relay.py
+      - name: Ponta a ponta do relay (root, namespace de rede)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq wireguard-tools nftables iproute2 iputils-ping curl
+          sudo bash tools/netroute-relay/e2e-ci.sh
+
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 60
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Build (Release, lock files)
+        shell: pwsh
+        run: |
+          dotnet restore Nexus.slnx --locked-mode
+          dotnet build Nexus.slnx -c Release --no-restore 2>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $warn = Select-String -Path build.log -Pattern 'warning [A-Z]+[0-9]+' | ForEach-Object { $_.Line } | Sort-Object -Unique
+          "avisos: $($warn.Count)"; $warn | Select-Object -First 60
+          dotnet build tests/Nexus.IntegrationTests -c Release
+          dotnet build tools/Nexus.Discover -c Release
+      - name: Testes unitários (todos)
+        shell: pwsh
+        run: dotnet test Nexus.slnx -c Release --no-build --filter Category=Unit --logger "trx;LogFileName=unit.trx" --logger "console;verbosity=minimal" --results-directory saida
+      - name: Liberação do portão (só se for VM)
+        shell: pwsh
+        run: |
+          $disc = & dotnet tools/Nexus.Discover/bin/Release/net10.0/Nexus.Discover.dll --rows 5 2>&1 | ForEach-Object { "$_" }
+          if (-not ($disc -match 'Máquina virtual: Sim')) { Write-Error 'SMBIOS não indica máquina virtual: liberação NÃO criada.'; exit 11 }
+          New-Item -ItemType Directory -Force -Path C:\ProgramData\NEXUS | Out-Null
+          $marker = 'C:\ProgramData\NEXUS\vm-test-host.allow'
+          [System.IO.File]::WriteAllText($marker, $env:COMPUTERNAME, (New-Object System.Text.UTF8Encoding($false)))
+          icacls $marker /setowner '*S-1-5-32-544'
+          icacls $marker /inheritance:r /grant:r '*S-1-5-32-544:F' '*S-1-5-18:F' '*S-1-5-32-545:R'
+      - name: Lista oficial de instaladores do WireGuard (diagnóstico)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          curl.exe -sS -D - https://download.wireguard.com/windows-client/latest.sig | Select-Object -First 25
+          curl.exe -sS https://download.wireguard.com/windows-client/ | Select-String 'msi|sig' | Select-Object -First 20
+      - name: Integração da rota de jogo (ETW real, WireGuard oficial, túnel)
+        shell: pwsh
+        run: dotnet test tests/Nexus.IntegrationTests -c Release --no-build --filter "FullyQualifiedName~NetRoute" --logger "console;verbosity=detailed" --logger "trx;LogFileName=netroute.trx" --results-directory saida
+      - name: nexus rota (ajuda e status, sem escrita)
+        shell: pwsh
+        run: |
+          & src/Nexus.Cli/bin/Release/net10.0/nexus.exe rota --help
+          & src/Nexus.Cli/bin/Release/net10.0/nexus.exe rota status
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: netroute-windows
+          path: |
+            saida/
+            build.log
+          retention-days: 7

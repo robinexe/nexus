@@ -27,6 +27,8 @@
     <ProjectReference Include="..\Nexus.Lab.Gpu\Nexus.Lab.Gpu.csproj" />
     <ProjectReference Include="..\Nexus.Lab.Memory\Nexus.Lab.Memory.csproj" />
     <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
+    <!-- Rota de jogo (docs/modules/netroute.md): handlers no autoteste; a interface e o nexus.exe recebem por aqui. -->
+    <ProjectReference Include="..\Nexus.NetRoute\Nexus.NetRoute.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Nexus.Tests" />

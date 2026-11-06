@@ -24,5 +24,6 @@ internal static class ModuleHandlers
         .. Nexus.Lab.Memory.MemoryLabHandlers.Create(environment),
         .. Nexus.Measurement.MeasureHandlers.Create(environment),
         .. Nexus.GameProfiles.GameProfilesHandlers.Create(environment),
+        .. Nexus.NetRoute.NetRouteHandlers.Create(environment),
     ];
 }

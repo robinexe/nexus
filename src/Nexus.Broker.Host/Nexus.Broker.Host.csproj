@@ -29,6 +29,8 @@
     <ProjectReference Include="..\Nexus.HardwareDiscovery\Nexus.HardwareDiscovery.csproj" />
     <!-- Medir: ação measure.perflog-group.join (grupo "Usuários do log de desempenho"). -->
     <ProjectReference Include="..\Nexus.Measurement\Nexus.Measurement.csproj" />
+    <!-- Rota de jogo: cliente WireGuard oficial, chave do PC, relays e túnel (catalog/netroute.v1.json). -->
+    <ProjectReference Include="..\Nexus.NetRoute\Nexus.NetRoute.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.ServiceProcess.ServiceController" />

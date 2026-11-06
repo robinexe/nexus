@@ -154,6 +154,7 @@ public static class NexusChecks
             ("Automático", Nexus.Automation.AutomationHandlers.Create), ("Lab CPU", Nexus.Lab.Cpu.CpuLabHandlers.Create),
             ("Lab GPU", Nexus.Lab.Gpu.GpuLabHandlers.Create), ("Lab memória", Nexus.Lab.Memory.MemoryLabHandlers.Create),
             ("Medir", Nexus.Measurement.MeasureHandlers.Create), ("Jogos (Fortnite)", Nexus.GameProfiles.GameProfilesHandlers.Create),
+            ("Rota de jogo", Nexus.NetRoute.NetRouteHandlers.Create),
         ];
         foreach (var (name, create) in modules)
         {
