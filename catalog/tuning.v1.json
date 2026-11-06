@@ -7,7 +7,14 @@
       "id": "fps.dwm.mpo.disable",
       "version": 1,
       "title": "Desligar o Multiplane Overlay (corrige tremedeira e tela preta)",
-      "i18n": { "en": { "title": "Turn off Multiplane Overlay (fixes flicker and black screen)" }, "es": { "title": "Desactivar Multiplane Overlay (corrige parpadeo y pantalla negra)" } },
+      "i18n": {
+        "en": {
+          "title": "Turn off Multiplane Overlay (fixes flicker and black screen)"
+        },
+        "es": {
+          "title": "Desactivar Multiplane Overlay (corrige parpadeo y pantalla negra)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Só para quem tem tremedeira, tela preta ou stutter em janelas.",
       "handlerKind": "RegistryValue",
@@ -41,7 +48,14 @@
       "id": "fps.dwm.overlay-minfps.zero",
       "version": 1,
       "title": "Corrigir apps congelando no 24H2 (Discord, Chrome)",
-      "i18n": { "en": { "title": "Fix apps freezing on 24H2 (Discord, Chrome)" }, "es": { "title": "Corregir apps que se congelan en 24H2 (Discord, Chrome)" } },
+      "i18n": {
+        "en": {
+          "title": "Fix apps freezing on 24H2 (Discord, Chrome)"
+        },
+        "es": {
+          "title": "Corregir apps que se congelan en 24H2 (Discord, Chrome)"
+        }
+      },
       "classification": "Experimental",
       "condition": "Só se apps congelarem em partes da janela.",
       "handlerKind": "RegistryValue",
@@ -74,7 +88,14 @@
       "id": "fps.mouse.acceleration.off.speed",
       "version": 1,
       "title": "Mouse sem aceleração (1/3: precisão do ponteiro)",
-      "i18n": { "en": { "title": "Mouse without acceleration (1/3: pointer precision)" }, "es": { "title": "Mouse sin aceleración (1/3: precisión del puntero)" } },
+      "i18n": {
+        "en": {
+          "title": "Mouse without acceleration (1/3: pointer precision)"
+        },
+        "es": {
+          "title": "Mouse sin aceleración (1/3: precisión del puntero)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -107,7 +128,14 @@
       "id": "fps.mouse.acceleration.off.threshold1",
       "version": 1,
       "title": "Mouse sem aceleração (2/3: limite 1)",
-      "i18n": { "en": { "title": "Mouse without acceleration (2/3: threshold 1)" }, "es": { "title": "Mouse sin aceleración (2/3: umbral 1)" } },
+      "i18n": {
+        "en": {
+          "title": "Mouse without acceleration (2/3: threshold 1)"
+        },
+        "es": {
+          "title": "Mouse sin aceleración (2/3: umbral 1)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -136,7 +164,14 @@
       "id": "fps.mouse.acceleration.off.threshold2",
       "version": 1,
       "title": "Mouse sem aceleração (3/3: limite 2)",
-      "i18n": { "en": { "title": "Mouse without acceleration (3/3: threshold 2)" }, "es": { "title": "Mouse sin aceleración (3/3: umbral 2)" } },
+      "i18n": {
+        "en": {
+          "title": "Mouse without acceleration (3/3: threshold 2)"
+        },
+        "es": {
+          "title": "Mouse sin aceleración (3/3: umbral 2)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -165,7 +200,14 @@
       "id": "fps.power.throttling.off",
       "version": 1,
       "title": "Desligar o Power Throttling (modo eficiência automático)",
-      "i18n": { "en": { "title": "Turn off Power Throttling (automatic efficiency mode)" }, "es": { "title": "Desactivar Power Throttling (modo de eficiencia automático)" } },
+      "i18n": {
+        "en": {
+          "title": "Turn off Power Throttling (automatic efficiency mode)"
+        },
+        "es": {
+          "title": "Desactivar Power Throttling (modo de eficiencia automático)"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -201,7 +243,14 @@
       "id": "fps.power.user-presence-qos.off",
       "version": 1,
       "title": "Não rebaixar o app em foco quando você fica sem mexer (bateria)",
-      "i18n": { "en": { "title": "Don't demote the focused app when you're idle (battery)" }, "es": { "title": "No rebajar la app en foco cuando estás inactivo (batería)" } },
+      "i18n": {
+        "en": {
+          "title": "Don't demote the focused app when you're idle (battery)"
+        },
+        "es": {
+          "title": "No rebajar la app en foco cuando estás inactivo (batería)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -233,7 +282,14 @@
       "id": "fps.power.min-processor-state.100.ac",
       "version": 1,
       "title": "Estado mínimo do processador em 100% (na tomada)",
-      "i18n": { "en": { "title": "Minimum processor state at 100% (plugged in)" }, "es": { "title": "Estado mínimo del procesador al 100% (enchufado)" } },
+      "i18n": {
+        "en": {
+          "title": "Minimum processor state at 100% (plugged in)"
+        },
+        "es": {
+          "title": "Estado mínimo del procesador al 100% (enchufado)"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -264,7 +320,14 @@
       "id": "fps.power.epp.performance.ac",
       "version": 1,
       "title": "Preferência de energia do processador: desempenho (na tomada)",
-      "i18n": { "en": { "title": "Processor energy preference: performance (plugged in)" }, "es": { "title": "Preferencia de energía del procesador: rendimiento (enchufado)" } },
+      "i18n": {
+        "en": {
+          "title": "Processor energy preference: performance (plugged in)"
+        },
+        "es": {
+          "title": "Preferencia de energía del procesador: rendimiento (enchufado)"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -291,7 +354,14 @@
       "id": "fps.power.usb-selective-suspend.off.ac",
       "version": 1,
       "title": "Não suspender portas USB (na tomada)",
-      "i18n": { "en": { "title": "Don't suspend USB ports (plugged in)" }, "es": { "title": "No suspender los puertos USB (enchufado)" } },
+      "i18n": {
+        "en": {
+          "title": "Don't suspend USB ports (plugged in)"
+        },
+        "es": {
+          "title": "No suspender los puertos USB (enchufado)"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -318,7 +388,14 @@
       "id": "fps.power.pcie-aspm.off.ac",
       "version": 1,
       "title": "PCIe sem economia de energia no link (na tomada)",
-      "i18n": { "en": { "title": "PCIe without link power saving (plugged in)" }, "es": { "title": "PCIe sin ahorro de energía en el enlace (enchufado)" } },
+      "i18n": {
+        "en": {
+          "title": "PCIe without link power saving (plugged in)"
+        },
+        "es": {
+          "title": "PCIe sin ahorro de energía en el enlace (enchufado)"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -349,7 +426,14 @@
       "id": "hw.nvme.latency-tolerance.ac",
       "version": 1,
       "title": "NVMe sem estados de energia profundos (na tomada)",
-      "i18n": { "en": { "title": "NVMe without deep power states (plugged in)" }, "es": { "title": "NVMe sin estados de energía profundos (enchufado)" } },
+      "i18n": {
+        "en": {
+          "title": "NVMe without deep power states (plugged in)"
+        },
+        "es": {
+          "title": "NVMe sin estados de energía profundos (enchufado)"
+        }
+      },
       "classification": "Experimental",
       "handlerKind": "PowerSettingValue",
       "target": {
@@ -376,7 +460,14 @@
       "id": "net.wifi.power-saving.dc-max-perf",
       "version": 1,
       "title": "Wi-Fi sem economia de energia (na bateria)",
-      "i18n": { "en": { "title": "Wi-Fi without power saving (on battery)" }, "es": { "title": "Wi-Fi sin ahorro de energía (con batería)" } },
+      "i18n": {
+        "en": {
+          "title": "Wi-Fi without power saving (on battery)"
+        },
+        "es": {
+          "title": "Wi-Fi sin ahorro de energía (con batería)"
+        }
+      },
       "classification": "Conditional",
       "condition": "Notebook jogando na bateria por Wi-Fi com ping oscilando. Na tomada o Windows já usa desempenho máximo.",
       "handlerKind": "PowerSettingValue",
@@ -408,7 +499,14 @@
       "id": "fps.dx.windowed-optimizations.global",
       "version": 1,
       "title": "Otimizações para jogos em janela (padrão para todos os jogos)",
-      "i18n": { "en": { "title": "Optimizations for windowed games (default for all games)" }, "es": { "title": "Optimizaciones para juegos en ventana (predeterminado para todos los juegos)" } },
+      "i18n": {
+        "en": {
+          "title": "Optimizations for windowed games (default for all games)"
+        },
+        "es": {
+          "title": "Optimizaciones para juegos en ventana (predeterminado para todos los juegos)"
+        }
+      },
       "classification": "SupportedDocumented",
       "condition": "Vale para jogos DirectX 10/11 em janela ou janela sem bordas. DX12, Vulkan e tela cheia exclusiva não mudam.",
       "handlerKind": "DirectXUserGpuPreference",
@@ -444,7 +542,14 @@
       "id": "fps.dx.vrr.global",
       "version": 1,
       "title": "Taxa de atualização variável para jogos DX11 em tela cheia",
-      "i18n": { "en": { "title": "Variable refresh rate for fullscreen DX11 games" }, "es": { "title": "Frecuencia de actualización variable para juegos DX11 en pantalla completa" } },
+      "i18n": {
+        "en": {
+          "title": "Variable refresh rate for fullscreen DX11 games"
+        },
+        "es": {
+          "title": "Frecuencia de actualización variable para juegos DX11 en pantalla completa"
+        }
+      },
       "classification": "Conditional",
       "condition": "Só com monitor G-SYNC, FreeSync ou Adaptive-Sync e driver WDDM 2.6+. Sem isso o Windows nem mostra a opção e não há efeito.",
       "handlerKind": "DirectXUserGpuPreference",
@@ -476,7 +581,14 @@
       "id": "fps.dx.autohdr.off",
       "version": 1,
       "title": "Desligar o Auto HDR",
-      "i18n": { "en": { "title": "Turn off Auto HDR" }, "es": { "title": "Desactivar Auto HDR" } },
+      "i18n": {
+        "en": {
+          "title": "Turn off Auto HDR"
+        },
+        "es": {
+          "title": "Desactivar Auto HDR"
+        }
+      },
       "classification": "Conditional",
       "condition": "Só faz diferença em tela HDR com o HDR do Windows ligado e se você não gosta das cores do Auto HDR.",
       "handlerKind": "DirectXUserGpuPreference",
@@ -508,7 +620,14 @@
       "id": "fps.gamedvr.policy.off",
       "version": 1,
       "title": "Política: sem gravação de jogos em segundo plano",
-      "i18n": { "en": { "title": "Policy: no background game recording" }, "es": { "title": "Directiva: sin grabación de juegos en segundo plano" } },
+      "i18n": {
+        "en": {
+          "title": "Policy: no background game recording"
+        },
+        "es": {
+          "title": "Directiva: sin grabación de juegos en segundo plano"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -537,7 +656,14 @@
       "id": "sys.do.download-mode.http-only",
       "version": 1,
       "title": "Atualizações sem enviar para outros PCs (Otimização de Entrega)",
-      "i18n": { "en": { "title": "Updates without sending to other PCs (Delivery Optimization)" }, "es": { "title": "Actualizaciones sin enviar a otros PC (Optimización de distribución)" } },
+      "i18n": {
+        "en": {
+          "title": "Updates without sending to other PCs (Delivery Optimization)"
+        },
+        "es": {
+          "title": "Actualizaciones sin enviar a otros PC (Optimización de distribución)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -566,7 +692,14 @@
       "id": "sys.do.background-bandwidth.cap50",
       "version": 1,
       "title": "Updates em segundo plano usando no máximo 50% da internet",
-      "i18n": { "en": { "title": "Background updates using at most 50% of the internet" }, "es": { "title": "Actualizaciones en segundo plano usando como máximo el 50% de internet" } },
+      "i18n": {
+        "en": {
+          "title": "Background updates using at most 50% of the internet"
+        },
+        "es": {
+          "title": "Actualizaciones en segundo plano usando como máximo el 50% de internet"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -595,7 +728,14 @@
       "id": "sys.ai.recall-enablement.off",
       "version": 1,
       "title": "Recall indisponível",
-      "i18n": { "en": { "title": "Recall unavailable" }, "es": { "title": "Recall no disponible" } },
+      "i18n": {
+        "en": {
+          "title": "Recall unavailable"
+        },
+        "es": {
+          "title": "Recall no disponible"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -627,7 +767,14 @@
       "id": "sys.ai.clicktodo.off",
       "version": 1,
       "title": "Desligar o Click to Do",
-      "i18n": { "en": { "title": "Turn off Click to Do" }, "es": { "title": "Desactivar Click to Do" } },
+      "i18n": {
+        "en": {
+          "title": "Turn off Click to Do"
+        },
+        "es": {
+          "title": "Desactivar Click to Do"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "PrivacyPolicyValue",
       "target": {
@@ -659,7 +806,14 @@
       "id": "sys.explorer.startup-delay.off",
       "version": 1,
       "title": "Programas da inicialização abrem sem atraso",
-      "i18n": { "en": { "title": "Startup programs open without delay" }, "es": { "title": "Los programas de inicio se abren sin retraso" } },
+      "i18n": {
+        "en": {
+          "title": "Startup programs open without delay"
+        },
+        "es": {
+          "title": "Los programas de inicio se abren sin retraso"
+        }
+      },
       "classification": "Experimental",
       "handlerKind": "RegistryValue",
       "target": {
@@ -692,7 +846,14 @@
       "id": "sys.ui.transparency.off",
       "version": 1,
       "title": "Desligar transparência das janelas",
-      "i18n": { "en": { "title": "Turn off window transparency" }, "es": { "title": "Desactivar la transparencia de las ventanas" } },
+      "i18n": {
+        "en": {
+          "title": "Turn off window transparency"
+        },
+        "es": {
+          "title": "Desactivar la transparencia de las ventanas"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -721,7 +882,14 @@
       "id": "sys.ui.minimize-animation.off",
       "version": 1,
       "title": "Sem animação ao minimizar e maximizar",
-      "i18n": { "en": { "title": "No animation when minimizing and maximizing" }, "es": { "title": "Sin animación al minimizar y maximizar" } },
+      "i18n": {
+        "en": {
+          "title": "No animation when minimizing and maximizing"
+        },
+        "es": {
+          "title": "Sin animación al minimizar y maximizar"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -750,7 +918,14 @@
       "id": "sys.ui.taskbar-animations.off",
       "version": 1,
       "title": "Sem animações da barra de tarefas",
-      "i18n": { "en": { "title": "No taskbar animations" }, "es": { "title": "Sin animaciones de la barra de tareas" } },
+      "i18n": {
+        "en": {
+          "title": "No taskbar animations"
+        },
+        "es": {
+          "title": "Sin animaciones de la barra de tareas"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -779,7 +954,14 @@
       "id": "sys.ui.menu-show-delay.200",
       "version": 1,
       "title": "Submenus abrem mais rápido (400→200 ms)",
-      "i18n": { "en": { "title": "Submenus open faster (400→200 ms)" }, "es": { "title": "Los submenús se abren más rápido (400→200 ms)" } },
+      "i18n": {
+        "en": {
+          "title": "Submenus open faster (400→200 ms)"
+        },
+        "es": {
+          "title": "Los submenús se abren más rápido (400→200 ms)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -808,7 +990,14 @@
       "id": "sys.ntfs.last-access.disable",
       "version": 1,
       "title": "NTFS sem gravar 'último acesso' a cada leitura",
-      "i18n": { "en": { "title": "NTFS without writing 'last access' on every read" }, "es": { "title": "NTFS sin grabar 'último acceso' en cada lectura" } },
+      "i18n": {
+        "en": {
+          "title": "NTFS without writing 'last access' on every read"
+        },
+        "es": {
+          "title": "NTFS sin grabar 'último acceso' en cada lectura"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -837,7 +1026,14 @@
       "id": "sys.power.fast-startup.off",
       "version": 1,
       "title": "Desligar a Inicialização Rápida (desligar = desligar de verdade)",
-      "i18n": { "en": { "title": "Turn off Fast Startup (shut down = really shut down)" }, "es": { "title": "Desactivar el Inicio rápido (apagar = apagar de verdad)" } },
+      "i18n": {
+        "en": {
+          "title": "Turn off Fast Startup (shut down = really shut down)"
+        },
+        "es": {
+          "title": "Desactivar el Inicio rápido (apagar = apagar de verdad)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -866,7 +1062,14 @@
       "id": "sys.explorer.show-extensions",
       "version": 1,
       "title": "Mostrar extensões de arquivo (.exe, .pdf…)",
-      "i18n": { "en": { "title": "Show file extensions (.exe, .pdf…)" }, "es": { "title": "Mostrar las extensiones de archivo (.exe, .pdf…)" } },
+      "i18n": {
+        "en": {
+          "title": "Show file extensions (.exe, .pdf…)"
+        },
+        "es": {
+          "title": "Mostrar las extensiones de archivo (.exe, .pdf…)"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "RegistryValue",
       "target": {
@@ -895,7 +1098,14 @@
       "id": "sys.notifications.toasts.off",
       "version": 1,
       "title": "Desligar todas as notificações pop-up",
-      "i18n": { "en": { "title": "Turn off all pop-up notifications" }, "es": { "title": "Desactivar todas las notificaciones emergentes" } },
+      "i18n": {
+        "en": {
+          "title": "Turn off all pop-up notifications"
+        },
+        "es": {
+          "title": "Desactivar todas las notificaciones emergentes"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "RegistryValue",
       "target": {
@@ -924,7 +1134,14 @@
       "id": "net.ipv6.prefer-ipv4",
       "version": 1,
       "title": "Preferir IPv4 sem desligar o IPv6",
-      "i18n": { "en": { "title": "Prefer IPv4 without turning off IPv6" }, "es": { "title": "Preferir IPv4 sin desactivar IPv6" } },
+      "i18n": {
+        "en": {
+          "title": "Prefer IPv4 without turning off IPv6"
+        },
+        "es": {
+          "title": "Preferir IPv4 sin desactivar IPv6"
+        }
+      },
       "classification": "Conditional",
       "condition": "Só se sites/jogos demorarem a conectar por IPv6.",
       "handlerKind": "RegistryValue",
@@ -954,7 +1171,14 @@
       "id": "sys.svc.pcasvc.disabled",
       "version": 1,
       "title": "Desativar o Assistente de Compatibilidade de Programas",
-      "i18n": { "en": { "title": "Disable the Program Compatibility Assistant" }, "es": { "title": "Desactivar el Asistente para la compatibilidad de programas" } },
+      "i18n": {
+        "en": {
+          "title": "Disable the Program Compatibility Assistant"
+        },
+        "es": {
+          "title": "Desactivar el Asistente para la compatibilidad de programas"
+        }
+      },
       "classification": "Conditional",
       "handlerKind": "ServiceStartType",
       "target": {
@@ -979,7 +1203,14 @@
       "id": "sys.svc.trkwks.disabled",
       "version": 1,
       "title": "Desativar o Cliente de Rastreamento de Link Distribuído",
-      "i18n": { "en": { "title": "Disable the Distributed Link Tracking Client" }, "es": { "title": "Desactivar el Cliente de seguimiento de vínculos distribuidos" } },
+      "i18n": {
+        "en": {
+          "title": "Disable the Distributed Link Tracking Client"
+        },
+        "es": {
+          "title": "Desactivar el Cliente de seguimiento de vínculos distribuidos"
+        }
+      },
       "classification": "SupportedDocumented",
       "handlerKind": "ServiceStartType",
       "target": {
@@ -999,6 +1230,1196 @@
       "reboot": "Recommended",
       "verification": "QueryServiceConfig.",
       "revert": "Restaurar o tipo de inicialização original."
+    },
+    {
+      "id": "fps.power.min-processor-state.100.dc",
+      "version": 1,
+      "title": "Estado mínimo do processador em 100% (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Minimum processor state at 100% (on battery)"
+        },
+        "es": {
+          "title": "Estado mínimo del procesador al 100 % (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "893dee8e-2bef-41e0-89c6-b55d0929964c",
+        "acdc": "DC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Processador nunca desce do clock base: sem a demora para subir o clock quando o jogo pede. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-minperformance"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.epp.performance.dc",
+      "version": 1,
+      "title": "Preferência de energia do processador: desempenho (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Processor energy preference: performance (on battery)"
+        },
+        "es": {
+          "title": "Preferencia de energía del procesador: rendimiento (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "36687f9e-e3a5-4dbf-b1dc-15eb381c6863",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Energy Performance Preference = 0: o processador (Intel HWP / Ryzen CPPC2) prioriza desempenho e sobe o clock mais rápido. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perfenergypreference"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.epp1.performance.ac",
+      "version": 1,
+      "title": "Preferência de energia dos núcleos de eficiência: desempenho (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Efficiency-core energy preference: performance (plugged in)"
+        },
+        "es": {
+          "title": "Preferencia de energía de los núcleos de eficiencia: rendimiento (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "36687f9e-e3a5-4dbf-b1dc-15eb381c6864",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Mesma preferência (EPP = 0) para a classe 1 de núcleos (núcleos E da Intel 12ª geração em diante e Core Ultra). Em processadores sem núcleos E o ajuste não existe e o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perfenergypreference"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.epp1.performance.dc",
+      "version": 1,
+      "title": "Preferência de energia dos núcleos de eficiência: desempenho (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Efficiency-core energy preference: performance (on battery)"
+        },
+        "es": {
+          "title": "Preferencia de energía de los núcleos de eficiencia: rendimiento (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "36687f9e-e3a5-4dbf-b1dc-15eb381c6864",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Mesma preferência (EPP = 0) para a classe 1 de núcleos (núcleos E da Intel 12ª geração em diante e Core Ultra). Em processadores sem núcleos E o ajuste não existe e o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perfenergypreference"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.boost-mode.aggressive.dc",
+      "version": 1,
+      "title": "Turbo do processador agressivo (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Aggressive processor boost (on battery)"
+        },
+        "es": {
+          "title": "Turbo del procesador agresivo (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "be337238-0d82-4146-a960-4f3749d470c7",
+        "acdc": "DC"
+      },
+      "desiredValue": 2,
+      "mechanism": "Modo de aumento de desempenho = Agressivo: o turbo entra sempre que há margem térmica. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perfboostmode"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.max-processor-state.100.dc",
+      "version": 1,
+      "title": "Estado máximo do processador em 100% (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Maximum processor state at 100% (on battery)"
+        },
+        "es": {
+          "title": "Estado máximo del procesador al 100 % (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "bc5038f7-23e0-4960-96da-33abaf5935ec",
+        "acdc": "DC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Garante que nenhum plano limite o processador abaixo de 100% (alguns notebooks vêm com 99% na bateria, o que desliga o turbo). Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/configure-processor-power-management-options"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.min-cores-parking.100.dc",
+      "version": 1,
+      "title": "Todos os núcleos sempre acordados (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "All cores always unparked (on battery)"
+        },
+        "es": {
+          "title": "Todos los núcleos siempre activos (con batería)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "0cc5b647-c1df-4637-891a-dec35c318583",
+        "acdc": "DC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Mínimo de núcleos não estacionados = 100%: nenhum núcleo dorme; o jogo não espera um núcleo acordar. (Não em Ryzen X3D de dois chiplets.) Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-core-parking-cpminimumcores"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.min-cores-parking1.100.ac",
+      "version": 1,
+      "title": "Núcleos de eficiência sempre acordados (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Efficiency cores always unparked (plugged in)"
+        },
+        "es": {
+          "title": "Núcleos de eficiencia siempre activos (enchufado)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "0cc5b647-c1df-4637-891a-dec35c318584",
+        "acdc": "AC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Mesmo ajuste para a classe 1 (núcleos E da Intel). Sem núcleos E, o ajuste não existe e o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-core-parking-cpminimumcores"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.min-cores-parking1.100.dc",
+      "version": 1,
+      "title": "Núcleos de eficiência sempre acordados (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Efficiency cores always unparked (on battery)"
+        },
+        "es": {
+          "title": "Núcleos de eficiencia siempre activos (con batería)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "0cc5b647-c1df-4637-891a-dec35c318584",
+        "acdc": "DC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Mesmo ajuste para a classe 1 (núcleos E da Intel). Sem núcleos E, o ajuste não existe e o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-core-parking-cpminimumcores"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.latency-hint-perf.100.ac",
+      "version": 1,
+      "title": "Resposta rápida a cliques: desempenho máximo (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Fast response to clicks: maximum performance (plugged in)"
+        },
+        "es": {
+          "title": "Respuesta rápida a clics: rendimiento máximo (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "619b7505-003b-4e82-b7a6-4dd29c300971",
+        "acdc": "AC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Latency hint: quando o Windows detecta uma ação sensível a atraso (clique, tecla), sobe o processador ao máximo na hora. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perflatencyhint"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.latency-hint-perf.100.dc",
+      "version": 1,
+      "title": "Resposta rápida a cliques: desempenho máximo (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Fast response to clicks: maximum performance (on battery)"
+        },
+        "es": {
+          "title": "Respuesta rápida a clics: rendimiento máximo (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "619b7505-003b-4e82-b7a6-4dd29c300971",
+        "acdc": "DC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Latency hint: quando o Windows detecta uma ação sensível a atraso (clique, tecla), sobe o processador ao máximo na hora. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perflatencyhint"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.latency-hint-perf1.100.ac",
+      "version": 1,
+      "title": "Resposta rápida a cliques nos núcleos de eficiência (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Fast response to clicks on efficiency cores (plugged in)"
+        },
+        "es": {
+          "title": "Respuesta rápida a clics en núcleos de eficiencia (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "619b7505-003b-4e82-b7a6-4dd29c300972",
+        "acdc": "AC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Mesmo latency hint para a classe 1 de núcleos (Intel híbrido). Sem ela, o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perflatencyhint"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.latency-hint-perf1.100.dc",
+      "version": 1,
+      "title": "Resposta rápida a cliques nos núcleos de eficiência (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Fast response to clicks on efficiency cores (on battery)"
+        },
+        "es": {
+          "title": "Respuesta rápida a clics en núcleos de eficiencia (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "619b7505-003b-4e82-b7a6-4dd29c300972",
+        "acdc": "DC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Mesmo latency hint para a classe 1 de núcleos (Intel híbrido). Sem ela, o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perflatencyhint"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.latency-hint-unpark.100.ac",
+      "version": 1,
+      "title": "Resposta rápida a cliques: acordar todos os núcleos (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Fast response to clicks: wake all cores (plugged in)"
+        },
+        "es": {
+          "title": "Respuesta rápida a clics: despertar todos los núcleos (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "616cdaa5-695e-4545-97ad-97dc2d1bdd88",
+        "acdc": "AC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Latency hint de estacionamento: numa ação sensível a atraso, todos os núcleos acordam na hora. (Não em Ryzen X3D de dois chiplets.) Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perflatencyhint"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.latency-hint-unpark.100.dc",
+      "version": 1,
+      "title": "Resposta rápida a cliques: acordar todos os núcleos (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Fast response to clicks: wake all cores (on battery)"
+        },
+        "es": {
+          "title": "Respuesta rápida a clics: despertar todos los núcleos (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "616cdaa5-695e-4545-97ad-97dc2d1bdd88",
+        "acdc": "DC"
+      },
+      "desiredValue": 100,
+      "mechanism": "Latency hint de estacionamento: numa ação sensível a atraso, todos os núcleos acordam na hora. (Não em Ryzen X3D de dois chiplets.) Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/options-for-perf-state-engine-perflatencyhint"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.throttle-states.off.ac",
+      "version": 1,
+      "title": "Sem estados de estrangulamento do processador (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "No processor throttle states (plugged in)"
+        },
+        "es": {
+          "title": "Sin estados de estrangulamiento del procesador (enchufado)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Desliga os T-states (estrangulamento por ciclo) que alguns planos usam além do P-state. Em processadores modernos costuma não existir e o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/configure-processor-power-management-options"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.throttle-states.off.dc",
+      "version": 1,
+      "title": "Sem estados de estrangulamento do processador (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "No processor throttle states (on battery)"
+        },
+        "es": {
+          "title": "Sin estados de estrangulamiento del procesador (con batería)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Desliga os T-states (estrangulamento por ciclo) que alguns planos usam além do P-state. Em processadores modernos costuma não existir e o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/configure-processor-power-management-options"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.pcie-aspm.off.dc",
+      "version": 1,
+      "title": "PCIe sem economia de energia no link (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "PCIe link without power saving (on battery)"
+        },
+        "es": {
+          "title": "PCIe sin ahorro de energía en el enlace (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "501a4d13-42af-4429-9fd1-a8218c268e20",
+        "setting": "ee12f906-d277-404b-b6da-e5fa1a576df5",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "ASPM desligado: placa de vídeo, SSD NVMe e rede no PCIe não entram em estados de baixa energia que atrasam a volta. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/pci-express-settings-link-state-power-management"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.power.usb-selective-suspend.off.dc",
+      "version": 1,
+      "title": "Não suspender portas USB (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Don't suspend USB ports (on battery)"
+        },
+        "es": {
+          "title": "No suspender los puertos USB (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "2a737441-1930-4402-8d77-b2bebba308a3",
+        "setting": "48e6b7a6-50f5-4782-a5d4-53bb8f07e226",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Mouse, teclado e headset USB não são suspensos pelo Windows (evita o primeiro movimento atrasado e desconexões). Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/usb-settings-usb-selective-suspend-setting"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.latency-tolerance.dc",
+      "version": 1,
+      "title": "NVMe sem estados de energia profundos (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "NVMe without deep power states (on battery)"
+        },
+        "es": {
+          "title": "NVMe sin estados de energía profundos (con batería)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "fc95af4d-40e7-4b6d-835a-56d131dbc80e",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tolerância de latência 0 ms: o driver da Microsoft (StorNVMe) não põe o SSD em estados profundos; carregamentos depois de ocioso ficam mais rápidos. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.latency-tolerance2.ac",
+      "version": 1,
+      "title": "NVMe sem estados profundos (tolerância secundária) (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "NVMe without deep states (secondary tolerance) (plugged in)"
+        },
+        "es": {
+          "title": "NVMe sin estados profundos (tolerancia secundaria) (enchufado)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "dbc9e238-6de9-49e3-92cd-8c2b4946b472",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tolerância de latência secundária do NVMe em 0 ms (complementa a primária). Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.latency-tolerance2.dc",
+      "version": 1,
+      "title": "NVMe sem estados profundos (tolerância secundária) (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "NVMe without deep states (secondary tolerance) (on battery)"
+        },
+        "es": {
+          "title": "NVMe sin estados profundos (tolerancia secundaria) (con batería)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "dbc9e238-6de9-49e3-92cd-8c2b4946b472",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tolerância de latência secundária do NVMe em 0 ms (complementa a primária). Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.idle-timeout.off.ac",
+      "version": 1,
+      "title": "NVMe sem entrar em repouso sozinho (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "NVMe never idles on its own (plugged in)"
+        },
+        "es": {
+          "title": "NVMe sin entrar en reposo solo (enchufado)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "d639518a-e56d-4345-8af2-b9f32fb26109",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tempo para o SSD NVMe entrar sozinho em repouso (APST) = 0: desliga a entrada automática; sem pausas ao carregar mapas e texturas. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.idle-timeout.off.dc",
+      "version": 1,
+      "title": "NVMe sem entrar em repouso sozinho (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "NVMe never idles on its own (on battery)"
+        },
+        "es": {
+          "title": "NVMe sin entrar en reposo solo (con batería)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "d639518a-e56d-4345-8af2-b9f32fb26109",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tempo para o SSD NVMe entrar sozinho em repouso (APST) = 0: desliga a entrada automática; sem pausas ao carregar mapas e texturas. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.idle-timeout2.off.ac",
+      "version": 1,
+      "title": "NVMe sem repouso sozinho (tempo secundário) (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "NVMe never idles (secondary timeout) (plugged in)"
+        },
+        "es": {
+          "title": "NVMe sin reposo (tiempo secundario) (enchufado)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "d3d55efd-c1ff-424e-9dc3-441be7833010",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tempo secundário de repouso automático do NVMe = 0. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.nvme.idle-timeout2.off.dc",
+      "version": 1,
+      "title": "NVMe sem repouso sozinho (tempo secundário) (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "NVMe never idles (secondary timeout) (on battery)"
+        },
+        "es": {
+          "title": "NVMe sin reposo (tiempo secundario) (con batería)"
+        }
+      },
+      "classification": "Experimental",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "d3d55efd-c1ff-424e-9dc3-441be7833010",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Tempo secundário de repouso automático do NVMe = 0. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/power-management-for-storage-hardware-devices-nvme"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.sata.link-power.active.ac",
+      "version": 1,
+      "title": "SSD e HD SATA sem economia no link (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "SATA SSD and HDD link without power saving (plugged in)"
+        },
+        "es": {
+          "title": "SSD y HDD SATA sin ahorro en el enlace (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "0b2d69d7-a2a1-449c-9680-f91c70521c60",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Gerenciamento de energia do link AHCI (HIPM/DIPM) = Ativo: o disco SATA não desliga o link entre leituras. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/disk-settings-link-power-management-mode---hipm-dipm"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.sata.link-power.active.dc",
+      "version": 1,
+      "title": "SSD e HD SATA sem economia no link (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "SATA SSD and HDD link without power saving (on battery)"
+        },
+        "es": {
+          "title": "SSD y HDD SATA sin ahorro en el enlace (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "0b2d69d7-a2a1-449c-9680-f91c70521c60",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Gerenciamento de energia do link AHCI (HIPM/DIPM) = Ativo: o disco SATA não desliga o link entre leituras. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/disk-settings-link-power-management-mode---hipm-dipm"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.disk.idle-timeout.never.ac",
+      "version": 1,
+      "title": "Nunca desligar o disco (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Never turn off the disk (plugged in)"
+        },
+        "es": {
+          "title": "Nunca apagar el disco (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "6738e2c4-e8a5-4a42-b16a-e040e769756e",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Desligar o disco após = nunca: o HD não para de girar e não trava o jogo esperando voltar. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/disk-settings-turn-off-hard-disk-after"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "hw.disk.idle-timeout.never.dc",
+      "version": 1,
+      "title": "Nunca desligar o disco (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Never turn off the disk (on battery)"
+        },
+        "es": {
+          "title": "Nunca apagar el disco (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "0012ee47-9041-4b5d-9b77-535fba8b1442",
+        "setting": "6738e2c4-e8a5-4a42-b16a-e040e769756e",
+        "acdc": "DC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Desligar o disco após = nunca: o HD não para de girar e não trava o jogo esperando voltar. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/disk-settings-turn-off-hard-disk-after"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.gpu.intel.power-plan.max.ac",
+      "version": 1,
+      "title": "Gráficos Intel em desempenho máximo (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Intel graphics at maximum performance (plugged in)"
+        },
+        "es": {
+          "title": "Gráficos Intel al máximo rendimiento (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "44f3beca-a7c0-460e-9df2-bb8b99e0cba6",
+        "setting": "3619c3f2-afb2-4afc-b0e9-e7fef372de36",
+        "acdc": "AC"
+      },
+      "desiredValue": 2,
+      "mechanism": "Plano de energia dos gráficos Intel = Desempenho máximo (o mesmo do Painel da Intel). Só existe com gráficos Intel; em outros PCs o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.intel.com/content/www/us/en/support/articles/000057183.html"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.gpu.intel.power-plan.max.dc",
+      "version": 1,
+      "title": "Gráficos Intel em desempenho máximo (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Intel graphics at maximum performance (on battery)"
+        },
+        "es": {
+          "title": "Gráficos Intel al máximo rendimiento (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "44f3beca-a7c0-460e-9df2-bb8b99e0cba6",
+        "setting": "3619c3f2-afb2-4afc-b0e9-e7fef372de36",
+        "acdc": "DC"
+      },
+      "desiredValue": 2,
+      "mechanism": "Plano de energia dos gráficos Intel = Desempenho máximo (o mesmo do Painel da Intel). Só existe com gráficos Intel; em outros PCs o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.intel.com/content/www/us/en/support/articles/000057183.html"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.gpu.amd.switchable.max.ac",
+      "version": 1,
+      "title": "Gráficos híbridos AMD em desempenho máximo (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "AMD switchable graphics at maximum performance (plugged in)"
+        },
+        "es": {
+          "title": "Gráficos híbridos AMD al máximo rendimiento (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "e276e160-7cb0-43c6-b20b-73f5dce39954",
+        "setting": "a1662ab2-9d34-4e53-ba8b-2639b9e20857",
+        "acdc": "AC"
+      },
+      "desiredValue": 3,
+      "mechanism": "Gráficos dinâmicos alternáveis da AMD = Maximizar desempenho: notebooks AMD usam a GPU mais forte sem economizar. Só existe nesses notebooks; nos outros o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.amd.com/en/resources/support-articles/faqs/DH-017.html"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "fps.gpu.amd.switchable.max.dc",
+      "version": 1,
+      "title": "Gráficos híbridos AMD em desempenho máximo (na bateria)",
+      "i18n": {
+        "en": {
+          "title": "AMD switchable graphics at maximum performance (on battery)"
+        },
+        "es": {
+          "title": "Gráficos híbridos AMD al máximo rendimiento (con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "e276e160-7cb0-43c6-b20b-73f5dce39954",
+        "setting": "a1662ab2-9d34-4e53-ba8b-2639b9e20857",
+        "acdc": "DC"
+      },
+      "desiredValue": 3,
+      "mechanism": "Gráficos dinâmicos alternáveis da AMD = Maximizar desempenho: notebooks AMD usam a GPU mais forte sem economizar. Só existe nesses notebooks; nos outros o NEXUS pula. Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://www.amd.com/en/resources/support-articles/faqs/DH-017.html"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído e bateria durando menos. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor DC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "net.wifi.power-saving.max-perf.ac",
+      "version": 1,
+      "title": "Wi-Fi sem economia de energia (na tomada)",
+      "i18n": {
+        "en": {
+          "title": "Wi-Fi without power saving (plugged in)"
+        },
+        "es": {
+          "title": "Wi-Fi sin ahorro de energía (enchufado)"
+        }
+      },
+      "classification": "Conditional",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "19cbb8fa-5279-450e-9fac-8a3d5fedd0c1",
+        "setting": "12bbebe6-58d6-4636-95bb-3217ef867c1a",
+        "acdc": "AC"
+      },
+      "desiredValue": 0,
+      "mechanism": "Modo de economia do adaptador sem fio = Desempenho máximo: o Wi-Fi não cochila entre pacotes (ping mais estável). Diretriz do NEXUS: desempenho máximo, sem poupar energia.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/wireless-adapter-settings-power-saving-mode"
+        }
+      ],
+      "risks": "Mais consumo, calor e ruído. Se o ajuste não existir neste PC, o NEXUS pula sem mudar nada.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
     }
   ],
   "rejected": [

@@ -591,7 +591,7 @@ public static class StepPlanners
     }
 
     /// <summary>A ação monta com os parâmetros deste PC (e, quando o catálogo só oferece escolha, com o valor escolhido)?</summary>
-    private static bool CanInstantiate(CatalogEntry e, IReadOnlyDictionary<string, string> parameters, string? value)
+    private static bool CanInstantiate(Nexus.Core.CatalogEntry e, IReadOnlyDictionary<string, string> parameters, string? value)
     {
         if (value is null) return e.TryInstantiate(parameters, out _) is not null;
         // Só falta o valor: o motivo é "Requer escolha de valor" (parâmetros e esquema de energia já resolvidos).

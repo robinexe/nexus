@@ -539,6 +539,28 @@ public sealed class SimpleGamesPage : ModulePage
     internal IReadOnlyList<(string Name, string Exe, IReadOnlyList<(string Text, GameOptionPlan Plan)> Options)> DescribeForLab() =>
         [.. Describe().Select(g => (g.Name, g.Exe, g.Plans))];
 
+    /// <summary>
+    /// "Otimizar meu PC" (Desempenho máximo): as opções por jogo que dão FPS em cada jogo da biblioteca — FPS sem limite e placa
+    /// no máximo (driver NVIDIA), otimizações para jogos em janela e, no Fortnite, FPS máximo, modo desempenho e imagem nítida —
+    /// mais o perfil global do driver sem limite. Fica fora o que não é FPS (modo de baixa latência pode baixar o FPS quando o
+    /// processador é o gargalo). Só leitura: quem aplica é o Assistente, com o diário de sempre.
+    /// </summary>
+    internal async Task<IReadOnlyList<(string Game, string Text, GameOptionPlan Plan)>> MaxPerformancePlansAsync()
+    {
+        await Gpu.OnShownAsync(); // placa e biblioteca de jogos (só leitura)
+        var result = new List<(string, string, GameOptionPlan)>();
+        foreach (var g in Describe())
+            foreach (var (text, plan) in g.Plans)
+                if (IsMaxPerformancePlan(plan.Id)) result.Add((g.IsFortnite ? "Fortnite" : g.Name, text, plan));
+        if (Gpu.NvAvailable) result.Add((Loc.T("Simple.Games.GlobalFpsTitle"), Loc.T("Simple.Games.GlobalFpsFix"), GameOptionPlans.NvGlobalUncap()));
+        return result;
+    }
+
+    /// <summary>Planos da tela Jogos que o Desempenho máximo aplica (por identidade do plano).</summary>
+    internal static bool IsMaxPerformancePlan(string planId) =>
+        planId.EndsWith("|nv.uncap", StringComparison.Ordinal) || planId.EndsWith("|nv.maxpower", StringComparison.Ordinal) ||
+        planId.EndsWith("|windowed", StringComparison.Ordinal) || planId.StartsWith("fortnite|", StringComparison.Ordinal);
+
     /// <summary>Um jogo e as opções que valem para ele (texto + plano: o que pede, como ler, como achar no diário).</summary>
     private sealed record GameDescription(string Name, string Exe, bool IsFortnite, IReadOnlyList<(string Text, GameOptionPlan Plan)> Plans);
 

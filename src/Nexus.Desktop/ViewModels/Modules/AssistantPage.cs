@@ -1038,7 +1038,10 @@ public sealed class AssistantPage : ModulePage
                 await ScanAsync(step);
                 var scan = _scan;
                 // "Otimizar meu PC" = Desempenho máximo: tudo o que dá desempenho e pode ser desfeito, em qualquer PC (AutoPilot).
-                var chosen = scan is null ? [] : AutoPilot.SelectMaxPerformance(scan.Changes, host.HardwareProfile);
+                // Na etapa Desempenho entram também os ajustes por jogo da biblioteca (FPS sem limite, placa no máximo, Fortnite…).
+                var proposed = scan is null ? new List<ProposedChange>() : scan.Changes.ToList();
+                if (scan is not null && step == AssistantStepId.Performance) proposed.AddRange(await GameChangesAsync());
+                var chosen = AutoPilot.SelectMaxPerformance(proposed, host.HardwareProfile);
                 var summary = scan is null ? Loc.T("Asst.Verificada") : scan.Recommendation;
                 if (chosen.Count > 0)
                 {
@@ -1054,7 +1057,7 @@ public sealed class AssistantPage : ModulePage
                     _autoApplied += result.Applied;
                     summary = result.Summary;
                 }
-                if (scan is not null) AssistantRunner.RecordUnselected(_state, scan.Changes.Where(c => !chosen.Contains(c)), host.HardwareProfile, maxPerformance: true);
+                if (scan is not null) AssistantRunner.RecordUnselected(_state, proposed.Where(c => !chosen.Contains(c)), host.HardwareProfile, maxPerformance: true);
                 _flow.Advance(summary, scan?.Facts);
                 Save();
             }
@@ -1076,6 +1079,21 @@ public sealed class AssistantPage : ModulePage
             OnPropertyChanged(nameof(PendingUserActions));
         }
         AutoFinished?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Ajustes por jogo da tela Jogos como mudanças do Assistente (nível, risco e desfazer vêm do catálogo).</summary>
+    private async Task<IReadOnlyList<ProposedChange>> GameChangesAsync()
+    {
+        if (Host?.FindPage(typeof(Simple.SimpleGamesPage)) is not Simple.SimpleGamesPage games || _catalog is not { } catalog) return [];
+        try
+        {
+            var list = new List<ProposedChange>();
+            foreach (var (game, text, plan) in await games.MaxPerformancePlansAsync())
+                foreach (var (request, _) in plan.Requests)
+                    if (catalog.Change(AssistantStepId.Performance, request, $"{game}: {text}", text) is { } change) list.Add(change);
+            return list;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { return []; } // sem a biblioteca de jogos: segue com os ajustes do PC
     }
 
     /// <summary>Escrita do modo automático: o usuário confirmou tudo no começo; cada lote vai ao aplicador sem outra caixa.</summary>

@@ -81,6 +81,17 @@ public static class HardwareRules
         "fps.power.pcie-aspm.off.ac", "hw.nvme.latency-tolerance.ac", "cpulab.power.max-state.ac", "cpulab.power.boost-mode.ac",
     };
 
+    /// <summary>
+    /// Os ajustes de energia do plano (processador, PCIe, USB, disco, gráficos) acrescentados em 06/11/2026, na tomada e na bateria:
+    /// mesma família de <see cref="AlwaysOnPowerActions"/> (no passo a passo, avisam calor/bateria em notebook; o "Desempenho máximo"
+    /// aplica mesmo assim).
+    /// </summary>
+    private static bool IsPowerSettingFamily(string id) =>
+        (id.EndsWith(".ac", StringComparison.Ordinal) || id.EndsWith(".dc", StringComparison.Ordinal)) &&
+        (id.StartsWith("fps.power.", StringComparison.Ordinal) || id.StartsWith("hw.nvme.", StringComparison.Ordinal) ||
+         id.StartsWith("hw.sata.", StringComparison.Ordinal) || id.StartsWith("hw.disk.", StringComparison.Ordinal) ||
+         id.StartsWith("fps.gpu.", StringComparison.Ordinal));
+
     /// <summary>Ajustes que liberam RAM (navegador e compressão), com fonte do fabricante.</summary>
     private static readonly HashSet<string> MemoryReliefActions = new(StringComparer.Ordinal)
     {
@@ -97,12 +108,12 @@ public static class HardwareRules
         var id = at < 0 ? actionIdOrKey : actionIdOrKey[..at];
 
         // ---- Ryzen X3D de dois CCDs: o plano Equilibrado + estacionamento manda o jogo para o CCD com cache (orientação da AMD)
-        if (profile.DualCcdX3d && id is "power.active-scheme.high-performance.session" or "power.processor.min-cores-parking"
-                or "fps.power.min-cores-parking1.100.ac" or "fps.power.latency-hint-unpark.100.ac")
+        if (profile.DualCcdX3d && (id is "power.active-scheme.high-performance.session" or "power.processor.min-cores-parking" ||
+                id.StartsWith("fps.power.min-cores-parking", StringComparison.Ordinal) || id.StartsWith("fps.power.latency-hint-unpark", StringComparison.Ordinal)))
             return Fit.No(FitReason.X3dParking);
 
         // ---- energia: notebook (na bateria pesa mais que o formato)
-        if (AlwaysOnPowerActions.Contains(id))
+        if (AlwaysOnPowerActions.Contains(id) || IsPowerSettingFamily(id))
         {
             if (profile.OnBattery == true) return Fit.No(FitReason.OnBattery);
             if (profile.IsLaptop == true) return Fit.No(FitReason.LaptopHeat);
