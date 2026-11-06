@@ -4446,6 +4446,7 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recommended for laptops: less heat and noise</value></data>
   <data name="Fit.Uncapped" xml:space="preserve"><value>Recommended: removes the cap so the game runs at max FPS</value></data>
   <data name="Fit.X3dParking" xml:space="preserve"><value>Not for dual-chiplet Ryzen X3D: it moves games off the cache chiplet and FPS drops</value></data>
+  <data name="Fit.DesktopOnly" xml:space="preserve"><value>Desktop only: on laptops Windows ignores this plan</value></data>
   <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recommended for your PC: background recording keeps the graphics card busy</value></data>
   <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Apply recommended</value></data>
   <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Apply what is recommended for this PC (the options flagged above, all at once)</value></data>

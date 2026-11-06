@@ -34,6 +34,7 @@ public static class FitText
         FitReason.LaptopCooler => Loc.T("Fit.LaptopCooler"),
         FitReason.Uncapped => Loc.T("Fit.Uncapped"),
         FitReason.X3dParking => Loc.T("Fit.X3dParking"),
+        FitReason.DesktopOnly => Loc.T("Fit.DesktopOnly"),
         FitReason.BackgroundCapture => Loc.T("Fit.BackgroundCapture"),
         _ => "",
     };

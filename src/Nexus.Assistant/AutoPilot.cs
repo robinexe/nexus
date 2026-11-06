@@ -67,6 +67,8 @@ public static class AutoPilot
         "net.ipv6.prefer-ipv4", "sys.notifications.toasts.off",              // preferência, não ganho
         "memorylab.standby.purge",                                           // momentâneo, não desfaz
         "fps.lab.sched.prefer-performant.ac", "fps.lab.sched-short.prefer-performant.ac", // laboratório: só com medição (pode piorar)
+        // Trocar de plano no meio da rodada deixaria os ajustes de energia gravados no plano anterior (inativo): fica no passo a passo.
+        "fps.power.plan.ultimate",
         // Game Pass, login Xbox e a detecção de jogo dos Ryzen X3D dependem destes; impressora é recurso que a pessoa usa.
         "boot.service.xblauthmanager.disabled", "boot.service.xblgamesave.disabled", "boot.service.xboxnetapisvc.disabled",
         "boot.service.spooler.disabled", "boot.service.fax.disabled",
@@ -97,7 +99,7 @@ public static class AutoPilot
     private static readonly HashSet<FitReason> MaxKeptVetoes =
     [
         FitReason.NotNvidia, FitReason.NotAmd, FitReason.NotIntel, FitReason.IntegratedGpu, FitReason.SysMainHelpsHere,
-        FitReason.WeakGpuRelief, FitReason.X3dParking, // modo desempenho do Fortnite entra até em placa forte: é o que dá mais FPS
+        FitReason.WeakGpuRelief, FitReason.X3dParking, FitReason.DesktopOnly, // modo desempenho do Fortnite entra até em placa forte: é o que dá mais FPS
     ];
 
     /// <summary>A ação toca em proteção do Windows (id com um dos <see cref="SecurityTerms"/>)?</summary>

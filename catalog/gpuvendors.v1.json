@@ -1,0 +1,245 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Ajustes globais do driver AMD (ADLX) e Intel (IGCL) pelo handler GpuVendorSetting (src/Nexus.Lab.Gpu/Vendors): o código do fabricante roda num processo separado (nexus-broker --gpu-vendor-tool). Sem a placa/driver, 'não se aplica'.",
+  "actions": [
+    {
+      "id": "gpu.amd.antilag.on",
+      "version": 1,
+      "title": "AMD: Radeon Anti-Lag ligado",
+      "i18n": {
+        "en": {
+          "title": "AMD: Radeon Anti-Lag on"
+        },
+        "es": {
+          "title": "AMD: Radeon Anti-Lag activado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa ou gráfico integrado AMD Radeon com driver Adrenalin.",
+      "handlerKind": "GpuVendorSetting",
+      "target": {
+        "setting": "amd/antilag"
+      },
+      "desiredValue": "on",
+      "desiredType": "VendorValue",
+      "mechanism": "Radeon Anti-Lag (o equivalente da AMD ao modo de baixa latência): o processador não adianta quadros demais, e o clique chega antes na tela. Ajuste global do driver pelo ADLX (Get3DSettingsServices → GetAntiLag → SetEnabled).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://gpuopen.com/manuals/adlx/adlx-sdk-references/adlx-interfaces/3d-graphics/iadlx3dsettingsservices"
+        }
+      ],
+      "risks": "Em alguns jogos limitados pelo processador, o FPS médio pode cair um pouco.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura pelo SDK do fabricante.",
+      "revert": "Devolve o valor lido antes."
+    },
+    {
+      "id": "gpu.amd.chill.off",
+      "version": 1,
+      "title": "AMD: Radeon Chill desligado (não reduz o FPS)",
+      "i18n": {
+        "en": {
+          "title": "AMD: Radeon Chill off (doesn't lower FPS)"
+        },
+        "es": {
+          "title": "AMD: Radeon Chill desactivado (no reduce los FPS)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa AMD Radeon com driver Adrenalin.",
+      "handlerKind": "GpuVendorSetting",
+      "target": {
+        "setting": "amd/chill"
+      },
+      "desiredValue": "off",
+      "desiredType": "VendorValue",
+      "mechanism": "Radeon Chill reduz o FPS quando você não está mexendo o mouse, para economizar energia. Desligado, o FPS fica sempre no máximo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://gpuopen.com/manuals/adlx/adlx-sdk-references/adlx-interfaces/3d-graphics/iadlx3dsettingsservices"
+        }
+      ],
+      "risks": "Mais consumo e calor.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura pelo SDK do fabricante.",
+      "revert": "Devolve o valor lido antes."
+    },
+    {
+      "id": "gpu.amd.frtc.off",
+      "version": 1,
+      "title": "AMD: limite de FPS do driver (FRTC) desligado",
+      "i18n": {
+        "en": {
+          "title": "AMD: driver FPS limit (FRTC) off"
+        },
+        "es": {
+          "title": "AMD: límite de FPS del driver (FRTC) desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa AMD Radeon com driver Adrenalin.",
+      "handlerKind": "GpuVendorSetting",
+      "target": {
+        "setting": "amd/frtc"
+      },
+      "desiredValue": "off",
+      "desiredType": "VendorValue",
+      "mechanism": "Frame Rate Target Control limita o FPS no driver. Desligado: o jogo roda no máximo (diretriz do NEXUS: nunca limitar FPS).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://gpuopen.com/manuals/adlx/adlx-sdk-references/adlx-interfaces/3d-graphics/iadlx3dsettingsservices"
+        }
+      ],
+      "risks": "Mais consumo e calor.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura pelo SDK do fabricante.",
+      "revert": "Devolve o valor lido antes."
+    },
+    {
+      "id": "gpu.amd.vsync.off",
+      "version": 1,
+      "title": "AMD: V-Sync do driver desligado (a menos que o jogo peça)",
+      "i18n": {
+        "en": {
+          "title": "AMD: driver V-Sync off (unless the game asks)"
+        },
+        "es": {
+          "title": "AMD: V-Sync del driver desactivado (salvo que el juego lo pida)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa AMD Radeon com driver Adrenalin.",
+      "handlerKind": "GpuVendorSetting",
+      "target": {
+        "setting": "amd/vsync"
+      },
+      "desiredValue": "1",
+      "desiredType": "VendorValue",
+      "mechanism": "Wait for Vertical Refresh = \"Desligado, a menos que o aplicativo especifique\": o driver não força V-Sync (que prende o FPS na taxa do monitor); o V-Sync do próprio jogo continua valendo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://gpuopen.com/manuals/adlx/adlx-sdk-references/adlx-interfaces/3d-graphics/iadlx3dsettingsservices"
+        }
+      ],
+      "risks": "Sem V-Sync pode aparecer rasgo de imagem sem monitor FreeSync.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura pelo SDK do fabricante.",
+      "revert": "Devolve o valor lido antes."
+    },
+    {
+      "id": "gpu.intel.lowlatency.on",
+      "version": 1,
+      "title": "Intel: modo de baixa latência ligado",
+      "i18n": {
+        "en": {
+          "title": "Intel: low latency mode on"
+        },
+        "es": {
+          "title": "Intel: modo de baja latencia activado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Gráficos Intel Arc ou Iris Xe com driver atual.",
+      "handlerKind": "GpuVendorSetting",
+      "target": {
+        "setting": "intel/lowlatency"
+      },
+      "desiredValue": "1",
+      "desiredType": "VendorValue",
+      "mechanism": "Low Latency do driver Intel (Arc Control): menos quadros na fila, clique mais rápido na tela. Ajuste global pelo IGCL (ctlGetSet3DFeature, CTL_3D_FEATURE_LOW_LATENCY).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://intel.github.io/drivers.gpu.control-library/Control/api.html"
+        }
+      ],
+      "risks": "Em alguns jogos limitados pelo processador, o FPS médio pode cair um pouco.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura pelo SDK do fabricante.",
+      "revert": "Devolve o valor lido antes."
+    },
+    {
+      "id": "gpu.intel.endurance.off",
+      "version": 1,
+      "title": "Intel: Endurance Gaming desligado (não limita o FPS na bateria)",
+      "i18n": {
+        "en": {
+          "title": "Intel: Endurance Gaming off (doesn't cap FPS on battery)"
+        },
+        "es": {
+          "title": "Intel: Endurance Gaming desactivado (no limita los FPS con batería)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Notebook com gráficos Intel.",
+      "handlerKind": "GpuVendorSetting",
+      "target": {
+        "setting": "intel/endurance"
+      },
+      "desiredValue": "0",
+      "desiredType": "VendorValue",
+      "mechanism": "Endurance Gaming limita o FPS na bateria para economizar. Desligado, o jogo roda no máximo também na bateria.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://intel.github.io/drivers.gpu.control-library/Control/api.html"
+        }
+      ],
+      "risks": "A bateria dura menos jogando.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura pelo SDK do fabricante.",
+      "revert": "Devolve o valor lido antes."
+    },
+    {
+      "id": "gpu.intel.framelimit.off",
+      "version": 1,
+      "title": "Intel: limite de FPS do driver desligado",
+      "i18n": {
+        "en": {
+          "title": "Intel: driver FPS limit off"
+        },
+        "es": {
+          "title": "Intel: límite de FPS del driver desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Gráficos Intel com driver atual.",
+      "handlerKind": "GpuVendorSetting",
+      "target": {
+        "setting": "intel/framelimit"
+      },
+      "desiredValue": "off",
+      "desiredType": "VendorValue",
+      "mechanism": "Frame Limit do driver Intel desligado: o jogo roda no máximo (diretriz do NEXUS: nunca limitar FPS).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://intel.github.io/drivers.gpu.control-library/Control/api.html"
+        }
+      ],
+      "risks": "Mais consumo e calor.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura pelo SDK do fabricante.",
+      "revert": "Devolve o valor lido antes."
+    }
+  ]
+}

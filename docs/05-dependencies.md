@@ -89,3 +89,18 @@ máquina de quem desenvolve. Obrigação para a distribuição: nenhuma.
 
 `tools/Nexus.SmokeJournal` (gerador do diário de teste), `tools/Nexus.Discover` (relatório de texto da descoberta) e
 `tests/Nexus.TestHelper` (processo auxiliar dos testes de coordenação) usam só projetos do próprio NEXUS. Nenhum pacote novo.
+
+## Bibliotecas do driver de vídeo usadas em tempo de execução (não redistribuídas)
+
+O NEXUS não traz estas DLLs: elas vêm com o driver de vídeo que já está no PC. Os bindings são código próprio escrito a
+partir dos cabeçalhos públicos de cada SDK. Nenhum arquivo do SDK é copiado para o repositório ou para o instalador.
+
+| Biblioteca | Vem com | Cabeçalhos de referência (licença) | Integração | Redistribuído? |
+|---|---|---|---|---|
+| `nvapi64.dll`, `nvml.dll` | Driver NVIDIA | NVAPI SDK (`NvApiDriverSettings.h`, MIT) | `Nexus.Lab.Gpu` (perfis DRS, leituras) | Não |
+| `amdadlx64.dll` | Driver AMD Adrenalin | ADLX SDK 2.0 (GPUOpen, MIT) | `Nexus.Lab.Gpu/Vendors/GpuVendorTool.cs` (Anti-Lag, Chill, FRTC, V-Sync) | Não |
+| `ControlLib.dll` | Driver Intel Graphics | Intel Graphics Control Library 1.1 (MIT) | `Nexus.Lab.Gpu/Vendors/GpuVendorTool.cs` (baixa latência, Endurance Gaming, limite de FPS) | Não |
+
+AMD e Intel rodam num processo separado (`nexus-broker.exe --gpu-vendor-tool`, com limite de 20 s): uma falha do código
+nativo do fabricante encerra só esse processo, nunca o aplicador. Adicionado em 06/11/2026 a pedido do responsável ("faça
+tudo"), registrado aqui e avisado na conversa.

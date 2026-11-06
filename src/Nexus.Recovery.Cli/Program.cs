@@ -193,6 +193,7 @@ static HandlerRegistry BuildHandlers()
            .Add(new PowerActiveSchemeHandler(new WindowsPowerBackend()))
            .Add(new PowerSettingValueHandler(new WindowsPowerBackend()))
            .Add(new PowerOverlaySchemeHandler(new WindowsPowerBackend()))
+           .Add(new PowerUltimateSchemeHandler(new WindowsPowerBackend()))
            .Add(new ServiceStartTypeHandler(new WindowsServiceBackend()));
     }
     return reg;

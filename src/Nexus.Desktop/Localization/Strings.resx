@@ -4446,6 +4446,7 @@ São {2} partidas de pelo menos 3 minutos. Entre elas, o NEXUS aplica o ajuste p
   <data name="Fit.LaptopCooler" xml:space="preserve"><value>Recomendado para notebook: menos calor e ruído</value></data>
   <data name="Fit.Uncapped" xml:space="preserve"><value>Recomendado: tira o limite e o jogo roda no máximo de FPS</value></data>
   <data name="Fit.X3dParking" xml:space="preserve"><value>Não indicado para Ryzen X3D de dois chiplets: tira o jogo do chiplet com cache e o FPS cai</value></data>
+  <data name="Fit.DesktopOnly" xml:space="preserve"><value>Só para desktop: em notebook o Windows ignora este plano</value></data>
   <data name="Fit.BackgroundCapture" xml:space="preserve"><value>Recomendado para o seu PC: a gravação em segundo plano ocupa a placa de vídeo</value></data>
   <data name="Simple.Games.ApplyRecommended" xml:space="preserve"><value>Aplicar o recomendado</value></data>
   <data name="Simple.Games.RecommendedLead" xml:space="preserve"><value>Aplicar o recomendado para este PC (as opções marcadas acima, de uma vez)</value></data>

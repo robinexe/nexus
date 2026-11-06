@@ -52,6 +52,8 @@ public enum FitReason
     BackgroundCapture,
     /// <summary>Tira um limite de FPS (driver, V-Sync forçado): o jogo roda no máximo que o PC entrega.</summary>
     Uncapped,
+    /// <summary>Só para desktop: em notebook o plano é escondido/ignorado pelo Windows (Modern Standby) e o ganho some no calor.</summary>
+    DesktopOnly,
     /// <summary>Ryzen X3D de dois CCDs: o estacionamento de núcleos é o que põe o jogo no CCD com cache; desfazer DIMINUI o FPS.</summary>
     X3dParking,
 }
@@ -107,6 +109,9 @@ public static class HardwareRules
         var at = actionIdOrKey.IndexOf('@', StringComparison.Ordinal);
         var id = at < 0 ? actionIdOrKey : actionIdOrKey[..at];
 
+        if (id == "fps.power.plan.ultimate")
+            return profile.DualCcdX3d ? Fit.No(FitReason.X3dParking) : profile.IsLaptop == true ? Fit.No(FitReason.DesktopOnly) : Fit.Neutral;
+
         // ---- Ryzen X3D de dois CCDs: o plano Equilibrado + estacionamento manda o jogo para o CCD com cache (orientação da AMD)
         if (profile.DualCcdX3d && (id is "power.active-scheme.high-performance.session" or "power.processor.min-cores-parking" ||
                 id.StartsWith("fps.power.min-cores-parking", StringComparison.Ordinal) || id.StartsWith("fps.power.latency-hint-unpark", StringComparison.Ordinal) ||
@@ -138,6 +143,12 @@ public static class HardwareRules
             return profile.GpuClass == GpuClass.Integrated ? Fit.Yes(FitReason.WeakGpuRelief) : profile.IsLaptop == true ? Fit.Yes(FitReason.LaptopHeat) : Fit.Neutral;
         if (id is "win.gamedvr.background-capture.disable" or "fps.gamedvr.policy.off")
             return profile.WeakGpu || profile.IsLaptop == true ? Fit.Yes(FitReason.BackgroundCapture) : Fit.Neutral;
+
+        // ---- driver AMD (ADLX) e Intel (IGCL): só na placa principal do fabricante
+        if (id.StartsWith("gpu.amd.", StringComparison.Ordinal))
+            return Maker(profile, GpuMaker.Amd, FitReason.AmdGpu, FitReason.NotAmd) ?? Fit.Neutral;
+        if (id.StartsWith("gpu.intel.", StringComparison.Ordinal))
+            return Maker(profile, GpuMaker.Intel, FitReason.IntelGpu, FitReason.NotIntel) ?? Fit.Neutral;
 
         // ---- driver NVIDIA (DRS): só em placas NVIDIA
         if (id.StartsWith("gpu.nv.", StringComparison.Ordinal))

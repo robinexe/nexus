@@ -93,6 +93,70 @@ public sealed class PowerOverlaySchemeHandler : IActionHandler, IRestoreValidato
     }
 }
 
+/// <summary>Cria e apaga o plano "Desempenho máximo" do NEXUS (cópia do Ultimate Performance do Windows).</summary>
+public interface IPowerSchemeFactory
+{
+    IReadOnlyList<Guid> EnumerateSchemes();
+    Guid GetActiveScheme();
+    void SetActiveScheme(Guid scheme);
+    /// <summary>Copia <paramref name="source"/> para o GUID fixo <paramref name="destination"/>.</summary>
+    void DuplicateScheme(Guid source, Guid destination);
+    void DeleteScheme(Guid scheme);
+}
+
+/// <summary>
+/// Handler "PowerUltimateScheme": ativa o plano "Desempenho máximo" (Ultimate Performance, e9a42b02), criado como uma cópia com
+/// GUID fixo do NEXUS (o Windows esconde o original). Só para desktop (o HardwareRules veta notebook e Ryzen X3D de dois CCDs).
+/// Alvo: <c>plan</c>=<c>ultimate</c>. Desejado: Type "Guid" = o GUID do plano do NEXUS. Desfazer: volta ao plano anterior e apaga
+/// a cópia.
+/// </summary>
+public sealed class PowerUltimateSchemeHandler : IActionHandler, IRestoreValidator
+{
+    public const string Kind = "PowerUltimateScheme";
+    public static readonly Guid UltimateSource = new("e9a42b02-d5df-448d-aa00-03f14749eb61");
+    public static readonly Guid NexusUltimate = new("6e783e5a-5bd0-4b1c-9b9e-0e5850a1e9a4");
+
+    private readonly IPowerSchemeFactory _power;
+    public PowerUltimateSchemeHandler(IPowerSchemeFactory power) => _power = power ?? throw new ArgumentNullException(nameof(power));
+    public string HandlerKind => Kind;
+
+    private static bool TargetOk(ActionInstance a) => a.Target.Count == 1 && a.Target.TryGetValue("plan", out var p) && p == "ultimate";
+
+    public Applicability Assess(ActionInstance action, SystemContext context)
+    {
+        var common = CommonAssessment.Check(action, context);
+        if (common.Kind != ApplicabilityKind.Applicable) return common;
+        if (!TargetOk(action)) return Applicability.Blocked("Alvo do plano de energia inválido.");
+        if (action.Desired.Type != "Guid" || action.Desired.Value != NexusUltimate.ToString("D")) return Applicability.Blocked("Só o plano Desempenho máximo do NEXUS.");
+        return Applicability.Ok;
+    }
+
+    public string? CheckRestore(ActionInstance action, StateSnapshot original)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        if (!TargetOk(action)) return "Alvo inválido no diário.";
+        return original.Exists && original.Type == "Guid" && Guid.TryParse(original.Value, out _) ? null : "Plano anterior inválido no diário.";
+    }
+
+    public StateSnapshot Detect(ActionInstance action) => StateSnapshot.Of("Guid", _power.GetActiveScheme().ToString("D"), ValueOrigin.Explicit);
+
+    public void Apply(ActionInstance action)
+    {
+        if (!TargetOk(action)) throw new InvalidOperationException("Alvo inválido.");
+        if (!_power.EnumerateSchemes().Contains(NexusUltimate)) _power.DuplicateScheme(UltimateSource, NexusUltimate);
+        _power.SetActiveScheme(NexusUltimate);
+    }
+
+    public void Restore(ActionInstance action, StateSnapshot original)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        if (!Guid.TryParse(original.Value, out var previous)) throw new InvalidOperationException("Plano anterior inválido.");
+        if (previous == NexusUltimate) return; // já era ele antes: nada a desfazer
+        if (_power.EnumerateSchemes().Contains(previous)) _power.SetActiveScheme(previous);
+        if (_power.GetActiveScheme() != NexusUltimate && _power.EnumerateSchemes().Contains(NexusUltimate)) _power.DeleteScheme(NexusUltimate);
+    }
+}
+
 /// <summary>Handler "PowerActiveScheme". Alvo: schemeGuid. Desejado: Type "Guid".</summary>
 public sealed class PowerActiveSchemeHandler : IActionHandler, IRestoreValidator
 {
@@ -196,8 +260,21 @@ public sealed class PowerSettingValueHandler : IActionHandler, IRestoreValidator
 }
 
 [SupportedOSPlatform("windows")]
-public sealed partial class WindowsPowerBackend : IPowerBackend, IPowerOverlayBackend
+public sealed partial class WindowsPowerBackend : IPowerBackend, IPowerOverlayBackend, IPowerSchemeFactory
 {
+    public unsafe void DuplicateScheme(Guid source, Guid destination)
+    {
+        var dest = (Guid*)Marshal.AllocHGlobal(sizeof(Guid));
+        try
+        {
+            *dest = destination; // destino informado: o Windows usa este GUID em vez de criar um
+            Check(PowerDuplicateScheme(IntPtr.Zero, &source, &dest), nameof(PowerDuplicateScheme));
+        }
+        finally { Marshal.FreeHGlobal((IntPtr)dest); }
+    }
+
+    public unsafe void DeleteScheme(Guid scheme) => Check(PowerDeleteScheme(IntPtr.Zero, &scheme), nameof(PowerDeleteScheme));
+
     // PowerGetEffectiveOverlayScheme / PowerSetActiveOverlayScheme (powrprof, Windows 10 1709+): procurados em tempo de execução;
     // ausentes = recurso inexistente (o handler responde "não se aplica").
     private static readonly Lazy<(IntPtr Get, IntPtr Set)> Overlay = new(() =>
@@ -283,5 +360,7 @@ public sealed partial class WindowsPowerBackend : IPowerBackend, IPowerOverlayBa
     [LibraryImport("powrprof.dll")] private static unsafe partial uint PowerReadDCValueIndex(IntPtr root, Guid* scheme, Guid* subgroup, Guid* setting, uint* value);
     [LibraryImport("powrprof.dll")] private static unsafe partial uint PowerWriteDCValueIndex(IntPtr root, Guid* scheme, Guid* subgroup, Guid* setting, uint value);
     [LibraryImport("powrprof.dll")] private static partial uint PowerEnumerate(IntPtr root, IntPtr scheme, IntPtr subgroup, uint accessFlags, uint index, [Out] byte[] buffer, ref uint bufferSize);
+    [LibraryImport("powrprof.dll")] private static unsafe partial uint PowerDuplicateScheme(IntPtr root, Guid* source, Guid** destination);
+    [LibraryImport("powrprof.dll")] private static unsafe partial uint PowerDeleteScheme(IntPtr root, Guid* scheme);
     [LibraryImport("kernel32.dll")] private static partial IntPtr LocalFree(IntPtr mem);
 }

@@ -3046,6 +3046,44 @@
       "reboot": "Recommended",
       "verification": "Releitura da política (aplicativo e DSCP).",
       "revert": "Apaga a política criada pelo NEXUS (ou devolve o DSCP anterior)."
+    },
+    {
+      "id": "fps.power.plan.ultimate",
+      "version": 1,
+      "title": "Plano de energia Desempenho máximo (desktop)",
+      "i18n": {
+        "en": {
+          "title": "Ultimate Performance power plan (desktop)"
+        },
+        "es": {
+          "title": "Plan de energía Máximo rendimiento (escritorio)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Desktop (não notebook) e processador que não seja Ryzen X3D de dois chiplets.",
+      "handlerKind": "PowerUltimateScheme",
+      "target": {
+        "plan": "ultimate"
+      },
+      "desiredValue": "6e783e5a-5bd0-4b1c-9b9e-0e5850a1e9a4",
+      "desiredType": "Guid",
+      "mechanism": "Cria uma cópia do plano \"Desempenho máximo\" (Ultimate Performance, e9a42b02, que o Windows esconde) com um GUID fixo do NEXUS e ativa: sem economia de energia em processador, disco e dispositivos. Os ajustes de energia do NEXUS passam a valer nele (são gravados no plano ativo).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/configure-power-settings"
+        },
+        {
+          "level": "Observed",
+          "source": "https://winutil.christitus.com/code-reference/tweaks/performance-plans---not-for-laptops/addultperf"
+        }
+      ],
+      "risks": "Ganho pequeno sobre o Alto desempenho; mais consumo. Com ele ativo, o \"Modo de energia\" do Windows deixa de valer (só funciona no Equilibrado). Desfazer volta ao plano anterior e apaga a cópia.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Plano ativo relido.",
+      "revert": "Volta ao plano anterior e apaga a cópia do NEXUS."
     }
   ],
   "rejected": [
