@@ -2694,6 +2694,358 @@
       "reboot": "None",
       "verification": "PowerGetEffectiveOverlayScheme relido.",
       "revert": "Volta ao modo de energia anterior."
+    },
+    {
+      "id": "net.nic.eee.off",
+      "version": 1,
+      "title": "Rede: Ethernet com eficiência de energia (EEE) desligado",
+      "i18n": {
+        "en": {
+          "title": "Network: Energy-Efficient Ethernet (EEE) off"
+        },
+        "es": {
+          "title": "Red: Ethernet de eficiencia energética (EEE) desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa de rede física deste PC que tem esta opção (o NEXUS só propõe quando ela existe no driver).",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "{nicPath}",
+        "name": "*EEE",
+        "type": "String",
+        "view": "Default"
+      },
+      "userParameters": {
+        "nicPath": "SYSTEM\\\\CurrentControlSet\\\\Control\\\\Class\\\\\\{4d36e972-e325-11ce-bfc1-08002be10318\\}\\\\[0-9]{4}"
+      },
+      "desiredValue": "0",
+      "mechanism": "Palavra-chave padrão do NDIS *EEE = 0: o cabo não entra em modo de baixa energia entre pacotes, o que soma microatrasos e às vezes quedas de link.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/drivers/network/standardized-inf-keywords-for-power-management"
+        },
+        {
+          "level": "Observed",
+          "source": "https://github.com/valleyofdoom/PC-Tuning"
+        }
+      ],
+      "risks": "Um pouco mais de consumo na placa de rede. A rede reinicia o adaptador (alguns segundos sem internet).",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura do valor na chave do adaptador.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "net.nic.green-ethernet.off",
+      "version": 1,
+      "title": "Rede: Green Ethernet desligado (Realtek)",
+      "i18n": {
+        "en": {
+          "title": "Network: Green Ethernet off (Realtek)"
+        },
+        "es": {
+          "title": "Red: Green Ethernet desactivado (Realtek)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa de rede física deste PC que tem esta opção (o NEXUS só propõe quando ela existe no driver).",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "{nicPath}",
+        "name": "EnableGreenEthernet",
+        "type": "String",
+        "view": "Default"
+      },
+      "userParameters": {
+        "nicPath": "SYSTEM\\\\CurrentControlSet\\\\Control\\\\Class\\\\\\{4d36e972-e325-11ce-bfc1-08002be10318\\}\\\\[0-9]{4}"
+      },
+      "desiredValue": "0",
+      "mechanism": "Opção \"Green Ethernet\" do driver Realtek (comum em placas-mãe e notebooks): reduz a potência do link e pode somar atraso.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://github.com/valleyofdoom/PC-Tuning"
+        }
+      ],
+      "risks": "Um pouco mais de consumo na placa de rede.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura do valor na chave do adaptador.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "net.nic.power-saving-mode.off",
+      "version": 1,
+      "title": "Rede: modo de economia de energia do driver desligado",
+      "i18n": {
+        "en": {
+          "title": "Network: driver power saving mode off"
+        },
+        "es": {
+          "title": "Red: modo de ahorro de energía del driver desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa de rede física deste PC que tem esta opção (o NEXUS só propõe quando ela existe no driver).",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "{nicPath}",
+        "name": "PowerSavingMode",
+        "type": "String",
+        "view": "Default"
+      },
+      "userParameters": {
+        "nicPath": "SYSTEM\\\\CurrentControlSet\\\\Control\\\\Class\\\\\\{4d36e972-e325-11ce-bfc1-08002be10318\\}\\\\[0-9]{4}"
+      },
+      "desiredValue": "0",
+      "mechanism": "Opção \"Power Saving Mode\" do driver (Realtek e outros): desliga a economia do próprio adaptador.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://github.com/valleyofdoom/PC-Tuning"
+        }
+      ],
+      "risks": "Um pouco mais de consumo na placa de rede.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura do valor na chave do adaptador.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "net.nic.gigalite.off",
+      "version": 1,
+      "title": "Rede: GigaLite desligado (Realtek)",
+      "i18n": {
+        "en": {
+          "title": "Network: GigaLite off (Realtek)"
+        },
+        "es": {
+          "title": "Red: GigaLite desactivado (Realtek)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa de rede física deste PC que tem esta opção (o NEXUS só propõe quando ela existe no driver).",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "{nicPath}",
+        "name": "GigaLite",
+        "type": "String",
+        "view": "Default"
+      },
+      "userParameters": {
+        "nicPath": "SYSTEM\\\\CurrentControlSet\\\\Control\\\\Class\\\\\\{4d36e972-e325-11ce-bfc1-08002be10318\\}\\\\[0-9]{4}"
+      },
+      "desiredValue": "0",
+      "mechanism": "Opção \"GigaLite\" do driver Realtek: um modo de economia que pode baixar a velocidade do link.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://github.com/valleyofdoom/PC-Tuning"
+        }
+      ],
+      "risks": "Um pouco mais de consumo na placa de rede.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura do valor na chave do adaptador.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "net.nic.allow-turn-off.off",
+      "version": 1,
+      "title": "Rede: o Windows não desliga a placa de rede para economizar",
+      "i18n": {
+        "en": {
+          "title": "Network: Windows doesn't turn off the network card to save power"
+        },
+        "es": {
+          "title": "Red: Windows no apaga la tarjeta de red para ahorrar"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Placa de rede física deste PC que tem esta opção (o NEXUS só propõe quando ela existe no driver).",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "{nicPath}",
+        "name": "PnPCapabilities",
+        "type": "DWord",
+        "view": "Default"
+      },
+      "userParameters": {
+        "nicPath": "SYSTEM\\\\CurrentControlSet\\\\Control\\\\Class\\\\\\{4d36e972-e325-11ce-bfc1-08002be10318\\}\\\\[0-9]{4}"
+      },
+      "desiredValue": "24",
+      "mechanism": "PnPCapabilities = 24 desmarca \"O computador pode desligar este dispositivo para economizar energia\" (Gerenciador de Dispositivos → Gerenciamento de energia): a placa não é desligada nem acordada no meio do jogo.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/networking/power-management-on-network-adapter"
+        }
+      ],
+      "risks": "A placa de rede consome um pouco mais em repouso. Vale depois de reiniciar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura do valor na chave do adaptador.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "cpulab.sched.prefer-performant.ac",
+      "version": 1,
+      "title": "Laboratório: threads preferem os núcleos de desempenho (Intel híbrido)",
+      "i18n": {
+        "en": {
+          "title": "Lab: threads prefer performance cores (Intel hybrid)"
+        },
+        "es": {
+          "title": "Laboratorio: los hilos prefieren núcleos de rendimiento (Intel híbrido)"
+        }
+      },
+      "classification": "Experimental",
+      "condition": "Intel 12ª geração em diante ou Core Ultra (núcleos P e E). Só no laboratório, com medição antes e depois: pode ajudar ou atrapalhar o Thread Director.",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "93b8b6dc-0698-4d1c-9ee4-0644e900c85d",
+        "acdc": "AC"
+      },
+      "desiredValue": 2,
+      "mechanism": "Política de agendamento heterogêneo = 2 (preferir processadores de desempenho; padrão 5, automático). Em processadores sem núcleos E o ajuste não existe e o NEXUS pula.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/configure-processor-power-management-options"
+        }
+      ],
+      "risks": "Pode piorar jogos que o Thread Director/APO da Intel já distribuem bem. Meça com o Medir antes e depois.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "cpulab.sched-short.prefer-performant.ac",
+      "version": 1,
+      "title": "Laboratório: threads curtas preferem os núcleos de desempenho (Intel híbrido)",
+      "i18n": {
+        "en": {
+          "title": "Lab: short threads prefer performance cores (Intel hybrid)"
+        },
+        "es": {
+          "title": "Laboratorio: hilos cortos prefieren núcleos de rendimiento (Intel híbrido)"
+        }
+      },
+      "classification": "Experimental",
+      "condition": "Intel 12ª geração em diante ou Core Ultra (núcleos P e E). Só no laboratório, com medição antes e depois: pode ajudar ou atrapalhar o Thread Director.",
+      "handlerKind": "PowerSettingValue",
+      "target": {
+        "subgroup": "54533251-82be-4824-96c1-47b60b740d00",
+        "setting": "bae08b81-2d5e-4688-ad6a-13243356654b",
+        "acdc": "AC"
+      },
+      "desiredValue": 2,
+      "mechanism": "Política de agendamento heterogêneo = 2 (preferir processadores de desempenho; padrão 5, automático). Em processadores sem núcleos E o ajuste não existe e o NEXUS pula.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-hardware/customize/power-settings/configure-processor-power-management-options"
+        }
+      ],
+      "risks": "Pode piorar jogos que o Thread Director/APO da Intel já distribuem bem. Meça com o Medir antes e depois.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "None",
+      "verification": "Leitura do valor AC no esquema ativo.",
+      "revert": "Restaurar o índice anterior do mesmo esquema."
+    },
+    {
+      "id": "net.qos.do-not-use-nla",
+      "version": 1,
+      "title": "Rede: políticas de QoS valem fora de domínio",
+      "i18n": {
+        "en": {
+          "title": "Network: QoS policies apply outside a domain"
+        },
+        "es": {
+          "title": "Red: las políticas de QoS valen fuera de un dominio"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "PC doméstico (fora de domínio de empresa): sem isto o Windows ignora as políticas de QoS por jogo.",
+      "handlerKind": "RegistryValue",
+      "target": {
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\QoS",
+        "name": "Do not use NLA",
+        "type": "String",
+        "view": "Default"
+      },
+      "desiredValue": "1",
+      "mechanism": "\"Do not use NLA\" = 1: o Windows aplica as políticas de QoS em qualquer rede, não só na rede do domínio.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://github.com/valleyofdoom/PC-Tuning/blob/main/docs/research.md"
+        }
+      ],
+      "risks": "Nenhum conhecido além do efeito das próprias políticas de QoS.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura do valor.",
+      "revert": "Restaurar o valor original ou remover se não existia."
+    },
+    {
+      "id": "net.qos.game",
+      "version": 1,
+      "title": "Rede: prioridade para o jogo (QoS DSCP 46)",
+      "i18n": {
+        "en": {
+          "title": "Network: game priority (QoS DSCP 46)"
+        },
+        "es": {
+          "title": "Red: prioridad para el juego (QoS DSCP 46)"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Jogo online instalado. Só ajuda quando o roteador/Wi-Fi respeita a marcação (WMM: DSCP 46 vai para a fila de voz).",
+      "handlerKind": "QosGamePolicy",
+      "target": {
+        "exe": "{qosExe}"
+      },
+      "userParameters": {
+        "qosExe": "(?i)[A-Za-z0-9 ._()+\\-]{1,64}\\.exe"
+      },
+      "desiredValue": "46",
+      "desiredType": "Dscp",
+      "mechanism": "Política de QoS local por jogo (a mesma da Política de Grupo \"QoS baseado em política\", chave HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\NEXUS <jogo>): os pacotes só deste executável saem marcados com DSCP 46 (Expedited Forwarding), como o Xbox faz. No Wi-Fi, vão para a fila de prioridade de voz do WMM.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/networking/overviews/qos-packet-tagging"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/qos/qos-policy-manage"
+        }
+      ],
+      "risks": "Sem efeito em roteadores que ignoram DSCP. Raros roteadores antigos tratam mal pacotes marcados. Vale depois de reiniciar.",
+      "privileges": "Admin",
+      "persistence": "Persistent",
+      "reboot": "Recommended",
+      "verification": "Releitura da política (aplicativo e DSCP).",
+      "revert": "Apaga a política criada pelo NEXUS (ou devolve o DSCP anterior)."
     }
   ],
   "rejected": [

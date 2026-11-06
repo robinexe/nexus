@@ -4488,4 +4488,19 @@ São {2} partidas de pelo menos 3 minutos. Entre elas, o NEXUS aplica o ajuste p
   <data name="Gpu.Fn.PostLow" xml:space="preserve"><value>Pós-processamento no baixo</value></data>
   <data name="Gpu.Fn.FoliageLow" xml:space="preserve"><value>Folhagem no baixo</value></data>
   <data name="Gpu.Fn.LowText" xml:space="preserve"><value>Pôr esta qualidade no "Baixo" (o mesmo valor do menu do jogo)? Mais FPS, visual mais simples.</value></data>
+  <data name="Pg.Firmware.Button" xml:space="preserve"><value>Reiniciar na BIOS</value></data>
+  <data name="Pg.Firmware.Title" xml:space="preserve"><value>Reiniciar na BIOS (UEFI)</value></data>
+  <data name="Pg.Firmware.Text" xml:space="preserve"><value>O PC vai reiniciar em 15 segundos direto na tela de configuração da placa-mãe, para você ajustar: {0}.
+
+• Salve e feche o que estiver aberto antes
+• Na BIOS: memória → perfil XMP/EXPO/DOCP "Perfil 1"; PCI → "Above 4G Decoding" e "Resizable BAR"/"Smart Access Memory" ligados; gráficos → modo "dGPU/Discreta" (MUX), quando houver
+• Salve e saia (normalmente F10). Se o PC não ligar depois do XMP, a placa-mãe volta sozinha ao padrão após algumas tentativas
+
+O NEXUS não muda a BIOS sozinho: não existe forma universal e segura de fazer isso pelo Windows. O Windows vai pedir permissão de administrador.
+
+Reiniciar agora?</value></data>
+  <data name="Pg.Firmware.Failed" xml:space="preserve"><value>Este PC não aceitou reiniciar direto na BIOS (comum em PC sem UEFI). Reinicie e aperte Del, F2 ou F10 logo que a tela acender.</value></data>
+  <data name="Simple.Games.Qos" xml:space="preserve"><value>prioridade de rede para o jogo (QoS DSCP 46)</value></data>
+  <data name="Simple.Games.NicAllowOff" xml:space="preserve"><value>o Windows não desliga a placa de rede para economizar</value></data>
+  <data name="Simple.Games.GameBarTip" xml:space="preserve"><value>Dica: com o jogo aberto, aperte Win + G e, em Configurações, marque "Lembrar que isto é um jogo". O Modo de Jogo do Windows passa a priorizar ele (nos Ryzen X3D é isso que manda o jogo para o chiplet com cache).</value></data>
 </root>

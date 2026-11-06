@@ -595,7 +595,11 @@
         </Border>
 
         <TextBlock Text="{l:T Simple.Games.Title}" Style="{StaticResource S.Title}"/>
-        <TextBlock Text="{l:T Simple.Games.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,20"/>
+        <TextBlock Text="{l:T Simple.Games.Lead}" Style="{StaticResource S.Lead}" Margin="0,8,0,12"/>
+        <DockPanel Margin="0,0,0,20">
+          <c:Icon Data="{StaticResource Icon.Info}" Size="15" Foreground="{StaticResource Brush.Signal}" Margin="0,2,8,0" VerticalAlignment="Top"/>
+          <TextBlock Text="{l:T Simple.Games.GameBarTip}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextMuted}" TextWrapping="Wrap"/>
+        </DockPanel>
 
         <!-- Modo de jogo do Windows (resumo) -->
         <Border Style="{StaticResource S.Card}" Margin="0,0,0,24">

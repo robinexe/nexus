@@ -567,6 +567,18 @@ public sealed class SimpleGamesPage : ModulePage
         return result;
     }
 
+    /// <summary>Jogos online competitivos (executável que desenha): recebem a prioridade de rede (QoS DSCP 46) no Desempenho máximo.</summary>
+    internal static readonly HashSet<string> OnlineGameExes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "cs2.exe", "VALORANT-Win64-Shipping.exe", "FortniteClient-Win64-Shipping.exe", "League of Legends.exe", "RainbowSix.exe",
+        "RainbowSix_BE.exe", "Overwatch.exe", "r5apex.exe", "r5apex_dx12.exe", "cod.exe", "TslGame.exe", "RocketLeague.exe",
+        "dota2.exe", "Marvel-Win64-Shipping.exe", "GTA5.exe", "GTA5_Enhanced.exe", "FiveM.exe", "deadlock.exe", "FragPunk.exe",
+    };
+
+    /// <summary>Executáveis dos jogos online da biblioteca (inclui o que desenha por trás de um lançador, ex.: VALORANT.exe).</summary>
+    internal IReadOnlyList<string> OnlineExes() =>
+        [.. Describe().SelectMany(g => GameOptionStates.NvTargets(g.Exe).Prepend(g.Exe)).Where(OnlineGameExes.Contains).Distinct(StringComparer.OrdinalIgnoreCase)];
+
     /// <summary>Planos da tela Jogos que o Desempenho máximo aplica (por identidade do plano).</summary>
     internal static bool IsMaxPerformancePlan(string planId) =>
         planId.EndsWith("|nv.uncap", StringComparison.Ordinal) || planId.EndsWith("|nv.maxpower", StringComparison.Ordinal) ||

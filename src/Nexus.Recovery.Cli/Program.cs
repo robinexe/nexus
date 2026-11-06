@@ -186,6 +186,7 @@ static HandlerRegistry BuildHandlers()
     {
         var registry = new WindowsRegistryBackend();
         reg.Add(new RegistryValueHandler(registry))
+           .Add(new Nexus.WindowsActions.Network.QosGamePolicyHandler(registry))
            .Add(new DirectXUserGpuPreferenceHandler(registry))
            .Add(new StartupApprovedHandler(registry))
            .Add(new PowerActiveSchemeHandler(new WindowsPowerBackend()))

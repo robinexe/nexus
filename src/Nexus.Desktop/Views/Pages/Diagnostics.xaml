@@ -95,6 +95,8 @@
                       <TextBlock Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap" Margin="0,2,0,0">
                         <Run Text="{l:T Pg.GanhoMedido}" Foreground="{StaticResource Brush.Trace}"/> <Run Text="{Binding OwnerGain, Mode=OneWay}"/>
                       </TextBlock>
+                      <Button Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,8,0,0" Content="{l:T Pg.Firmware.Button}"
+                              Command="{Binding RestartToFirmwareCommand}" Visibility="{Binding IsBiosFix, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
                     <c:ExplainToggle Margin="0,2,0,0">
                       <StackPanel>

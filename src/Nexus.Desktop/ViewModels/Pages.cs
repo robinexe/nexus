@@ -209,11 +209,43 @@ public sealed class FindingCard(DiagnosticFinding finding)
     public RelayCommand OpenSourceCommand => _open ??= new RelayCommand(OpenSource, () => OwnerChecks.SourceUrls.Contains(OwnerSourceUrl));
     private RelayCommand? _open;
 
+    /// <summary>XMP/EXPO, Resizable BAR e MUX só mudam na BIOS/UEFI: o NEXUS reinicia direto na tela de configuração dela.</summary>
+    public bool IsBiosFix => Finding.Owner is not null && Finding.Id is OwnerChecks.XmpId or OwnerChecks.ReBarId or OwnerChecks.MuxId;
+    public RelayCommand RestartToFirmwareCommand => _firmware ??= new RelayCommand(() => FirmwareRestart.Ask(Finding.Title));
+    private RelayCommand? _firmware;
+
     private void OpenSource()
     {
         if (!OwnerChecks.SourceUrls.Contains(OwnerSourceUrl)) return;
         try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(OwnerSourceUrl) { UseShellExecute = true })?.Dispose(); }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { }
+    }
+}
+
+/// <summary>
+/// "Reiniciar na BIOS": o Windows reinicia direto na tela de configuração da placa-mãe (UEFI), onde ficam XMP/EXPO, Resizable
+/// BAR e MUX. O NEXUS não muda a BIOS: nenhuma ferramenta universal e segura faz isso pelo Windows (só as de cada fabricante,
+/// com drivers próprios, e uma memória instável pode deixar o PC sem ligar). Pergunta antes, avisa para salvar o trabalho,
+/// pede administrador (UAC) e usa o próprio shutdown.exe do Windows (/r /fw), que só existe em PC com UEFI.
+/// </summary>
+public static class FirmwareRestart
+{
+    public static void Ask(string what)
+    {
+        if (!Views.Shell.NexusDialog.Confirm(Loc.T("Pg.Firmware.Title"), Loc.F("Pg.Firmware.Text", what))) return;
+        var shutdown = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "shutdown.exe");
+        try
+        {
+            var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(shutdown, "/r /fw /t 15")
+            { UseShellExecute = true, Verb = "runas", WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden });
+            if (p is null) return;
+            p.WaitForExit(10_000);
+            if (p.HasExited && p.ExitCode != 0)
+                Views.Shell.NexusDialog.Alert(Loc.T("Pg.Firmware.Title"), Loc.T("Pg.Firmware.Failed"), DialogTone.Warning);
+            p.Dispose();
+        }
+        catch (System.ComponentModel.Win32Exception) { } // a pessoa recusou o administrador: nada acontece
+        catch (InvalidOperationException) { }
     }
 }
 

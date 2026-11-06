@@ -4488,4 +4488,19 @@ Son {2} partidas de al menos 3 minutos. Entre ellas, NEXUS aplica el ajuste con 
   <data name="Gpu.Fn.PostLow" xml:space="preserve"><value>Posprocesado en bajo</value></data>
   <data name="Gpu.Fn.FoliageLow" xml:space="preserve"><value>Follaje en bajo</value></data>
   <data name="Gpu.Fn.LowText" xml:space="preserve"><value>¿Poner esta calidad en "Bajo" (el mismo valor del menú del juego)? Más FPS, imagen más simple.</value></data>
+  <data name="Pg.Firmware.Button" xml:space="preserve"><value>Reiniciar en la BIOS</value></data>
+  <data name="Pg.Firmware.Title" xml:space="preserve"><value>Reiniciar en la BIOS (UEFI)</value></data>
+  <data name="Pg.Firmware.Text" xml:space="preserve"><value>El PC se reiniciará en 15 segundos directo en la pantalla de configuración de la placa base, para que ajustes: {0}.
+
+• Guarda y cierra lo que esté abierto antes
+• En la BIOS: memoria → perfil XMP/EXPO/DOCP "Perfil 1"; PCI → "Above 4G Decoding" y "Resizable BAR"/"Smart Access Memory" activados; gráficos → modo "dGPU/Discreta" (MUX), si existe
+• Guarda y sal (normalmente F10). Si el PC no arranca tras el XMP, la placa vuelve sola a los valores de fábrica tras algunos intentos
+
+NEXUS no cambia la BIOS por su cuenta: no existe una forma universal y segura de hacerlo desde Windows. Windows pedirá permiso de administrador.
+
+¿Reiniciar ahora?</value></data>
+  <data name="Pg.Firmware.Failed" xml:space="preserve"><value>Este PC no aceptó reiniciar directo en la BIOS (común sin UEFI). Reinicia y pulsa Supr, F2 o F10 en cuanto se encienda la pantalla.</value></data>
+  <data name="Simple.Games.Qos" xml:space="preserve"><value>prioridad de red para el juego (QoS DSCP 46)</value></data>
+  <data name="Simple.Games.NicAllowOff" xml:space="preserve"><value>Windows no apaga la tarjeta de red para ahorrar</value></data>
+  <data name="Simple.Games.GameBarTip" xml:space="preserve"><value>Consejo: con el juego abierto, pulsa Win + G y, en Configuración, marca "Recordar que esto es un juego". El Modo Juego de Windows pasa a priorizarlo (en Ryzen X3D es lo que manda el juego al chiplet con caché).</value></data>
 </root>

@@ -31,6 +31,7 @@ public sealed class NexusServices
         return SimulationOnlyHandler.Wrap(
         [
             new RegistryValueHandler(registry),
+            new Nexus.WindowsActions.Network.QosGamePolicyHandler(registry),
             new DirectXUserGpuPreferenceHandler(registry),
             new StartupApprovedHandler(registry),
             new PowerActiveSchemeHandler(new WindowsPowerBackend()),

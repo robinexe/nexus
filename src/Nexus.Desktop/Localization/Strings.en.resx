@@ -4488,4 +4488,19 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Gpu.Fn.PostLow" xml:space="preserve"><value>Post-processing on low</value></data>
   <data name="Gpu.Fn.FoliageLow" xml:space="preserve"><value>Foliage on low</value></data>
   <data name="Gpu.Fn.LowText" xml:space="preserve"><value>Set this quality to "Low" (the same value as the game menu)? More FPS, simpler visuals.</value></data>
+  <data name="Pg.Firmware.Button" xml:space="preserve"><value>Restart into BIOS</value></data>
+  <data name="Pg.Firmware.Title" xml:space="preserve"><value>Restart into BIOS (UEFI)</value></data>
+  <data name="Pg.Firmware.Text" xml:space="preserve"><value>Your PC will restart in 15 seconds straight into the motherboard setup screen, so you can adjust: {0}.
+
+• Save and close what's open first
+• In the BIOS: memory → XMP/EXPO/DOCP "Profile 1"; PCI → "Above 4G Decoding" and "Resizable BAR"/"Smart Access Memory" on; graphics → "dGPU/Discrete" mode (MUX), when available
+• Save and exit (usually F10). If the PC doesn't boot after XMP, the motherboard returns to defaults by itself after a few tries
+
+NEXUS doesn't change the BIOS by itself: there's no universal, safe way to do it from Windows. Windows will ask for administrator permission.
+
+Restart now?</value></data>
+  <data name="Pg.Firmware.Failed" xml:space="preserve"><value>This PC didn't accept restarting straight into the BIOS (common without UEFI). Restart and press Del, F2 or F10 as soon as the screen turns on.</value></data>
+  <data name="Simple.Games.Qos" xml:space="preserve"><value>network priority for the game (QoS DSCP 46)</value></data>
+  <data name="Simple.Games.NicAllowOff" xml:space="preserve"><value>Windows doesn't turn off the network card to save power</value></data>
+  <data name="Simple.Games.GameBarTip" xml:space="preserve"><value>Tip: with the game open, press Win + G and, in Settings, check "Remember this is a game". Windows Game Mode then prioritizes it (on Ryzen X3D this is what sends the game to the cache chiplet).</value></data>
 </root>

@@ -1097,9 +1097,53 @@ public sealed class AssistantPage : ModulePage
             foreach (var (game, text, plan) in await games.MaxPerformancePlansAsync())
                 foreach (var (request, _) in plan.Requests)
                     if (catalog.Change(AssistantStepId.Performance, request, $"{game}: {text}", text) is { } change) list.Add(change);
+            // Prioridade de rede (QoS DSCP 46) para cada jogo online da biblioteca.
+            foreach (var exe in games.OnlineExes())
+                if (catalog.Change(AssistantStepId.Performance, new ActionRequest(QosGameAction, null, new Dictionary<string, string> { ["qosExe"] = exe }),
+                        $"{exe}: {Loc.T("Simple.Games.Qos")}", Loc.T("Simple.Games.Qos")) is { } qos) list.Add(qos);
+            list.AddRange(NicChanges(catalog));
             return list;
         }
         catch (Exception ex) when (ex is not OutOfMemoryException) { return []; } // sem a biblioteca de jogos: segue com os ajustes do PC
+    }
+
+    private const string QosGameAction = "net.qos.game@1";
+    private const string NicClass = @"SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}";
+
+    /// <summary>Opções de economia de energia do driver de rede: só propostas quando o driver da placa tem a opção.</summary>
+    private static readonly (string Action, string Value)[] NicOptions =
+    [
+        ("net.nic.eee.off@1", "*EEE"), ("net.nic.green-ethernet.off@1", "EnableGreenEthernet"),
+        ("net.nic.power-saving-mode.off@1", "PowerSavingMode"), ("net.nic.gigalite.off@1", "GigaLite"),
+    ];
+
+    /// <summary>
+    /// Placas de rede FÍSICAS (Characteristics com NCF_PHYSICAL 0x4) da classe de rede: economia de energia do driver desligada (só
+    /// as opções que existem nela) e "o computador pode desligar este dispositivo" desmarcado. Só leitura aqui; quem grava é o aplicador.
+    /// </summary>
+    private static IReadOnlyList<ProposedChange> NicChanges(AssistantCatalog catalog)
+    {
+        var list = new List<ProposedChange>();
+        if (!OperatingSystem.IsWindows()) return list;
+        try
+        {
+            using var cls = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(NicClass);
+            if (cls is null) return list;
+            foreach (var sub in cls.GetSubKeyNames().Where(n => n.Length == 4 && n.All(char.IsAsciiDigit)))
+            {
+                using var key = cls.OpenSubKey(sub);
+                if (key?.GetValue("Characteristics") is not int ch || (ch & 0x4) == 0 || key.GetValue("NetCfgInstanceId") is null) continue;
+                var name = key.GetValue("DriverDesc") as string ?? sub;
+                var args = new Dictionary<string, string> { ["nicPath"] = NicClass + "\\" + sub };
+                foreach (var (action, value) in NicOptions)
+                    if (key.GetValue(value) is not null &&
+                        catalog.Change(AssistantStepId.Performance, new ActionRequest(action, null, args), $"{name}: {value} = 0", name) is { } c) list.Add(c);
+                if (catalog.Change(AssistantStepId.Performance, new ActionRequest("net.nic.allow-turn-off.off@1", null, args),
+                        $"{name}: {Loc.T("Simple.Games.NicAllowOff")}", name) is { } off) list.Add(off);
+            }
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException) { }
+        return list;
     }
 
     /// <summary>Escrita do modo automático: o usuário confirmou tudo no começo; cada lote vai ao aplicador sem outra caixa.</summary>
