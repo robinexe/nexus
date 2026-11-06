@@ -1121,7 +1121,7 @@ public sealed class AssistantPage : ModulePage
     /// Placas de rede FÍSICAS (Characteristics com NCF_PHYSICAL 0x4) da classe de rede: economia de energia do driver desligada (só
     /// as opções que existem nela) e "o computador pode desligar este dispositivo" desmarcado. Só leitura aqui; quem grava é o aplicador.
     /// </summary>
-    private static IReadOnlyList<ProposedChange> NicChanges(AssistantCatalog catalog)
+    private static List<ProposedChange> NicChanges(AssistantCatalog catalog)
     {
         var list = new List<ProposedChange>();
         if (!OperatingSystem.IsWindows()) return list;

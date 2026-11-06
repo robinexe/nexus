@@ -233,7 +233,7 @@ public static class FirmwareRestart
     public static void Ask(string what)
     {
         if (!Views.Shell.NexusDialog.Confirm(Loc.T("Pg.Firmware.Title"), Loc.F("Pg.Firmware.Text", what))) return;
-        var shutdown = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "shutdown.exe");
+        var shutdown = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "shutdown.exe");
         try
         {
             var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(shutdown, "/r /fw /t 15")
