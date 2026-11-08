@@ -284,8 +284,9 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     resultado por `%LocalAppData%\NEXUS\driver-latency\ultimo.json`; docs/modules/measure.md); tela Jogos consome
     `GameCardRegistry` (`GameBadge`, `GameCardPlans`, `GameCardState`); cartões Fortnite/OW2/Apex/Minecraft/Roblox/GTA V com ações,
     VALORANT/LoL/CoD/Rocket League/EA FC só Medir/Comparar (motivos com fonte em docs/modules/<jogo>.md). `ConfigLines` ganhou XML
-    (atributo e `<tipo name=>`). **Falta testar em PC real:** ETW de verdade (logger privado vs NT Kernel Logger, culpado comparado ao
-    LatencyMon), grafia atual dos arquivos de OW2/Apex/Roblox/GTA V Enhanced/Bedrock, visual dos cartões (1100 px, DPI, pt longo).
+    (atributo e `<tipo name=>`). ETW validado na VM do CI (2022/2025): ~15 mil DPC/ISR em 10 s, 0 sem módulo — exigiu
+    `PROCESS_TRACE_MODE_RAW_TIMESTAMP` (sem ele o TimeStamp vem em FILETIME e a duração sai absurda). Instalador 1.1.3-ci.55
+    (branch `entrega/nexus-1.1.3-ci.55`). **Falta testar em PC real:** culpado comparado ao LatencyMon, grafia atual dos arquivos de OW2/Apex/Roblox/GTA V Enhanced/Bedrock, visual dos cartões (1100 px, DPI, pt longo).
 26. **Pedido do responsável (03/11), fora do escopo e NÃO feito:** "destravar velocidades e funções bloqueadas pelo fabricante /
     passar dos limites de fábrica" contraria a regra de honestidade e segurança (só o que o fabricante expõe; nada de vBIOS,
     firmware ou driver modificado). Cabe em "rejected" com fonte, não como ação.
