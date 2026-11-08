@@ -446,6 +446,15 @@ public sealed class MeasurePage : ModulePage, IDisposable
         return last is null ? "" : StutterWords.Verdict(last.Stutters);
     }
 
+    /// <summary>FPS médio da última partida medida deste jogo (para o estado do cartão em Jogos), ou null sem medição.</summary>
+    public double? LatestAverageFps(string exe)
+    {
+        if (string.IsNullOrWhiteSpace(exe)) return null;
+        var key = GameKey.Of(exe);
+        var last = _all.Where(x => x.Game == key).MaxBy(x => x.CapturedAt);
+        return last is null || last.Summary.AverageFps <= 0 ? null : last.Summary.AverageFps;
+    }
+
     public void Dispose()
     {
         _pollTimer.Stop();

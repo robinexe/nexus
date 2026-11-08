@@ -6,6 +6,7 @@ using Nexus.Core;
 using Nexus.Desktop.Views.Controls;
 using Nexus.Desktop.Views.Shell;
 using Nexus.GameProfiles;
+using Nexus.GameProfiles.Cards;
 using Nexus.GameProfiles.Fortnite;
 using Nexus.HardwareDiscovery;
 using Nexus.Lab.Gpu;
@@ -279,8 +280,10 @@ public sealed class SimpleCleanPage : ModulePage
 
 /// <summary>Uma opção de um jogo, em palavras simples, com o botão de um clique ("Ligar" → "Feito ✓ — Desfazer"; já ligada: "✓ Ligado — Desfazer").</summary>
 /// <param name="Fit">Veredito do hardware (selo discreto "Recomendado para o seu PC" / "Não indicado…"); neutro = sem selo.</param>
-public sealed record GameOption(string Text, OneClickAction Action, Fit Fit)
+/// <param name="Detail">Uma frase com o efeito e o custo (cartões de jogo); vazio quando a opção não tem detalhe.</param>
+public sealed record GameOption(string Text, OneClickAction Action, Fit Fit, string Detail = "")
 {
+    public bool HasDetail => Detail.Length > 0;
     public string FitNote => FitText.Sentence(Fit);
     public bool HasFitNote => FitNote.Length > 0;
     public Views.Controls.Tone FitTone => Fit.IsRecommended ? Views.Controls.Tone.Good : Views.Controls.Tone.Warn;
@@ -295,6 +298,16 @@ public sealed class SimpleGameRow(string name, string exe, IReadOnlyList<GameOpt
     /// <summary>Nome do executável (ex.: cs2.exe), só para Medir.</summary>
     public string Exe { get; } = exe;
     public string Initial => Name.Length > 0 ? char.ToUpper(Name[0], Loc.Culture).ToString() : "?";
+    /// <summary>Selo do cartão: monograma de 1–3 letras do cartão do jogo (<see cref="GameCardDefinition.Monogram"/>), ou a inicial do nome.</summary>
+    public string Monogram { get; init; } = name.Length > 0 ? char.ToUpper(name[0], Loc.Culture).ToString() : "?";
+    /// <summary>Cor de destaque do cartão (#RRGGBB) ou null (jogo sem cartão próprio: âmbar do tema).</summary>
+    public string? AccentHex { get; init; }
+    /// <summary>Jogo com cartão próprio (opções do arquivo do jogo, estado lido, aviso "feche antes").</summary>
+    public bool HasCard => AccentHex is not null;
+    /// <summary>"Instalado · aberto agora · última partida: 143 FPS", lido a cada abertura; vazio sem leitura.</summary>
+    public string StatusLine { get => _statusLine; set { if (Set(ref _statusLine, value)) OnPropertyChanged(nameof(HasStatusLine)); } }
+    public bool HasStatusLine => _statusLine.Length > 0;
+    private string _statusLine = "";
     public IReadOnlyList<GameOption> Options { get; } = options;
     public bool HasOptions => Options.Count > 0;
     public RelayCommand MeasureCommand { get; } = measure;
@@ -508,8 +521,9 @@ public sealed class SimpleGamesPage : ModulePage
             var global = Gpu.NvAvailable ? GameOptionPlans.NvGlobalUncap() : null;
             IEnumerable<GameOptionPlan> plans = games.SelectMany(g => g.Plans.Select(p => p.Plan));
             if (global is not null) plans = plans.Append(global);
-            var (fortnite, states) = await Task.Run(() => (ReadFortnite(), GameStateReader.Read(plans, source, SafeJournal())));
+            var (fortnite, running, states) = await Task.Run(() => (ReadFortnite(), ReadRunning(games), GameStateReader.Read(plans, source, SafeJournal())));
             _fortnite = fortnite;
+            _running = running;
             foreach (var (id, status) in states) _states[id] = status;
             if (global is not null && states.TryGetValue(global.Id, out var globalStatus)) ShowGlobalFps(globalStatus);
             Build(games);
@@ -526,23 +540,33 @@ public sealed class SimpleGamesPage : ModulePage
             if (game is null) return;
             var source = StateSource;
             var fortnite = game.IsFortnite;
-            var (fn, states) = await Task.Run(() => (fortnite ? ReadFortnite() : _fortnite, GameStateReader.Read(game.Plans.Select(p => p.Plan), source, SafeJournal())));
+            var (fn, running, states) = await Task.Run(() => (fortnite ? ReadFortnite() : _fortnite, game.Card is not null && !fortnite && CardRunning(game.Card),
+                GameStateReader.Read(game.Plans.Select(p => p.Plan), source, SafeJournal())));
             foreach (var (id, status) in states)
             {
                 _states[id] = status;
                 if (_actions.TryGetValue(id, out var action)) action.ShowState(status);
             }
+            var row = Games.FirstOrDefault(g => string.Equals(g.Exe, exe, StringComparison.OrdinalIgnoreCase));
             if (fortnite)
             {
                 _fortnite = fn;
-                if (Games.FirstOrDefault(g => string.Equals(g.Exe, exe, StringComparison.OrdinalIgnoreCase)) is { } row) row.Status = FortniteStatus(fn.State);
+                if (row is not null) row.Status = FortniteStatus(fn.State);
             }
+            else if (game.Card is not null) _running[exe] = running;
+            if (row is not null && game.Card is not null) row.StatusLine = StatusLineFor(game, fortnite ? fn.Running : running);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException) { Message = ex.Message; } // a releitura falhou: o botão fica como estava
     }
 
     /// <summary>Fortnite: configurações atuais (GameUserSettings.ini do seu perfil) e se o jogo está aberto. Só leitura.</summary>
     private (FortniteState State, bool Running) _fortnite = (FortniteState.NotFound, false);
+
+    /// <summary>Jogos com cartão abertos agora, por executável da biblioteca (lido fora da thread da interface).</summary>
+    private Dictionary<string, bool> _running = new(StringComparer.OrdinalIgnoreCase);
+
+    private static Dictionary<string, bool> ReadRunning(IEnumerable<GameDescription> games) =>
+        games.Where(g => g.Card is not null && !g.IsFortnite).ToDictionary(g => g.Exe, g => CardRunning(g.Card!), StringComparer.OrdinalIgnoreCase);
 
     private (FortniteState State, bool Running) ReadFortnite() => (StateSource.Fortnite(), FortniteProcesses.AnyRunning());
 
@@ -562,7 +586,7 @@ public sealed class SimpleGamesPage : ModulePage
         var result = new List<(string, string, GameOptionPlan)>();
         foreach (var g in Describe())
             foreach (var (text, plan) in g.Plans)
-                if (IsMaxPerformancePlan(plan.Id)) result.Add((g.IsFortnite ? "Fortnite" : g.Name, text, plan));
+                if (IsMaxPerformancePlan(plan.Id)) result.Add((g.Title, text, plan));
         if (Gpu.NvAvailable) result.Add((Loc.T("Simple.Games.GlobalFpsTitle"), Loc.T("Simple.Games.GlobalFpsFix"), GameOptionPlans.NvGlobalUncap()));
         return result;
     }
@@ -587,22 +611,53 @@ public sealed class SimpleGamesPage : ModulePage
 
     /// <summary>Um jogo e as opções que valem para ele (texto + plano: o que pede, como ler, como achar no diário).</summary>
     /// <summary>
-    /// O que só dá para mudar dentro do jogo (o NEXUS não edita o arquivo: VALORANT tem anticheat Vanguard e a configuração
-    /// sincroniza na conta Riot; o CS2 grava Reflex/V-Sync no menu). Pesquisa de 06/11/2026.
+    /// O que só dá para mudar dentro do jogo (o NEXUS não edita o arquivo: VALORANT e League of Legends rodam sob o Vanguard e a
+    /// configuração sincroniza na conta Riot; Call of Duty troca o arquivo a cada título e roda sob o Ricochet; o CS2 grava
+    /// Reflex/V-Sync no menu). Pesquisa de 06/11/2026 e 08/11/2026 (docs/modules/valorant.md, lol.md, cod.md).
     /// </summary>
-    private static string GuideFor(string exe) =>
-        exe.StartsWith("VALORANT", StringComparison.OrdinalIgnoreCase) ? Loc.T("Simple.Games.Guide.Valorant")
-        : string.Equals(exe, "cs2.exe", StringComparison.OrdinalIgnoreCase) ? Loc.T("Simple.Games.Guide.Cs2")
-        : "";
+    private static string GuideFor(GameCardDefinition? card, string exe) =>
+        card?.Id switch
+        {
+            "valorant" => Loc.T("Simple.Games.Guide.Valorant"),
+            "lol" => Loc.T("Card.Guide.Lol"),
+            "cod" => Loc.T("Card.Guide.Cod"),
+            _ => string.Equals(exe, "cs2.exe", StringComparison.OrdinalIgnoreCase) ? Loc.T("Simple.Games.Guide.Cs2") : "",
+        };
 
-    private sealed record GameDescription(string Name, string Exe, bool IsFortnite, IReadOnlyList<(string Text, GameOptionPlan Plan)> Plans);
+    /// <param name="Card">Cartão do jogo (<see cref="GameCardRegistry"/>), ou null para o cartão genérico (só driver/janela).</param>
+    private sealed record GameDescription(string Name, string Exe, GameCardDefinition? Card, IReadOnlyList<(string Text, GameOptionPlan Plan)> Plans)
+    {
+        public bool IsFortnite => Card?.Id == FortniteCard.Id;
+        /// <summary>Nome oficial do cartão quando há; senão o nome da biblioteca.</summary>
+        public string Title => Card?.DisplayName ?? Name;
+    }
 
-    /// <summary>Veredito do hardware para um plano: o pior entre as ações que ele pede (uma "não recomendada" pesa mais que uma "recomendada").</summary>
+    /// <summary>Detalhe (uma frase) e público de cada opção de cartão, por identidade do plano.</summary>
+    private readonly Dictionary<string, (string Detail, GameCardAudience Audience)> _cardOptions = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Veredito do hardware para um plano: o pior entre as ações que ele pede (uma "não recomendada" pesa mais que uma
+    /// "recomendada") e, nas opções de cartão, o público declarado (<see cref="HardwareRules.ForAudience"/>).
+    /// </summary>
     private Fit FitOf(GameOptionPlan plan)
     {
         if (Host?.HardwareProfile is not { } hw) return Fit.Neutral;
         var fits = plan.Requests.Select(r => HardwareRules.ForAction(hw, r.Request.ActionId)).ToList();
+        if (_cardOptions.TryGetValue(plan.Id, out var card) && card.Audience != GameCardAudience.Everyone) fits.Add(HardwareRules.ForAudience(hw, card.Audience));
         return fits.FirstOrDefault(f => f.IsNotRecommended) ?? fits.FirstOrDefault(f => f.IsRecommended) ?? Fit.Neutral;
+    }
+
+    /// <summary>Processos (sem .exe) do cartão: algum aberto = as opções do arquivo não podem ser aplicadas agora.</summary>
+    private static bool CardRunning(GameCardDefinition card) =>
+        card.Id == FortniteCard.Id ? FortniteProcesses.AnyRunning() : FortniteProcesses.AnyOf(GameCardLookup.ProcessNames(card));
+
+    /// <summary>"Instalado · aberto agora · última partida: 143 FPS" (o que foi lido; nada presumido).</summary>
+    private string StatusLineFor(GameDescription game, bool running)
+    {
+        var parts = new List<string> { Loc.T("Card.Installed") };
+        if (running) parts.Add(Loc.T("Card.RunningNow"));
+        if (Measure.LatestAverageFps(game.Exe) is { } fps) parts.Add(Loc.F("Card.LastFps", fps.ToString("0", Loc.Culture)));
+        return string.Join(" · ", parts);
     }
 
     /// <summary>Os jogos da biblioteca (jogos em janela + driver NVIDIA) com as opções de cada um. Só a partir das leituras já feitas.</summary>
@@ -622,12 +677,23 @@ public sealed class SimpleGamesPage : ModulePage
         return list;
     }
 
-    /// <summary>As opções que valem para o jogo: Fortnite (arquivo do jogo), driver NVIDIA (administrador) e jogos em janela (sua conta).</summary>
+    /// <summary>
+    /// As opções que valem para o jogo: as do cartão do jogo (arquivo do jogo, sua conta, jogo fechado), driver NVIDIA (administrador)
+    /// e jogos em janela (sua conta). O Fortnite mantém os planos e a leitura próprios (GameUserSettings.ini); os outros cartões
+    /// usam a ponte <see cref="GameCardPlans"/> (ações do handler de configuração e leitor de estado do jogo).
+    /// </summary>
     private GameDescription Describe(string name, string exe, bool nvidia, string? windowedPath)
     {
         var options = new List<(string, GameOptionPlan)>();
-        var fortnite = string.Equals(exe, FortniteSettings.GameExe, StringComparison.OrdinalIgnoreCase);
-        if (fortnite) options.AddRange(FortniteOptions());
+        var card = GameCardLookup.ForExe(exe);
+        if (card is not null)
+        {
+            var plans = card.Id == FortniteCard.Id ? FortniteOptions(card)
+                : card.Options.Zip(GameCardPlans.ForCard(card, GameCardPlans.CurrentUserContext)).Select(x => (Loc.T(x.First.TitleKey), x.Second)).ToList();
+            foreach (var (option, (_, plan)) in card.Options.Zip(plans))
+                _cardOptions[plan.Id] = (Loc.T(option.DetailKey), option.Audience);
+            options.AddRange(plans);
+        }
         if (nvidia)
         {
             options.Add((Loc.T("Simple.Games.LowLatency"), GameOptionPlans.NvLowLatency(exe)));
@@ -640,7 +706,7 @@ public sealed class SimpleGamesPage : ModulePage
             options.Add((Loc.T("Simple.Games.Windowed"), GameOptionPlans.Windowed(exe, windowedPath)));
             options.Add((Loc.T("Simple.Games.GpuHigh"), GameOptionPlans.HighPerformanceGpu(exe, windowedPath)));
         }
-        return new GameDescription(name, exe, fortnite, options);
+        return new GameDescription(name, exe, card, options);
     }
 
     /// <summary>
@@ -648,15 +714,18 @@ public sealed class SimpleGamesPage : ModulePage
     /// FPS, V-Sync do jogo desligado e Reflex nas placas NVIDIA); imagem nítida (sem desfoque). Nunca põe limite de FPS.
     /// A "mira sem aceleração" não entra: no Windows o jogo já lê o mouse direto, e a chave bDisableMouseAcceleration não faz nada.
     /// </summary>
-    private List<(string, GameOptionPlan)> FortniteOptions()
+    private List<(string, GameOptionPlan)> FortniteOptions(GameCardDefinition card)
     {
         var nvidia = Gpu.Report?.Primary?.Vendor == GpuVendor.Nvidia;
         return
         [
-            (Loc.T("Simple.Games.Fn.Perf"), GameOptionPlans.FortnitePerformance()),
-            (nvidia ? Loc.T("Simple.Games.Fn.MaxFpsReflex") : Loc.T("Simple.Games.Fn.MaxFps"), GameOptionPlans.FortniteLatency(nvidia)),
-            (Loc.T("Simple.Games.Fn.Clear"), GameOptionPlans.FortniteClear()),
-            (Loc.T("Simple.Games.Fn.LowFx"), GameOptionPlans.FortniteLowFx()),
+            .. card.Options.Select(o => o.Id switch
+            {
+                FortniteCard.PerfOption => (Loc.T(o.TitleKey), GameOptionPlans.FortnitePerformance()),
+                FortniteCard.LatencyOption => (nvidia ? Loc.T("Simple.Games.Fn.MaxFpsReflex") : Loc.T(o.TitleKey), GameOptionPlans.FortniteLatency(nvidia)),
+                FortniteCard.ClearOption => (Loc.T(o.TitleKey), GameOptionPlans.FortniteClear()),
+                _ => (Loc.T(o.TitleKey), GameOptionPlans.FortniteLowFx()),
+            }),
         ];
     }
 
@@ -665,15 +734,20 @@ public sealed class SimpleGamesPage : ModulePage
         Games.Clear();
         foreach (var g in games)
         {
-            var options = g.Plans.Select(p => new GameOption(p.Text, ActionFor(g, p.Text, p.Plan), FitOf(p.Plan))).ToList();
-            Games.Add(new SimpleGameRow(g.Name, g.Exe, options, new RelayCommand(() => { Measure.ManualExe = g.Exe; Host?.Navigate(Measure); }))
+            var options = g.Plans.Select(p => new GameOption(p.Text, ActionFor(g, p.Text, p.Plan), FitOf(p.Plan), _cardOptions.GetValueOrDefault(p.Plan.Id).Detail ?? "")).ToList();
+            var running = g.IsFortnite ? _fortnite.Running : _running.GetValueOrDefault(g.Exe);
+            var closeFirst = g.Card?.CloseFirstNoteKey is not null && g.Card.Options.Count > 0;
+            Games.Add(new SimpleGameRow(g.Title, g.Exe, options, new RelayCommand(() => { Measure.ManualExe = g.Exe; Host?.Navigate(Measure); }))
             {
                 CompareCommand = AbLab is { } lab && g.Plans.Count > 0 ? new RelayCommand(() => { lab.PreselectGame(g.Exe); Host?.Navigate(lab); }) : null,
                 ApplyRecommended = ApplyRecommendedFor(g),
                 StutterVerdict = Measure.LatestStutterVerdict(g.Exe),
                 Status = g.IsFortnite ? FortniteStatus(_fortnite.State) : "",
-                Note = g.IsFortnite ? (_fortnite.Running ? Loc.T("Simple.Games.Fn.Running") : Loc.T("Simple.Games.Fn.Note")) : GuideFor(g.Exe),
-                IsRunning = g.IsFortnite && _fortnite.Running,
+                Note = closeFirst ? (running ? Loc.F("Card.Running", g.Title) : Loc.T(g.Card!.CloseFirstNoteKey!)) : GuideFor(g.Card, g.Exe),
+                IsRunning = closeFirst && running,
+                Monogram = g.Card?.Monogram ?? (g.Name.Length > 0 ? char.ToUpper(g.Name[0], Loc.Culture).ToString() : "?"),
+                AccentHex = g.Card?.AccentHex,
+                StatusLine = g.Card is null ? "" : StatusLineFor(g, running),
             });
         }
         OnPropertyChanged(nameof(HasGames));
@@ -695,7 +769,7 @@ public sealed class SimpleGamesPage : ModulePage
         if (!_actions.TryGetValue(id, out var action))
         {
             var exe = game.Exe;
-            var title = game.IsFortnite ? "Fortnite" : game.Name;
+            var title = game.Title;
             var admin = requests.Any(r => r.Level == BrokerLevel.Admin);
             action = new OneClickAction(Loc.T("Simple.Games.ApplyRecommended"), Applier,
                 q => q.ApplyAsync(title, admin ? Loc.F("Simple.Games.ConfirmRecommendedAdmin", title, names) : Loc.F("Simple.Games.ConfirmRecommended", title, names), requests),
@@ -710,10 +784,12 @@ public sealed class SimpleGamesPage : ModulePage
     {
         if (!_actions.TryGetValue(plan.Id, out var action))
         {
-            var title = game.IsFortnite ? "Fortnite" : game.Name;
+            var title = game.Title;
             var admin = plan.Requests.Any(r => r.Level == BrokerLevel.Admin);
-            var sentence = game.IsFortnite && !admin ? Loc.F("Simple.Games.Fn.Confirm", text)
-                : admin ? Loc.F("Simple.Games.ConfirmAdmin", game.Name, text) : Loc.F("Simple.Games.Confirm", game.Name, text);
+            // Opção do arquivo do jogo (cartão com "feche antes"): a frase de confirmação já pede para fechar o jogo.
+            var closeFirst = !admin && game.Card?.CloseFirstNoteKey is not null && _cardOptions.ContainsKey(plan.Id);
+            var sentence = closeFirst ? Loc.F("Card.Confirm", title, text)
+                : admin ? Loc.F("Simple.Games.ConfirmAdmin", title, text) : Loc.F("Simple.Games.Confirm", title, text);
             var exe = game.Exe;
             action = new OneClickAction(Loc.T("Simple.Games.TurnOn"), Applier, q => q.ApplyAsync(title, sentence, plan.Requests), () => _ = RefreshGameAsync(exe));
             _actions[plan.Id] = action;

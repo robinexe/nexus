@@ -744,67 +744,105 @@
                       ActionText="{l:T Simple.Games.Measure}" Command="{x:Static shell:ShellCommands.Navigate}" CommandParameter="MeasurePage"
                       Visibility="{Binding NoGames, Converter={StaticResource BoolToVis}}"/>
 
+        <!-- Cartões de jogo (um por jogo da biblioteca). Jogo com cartão próprio (GameCardRegistry): selo com monograma e cor de
+             destaque, linha de estado "instalado · aberto agora · última partida", opções em linhas (título, uma frase de efeito
+             e custo, selo da recomendação por hardware, um clique à direita), aviso "feche o jogo antes" quando o jogo regrava o
+             arquivo ao sair. Jogo sem cartão: mesmo molde com a inicial do nome e só as opções do driver/janela. -->
         <ItemsControl ItemsSource="{Binding Games}" Focusable="False">
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="{x:Type sv:SimpleGameRow}">
-              <Border Style="{StaticResource S.Card}">
+              <Border Style="{StaticResource S.Card}" Padding="22,20,22,18">
                 <StackPanel>
+                  <!-- Cabeçalho: selo, nome e estado; à direita "Medir FPS" e "Comparar com e sem" -->
                   <DockPanel>
-                    <Button DockPanel.Dock="Right" Style="{StaticResource Button.Secondary}" Margin="16,0,0,0" Command="{Binding MeasureCommand}" VerticalAlignment="Center">
-                      <StackPanel Orientation="Horizontal">
-                        <c:Icon Data="{StaticResource Icon.Measure}" Size="16" Margin="0,0,8,0"/>
-                        <TextBlock Text="{l:T Simple.Games.Measure}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-                      </StackPanel>
-                    </Button>
-                    <!-- Laboratório A/B: comparar uma partida com e sem um ajuste (só com opções para testar) -->
-                    <Button DockPanel.Dock="Right" Style="{StaticResource Button.Ghost}" Margin="8,0,0,0" Command="{Binding CompareCommand}" VerticalAlignment="Center"
-                            ToolTip="{l:T Simple.Games.CompareTip}" Visibility="{Binding HasCompare, Converter={StaticResource BoolToVis}}">
-                      <StackPanel Orientation="Horizontal">
-                        <c:Icon Data="{StaticResource Icon.AbLab}" Size="16" Margin="0,0,8,0"/>
-                        <TextBlock Text="{l:T Simple.Games.Compare}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
-                      </StackPanel>
-                    </Button>
-                    <Border Width="48" Height="48" CornerRadius="10" Background="{StaticResource Brush.SurfaceHi}" Margin="0,0,16,0">
-                      <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource Font.Display}" FontSize="22" Foreground="{StaticResource Brush.Trace}"
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}" FontSize="19" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Top">
+                      <!-- Laboratório A/B: comparar uma partida com e sem um ajuste (só com opções para testar) -->
+                      <Button Style="{StaticResource Button.Ghost}" Margin="0,0,8,0" Command="{Binding CompareCommand}" VerticalAlignment="Center"
+                              ToolTip="{l:T Simple.Games.CompareTip}" Visibility="{Binding HasCompare, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                          <c:Icon Data="{StaticResource Icon.AbLab}" Size="16" Margin="0,0,8,0"/>
+                          <TextBlock Text="{l:T Simple.Games.Compare}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </Button>
+                      <Button Style="{StaticResource Button.Secondary}" Margin="0" Command="{Binding MeasureCommand}" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                          <c:Icon Data="{StaticResource Icon.Measure}" Size="16" Margin="0,0,8,0"/>
+                          <TextBlock Text="{l:T Simple.Games.Measure}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </Button>
+                    </StackPanel>
+                    <c:GameBadge Monogram="{Binding Monogram}" AccentHex="{Binding AccentHex}" Margin="0,0,16,0" AutomationProperties.Name="{Binding Name}"/>
+                    <StackPanel VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Name}" Style="{StaticResource Text.H2}" FontSize="19" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                      <!-- "Instalado · aberto agora · última partida: 143 FPS" -->
+                      <TextBlock Text="{Binding StatusLine}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,4,0,0"
+                                 TextWrapping="Wrap" Visibility="{Binding HasStatusLine, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
                   </DockPanel>
-                  <ItemsControl ItemsSource="{Binding Options}" Focusable="False" Margin="64,10,0,0" Visibility="{Binding HasOptions, Converter={StaticResource BoolToVis}}">
+
+                  <!-- Aviso do jogo: "feche o jogo antes" (âmbar quando está aberto agora) ou orientação do que só muda dentro do jogo -->
+                  <Border Margin="0,16,0,0" Padding="14,10" CornerRadius="{StaticResource Radius.Control}"
+                          Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}">
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource Brush.SurfaceLow}"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                            <Setter Property="Background" Value="{StaticResource Brush.WarnBg}"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                    <DockPanel>
+                      <c:Icon Data="{StaticResource Icon.Info}" Size="15" Foreground="{StaticResource Brush.Signal}" Margin="0,2,10,0" VerticalAlignment="Top"
+                              Visibility="{Binding IsRunning, Converter={StaticResource FalseToVisible}}"/>
+                      <c:Icon Data="{StaticResource Icon.Warning}" Size="15" Foreground="{StaticResource Brush.Trace}" Margin="0,2,10,0" VerticalAlignment="Top"
+                              Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
+                      <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextSoft}" TextWrapping="Wrap"
+                                 AutomationProperties.LiveSetting="Polite"/>
+                    </DockPanel>
+                  </Border>
+
+                  <!-- Opções em linhas: título, uma frase (efeito e custo), selo da recomendação; um clique à direita -->
+                  <ItemsControl ItemsSource="{Binding Options}" Focusable="False" Margin="0,8,0,0" Visibility="{Binding HasOptions, Converter={StaticResource BoolToVis}}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate DataType="{x:Type sv:GameOption}">
-                        <DockPanel Margin="0,6">
-                          <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding Action}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"/>
-                          <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}"/>
-                            <!-- Selo discreto da recomendação por hardware ("Recomendado para o seu PC: …") -->
-                            <c:StatusChip Tone="{Binding FitTone}" Text="{Binding FitNote}" HorizontalAlignment="Left" Margin="0,4,0,0"
-                                          Visibility="{Binding HasFitNote, Converter={StaticResource BoolToVis}}"/>
-                          </StackPanel>
-                        </DockPanel>
+                        <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,12,0,10">
+                          <DockPanel>
+                            <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding Action}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"
+                                            VerticalAlignment="Center"/>
+                            <StackPanel VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Body}" FontSize="15" Foreground="{StaticResource Brush.Text}" TextWrapping="Wrap"/>
+                              <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Small}" Foreground="{StaticResource Brush.TextMuted}" Margin="0,3,0,0"
+                                         TextWrapping="Wrap" Visibility="{Binding HasDetail, Converter={StaticResource BoolToVis}}"/>
+                              <!-- Selo discreto da recomendação por hardware ("Recomendado para o seu PC: …") -->
+                              <c:StatusChip Tone="{Binding FitTone}" Text="{Binding FitNote}" HorizontalAlignment="Left" Margin="0,6,0,0"
+                                            Visibility="{Binding HasFitNote, Converter={StaticResource BoolToVis}}"/>
+                            </StackPanel>
+                          </DockPanel>
+                        </Border>
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
+
                   <!-- "Aplicar o recomendado para este PC": um clique, confirmação, desfazer (só quando há opção recomendada ainda desligada) -->
-                  <DockPanel Margin="64,10,0,0" Visibility="{Binding HasApplyRecommended, Converter={StaticResource BoolToVis}}">
-                    <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding ApplyRecommended}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"/>
-                    <TextBlock Text="{l:T Simple.Games.RecommendedLead}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextDim}" VerticalAlignment="Center" TextWrapping="Wrap"/>
-                  </DockPanel>
-                  <!-- Estado atual lido do jogo e aviso (Fortnite: "Agora: Modo desempenho · limite 141 FPS"; "feche o Fortnite antes") -->
-                  <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.Signal}" Margin="64,10,0,0"
-                             TextWrapping="Wrap" Visibility="{Binding HasStatus, Converter={StaticResource BoolToVis}}"/>
-                  <DockPanel Margin="64,6,0,0" Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}">
-                    <c:Icon Data="{StaticResource Icon.Info}" Size="15" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,8,0" VerticalAlignment="Top"
-                            Visibility="{Binding IsRunning, Converter={StaticResource FalseToVisible}}"/>
-                    <c:Icon Data="{StaticResource Icon.Warning}" Size="15" Foreground="{StaticResource Brush.Trace}" Margin="0,2,8,0" VerticalAlignment="Top"
-                            Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
-                    <TextBlock Text="{Binding Note}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextDim}" TextWrapping="Wrap"/>
-                  </DockPanel>
+                  <Border BorderBrush="{StaticResource Brush.LineSoft}" BorderThickness="0,1,0,0" Padding="0,12,0,0"
+                          Visibility="{Binding HasApplyRecommended, Converter={StaticResource BoolToVis}}">
+                    <DockPanel>
+                      <ContentControl DockPanel.Dock="Right" Margin="16,0,0,0" Content="{Binding ApplyRecommended}" ContentTemplate="{StaticResource S.OneClick}" Focusable="False"/>
+                      <TextBlock Text="{l:T Simple.Games.RecommendedLead}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextMuted}"
+                                 VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </DockPanel>
+                  </Border>
+
+                  <!-- Estado atual lido do arquivo do jogo (Fortnite: "Agora: Modo desempenho · sem limite de FPS · Reflex ligado") -->
+                  <TextBlock Text="{Binding Status}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.Signal}" Margin="0,12,0,0"
+                             TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" Visibility="{Binding HasStatus, Converter={StaticResource BoolToVis}}"/>
                   <!-- Por que travou? (última partida medida deste jogo) -->
-                  <DockPanel Margin="64,10,0,0" Visibility="{Binding HasStutterVerdict, Converter={StaticResource BoolToVis}}">
+                  <DockPanel Margin="0,10,0,0" Visibility="{Binding HasStutterVerdict, Converter={StaticResource BoolToVis}}">
                     <c:Icon Data="{StaticResource Icon.Warning}" Size="15" Foreground="{StaticResource Brush.TextDim}" Margin="0,2,8,0" VerticalAlignment="Top"
                             ToolTip="{l:T Simple.Games.StutterTip}"/>
-                    <TextBlock Text="{Binding StutterVerdict}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextDim}"/>
+                    <TextBlock Text="{Binding StutterVerdict}" Style="{StaticResource Text.Body}" FontSize="14" Foreground="{StaticResource Brush.TextMuted}" TextWrapping="Wrap"/>
                   </DockPanel>
                 </StackPanel>
               </Border>

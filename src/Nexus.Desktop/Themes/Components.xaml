@@ -5,7 +5,7 @@
 
   Nas páginas: xmlns:c="clr-namespace:Nexus.Desktop.Views.Controls" e xmlns:shell="clr-namespace:Nexus.Desktop.Views.Shell".
   Controles: c:HeroPanel, c:AnimatedNumber, c:RingMeter, c:BeforeAfter, c:HowItWorks + c:StepItem (modelo "StepCard"), c:StatTile,
-             c:ExplainToggle, c:StatusChip, c:EmptyState, c:SkeletonLoader, c:Sparkline, c:Icon.
+             c:ExplainToggle, c:StatusChip, c:EmptyState, c:SkeletonLoader, c:Sparkline, c:Icon, c:GameBadge (selo de jogo: monograma + cor).
   Conversores: ResourceByKey (texto → recurso), ToneBrush (Tone → pincel; "soft"/"text"), PageIcon (página → ícone; "illustration"),
                InvertBool.
   Estilos: Tab.Underline (RadioButton como aba com sublinhado âmbar), Explain.Toggle (o botão do "Por que isso?").
@@ -327,6 +327,27 @@
                          TextWrapping="NoWrap" VerticalAlignment="Center"/>
             </StackPanel>
           </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ===== GameBadge: monograma sobre gradiente discreto da cor do cartão (sem logotipo de marca) ===== -->
+  <Style TargetType="c:GameBadge">
+    <Setter Property="Width" Value="52"/>
+    <Setter Property="Height" Value="52"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="c:GameBadge">
+          <Grid>
+            <Border Background="{TemplateBinding AccentSoftBrush}" BorderBrush="{TemplateBinding AccentLineBrush}" BorderThickness="1"
+                    CornerRadius="{StaticResource Radius.Card}" SnapsToDevicePixels="True"/>
+            <!-- realce de 1 px no topo, como nos cartões do sistema -->
+            <Border Background="{StaticResource Brush.Highlight}" Height="1" VerticalAlignment="Top" Margin="8,1,8,0" CornerRadius="1"/>
+            <TextBlock Text="{TemplateBinding Monogram}" FontFamily="{StaticResource Font.Display}" FontSize="19" Foreground="{TemplateBinding AccentBrush}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="NoWrap" Margin="0,0,0,1"/>
+          </Grid>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

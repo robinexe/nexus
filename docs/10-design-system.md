@@ -168,6 +168,17 @@ Dê `Style` explícito aos `TextBlock` de dentro (não dependa do estilo implíc
 O selo antigo (`ContentTemplate="{StaticResource Chip}"` para FactStatus/DiagnosticSeverity) continua valendo para listas
 técnicas.
 
+### GameBadge — selo de um jogo (sem marca)
+Monograma de 1–3 letras (`Monogram`) sobre um gradiente discreto da cor de destaque do cartão (`AccentHex`, `#RRGGBB`; ≈ 12 % → 22 %
+da cor, contorno de 1 px a 35 %, realce de 1 px no topo como os cartões). Sem cor (jogo sem cartão próprio), usa o âmbar do tema.
+**Nenhum logotipo, arte ou cor registrada de marca é desenhado** (regra 5 do brief): só letras e uma cor discreta escolhida pelo NEXUS.
+Os valores vêm de `GameCardDefinition.Monogram`/`AccentHex` (`src/Nexus.GameProfiles/Cards/GameCards.cs`); `GameBadge.ParseHex` é
+lógica pura testada (`GameCardTests`).
+
+```xml
+<c:GameBadge Monogram="FN" AccentHex="#6E8BD9" AutomationProperties.Name="{Binding Name}"/>
+```
+
 ### EmptyState — nada aqui ainda
 Ilustração + frase + detalhe + botão que diz o que fazer.
 
@@ -451,6 +462,16 @@ pelo aplicador. O cartão/linha em que o usuário clicou fica à vista mesmo dep
 - **Limpar**: "X GB podem ser liberados", "Limpar agora" (só regras seguras, para a quarentena), lista em "Ver o que será limpo".
 - **Jogos**: Modo de jogo do Windows com "Ligar" de um clique. Por jogo: "Medir FPS" e cada opção que vale com "Ligar" de um
   clique (driver NVIDIA por jogo, jogos em janela).
+  - **Cartões de jogo (08/11/2026)**: a tela consome `GameCardRegistry` (`src/Nexus.GameProfiles/Cards/GameCards.cs`): um
+    `GameCardDefinition` → um cartão; jogo detectado sem definição continua no cartão genérico (inicial do nome, só driver/janela).
+    Cartão: selo `c:GameBadge` (monograma + cor discreta, sem logotipo), nome oficial, linha de estado "Instalado · aberto agora ·
+    última partida medida: N FPS" (só o que foi lido), aviso "feche o jogo antes" (`CloseFirstNoteKey`; âmbar quando o jogo está
+    aberto), opções em linhas separadas por `Brush.LineSoft` (título, uma frase de efeito e custo, selo da recomendação por hardware
+    pelo público `GameCardAudience` × `HardwareRules.ForAudience`, um clique `S.OneClick` à direita), "Aplicar o recomendado",
+    "Medir FPS" e "Comparar com e sem". Cartões: Fortnite (migrado, mesmos planos e leitura), Overwatch 2 e Apex Legends (handler
+    `GameConfigValue`, estado lido das mesmas chaves que as ações gravam: `GameCardConfigReads`), VALORANT, League of Legends e Call
+    of Duty (só Medir/Comparar e orientação; motivos em `docs/modules/<jogo>.md`). Funciona em 1100 px: cabeçalho em `DockPanel`
+    com os botões à direita e texto com reticências; linhas quebram o texto e mantêm o botão.
   - Cada opção mostra o estado REAL, lido de onde a ação escreve (`GameOptionStates.cs`, lógica pura testada em
     `GameOptionStateTests`): Modo de jogo pelo registro (releitura do catálogo depois de aplicar), driver NVIDIA pelo leitor do
     DRS em cada executável (o da biblioteca e, se ele só abre o jogo, o que desenha: `GameAliases`), jogos em janela pelo token
