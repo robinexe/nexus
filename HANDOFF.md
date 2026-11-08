@@ -279,8 +279,13 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     commit (refazer): opções por jogo AMD (ADLX)/Intel — feitas depois na 1.1.0. **Modo jogo automático integrado em 08/11**
     (`Nexus.Measurement/GameModeAuto.cs`, `GameModeAutoPanel.cs`, `docs/modules/game-mode-auto.md`; versão 1.1.2; 2636 testes).
     Falta testar em PC real: aplicar/desfazer com jogo de verdade, reabertura com pendência, reinício com plano de sessão.
-    Ainda não feitos (a rodada de agentes de 03/11 caiu no limite semanal): atraso de drivers apontando o culpado, design novo dos
-    cartões, cartões VALORANT/LoL/COD/Apex/OW2/Minecraft/Roblox/GTA V/Rocket League/EA FC.
+    **08/11 (versão 1.1.3, 2677 testes):** atraso de drivers com culpado (ação efêmera admin `measure.driver-latency.trace@1`,
+    ETW DPC/ISR por P/Invoke, `Nexus.Measurement/DriverTrace*.cs`, inventário .sys→dispositivo em `Nexus.DriverUpdates/DriverModules.cs`,
+    resultado por `%LocalAppData%\NEXUS\driver-latency\ultimo.json`; docs/modules/measure.md); tela Jogos consome
+    `GameCardRegistry` (`GameBadge`, `GameCardPlans`, `GameCardState`); cartões Fortnite/OW2/Apex/Minecraft/Roblox/GTA V com ações,
+    VALORANT/LoL/CoD/Rocket League/EA FC só Medir/Comparar (motivos com fonte em docs/modules/<jogo>.md). `ConfigLines` ganhou XML
+    (atributo e `<tipo name=>`). **Falta testar em PC real:** ETW de verdade (logger privado vs NT Kernel Logger, culpado comparado ao
+    LatencyMon), grafia atual dos arquivos de OW2/Apex/Roblox/GTA V Enhanced/Bedrock, visual dos cartões (1100 px, DPI, pt longo).
 26. **Pedido do responsável (03/11), fora do escopo e NÃO feito:** "destravar velocidades e funções bloqueadas pelo fabricante /
     passar dos limites de fábrica" contraria a regra de honestidade e segurança (só o que o fabricante expõe; nada de vBIOS,
     firmware ou driver modificado). Cabe em "rejected" com fonte, não como ação.

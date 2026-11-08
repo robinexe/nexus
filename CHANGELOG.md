@@ -3,6 +3,21 @@
 Cada versão tem um resumo de uma linha (a linha que começa com `>`): é o texto do aviso de atualização dentro do NEXUS.
 O resto da seção vai para a página de download (GitHub Releases).
 
+## 1.1.3
+
+> Cartões de 11 jogos com design novo, e "Atraso de drivers" apontando qual driver é o culpado.
+
+- **Cartões de jogo redesenhados** (Desempenho › Jogos): selo com monograma e cor discreta (sem logotipos), estado
+  "instalado · aberto agora · última partida medida", opções de um clique com "✓ Ligado — Desfazer", "Medir FPS" e "Comparar
+  com e sem", aviso para fechar o jogo antes e destaque do que é recomendado para o seu PC.
+- **Jogos novos**: Fortnite (migrado), Overwatch 2, Apex Legends, Minecraft (Java e Bedrock), Roblox, GTA V (Legacy e
+  Enhanced) com opções no arquivo que o próprio jogo grava; VALORANT, League of Legends, Call of Duty, Rocket League e EA FC
+  só com Medir/Comparar e a explicação de por que o NEXUS não mexe nos arquivos deles (servidor, antitrapaça ou arquivo
+  regravado). Mitos de cada jogo em "rejeitados" com fonte.
+- **Atraso de drivers com culpado**: "Investigar como administrador (10 s)" rastreia DPC/interrupções (ETW) e mostra o
+  provável driver culpado, o dispositivo e os cinco que mais seguraram o processador, com um conselho por categoria. Sem
+  administrador, continua só o total, dito com honestidade. Aparece também no Diagnóstico quando o nível é ruim.
+
 ## 1.1.2
 
 > Modo jogo automático: liga o conjunto escolhido quando um jogo abre e desfaz tudo quando ele fecha.
