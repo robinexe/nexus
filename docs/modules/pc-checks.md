@@ -10,6 +10,7 @@ monitor) usa a ação reversível que já existia (`gpulab.display.mode`) com a 
 | Monitor | Início ("Usar 144 Hz"); Problemas; Placa de vídeo (já existia); Diagnóstico | `QueryDisplayConfig` + `EnumDisplaySettingsEx` pela leitura leve `GpuLabScanner.MonitorsOnly()` (sem DXGI/NVML): taxa atual × maior taxa listada na MESMA resolução; HDR (cores avançadas) suportado/ligado | [Blur Busters](https://www.blurbusters.com/oh-no-im-at-the-wrong-refresh-rate/) |
 | Notebook na bateria | Notificação da bandeja + barra de status ao abrir um jogo; Ajustes › "Avisar quando eu abrir um jogo com o notebook na bateria" | Detecção de jogo do Medir (`MeasurePage.GameStarted`) + `GetSystemPowerStatus`. No máximo um aviso a cada 30 min | [TechSpot: notebooks gamer na bateria](https://www.techspot.com/article/1571-gaming-laptop-battery-performance/) |
 | Limitação pelo firmware | Problemas; Diagnóstico | Eventos 37 do `Microsoft-Windows-Kernel-Processor-Power` no log Sistema (últimos 7 dias; não exige administrador) e `Win32_PerfFormattedData_Counters_ProcessorInformation.PercentPerformanceLimit` (o nome da classe não muda com o idioma, ao contrário do caminho "\Processor Information\% Performance Limit"); 3 amostras, vale a menor | [Intel: evento 37](https://www.intel.com/content/www/us/en/support/articles/000090904.html) |
+| Atraso de drivers (`drivers.latency`) | Problemas; Diagnóstico — **só depois que o usuário roda o teste** em Desempenho › Medir (não há leitura automática) | Veredito dos contadores DPC/interrupção do Medir; com "Investigar como administrador (10 s)", o driver culpado e o dispositivo (ver `docs/modules/measure.md`, "Atraso de drivers") | [Microsoft Learn: PerfInfo DPC/ISR](https://learn.microsoft.com/windows/win32/etw/perfinfo) |
 
 ## Regras (Nexus.HardwareDiscovery.PcChecks, testadas em PcChecksTests)
 
@@ -23,6 +24,9 @@ monitor) usa a ação reversível que já existia (`gpulab.display.mode`) com a 
 - **Monitor:** abaixo da maior taxa listada na mesma resolução = atenção; HDR disponível e desligado = informação (escolha sua).
 - **Limitação:** algum evento 37 ou limite atual < 90% = aviso neutro ("pode ser temperatura, energia ou limite do fabricante");
   atenção com ≥ 3 eventos ou limite < 80%, e só informação na bateria (limitar na bateria é esperado).
+- **Atraso de drivers:** "Ruim" = atenção; "Pode causar engasgos" = informação; "Bom" = ok. Com a investigação, a frase simples é
+  "<driver.sys> (<dispositivo>) está atrasando o processador"; sem ela, "Drivers estão segurando o processador" + o caminho para
+  investigar. Impacto 68 na lista Problemas (entre a limitação do processador e o monitor).
 
 ## O teste com carga (bufferbloat)
 

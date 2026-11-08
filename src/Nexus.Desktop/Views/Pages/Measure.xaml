@@ -876,8 +876,39 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
 
+              <!-- Investigação como administrador: qual driver (rastreamento do kernel pelo aplicador, ação efêmera) -->
+              <Border Margin="0,14,0,0" Padding="14,12" Background="{StaticResource Brush.SurfaceLow}" CornerRadius="{StaticResource Radius.Card}">
+                <StackPanel>
+                  <TextBlock Text="{l:T Dpc.TraceHeader}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
+                  <TextBlock Text="{l:T Dpc.NoAdmin}" Style="{StaticResource Text.Small}" Margin="0,4,0,0" TextWrapping="Wrap"
+                             Visibility="{Binding ShowNoAdmin, Converter={StaticResource M.Vis}}"/>
+                  <StackPanel Visibility="{Binding HasTrace, Converter={StaticResource M.Vis}}" Margin="0,6,0,0">
+                    <TextBlock Text="{Binding CulpritText}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Trace}" TextWrapping="Wrap"
+                               Visibility="{Binding HasCulprit, Converter={StaticResource M.Vis}}"/>
+                    <TextBlock Text="{Binding NoCulpritText}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Good}" TextWrapping="Wrap"
+                               Visibility="{Binding NoCulpritText, Converter={StaticResource M.Has}}"/>
+                    <TextBlock Text="{l:T Dpc.TopTitle}" Style="{StaticResource Text.Small}" Margin="0,8,0,0"/>
+                    <ItemsControl ItemsSource="{Binding TopRows}" Focusable="False" Margin="0,2,0,0">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:DriverTraceRow}">
+                          <TextBlock Text="{Binding Text}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Numbers}" TextWrapping="Wrap"
+                                     Foreground="{StaticResource Brush.TextMuted}"/>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{l:T Dpc.KernelNote}" Style="{StaticResource Text.Small}" Margin="0,6,0,0" TextWrapping="Wrap"
+                               Visibility="{Binding HasKernelInTop, Converter={StaticResource M.Vis}}"/>
+                    <TextBlock Text="{Binding TraceNote}" Style="{StaticResource Text.Small}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                  </StackPanel>
+                  <TextBlock Text="{Binding TraceStatus}" Style="{StaticResource Text.Small}" Margin="0,6,0,0" TextWrapping="Wrap"
+                             Visibility="{Binding TraceStatus, Converter={StaticResource M.Has}}"/>
+                  <Button Style="{StaticResource Button.Secondary}" Command="{Binding InvestigateCommand}" Content="{l:T Dpc.Investigate}"
+                          HorizontalAlignment="Left" Margin="0,10,0,0" ToolTip="{l:T Dpc.InvestigateTip}"/>
+                </StackPanel>
+              </Border>
+
               <StackPanel Margin="0,12,0,0" Visibility="{Binding HasAdvice, Converter={StaticResource M.Vis}}">
-                <TextBlock Text="{l:T Dpc.CulpritsTitle}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
+                <TextBlock Text="{Binding CulpritsHeader}" Style="{StaticResource Text.Body}" Foreground="{StaticResource Brush.Text}"/>
                 <ItemsControl ItemsSource="{Binding Advice}" Focusable="False">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:DriverAdviceRow}">
@@ -894,7 +925,10 @@
             </StackPanel>
 
             <c:ExplainToggle Header="{l:T Dpc.HowHeader}" Margin="0,10,0,0">
-              <TextBlock Text="{l:T Dpc.Approx}" Style="{StaticResource Text.Small}"/>
+              <StackPanel>
+                <TextBlock Text="{l:T Dpc.Approx}" Style="{StaticResource Text.Small}"/>
+                <TextBlock Text="{l:T Dpc.TraceHow}" Style="{StaticResource Text.Small}" Margin="0,6,0,0"/>
+              </StackPanel>
             </c:ExplainToggle>
           </StackPanel>
         </Border>

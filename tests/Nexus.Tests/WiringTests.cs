@@ -64,6 +64,7 @@ public sealed partial class WiringTests
     {
         "disk.system-free", // achado do diagnóstico (HardwareDiscovery), não ação
         "disk.system-media", // achado do diagnóstico (SSD/HDD do disco do sistema), não ação
+        "disk.sys", // driver de disco do Windows (categoria do Atraso de drivers em DriverModuleLookup), não ação
         "privacy.v1.json", // nome do arquivo do catálogo de privacidade
     };
 

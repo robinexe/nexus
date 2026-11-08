@@ -62,6 +62,8 @@
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Modules\AbLabText.cs" Link="Shell\AbLabText.cs" />
     <!-- Medir: "Por que travou?" em palavras simples (MeasureStutterTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Modules\MeasureStutter.cs" Link="Shell\MeasureStutter.cs" />
+    <!-- Medir: Atraso de drivers com a investigação como administrador — culpado, top 5, conselho, resultado do aplicador (MeasureDriverTraceTests). -->
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Modules\MeasureDriverTraceText.cs" Link="Shell\MeasureDriverTraceText.cs" />
     <!-- Checagens do PC: achados em palavras simples com os números da leitura (PcChecksDesktopTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\PcCheckText.cs" Link="Shell\PcCheckText.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\PcChecksCoordinator.cs" Link="Shell\PcChecksCoordinator.cs" />

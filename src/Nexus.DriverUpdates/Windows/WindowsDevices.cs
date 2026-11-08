@@ -61,7 +61,7 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
     }
 
     private const uint DigcfPresent = 0x2, DigcfAllClasses = 0x4;
-    private const uint SpdrpDeviceDesc = 0x0, SpdrpHardwareId = 0x1, SpdrpCompatibleIds = 0x2, SpdrpClass = 0x7, SpdrpClassGuid = 0x8,
+    private const uint SpdrpDeviceDesc = 0x0, SpdrpHardwareId = 0x1, SpdrpCompatibleIds = 0x2, SpdrpService = 0x4, SpdrpClass = 0x7, SpdrpClassGuid = 0x8,
         SpdrpDriver = 0x9, SpdrpMfg = 0xB, SpdrpFriendlyName = 0xC;
 
     [GeneratedRegex(@"\A\{[0-9A-Fa-f\-]{36}\}\\[0-9]{4}\z", RegexOptions.CultureInvariant)]
@@ -103,7 +103,7 @@ public sealed unsafe partial class SetupApiDeviceInventory : IDeviceInventory
                 list.Add(new DeviceDriver(instance, First(set, pData, buf, SpdrpFriendlyName) ?? First(set, pData, buf, SpdrpDeviceDesc) ?? instance,
                     Strings(set, pData, SpdrpHardwareId, buf), Strings(set, pData, SpdrpCompatibleIds, buf),
                     First(set, pData, buf, SpdrpClass), First(set, pData, buf, SpdrpClassGuid)?.ToLowerInvariant(), First(set, pData, buf, SpdrpMfg), version, date, provider, inf, matching, ProblemCode(data.DevInst),
-                    package is { Length: > 0 and < 32 } ? package.Trim() : null));
+                    package is { Length: > 0 and < 32 } ? package.Trim() : null, First(set, pData, buf, SpdrpService)));
             }
         }
         finally { SetupDiDestroyDeviceInfoList(set); }

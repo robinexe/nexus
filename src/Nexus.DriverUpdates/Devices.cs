@@ -13,6 +13,8 @@ namespace Nexus.DriverUpdates;
 /// 28 = sem driver etc. Null quando não deu para ler.</param>
 /// <param name="VendorPackageVersion">Versão do pacote do fabricante gravada pelo driver na chave dele, quando existe (AMD:
 /// valor "RadeonSoftwareVersion", ex.: "26.5.2"). Null quando o driver não grava.</param>
+/// <param name="Service">Serviço de driver do dispositivo (SPDRP_SERVICE, ex.: "nvlddmkm", "rt640x64"): liga o dispositivo ao arquivo .sys
+/// pelo ImagePath do serviço (Atraso de drivers). Null quando o dispositivo não tem serviço.</param>
 public sealed record DeviceDriver(
     string InstanceId,
     string Description,
@@ -27,7 +29,8 @@ public sealed record DeviceDriver(
     string? InfName,
     string? MatchingDeviceId,
     int? ProblemCode = null,
-    string? VendorPackageVersion = null)
+    string? VendorPackageVersion = null,
+    string? Service = null)
 {
     /// <summary>Classe "Display" (adaptador de vídeo).</summary>
     public const string DisplayClassGuid = "{4d36e968-e325-11ce-bfc1-08002be10318}";

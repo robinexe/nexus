@@ -118,6 +118,34 @@ public static class MeasureHandlers
     {
         ArgumentNullException.ThrowIfNull(environment);
         if (!OperatingSystem.IsWindows()) return [];
-        return [new PerfLogGroupHandler(new Windows.WindowsLocalGroupBackend(), Windows.WindowsLocalGroupBackend.CurrentUserSid, environment.OtherAccount)];
+        return
+        [
+            new PerfLogGroupHandler(new Windows.WindowsLocalGroupBackend(), Windows.WindowsLocalGroupBackend.CurrentUserSid, environment.OtherAccount),
+            new DriverTraceHandler(new Windows.WindowsKernelTrace(), sid => LocalAppDataForSid(environment, sid), environment.OtherAccount),
+        ];
+    }
+
+    /// <summary>
+    /// %LocalAppData% de quem pediu, pelo ProfileList (HKLM) e pelo SID — nunca por variáveis de ambiente do aplicador (que pode ser
+    /// um serviço). Sem SID: a conta deste processo, só quando o aplicador é a própria conta de quem pede. Mesma regra do Fortnite/Limpeza.
+    /// </summary>
+    public static string? LocalAppDataForSid(HandlerEnvironment environment, string? sid)
+    {
+        ArgumentNullException.ThrowIfNull(environment);
+        if (!OperatingSystem.IsWindows()) return null;
+        var who = sid ?? (environment.OtherAccount ? null : Windows.WindowsLocalGroupBackend.CurrentUserSid());
+        if (!UserProfileScope.IsValidSid(who)) return null;
+        string? profile;
+        try
+        {
+            var r = environment.Registry.Read(new Nexus.WindowsActions.Registry.RegistryTarget(Nexus.WindowsActions.Registry.RegHive.HKLM,
+                $@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\{who}", "ProfileImagePath", Nexus.WindowsActions.Registry.RegView.Registry64));
+            if (!r.ValueExists || r.Value is null) return null;
+            profile = r.Value.Replace("%SystemDrive%", Environment.GetEnvironmentVariable("SystemDrive") ?? "C:", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Security.SecurityException) { return null; }
+        if (profile.Contains('%', StringComparison.Ordinal) || profile.Contains("..", StringComparison.Ordinal) ||
+            profile.Length < 3 || !char.IsAsciiLetter(profile[0]) || profile[1] != ':' || profile[2] is not ('\\' or '/')) return null;
+        return Path.Combine(profile.TrimEnd('\\', '/'), "AppData", "Local");
     }
 }

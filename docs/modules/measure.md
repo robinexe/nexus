@@ -163,11 +163,22 @@ processos do Monitor (`WindowsProcessSource` + `ProcessCpuTracker`, o mesmo cál
 PROCESS_QUERY_LIMITED_INFORMATION — o acesso do Gerenciador de Tarefas; inclui disco e outras E/S). Nada é injetado nem lido da
 memória do jogo. Jogo protegido que negue até esse acesso: sem dado de disco, e a tela avisa.
 
-**O que o modo administrador acrescentaria (não feito):** um rastreamento ETW do kernel (FileIo/DiskIo, DPC, CSwitch) diria quais
-arquivos o jogo leu e qual driver/thread segurou o processador em cada travada. Exige administrador (sessão do kernel); o NEXUS não
-pede elevação a cada partida, por isso fica no nível de usuário e diz "provável".
+**O que o modo administrador acrescentaria (não feito para as travadas):** um rastreamento ETW do kernel (FileIo/DiskIo, CSwitch) diria
+quais arquivos o jogo leu e qual thread segurou o processador em cada travada. Exige administrador (sessão do kernel); o NEXUS não
+pede elevação a cada partida, por isso fica no nível de usuário e diz "provável". A parte de **drivers** (DPC/ISR) existe como ação
+sob demanda: ver "Atraso de drivers", abaixo.
 
-## Atraso de drivers (DPC/ISR, aproximação de nível de usuário)
+## Atraso de drivers (DPC/ISR)
+
+Duas camadas, honestas sobre o que cada uma consegue:
+
+| | Sem administrador (contadores) | Com administrador (rastreamento do kernel, 10 s) |
+|---|---|---|
+| O que diz | QUANTO os drivers seguraram cada núcleo (veredito bom / pode causar engasgos / ruim) | QUAL driver (.sys) e a pior chamada isolada de cada um |
+| Como | PDH, uma leitura por segundo, 60–180 s | ação efêmera do catálogo `measure.driver-latency.trace@1` pelo aplicador |
+| Muda algo? | Não | Não (sessão ETW temporária, parada ao fim; um arquivo de resumo no perfil) |
+
+### Contadores (aproximação de nível de usuário)
 
 Cartão em Medir: teste de 1, 2 ou 3 minutos. Lê uma vez por segundo os contadores **documentados** do Windows
 `\Processor Information(*)\% DPC Time`, `% Interrupt Time`, `DPCs Queued/sec` e `Interrupts/sec` por núcleo (PDH com nomes em
@@ -181,14 +192,43 @@ inglês, funciona em qualquer idioma; `src/Nexus.Measurement/Windows/WindowsDpcC
 | Bom | abaixo disso |
 
 Mostra também o pior momento (núcleo, %, segundo), a média e a **duração média** de cada DPC/ISR (% do tempo × 1 s ÷ chamadas
-por segundo; só com ≥ 20 chamadas/s). Fora de "Bom", lista os culpados típicos com o que fazer (Wi-Fi, áudio, rede, vídeo →
-"Abrir Atualizar drivers").
+por segundo; só com ≥ 20 chamadas/s). Os contadores mostram QUANTO os drivers seguram o processador, não QUAL driver, e uma chamada
+isolada longa (ex.: 2 ms uma vez) some na média do segundo. **A tela diz isso com todas as letras** ("Sem administrador, o teste mostra
+só o total: não dá para saber QUAL driver") e oferece o botão abaixo. Fora de "Bom" e sem investigação, lista os culpados típicos
+(Wi-Fi, áudio, rede, vídeo → "Abrir Atualizar drivers").
 
-**Por que aproximação e não ETW:** o LatencyMon usa o NT Kernel Logger (eventos DPC/ISR com o endereço da rotina, mapeado para o
-módulo do driver). Isso exige administrador; fazer pelo aplicador elevado pediria um pedido "de leitura" novo no protocolo do broker
-(Core/Broker fora do escopo deste módulo) ou um executável auxiliar elevado (empacotamento novo). Os contadores mostram QUANTO os
-drivers seguram o processador, não QUAL driver, e uma chamada isolada longa (ex.: 2 ms uma vez) some na média do segundo. A tela
-diz isso em "Como foi medido".
+### Investigar como administrador (10 s): `measure.driver-latency.trace@1`
+
+É o que o LatencyMon e o xperf fazem. Ação de catálogo (`catalog/measure.v1.json`), **efêmera, administrador, só leitura**: handler
+`MeasureDriverLatencyTrace` (`src/Nexus.Measurement/DriverTraceHandler.cs`), backend `Windows/WindowsKernelTrace.cs` (P/Invoke em
+`advapi32`/`kernel32`, sem dependência nova), agregação pura em `DriverTrace.cs`.
+
+| | |
+|---|---|
+| Sessão | Logger de sistema privado `NEXUS-DriverLatency` (`LogFileMode = EVENT_TRACE_REAL_TIME_MODE \| EVENT_TRACE_SYSTEM_LOGGER_MODE`, GUID próprio em `Wnode.Guid`, Windows 8+). Se o Windows recusar o modo privado, cai para o `NT Kernel Logger` clássico (`KERNEL_LOGGER_NAME` + `SystemTraceControlGuid`). Fonte: [Configuring and Starting a SystemTraceProvider Session](https://learn.microsoft.com/windows/win32/etw/configuring-and-starting-a-systemtraceprovider-session), [Configuring and Starting the NT Kernel Logger Session](https://learn.microsoft.com/windows/win32/etw/configuring-and-starting-the-nt-kernel-logger-session), [EVENT_TRACE_PROPERTIES](https://learn.microsoft.com/windows/win32/etw/event-trace-properties). |
+| Flags | `EnableFlags = EVENT_TRACE_FLAG_IMAGE_LOAD \| EVENT_TRACE_FLAG_DPC \| EVENT_TRACE_FLAG_INTERRUPT`; `ClientContext = 1` (QPC); 8–64 buffers de 128 KB; `StartTrace` → `OpenTrace` (tempo real, `PROCESS_TRACE_MODE_EVENT_RECORD`) → `ProcessTrace` numa thread → 10 s → `ControlTrace(STOP)` → `CloseTrace`. A parada fica num `finally`: também em erro a sessão é encerrada. Sessão esquecida com o mesmo nome (processo morto) é parada e recriada. |
+| Eventos | Classe MOF `PerfInfo` (`{ce1dbfb4-137e-4da6-87b0-3f59aa102cbc}`): DPC tipos 66 (ThreadDPC), 68 (DPC), 69 (TimerDPC) e ISR tipo 67; payload `InitialTime` (entrada) + `Routine` (endereço). Duração = carimbo do evento − `InitialTime`, em ticks QPC. Fontes: [PerfInfo](https://learn.microsoft.com/windows/win32/etw/perfinfo), [DPC](https://learn.microsoft.com/windows/win32/etw/dpc), [ISR](https://learn.microsoft.com/windows/win32/etw/isr) ("use com os eventos Image para achar o módulo"). |
+| Endereço → módulo | `Image_Load` (`{2cb15d1d-5fc1-11d2-abe1-00a0c911f518}`, tipos 10/3/4; `DCStart` enumera os já carregados) com `ImageBase`, `ImageSize`, `FileName`, só PID 0 (kernel) — [Image_Load](https://learn.microsoft.com/windows/win32/etw/image-load); mais [`EnumDeviceDrivers`](https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-enumdevicedrivers) + `GetDeviceDriverBaseName` (base de todos os drivers, sem tamanho). Regra (`DriverTraceAnalyzer.Resolve`): maior base ≤ endereço; com tamanho conhecido o endereço tem de caber; sem tamanho vale até a base seguinte (ou 64 MB). Sem módulo = "não resolvido", contado e mostrado quando ≥ 10%. |
+| Agregação | Por arquivo: quantidade, tempo total e **pior chamada** de DPC e de ISR. Chamada > 1 s é lixo (descartada). `ntoskrnl.exe`/`ntkrnlmp.exe`/`hal.dll` vêm marcados `IsKernelCore`. |
+| Culpado | O **driver** (não kernel) com a pior chamada ≥ 500 µs. Abaixo disso ninguém é apontado ("nenhum driver segurou um núcleo por mais de 0,5 ms"). Top 5 por pior chamada, kernel incluído e marcado. |
+| Resultado → tela | O protocolo do aplicador devolve só o veredito curto de uma ação efêmera, então o handler grava `%LocalAppData%\NEXUS\driver-latency\ultimo.json` **do perfil de quem pediu** (ProfileList pelo SID — `userSid` que o aplicador acrescenta com `"scope": "User"`, ou a conta do processo quando é a mesma; com outra conta e sem SID, recusa antes de iniciar a sessão). A interface lê o arquivo depois do `Verified` e ignora um arquivo de antes do pedido. É o mesmo canal do PresentMon elevado (arquivo no perfil). |
+| Dispositivo | `Nexus.DriverUpdates.DriverModuleLookup`: dispositivo → serviço (`SPDRP_SERVICE`, novo campo `DeviceDriver.Service`) → `ImagePath` do serviço em `HKLM\SYSTEM\CurrentControlSet\Services` → nome do .sys (sem `ImagePath`, o Windows usa `drivers\<serviço>.sys`). Sem dispositivo: descrição do arquivo (`FileVersionInfo`). Categoria (rede/áudio/armazenamento/vídeo/USB/kernel) pela classe do dispositivo ou por nomes conhecidos. |
+| Tela | "Provável culpado: ndis.sys (Intel(R) Wi-Fi 6 AX201) — DPC máximo 1,8 ms", top 5, nota sobre ntoskrnl/hal quando aparecem, limites (amostra de 10 s; máquina virtual) e **um** conselho pela categoria, sem prometer. O veredito ruim entra em Diagnóstico/Problemas (`drivers.latency`, atenção só em "Ruim"; com culpado, a frase diz o driver e o dispositivo; sem investigação, a frase manda investigar). |
+
+**Por que ntoskrnl.exe e hal.dll não são "culpa":** são o próprio Windows. Os DPCs deles são temporizadores do sistema, gerência de
+energia e trabalho feito em nome de algum driver que pediu (ex.: `KeSetTimer` com DPC do kernel) — o rastreamento não distingue o
+pedinte. Não existe "atualizar o ntoskrnl" fora do Windows Update, então a tela mostra, marca e explica, mas nunca aponta como culpado.
+
+**Limites (ditos na tela e no catálogo):** amostra curta (10 s) sem carga controlada — um driver que atrasa de vez em quando pode
+não aparecer; repetir com o problema acontecendo. Em **máquina virtual** (Hyper-V, VMware) os tempos de DPC/ISR refletem o
+hipervisor, não um PC real (o CI roda numa VM: confere o mecanismo, não os números). Durante os 10 s o Windows gasta um pouco de
+processador registrando milhares de eventos por segundo. Se LatencyMon/xperf estiverem com o `NT Kernel Logger` aberto e o Windows
+recusar o logger privado, a sessão deles é encerrada (dito em `risks`). Só Windows 64 bits (responde NotApplicable fora disso).
+
+**Falta testar em PC real** (a VM do CI só prova que a sessão abre, grava e fecha): um culpado de verdade (Wi-Fi baixando, áudio
+estalando) comparado com o LatencyMon; que a resolução de endereço cubra os drivers (a taxa de "não resolvido" deve ficar perto de
+0%); que o `DCStart` de `Image_Load` chegue no logger privado (senão `EnumDeviceDrivers` cobre, sem tamanho); e o caso do aplicador
+como serviço (SID vindo do pedido).
 
 ## Segurança e anticheat
 
@@ -221,17 +261,22 @@ diz isso em "Como foi medido".
 ## Arquivos
 
 * `src/Nexus.Measurement/`: `Stutter.cs` (Por que travou?), `CaptureActivity.cs` (amostras durante a captura),
-  `DriverLatency.cs` + `Windows/WindowsDpcCounters.cs` (Atraso de drivers), `Windows/WindowsProcessIo.cs`, `PresentMonTrust.cs` (localizador com o embutido primeiro, conferência hash/assinatura),
+  `DriverLatency.cs` + `Windows/WindowsDpcCounters.cs` (Atraso de drivers, contadores), `DriverTrace.cs` (agregação DPC/ISR por módulo + arquivo de resultado),
+  `DriverTraceHandler.cs` + `Windows/WindowsKernelTrace.cs` (ação `measure.driver-latency.trace`, sessão ETW), `Windows/WindowsProcessIo.cs`, `PresentMonTrust.cs` (localizador com o embutido primeiro, conferência hash/assinatura),
   `PresentMonSmokeTest.cs` (captura curta do autoteste), `PerfLogGroup.cs` (ação do grupo), `Windows/WindowsPresentMonTrustProbe.cs`
   (WinVerifyTrust + assinante), `Windows/WindowsLocalGroupBackend.cs` (NetLocalGroup* + marca), `GameLibrary.cs` (bibliotecas), `GameDetection.cs` (regras e máquina de estados), `PresentMonLive.cs`
   (parser em tempo real, linha de comando, localização), `PresentMonLiveCapture.cs` (processo + leitura do arquivo),
   `LiveStats.cs`, `AutoCompare.cs` (diário → mudanças, referência, avisos, trechos, veredito, biblioteca/CSV/relatório),
   `AutoMeasure.cs` (motor), `MeasurePreferences.cs` (preferências, atalho), `Overlay.cs` (estado do mostrador),
   `Windows/WindowsProcessProbe.cs`, `Windows/OverlayNative.cs`.
-* `src/Nexus.Desktop/ViewModels/Modules/MeasurePage.cs`, `MeasureRows.cs`, `MeasureStutter.cs` (frases), `MeasureDriverLatency.cs`,
+* `src/Nexus.Desktop/ViewModels/Modules/MeasurePage.cs`, `MeasureRows.cs`, `MeasureStutter.cs` (frases), `MeasureDriverLatency.cs` (painel) +
+  `MeasureDriverTraceText.cs` (frases da investigação, lógica pura), `src/Nexus.DriverUpdates/DriverModules.cs` (.sys → dispositivo/categoria),
   `MeasureActivitySource.cs`, `Views/Pages/Measure.xaml`,
   `Views/Modules/Measure/OverlayWindow.cs` (mostrador + atalho), `Sparkline.cs`.
 * Testes: `tests/Nexus.Tests/Modules/MeasureStutterTests.cs` (CSVs sintéticos do 2.6, causas, amostrador, DPC sintético),
+  `MeasureDriverTraceTests.cs` (eventos DPC/ISR sintéticos → agregação, culpado, kernel marcado; handler com backend falso; .sys →
+  dispositivo; achado do Diagnóstico nos 3 idiomas; frases da tela; leitura da resposta do aplicador),
+  `tests/Nexus.IntegrationTests/Modules/MeasureIntegrationTests.cs` (VM do CI: a ação abre a sessão, grava o resumo e fecha),
   `tests/Nexus.Tests/Modules/MeasureTests.cs`, `MeasurePresentMonTests.cs` (localização, conferência com falsos, recusa
   antes de executar, handler do grupo com backend falso, catálogo, interface sem escrita direta) e `MeasurementTests.cs`.
 * Autoteste: "Medir · PresentMon encontrado?" mostra origem (embutido/configurado/achado), conferido e assinante; "Medir ·
@@ -260,4 +305,7 @@ diz isso em "Como foi medido".
    deve apontar "shader ou carregamento" nos primeiros minutos. Rode uma verificação do Defender durante uma partida: as travadas
    devem apontar "outro programa (MsMpEng)". Na tela Jogos, o cartão do jogo mostra a frase de uma linha.
 7. Atraso de drivers: Medir → "Atraso de drivers" → 1 min. Num PC calmo, "Bom"; com Wi-Fi baixando muito ou áudio estalando,
-   compare com o LatencyMon (que diz o driver) para calibrar os limites de 5%/20%.
+   compare com o LatencyMon (que diz o driver) para calibrar os limites de 5%/20%. Depois "Investigar como administrador (10 s)":
+   confirme, aceite o aviso do Windows; em ~10 s aparece "Provável culpado: <driver.sys> (<dispositivo>) — DPC máximo X ms" e o top 5
+   (ntoskrnl.exe marcado como Windows). Confira com o LatencyMon ("Drivers" → highest execution) que o driver é o mesmo e que a
+   sessão `NEXUS-DriverLatency` não existe mais (`logman query -ets`). Com veredito "Ruim", o Diagnóstico e Problemas mostram o achado.
