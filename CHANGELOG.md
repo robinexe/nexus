@@ -3,6 +3,17 @@
 Cada versão tem um resumo de uma linha (a linha que começa com `>`): é o texto do aviso de atualização dentro do NEXUS.
 O resto da seção vai para a página de download (GitHub Releases).
 
+## 1.1.2
+
+> Modo jogo automático: liga o conjunto escolhido quando um jogo abre e desfaz tudo quando ele fecha.
+
+- **Modo jogo automático** (Jogos; desligado por padrão): você escolhe o que entra (plano de energia de sessão, notificações
+  silenciadas, captura em segundo plano do Game DVR; teto de downloads só com o NEXUS como administrador). Ao abrir um jogo, o
+  NEXUS aplica pelo aplicador; ao fechar (com folga configurável de 5 s a 2 min), desfaz pelas execuções do histórico. Se o
+  NEXUS for fechado com um jogo aberto, ao abrir de novo ele desfaz o que ficou pendente. Avisos discretos na bandeja; se um
+  desfazer falhar, aparece em Problemas com atalho para o Histórico. Substitui a "Sessão de jogo".
+- Dois avisos do compilador corrigidos (build volta a 0 avisos).
+
 ## 1.1.1
 
 > "Otimizar meu PC" mostra a conta completa: o que aplicou agora, o que já estava no máximo e o que não serve para o seu PC.

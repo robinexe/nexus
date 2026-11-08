@@ -11,6 +11,8 @@ namespace Nexus.Tests.Modules;
 [Trait("Category", "Unit")]
 public sealed class GpuVendorTests
 {
+    private static readonly string[] GetOrSet = ["get", "set"];
+
     private static ActionInstance Action(string key)
     {
         var e = Wiring.Entry(key) ?? throw new InvalidOperationException(key + " ausente");
@@ -47,7 +49,7 @@ public sealed class GpuVendorTests
         Assert.Null(h.CheckRestore(a, original));
         h.Restore(a, original);
         Assert.Equal("off", tool.Values["amd/antilag"]);
-        Assert.All(tool.Calls, c => Assert.Contains(c[0], new[] { "get", "set" }));
+        Assert.All(tool.Calls, c => Assert.Contains(c[0], GetOrSet));
     }
 
     [Fact]

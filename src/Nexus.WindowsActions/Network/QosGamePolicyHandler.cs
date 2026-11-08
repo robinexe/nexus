@@ -39,7 +39,7 @@ public sealed partial class QosGamePolicyHandler : IActionHandler, IRestoreValid
 
     public static string KeyPath(string exe) => Root + @"\NEXUS " + Path.GetFileNameWithoutExtension(exe);
 
-    private RegistryTarget T(string exe, string name) => new(RegHive.HKLM, KeyPath(exe), name, RegView.Registry64);
+    private static RegistryTarget T(string exe, string name) => new(RegHive.HKLM, KeyPath(exe), name, RegView.Registry64);
 
     private string? Read(string exe, string name)
     {

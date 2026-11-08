@@ -186,6 +186,8 @@ public sealed partial class WiringTests
         ["SystemToolsPage.cs|actionId"] = nameof(Key_and_level_written_together_match_the_catalog),
         ["CpuLabPage.cs|f.ActionId"] = nameof(Cpu_findings_send_valid_actions_at_the_right_level),
         ["ScannerPage.cs|id + \"@1\""] = nameof(Scanner_quarantine_slots_exist_with_the_right_level),
+        ["GameModeAutoPanel.cs|k"] = nameof(Game_mode_auto_actions_exist_with_the_right_level), // lista fechada GameModeActions
+
         ["SecurityPage.cs|actionId + \"@1\""] = nameof(Security_fix_actions_exist_with_the_right_level_and_arguments),
         ["SettingsPage.cs|ActionKey(editor.Kind.ActionId)"] = nameof(Schedule_kinds_point_to_valid_actions),
         ["AbLabText.cs|a.ActionId"] = nameof(Ab_lab_candidates_only_come_from_game_option_plans_and_catalog_tweaks),
@@ -321,6 +323,21 @@ public sealed partial class WiringTests
             var entry = Wiring.Entry(f.ActionId!);
             if (entry is null) { problems.Add($"{f.Id}: '{f.ActionId}' não existe"); continue; }
             problems.AddRange(CheckRequest(f.Id, entry, [f.ActionValue], [], false, false, f.ActionNeedsAdmin ? "Admin" : "User"));
+        }
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+    }
+
+    /// <summary>Modo jogo automático: a lista fechada <see cref="Nexus.Measurement.GameModeActions"/> pede cada ação no nível que o catálogo declara, sem valor nem argumentos.</summary>
+    [Fact]
+    public void Game_mode_auto_actions_exist_with_the_right_level()
+    {
+        new Modules.GameModeAutoTests().Closed_list_matches_the_catalog_and_is_safe_for_a_match();
+        var problems = new List<string>();
+        foreach (var action in Nexus.Measurement.GameModeActions.All)
+        {
+            var entry = Wiring.Entry(action.Key);
+            if (entry is null) { problems.Add($"'{action.Key}' não existe"); continue; }
+            problems.AddRange(CheckRequest("Modo jogo automático", entry, [null], null, false, false, action.Admin ? "Admin" : "User"));
         }
         Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
     }

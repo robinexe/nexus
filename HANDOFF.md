@@ -276,7 +276,11 @@ Detalhes: `docs/07-recovery-cases.md` (casos e revisão independente) e `docs/06
     Ferramentas avançadas) e recomendação automática por hardware (HardwareProfile/HardwareRules em Nexus.Assistant, AutoPilot com
     perfil, "Aplicar o recomendado para este PC" no Jogos, Ajustes › Perfil do PC; docs/modules/recommendation.md). 2491 testes.
     **Falta testar em máquina real** (A/B com jogo de verdade; perfil do PC em notebook/AMD/Intel). Começados e abandonados sem
-    commit (refazer): modo jogo automático completo (`GameModeAuto`), opções por jogo AMD (ADLX)/Intel.
+    commit (refazer): opções por jogo AMD (ADLX)/Intel — feitas depois na 1.1.0. **Modo jogo automático integrado em 08/11**
+    (`Nexus.Measurement/GameModeAuto.cs`, `GameModeAutoPanel.cs`, `docs/modules/game-mode-auto.md`; versão 1.1.2; 2636 testes).
+    Falta testar em PC real: aplicar/desfazer com jogo de verdade, reabertura com pendência, reinício com plano de sessão.
+    Ainda não feitos (a rodada de agentes de 03/11 caiu no limite semanal): atraso de drivers apontando o culpado, design novo dos
+    cartões, cartões VALORANT/LoL/COD/Apex/OW2/Minecraft/Roblox/GTA V/Rocket League/EA FC.
 26. **Pedido do responsável (03/11), fora do escopo e NÃO feito:** "destravar velocidades e funções bloqueadas pelo fabricante /
     passar dos limites de fábrica" contraria a regra de honestidade e segurança (só o que o fabricante expõe; nada de vBIOS,
     firmware ou driver modificado). Cabe em "rejected" com fonte, não como ação.
