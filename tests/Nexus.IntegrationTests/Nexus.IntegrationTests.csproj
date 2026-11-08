@@ -34,6 +34,7 @@
     <ProjectReference Include="..\..\src\Nexus.Recovery.Cli\Nexus.Recovery.Cli.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Assistant\Nexus.Assistant.csproj" />
     <ProjectReference Include="..\..\src\Nexus.NetRoute\Nexus.NetRoute.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Measurement\Nexus.Measurement.csproj" />
     <ProjectReference Include="..\..\src\Nexus.Broker.Host\Nexus.Broker.Host.csproj" ReferenceOutputAssembly="false" />
     <!-- nexus.exe ao lado do aplicador (como no produto instalado): a etapa "Manter em dia" do assistente agenda a verificação
          semanal apontando para ele. Só a ordem de compilação; os arquivos são copiados em CopyCli. -->

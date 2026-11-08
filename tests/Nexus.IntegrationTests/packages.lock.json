@@ -131,61 +131,62 @@
       "nexus-recover": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Broker": "[1.0.0, )",
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.GameProfiles": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.Persistence": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Broker": "[1.1.2, )",
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.GameProfiles": "[1.1.2, )",
+          "Nexus.HardwareDiscovery": "[1.1.2, )",
+          "Nexus.Persistence": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.assistant": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Automation": "[1.0.0, )",
-          "Nexus.Boot": "[1.0.0, )",
-          "Nexus.Broker": "[1.0.0, )",
-          "Nexus.Cleaning": "[1.0.0, )",
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.DriverUpdates": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.Lab.Cpu": "[1.0.0, )",
-          "Nexus.Lab.Gpu": "[1.0.0, )",
-          "Nexus.Lab.Memory": "[1.0.0, )",
-          "Nexus.Privacy": "[1.0.0, )",
-          "Nexus.Programs": "[1.0.0, )",
-          "Nexus.Security": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Automation": "[1.1.2, )",
+          "Nexus.Boot": "[1.1.2, )",
+          "Nexus.Broker": "[1.1.2, )",
+          "Nexus.Cleaning": "[1.1.2, )",
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.DriverUpdates": "[1.1.2, )",
+          "Nexus.GameProfiles": "[1.1.2, )",
+          "Nexus.HardwareDiscovery": "[1.1.2, )",
+          "Nexus.Lab.Cpu": "[1.1.2, )",
+          "Nexus.Lab.Gpu": "[1.1.2, )",
+          "Nexus.Lab.Memory": "[1.1.2, )",
+          "Nexus.Privacy": "[1.1.2, )",
+          "Nexus.Programs": "[1.1.2, )",
+          "Nexus.Security": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.automation": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Broker": "[1.0.0, )",
-          "Nexus.Cleaning": "[1.0.0, )",
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Broker": "[1.1.2, )",
+          "Nexus.Cleaning": "[1.1.2, )",
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.HardwareDiscovery": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.boot": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.broker": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )"
         }
       },
       "nexus.cleaning": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.core": {
@@ -194,24 +195,27 @@
       "nexus.disktools": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.driverupdates": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.Lab.Gpu": "[1.0.0, )",
-          "Nexus.SystemTools": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.Lab.Gpu": "[1.1.2, )",
+          "Nexus.SystemTools": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
+      },
+      "nexus.experimentation": {
+        "type": "Project"
       },
       "nexus.gameprofiles": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.hardwarediscovery": {
@@ -220,82 +224,93 @@
       "nexus.lab.cpu": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.HardwareDiscovery": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.lab.gpu": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.HardwareDiscovery": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.lab.memory": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.HardwareDiscovery": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
+        }
+      },
+      "nexus.measurement": {
+        "type": "Project",
+        "dependencies": {
+          "Nexus.Experimentation": "[1.1.2, )",
+          "Nexus.Lab.Gpu": "[1.1.2, )",
+          "Nexus.TraceAnalysis": "[1.1.2, )"
         }
       },
       "nexus.monitoring": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.netroute": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.Security": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.Security": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.persistence": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Data.Sqlite": "[10.0.14, )",
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )"
         }
       },
       "nexus.privacy": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.programs": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.security": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
       },
       "nexus.systemtools": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )",
-          "Nexus.HardwareDiscovery": "[1.0.0, )",
-          "Nexus.WindowsActions": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )",
+          "Nexus.HardwareDiscovery": "[1.1.2, )",
+          "Nexus.WindowsActions": "[1.1.2, )"
         }
+      },
+      "nexus.traceanalysis": {
+        "type": "Project"
       },
       "nexus.windowsactions": {
         "type": "Project",
         "dependencies": {
-          "Nexus.Core": "[1.0.0, )"
+          "Nexus.Core": "[1.1.2, )"
         }
       },
       "Microsoft.Data.Sqlite": {
