@@ -35,6 +35,9 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
     private const uint EventTraceFlagInterrupt = 0x00000040;
     private const uint ProcessTraceModeRealTime = 0x00000100;
     private const uint ProcessTraceModeEventRecord = 0x10000000;
+    /// <summary>Sem este modo, ProcessTrace converte o TimeStamp do cabeçalho para hora do sistema (FILETIME) e a subtração com o
+    /// InitialTime da DPC (ticks QPC crus) sai absurda — foi o que zerou a primeira rodada na VM do CI.</summary>
+    private const uint ProcessTraceModeRawTimestamp = 0x00001000;
     private const uint EventTraceControlStop = 1;
     private const int ErrorAlreadyExists = 183;
     private const int ErrorAccessDenied = 5;
@@ -64,6 +67,8 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
     private readonly Dictionary<Guid, long> _byProvider = [];
     private uint _eventsLost, _buffersWritten, _realTimeLost;
     private int _openTraceError;
+    private int _samples;
+    private string _sample = "";
 
     /// <inheritdoc/>
     public string? Diagnostics
@@ -72,7 +77,8 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
         {
             var providers = string.Join(", ", _byProvider.OrderByDescending(kv => kv.Value).Take(6).Select(kv => $"{Name(kv.Key)}={kv.Value}"));
             return $"sessão={_sessionName}; callbacks={_callbacks}; por provedor: [{providers}]; descartados={Dropped}; " +
-                   $"EventsLost={_eventsLost}; BuffersWritten={_buffersWritten}; RealTimeBuffersLost={_realTimeLost}; OpenTrace erro={_openTraceError}";
+                   $"EventsLost={_eventsLost}; BuffersWritten={_buffersWritten}; RealTimeBuffersLost={_realTimeLost}; OpenTrace erro={_openTraceError}; " +
+                   $"QPC/s={Stopwatch.Frequency}; amostras:{_sample}";
         }
     }
 
@@ -97,7 +103,7 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
             namePtr = Marshal.StringToHGlobalUni(_sessionName);
             var b = (byte*)logFile;
             *(IntPtr*)(b + LogFileLoggerName) = namePtr;
-            *(uint*)(b + LogFileProcessTraceMode) = ProcessTraceModeRealTime | ProcessTraceModeEventRecord;
+            *(uint*)(b + LogFileProcessTraceMode) = ProcessTraceModeRealTime | ProcessTraceModeEventRecord | ProcessTraceModeRawTimestamp;
             *(IntPtr*)(b + LogFileEventRecordCallback) = (IntPtr)(delegate* unmanaged<IntPtr, void>)&OnEventRecord;
             trace = OpenTraceW(logFile);
             if (trace == InvalidProcessTraceHandle) { _openTraceError = Marshal.GetLastPInvokeError(); throw new InvalidOperationException($"OpenTrace falhou (código {_openTraceError})."); }
@@ -204,6 +210,7 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
             var initial = *(long*)data;
             var routine = *(ulong*)(data + 8);
             var us = (end - initial) * _usPerTick;
+            if (_samples < 3) { _samples++; _sample += $" [{kind} ts={end} ini={initial} us={us:0.#}]"; }
             var ev = new KernelRoutineEvent(kind, routine, us, *(r + 80));
             lock (_events)
             {
