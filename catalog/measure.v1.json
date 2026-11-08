@@ -1,8 +1,56 @@
 {
   "catalogVersion": "1.0.0",
   "schema": "nexus.catalog/1",
-  "note": "Módulo Medir. Medir em si é somente leitura (PresentMon, rastreamento de eventos do Windows). A única ação é opcional: colocar a sua conta no grupo do Windows que permite rastrear sem pedir permissão a cada partida.",
+  "note": "Módulo Medir. Medir em si é somente leitura (PresentMon, rastreamento de eventos do Windows). Duas ações: colocar a sua conta no grupo do Windows que permite rastrear sem pedir permissão a cada partida (opcional, reversível) e a investigação do Atraso de drivers por rastreamento do kernel (efêmera: só lê por ~10 s, exige administrador, nada fica).",
   "actions": [
+    {
+      "id": "measure.driver-latency.trace",
+      "version": 1,
+      "title": "Atraso de drivers: investigar qual driver (rastreamento de 10 s, como administrador)",
+      "i18n": { "en": { "title": "Driver latency: find out which driver (10 s trace, as administrator)" }, "es": { "title": "Retraso de drivers: averiguar qué driver (rastreo de 10 s, como administrador)" } },
+      "classification": "SupportedDocumented",
+      "handlerKind": "MeasureDriverLatencyTrace",
+      "target": {
+        "scope": "User",
+        "seconds": "10"
+      },
+      "desiredType": "Ephemeral",
+      "desiredValue": "executado",
+      "risk": "Low",
+      "mechanism": "Abre por 10 segundos uma sessão de rastreamento de eventos do kernel do Windows (ETW, provedor de sistema: logger privado \"NEXUS-DriverLatency\" em EVENT_TRACE_SYSTEM_LOGGER_MODE, ou o \"NT Kernel Logger\" se o Windows não aceitar o privado) com as flags EVENT_TRACE_FLAG_DPC, EVENT_TRACE_FLAG_INTERRUPT e EVENT_TRACE_FLAG_IMAGE_LOAD, por StartTrace/OpenTrace/ProcessTrace/ControlTrace. Cada evento PerfInfo DPC/ISR traz a hora de entrada e o endereço da rotina; os eventos Image_Load (e EnumDeviceDrivers) dizem em qual arquivo .sys esse endereço cai. O NEXUS soma por arquivo (quantas chamadas, tempo total e a pior chamada) e grava o resumo em %LocalAppData%\\NEXUS\\driver-latency\\ultimo.json do perfil de quem pediu, para a tela mostrar. É o mesmo método do LatencyMon e do xperf. Só lê: não muda a resolução do timer nem nenhuma configuração. ntoskrnl.exe e hal.dll aparecem na lista mas não são 'culpa' de driver: são o próprio Windows (temporizadores e trabalho do sistema, às vezes em nome de um driver).",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/etw/configuring-and-starting-a-systemtraceprovider-session (logger de sistema privado, Windows 8+)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/etw/configuring-and-starting-the-nt-kernel-logger-session"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/etw/perfinfo (DPC tipos 66/68/69, ISR tipo 67; EVENT_TRACE_FLAG_DPC e EVENT_TRACE_FLAG_INTERRUPT)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/etw/dpc e https://learn.microsoft.com/windows/win32/etw/isr (InitialTime + Routine; 'use com os eventos Image para achar o módulo')"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/etw/image-load (ImageBase, ImageSize, FileName; DCStart enumera os já carregados)"
+        },
+        {
+          "level": "VendorDocumented",
+          "source": "https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-enumdevicedrivers"
+        }
+      ],
+      "risks": "Baixo. Durante os 10 segundos o Windows gasta um pouco de processador registrando os eventos (milhares por segundo) e usa até 8 MB de memória de buffers; jogos e áudio podem sentir um leve custo nesse intervalo. Se outro programa estiver com o \"NT Kernel Logger\" aberto (LatencyMon, xperf) e o Windows recusar o logger privado, a sessão dele é encerrada. Nenhuma configuração muda. A amostra é curta (10 s): um driver que só atrasa de vez em quando pode não aparecer. Em máquina virtual (Hyper-V, VMware) os tempos de DPC/ISR não refletem um PC real.",
+      "privileges": "Admin",
+      "persistence": "Ephemeral",
+      "reboot": "None",
+      "verification": "O arquivo de resultado foi gravado no perfil de quem pediu e a sessão ETW não existe mais ao fim (ControlTrace STOP).",
+      "revert": "Nada a desfazer: a sessão ETW é parada ao fim da captura (também em erro) e nada fica no sistema. O único arquivo é o resumo no seu perfil (%LocalAppData%\\NEXUS\\driver-latency), que você pode apagar."
+    },
     {
       "id": "measure.perflog-group.join",
       "version": 1,

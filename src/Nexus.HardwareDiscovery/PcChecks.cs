@@ -107,6 +107,14 @@ public sealed record DisplayCheckFacts(string Device, string Name, int Width, in
 /// <param name="PerformanceLimitPercent">Menor "% Performance Limit" amostrado agora (100 = sem limite; null = não leu).</param>
 public sealed record ThrottleFacts(int? Events37, DateTimeOffset? LastEvent, double? PerformanceLimitPercent, bool? OnBattery = null, int WindowDays = 7);
 
+/// <summary>
+/// Resultado do "Atraso de drivers" do Medir, resumido para o Diagnóstico. <paramref name="Level"/>: "Good", "MayStutter" ou "Bad"
+/// (veredito dos contadores, sem administrador). <paramref name="Culprit"/>/<paramref name="Device"/>/<paramref name="WorstUs"/>: só
+/// quando a investigação como administrador (rastreamento do kernel) rodou e apontou um driver; <paramref name="Traced"/> diz se rodou.
+/// </summary>
+public sealed record DriverLatencyFacts(string Level, double PeakPercent, bool Traced, string? Culprit = null, string? Device = null, double? WorstUs = null,
+    bool? VirtualMachine = null);
+
 /// <summary>Regras das checagens do PC (puras). Ids estáveis: a interface traduz pelo id.</summary>
 public static class PcChecks
 {
@@ -122,6 +130,7 @@ public static class PcChecks
     public const string DisplayHdrPrefix = "display.hdr.";
     public const string DisplayOkId = "display.ok";
     public const string ThrottleId = "cpu.firmware-limit";
+    public const string DriverLatencyId = "drivers.latency";
 
     /// <summary>Limites (testados): perda de pacotes, jitter, ping e sinal do Wi-Fi.</summary>
     public const double LossAttentionPercent = 2;
@@ -150,14 +159,17 @@ public static class PcChecks
     public static readonly (string Title, string Url) BatterySource =
         ("TechSpot: desempenho de notebooks gamer na bateria", "https://www.techspot.com/article/1571-gaming-laptop-battery-performance/");
 
+    public static readonly (string Title, string Url) DriverLatencySource =
+        ("Microsoft Learn: eventos DPC/ISR do rastreamento do kernel (PerfInfo) — o que o LatencyMon e o xperf leem", "https://learn.microsoft.com/windows/win32/etw/perfinfo");
+
     /// <summary>Fontes fixas que a interface aceita abrir a partir destes achados.</summary>
     public static IReadOnlyList<string> SourceUrls { get; } =
-        [BufferbloatSource.Url, DiskCounterSource.Url, LoadTimeSource.Url, RefreshSource.Url, ThrottleSource.Url, BatterySource.Url];
+        [BufferbloatSource.Url, DiskCounterSource.Url, LoadTimeSource.Url, RefreshSource.Url, ThrottleSource.Url, BatterySource.Url, DriverLatencySource.Url];
 
     /// <summary>O achado veio destas checagens (para trocar a leva antiga pela nova).</summary>
     public static bool IsPcCheckId(string? id) =>
         id is not null && (id.StartsWith("net.", StringComparison.Ordinal) || id.StartsWith(DiskPrefix, StringComparison.Ordinal) ||
-                           id.StartsWith("display.", StringComparison.Ordinal) || id == ThrottleId);
+                           id.StartsWith("display.", StringComparison.Ordinal) || id == ThrottleId || id == DriverLatencyId);
 
     private static DiagnosticFinding F(string id, string title, DiagnosticSeverity sev, string evidence, string explanation = "", string gain = "",
         (string Title, string Url)? source = null) =>
@@ -397,6 +409,31 @@ public static class PcChecks
         var strong = (t.Events37 ?? 0) >= 3 || t.PerformanceLimitPercent < 80;
         return F(ThrottleId, "O firmware limitou a velocidade do processador", strong && t.OnBattery != true ? DiagnosticSeverity.Attention : DiagnosticSeverity.Info,
             ev, explanation, gain, ThrottleSource);
+    }
+
+    // ------------------------------------------------------------------ 3b. atraso de drivers (do Medir)
+
+    /// <summary>
+    /// Só o teste que o usuário rodou em Medir alimenta isto (não há leitura automática). "Bad" = atenção; "MayStutter" = informação;
+    /// "Good" = ok. Com a investigação como administrador, o texto diz o driver; sem ela, diz com honestidade que só o total é conhecido.
+    /// </summary>
+    public static DiagnosticFinding? DriverLatency(DriverLatencyFacts f)
+    {
+        ArgumentNullException.ThrowIfNull(f);
+        if (f.Level is not ("Good" or "MayStutter" or "Bad")) return null;
+        var ev = string.Create(Pt, $"Pior segundo do teste: {f.PeakPercent:0.#}% de um núcleo em DPC + interrupções (contadores \"Processor Information\", sem administrador).");
+        if (f.Traced)
+            ev += f.Culprit is { } c
+                ? string.Create(Pt, $" Rastreamento do kernel: pior chamada {c}{(f.Device is { } d ? $" ({d})" : "")} com {f.WorstUs ?? 0:0} µs.")
+                : " Rastreamento do kernel: nenhum driver com chamada acima de 500 µs.";
+        else ev += " Sem a investigação como administrador, não dá para saber qual driver.";
+        if (f.VirtualMachine == true) ev += " Máquina virtual: os tempos não refletem um PC real.";
+        if (f.Level == "Good") return F(DriverLatencyId, "Drivers sem atraso relevante", DiagnosticSeverity.Ok, ev);
+        var title = f.Traced && f.Culprit is { } culprit ? $"Atraso de drivers: provável culpado {culprit}" : "Atraso de drivers pode causar engasgos";
+        const string explanation = "Drivers seguram um núcleo do processador em DPC/interrupções; isso causa estalos de áudio e travadinhas. Atualize o driver apontado " +
+                                   "(Atualizar drivers) ou, sem culpado apontado, rode \"Investigar como administrador\" em Desempenho › Medir. O NEXUS só mede; não muda nada aqui.";
+        const string gain = "O método (eventos DPC/ISR com o endereço da rotina → módulo) é o do LatencyMon/xperf; amostra curta: um driver que atrasa de vez em quando pode não aparecer.";
+        return F(DriverLatencyId, title, f.Level == "Bad" ? DiagnosticSeverity.Attention : DiagnosticSeverity.Info, ev, explanation, gain, DriverLatencySource);
     }
 
     // ------------------------------------------------------------------ 4. notebook na bateria
