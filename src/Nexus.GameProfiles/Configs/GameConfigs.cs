@@ -11,6 +11,18 @@ public enum ConfigRoot
     SavedGames,
     /// <summary>Pasta da Steam (InstallPath no registro da máquina): userdata\&lt;conta&gt;\730\local\cfg do CS2 (pasta "local" = da máquina, fora do Steam Cloud).</summary>
     Steam,
+    /// <summary>%LOCALAPPDATA% (AppData\Local): Roblox e os aplicativos da Microsoft Store (Packages\...\LocalState).</summary>
+    LocalAppData,
+}
+
+/// <summary>
+/// Jogos que entram em <see cref="GameConfigs.All"/> sem editar a lista central: crie em src/Nexus.GameProfiles/&lt;Jogo&gt;/ uma
+/// classe sem parâmetros que implemente esta interface (mesmo mecanismo dos cartões, <see cref="Cards.IGameCardProvider"/>):
+/// vários jogos em paralelo sem conflito. Ids repetidos são erro na inicialização (nunca um jogo "sobrescreve" outro).
+/// </summary>
+public interface IGameConfigProvider
+{
+    IReadOnlyList<GameConfig> Games { get; }
 }
 
 /// <summary>Uma chave que o NEXUS pode trocar e os únicos valores que ele grava (os do menu do próprio jogo).</summary>
@@ -31,13 +43,33 @@ public sealed record GameConfig(string Id, string Name, ConfigRoot Root, string 
 /// o próprio jogo grava, editáveis com o jogo fechado e sem risco de anticheat; valores sempre dentro do menu do jogo). Ficam
 /// de fora, só com orientação: VALORANT, League of Legends, Call of Duty, Marvel Rivals (anticheat/arquivo sincronizado na conta)
 /// e o que o CS2 guarda no Steam Cloud (pasta "remote"; o NEXUS só mexe na pasta "local", da máquina)
-/// e Rocket League (exigiria arquivo somente leitura). Diretriz: nunca limitar FPS; o máximo do menu ou "sem limite".
+/// e Rocket League (exigiria arquivo somente leitura) e EA FC (fcsetup.ini regravado pelo jogo). Diretriz: nunca limitar FPS; o máximo do menu ou "sem limite".
+/// Pesquisa de 08/11/2026: Minecraft Bedrock, Roblox e GTA V entram por <see cref="IGameConfigProvider"/> nas pastas deles.
 /// </summary>
 public static class GameConfigs
 {
     public const string HandlerKind = "GameConfigValue";
 
-    public static IReadOnlyList<GameConfig> All { get; } =
+    /// <summary>Os jogos da lista embutida mais os dos <see cref="IGameConfigProvider"/> deste assembly, por id.</summary>
+    public static IReadOnlyList<GameConfig> All => AllGames.Value;
+
+    private static readonly Lazy<IReadOnlyList<GameConfig>> AllGames = new(Compose);
+
+    private static List<GameConfig> Compose()
+    {
+        var list = new List<GameConfig>(BuiltIn);
+        var providers = typeof(GameConfigs).Assembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IGameConfigProvider).IsAssignableFrom(t) && t.GetConstructor(Type.EmptyTypes) is not null)
+            .Select(t => (IGameConfigProvider)Activator.CreateInstance(t)!)
+            .OrderBy(p => p.GetType().FullName, StringComparer.Ordinal);
+        foreach (var p in providers) list.AddRange(p.Games);
+        var repeated = list.GroupBy(g => g.Id, StringComparer.Ordinal).FirstOrDefault(g => g.Count() > 1);
+        if (repeated is not null) throw new InvalidOperationException($"Jogo '{repeated.Key}' registrado duas vezes em GameConfigs.");
+        return list;
+    }
+
+    /// <summary>Lista embutida (pesquisa de 06/11/2026). Jogos novos entram por <see cref="IGameConfigProvider"/> na pasta deles.</summary>
+    private static readonly GameConfig[] BuiltIn =
     [
         new("minecraft", "Minecraft (Java)", ConfigRoot.Roaming, @".minecraft\options.txt", ConfigSyntax.Colon,
             ["javaw", "Minecraft", "MinecraftLauncher"],
@@ -48,6 +80,8 @@ public static class GameConfigs
                 new("renderClouds", ["false"]),
                 new("particles", ["2"]),               // Mínimo
                 new("entityShadows", ["false"]),
+                new("renderDistance", ["8"]),          // chunks (menu: 2 a 32; padrão 12). Pesquisa de 08/11/2026 (docs/modules/minecraft.md)
+                new("simulationDistance", ["6"]),      // chunks (menu: 5 a 32; padrão 12)
             ]),
         new("r6", "Rainbow Six Siege", ConfigRoot.Documents, @"My Games\Rainbow Six - Siege\*\GameSettings.ini", ConfigSyntax.Equals,
             ["RainbowSix", "RainbowSix_BE", "RainbowSix_Vulkan", "RainbowSix_DX12"],
@@ -109,6 +143,9 @@ public static class GameConfigs
                 break;
             case ConfigRoot.SavedGames:
                 yield return Path.Combine(profileDir, "Saved Games");
+                break;
+            case ConfigRoot.LocalAppData:
+                yield return Path.Combine(profileDir, "AppData", "Local");
                 break;
             default:
                 yield return Path.Combine(profileDir, "Documents");

@@ -9,7 +9,7 @@ namespace Nexus.GameProfiles;
 
 /// <summary>
 /// Handlers de configuração de jogos registrados no aplicador como módulo (o do CS2 continua embutido no Program.cs do
-/// aplicador). Hoje: Fortnite (GameUserSettings.ini) e os jogos de Configs.GameConfigs (Minecraft, R6, Overwatch 2, Apex). Cada handler precisa de ação correspondente no catálogo.
+/// aplicador). Hoje: Fortnite (GameUserSettings.ini) e os jogos de Configs.GameConfigs (Minecraft Java/Bedrock, R6, Overwatch 2, Apex, CS2, Roblox, GTA V). Cada handler precisa de ação correspondente no catálogo.
 /// </summary>
 public static class GameProfilesHandlers
 {
