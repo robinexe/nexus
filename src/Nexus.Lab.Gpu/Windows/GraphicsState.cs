@@ -122,6 +122,37 @@ internal static unsafe partial class GraphicsState
         return list;
     }
 
+    /// <summary>
+    /// "Programas instalados" da máquina (HKLM\...\Uninstall, 64 bits e WOW6432Node): DisplayName e InstallLocation de cada
+    /// entrada. Só leitura; serve para achar jogos de lojas sem manifesto (Battle.net, EA app) pela lista fechada de
+    /// <see cref="GameLibraries.FromInstalledPrograms"/>.
+    /// </summary>
+    public static IReadOnlyList<(string DisplayName, string? InstallLocation)> InstalledPrograms()
+    {
+        var list = new List<(string, string?)>();
+        foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 })
+        {
+            try
+            {
+                using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+                using var root = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
+                if (root is null) continue;
+                foreach (var name in root.GetSubKeyNames().Take(1000))
+                {
+                    try
+                    {
+                        using var k = root.OpenSubKey(name);
+                        if (k?.GetValue("DisplayName") is string display && display.Length > 0)
+                            list.Add((display, k.GetValue("InstallLocation") as string));
+                    }
+                    catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException) { }
+                }
+            }
+            catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException) { }
+        }
+        return list;
+    }
+
     public static string? SteamPath()
     {
         try
