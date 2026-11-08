@@ -75,7 +75,8 @@ public sealed class MeasureIntegrationTests : IDisposable
             Assert.NotNull(result);
             Assert.True(result!.TakenAt >= before.AddSeconds(-1));
             Assert.Equal(10, result.DurationSeconds);
-            Assert.True(result.EventCount > 0, "um Windows ligado tem DPCs (temporizadores) em 10 s");
+            _out.WriteLine("[dpc] diagnóstico: " + (result.Diagnostics ?? "(nenhum)"));
+            Assert.True(result.EventCount > 0, "um Windows ligado tem DPCs (temporizadores) em 10 s. " + result.Diagnostics);
             Assert.Contains(result.Modules, m => m.IsKernelCore); // ntoskrnl sempre aparece
             Assert.All(result.Modules, m => Assert.False(string.IsNullOrWhiteSpace(m.Module)));
             _out.WriteLine($"[dpc] {result.EventCount} eventos, {result.Unresolved} sem módulo, {result.Modules.Count} módulos; culpado: {result.Culprit?.Module ?? "nenhum"}");

@@ -51,6 +51,9 @@ public sealed record DriverTraceResult(
     bool? VirtualMachine,
     IReadOnlyList<DriverModuleSummary> Modules)
 {
+    /// <summary>Diagnóstico técnico da captura (para o log/CI; a interface não mostra): modo da sessão, callbacks, buffers perdidos.</summary>
+    public string? Diagnostics { get; init; }
+
     /// <summary>
     /// Provável culpado: o driver (não kernel) com a pior chamada isolada ≥ <see cref="DriverTraceAnalyzer.CulpritMinUs"/> µs; abaixo disso,
     /// ninguém é apontado (todos se comportaram). Lógica pura; a interface só traduz.

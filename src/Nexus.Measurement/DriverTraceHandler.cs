@@ -11,6 +11,9 @@ public interface IKernelTraceBackend
     /// devolve os eventos e os módulos vistos. A sessão é SEMPRE parada antes de voltar (também em erro).
     /// </summary>
     (IReadOnlyList<KernelRoutineEvent> Events, IReadOnlyList<KernelModule> Modules) Capture(TimeSpan duration);
+
+    /// <summary>Linha de diagnóstico da última captura (modo da sessão, callbacks por provedor, buffers perdidos), ou null.</summary>
+    string? Diagnostics => null;
 }
 
 /// <summary>
@@ -91,7 +94,7 @@ public sealed class DriverTraceHandler(IKernelTraceBackend backend, Func<string?
         var seconds = Seconds(action) ?? throw new InvalidOperationException("Duração inválida.");
         var started = _clock();
         var (events, modules) = _backend.Capture(TimeSpan.FromSeconds(seconds));
-        var result = DriverTraceAnalyzer.Aggregate(events, modules, seconds, started, _vm());
+        var result = DriverTraceAnalyzer.Aggregate(events, modules, seconds, started, _vm()) with { Diagnostics = _backend.Diagnostics };
         DriverTraceFile.Save(path, result);
     }
 

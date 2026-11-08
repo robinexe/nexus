@@ -60,6 +60,23 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
     private IntPtr _properties;
 
     public long Dropped { get; private set; }
+    private long _callbacks;
+    private readonly Dictionary<Guid, long> _byProvider = [];
+    private uint _eventsLost, _buffersWritten, _realTimeLost;
+    private int _openTraceError;
+
+    /// <inheritdoc/>
+    public string? Diagnostics
+    {
+        get
+        {
+            var providers = string.Join(", ", _byProvider.OrderByDescending(kv => kv.Value).Take(6).Select(kv => $"{Name(kv.Key)}={kv.Value}"));
+            return $"sessão={_sessionName}; callbacks={_callbacks}; por provedor: [{providers}]; descartados={Dropped}; " +
+                   $"EventsLost={_eventsLost}; BuffersWritten={_buffersWritten}; RealTimeBuffersLost={_realTimeLost}; OpenTrace erro={_openTraceError}";
+        }
+    }
+
+    private static string Name(Guid g) => g == PerfInfoGuid ? "PerfInfo" : g == ImageGuid ? "Image" : g.ToString("N")[..8];
 
     public (IReadOnlyList<KernelRoutineEvent> Events, IReadOnlyList<KernelModule> Modules) Capture(TimeSpan duration)
     {
@@ -83,7 +100,7 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
             *(uint*)(b + LogFileProcessTraceMode) = ProcessTraceModeRealTime | ProcessTraceModeEventRecord;
             *(IntPtr*)(b + LogFileEventRecordCallback) = (IntPtr)(delegate* unmanaged<IntPtr, void>)&OnEventRecord;
             trace = OpenTraceW(logFile);
-            if (trace == InvalidProcessTraceHandle) throw new InvalidOperationException($"OpenTrace falhou (código {Marshal.GetLastPInvokeError()}).");
+            if (trace == InvalidProcessTraceHandle) { _openTraceError = Marshal.GetLastPInvokeError(); throw new InvalidOperationException($"OpenTrace falhou (código {_openTraceError})."); }
             var handle = trace;
             thread = new Thread(() => { var h = handle; _ = ProcessTrace(&h, 1, IntPtr.Zero, IntPtr.Zero); }) { IsBackground = true, Name = "NEXUS ETW drivers" };
             thread.Start();
@@ -151,6 +168,8 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
         if (_properties == IntPtr.Zero || _session == 0) return;
         FillProperties(_properties, Guid.Empty, 0);
         _ = ControlTraceW(_session, null, _properties, EventTraceControlStop);
+        var b = (byte*)_properties;
+        _eventsLost = *(uint*)(b + 88); _buffersWritten = *(uint*)(b + 92); _realTimeLost = *(uint*)(b + 100);
         _session = 0;
     }
 
@@ -168,6 +187,8 @@ public sealed unsafe class WindowsKernelTrace : IKernelTraceBackend
     private void Handle(byte* r)
     {
         var provider = *(Guid*)(r + 24);
+        _callbacks++;
+        lock (_byProvider) { _byProvider[provider] = _byProvider.GetValueOrDefault(provider) + 1; }
         var opcode = *(r + 45);
         var length = *(ushort*)(r + 86);
         var data = *(byte**)(r + 96);
