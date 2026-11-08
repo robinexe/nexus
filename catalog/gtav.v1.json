@@ -1,0 +1,179 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Grand Theft Auto V (Legacy e Enhanced): só o settings.xml que o próprio menu grava em Documentos\\Rockstar Games, pelo handler GameConfigValue (um elemento XML por linha; só o valor do atributo muda), com o jogo fechado. Nada de arquivos do jogo, mods, gameconfig.xml ou BattlEye. Pesquisa de 08/11/2026: docs/modules/gtav.md.",
+  "actions": [
+    {
+      "id": "gtav.cfg.vsync.off",
+      "version": 1,
+      "title": "GTA V: VSync desligado",
+      "i18n": {
+        "en": {
+          "title": "GTA V: VSync off"
+        },
+        "es": {
+          "title": "GTA V: VSync desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "GTA V Legacy aberto pelo menos uma vez (Documentos\\Rockstar Games\\GTA V\\settings.xml existe), fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "gtav",
+        "key": "VSync"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "settings.xml do GTA V, elemento <VSync value=\"...\"/> na seção <video>: 0 é VSync Desligado no menu Gráficos. Com VSync ligado o jogo prende o FPS na taxa do monitor (ou na metade); desligado, roda no máximo que o PC entrega. O jogo não tem limitador de FPS próprio: esta é a única trava de FPS no arquivo.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "Arquivo settings.xml real do GTA V (seção <video>: VSync, PauseOnFocusLoss, Windowed), publicado em https://pastebin.com/8JvbMYp2"
+        },
+        {
+          "level": "Community",
+          "source": "https://www.minitool.com/news/grand-theft-auto-v-enhanced-save-file-location.html (pastas Documentos\\Rockstar Games\\GTA V e GTAV Enhanced)"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Com o jogo aberto, o NEXUS recusa (ele regrava o arquivo ao sair).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do atributo no settings.xml; no jogo, Configurações > Gráficos > VSync.",
+      "revert": "Devolve o valor anterior exato do atributo."
+    },
+    {
+      "id": "gtav.cfg.pause-on-focus-loss.off",
+      "version": 1,
+      "title": "GTA V: continuar rodando ao alternar de janela",
+      "i18n": {
+        "en": {
+          "title": "GTA V: keep running when switching windows"
+        },
+        "es": {
+          "title": "GTA V: seguir ejecutándose al cambiar de ventana"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "GTA V Legacy aberto pelo menos uma vez (Documentos\\Rockstar Games\\GTA V\\settings.xml existe), fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "gtav",
+        "key": "PauseOnFocusLoss"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "settings.xml do GTA V, elemento <PauseOnFocusLoss value=\"...\"/> na seção <video>: 0 é 'Pausar jogo ao perder o foco' Desligado no menu Gráficos. Ao alternar para outra janela (segundo monitor, Discord), o jogo continua rodando em vez de pausar e redesenhar tudo na volta; não dá FPS, evita a engasgada ao voltar.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "Arquivo settings.xml real do GTA V (seção <video>: VSync, PauseOnFocusLoss, Windowed), publicado em https://pastebin.com/8JvbMYp2"
+        }
+      ],
+      "risks": "O jogo continua consumindo processador e placa de vídeo enquanto você está em outra janela. Com o jogo aberto, o NEXUS recusa.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do atributo no settings.xml; no jogo, Configurações > Gráficos > Pausar jogo ao perder o foco.",
+      "revert": "Devolve o valor anterior exato do atributo."
+    },
+    {
+      "id": "gtav.enhanced.vsync.off",
+      "version": 1,
+      "title": "GTA V Enhanced: VSync desligado",
+      "i18n": {
+        "en": {
+          "title": "GTA V Enhanced: VSync off"
+        },
+        "es": {
+          "title": "GTA V Enhanced: VSync desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "GTA V Enhanced aberto pelo menos uma vez (Documentos\\Rockstar Games\\GTAV Enhanced\\settings.xml existe), fechado na hora de aplicar. Falta confirmar o arquivo em máquina real.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "gtav-enhanced",
+        "key": "VSync"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "Mesmo settings.xml do GTA V (elemento <VSync value=\"...\"/>, 0 = Desligado), na pasta própria da edição Enhanced (Documentos\\Rockstar Games\\GTAV Enhanced). Sem o arquivo (edição não instalada), não se aplica e nada muda.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "Arquivo settings.xml real do GTA V (seção <video>), publicado em https://pastebin.com/8JvbMYp2"
+        },
+        {
+          "level": "Community",
+          "source": "https://www.minitool.com/news/grand-theft-auto-v-enhanced-save-file-location.html (pasta Documentos\\Rockstar Games\\GTAV Enhanced)"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Com o jogo aberto, o NEXUS recusa (ele regrava o arquivo ao sair).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do atributo no settings.xml; no jogo, Configurações > Gráficos > VSync.",
+      "revert": "Devolve o valor anterior exato do atributo."
+    },
+    {
+      "id": "gtav.enhanced.pause-on-focus-loss.off",
+      "version": 1,
+      "title": "GTA V Enhanced: continuar rodando ao alternar de janela",
+      "i18n": {
+        "en": {
+          "title": "GTA V Enhanced: keep running when switching windows"
+        },
+        "es": {
+          "title": "GTA V Enhanced: seguir ejecutándose al cambiar de ventana"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "GTA V Enhanced aberto pelo menos uma vez (Documentos\\Rockstar Games\\GTAV Enhanced\\settings.xml existe), fechado na hora de aplicar. Falta confirmar o arquivo em máquina real.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "gtav-enhanced",
+        "key": "PauseOnFocusLoss"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "Mesmo elemento <PauseOnFocusLoss value=\"...\"/> do GTA V (0 = Desligado), na pasta própria da edição Enhanced. Sem o arquivo, não se aplica.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "Arquivo settings.xml real do GTA V (seção <video>), publicado em https://pastebin.com/8JvbMYp2"
+        }
+      ],
+      "risks": "O jogo continua consumindo processador e placa de vídeo enquanto você está em outra janela. Com o jogo aberto, o NEXUS recusa.",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do atributo no settings.xml; no jogo, Configurações > Gráficos > Pausar jogo ao perder o foco.",
+      "revert": "Devolve o valor anterior exato do atributo."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "myth.gtav.gameconfig-xml",
+      "classification": "Rejected",
+      "reason": "Trocar o gameconfig.xml (dentro do update.rpf, na pasta do jogo) por versões 'otimizadas' não é oferecido: é arquivo do jogo, exige ferramentas de mod (OpenIV) e quebra a verificação de integridade; com o BattlEye do GTA Online pode dar bloqueio. O NEXUS só edita o settings.xml do perfil.",
+      "source": "https://vertexmods.com/free-mods/gta5-singleplayer/gameconfig-xml"
+    },
+    {
+      "id": "myth.gtav.commandline-txt",
+      "classification": "Rejected",
+      "reason": "commandline.txt na pasta do jogo (-ignoreDifferentVideoCard, -DX10, -noprecompile…) não entra: é arquivo na pasta de instalação, não do perfil, e esses argumentos servem para contornar problemas (placa não reconhecida, travamento no carregamento), não para desempenho; -DX10 tira recursos gráficos do jogo.",
+      "source": "https://www.intel.com/content/www/us/en/support/articles/000098184.html"
+    },
+    {
+      "id": "myth.gtav.settings-read-only",
+      "classification": "Rejected",
+      "reason": "Marcar o settings.xml como somente leitura para 'segurar' a configuração impede o próprio jogo de salvar o menu (o relato clássico de 'GTA V não salva as configurações gráficas'). O NEXUS recusa editar arquivo somente leitura e nunca marca um.",
+      "source": "https://windowsreport.com/?p=735932"
+    }
+  ]
+}

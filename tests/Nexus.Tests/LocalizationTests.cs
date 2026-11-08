@@ -281,6 +281,10 @@ public sealed partial class LocalizationTests
             var text = File.ReadAllText(file);
             foreach (Match m in regex.Matches(text)) used.Add((m.Groups[1].Value, Path.GetFileName(file)));
         }
+        // Cartões de jogo (src/Nexus.GameProfiles/<Jogo>/<Jogo>Card.cs): as chaves Card.<jogo>.* ficam nas definições e a tela as
+        // resolve em execução (Loc.T(option.TitleKey)), então contam como uso.
+        foreach (var file in Directory.EnumerateFiles(Path.Combine(Root(), "src", "Nexus.GameProfiles"), "*Card.cs", SearchOption.AllDirectories))
+            foreach (Match m in CardKeyRegex().Matches(File.ReadAllText(file))) used.Add((m.Groups[1].Value, Path.GetFileName(file)));
         return used;
     }
 
@@ -333,6 +337,9 @@ public sealed partial class LocalizationTests
 
     [GeneratedRegex(@"\bLoc\.[TF]\(\s*""([\w.]+)""")]
     private static partial Regex CodeKeyRegex();
+
+    [GeneratedRegex(@"""(Card\.[\w.]+)""")]
+    private static partial Regex CardKeyRegex();
 
     [GeneratedRegex(@"[A-Za-zÀ-ÿ]{2,}")]
     private static partial Regex LettersRegex();

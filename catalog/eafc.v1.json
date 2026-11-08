@@ -1,0 +1,26 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "EA SPORTS FC (FC 25 / FC 26, PC): nenhuma ação de arquivo. O fcsetup.ini (%LOCALAPPDATA%\\EA SPORTS FC 25 ou FC26\\settings) não é documentado pela EA, muda de nome de chave entre edições e é regravado pelo jogo (relatos de volta ao padrão a cada abertura); os guias dependem de arquivo somente leitura ou de negar permissão de escrita, o que o NEXUS não faz. O cartão oferece Medir/Comparar e as opções genéricas. Pesquisa de 08/11/2026: docs/modules/eafc.md.",
+  "actions": [],
+  "rejected": [
+    {
+      "id": "myth.eafc.fcsetup-ini-tweaks",
+      "classification": "Rejected",
+      "reason": "Editar fcsetup.ini (MAX_FRAME_RATE / TARGET_FRAME_RATE = 0, WAITFORVSYNC/WAIT_FOR_VSYNC = 0, REFRESH_RATE) não é oferecido: a EA não documenta o arquivo, os nomes das chaves mudaram do FC 25 para o FC 26 (WAITFORVSYNC → WAIT_FOR_VSYNC, RENDERINGQUALITY → RENDERING_QUALITY, pasta 'EA SPORTS FC 25' → 'FC26') e os próprios relatos do fórum da EA dizem que o jogo regrava o arquivo e que é preciso marcar somente leitura e 'conferir antes de cada login'. Uma edição que o jogo desfaz sozinho não tem desfazer confiável. As mesmas opções (V-Sync, limite de quadros, taxa de atualização) estão no menu Configurações > Vídeo do jogo.",
+      "source": "https://forums.ea.com/discussions/fc-26-technical-issues-en/remove-the-60-fps-limiter-fc-26/13164666"
+    },
+    {
+      "id": "myth.eafc.deny-write-permission",
+      "classification": "Rejected",
+      "reason": "Negar permissão de escrita (ACL) em fcsetup.ini e overrideAutodetect.lua para 'travar' as configurações, como sugerido no fórum da EA, impede o jogo de salvar qualquer coisa e a sugestão está sem confirmação de que funciona. O NEXUS não altera permissões de arquivos de jogos.",
+      "source": "https://forums.ea.com/discussions/fc-26-technical-issues-en/fps-drop-and-file-overwriting/13628037"
+    },
+    {
+      "id": "myth.eafc.60fps-locked-file",
+      "classification": "Ineffective",
+      "reason": "O 'limite de 60 FPS' do EA FC no PC vem da opção de limite de quadros do menu Vídeo e do 'Target Frame Rate' (a taxa em que a jogabilidade é calculada); trocar o número no fcsetup.ini não faz nada que o menu não faça, e o jogo pode regravar o arquivo. Use o menu.",
+      "source": "https://forums.ea.com/discussions/fc-25-bug-reports-archive-en/fc-25-pc-refresh-rate-locked-to-60hz/7853548"
+    }
+  ]
+}

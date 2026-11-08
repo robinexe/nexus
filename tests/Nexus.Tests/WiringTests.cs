@@ -188,6 +188,7 @@ public sealed partial class WiringTests
         ["CpuLabPage.cs|f.ActionId"] = nameof(Cpu_findings_send_valid_actions_at_the_right_level),
         ["ScannerPage.cs|id + \"@1\""] = nameof(Scanner_quarantine_slots_exist_with_the_right_level),
         ["GameModeAutoPanel.cs|k"] = nameof(Game_mode_auto_actions_exist_with_the_right_level), // lista fechada GameModeActions
+        ["GameCardPlans.cs|k"] = nameof(Game_card_options_point_to_valid_user_actions), // cartões de jogo (GameCardRegistry); a principal (option.ActionKey) é vista como "resolvida" pelo leitor
 
         ["SecurityPage.cs|actionId + \"@1\""] = nameof(Security_fix_actions_exist_with_the_right_level_and_arguments),
         ["SettingsPage.cs|ActionKey(editor.Kind.ActionId)"] = nameof(Schedule_kinds_point_to_valid_actions),
@@ -340,6 +341,32 @@ public sealed partial class WiringTests
             if (entry is null) { problems.Add($"'{action.Key}' não existe"); continue; }
             problems.AddRange(CheckRequest("Modo jogo automático", entry, [null], null, false, false, action.Admin ? "Admin" : "User"));
         }
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+    }
+
+    /// <summary>
+    /// Cartões de jogo (<see cref="Nexus.GameProfiles.Cards.GameCardRegistry"/>, achados por reflexão): toda opção pede ações que existem,
+    /// de nível usuário (arquivo do perfil), com o valor escolhido entre os permitidos e as extras com valor fixo do catálogo.
+    /// </summary>
+    [Fact]
+    public void Game_card_options_point_to_valid_user_actions()
+    {
+        var problems = new List<string>();
+        Assert.NotEmpty(Nexus.GameProfiles.Cards.GameCardRegistry.All);
+        foreach (var card in Nexus.GameProfiles.Cards.GameCardRegistry.All)
+            foreach (var option in card.Options)
+            {
+                var where = $"cartão {card.Id}/{option.Id}";
+                var main = Wiring.Entry(option.ActionKey);
+                if (main is null) { problems.Add($"{where}: '{option.ActionKey}' não existe"); continue; }
+                problems.AddRange(CheckRequest(where, main, [option.Value], null, false, false, "User"));
+                foreach (var k in option.ExtraActionKeys ?? [])
+                {
+                    var extra = Wiring.Entry(k);
+                    if (extra is null) { problems.Add($"{where}: '{k}' não existe"); continue; }
+                    problems.AddRange(CheckRequest(where, extra, [null], null, false, false, "User"));
+                }
+            }
         Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
     }
 

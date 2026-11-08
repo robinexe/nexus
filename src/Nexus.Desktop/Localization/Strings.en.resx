@@ -4574,4 +4574,21 @@ When the game has been closed for {1} seconds, it undoes everything by itself. Y
   <data name="Pc.Drv.Total" xml:space="preserve"><value>Drivers are holding the processor (hitches and audio crackling)</value></data>
   <data name="Pc.Drv.TotalDo" xml:space="preserve"><value>In Performance › Measure › Driver latency, use "Investigate as administrator (10 s)" to find which driver and update it.</value></data>
   <data name="Simple.Topic.Drivers" xml:space="preserve"><value>drivers</value></data>
+  <data name="Card.minecraft.CloseFirst" xml:space="preserve"><value>Close Minecraft first: while open, it rewrites options.txt on exit and the change would be lost.</value></data>
+  <data name="Card.minecraft.JavaFps.Title" xml:space="preserve"><value>Uncapped FPS (Java)</value></data>
+  <data name="Card.minecraft.JavaFps.Detail" xml:space="preserve"><value>Turns V-Sync off and sets Max Framerate to Unlimited, as in the Video menu. The game runs as fast as your PC allows; tearing may appear without a VRR monitor.</value></data>
+  <data name="Card.minecraft.JavaLight.Title" xml:space="preserve"><value>Light graphics (Java)</value></data>
+  <data name="Card.minecraft.JavaLight.Detail" xml:space="preserve"><value>Fast graphics, no clouds, minimal particles and no entity shadows: the same Video-menu values, less to draw on a weak PC or laptop.</value></data>
+  <data name="Card.minecraft.JavaNear.Title" xml:space="preserve"><value>Closer world (Java)</value></data>
+  <data name="Card.minecraft.JavaNear.Detail" xml:space="preserve"><value>Render distance 8 and simulation distance 6 chunks (default 12): less terrain loaded and simulated, the setting that most relieves CPU and memory. You see less far.</value></data>
+  <data name="Card.minecraft.BedrockVsync.Title" xml:space="preserve"><value>V-Sync off (Bedrock)</value></data>
+  <data name="Card.minecraft.BedrockVsync.Detail" xml:space="preserve"><value>In the Microsoft Store edition, removes the FPS lock at the monitor refresh rate (Video › V-Sync). On dual-GPU laptops Bedrock may still cap at 2x the refresh rate (known Mojang issue).</value></data>
+  <data name="Card.roblox.CloseFirst" xml:space="preserve"><value>Close Roblox first: while open, it rewrites its settings on exit and the change would be lost.</value></data>
+  <data name="Card.roblox.FpsMax.Title" xml:space="preserve"><value>Max frame rate 240</value></data>
+  <data name="Card.roblox.FpsMax.Detail" xml:space="preserve"><value>Sets Roblox's Maximum Frame Rate menu option to its maximum (240 instead of the default 60). The way Roblox itself recommends, with no external unlockers or Fast Flags.</value></data>
+  <data name="Card.gtav.CloseFirst" xml:space="preserve"><value>Close GTA V first: while open, it rewrites settings.xml on exit and the change would be lost.</value></data>
+  <data name="Card.gtav.VsyncOff.Title" xml:space="preserve"><value>VSync off</value></data>
+  <data name="Card.gtav.VsyncOff.Detail" xml:space="preserve"><value>Removes the FPS lock at the monitor refresh rate (Graphics › VSync) in whichever of Legacy and Enhanced is installed. GTA V has no other FPS limiter. Tearing may appear without a VRR monitor.</value></data>
+  <data name="Card.gtav.KeepRunning.Title" xml:space="preserve"><value>Keep running when switching windows</value></data>
+  <data name="Card.gtav.KeepRunning.Detail" xml:space="preserve"><value>Turns off Pause game on focus loss: when you open Discord or your second monitor, the game keeps running instead of pausing and stuttering when you come back. It keeps using GPU and CPU while you are away.</value></data>
 </root>

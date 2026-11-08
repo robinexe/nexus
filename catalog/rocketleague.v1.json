@@ -1,0 +1,26 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Rocket League (PC): nenhuma ação de arquivo. O jogo regrava TASystemSettings.ini ao abrir, os 'tweaks' só sobrevivem com o arquivo somente leitura, e a Epic documenta que o arquivo somente leitura é justamente o que impede o jogo de salvar as configurações. O cartão oferece Medir/Comparar e as opções genéricas (driver, placa de alto desempenho). Pesquisa de 08/11/2026: docs/modules/rocketleague.md.",
+  "actions": [],
+  "rejected": [
+    {
+      "id": "myth.rocketleague.tasystemsettings-read-only",
+      "classification": "Rejected",
+      "reason": "Os guias de 'mais FPS' editam Documentos\\My Games\\Rocket League\\TAGame\\Config\\TASystemSettings.ini (sombras, bloom, LOD, texturas) e mandam marcar o arquivo como somente leitura, porque o jogo regrava o arquivo ao abrir e as edições se perdem. A Epic, no suporte oficial, explica que o arquivo somente leitura é a causa de 'Rocket League não salva minhas configurações' e manda desmarcar. O NEXUS não marca arquivos como somente leitura nem edita um arquivo que o jogo vai sobrescrever: as opções de vídeo ficam no menu do jogo.",
+      "source": "https://www.epicgames.com/help/rocket-league-c-202300000001622/technical-support-c-202300000001679/what-do-i-do-if-rocket-league-doesn-t-save-my-settings-a202300000082700"
+    },
+    {
+      "id": "myth.rocketleague.allowperframesleep-uncap",
+      "classification": "Rejected",
+      "reason": "AllowPerFrameSleep=False em TASystemSettings.ini como 'destravar o FPS acima de 250' não tem fonte da Psyonix/Epic; o próprio guia que o cita diz que é opcional e avisa sobre superaquecimento, e a edição exige o arquivo somente leitura (acima). O limite de FPS do Rocket League é a opção 'FPS máximo' do menu Vídeo (até 250), com V-Sync desligado no mesmo menu.",
+      "source": "https://esportstales.com/rocket-league/how-to-increase-fps-tasystemsettings-video-options"
+    },
+    {
+      "id": "myth.rocketleague.texturegroup-lod",
+      "classification": "Rejected",
+      "reason": "Reduzir TEXTUREGROUP_*=MaxLODSize=256 no .ini deixa as texturas em qualidade mínima, abaixo do que o menu oferece, sem medição publicada de ganho de FPS numa placa dedicada (o Rocket League é limitado pelo processador na maioria dos PCs) e também se perde sem o arquivo somente leitura.",
+      "source": "https://esportstales.com/rocket-league/how-to-increase-fps-tasystemsettings-video-options"
+    }
+  ]
+}

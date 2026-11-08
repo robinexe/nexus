@@ -1,0 +1,133 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Minecraft (Java e Bedrock), complemento de games.v1.json: distância de renderização/simulação no options.txt do Java e V-Sync no options.txt do Bedrock, pelo handler GameConfigValue (só troca o valor de uma linha que o jogo já gravou, com o jogo fechado). Pesquisa de 08/11/2026: docs/modules/minecraft.md.",
+  "actions": [
+    {
+      "id": "minecraft.cfg.render-distance.near",
+      "version": 1,
+      "title": "Minecraft: distância de renderização 8 chunks",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: render distance 8 chunks"
+        },
+        "es": {
+          "title": "Minecraft: distancia de renderizado 8 chunks"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "PC fraco ou pouca memória: Minecraft Java instalado e aberto pelo menos uma vez (o options.txt existe), fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "renderDistance"
+      },
+      "desiredValue": "8",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft Java: renderDistance é o controle deslizante Distância de renderização (2 a 32 chunks; padrão 12). Cada chunk a menos é menos terreno para carregar, guardar na memória e desenhar: é o ajuste que mais muda o FPS e o uso de memória do Java. 8 é a posição que o jogo chamava de \"Normal\" nas versões antigas.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Você enxerga menos longe (névoa mais perto). Em servidores, a distância efetiva é a menor entre a sua e a do servidor. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt; no jogo, Opções > Vídeo > Distância de renderização.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "minecraft.cfg.simulation-distance.near",
+      "version": 1,
+      "title": "Minecraft: distância de simulação 6 chunks",
+      "i18n": {
+        "en": {
+          "title": "Minecraft: simulation distance 6 chunks"
+        },
+        "es": {
+          "title": "Minecraft: distancia de simulación 6 chunks"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "PC fraco ou pouca memória: Minecraft Java 1.18 ou mais novo (a chave existe), fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft",
+        "key": "simulationDistance"
+      },
+      "desiredValue": "6",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Minecraft Java (1.18+): simulationDistance é o controle Distância de simulação (5 a 32 chunks; padrão 12): até que distância criaturas, plantações e redstone continuam sendo calculados no seu mundo local. Menos chunks simulados = menos trabalho do processador em mundos de um jogador.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://minecraft.wiki/w/Options.txt"
+        }
+      ],
+      "risks": "Fazendas e máquinas longe de você param até você se aproximar. Em servidores quem manda é o servidor. Versões antes da 1.18 não têm a chave (não se aplica).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt; no jogo, Opções > Vídeo > Distância de simulação.",
+      "revert": "Devolve o valor anterior exato da linha."
+    },
+    {
+      "id": "minecraft.bedrock.vsync.off",
+      "version": 1,
+      "title": "Minecraft Bedrock: V-Sync desligado",
+      "i18n": {
+        "en": {
+          "title": "Minecraft Bedrock: V-Sync off"
+        },
+        "es": {
+          "title": "Minecraft Bedrock: V-Sync desactivado"
+        }
+      },
+      "classification": "Conditional",
+      "condition": "Minecraft Bedrock (Microsoft Store) instalado e aberto pelo menos uma vez (o options.txt existe em LocalState), fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "minecraft-bedrock",
+        "key": "gfx_vsync"
+      },
+      "desiredValue": "0",
+      "desiredType": "ConfigValue",
+      "mechanism": "options.txt do Bedrock (Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState\\games\\com.mojang\\minecraftpe): gfx_vsync 1 prende o FPS à taxa do monitor; 0 é o V-Sync desligado do menu Vídeo. Mesmo valor que o jogo grava; moderador da Mojang orienta exatamente esta troca no rastreador de bugs.",
+      "evidence": [
+        {
+          "level": "Observed",
+          "source": "https://bugs.mojang.com/browse/MCPE-229062"
+        },
+        {
+          "level": "Observed",
+          "source": "https://bugs.mojang.com/browse/MCPE-166745"
+        }
+      ],
+      "risks": "Pode aparecer rasgo de imagem sem monitor VRR. Em notebook com vídeo híbrido (Intel + NVIDIA), a Mojang reconhece (MCPE-166745, sem correção) que o Bedrock ainda pode travar o FPS em 2x a taxa do monitor mesmo sem V-Sync. Com o jogo aberto, o NEXUS recusa (o jogo regravaria o arquivo).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura da linha no options.txt; no jogo, Configurações > Vídeo > V-Sync.",
+      "revert": "Devolve o valor anterior exato da linha."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "myth.minecraft.xmx-more-ram",
+      "classification": "Rejected",
+      "reason": "Aumentar o -Xmx (memória do Java) em launcher_profiles.json não é oferecido: o lançador oficial regrava o JSON (a edição some ao abrir o lançador), o padrão de 2 GB (-Xmx2G) é o que a Mojang define para o jogo sem mods e não há medição publicada de ganho de FPS com mais; só modpacks pesados precisam de mais, e isso se faz no próprio lançador (Instalações > Mais opções > Argumentos JVM). O NEXUS não mexe em argumentos de máquina virtual Java.",
+      "source": "https://minecraft.wiki/w/Launcher_profiles.json"
+    },
+    {
+      "id": "myth.minecraft.bedrock-max-framerate-key",
+      "classification": "Ineffective",
+      "reason": "Editar gfx_max_framerate no options.txt do Bedrock não está na lista: relatos no rastreador da Mojang (MCPE-110384) mostram o valor sendo ignorado, e o próprio menu Vídeo já oferece FPS máximo 'Ilimitado'. Sem mecanismo confirmado, não entra.",
+      "source": "https://bugs-legacy.mojang.com/browse/MCPE-110384"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Nexus.GameProfiles.Configs;
 
 /// <summary>Sintaxe de uma linha "chave + valor" num arquivo de configuração de jogo.</summary>
@@ -9,6 +11,11 @@ public enum ConfigSyntax
     Colon,
     /// <summary><c>"chave"   "valor"</c> (KeyValues da Valve/Respawn: videoconfig.txt do Apex).</summary>
     KeyValues,
+    /// <summary><c>&lt;Chave value="valor" /&gt;</c>: um elemento XML por linha, valor no atributo <c>value</c> (settings.xml do GTA V).</summary>
+    XmlAttribute,
+    /// <summary><c>&lt;tipo name="Chave"&gt;valor&lt;/tipo&gt;</c>: um elemento XML por linha, chave no atributo <c>name</c> e valor no
+    /// conteúdo (GlobalBasicSettings_13.xml do Roblox). Elementos com filhos em outras linhas não são chave.</summary>
+    XmlNamed,
 }
 
 /// <summary>Como uma chave aparece no arquivo: ausente, uma vez (com o valor) ou repetida (o editor não mexe).</summary>
@@ -20,7 +27,7 @@ public enum ConfigKeyState { Absent, Present, Ambiguous }
 /// vez só; repetida = ambígua, o editor recusa. O editor NUNCA acrescenta chave: só troca o valor de uma que o jogo já gravou
 /// (assim nada estranho entra no arquivo e desfazer é só devolver o valor). Valor com aspas continua com aspas.
 /// </summary>
-public sealed class ConfigLines
+public sealed partial class ConfigLines
 {
     private sealed record Line(string Raw, string? Key, int ValueStart, int ValueLength);
 
@@ -51,7 +58,10 @@ public sealed class ConfigLines
     private static Line ParseLine(string raw, ConfigSyntax syntax)
     {
         var t = raw.TrimStart();
-        if (t.Length == 0 || t[0] is ';' or '#' || t.StartsWith("//", StringComparison.Ordinal) || t[0] == '[') return new Line(raw, null, 0, 0);
+        if (t.Length == 0) return new Line(raw, null, 0, 0);
+        if (syntax is ConfigSyntax.XmlAttribute or ConfigSyntax.XmlNamed)
+            return t[0] == '<' ? XmlLine(raw, syntax) : new Line(raw, null, 0, 0);
+        if (t[0] is ';' or '#' || t.StartsWith("//", StringComparison.Ordinal) || t[0] == '[') return new Line(raw, null, 0, 0);
         return syntax switch
         {
             ConfigSyntax.Equals => Separated(raw, '='),
@@ -59,6 +69,29 @@ public sealed class ConfigLines
             _ => KeyValuesLine(raw),
         };
     }
+
+    /// <summary>
+    /// Um elemento XML inteiro numa linha: <c>&lt;Chave value="V" /&gt;</c> (atributo) ou <c>&lt;tipo name="Chave"&gt;V&lt;/tipo&gt;</c>
+    /// (nomeado). Linha que não bate exatamente com a forma esperada (comentário, abertura de bloco, vários elementos) não é
+    /// chave: o editor só reconhece o que pode trocar sem alterar a estrutura do arquivo. O valor fica sem aspas e sem '&lt;';
+    /// entidades XML (&amp;amp; etc.) não entram nos valores aceitos (<see cref="IsSafeValue"/> recusa '&amp;' e '&lt;').
+    /// </summary>
+    private static Line XmlLine(string raw, ConfigSyntax syntax)
+    {
+        var m = syntax == ConfigSyntax.XmlAttribute ? XmlAttributeRegex().Match(raw) : XmlNamedRegex().Match(raw);
+        if (!m.Success) return new Line(raw, null, 0, 0);
+        var key = m.Groups["key"].Value;
+        var value = m.Groups["value"];
+        if (key.Length == 0 || value.Value.Contains('<', StringComparison.Ordinal) || value.Value.Contains('&', StringComparison.Ordinal)) return new Line(raw, null, 0, 0);
+        if (syntax == ConfigSyntax.XmlNamed && !string.Equals(m.Groups["tag"].Value, m.Groups["close"].Value, StringComparison.Ordinal)) return new Line(raw, null, 0, 0);
+        return new Line(raw, key, value.Index, value.Length);
+    }
+
+    [GeneratedRegex(@"^\s*<(?<key>[A-Za-z_][\w.\-]*)\s+value=""(?<value>[^""<>]*)""\s*/>\s*$", RegexOptions.CultureInvariant)]
+    private static partial Regex XmlAttributeRegex();
+
+    [GeneratedRegex(@"^\s*<(?<tag>[A-Za-z_][\w.\-]*)\s+name=""(?<key>[^""<>]+)""\s*>(?<value>[^<>]*)</(?<close>[A-Za-z_][\w.\-]*)\s*>\s*$", RegexOptions.CultureInvariant)]
+    private static partial Regex XmlNamedRegex();
 
     /// <summary>"chave SEP valor": o valor vai do primeiro caractere não-espaço depois do separador até o fim (sem espaços finais);
     /// entre aspas, só o miolo é o valor (as aspas ficam).</summary>
@@ -117,9 +150,9 @@ public sealed class ConfigLines
         return (state, l.Raw.Substring(l.ValueStart, l.ValueLength));
     }
 
-    /// <summary>Valor aceito: uma linha, sem controle, sem aspas, até 256 caracteres.</summary>
+    /// <summary>Valor aceito: uma linha, sem controle, sem aspas nem '&lt;', '&gt;' ou '&amp;' (quebrariam um arquivo XML), até 256 caracteres.</summary>
     public static bool IsSafeValue(string? value) =>
-        value is { Length: <= 256 } && !value.Any(c => char.IsControl(c) || c == '"');
+        value is { Length: <= 256 } && !value.Any(c => char.IsControl(c) || c is '"' or '<' or '>' or '&');
 
     /// <summary>Troca o valor de uma chave que já existe (nunca acrescenta). Falso quando a chave não está no arquivo.</summary>
     public bool Set(string key, string value)
