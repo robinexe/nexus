@@ -368,6 +368,7 @@ public static class PlainFindings
         if (x.StartsWith("sec.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Security");
         if (x.StartsWith("power.", StringComparison.Ordinal) || x.StartsWith("cpu.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Power");
         if (x.StartsWith("win.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Games");
+        if (x.StartsWith("drivers.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Drivers");
         if (x.StartsWith("startup.", StringComparison.Ordinal) || x.StartsWith("svc.", StringComparison.Ordinal)) return Loc.T("Simple.Topic.Startup");
         return Loc.T("Simple.Topic.Windows");
     }
@@ -382,6 +383,7 @@ public static class PlainFindings
             _ when f.Id.StartsWith(PcChecks.DiskPrefix, StringComparison.Ordinal) => 95, // disco falhando: backup antes de tudo
             _ when f.Id.StartsWith(PcChecks.DisplayRefreshPrefix, StringComparison.Ordinal) => 72,
             PcChecks.ThrottleId => 65,
+            PcChecks.DriverLatencyId => 68, // engasgos e estalos de áudio: pesa mais que a rede, menos que o monitor
             _ when f.Id.StartsWith("net.", StringComparison.Ordinal) => 55,
             "disk.system-media" => 90,
             "disk.system-free" => 85,

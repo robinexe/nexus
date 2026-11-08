@@ -16,8 +16,10 @@ public sealed record PcCheckState
     public IReadOnlyList<GameOnDisk> Games { get; init; } = [];
     public IReadOnlyList<DisplayCheckFacts>? Displays { get; init; }
     public ThrottleFacts? Throttle { get; init; }
+    /// <summary>Último "Atraso de drivers" rodado em Medir (não há leitura automática).</summary>
+    public DriverLatencyFacts? DriverLatency { get; init; }
 
-    /// <summary>Todos os achados das checagens, pela ordem: rede, discos, monitor, processador.</summary>
+    /// <summary>Todos os achados das checagens, pela ordem: rede, discos, monitor, processador, drivers.</summary>
     public IReadOnlyList<DiagnosticFinding> Findings()
     {
         var list = new List<DiagnosticFinding>();
@@ -25,6 +27,7 @@ public sealed record PcCheckState
         if (Disks is { } d) list.AddRange(PcChecks.Disks(d, Games));
         if (Displays is { } m) list.AddRange(PcChecks.Displays(m));
         if (Throttle is { } t && PcChecks.Throttle(t) is { } tf) list.Add(tf);
+        if (DriverLatency is { } dl && PcChecks.DriverLatency(dl) is { } df) list.Add(df);
         return list;
     }
 
@@ -71,6 +74,10 @@ public static class PcCheckText
                 return new(onHdd == 1 ? Loc.T("Pc.Disk.Games1") : Loc.F("Pc.Disk.GamesN", onHdd), Loc.T("Pc.Disk.GamesDo"), topic, "Icon.Games");
             case PcChecks.ThrottleId:
                 return new(Loc.T("Pc.Cpu.Limited"), Loc.T("Pc.Cpu.LimitedDo"), topic, "Icon.Cpu");
+            case PcChecks.DriverLatencyId when s.DriverLatency is { } dl:
+                return dl is { Traced: true, Culprit: { } culprit }
+                    ? new(dl.Device is { } dev ? Loc.F("Pc.Drv.CulpritDevice", culprit, dev) : Loc.F("Pc.Drv.Culprit", culprit), Loc.T("Pc.Drv.CulpritDo"), topic, "Icon.Drivers")
+                    : new(Loc.T("Pc.Drv.Total"), Loc.T("Pc.Drv.TotalDo"), topic, "Icon.Drivers");
         }
         if (f.Id.StartsWith(PcChecks.DiskPrefix, StringComparison.Ordinal) &&
             s.Disks?.FirstOrDefault(d => PcChecks.DiskPrefix + (d.Number?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? d.Name) == f.Id) is { } disk)

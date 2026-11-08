@@ -107,6 +107,8 @@ public sealed class MainViewModel : ObservableObject, IModuleHost, ISimpleAction
         Checks.Changed += (_, _) => System.Windows.Application.Current?.Dispatcher.BeginInvoke(MergePcChecks);
         // Notebook na bateria: um jogo começou (detecção do Medir) → aviso, se ligado em Ajustes.
         Measure.GameStarted += (_, game) => Checks.OnGameStarted(game, UiSettings.Current.GameBatteryNotice, DateTimeOffset.Now);
+        // Atraso de drivers (Medir) entra no Diagnóstico/Problemas quando o veredito é ruim; a investigação como administrador acrescenta o culpado.
+        Measure.DriverLatency.FactsChanged += (_, facts) => Checks.Update(s => s with { DriverLatency = facts });
         Checks.Notice += (_, n) => System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => { Status = n.Text; GameNotice?.Invoke(this, n); });
         // Modo jogo automático: aviso discreto na bandeja ao ligar/aplicar/desfazer; desfazer que desistiu vira linha em Problemas.
         SimpleGames.GameMode.Notice += (_, n) => GameNotice?.Invoke(this, n);

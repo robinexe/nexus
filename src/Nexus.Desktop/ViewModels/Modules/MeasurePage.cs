@@ -73,6 +73,7 @@ public sealed class MeasurePage : ModulePage, IDisposable
 
     public MeasurePage()
     {
+        DriverLatency = new DriverLatencyPanel(host: () => Host);
         _prefs = MeasurePreferences.Load(_prefsPath);
         if (_prefs.PresentMonPath is null && LegacyPresentMonPath() is { } legacy) _prefs = _prefs with { PresentMonPath = legacy };
         // Conferir o PresentMon (SHA-256/assinatura) e ler as sessões salvas vão para fora da thread da interface (InitialLoadAsync):
@@ -434,8 +435,8 @@ public sealed class MeasurePage : ModulePage, IDisposable
     private static CaptureActivitySampler? StartActivity(LiveSession session) =>
         OperatingSystem.IsWindows() ? new CaptureActivitySampler(new WindowsActivitySource(), session).Start() : null;
 
-    /// <summary>Teste "Atraso de drivers" (DPC/interrupções, aproximação de nível de usuário).</summary>
-    public DriverLatencyPanel DriverLatency { get; } = new();
+    /// <summary>Teste "Atraso de drivers" (contadores sem administrador + investigação como administrador pelo aplicador).</summary>
+    public DriverLatencyPanel DriverLatency { get; }
 
     /// <summary>Uma linha de "Por que travou?" da última partida medida deste jogo (para a tela Jogos), ou vazio.</summary>
     public string LatestStutterVerdict(string exe)

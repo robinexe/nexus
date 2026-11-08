@@ -1881,7 +1881,7 @@ O jogo passa a usar a GPU dedicada (mais FPS, mais consumo de bateria). </value>
   <data name="Dpc.Advice.Video" xml:space="preserve"><value>O driver da placa de vídeo é outro suspeito comum. Instale a versão nova pelo NEXUS (Atualizar drivers baixa a oficial da NVIDIA/AMD).</value></data>
   <data name="Dpc.OpenDrivers" xml:space="preserve"><value>Abrir Atualizar drivers</value></data>
   <data name="Dpc.HowHeader" xml:space="preserve"><value>Como foi medido (aproximação)</value></data>
-  <data name="Dpc.Approx" xml:space="preserve"><value>Aproximação sem administrador: o NEXUS lê uma vez por segundo os contadores do Windows "% DPC Time", "% Interrupt Time", "DPCs Queued/sec" e "Interrupts/sec" de cada núcleo. Ruim = algum segundo com 20% ou mais de um núcleo em drivers (ou média de 3%); pode causar engasgos = 5% ou mais (ou média de 1%). Esses limites são do NEXUS, não uma norma. A duração média de cada chamada é a conta tempo ÷ quantidade: é média, não o pior caso. O que só um rastreamento do kernel (administrador, como o LatencyMon faz) mostraria: QUAL driver (ndis.sys, nvlddmkm.sys…) e a pior chamada isolada — um atraso único de 2 ms some na média de um segundo. O teste não muda a resolução do timer nem nada do sistema.</value></data>
+  <data name="Dpc.Approx" xml:space="preserve"><value>Aproximação sem administrador: o NEXUS lê uma vez por segundo os contadores do Windows "% DPC Time", "% Interrupt Time", "DPCs Queued/sec" e "Interrupts/sec" de cada núcleo. Ruim = algum segundo com 20% ou mais de um núcleo em drivers (ou média de 3%); pode causar engasgos = 5% ou mais (ou média de 1%). Esses limites são do NEXUS, não uma norma. A duração média de cada chamada é a conta tempo ÷ quantidade: é média, não o pior caso. O que só um rastreamento do kernel mostra: QUAL driver (ndis.sys, nvlddmkm.sys…) e a pior chamada isolada — um atraso único de 2 ms some na média de um segundo; é isso que "Investigar como administrador" faz. O teste não muda a resolução do timer nem nada do sistema.</value></data>
   <data name="Mem.AliAbreMaisRapido" xml:space="preserve"><value>ali abre mais rápido e é devolvido na hora a quem precisar. Esvaziar à força joga esse cache fora, faz os programas lerem </value></data>
   <data name="Mem.AplicadoReiniciePcValer" xml:space="preserve"><value>Aplicado. Reinicie o PC para valer.</value></data>
   <data name="Mem.ArquivoPaginacao" xml:space="preserve"><value>Arquivo de paginação</value></data>
@@ -4538,4 +4538,40 @@ Quando o jogo fechar há {1} segundos, desfaz tudo sozinho. Você pode desligar 
   <data name="GameAuto.Problem.Title" xml:space="preserve"><value>O modo jogo automático não conseguiu desfazer a última partida</value></data>
   <data name="GameAuto.Problem.WhatToDo" xml:space="preserve"><value>Abra o Histórico e clique em Desfazer na mudança do modo jogo automático. Se não der, reinicie o PC e tente de novo.</value></data>
   <data name="GameAuto.Problem.Action" xml:space="preserve"><value>Abrir Histórico</value></data>
+  <data name="Dpc.TraceHeader" xml:space="preserve"><value>Qual driver? Investigação como administrador</value></data>
+  <data name="Dpc.NoAdmin" xml:space="preserve"><value>Sem administrador, o teste mostra só o total: não dá para saber QUAL driver. A investigação abaixo pede a permissão do Windows uma vez e rastreia o kernel por 10 segundos (como o LatencyMon faz), sem mudar nada no PC.</value></data>
+  <data name="Dpc.Investigate" xml:space="preserve"><value>Investigar como administrador (10 s)</value></data>
+  <data name="Dpc.InvestigateTip" xml:space="preserve"><value>Pede a permissão do Windows, rastreia DPC/interrupções por 10 s e diz qual driver segurou o processador. A sessão de rastreamento é encerrada no fim; nada fica.</value></data>
+  <data name="Dpc.Investigating" xml:space="preserve"><value>Aguardando a permissão do Windows e rastreando por 10 s… use o PC como de costume (de preferência com o problema acontecendo).</value></data>
+  <data name="Dpc.Trace.Title" xml:space="preserve"><value>Investigar o atraso de drivers</value></data>
+  <data name="Dpc.Trace.Confirm" xml:space="preserve"><value>O NEXUS vai pedir a permissão do Windows e rastrear o kernel por 10 segundos para ver qual driver segura o processador (DPC e interrupções). Só lê: não muda nenhuma configuração; a sessão de rastreamento é encerrada no fim e o único arquivo é um resumo no seu perfil. Nesses 10 segundos o PC pode ficar um pouco mais lento.</value></data>
+  <data name="Dpc.Trace.Cancelled" xml:space="preserve"><value>Investigação cancelada: nada foi alterado.</value></data>
+  <data name="Dpc.Trace.Failed" xml:space="preserve"><value>A investigação não terminou: {0}</value></data>
+  <data name="Dpc.Trace.NoFile" xml:space="preserve"><value>O rastreamento terminou, mas o resumo não apareceu no seu perfil. Tente de novo; se repetir, o aplicador pode estar rodando com outra conta.</value></data>
+  <data name="Dpc.CulpritLine" xml:space="preserve"><value>Provável culpado: {0} ({1}) — {2}</value></data>
+  <data name="Dpc.CulpritLineNoDevice" xml:space="preserve"><value>Provável culpado: {0} — {1}</value></data>
+  <data name="Dpc.WorstDpc" xml:space="preserve"><value>DPC máximo {0}</value></data>
+  <data name="Dpc.WorstIsr" xml:space="preserve"><value>interrupção máxima {0}</value></data>
+  <data name="Dpc.NoCulprit" xml:space="preserve"><value>Nenhum driver segurou um núcleo por mais de 0,5 ms nos {0} s rastreados. Se o problema não estava acontecendo, repita com ele acontecendo.</value></data>
+  <data name="Dpc.TopTitle" xml:space="preserve"><value>Quem mais segurou o processador (pior chamada isolada):</value></data>
+  <data name="Dpc.ModuleWithDevice" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="Dpc.TopLine" xml:space="preserve"><value>{0}: pior {1}; {2} chamadas, {3:0.#} ms no total</value></data>
+  <data name="Dpc.KernelNote" xml:space="preserve"><value>ntoskrnl.exe e hal.dll são o próprio Windows (temporizadores e trabalho do sistema, às vezes em nome de um driver que pediu): não são um driver para trocar.</value></data>
+  <data name="Dpc.TraceNote" xml:space="preserve"><value>Amostra de {0} s: um driver que atrasa só de vez em quando pode não ter aparecido. Repita com o áudio estalando ou o jogo aberto.</value></data>
+  <data name="Dpc.TraceVm" xml:space="preserve"><value>Máquina virtual: os tempos de DPC/interrupção não refletem um PC real.</value></data>
+  <data name="Dpc.TraceUnresolved" xml:space="preserve"><value>{0}% das chamadas não puderam ser ligadas a um arquivo e ficaram de fora.</value></data>
+  <data name="Dpc.CulpritsTitleTraced" xml:space="preserve"><value>O que fazer com o driver apontado (sem garantia de resolver):</value></data>
+  <data name="Dpc.Culprit.Storage" xml:space="preserve"><value>Armazenamento</value></data>
+  <data name="Dpc.Culprit.Usb" xml:space="preserve"><value>USB</value></data>
+  <data name="Dpc.Advice.NetworkTraced" xml:space="preserve"><value>Atualize o driver de rede/Wi‑Fi pelo NEXUS (Atualizar drivers) ou no site do fabricante. Para confirmar, jogue com cabo e o Wi‑Fi desligado (ou vice-versa) e repita a investigação.</value></data>
+  <data name="Dpc.Advice.Storage" xml:space="preserve"><value>Driver de disco/controladora (NVMe, SATA, RAID). Atualize pelo NEXUS ou no site do fabricante da placa-mãe; confira também o firmware do SSD no programa do fabricante. Não mexa em configurações de energia do disco por conta própria.</value></data>
+  <data name="Dpc.Advice.Usb" xml:space="preserve"><value>Controladora ou aparelho USB (áudio USB, captura, hub). Teste com o aparelho em outra porta ou desconectado e repita a investigação; depois atualize o driver do chipset pelo site do fabricante da placa-mãe.</value></data>
+  <data name="Dpc.Advice.Unknown" xml:space="preserve"><value>Driver sem dispositivo identificado. Procure o nome do arquivo no site do fabricante do PC/placa-mãe para saber de qual programa ou aparelho ele é, e atualize por lá. Se for de um programa que você não usa, desinstale o programa (não apague o arquivo).</value></data>
+  <data name="Dpc.TraceHow" xml:space="preserve"><value>Investigação como administrador: ação do catálogo pelo aplicador do NEXUS (ETW, provedor de sistema do kernel com DPC + interrupções + carga de imagens, 10 s). Cada evento DPC/ISR traz a hora de entrada e o endereço da rotina; o NEXUS acha o arquivo .sys daquele endereço e soma por arquivo: pior chamada, quantidade e tempo total. É o método do LatencyMon e do xperf. "Provável culpado" = o driver (não o kernel) com a pior chamada acima de 0,5 ms. O dispositivo vem do inventário de drivers (serviço → arquivo). Amostra curta e sem carga controlada: é indício, não prova.</value></data>
+  <data name="Pc.Drv.Culprit" xml:space="preserve"><value>{0} está atrasando o processador (atraso de drivers)</value></data>
+  <data name="Pc.Drv.CulpritDevice" xml:space="preserve"><value>{0} ({1}) está atrasando o processador</value></data>
+  <data name="Pc.Drv.CulpritDo" xml:space="preserve"><value>Atualize esse driver em Atualizar drivers (ou no site do fabricante) e repita o teste em Desempenho › Medir.</value></data>
+  <data name="Pc.Drv.Total" xml:space="preserve"><value>Drivers estão segurando o processador (engasgos e estalos de áudio)</value></data>
+  <data name="Pc.Drv.TotalDo" xml:space="preserve"><value>Em Desempenho › Medir › Atraso de drivers, use "Investigar como administrador (10 s)" para saber qual driver e atualizá-lo.</value></data>
+  <data name="Simple.Topic.Drivers" xml:space="preserve"><value>drivers</value></data>
 </root>
