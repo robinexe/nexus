@@ -4538,4 +4538,21 @@ Cuando el juego lleve {1} segundos cerrado, lo deshace todo solo. Puedes desacti
   <data name="GameAuto.Problem.Title" xml:space="preserve"><value>El modo juego automático no pudo deshacer la última partida</value></data>
   <data name="GameAuto.Problem.WhatToDo" xml:space="preserve"><value>Abre el Historial y pulsa Deshacer en el cambio del modo juego automático. Si no funciona, reinicia el PC e inténtalo de nuevo.</value></data>
   <data name="GameAuto.Problem.Action" xml:space="preserve"><value>Abrir Historial</value></data>
+  <data name="Card.minecraft.CloseFirst" xml:space="preserve"><value>Cierra Minecraft antes: abierto, reescribe options.txt al salir y el cambio se perdería.</value></data>
+  <data name="Card.minecraft.JavaFps.Title" xml:space="preserve"><value>FPS sin límite (Java)</value></data>
+  <data name="Card.minecraft.JavaFps.Detail" xml:space="preserve"><value>Desactiva el V-Sync y pone los FPS máximos en Ilimitado, como en el menú Vídeo. El juego corre al máximo que da tu PC; puede aparecer desgarro sin monitor VRR.</value></data>
+  <data name="Card.minecraft.JavaLight.Title" xml:space="preserve"><value>Gráficos ligeros (Java)</value></data>
+  <data name="Card.minecraft.JavaLight.Detail" xml:space="preserve"><value>Gráficos Rápidos, sin nubes, partículas al mínimo y sin sombras de criaturas: los mismos valores del menú Vídeo, menos que dibujar en un PC débil o portátil.</value></data>
+  <data name="Card.minecraft.JavaNear.Title" xml:space="preserve"><value>Mundo más cerca (Java)</value></data>
+  <data name="Card.minecraft.JavaNear.Detail" xml:space="preserve"><value>Distancia de renderizado 8 y de simulación 6 chunks (por defecto 12): menos terreno cargado y calculado, el ajuste que más alivia procesador y memoria. Ves menos lejos.</value></data>
+  <data name="Card.minecraft.BedrockVsync.Title" xml:space="preserve"><value>V-Sync desactivado (Bedrock)</value></data>
+  <data name="Card.minecraft.BedrockVsync.Detail" xml:space="preserve"><value>En la edición de Microsoft Store, quita el bloqueo de FPS a la tasa del monitor (Vídeo › V-Sync). En portátiles con dos tarjetas Bedrock aún puede limitar a 2x la tasa del monitor (problema conocido de Mojang).</value></data>
+  <data name="Card.roblox.CloseFirst" xml:space="preserve"><value>Cierra Roblox antes: abierto, reescribe la configuración al salir y el cambio se perdería.</value></data>
+  <data name="Card.roblox.FpsMax.Title" xml:space="preserve"><value>FPS máximos 240</value></data>
+  <data name="Card.roblox.FpsMax.Detail" xml:space="preserve"><value>Pone la opción Maximum Frame Rate del menú de Roblox al máximo (240, en vez de los 60 por defecto). Es lo que la propia Roblox recomienda, sin programas externos ni Fast Flags.</value></data>
+  <data name="Card.gtav.CloseFirst" xml:space="preserve"><value>Cierra GTA V antes: abierto, reescribe settings.xml al salir y el cambio se perdería.</value></data>
+  <data name="Card.gtav.VsyncOff.Title" xml:space="preserve"><value>VSync desactivado</value></data>
+  <data name="Card.gtav.VsyncOff.Detail" xml:space="preserve"><value>Quita el bloqueo de FPS a la tasa del monitor (Gráficos › VSync), en las ediciones Legacy y Enhanced que estén instaladas. GTA V no tiene otro limitador de FPS. Puede aparecer desgarro sin monitor VRR.</value></data>
+  <data name="Card.gtav.KeepRunning.Title" xml:space="preserve"><value>Seguir ejecutándose al cambiar de ventana</value></data>
+  <data name="Card.gtav.KeepRunning.Detail" xml:space="preserve"><value>Desactiva Pausar juego al perder el foco: al abrir Discord o el segundo monitor, el juego sigue corriendo en vez de pausarse y trabarse al volver. Sigue usando tarjeta y procesador mientras estás fuera.</value></data>
 </root>

@@ -186,7 +186,7 @@ public sealed class GameConfigTests : IDisposable
     public void Catalog_never_caps_fps_and_every_value_is_in_the_handler_list()
     {
         var mine = Wiring.Catalog.Actions.Where(e => e.Definition.HandlerKind == GameConfigs.HandlerKind).ToList();
-        Assert.Equal(28, mine.Count); // 20 + CS2 (7 de vídeo e o fps_max)
+        Assert.Equal(36, mine.Count); // 20 + CS2 (7 de vídeo e o fps_max) + Minecraft distâncias/Bedrock (3) + Roblox (1) + GTA V Legacy/Enhanced (4)
         foreach (var e in mine)
         {
             var t = e.TargetTemplate;
