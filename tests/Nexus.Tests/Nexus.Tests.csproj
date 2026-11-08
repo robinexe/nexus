@@ -56,6 +56,7 @@
     <!-- Jogos: estado real de cada opção e o que a desfaz no diário (GameOptionStateTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameOptionStates.cs" Link="Shell\GameOptionStates.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameCardPlans.cs" Link="Shell\GameCardPlans.cs" />
+    <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameCardLookup.cs" Link="Shell\GameCardLookup.cs" />
     <!-- Recomendação por hardware: textos dos vereditos, seleção padrão e frase do perfil (HardwareRecommendationTests). -->
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\HardwareFitText.cs" Link="Shell\HardwareFitText.cs" />
     <Compile Include="..\..\src\Nexus.Desktop\ViewModels\Simple\GameSessionStore.cs" Link="Shell\GameSessionStore.cs" />

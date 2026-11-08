@@ -4003,18 +4003,16 @@ Everything goes back to how it was. System changes ask for administrator permiss
   <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: turn on "{1}"? You can undo it.</value></data>
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: turn on "{1}"? Windows will ask for administrator permission. You can undo it.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>Turn on Windows Game Mode? You can undo it.</value></data>
-  <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>More FPS on a weak PC (Performance mode)</value></data>
+  <data name="Card.Fn.Perf" xml:space="preserve"><value>More FPS on a weak PC (Performance mode)</value></data>
   <data name="Simple.Games.Fn.MaxFpsReflex" xml:space="preserve"><value>Max FPS and less latency (no FPS limit + Reflex)</value></data>
-  <data name="Simple.Games.Fn.MaxFps" xml:space="preserve"><value>Max FPS (no FPS limit and no V-Sync)</value></data>
+  <data name="Card.Fn.MaxFps" xml:space="preserve"><value>Max FPS (no FPS limit and no V-Sync)</value></data>
   <data name="Simple.Games.GlobalFpsFree" xml:space="preserve"><value>NVIDIA driver: no FPS limit for games</value></data>
   <data name="Simple.Games.GlobalFpsCapped" xml:space="preserve"><value>The NVIDIA driver is limiting FPS in every game (FPS limit or forced V-Sync). Free it so games run as fast as the card can go.</value></data>
   <data name="Simple.Games.GlobalFpsFix" xml:space="preserve"><value>Free FPS</value></data>
   <data name="Simple.Games.GlobalFpsTitle" xml:space="preserve"><value>NVIDIA driver (all games)</value></data>
   <data name="Simple.Games.ConfirmGlobalFps" xml:space="preserve"><value>Remove the FPS limit and forced V-Sync from the NVIDIA driver for every game? The card will run flat out (more heat and fan noise). Windows will ask for administrator permission. You can undo it.</value></data>
-  <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Sharp image when turning (no motion blur)</value></data>
-  <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: turn on "{0}"? Close Fortnite first. You can undo it.</value></data>
-  <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Close Fortnite first: while open it rewrites its settings on exit. Aim already has no acceleration: the game reads the mouse directly.</value></data>
-  <data name="Simple.Games.Fn.Running" xml:space="preserve"><value>Fortnite is open right now. Close the game to apply these options.</value></data>
+  <data name="Card.Fn.Clear" xml:space="preserve"><value>Sharp image when turning (no motion blur)</value></data>
+  <data name="Card.Fn.Note" xml:space="preserve"><value>Close Fortnite first: while open it rewrites its settings on exit. Aim already has no acceleration: the game reads the mouse directly.</value></data>
   <data name="Simple.Games.Fn.NotFound" xml:space="preserve"><value>Open Fortnite once so NEXUS can find the game settings.</value></data>
   <data name="Simple.Games.Fn.Now" xml:space="preserve"><value>Now: {0}</value></data>
   <data name="Simple.Games.Fn.ModePerf" xml:space="preserve"><value>Performance mode</value></data>
@@ -4474,7 +4472,7 @@ Nothing is deleted: it can be undone, and the space only comes back when you emp
   <data name="Dialog.ErrorFooter" xml:space="preserve"><value>If it happens again, it won't show up again this session. Details in %LocalAppData%\NEXUS\desktop-erros.log.</value></data>
   <data name="Simple.Opt.PendingRecovery" xml:space="preserve"><value>A previous NEXUS change was interrupted (the PC may have shut down midway). Use "Recover" in History before optimizing again.</value></data>
   <data name="Simple.Games.GpuHigh" xml:space="preserve"><value>Use the high-performance graphics card for this game</value></data>
-  <data name="Simple.Games.Fn.LowFx" xml:space="preserve"><value>Light effects for more FPS (shadows, grass, effects and foliage at minimum)</value></data>
+  <data name="Card.Fn.LowFx" xml:space="preserve"><value>Light effects for more FPS (shadows, grass, effects and foliage at minimum)</value></data>
   <data name="Simple.Games.Guide.Valorant" xml:space="preserve"><value>In VALORANT, NEXUS doesn't touch the game file (Vanguard anti-cheat; settings live in your Riot account). In-game, under Video: Display mode Fullscreen; Limit FPS always/in menu/in background off; NVIDIA Reflex "On + Boost"; Multithreaded rendering On; Material, Texture and Detail Low; Anti-aliasing None; VSync, Vignette, Distortion, Cast shadows and Bloom off.</value></data>
   <data name="Simple.Games.Guide.Cs2" xml:space="preserve"><value>In CS2, NEXUS removes the FPS cap and turns on Reflex in the game files (with the game closed). In the Video menu, check: Display mode Fullscreen, Global shadows Low, Particle detail Low, Ambient occlusion Disabled, FidelityFX Super Resolution off (unless the PC is very weak).</value></data>
   <data name="Gpu.Fn.EffectsLow" xml:space="preserve"><value>Effects on low</value></data>
@@ -4591,4 +4589,27 @@ When the game has been closed for {1} seconds, it undoes everything by itself. Y
   <data name="Card.gtav.VsyncOff.Detail" xml:space="preserve"><value>Removes the FPS lock at the monitor refresh rate (Graphics › VSync) in whichever of Legacy and Enhanced is installed. GTA V has no other FPS limiter. Tearing may appear without a VRR monitor.</value></data>
   <data name="Card.gtav.KeepRunning.Title" xml:space="preserve"><value>Keep running when switching windows</value></data>
   <data name="Card.gtav.KeepRunning.Detail" xml:space="preserve"><value>Turns off Pause game on focus loss: when you open Discord or your second monitor, the game keeps running instead of pausing and stuttering when you come back. It keeps using GPU and CPU while you are away.</value></data>
+  <data name="Card.Fn.Perf.Detail" xml:space="preserve"><value>Draws with less detail so a weak CPU/GPU can keep up; the picture gets simpler.</value></data>
+  <data name="Card.Fn.MaxFps.Detail" xml:space="preserve"><value>Removes the in-game FPS cap and V-Sync (and turns on Reflex on NVIDIA cards): more frames and less delay; may tear without a VRR monitor.</value></data>
+  <data name="Card.Fn.Clear.Detail" xml:space="preserve"><value>Turns off motion blur: the picture stays sharp when you turn. Visual only, no cost.</value></data>
+  <data name="Card.Fn.LowFx.Detail" xml:space="preserve"><value>Shadows, grass, effects, post-processing and foliage at the menu minimum: more FPS on a weak PC, poorer visuals.</value></data>
+  <data name="Card.Ow2.CloseFirst" xml:space="preserve"><value>Close Overwatch 2 first: while open it rewrites its settings on exit. NEXUS only changes values the game already wrote to the file.</value></data>
+  <data name="Card.Ow2.Fps" xml:space="preserve"><value>FPS at the menu maximum (600), not locked to the monitor rate</value></data>
+  <data name="Card.Ow2.Fps.Detail" xml:space="preserve"><value>Custom cap at the highest menu value and "Limit to refresh rate" off: the game runs as fast as the PC allows. More heat and power.</value></data>
+  <data name="Card.Ow2.Reflex" xml:space="preserve"><value>Less input delay (NVIDIA Reflex on + boost)</value></data>
+  <data name="Card.Ow2.Reflex.Detail" xml:space="preserve"><value>Same value as the Video menu; only has an effect on NVIDIA cards. Boost keeps the clock high and uses more power.</value></data>
+  <data name="Card.Ow2.Sharp" xml:space="preserve"><value>Always-sharp picture (no dynamic render scale)</value></data>
+  <data name="Card.Ow2.Sharp.Detail" xml:space="preserve"><value>The game stops lowering resolution on its own to hold FPS: sharp picture, but on a weak PC FPS may drop in heavy scenes.</value></data>
+  <data name="Card.Apex.CloseFirst" xml:space="preserve"><value>Close Apex Legends first: while open it rewrites videoconfig.txt on exit. Steam/EA launch options stay up to you.</value></data>
+  <data name="Card.Apex.VSync" xml:space="preserve"><value>In-game V-Sync off (less delay)</value></data>
+  <data name="Card.Apex.VSync.Detail" xml:space="preserve"><value>Same "Disabled" as the Video menu: frames reach the screen as soon as they are ready. May tear without a VRR monitor.</value></data>
+  <data name="Card.Apex.LowFx" xml:space="preserve"><value>Light effects for more FPS (ambient occlusion, volumetric lighting, soft edges and sun shadows off)</value></data>
+  <data name="Card.Apex.LowFx.Detail" xml:space="preserve"><value>Same values as the Video menu: less GPU work on a weak PC; the picture loses depth and shadows.</value></data>
+  <data name="Card.Guide.Lol" xml:space="preserve"><value>In League of Legends NEXUS does not touch the game files (Vanguard anti-cheat; settings live in the game folder and in your Riot account). In-game, under Video: Frame Rate Cap Uncapped (or your monitor rate), Vertical Sync off, Window Mode Borderless or Fullscreen, Effects and Shadow quality Low on a weak PC.</value></data>
+  <data name="Card.Guide.Cod" xml:space="preserve"><value>In Call of Duty NEXUS does not touch the options file (Ricochet anti-cheat; the file changes with each title and the game rewrites it). In-game, under Graphics: Display Mode Fullscreen Exclusive, V-Sync off, Frame Rate Limit Custom at maximum or Unlimited, NVIDIA Reflex On + Boost, Texture and Shadow quality according to your card's VRAM.</value></data>
+  <data name="Card.Installed" xml:space="preserve"><value>Installed</value></data>
+  <data name="Card.RunningNow" xml:space="preserve"><value>open right now</value></data>
+  <data name="Card.LastFps" xml:space="preserve"><value>last measured match: {0} FPS</value></data>
+  <data name="Card.Running" xml:space="preserve"><value>{0} is open right now. Close the game to apply its file options.</value></data>
+  <data name="Card.Confirm" xml:space="preserve"><value>{0}: turn on "{1}"? Close {0} first. You can undo it.</value></data>
 </root>

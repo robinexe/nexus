@@ -33,6 +33,16 @@ public static class DesignMath
     private static readonly string[] ByteUnits = ["B", "KB", "MB", "GB", "TB"];
 
     /// <summary>Escreve <paramref name="value"/> no formato pedido. <paramref name="decimals"/> &lt; 0 = automático.</summary>
+    /// <summary>"#RRGGBB" → (R, G, B); qualquer outra coisa → null (cor de destaque dos cartões de jogo, c:GameBadge).</summary>
+    public static (byte R, byte G, byte B)? ParseHexColor(string? hex)
+    {
+        if (hex is not { Length: 7 } || hex[0] != '#') return null;
+        return byte.TryParse(hex.AsSpan(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var r) &&
+               byte.TryParse(hex.AsSpan(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var g) &&
+               byte.TryParse(hex.AsSpan(5, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var b)
+            ? (r, g, b) : null;
+    }
+
     public static string Format(double value, NumberKind kind, int decimals = -1)
     {
         if (!double.IsFinite(value)) return "—";

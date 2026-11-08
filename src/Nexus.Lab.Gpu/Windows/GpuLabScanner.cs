@@ -105,6 +105,9 @@ public static class GpuLabScanner
                 list.AddRange(GameLibraries.EpicGames(epic));
                 var riot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Riot Games", "Metadata");
                 list.AddRange(GameLibraries.RiotGames(riot));
+                // Battle.net (Overwatch 2, Call of Duty) e EA app (Apex Legends): sem manifesto legível, pelos "Programas instalados".
+                foreach (var g in GameLibraries.FromInstalledPrograms(GraphicsState.InstalledPrograms(), File.Exists))
+                    if (!list.Any(x => string.Equals(x.ExePath, g.ExePath, StringComparison.OrdinalIgnoreCase))) list.Add(g);
                 return (IReadOnlyList<GameEntry>)list.OrderBy(g => g.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
             }, []);
 

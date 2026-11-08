@@ -228,6 +228,43 @@ public static partial class GameLibraries
         return games;
     }
 
+    /// <summary>
+    /// Jogos de lojas sem manifesto legível (Battle.net, EA app): nome registrado em "Programas instalados" → loja, nome e
+    /// executável que desenha, relativo à pasta de instalação. Lista fechada: só os jogos com cartão (docs/modules/&lt;jogo&gt;.md).
+    /// </summary>
+    private static readonly (string DisplayName, string Store, string Name, string[] ExeRelative)[] InstalledPrograms =
+    [
+        ("Overwatch", "Battle.net", "Overwatch 2", [@"_retail_\Overwatch.exe"]),
+        ("Call of Duty", "Battle.net", "Call of Duty", [@"_retail_\cod.exe", "cod.exe"]),
+        ("Apex Legends", "EA app", "Apex Legends", ["r5apex.exe", "r5apex_dx12.exe"]),
+    ];
+
+    /// <summary>
+    /// Jogos achados nas entradas de "Programas instalados" (HKLM\...\Uninstall, 64 bits e WOW6432Node): pelo DisplayName exato da
+    /// lista fechada e pelo InstallLocation. Só leitura; o executável precisa existir na pasta informada (nada é adivinhado).
+    /// </summary>
+    public static IReadOnlyList<GameEntry> FromInstalledPrograms(IEnumerable<(string DisplayName, string? InstallLocation)> programs, Func<string, bool> fileExists)
+    {
+        ArgumentNullException.ThrowIfNull(programs);
+        ArgumentNullException.ThrowIfNull(fileExists);
+        var games = new List<GameEntry>();
+        foreach (var (display, location) in programs)
+        {
+            if (display is null || location is null) continue;
+            var dir = location.Trim().Trim('"').Replace('/', '\\').TrimEnd('\\');
+            if (dir.Length < 4 || !char.IsAsciiLetter(dir[0]) || dir[1] != ':' || dir[2] != '\\' || dir.Contains("..", StringComparison.Ordinal)) continue;
+            foreach (var known in InstalledPrograms)
+            {
+                if (!string.Equals(known.DisplayName, display.Trim(), StringComparison.OrdinalIgnoreCase)) continue;
+                if (games.Any(g => g.Name == known.Name)) break;
+                var exe = known.ExeRelative.Select(rel => dir + "\\" + rel).FirstOrDefault(p => IsValidExePath(p) && fileExists(p));
+                if (exe is not null) games.Add(new GameEntry(known.Name, known.Store, dir, exe, true));
+                break;
+            }
+        }
+        return games;
+    }
+
     /// <summary>"GpuPreference=2;SwapEffectUpgradeEnable=1;" → 2. Null se o token não existir.</summary>
     public static int? ParseGpuPreference(string? raw) => ParseToken(raw, "GpuPreference");
 
