@@ -37,6 +37,10 @@ o par.
 - **Placa de vídeo › Ajustes por jogo › Fortnite (avançado)**: todas as ações, com escolha de modo, limite (já vem em "sem limite"; um limite só se o usuário escolher) e Reflex, estado
   de cada chave, dica pela VRAM da GPU principal.
 - **Aplicar / Testar sem aplicar**: as ações aparecem na lista do catálogo, como as demais.
+- **Cartão (08/11/2026)**: `src/Nexus.GameProfiles/Fortnite/FortniteCard.cs` implementa `IGameCardProvider` (monograma "FN", cor
+  discreta `#6E8BD9`, aviso "feche antes", 4 opções com as mesmas ações). A tela Jogos monta o cartão a partir dele; os planos e a
+  leitura do estado continuam em `GameOptionPlans.Fortnite*`/`FortniteState` (comportamento inalterado; teste
+  `GameCardTests.Fortnite_card_keeps_the_same_actions_as_the_screen_plans`).
 
 ## Como é seguro (handler `FortniteIniValue`, `src/Nexus.GameProfiles/Fortnite`)
 

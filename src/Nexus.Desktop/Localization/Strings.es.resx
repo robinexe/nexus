@@ -4003,18 +4003,16 @@ Cada cosa vuelve como estaba. Lo que es del sistema pide permiso de administrado
   <data name="Simple.Games.Confirm" xml:space="preserve"><value>{0}: ¿activar "{1}"? Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmAdmin" xml:space="preserve"><value>{0}: ¿activar "{1}"? Windows pide permiso de administrador. Se puede deshacer.</value></data>
   <data name="Simple.Games.ConfirmGameMode" xml:space="preserve"><value>¿Activar el Modo de juego de Windows? Se puede deshacer.</value></data>
-  <data name="Simple.Games.Fn.Perf" xml:space="preserve"><value>Más FPS en PC débil (Modo rendimiento)</value></data>
+  <data name="Card.Fn.Perf" xml:space="preserve"><value>Más FPS en PC débil (Modo rendimiento)</value></data>
   <data name="Simple.Games.Fn.MaxFpsReflex" xml:space="preserve"><value>FPS máximos y menos retraso (sin límite de FPS + Reflex)</value></data>
-  <data name="Simple.Games.Fn.MaxFps" xml:space="preserve"><value>FPS máximos (sin límite de FPS y sin V-Sync)</value></data>
+  <data name="Card.Fn.MaxFps" xml:space="preserve"><value>FPS máximos (sin límite de FPS y sin V-Sync)</value></data>
   <data name="Simple.Games.GlobalFpsFree" xml:space="preserve"><value>Driver NVIDIA: ningún límite de FPS para los juegos</value></data>
   <data name="Simple.Games.GlobalFpsCapped" xml:space="preserve"><value>El driver NVIDIA está limitando los FPS de todos los juegos (límite de FPS o V-Sync forzado). Libéralos para que el juego vaya al máximo que da la tarjeta.</value></data>
   <data name="Simple.Games.GlobalFpsFix" xml:space="preserve"><value>Liberar FPS</value></data>
   <data name="Simple.Games.GlobalFpsTitle" xml:space="preserve"><value>Driver NVIDIA (todos los juegos)</value></data>
   <data name="Simple.Games.ConfirmGlobalFps" xml:space="preserve"><value>¿Quitar el límite de FPS y el V-Sync forzado del driver NVIDIA para todos los juegos? La tarjeta trabajará al máximo (más calor y ventilador). Windows pide permiso de administrador. Se puede deshacer.</value></data>
-  <data name="Simple.Games.Fn.Clear" xml:space="preserve"><value>Imagen nítida al girar (sin desenfoque de movimiento)</value></data>
-  <data name="Simple.Games.Fn.Confirm" xml:space="preserve"><value>Fortnite: ¿activar "{0}"? Cierra Fortnite antes. Se puede deshacer.</value></data>
-  <data name="Simple.Games.Fn.Note" xml:space="preserve"><value>Cierra Fortnite antes: abierto, reescribe la configuración al salir. La mira ya no tiene aceleración: el juego lee el ratón directamente.</value></data>
-  <data name="Simple.Games.Fn.Running" xml:space="preserve"><value>Fortnite está abierto ahora. Cierra el juego para aplicar estas opciones.</value></data>
+  <data name="Card.Fn.Clear" xml:space="preserve"><value>Imagen nítida al girar (sin desenfoque de movimiento)</value></data>
+  <data name="Card.Fn.Note" xml:space="preserve"><value>Cierra Fortnite antes: abierto, reescribe la configuración al salir. La mira ya no tiene aceleración: el juego lee el ratón directamente.</value></data>
   <data name="Simple.Games.Fn.NotFound" xml:space="preserve"><value>Abre Fortnite una vez para que NEXUS encuentre la configuración del juego.</value></data>
   <data name="Simple.Games.Fn.Now" xml:space="preserve"><value>Ahora: {0}</value></data>
   <data name="Simple.Games.Fn.ModePerf" xml:space="preserve"><value>Modo rendimiento</value></data>
@@ -4474,7 +4472,7 @@ Son {2} partidas de al menos 3 minutos. Entre ellas, NEXUS aplica el ajuste con 
   <data name="Dialog.ErrorFooter" xml:space="preserve"><value>Si se repite, no vuelve a aparecer en esta sesión. Detalles en %LocalAppData%\NEXUS\desktop-erros.log.</value></data>
   <data name="Simple.Opt.PendingRecovery" xml:space="preserve"><value>Un cambio anterior de NEXUS quedó a medias (el PC pudo apagarse en medio). Usa "Recuperar" en el Historial antes de optimizar de nuevo.</value></data>
   <data name="Simple.Games.GpuHigh" xml:space="preserve"><value>Usar la tarjeta gráfica de alto rendimiento en este juego</value></data>
-  <data name="Simple.Games.Fn.LowFx" xml:space="preserve"><value>Efectos ligeros para más FPS (sombras, hierba, efectos y follaje al mínimo)</value></data>
+  <data name="Card.Fn.LowFx" xml:space="preserve"><value>Efectos ligeros para más FPS (sombras, hierba, efectos y follaje al mínimo)</value></data>
   <data name="Simple.Games.Guide.Valorant" xml:space="preserve"><value>En VALORANT, NEXUS no toca el archivo del juego (anticheat Vanguard; la configuración está en tu cuenta Riot). Dentro del juego, en Video: Modo de pantalla Pantalla completa; Limitar FPS siempre/en menú/en segundo plano desactivados; NVIDIA Reflex "Activado + Boost"; Renderizado multihilo Activado; Material, Textura y Detalle Bajo; Antialiasing Ninguno; VSync, Viñeta, Distorsión, Sombras proyectadas y Bloom desactivados.</value></data>
   <data name="Simple.Games.Guide.Cs2" xml:space="preserve"><value>En CS2, NEXUS quita el límite de FPS y activa Reflex en los archivos del juego (con el juego cerrado). En el menú Video conviene revisar: Modo de pantalla Pantalla completa, Sombras globales Bajo, Detalle de partículas Bajo, Oclusión ambiental Desactivada, FidelityFX Super Resolution desactivado (salvo en un PC muy débil).</value></data>
   <data name="Gpu.Fn.EffectsLow" xml:space="preserve"><value>Efectos en bajo</value></data>
@@ -4538,4 +4536,27 @@ Cuando el juego lleve {1} segundos cerrado, lo deshace todo solo. Puedes desacti
   <data name="GameAuto.Problem.Title" xml:space="preserve"><value>El modo juego automático no pudo deshacer la última partida</value></data>
   <data name="GameAuto.Problem.WhatToDo" xml:space="preserve"><value>Abre el Historial y pulsa Deshacer en el cambio del modo juego automático. Si no funciona, reinicia el PC e inténtalo de nuevo.</value></data>
   <data name="GameAuto.Problem.Action" xml:space="preserve"><value>Abrir Historial</value></data>
+  <data name="Card.Fn.Perf.Detail" xml:space="preserve"><value>Dibuja con menos detalle para que un procesador o una tarjeta débil respiren; la imagen queda más simple.</value></data>
+  <data name="Card.Fn.MaxFps.Detail" xml:space="preserve"><value>Quita el límite de FPS y el V-Sync del juego (y activa Reflex en tarjetas NVIDIA): más cuadros y menos retraso; puede rasgar la imagen sin monitor VRR.</value></data>
+  <data name="Card.Fn.Clear.Detail" xml:space="preserve"><value>Desactiva el desenfoque de movimiento: la imagen queda nítida al girar. Solo visual, sin costo.</value></data>
+  <data name="Card.Fn.LowFx.Detail" xml:space="preserve"><value>Sombras, hierba, efectos, posprocesado y follaje al mínimo del menú: más FPS en un PC débil, visual más pobre.</value></data>
+  <data name="Card.Ow2.CloseFirst" xml:space="preserve"><value>Cierra Overwatch 2 antes: abierto, reescribe la configuración al salir. NEXUS solo cambia valores que el juego ya escribió en el archivo.</value></data>
+  <data name="Card.Ow2.Fps" xml:space="preserve"><value>FPS al máximo del menú (600) y sin fijarlo a la tasa del monitor</value></data>
+  <data name="Card.Ow2.Fps.Detail" xml:space="preserve"><value>Límite personalizado en el mayor valor del menú y "Limitar a la tasa de refresco" desactivado: el juego corre al máximo que da el PC. Más calor y consumo.</value></data>
+  <data name="Card.Ow2.Reflex" xml:space="preserve"><value>Menos retraso al disparar (NVIDIA Reflex activado + boost)</value></data>
+  <data name="Card.Ow2.Reflex.Detail" xml:space="preserve"><value>El mismo valor del menú Vídeo; solo tiene efecto en tarjetas NVIDIA. El boost mantiene el reloj alto y gasta más energía.</value></data>
+  <data name="Card.Ow2.Sharp" xml:space="preserve"><value>Imagen siempre nítida (sin escala dinámica de renderizado)</value></data>
+  <data name="Card.Ow2.Sharp.Detail" xml:space="preserve"><value>El juego deja de bajar la resolución solo para sostener los FPS: imagen nítida, pero en un PC débil los FPS pueden caer en escenas pesadas.</value></data>
+  <data name="Card.Apex.CloseFirst" xml:space="preserve"><value>Cierra Apex Legends antes: abierto, reescribe videoconfig.txt al salir. Las opciones de lanzamiento de Steam/EA quedan contigo.</value></data>
+  <data name="Card.Apex.VSync" xml:space="preserve"><value>Sin V-Sync del juego (menos retraso)</value></data>
+  <data name="Card.Apex.VSync.Detail" xml:space="preserve"><value>El mismo "Desactivado" del menú Vídeo: el cuadro llega a la pantalla apenas está listo. Puede rasgar la imagen sin monitor VRR.</value></data>
+  <data name="Card.Apex.LowFx" xml:space="preserve"><value>Efectos ligeros para más FPS (oclusión, luz volumétrica, bordes suaves y sombras del sol desactivados)</value></data>
+  <data name="Card.Apex.LowFx.Detail" xml:space="preserve"><value>Los mismos valores del menú Vídeo: menos trabajo para la tarjeta en un PC débil; la imagen pierde profundidad y sombras.</value></data>
+  <data name="Card.Guide.Lol" xml:space="preserve"><value>En League of Legends, NEXUS no toca los archivos del juego (anticheat Vanguard; la configuración está en la carpeta del juego y en tu cuenta Riot). Dentro del juego, en Vídeo: Límite de cuadros Sin límite (o la tasa del monitor), Sincronización vertical desactivada, Modo de ventana Sin bordes o Pantalla completa, Calidad de efectos y Sombras Bajo en un PC débil.</value></data>
+  <data name="Card.Guide.Cod" xml:space="preserve"><value>En Call of Duty, NEXUS no toca el archivo de opciones (anticheat Ricochet; el archivo cambia con cada título y el juego lo reescribe). Dentro del juego, en Gráficos: Modo de pantalla Pantalla completa exclusiva, Sincronización vertical desactivada, Límite de cuadros Personalizado al máximo o Sin límite, NVIDIA Reflex Activado + Boost, Calidad de texturas y Sombras según la VRAM de la tarjeta.</value></data>
+  <data name="Card.Installed" xml:space="preserve"><value>Instalado</value></data>
+  <data name="Card.RunningNow" xml:space="preserve"><value>abierto ahora</value></data>
+  <data name="Card.LastFps" xml:space="preserve"><value>última partida medida: {0} FPS</value></data>
+  <data name="Card.Running" xml:space="preserve"><value>{0} está abierto ahora. Cierra el juego para aplicar las opciones de su archivo.</value></data>
+  <data name="Card.Confirm" xml:space="preserve"><value>{0}: ¿activar "{1}"? Cierra {0} antes. Se puede deshacer.</value></data>
 </root>

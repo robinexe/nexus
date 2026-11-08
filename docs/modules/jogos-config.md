@@ -25,7 +25,14 @@ exato. Lista fechada de jogos, chaves e valores (`GameConfigs.All`), sempre valo
 - **Pastas:** Documentos também é procurado no OneDrive. A pasta do perfil vem do ProfileList pelo SID, os links são recusados e nada sai da pasta do perfil.
 - **No "Otimizar meu PC" (Desempenho máximo):** entram todos os ajustes acima, exceto Reflex em placa que não é NVIDIA.
 
-## Fora, só com orientação no jogo (pesquisa de 06/11/2026)
+## Cartões na tela Jogos (08/11/2026)
+
+Overwatch 2 e Apex Legends têm cartão próprio (`src/Nexus.GameProfiles/Overwatch2/Overwatch2Card.cs`, `Apex/ApexCard.cs`) que agrupa
+estas ações em opções de um clique com estado lido (`GameCardConfigReads`); detalhes e fontes em `docs/modules/overwatch2.md` e
+`docs/modules/apex.md`. VALORANT, League of Legends e Call of Duty têm cartão só com Medir/Comparar (`docs/modules/valorant.md`,
+`lol.md`, `cod.md`).
+
+## Fora, só com orientação no jogo (pesquisa de 06/11/2026, confirmada em 08/11/2026)
 
 - **VALORANT, League of Legends** (Vanguard): o arquivo sincroniza na conta e a Riot não autoriza edição.
 - **Call of Duty** (Ricochet): os guias exigem arquivo somente leitura; sem posição da Activision.
