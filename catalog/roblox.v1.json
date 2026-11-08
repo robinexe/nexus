@@ -1,0 +1,67 @@
+{
+  "catalogVersion": "1.0.0",
+  "schema": "nexus.catalog/1",
+  "note": "Roblox (PC): só o arquivo do próprio menu (GlobalBasicSettings_13.xml em %LOCALAPPDATA%\\Roblox), pelo handler GameConfigValue, com o Roblox fechado. Nada de Fast Flags (ClientAppSettings.json): a Roblox só aceita uma lista fechada desde 29/09/2025 e ignora o resto. Pesquisa de 08/11/2026: docs/modules/roblox.md.",
+  "actions": [
+    {
+      "id": "roblox.cfg.framerate-cap.max",
+      "version": 1,
+      "title": "Roblox: FPS máximo 240 (o máximo do menu)",
+      "i18n": {
+        "en": {
+          "title": "Roblox: max frame rate 240 (the menu maximum)"
+        },
+        "es": {
+          "title": "Roblox: FPS máximos 240 (el máximo del menú)"
+        }
+      },
+      "classification": "SupportedDocumented",
+      "condition": "Roblox (versão do site, não a da Microsoft Store) instalado e aberto pelo menos uma vez, fechado na hora de aplicar.",
+      "handlerKind": "GameConfigValue",
+      "target": {
+        "scope": "User",
+        "game": "roblox",
+        "key": "FramerateCap"
+      },
+      "desiredValue": "240",
+      "desiredType": "ConfigValue",
+      "mechanism": "GlobalBasicSettings_13.xml guarda a opção Maximum Frame Rate do menu Configurações (Padrão = 60, 120, 144 ou 240) no elemento <int name=\"FramerateCap\">. 240 é o maior valor que o menu oferece e o que a Roblox recomenda usar em vez de 'desbloqueadores' externos. O NEXUS só troca o número desse elemento, uma linha.",
+      "evidence": [
+        {
+          "level": "VendorDocumented",
+          "source": "https://devforum.roblox.com/t/introducing-the-maximum-framerate-setting/2995965"
+        },
+        {
+          "level": "Observed",
+          "source": "https://devforum.roblox.com/t/roblox-caps-fps-at-240-regardless-of-globalbasicsettings13xml-framerate-cap/4451048"
+        }
+      ],
+      "risks": "Mais calor e consumo; em monitor de 60 Hz sem VRR pode aparecer rasgo de imagem (o V-Sync do Roblox fica no próprio menu). A Roblox diz que não suporta oficialmente mais de 240. Com o Roblox aberto, o NEXUS recusa (ele regrava o arquivo ao fechar).",
+      "privileges": "User",
+      "persistence": "Persistent",
+      "reboot": "GameRestart",
+      "verification": "Releitura do elemento no GlobalBasicSettings_13.xml; no Roblox, menu Configurações > Maximum Frame Rate.",
+      "revert": "Devolve o valor anterior exato do elemento."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "myth.roblox.fastflags-clientappsettings",
+      "classification": "Rejected",
+      "reason": "Editar Fast Flags em ClientAppSettings.json (ou por Bloxstrap/Fishstrap) para 'mais FPS' não é oferecido: em 29/09/2025 a Roblox passou a aceitar só uma lista fechada de flags (texturas, MSAA, distância de detalhe, API gráfica) e a ignorar todas as outras, inclusive DFIntTaskSchedulerTargetFps (o limite de FPS); a Roblox já tinha dito em 2024 que essas flags 'nunca foram uma API pública estável e podem mudar sem aviso' e recomendou a opção do menu. Flags de renderização que ainda passam são de qualidade visual, não de desempenho mensurável; e a lista pode mudar a qualquer momento.",
+      "source": "https://devforum.roblox.com/t/allowlist-for-local-client-configuration-via-fast-flags/3966569"
+    },
+    {
+      "id": "myth.roblox.fps-unlocker",
+      "classification": "Rejected",
+      "reason": "Programas 'FPS unlocker' externos (rbxfpsunlocker e similares) alteram a mesma flag interna que a Roblox diz não ser estável; desde 2024 o menu tem a opção Maximum Frame Rate até 240 e a Roblox recomenda usá-la. O NEXUS não instala nem injeta nada no Roblox.",
+      "source": "https://devforum.roblox.com/t/introducing-the-maximum-framerate-setting/2995965"
+    },
+    {
+      "id": "myth.roblox.framerate-cap-above-240",
+      "classification": "Ineffective",
+      "reason": "Escrever um número acima de 240 (ex.: 9999) em FramerateCap não dá FPS: o Roblox trava em 240 de qualquer jeito e relatos mostram o valor voltando a -1 (padrão). Fora do menu, fora da lista.",
+      "source": "https://devforum.roblox.com/t/roblox-caps-fps-at-240-regardless-of-globalbasicsettings13xml-framerate-cap/4451048"
+    }
+  ]
+}
